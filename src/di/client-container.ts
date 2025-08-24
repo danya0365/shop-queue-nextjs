@@ -3,6 +3,7 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
+import { ShopService } from "../application/services/shop-service";
 import { Logger } from "../domain/interfaces/logger";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
 import { supabase } from "../infrastructure/datasources/supabase-browser-client";
@@ -58,6 +59,12 @@ export function createClientContainer(): Container {
     container.register("AuthorizationService", () => {
       return new AuthorizationService(
         logger
+      );
+    });
+
+    container.register("ShopService", () => {
+      return new ShopService(
+
       );
     });
 

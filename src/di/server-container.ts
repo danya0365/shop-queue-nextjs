@@ -2,6 +2,7 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
+import { ShopService } from "../application/services/shop-service";
 import { Logger } from "../domain/interfaces/logger";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
@@ -57,6 +58,12 @@ export async function createServerContainer(): Promise<Container> {
     container.register("AuthorizationService", () => {
       return new AuthorizationService(
         logger
+      );
+    });
+
+    container.register("ShopService", () => {
+      return new ShopService(
+
       );
     });
 
