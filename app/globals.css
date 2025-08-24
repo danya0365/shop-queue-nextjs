@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 1) ทำให้ dark: ใช้ได้แบบสลับด้วยคลาส .dark (ค่าเริ่มต้นของ v4 คือ media query) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 2) ประกาศ theme tokens (จะได้ใช้คลาสเช่น bg-background, text-foreground, font-sans) */
+@theme {
+  --font-sans: "Kanit", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* Light defaults */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-surface: #ffffff;
+  --color-on-surface: #000000;
+
+  /* Queue status colors -> ใช้ bg-waiting, text-serving ได้เลย */
+  --color-waiting: #f59e0b;
+  --color-serving: #10b981;
+  --color-completed: #6b7280;
+  --color-cancelled: #ef4444;
+  --color-priority: #8b5cf6;
+
+  /* Status colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #047857;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #d97706;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #dc2626;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-info-dark: #1d4ed8;
+
+  /* UI Colors - Gray scale */
+  --color-muted: #6b7280;
+  --color-muted-light: #f9fafb;
+  --color-muted-dark: #374151;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-border-dark: #374151;
+
+  /* Primary brand colors - Shop Queue Theme */
+  --color-primary: #3b82f6;
+  --color-primary-light: #dbeafe;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #10b981;
+  --color-secondary-light: #d1fae5;
+  --color-secondary-dark: #047857;
+
+  /* Overlay colors */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-overlay-light: rgba(255, 255, 255, 0.9);
+  --color-overlay-dark: rgba(0, 0, 0, 0.8);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* 3) ตัวแปรที่ไม่ต้องการให้สร้าง utility อัตโนมัติ เก็บไว้ใน base */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* UI Theme */
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(0, 0, 0, 0.1);
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.03);
+  }
+
+  /* ใช้ tokens กับ body ผ่าน utilities ของ Tailwind */
+  body { @apply bg-background text-foreground font-sans; }
+
+  /* Card styling classes */
+  .card-bg { background-color: var(--card-bg); }
+  .card-border { border-color: var(--card-border); }
+  .card-shadow { box-shadow: var(--card-shadow); }
+
+  /* UI utility classes */
+  .bg-overlay { background-color: var(--color-overlay); }
+  .bg-overlay-light { background-color: var(--color-overlay-light); }
+  .bg-overlay-dark { background-color: var(--color-overlay-dark); }
+  
+  /* Brand gradient classes */
+  .bg-primary-gradient { 
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); 
+  }
+  .bg-hero-gradient { 
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), #06b6d4); 
+  }
+  .bg-queue-gradient {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 4) Overrides ตอนเป็น .dark (แค่เปลี่ยนค่าตัวแปรก็พอ) */
+@layer base {
+  .dark {
+    --color-background: #0a0a0a;
+    --color-foreground: #f5f5f5;
+    --color-surface: #1a1a1a;
+    --color-on-surface: #ffffff;
+
+    --card-bg: rgba(30,30,30,0.8);
+    --card-border: rgba(255,255,255,0.1);
+    --card-shadow: 0 4px 6px rgba(255,255,255,0.05), 0 10px 15px rgba(255,255,255,0.03);
+
+    /* Status colors for dark mode */
+    --color-success-light: #065f46;
+    --color-success-dark: #34d399;
+    --color-warning-light: #92400e;
+    --color-warning-dark: #fbbf24;
+    --color-error-light: #991b1b;
+    --color-error-dark: #f87171;
+    --color-info-light: #1e3a8a;
+    --color-info-dark: #60a5fa;
+    --color-development-light: #92400e;
+    --color-development-dark: #fbbf24;
+    --color-islamic-light: #065f46;
+    --color-islamic-dark: #34d399;
+    --color-ramadan-light: #581c87;
+    --color-ramadan-dark: #a78bfa;
+
+    /* UI Colors - Gray scale (dark mode) */
+    --color-muted: #9ca3af;
+    --color-muted-light: #1f2937;
+    --color-muted-dark: #d1d5db;
+    --color-border: #374151;
+    --color-border-light: #1f2937;
+    --color-border-dark: #6b7280;
+
+    /* Primary brand colors (dark mode) */
+    --color-primary-light: #065f46;
+    --color-primary-dark: #34d399;
+    --color-secondary-light: #312e81;
+    --color-secondary-dark: #818cf8;
+
+    /* Overlay colors (dark mode) */
+    --color-overlay: rgba(0, 0, 0, 0.7);
+    --color-overlay-light: rgba(0, 0, 0, 0.9);
+    --color-overlay-dark: rgba(255, 255, 255, 0.1);
+  }
 }
