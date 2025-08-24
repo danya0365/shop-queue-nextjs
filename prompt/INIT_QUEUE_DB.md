@@ -18,7 +18,7 @@ CREATE TABLE shops (
 
 ### 👥 Local Users Table
 ```sql
-CREATE TABLE local_users (
+CREATE TABLE shop_local_users (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     name VARCHAR(255) NOT NULL,
@@ -32,17 +32,17 @@ CREATE TABLE local_users (
 
 ### 🚶 Queues Table
 ```sql
-CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'served', 'canceled');
-CREATE TYPE payment_status AS ENUM ('unpaid', 'partial', 'paid');
+CREATE TYPE shop_queue_status AS ENUM ('waiting', 'confirmed', 'served', 'canceled');
+CREATE TYPE shop_payment_status AS ENUM ('unpaid', 'partial', 'paid');
 
-CREATE TABLE queues (
+CREATE TABLE shop_queues (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     local_user_id UUID NOT NULL REFERENCES local_users(id),
     queue_number INTEGER NOT NULL,
-    status queue_status NOT NULL,
+    status shop_queue_status NOT NULL,
     note TEXT,
-    payment_status payment_status NOT NULL,
+    payment_status shop_payment_status NOT NULL,
     amount_due DECIMAL(10, 2) NOT NULL,
     amount_paid DECIMAL(10, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -52,7 +52,7 @@ CREATE TABLE queues (
 
 ### 💡 Queue Notes Suggestions Table
 ```sql
-CREATE TABLE queue_notes_suggestions (
+CREATE TABLE shop_queue_notes_suggestions (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     suggestion_text TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE queue_notes_suggestions (
 
 ### 🎫 Loyalty Points Table
 ```sql
-CREATE TABLE loyalty_points (
+CREATE TABLE shop_loyalty_points (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     profile_id UUID NOT NULL REFERENCES profiles(id),
@@ -75,7 +75,7 @@ CREATE TABLE loyalty_points (
 
 ### 🏷️ Promotions Table
 ```sql
-CREATE TABLE promotions (
+CREATE TABLE shop_promotions (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     description TEXT NOT NULL,

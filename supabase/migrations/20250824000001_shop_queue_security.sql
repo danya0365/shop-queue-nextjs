@@ -5,11 +5,11 @@
 
 -- Enable Row Level Security on all shop queue tables
 ALTER TABLE public.shops ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.local_users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.queues ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.queue_notes_suggestions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.loyalty_points ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_local_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_queues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_queue_notes_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_loyalty_points ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_promotions ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check if user is shop owner
 CREATE OR REPLACE FUNCTION public.is_shop_owner(shop_id_param UUID)
@@ -58,12 +58,12 @@ CREATE POLICY "Shop owners can delete their shops"
 -- Local users policies
 -- Shop staff can view local users in their shop
 CREATE POLICY "Shop staff can view local users in their shop"
-  ON public.local_users FOR SELECT
+  ON public.shop_local_users FOR SELECT
   USING (public.is_shop_staff(shop_id));
 
 -- Shop staff can create local users in their shop
 CREATE POLICY "Shop staff can create local users in their shop"
-  ON public.local_users FOR INSERT
+  ON public.shop_local_users FOR INSERT
   WITH CHECK (public.is_shop_staff(shop_id));
 
 -- Shop staff can update local users in their shop
@@ -74,75 +74,75 @@ CREATE POLICY "Shop staff can update local users in their shop"
 
 -- Shop staff can delete local users in their shop
 CREATE POLICY "Shop staff can delete local users in their shop"
-  ON public.local_users FOR DELETE
+  ON public.shop_local_users FOR DELETE
   USING (public.is_shop_staff(shop_id));
 
 -- Queues policies
 -- Shop staff can view all queues in their shop
 CREATE POLICY "Shop staff can view all queues in their shop"
-  ON public.queues FOR SELECT
+  ON public.shop_queues FOR SELECT
   USING (public.is_shop_staff(shop_id));
 
 -- Customers can view their own queues
 CREATE POLICY "Users can view their own queues"
-  ON public.queues FOR SELECT
+  ON public.shop_queues FOR SELECT
   USING (
     local_user_id IN (
-      SELECT id FROM public.local_users 
+      SELECT id FROM public.shop_local_users 
       WHERE profile_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
     )
   );
 
 -- Shop staff can create queues in their shop
 CREATE POLICY "Shop staff can create queues in their shop"
-  ON public.queues FOR INSERT
+  ON public.shop_queues FOR INSERT
   WITH CHECK (public.is_shop_staff(shop_id));
 
 -- Shop staff can update queues in their shop
 CREATE POLICY "Shop staff can update queues in their shop"
-  ON public.queues FOR UPDATE
+  ON public.shop_queues FOR UPDATE
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));
 
 -- Queue notes suggestions policies
 -- Anyone can view queue notes suggestions
 CREATE POLICY "Queue notes suggestions are viewable by everyone"
-  ON public.queue_notes_suggestions FOR SELECT
+  ON public.shop_queue_notes_suggestions FOR SELECT
   USING (true);
 
 -- Only shop staff can manage queue notes suggestions
 CREATE POLICY "Only shop staff can manage queue notes suggestions"
-  ON public.queue_notes_suggestions FOR ALL
+  ON public.shop_queue_notes_suggestions FOR ALL
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));
 
 -- Loyalty points policies
 -- Users can view their own loyalty points
 CREATE POLICY "Users can view their own loyalty points"
-  ON public.loyalty_points FOR SELECT
+  ON public.shop_loyalty_points FOR SELECT
   USING (
     profile_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
   );
 
 -- Shop staff can view all loyalty points in their shop
 CREATE POLICY "Shop staff can view all loyalty points in their shop"
-  ON public.loyalty_points FOR SELECT
+  ON public.shop_loyalty_points FOR SELECT
   USING (public.is_shop_staff(shop_id));
 
 -- Shop staff can manage loyalty points in their shop
 CREATE POLICY "Shop staff can manage loyalty points in their shop"
-  ON public.loyalty_points FOR ALL
+  ON public.shop_loyalty_points FOR ALL
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));
 
 -- Promotions policies
 -- Anyone can view promotions
 CREATE POLICY "Promotions are viewable by everyone"
-  ON public.promotions FOR SELECT
+  ON public.shop_promotions FOR SELECT
   USING (true);
 
 -- Only shop staff can manage promotions
 CREATE POLICY "Only shop staff can manage promotions"
-  ON public.promotions FOR ALL
+  ON public.shop_promotions FOR ALL
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));

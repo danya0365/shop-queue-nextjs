@@ -7,8 +7,8 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create enum types
-CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'served', 'canceled');
-CREATE TYPE payment_status AS ENUM ('unpaid', 'partial', 'paid');
+CREATE TYPE shop_queue_status AS ENUM ('waiting', 'confirmed', 'served', 'canceled');
+CREATE TYPE shop_payment_status AS ENUM ('unpaid', 'partial', 'paid');
 
 -- Create shops table
 CREATE TABLE IF NOT EXISTS public.shops (
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS public.shops (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create local_users table
-CREATE TABLE IF NOT EXISTS public.local_users (
+-- Create shop_local_users table
+CREATE TABLE IF NOT EXISTS public.shop_local_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -34,23 +34,23 @@ CREATE TABLE IF NOT EXISTS public.local_users (
     CONSTRAINT unique_shop_user UNIQUE (shop_id, id)
 );
 
--- Create queues table
-CREATE TABLE IF NOT EXISTS public.queues (
+-- Create shop_queues table
+CREATE TABLE IF NOT EXISTS public.shop_queues (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     local_user_id UUID NOT NULL REFERENCES public.local_users(id) ON DELETE CASCADE,
     queue_number INTEGER NOT NULL,
-    status queue_status NOT NULL DEFAULT 'waiting',
+    status shop_queue_status NOT NULL DEFAULT 'waiting',
     note TEXT,
-    payment_status payment_status NOT NULL DEFAULT 'unpaid',
+    payment_status shop_payment_status NOT NULL DEFAULT 'unpaid',
     amount_due DECIMAL(10, 2) NOT NULL DEFAULT 0,
     amount_paid DECIMAL(10, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create queue_notes_suggestions table
-CREATE TABLE IF NOT EXISTS public.queue_notes_suggestions (
+-- Create shop_queue_notes_suggestions table
+CREATE TABLE IF NOT EXISTS public.shop_queue_notes_suggestions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     suggestion_text TEXT NOT NULL,
@@ -58,19 +58,19 @@ CREATE TABLE IF NOT EXISTS public.queue_notes_suggestions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create loyalty_points table
-CREATE TABLE IF NOT EXISTS public.loyalty_points (
+-- Create profile_loyalty_points table
+CREATE TABLE IF NOT EXISTS public.profile_loyalty_points (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     points INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(shop_id, profile_id)
 );
 
--- Create promotions table
-CREATE TABLE IF NOT EXISTS public.promotions (
+-- Create shop_promotions table
+CREATE TABLE IF NOT EXISTS public.shop_promotions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
     description TEXT NOT NULL,
