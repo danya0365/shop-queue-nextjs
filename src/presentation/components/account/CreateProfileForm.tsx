@@ -1,9 +1,9 @@
 'use client';
 
 import { CreateProfileInputDto } from '@/src/application/dtos/profile-dto';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 const createProfileSchema = z.object({
@@ -58,6 +58,7 @@ export function CreateProfileForm({
       reset();
     } catch (error) {
       // Error handling is done in parent component
+      console.error("Error creating profile:", error);
     } finally {
       setIsSubmitting(false);
     }

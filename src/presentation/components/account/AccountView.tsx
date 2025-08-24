@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthUserDto } from "@/src/application/dtos/auth-dto";
 import {
   CreateProfileInputDto,
   ProfileDto,
@@ -12,14 +13,12 @@ import { EditProfileForm } from "./EditProfileForm";
 import { ProfileCard } from "./ProfileCard";
 
 interface AccountViewProps {
-  title: string;
-  description: string;
-  authId: string;
+  user: AuthUserDto;
 }
 
 type ViewMode = "list" | "create" | "edit";
 
-export function AccountView({ title, description, authId }: AccountViewProps) {
+export function AccountView({ user }: AccountViewProps) {
   const {
     profiles,
     activeProfile,
@@ -40,11 +39,12 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
   // Load profiles on component mount
   useEffect(() => {
     const loadProfiles = async () => {
-      await Promise.all([fetchProfiles(authId), fetchActiveProfile(authId)]);
+      await Promise.all([fetchProfiles(user.id), fetchActiveProfile(user.id)]);
     };
 
     loadProfiles();
-  }, [authId, fetchProfiles, fetchActiveProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
 
   // Clear success message after 3 seconds
   useEffect(() => {
@@ -61,6 +61,7 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
       setViewMode("list");
     } catch (error) {
       // Error is handled by the store
+      console.error("Error creating profile:", error);
     }
   };
 
@@ -75,17 +76,19 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
       setEditingProfile(null);
     } catch (error) {
       // Error is handled by the store
+      console.error("Error updating profile:", error);
     }
   };
 
   const handleSwitchProfile = async (profileId: string) => {
     try {
-      const success = await switchProfile(profileId, authId);
+      const success = await switchProfile(profileId, user.id);
       if (success) {
         setSuccessMessage("เปลี่ยนโปรไฟล์หลักเรียบร้อยแล้ว");
       }
     } catch (error) {
       // Error is handled by the store
+      console.error("Error switching profile:", error);
     }
   };
 
@@ -102,6 +105,7 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
         }
       } catch (error) {
         // Error is handled by the store
+        console.error("Error deleting profile:", error);
       }
     }
   };
@@ -121,8 +125,8 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
-          <p className="text-muted">{description}</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">จัดการบัญชี</h1>
+          <p className="text-muted">จัดการโปรไฟล์และการตั้งค่าบัญชีของคุณ</p>
         </div>
 
         {/* Success Message */}
@@ -273,7 +277,7 @@ export function AccountView({ title, description, authId }: AccountViewProps) {
 
             {viewMode === "create" && (
               <CreateProfileForm
-                authId={authId}
+                authId={user.id}
                 onSubmit={handleCreateProfile}
                 onCancel={handleCancelForm}
                 loading={loading}

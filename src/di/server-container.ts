@@ -1,5 +1,12 @@
 
+import { AuthService } from "../application/services/auth-service";
+import { AuthorizationService } from "../application/services/authorization.service";
+import { ProfileService } from "../application/services/profile-service";
 import { Logger } from "../domain/interfaces/logger";
+import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
+import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
+import { createServerSupabaseClient } from "../infrastructure/datasources/supabase-server-client";
+import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { Container, createContainer } from "./container";
 
@@ -15,7 +22,44 @@ export async function createServerContainer(): Promise<Container> {
   container.registerInstance<Logger>("Logger", logger);
 
   try {
+    const supabase = await createServerSupabaseClient();
     // Create and register server datasources
+    // Register datasources
+    const databaseDatasource = new SupabaseDatasource(
+      supabase,
+      SupabaseClientType.SERVER,
+      logger
+    );
+
+    const authDatasource = new SupabaseAuthDataSource(logger, supabase);
+
+
+    const profileAdapter = ProfileRepositoryFactory.createAdapter(
+      databaseDatasource,
+      logger
+    );
+
+    container.register("AuthService", () => {
+      return new AuthService(
+        authDatasource,
+        logger
+      );
+    });
+
+    container.register("ProfileService", () => {
+      return new ProfileService(
+        profileAdapter,
+        logger
+      );
+    });
+
+    // Register AuthorizationService
+    container.register("AuthorizationService", () => {
+      return new AuthorizationService(
+        logger
+      );
+    });
+
     logger.info("Server container initialized successfully");
   } catch (error) {
     console.error("Failed to initialize server container:", error);
