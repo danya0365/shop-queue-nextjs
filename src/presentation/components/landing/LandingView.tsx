@@ -166,27 +166,6 @@ export function LandingView({ viewModel }: LandingViewProps) {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4">Shop Queue</h3>
-            <p className="text-muted mb-6">
-              ระบบจัดการคิวร้านค้าที่ทันสมัยและใช้งานง่าย
-            </p>
-            <div className="flex justify-center space-x-6">
-              <a href="#" className=" transition-colors">เกี่ยวกับเรา</a>
-              <a href="#" className=" transition-colors">ติดต่อ</a>
-              <a href="#" className=" transition-colors">นโยบายความเป็นส่วนตัว</a>
-              <a href="#" className=" transition-colors">เงื่อนไขการใช้งาน</a>
-            </div>
-            <div className="mt-8 pt-8 border-t border-border">
-              <p>&copy; 2024 Shop Queue. สงวนลิขสิทธิ์.</p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
