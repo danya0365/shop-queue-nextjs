@@ -13,15 +13,13 @@ export interface AccountViewModel {
  * Following SOLID principles and Clean Architecture
  */
 export class AccountPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   /**
    * Get view model for account page
    */
   async getViewModel(): Promise<AccountViewModel> {
     try {
-      this.logger.info('AccountPresenter: Getting account view model');
-
       return {
         title: 'จัดการบัญชีผู้ใช้',
         description: 'จัดการโปรไฟล์และการตั้งค่าบัญชีของคุณ'

@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthService } from "../application/services/auth-service";
+import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
 import { Logger } from "../domain/interfaces/logger";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -49,6 +50,13 @@ export function createClientContainer(): Container {
     container.register("ProfileService", () => {
       return new ProfileService(
         profileAdapter,
+        logger
+      );
+    });
+
+    // Register AuthorizationService
+    container.register("AuthorizationService", () => {
+      return new AuthorizationService(
         logger
       );
     });
