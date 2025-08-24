@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <FrontendLayout>
-      <LoginView redirectPath="/dashboard" />
+      <LoginView redirectPath="/account" />
     </FrontendLayout>
   );
 }
