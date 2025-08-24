@@ -109,7 +109,7 @@ export interface IReadDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   get<T extends Record<string, unknown>>(table: string, query?: Record<string, unknown>): Promise<T[]>;
-  
+
   /**
    * Get data from a table with advanced query options
    * @param table The table to query
@@ -118,7 +118,7 @@ export interface IReadDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   getAdvanced<T extends Record<string, unknown>>(table: string, options: QueryOptions): Promise<T[]>;
-  
+
   /**
    * Get a single record by ID
    * @param table The table to query
@@ -128,7 +128,7 @@ export interface IReadDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   getById<T extends Record<string, unknown>>(table: string, id: string, options?: Pick<QueryOptions, 'select' | 'joins'>): Promise<T | null>;
-  
+
   /**
    * Search data with a query
    * @param table The table to search
@@ -139,7 +139,7 @@ export interface IReadDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   search<T extends Record<string, unknown>>(table: string, query: string, columns: string[], options?: Omit<QueryOptions, 'filters'>): Promise<T[]>;
-  
+
   /**
    * Count records in a table with optional filters
    * @param table The table to count records in
@@ -163,7 +163,7 @@ export interface IWriteDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   insert<T extends Record<string, unknown>>(table: string, data: Record<string, unknown>): Promise<T>;
-  
+
   /**
    * Update data in a table
    * @param table The table to update
@@ -173,7 +173,7 @@ export interface IWriteDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   update<T extends Record<string, unknown>>(table: string, id: string, data: Record<string, unknown>): Promise<T>;
-  
+
   /**
    * Delete data from a table
    * @param table The table to delete from
@@ -190,15 +190,6 @@ export interface IWriteDataSource extends IBaseDataSource {
  */
 export interface IAdvancedDataSource extends IBaseDataSource {
   /**
-   * Execute a custom SQL query with parameters
-   * @param query The SQL query to execute
-   * @param params Optional parameters for the query
-   * @returns Promise with array of results
-   * @throws DatabaseError if the operation fails
-   */
-  customQuery<T extends Record<string, unknown>>(query: string, params?: unknown[]): Promise<T[]>;
-  
-  /**
    * Call a Remote Procedure Call (RPC) function
    * @param functionName The name of the RPC function to call
    * @param params Parameters to pass to the RPC function
@@ -206,7 +197,7 @@ export interface IAdvancedDataSource extends IBaseDataSource {
    * @throws DatabaseError if the operation fails
    */
   callRpc<T = unknown>(functionName: string, params?: Record<string, unknown>): Promise<T>;
-  
+
   /**
    * Get the underlying database client
    * @returns The database client instance
@@ -219,7 +210,7 @@ export interface IAdvancedDataSource extends IBaseDataSource {
  * Following the Dependency Inversion Principle, high-level modules should not depend on low-level modules
  * Clients should depend on the specific interfaces they need, not this combined interface
  */
-export interface DatabaseDataSource extends IReadDataSource, IWriteDataSource, IAdvancedDataSource {}
+export interface DatabaseDataSource extends IReadDataSource, IWriteDataSource, IAdvancedDataSource { }
 
 /**
  * Database error types for domain error handling

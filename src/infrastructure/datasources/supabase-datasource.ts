@@ -28,8 +28,7 @@ export enum SupabaseClientType {
  * Following Interface Segregation Principle by implementing multiple smaller interfaces
  */
 export class SupabaseDatasource
-  implements IReadDataSource, IWriteDataSource, IAdvancedDataSource
-{
+  implements IReadDataSource, IWriteDataSource, IAdvancedDataSource {
   private client: SupabaseClient;
   private clientType: SupabaseClientType;
   private logger?: Logger;
@@ -313,8 +312,7 @@ export class SupabaseDatasource
     } catch (error) {
       if (this.logger) {
         this.logger.error(
-          `Exception in getAdvanced: ${
-            error instanceof Error ? error.message : JSON.stringify(error)
+          `Exception in getAdvanced: ${error instanceof Error ? error.message : JSON.stringify(error)
           }`
         );
       }
@@ -701,41 +699,6 @@ export class SupabaseDatasource
         throw error;
       }
       this.handleError(error, "search", table);
-    }
-  }
-
-  /**
-   * Execute a custom SQL query with parameters
-   * This method is restricted to admin client type only for security reasons
-   * @param query SQL query string with placeholders ($1, $2, etc.)
-   * @param params Array of parameter values corresponding to placeholders
-   * @returns Array of query results
-   * @throws DatabaseError if the operation fails or if called with non-admin client
-   */
-  async customQuery<T>(query: string, params?: unknown[]): Promise<T[]> {
-    try {
-      // Security check: Only allow admin client to execute custom SQL queries
-      if (this.clientType !== SupabaseClientType.ADMIN) {
-        throw new Error(
-          "Custom SQL queries can only be executed with admin client for security reasons"
-        );
-      }
-
-      const { data, error } = await this.client.rpc("execute_sql", {
-        sql_query: query,
-        params: params || [],
-      });
-
-      if (error) {
-        this.handleError(error, "customQuery", query.substring(0, 50) + "...");
-      }
-
-      return (data as T[]) || [];
-    } catch (error) {
-      if (error instanceof DatabaseError) {
-        throw error;
-      }
-      this.handleError(error, "customQuery", query.substring(0, 50) + "...");
     }
   }
 
