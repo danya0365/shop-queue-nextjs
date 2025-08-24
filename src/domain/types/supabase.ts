@@ -152,59 +152,7 @@ export type Database = {
           },
         ]
       }
-      local_users: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string
-          phone: string | null
-          profile_id: string | null
-          shop_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name: string
-          phone?: string | null
-          profile_id?: string | null
-          shop_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string
-          phone?: string | null
-          profile_id?: string | null
-          shop_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "local_users_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "local_users_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "local_users_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      loyalty_points: {
+      profile_loyalty_points: {
         Row: {
           created_at: string | null
           id: string
@@ -231,21 +179,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "loyalty_points_profile_id_fkey"
+            foreignKeyName: "profile_loyalty_points_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "loyalty_points_profile_id_fkey"
+            foreignKeyName: "profile_loyalty_points_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "video_analytics"
             referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "loyalty_points_shop_id_fkey"
+            foreignKeyName: "profile_loyalty_points_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -325,7 +273,59 @@ export type Database = {
         }
         Relationships: []
       }
-      promotions: {
+      shop_local_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          phone: string | null
+          profile_id: string | null
+          shop_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          profile_id?: string | null
+          shop_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          profile_id?: string | null
+          shop_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_local_users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_local_users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "video_analytics"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "shop_local_users_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_promotions: {
         Row: {
           condition: string
           created_at: string | null
@@ -352,7 +352,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "promotions_shop_id_fkey"
+            foreignKeyName: "shop_promotions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -360,7 +360,7 @@ export type Database = {
           },
         ]
       }
-      queue_notes_suggestions: {
+      shop_queue_notes_suggestions: {
         Row: {
           created_at: string | null
           id: string
@@ -384,7 +384,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "queue_notes_suggestions_shop_id_fkey"
+            foreignKeyName: "shop_queue_notes_suggestions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -392,7 +392,7 @@ export type Database = {
           },
         ]
       }
-      queues: {
+      shop_queues: {
         Row: {
           amount_due: number
           amount_paid: number
@@ -400,10 +400,10 @@ export type Database = {
           id: string
           local_user_id: string
           note: string | null
-          payment_status: Database["public"]["Enums"]["payment_status"]
+          payment_status: Database["public"]["Enums"]["shop_payment_status"]
           queue_number: number
           shop_id: string
-          status: Database["public"]["Enums"]["queue_status"]
+          status: Database["public"]["Enums"]["shop_queue_status"]
           updated_at: string | null
         }
         Insert: {
@@ -413,10 +413,10 @@ export type Database = {
           id?: string
           local_user_id: string
           note?: string | null
-          payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_status?: Database["public"]["Enums"]["shop_payment_status"]
           queue_number: number
           shop_id: string
-          status?: Database["public"]["Enums"]["queue_status"]
+          status?: Database["public"]["Enums"]["shop_queue_status"]
           updated_at?: string | null
         }
         Update: {
@@ -426,22 +426,22 @@ export type Database = {
           id?: string
           local_user_id?: string
           note?: string | null
-          payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_status?: Database["public"]["Enums"]["shop_payment_status"]
           queue_number?: number
           shop_id?: string
-          status?: Database["public"]["Enums"]["queue_status"]
+          status?: Database["public"]["Enums"]["shop_queue_status"]
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "queues_local_user_id_fkey"
+            foreignKeyName: "shop_queues_local_user_id_fkey"
             columns: ["local_user_id"]
             isOneToOne: false
-            referencedRelation: "local_users"
+            referencedRelation: "shop_local_users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "queues_shop_id_fkey"
+            foreignKeyName: "shop_queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -930,9 +930,9 @@ export type Database = {
       }
     }
     Enums: {
-      payment_status: "unpaid" | "partial" | "paid"
       profile_role: "user" | "moderator" | "admin"
-      queue_status: "waiting" | "confirmed" | "served" | "canceled"
+      shop_payment_status: "unpaid" | "partial" | "paid"
+      shop_queue_status: "waiting" | "confirmed" | "served" | "canceled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1048,9 +1048,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      payment_status: ["unpaid", "partial", "paid"],
       profile_role: ["user", "moderator", "admin"],
-      queue_status: ["waiting", "confirmed", "served", "canceled"],
+      shop_payment_status: ["unpaid", "partial", "paid"],
+      shop_queue_status: ["waiting", "confirmed", "served", "canceled"],
     },
   },
 } as const
