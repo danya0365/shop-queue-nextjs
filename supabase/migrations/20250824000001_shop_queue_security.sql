@@ -8,7 +8,7 @@ ALTER TABLE public.shops ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_local_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_queues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_queue_notes_suggestions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.shop_loyalty_points ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profile_loyalty_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_promotions ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check if user is shop owner
@@ -68,7 +68,7 @@ CREATE POLICY "Shop staff can create local users in their shop"
 
 -- Shop staff can update local users in their shop
 CREATE POLICY "Shop staff can update local users in their shop"
-  ON public.local_users FOR UPDATE
+  ON public.shop_local_users FOR UPDATE
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));
 
@@ -119,19 +119,19 @@ CREATE POLICY "Only shop staff can manage queue notes suggestions"
 -- Loyalty points policies
 -- Users can view their own loyalty points
 CREATE POLICY "Users can view their own loyalty points"
-  ON public.shop_loyalty_points FOR SELECT
+  ON public.profile_loyalty_points FOR SELECT
   USING (
     profile_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
   );
 
 -- Shop staff can view all loyalty points in their shop
 CREATE POLICY "Shop staff can view all loyalty points in their shop"
-  ON public.shop_loyalty_points FOR SELECT
+  ON public.profile_loyalty_points FOR SELECT
   USING (public.is_shop_staff(shop_id));
 
 -- Shop staff can manage loyalty points in their shop
 CREATE POLICY "Shop staff can manage loyalty points in their shop"
-  ON public.shop_loyalty_points FOR ALL
+  ON public.profile_loyalty_points FOR ALL
   USING (public.is_shop_staff(shop_id))
   WITH CHECK (public.is_shop_staff(shop_id));
 

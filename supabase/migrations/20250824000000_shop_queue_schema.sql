@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.shop_local_users (
 CREATE TABLE IF NOT EXISTS public.shop_queues (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES public.shops(id) ON DELETE CASCADE,
-    local_user_id UUID NOT NULL REFERENCES public.local_users(id) ON DELETE CASCADE,
+    local_user_id UUID NOT NULL REFERENCES public.shop_local_users(id) ON DELETE CASCADE,
     queue_number INTEGER NOT NULL,
     status shop_queue_status NOT NULL DEFAULT 'waiting',
     note TEXT,
@@ -81,13 +81,13 @@ CREATE TABLE IF NOT EXISTS public.shop_promotions (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_shops_owner_id ON public.shops(owner_id);
-CREATE INDEX IF NOT EXISTS idx_local_users_shop_id ON public.local_users(shop_id);
-CREATE INDEX IF NOT EXISTS idx_local_users_profile_id ON public.local_users(profile_id);
-CREATE INDEX IF NOT EXISTS idx_queues_shop_id ON public.queues(shop_id);
-CREATE INDEX IF NOT EXISTS idx_queues_local_user_id ON public.queues(local_user_id);
-CREATE INDEX IF NOT EXISTS idx_queues_status ON public.queues(status);
-CREATE INDEX IF NOT EXISTS idx_queues_payment_status ON public.queues(payment_status);
-CREATE INDEX IF NOT EXISTS idx_queue_notes_suggestions_shop_id ON public.queue_notes_suggestions(shop_id);
-CREATE INDEX IF NOT EXISTS idx_loyalty_points_shop_id ON public.loyalty_points(shop_id);
-CREATE INDEX IF NOT EXISTS idx_loyalty_points_profile_id ON public.loyalty_points(profile_id);
-CREATE INDEX IF NOT EXISTS idx_promotions_shop_id ON public.promotions(shop_id);
+CREATE INDEX IF NOT EXISTS idx_local_users_shop_id ON public.shop_local_users(shop_id);
+CREATE INDEX IF NOT EXISTS idx_local_users_profile_id ON public.shop_local_users(profile_id);
+CREATE INDEX IF NOT EXISTS idx_queues_shop_id ON public.shop_queues(shop_id);
+CREATE INDEX IF NOT EXISTS idx_queues_local_user_id ON public.shop_queues(local_user_id);
+CREATE INDEX IF NOT EXISTS idx_queues_status ON public.shop_queues(status);
+CREATE INDEX IF NOT EXISTS idx_queues_payment_status ON public.shop_queues(payment_status);
+CREATE INDEX IF NOT EXISTS idx_queue_notes_suggestions_shop_id ON public.shop_queue_notes_suggestions(shop_id);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_shop_id ON public.profile_loyalty_points(shop_id);
+CREATE INDEX IF NOT EXISTS idx_loyalty_points_profile_id ON public.profile_loyalty_points(profile_id);
+CREATE INDEX IF NOT EXISTS idx_promotions_shop_id ON public.shop_promotions(shop_id);

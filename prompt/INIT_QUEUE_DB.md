@@ -63,7 +63,7 @@ CREATE TABLE shop_queue_notes_suggestions (
 
 ### 🎫 Loyalty Points Table
 ```sql
-CREATE TABLE shop_loyalty_points (
+CREATE TABLE profile_loyalty_points (
     id UUID PRIMARY KEY,
     shop_id UUID NOT NULL REFERENCES shops(id),
     profile_id UUID NOT NULL REFERENCES profiles(id),
