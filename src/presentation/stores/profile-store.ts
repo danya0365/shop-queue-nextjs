@@ -1,8 +1,8 @@
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { Logger } from "@/src/domain/interfaces/logger";
 import localforage from 'localforage';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { IProfileRepositoryAdapter } from '../../application/interfaces/profile-repository-adapter.interface';
 import { getClientService } from '../../di/client-container';
 import { createProfileActions } from './profile-store.actions';
 import { ProfileState } from './profile-store.types';
@@ -13,7 +13,7 @@ import { ProfileState } from './profile-store.types';
  */
 export const createProfileStore = () => {
   // Get dependencies from container
-  const profileAdapter = getClientService<IProfileRepositoryAdapter>('ProfileRepositoryAdapter');
+  const profileService = getClientService<IProfileService>('ProfileService');
   const logger = getClientService<Logger>('Logger');
 
   return create<ProfileState>()(
@@ -29,7 +29,7 @@ export const createProfileStore = () => {
 
         // Create actions with injected dependencies
         const actions = createProfileActions(
-          profileAdapter,
+          profileService,
           logger,
           get,
           set

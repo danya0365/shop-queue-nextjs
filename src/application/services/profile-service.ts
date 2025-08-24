@@ -1,11 +1,16 @@
-import { ErrorHandlingDecorator } from '../decorators/error-handling.decorator';
-import { CreateProfileDto, ProfileDto, UpdateProfileDto } from '../dtos/profile-dto';
-import { ProfileUseCaseFactory } from '../factories/profile-use-case.factory';
-import type { ILogger } from '../interfaces/logger.interface';
-import type { IProfileRepositoryAdapter } from '../interfaces/profile-repository-adapter.interface';
-import type { IProfileService } from '../interfaces/profile-service.interface';
-import type { IUseCase } from '../interfaces/use-case.interface';
-import { SetActiveProfileInput } from '../usecases/profile/set-active-profile';
+import { ErrorHandlingDecorator } from "../decorators/error-handling.decorator";
+import {
+  CreateProfileDto,
+  ProfileDto,
+  UpdateProfileDto,
+} from "../dtos/profile-dto";
+import { ProfileUseCaseFactory } from "../factories/profile-use-case.factory";
+import type { ILogger } from "../interfaces/logger.interface";
+import type { IProfileRepositoryAdapter } from "../interfaces/profile-repository-adapter.interface";
+import type { IProfileService } from "../interfaces/profile-service.interface";
+import type { IUseCase } from "../interfaces/use-case.interface";
+import { DeleteProfileInput } from "../usecases/profile/delete-profile";
+import { SetActiveProfileInput } from "../usecases/profile/set-active-profile";
 
 /**
  * Service class for profile operations
@@ -15,12 +20,28 @@ import { SetActiveProfileInput } from '../usecases/profile/set-active-profile';
 export class ProfileService implements IProfileService {
   private readonly getProfileByIdUseCase: IUseCase<string, ProfileDto | null>;
   private readonly getProfilesByAuthIdUseCase: IUseCase<string, ProfileDto[]>;
-  private readonly getActiveProfileByAuthIdUseCase: IUseCase<string, ProfileDto | null>;
-  private readonly setActiveProfileUseCase: IUseCase<SetActiveProfileInput, boolean>;
-  private readonly getProfileByUserIdUseCase: IUseCase<string, ProfileDto | null>;
+  private readonly getActiveProfileByAuthIdUseCase: IUseCase<
+    string,
+    ProfileDto | null
+  >;
+  private readonly setActiveProfileUseCase: IUseCase<
+    SetActiveProfileInput,
+    boolean
+  >;
+  private readonly getProfileByUserIdUseCase: IUseCase<
+    string,
+    ProfileDto | null
+  >;
   private readonly createProfileUseCase: IUseCase<CreateProfileDto, ProfileDto>;
-  private readonly updateProfileUseCase: IUseCase<{id: string, data: UpdateProfileDto}, ProfileDto | null>;
-  private readonly getCurrentUserProfileUseCase: IUseCase<void, ProfileDto | null>;
+  private readonly updateProfileUseCase: IUseCase<
+    { id: string; data: UpdateProfileDto },
+    ProfileDto | null
+  >;
+  private readonly getCurrentUserProfileUseCase: IUseCase<
+    void,
+    ProfileDto | null
+  >;
+  private readonly deleteProfileUseCase: IUseCase<DeleteProfileInput, void>;
 
   /**
    * Constructor with dependency injection
@@ -36,43 +57,49 @@ export class ProfileService implements IProfileService {
       ProfileUseCaseFactory.createGetProfileByIdUseCase(profileAdapter),
       logger
     );
-    
+
     this.getProfilesByAuthIdUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createGetProfilesByAuthIdUseCase(profileAdapter),
       logger
     );
-    
+
     this.getActiveProfileByAuthIdUseCase = new ErrorHandlingDecorator(
-      ProfileUseCaseFactory.createGetActiveProfileByAuthIdUseCase(profileAdapter),
+      ProfileUseCaseFactory.createGetActiveProfileByAuthIdUseCase(
+        profileAdapter
+      ),
       logger
     );
-    
+
     this.setActiveProfileUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createSetActiveProfileUseCase(profileAdapter),
       logger
     );
-    
+
     this.getProfileByUserIdUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createGetProfileByUserIdUseCase(profileAdapter),
       logger
     );
-    
+
     this.createProfileUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createCreateProfileUseCase(profileAdapter),
       logger
     );
-    
+
     this.updateProfileUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createUpdateProfileUseCase(profileAdapter),
       logger
     );
-    
+
     this.getCurrentUserProfileUseCase = new ErrorHandlingDecorator(
       ProfileUseCaseFactory.createGetCurrentUserProfileUseCase(profileAdapter),
       logger
     );
+
+    this.deleteProfileUseCase = new ErrorHandlingDecorator(
+      ProfileUseCaseFactory.createDeleteProfileUseCase(profileAdapter),
+      logger
+    );
   }
-  
 
   /**
    * Get a profile by its ID
@@ -114,7 +141,7 @@ export class ProfileService implements IProfileService {
     // Error handling is now managed by the decorator
     return this.setActiveProfileUseCase.execute({ profileId, authId });
   }
-  
+
   /**
    * Get a profile by user ID
    * @param userId User ID
@@ -124,7 +151,7 @@ export class ProfileService implements IProfileService {
     // Error handling is now managed by the decorator
     return this.getProfileByUserIdUseCase.execute(userId);
   }
-  
+
   /**
    * Create a new profile
    * @param profileData Data for the new profile
@@ -134,18 +161,21 @@ export class ProfileService implements IProfileService {
     // Error handling is now managed by the decorator
     return this.createProfileUseCase.execute(profileData);
   }
-  
+
   /**
    * Update a profile
    * @param id Profile ID
    * @param profileData Data to update
    * @returns Updated profile as DTO
    */
-  async updateProfile(id: string, profileData: UpdateProfileDto): Promise<ProfileDto | null> {
+  async updateProfile(
+    id: string,
+    profileData: UpdateProfileDto
+  ): Promise<ProfileDto | null> {
     // Error handling is now managed by the decorator
     return this.updateProfileUseCase.execute({ id, data: profileData });
   }
-  
+
   /**
    * Get the current user's profile
    * @returns Profile DTO or null if not found or not authenticated
@@ -153,5 +183,16 @@ export class ProfileService implements IProfileService {
   async getCurrentUserProfile(): Promise<ProfileDto | null> {
     // Error handling is now managed by the decorator
     return this.getCurrentUserProfileUseCase.execute();
+  }
+
+  /**
+   * Delete a profile
+   * @param payload Input containing profile ID
+   * @throws ProfileNotFoundException if the profile is not found
+   * @throws ProfileRepositoryException if there's an error in the repository
+   */
+  async deleteProfile(payload: DeleteProfileInput): Promise<void> {
+    // Error handling is now managed by the decorator
+    return this.deleteProfileUseCase.execute(payload);
   }
 }

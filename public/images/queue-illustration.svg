@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background elements -->
+  <rect width="600" height="400" fill="none"/>
+  
+  <!-- Store/shop building -->
+  <rect x="350" y="100" width="200" height="180" rx="5" fill="#FFFFFF" stroke="#333333" stroke-width="3"/>
+  <rect x="410" y="230" width="80" height="50" fill="#FFFFFF" stroke="#333333" stroke-width="3"/>
+  <rect x="435" y="230" width="30" height="50" fill="#FFFFFF" stroke="#333333" stroke-width="3"/>
+  <rect x="370" y="130" width="40" height="40" rx="2" fill="#A5D6FF" stroke="#333333" stroke-width="2"/>
+  <rect x="430" y="130" width="40" height="40" rx="2" fill="#A5D6FF" stroke="#333333" stroke-width="2"/>
+  <rect x="490" y="130" width="40" height="40" rx="2" fill="#A5D6FF" stroke="#333333" stroke-width="2"/>
+  <path d="M350 100 L550 100 L530 70 L370 70 Z" fill="#FF9B9B" stroke="#333333" stroke-width="3"/>
+  
+  <!-- Queue of people -->
+  <!-- Person 1 -->
+  <circle cx="100" cy="220" r="25" fill="#FFD6A5"/>
+  <rect x="90" y="250" width="20" height="60" rx="5" fill="#A5D6FF"/>
+  <rect x="75" y="260" width="15" height="40" rx="3" fill="#A5D6FF"/>
+  <rect x="110" y="260" width="15" height="40" rx="3" fill="#A5D6FF"/>
+  <rect x="90" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  <rect x="100" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  
+  <!-- Person 2 -->
+  <circle cx="160" cy="220" r="25" fill="#D8B4FE"/>
+  <rect x="150" y="250" width="20" height="60" rx="5" fill="#FFADAD"/>
+  <rect x="135" y="260" width="15" height="40" rx="3" fill="#FFADAD"/>
+  <rect x="170" y="260" width="15" height="40" rx="3" fill="#FFADAD"/>
+  <rect x="150" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  <rect x="160" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  
+  <!-- Person 3 -->
+  <circle cx="220" cy="220" r="25" fill="#A5F3FC"/>
+  <rect x="210" y="250" width="20" height="60" rx="5" fill="#FDBA74"/>
+  <rect x="195" y="260" width="15" height="40" rx="3" fill="#FDBA74"/>
+  <rect x="230" y="260" width="15" height="40" rx="3" fill="#FDBA74"/>
+  <rect x="210" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  <rect x="220" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  
+  <!-- Person 4 -->
+  <circle cx="280" cy="220" r="25" fill="#BBF7D0"/>
+  <rect x="270" y="250" width="20" height="60" rx="5" fill="#C4B5FD"/>
+  <rect x="255" y="260" width="15" height="40" rx="3" fill="#C4B5FD"/>
+  <rect x="290" y="260" width="15" height="40" rx="3" fill="#C4B5FD"/>
+  <rect x="270" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  <rect x="280" y="310" width="10" height="30" rx="3" fill="#333333"/>
+  
+  <!-- Queue line -->
+  <line x1="50" y1="340" x2="320" y2="340" stroke="#333333" stroke-width="3" stroke-dasharray="10 5"/>
+  <line x1="320" y1="340" x2="320" y2="240" stroke="#333333" stroke-width="3" stroke-dasharray="10 5"/>
+  <line x1="320" y1="240" x2="350" y2="240" stroke="#333333" stroke-width="3" stroke-dasharray="10 5"/>
+  
+  <!-- Queue number display -->
+  <rect x="400" y="50" width="100" height="60" rx="5" fill="#333333" stroke="#000000" stroke-width="2"/>
+  <text x="450" y="90" font-family="Arial" font-size="36" fill="#FF9B9B" text-anchor="middle">42</text>
+  
+  <!-- Mobile phone with app -->
+  <rect x="100" y="100" width="60" height="100" rx="10" fill="#333333" stroke="#000000" stroke-width="2"/>
+  <rect x="105" y="110" width="50" height="80" rx="2" fill="#FFFFFF"/>
+  <rect x="115" y="120" width="30" height="10" rx="2" fill="#A5D6FF"/>
+  <rect x="115" y="140" width="30" height="10" rx="2" fill="#A5D6FF"/>
+  <rect x="115" y="160" width="30" height="10" rx="2" fill="#A5D6FF"/>
+  <circle cx="130" cy="195" r="5" fill="#FFFFFF"/>
+</svg>

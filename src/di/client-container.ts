@@ -1,6 +1,12 @@
 "use client";
 
+import { AuthService } from "../application/services/auth-service";
+import { ProfileService } from "../application/services/profile-service";
 import { Logger } from "../domain/interfaces/logger";
+import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
+import { supabase } from "../infrastructure/datasources/supabase-browser-client";
+import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
+import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { Container, createContainer } from "./container";
 
@@ -16,6 +22,36 @@ export function createClientContainer(): Container {
   container.registerInstance<Logger>("Logger", logger);
 
   try {
+
+    // Create and register client datasources
+    // Register datasources
+    const databaseDatasource = new SupabaseDatasource(
+      supabase,
+      SupabaseClientType.BROWSER,
+      logger
+    );
+
+    const authDatasource = new SupabaseAuthDataSource(logger, supabase);
+
+
+    const profileAdapter = ProfileRepositoryFactory.createAdapter(
+      databaseDatasource,
+      logger
+    );
+
+    container.register("AuthService", () => {
+      return new AuthService(
+        authDatasource,
+        logger
+      );
+    });
+
+    container.register("ProfileService", () => {
+      return new ProfileService(
+        profileAdapter,
+        logger
+      );
+    });
 
     logger.info("Client container initialized successfully");
   } catch (error) {
