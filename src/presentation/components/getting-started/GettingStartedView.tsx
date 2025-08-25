@@ -2,8 +2,9 @@
 
 import { GettingStartedViewModel } from '@/src/presentation/presenters/getting-started/GettingStartedPresenter';
 import { useGettingStartedPresenter } from '@/src/presentation/presenters/getting-started/useGettingStartedPresenter';
+import { useAuthStore } from '@/src/presentation/stores/auth-store';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface GettingStartedViewProps {
   viewModel: GettingStartedViewModel;
@@ -11,6 +12,14 @@ interface GettingStartedViewProps {
 
 export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
   const [state, actions] = useGettingStartedPresenter();
+  const { authAccount } = useAuthStore();
+
+  // Auto-check step 1 if user is logged in
+  useEffect(() => {
+    if (authAccount && !state.completedSteps.includes(1)) {
+      actions.markStepComplete(1);
+    }
+  }, [authAccount, state.completedSteps, actions]);
   
   return (
     <div className="min-h-screen bg-background">
@@ -243,18 +252,37 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
             สมัครสมาชิกวันนี้และเริ่มจัดการคิวร้านค้าของคุณอย่างมืออาชีพ
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              สมัครสมาชิกฟรี
-            </Link>
-            <Link
-              href="/contact"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-primary transition-colors"
-            >
-              ติดต่อสอบถาม
-            </Link>
+            {!authAccount ? (
+              <>
+                <Link
+                  href="/auth/register"
+                  className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                >
+                  สมัครสมาชิกฟรี
+                </Link>
+                <Link
+                  href="/contact"
+                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-primary transition-colors"
+                >
+                  ติดต่อสอบถาม
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                >
+                  ไปที่แดชบอร์ด
+                </Link>
+                <Link
+                  href="/contact"
+                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-primary transition-colors"
+                >
+                  ติดต่อสอบถาม
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
