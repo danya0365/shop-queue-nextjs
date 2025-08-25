@@ -56,7 +56,14 @@
   --color-red-700: #b91c1c;
   --color-green-50: #f0fdf4;
   --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
   --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-green-900: #14532d;
 
   /* Additional gray variants for complete theme system */
   --color-gray-50: #f9fafb;
@@ -70,13 +77,22 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  /* Primary brand colors - Shop Queue Theme */
+  /* Primary brand colors - Shop Queue Theme (Orange) */
   --color-primary: #f97316;
   --color-primary-light: #fed7aa;
   --color-primary-dark: #ea580c;
   --color-secondary: #fb923c;
   --color-secondary-light: #ffedd5;
   --color-secondary-dark: #f97316;
+  
+  /* Hero Section Colors */
+  --color-hero-text-light: #ffedd5;
+  --color-hero-text-accent: #ea580c;
+  --color-hero-button-bg: #ffedd5;
+  --color-hero-status-active: #4ade80;
+  --color-hero-status-waiting: #fb923c;
+  --color-hero-status-pending: #fdba74;
+  --color-hero-accent-soft: #fdba74;
 
   /* Overlay colors */
   --color-overlay: rgba(0, 0, 0, 0.5);
@@ -92,10 +108,16 @@
     --card-border: rgba(0, 0, 0, 0.1);
     --card-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.03);
     
-    /* Hero background colors */
+    /* Hero background colors - Orange Theme */
     --color-hero-primary: #f97316;
     --color-hero-secondary: #ea580c;
     --color-hero-accent: #fb923c;
+    --color-hero-light: #fed7aa;
+    --color-hero-warm: #ffedd5;
+    
+    /* Hero pattern and effects */
+    --hero-pattern-opacity: 0.1;
+    --hero-glow-color: rgba(249, 115, 22, 0.3);
   }
 
   /* ใช้ tokens กับ body ผ่าน utilities ของ Tailwind */
@@ -132,6 +154,31 @@
   }
   .bg-queue-gradient {
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  }
+  
+  /* New Orange Hero Gradients */
+  .bg-hero-orange-sunset {
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 25%, #fed7aa 75%, #ffedd5 100%);
+  }
+  .bg-hero-orange-vibrant {
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  }
+  .bg-hero-orange-soft {
+    background: linear-gradient(135deg, #fb923c 0%, #fed7aa 100%);
+  }
+  
+  /* Hero pattern overlay */
+  .hero-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%, transparent 50%);
+  }
+  
+  /* Hero glow effect */
+  .hero-glow {
+    box-shadow: 
+      0 0 60px var(--hero-glow-color),
+      0 0 120px var(--hero-glow-color);
   }
 }
 

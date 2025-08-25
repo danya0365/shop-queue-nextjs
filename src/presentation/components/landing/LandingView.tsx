@@ -51,38 +51,163 @@ export function LandingView({ viewModel }: LandingViewProps) {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-hero-elegant text-white py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-overlay"></div>
-        <div className="relative container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            ระบบจัดการคิว
-            <br />
-            <span className="text-warning">อัจฉริยะ</span>
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed">
-            ช่วยให้ร้านค้าสามารถจัดการลูกค้าได้อย่างมีประสิทธิภาพ
-            ลดความแออัด และเพิ่มความพึงพอใจของลูกค้า
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/register"
-              className="bg-surface text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-muted-light transition-colors shadow-lg"
-            >
-              เริ่มใช้งานฟรี
-            </Link>
-            <Link
-              href="#demo"
-              className="border-2 border-surface text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-surface hover:text-primary transition-colors"
-            >
-              ดูตัวอย่าง
-            </Link>
+      <section className="relative bg-hero-orange-sunset text-white py-20 lg:py-32 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 hero-pattern opacity-30"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-white/10 rounded-full blur-lg animate-pulse delay-500"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-6 border border-white/30">
+                <span className="w-2 h-2 bg-hero-status-active rounded-full mr-2 animate-pulse"></span>
+                ระบบจัดการคิวอัจฉริยะ
+              </div>
+              
+              {/* Main Heading */}
+              <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-6">
+                <span className="block">จัดการคิว</span>
+                <span className="block bg-gradient-to-r from-white to-hero-text-light bg-clip-text text-transparent">
+                  อย่างมืออาชีพ
+                </span>
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-xl lg:text-2xl text-hero-text-light mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                ระบบจัดการคิวที่ทันสมัย ช่วยลดเวลารอ เพิ่มประสิทธิภาพ 
+                และสร้างประสบการณ์ที่ดีให้กับลูกค้าของคุณ
+              </p>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+                <Link
+                  href="/auth/register"
+                  className="group bg-white text-hero-text-accent px-8 py-4 rounded-xl font-semibold text-lg hover:bg-hero-button-bg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
+                >
+                  เริ่มใช้งานฟรี
+                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="#demo"
+                  className="group border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 backdrop-blur-sm transition-all duration-300 flex items-center justify-center"
+                >
+                  ดูการทำงาน
+                  <svg className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </Link>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-hero-text-light">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm">ใช้งานฟรี 30 วัน</span>
+                </div>
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm">ไม่ต้องติดตั้ง</span>
+                </div>
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm">รองรับทุกอุปกรณ์</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right Content - Visual Demo */}
+            <div className="relative">
+              {/* Main Demo Card */}
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl hero-glow">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white">คิวปัจจุบัน</h3>
+                  <div className="flex items-center text-hero-status-active">
+                    <div className="w-2 h-2 bg-hero-status-active rounded-full mr-2 animate-pulse"></div>
+                    <span className="text-sm">ออนไลน์</span>
+                  </div>
+                </div>
+                
+                {/* Queue Items */}
+                <div className="space-y-3">
+                  {[
+                    { number: 'A001', name: 'คุณสมชาย', status: 'กำลังให้บริการ', color: 'bg-hero-status-active' },
+                    { number: 'A002', name: 'คุณสมหญิง', status: 'รอ 5 นาที', color: 'bg-hero-status-waiting' },
+                    { number: 'A003', name: 'คุณสมศักดิ์', status: 'รอ 12 นาที', color: 'bg-hero-status-pending' }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center font-bold text-white mr-3">
+                          {item.number}
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{item.name}</div>
+                          <div className="text-hero-text-light text-sm">{item.status}</div>
+                        </div>
+                      </div>
+                      <div className={`w-3 h-3 ${item.color} rounded-full`}></div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/20">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">24</div>
+                    <div className="text-xs text-hero-text-light">วันนี้</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">8</div>
+                    <div className="text-xs text-hero-text-light">นาที</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">3</div>
+                    <div className="text-xs text-hero-text-light">รอคิว</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating Cards */}
+              <div className="absolute -top-4 -right-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-bounce">
+                <div className="flex items-center text-white">
+                  <svg className="w-4 h-4 mr-2 text-hero-status-active" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">เรียลไทม์</span>
+                </div>
+              </div>
+              
+              <div className="absolute -bottom-4 -left-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-pulse">
+                <div className="flex items-center text-white">
+                  <svg className="w-4 h-4 mr-2 text-hero-accent-soft" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium">อัตโนมัติ</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Decorative elements */}
-        <div className="absolute top-10 left-10 w-20 h-20 bg-overlay-light rounded-full animate-pulse"></div>
-        <div className="absolute bottom-10 right-10 w-32 h-32 bg-overlay-light rounded-full animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-warning/20 rounded-full animate-bounce"></div>
+        
+        {/* Bottom Wave */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-auto">
+            <path fill="rgba(255,255,255,0.1)" d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
+          </svg>
+        </div>
       </section>
 
       {/* Stats Section */}
