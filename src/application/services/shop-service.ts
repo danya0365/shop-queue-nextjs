@@ -5,6 +5,7 @@ import { IShopService } from "../interfaces/shop-service.interface";
 export class ShopService implements IShopService {
   // CREATE mock shop data
   getShopsByOwnerId(ownerId: string): Promise<ShopDto[]> {
+    console.log(ownerId);
     const mockShops: ShopDto[] = [
       {
         id: "1",

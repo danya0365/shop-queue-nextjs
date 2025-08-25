@@ -47,7 +47,7 @@ export class DashboardPresenter {
     private readonly logger: Logger,
     private readonly authService: IAuthService,
     private readonly shopService: IShopService
-  ) {}
+  ) { }
 
   /**
    * Get view model for dashboard page
@@ -89,6 +89,7 @@ export class DashboardPresenter {
     shops: ShopDto[]
   ): Promise<DashboardStats> {
     try {
+      console.log(userId);
       // Mock data for now - replace with actual service calls
       return {
         totalShops: shops.length,
@@ -118,6 +119,8 @@ export class DashboardPresenter {
     userId: string,
     shops: ShopDto[]
   ): Promise<RecentActivity[]> {
+    console.log(userId);
+    console.log(shops);
     try {
       // Mock data for now - replace with actual service calls
       return [

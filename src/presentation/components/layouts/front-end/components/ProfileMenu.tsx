@@ -2,7 +2,6 @@
 
 import { ProfileDto } from '@/src/application/dtos/profile-dto';
 import { useAuthorization } from '@/src/presentation/hooks/authorization';
-import { useAuthStore } from '@/src/presentation/stores/auth-store';
 import { useProfileStore } from '@/src/presentation/stores/profile-store';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -14,7 +13,6 @@ interface ProfileMenuProps {
 
 export function ProfileMenu({ profile, onLogout }: ProfileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { authAccount, signOut } = useAuthStore();
   const { activeProfile } = useProfileStore();
   const { hasBackendAccess } = useAuthorization();
   const menuRef = useRef<HTMLDivElement>(null);
