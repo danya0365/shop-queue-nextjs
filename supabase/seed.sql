@@ -242,7 +242,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.profile_roles (profile_id, role, granted_by)
 SELECT 
   p.id, 
-  'admin'::profile_role, 
+  'admin'::public.profile_role, 
   p.auth_id
 FROM 
   public.profiles p
@@ -252,7 +252,7 @@ WHERE
 ORDER BY u.created_at
 LIMIT 1
 ON CONFLICT (profile_id) DO UPDATE
-SET role = 'admin'::profile_role;
+SET role = 'admin'::public.profile_role;
 
 -- Execute the migration function
 SELECT public.migrate_profile_roles();

@@ -7,13 +7,13 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create custom types
-CREATE TYPE profile_role AS ENUM ('user', 'moderator', 'admin');
+CREATE TYPE public.profile_role AS ENUM ('user', 'moderator', 'admin');
 
 -- Create profile_roles table (managed by admins only)
 CREATE TABLE IF NOT EXISTS public.profile_roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID NOT NULL, -- Will be linked to profiles.id with FK after profiles table is created
-  role profile_role NOT NULL DEFAULT 'user',
+  role public.profile_role NOT NULL DEFAULT 'user',
   granted_by UUID REFERENCES auth.users(id),
   granted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(profile_id)
@@ -182,7 +182,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   -- Insert a default 'user' role for the newly created profile
   INSERT INTO public.profile_roles (profile_id, role, granted_by)
-  VALUES (NEW.id, 'user'::profile_role, NEW.auth_id);
+  VALUES (NEW.id, 'user'::public.profile_role, NEW.auth_id);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

@@ -31,7 +31,7 @@ BEGIN
             WHERE profile_id IN (
                 SELECT id FROM public.profiles 
                 WHERE auth_id = auth.uid() AND is_active = true
-            ) AND (role = 'admin' OR role = 'moderator')
+            ) AND (role = 'admin'::public.profile_role OR role = 'moderator'::public.profile_role)
         ) THEN
             RAISE EXCEPTION 'Admin or Moderator privileges required';
         END IF;

@@ -27,7 +27,7 @@ BEGIN
             WHERE profile_id IN (
                 SELECT id FROM public.profiles 
                 WHERE auth_id = auth.uid() AND is_active = true
-            ) AND role = 'admin'
+            ) AND role = 'admin'::public.profile_role
         ) THEN
             RAISE EXCEPTION 'Admin privileges required';
         END IF;
@@ -67,7 +67,7 @@ BEGIN
             COALESCE(u.raw_user_meta_data->>'full_name', 'Unknown') AS name,
             u.created_at,
             u.banned_until,
-            COALESCE(pr.role, 'user')::TEXT AS role,
+            COALESCE(pr.role, 'user'::public.profile_role)::TEXT AS role,
             COALESCE(pc.count, 0)::BIGINT AS profiles_count
         FROM 
             auth.users u

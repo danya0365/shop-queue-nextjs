@@ -34,21 +34,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to get profile role (can be called by anyone)
 CREATE OR REPLACE FUNCTION public.get_profile_role(profile_id UUID)
-RETURNS profile_role AS $$
+RETURNS public.profile_role AS $$
 DECLARE
-  profile_role profile_role;
+  profile_role public.profile_role;
 BEGIN
   SELECT role INTO profile_role FROM public.profile_roles WHERE profile_id = $1;
-  RETURN COALESCE(profile_role, 'user'::profile_role);
+  RETURN COALESCE(profile_role, 'user'::public.profile_role);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to get active profile role for current user (can be called by anyone)
 CREATE OR REPLACE FUNCTION public.get_active_profile_role()
-RETURNS profile_role AS $$
+RETURNS public.profile_role AS $$
 DECLARE
   active_profile_id UUID;
-  user_role profile_role;
+  user_role public.profile_role;
 BEGIN
   -- Get the active profile ID for current user
   SELECT id INTO active_profile_id FROM public.profiles 
@@ -56,24 +56,24 @@ BEGIN
   
   -- If no active profile, return 'user' as default role
   IF active_profile_id IS NULL THEN
-    RETURN 'user'::profile_role;
+    RETURN 'user'::public.profile_role;
   END IF;
   
   -- Get the role for this profile
   SELECT role INTO user_role FROM public.profile_roles WHERE profile_id = active_profile_id;
-  RETURN COALESCE(user_role, 'user'::profile_role);
+  RETURN COALESCE(user_role, 'user'::public.profile_role);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to set profile role (admin only)
 CREATE OR REPLACE FUNCTION public.set_profile_role(
   target_profile_id UUID,
-  new_role profile_role
+  new_role public.profile_role
 )
 RETURNS BOOLEAN AS $$
 DECLARE
   admin_profile_id UUID;
-  admin_role profile_role;
+  admin_role public.profile_role;
 BEGIN
   -- Get the active profile ID for current user
   SELECT id INTO admin_profile_id FROM public.profiles 
@@ -82,7 +82,7 @@ BEGIN
   -- Check if current user's active profile is admin
   SELECT role INTO admin_role FROM public.profile_roles WHERE profile_id = admin_profile_id;
   
-  IF admin_role != 'admin' THEN
+  IF admin_role != 'admin'::public.profile_role THEN
     RAISE EXCEPTION 'Only administrators can change profile roles';
     RETURN false;
   END IF;

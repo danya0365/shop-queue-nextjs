@@ -26,7 +26,7 @@ BEGIN
             WHERE profile_id IN (
                 SELECT id FROM public.profiles 
                 WHERE auth_id = auth.uid() AND is_active = true
-            ) AND role = 'admin'
+            ) AND role = 'admin'::public.profile_role
         ) THEN
             RAISE EXCEPTION 'Admin privileges required';
         END IF;

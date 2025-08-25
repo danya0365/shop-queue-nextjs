@@ -106,25 +106,25 @@ CREATE POLICY "Users can delete their own uploads"
 CREATE POLICY "Admins can select any object"
   ON storage.objects FOR SELECT
   USING (
-    public.get_active_profile_role() = 'admin'
+    public.get_active_profile_role() = 'admin'::public.profile_role
   );
 
 CREATE POLICY "Admins can insert any object"
   ON storage.objects FOR INSERT
   WITH CHECK (
-    public.get_active_profile_role() = 'admin'
+    public.get_active_profile_role() = 'admin'::public.profile_role
   );
 
 CREATE POLICY "Admins can update any object"
   ON storage.objects FOR UPDATE
   USING (
-    public.get_active_profile_role() = 'admin'
+    public.get_active_profile_role() = 'admin'::public.profile_role
   );
 
 CREATE POLICY "Admins can delete any object"
   ON storage.objects FOR DELETE
   USING (
-    public.get_active_profile_role() = 'admin'
+    public.get_active_profile_role() = 'admin'::public.profile_role
   );
 
 -- Create function to generate signed URLs for private files
@@ -146,7 +146,7 @@ BEGIN
       name = get_private_url.object_path AND
       (
         (storage.foldername(name))[1] = auth.uid()::text OR
-        public.get_active_profile_role() = 'admin'
+        public.get_active_profile_role() = 'admin'::public.profile_role
       )
   ) THEN
     RAISE EXCEPTION 'Access denied';

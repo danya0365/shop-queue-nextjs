@@ -92,7 +92,7 @@ BEGIN
   INSERT INTO public.profile_roles (profile_id, role, granted_by)
   SELECT 
     p.id,
-    'user'::profile_role,
+    'user'::public.profile_role,
     admin_auth_id
   FROM 
     public.profiles p

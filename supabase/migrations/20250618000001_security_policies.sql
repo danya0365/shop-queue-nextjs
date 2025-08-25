@@ -37,14 +37,14 @@ $$;
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN public.get_active_profile_role() = 'admin';
+  RETURN public.get_active_profile_role() = 'admin'::public.profile_role;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION public.is_moderator_or_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN public.get_active_profile_role() IN ('moderator', 'admin');
+  RETURN public.get_active_profile_role() IN ('moderator'::public.profile_role, 'admin'::public.profile_role);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -300,7 +300,7 @@ CREATE POLICY "Authenticated users can create their own profile_roles as user"
     AND (
       public.is_admin()
       OR (
-        role = 'user'
+        role = 'user'::public.profile_role
         AND profile_id = public.get_active_profile_id()
       )
     )
