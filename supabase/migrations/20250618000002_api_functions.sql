@@ -100,26 +100,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Helper function to get active profile ID for current user
-CREATE OR REPLACE FUNCTION public.get_active_profile_id()
-RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-  active_profile_id UUID;
-BEGIN
-  -- Check if user is authenticated
-  IF auth.uid() IS NULL THEN
-    RETURN NULL;
-  END IF;
-  
-  -- Get the active profile for the current user
-  SELECT id INTO active_profile_id
-  FROM public.profiles
-  WHERE auth_id = auth.uid() AND is_active = TRUE
-  LIMIT 1;
-  
-  RETURN active_profile_id;
-END;
-$$;
 
 -- Create API function to get video details with related data
 CREATE OR REPLACE FUNCTION public.get_video_details(video_id UUID)

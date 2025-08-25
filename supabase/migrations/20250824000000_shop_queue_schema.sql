@@ -9,6 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create enum types
 CREATE TYPE shop_queue_status AS ENUM ('waiting', 'confirmed', 'served', 'canceled');
 CREATE TYPE shop_payment_status AS ENUM ('unpaid', 'partial', 'paid');
+CREATE TYPE shop_status AS ENUM ('pending', 'approved', 'rejected', 'suspended');
 
 -- Create shops table
 CREATE TABLE IF NOT EXISTS public.shops (
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.shops (
     description TEXT,
     address TEXT,
     qr_code_url TEXT,
+    shop_status shop_status NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -81,6 +83,7 @@ CREATE TABLE IF NOT EXISTS public.shop_promotions (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_shops_owner_id ON public.shops(owner_id);
+CREATE INDEX IF NOT EXISTS idx_shops_shop_status ON public.shops(shop_status);
 CREATE INDEX IF NOT EXISTS idx_local_users_shop_id ON public.shop_local_users(shop_id);
 CREATE INDEX IF NOT EXISTS idx_local_users_profile_id ON public.shop_local_users(profile_id);
 CREATE INDEX IF NOT EXISTS idx_queues_shop_id ON public.shop_queues(shop_id);

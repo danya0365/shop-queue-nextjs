@@ -18,7 +18,7 @@ BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.shops 
     WHERE id = shop_id_param 
-    AND owner_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
+    AND owner_id = public.get_active_profile_id()
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -42,7 +42,10 @@ CREATE POLICY "Shops are viewable by everyone"
 -- Only authenticated users can create shops
 CREATE POLICY "Authenticated users can create shops"
   ON public.shops FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (
+    auth.role() = 'authenticated'
+    AND owner_id = public.get_active_profile_id()
+  );
 
 -- Only shop owners can update their shops
 CREATE POLICY "Shop owners can update their shops"
@@ -54,6 +57,38 @@ CREATE POLICY "Shop owners can update their shops"
 CREATE POLICY "Shop owners can delete their shops"
   ON public.shops FOR DELETE
   USING (public.is_shop_owner(id));
+
+-- Column-level privileges to prevent clients from setting/changing shop_status
+-- Remove broad INSERT/UPDATE privileges then grant only allowed columns to authenticated users
+REVOKE INSERT ON TABLE public.shops FROM authenticated;
+REVOKE UPDATE ON TABLE public.shops FROM authenticated;
+GRANT INSERT (owner_id, name, description, address, qr_code_url) ON TABLE public.shops TO authenticated;
+GRANT UPDATE (name, description, address, qr_code_url) ON TABLE public.shops TO authenticated;
+
+-- Admin-only function to update shop status
+CREATE OR REPLACE FUNCTION public.admin_update_shop_status(
+  p_shop_id UUID,
+  p_new_status shop_status
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'insufficient_privilege: admin role required';
+  END IF;
+
+  UPDATE public.shops
+  SET shop_status = p_new_status,
+      updated_at = NOW()
+  WHERE id = p_shop_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'shop_not_found: %', p_shop_id;
+  END IF;
+END;
+$$;
 
 -- Local users policies
 -- Shop staff can view local users in their shop
@@ -89,7 +124,7 @@ CREATE POLICY "Users can view their own queues"
   USING (
     local_user_id IN (
       SELECT id FROM public.shop_local_users 
-      WHERE profile_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
+      WHERE profile_id = public.get_active_profile_id()
     )
   );
 
@@ -121,7 +156,7 @@ CREATE POLICY "Only shop staff can manage queue notes suggestions"
 CREATE POLICY "Users can view their own loyalty points"
   ON public.profile_loyalty_points FOR SELECT
   USING (
-    profile_id = (SELECT id FROM public.profiles WHERE auth_id = auth.uid() LIMIT 1)
+    profile_id = public.get_active_profile_id()
   );
 
 -- Shop staff can view all loyalty points in their shop

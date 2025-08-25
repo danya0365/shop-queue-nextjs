@@ -1,7 +1,7 @@
--- FilmNest Security Policies
+-- ShopQueue Security Policies
 -- Created: 2025-06-18
 -- Author: Marosdee Uma
--- Description: Row Level Security (RLS) policies for FilmNest application
+-- Description: Row Level Security (RLS) policies for ShopQueue application
 
 -- Enable Row Level Security on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -11,6 +11,28 @@ ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.views ENABLE ROW LEVEL SECURITY;
 
+
+-- Helper function to get active profile ID for current user
+CREATE OR REPLACE FUNCTION public.get_active_profile_id()
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  active_profile_id UUID;
+BEGIN
+  -- Check if user is authenticated
+  IF auth.uid() IS NULL THEN
+    RETURN NULL;
+  END IF;
+  
+  -- Get the active profile for the current user
+  SELECT id INTO active_profile_id
+  FROM public.profiles
+  WHERE auth_id = auth.uid() AND is_active = TRUE
+  LIMIT 1;
+  
+  RETURN active_profile_id;
+END;
+$$;
+
 -- Create security definer functions for admin checks
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
@@ -18,28 +40,6 @@ BEGIN
   RETURN public.get_active_profile_role() = 'admin';
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Add RLS policies for profile_roles table
--- Everyone can view profile roles
-CREATE POLICY "Profile roles are viewable by everyone"
-  ON public.profile_roles FOR SELECT
-  USING (true);
-
--- Only admins can create profile roles
-CREATE POLICY "Only admins can create profile roles"
-  ON public.profile_roles FOR INSERT
-  WITH CHECK (is_admin());
-
--- Only admins can update profile roles
-CREATE POLICY "Only admins can update profile roles"
-  ON public.profile_roles FOR UPDATE
-  USING (is_admin())
-  WITH CHECK (is_admin());
-
--- Only admins can delete profile roles
-CREATE POLICY "Only admins can delete profile roles"
-  ON public.profile_roles FOR DELETE
-  USING (is_admin());
 
 CREATE OR REPLACE FUNCTION public.is_moderator_or_admin()
 RETURNS BOOLEAN AS $$
@@ -64,12 +64,6 @@ CREATE POLICY "Users can update their own profiles"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = auth_id)
   WITH CHECK (auth.uid() = auth_id);
-
--- Only admins can change user roles
-CREATE POLICY "Only admins can change user roles"
-  ON public.profiles FOR UPDATE
-  USING (is_admin() AND auth.uid() != auth_id)
-  WITH CHECK (is_admin() AND auth.uid() != auth_id);
 
 -- CATEGORIES POLICIES
 -- Categories are viewable by everyone
@@ -285,3 +279,29 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+
+-- Profile roles policies
+-- Profile roles are viewable by everyone
+CREATE POLICY "Profile roles are viewable by everyone"
+  ON public.profile_roles FOR SELECT
+  USING (true);
+
+CREATE POLICY "Only admins can update profile roles"
+  ON public.profile_roles FOR UPDATE
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+-- Insert policy: authenticated users can create their own profile_roles only as 'user'; admins can create for anyone with any role
+CREATE POLICY "Authenticated users can create their own profile_roles as user"
+  ON public.profile_roles FOR INSERT
+  WITH CHECK (
+    auth.role() = 'authenticated'
+    AND (
+      public.is_admin()
+      OR (
+        role = 'user'
+        AND profile_id = public.get_active_profile_id()
+      )
+    )
+  );

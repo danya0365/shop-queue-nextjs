@@ -1,7 +1,7 @@
--- FilmNest Database Schema
+-- ShopQueue Database Schema
 -- Created: 2025-06-18
 -- Author: Marosdee Uma
--- Description: Initial schema for FilmNest application following Clean Architecture principles
+-- Description: Initial schema for ShopQueue application following Clean Architecture principles
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
