@@ -91,6 +91,11 @@
     --card-bg: rgba(255, 255, 255, 0.8);
     --card-border: rgba(0, 0, 0, 0.1);
     --card-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.03);
+    
+    /* Hero background colors */
+    --color-hero-primary: #667eea;
+    --color-hero-secondary: #764ba2;
+    --color-hero-accent: #f093fb;
   }
 
   /* ใช้ tokens กับ body ผ่าน utilities ของ Tailwind */
@@ -111,7 +116,19 @@
     background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); 
   }
   .bg-hero-gradient { 
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), #06b6d4); 
+    background: linear-gradient(135deg, var(--color-hero-primary), var(--color-hero-secondary)); 
+  }
+  .bg-hero-modern { 
+    background: linear-gradient(135deg, var(--color-hero-primary) 0%, var(--color-hero-secondary) 50%, var(--color-hero-accent) 100%); 
+  }
+  .bg-hero-elegant { 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+  }
+  .bg-hero-warm { 
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%); 
+  }
+  .bg-hero-cool { 
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); 
   }
   .bg-queue-gradient {
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
