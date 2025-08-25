@@ -87,10 +87,10 @@ export function LandingView({ viewModel }: LandingViewProps) {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link
-                  href="/auth/register"
+                  href="/getting-started"
                   className="group bg-white text-hero-text-accent px-8 py-4 rounded-xl font-semibold text-lg hover:bg-hero-button-bg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
                 >
-                  เริ่มใช้งานฟรี
+                  สอนการใช้งาน
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -427,10 +427,10 @@ export function LandingView({ viewModel }: LandingViewProps) {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-surface text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-muted-light transition-colors shadow-lg"
             >
-              สมัครสมาชิกฟรี
+              สอนการใช้งาน
             </Link>
             <Link
               href="/contact"
