@@ -93,6 +93,19 @@
   --color-hero-status-waiting: #fb923c;
   --color-hero-status-pending: #fdba74;
   --color-hero-accent-soft: #fdba74;
+  
+  /* Hero Demo Card Colors - Better Contrast */
+  --color-hero-card-bg: rgba(0, 0, 0, 0.3);
+  --color-hero-card-text: #ffffff;
+  --color-hero-card-text-muted: #e5e7eb;
+  --color-hero-card-border: rgba(255, 255, 255, 0.2);
+  
+  /* Theme Toggle Colors */
+  --color-theme-toggle-bg: rgba(249, 115, 22, 0.1);
+  --color-theme-toggle-border: rgba(249, 115, 22, 0.2);
+  --color-theme-toggle-hover-bg: rgba(249, 115, 22, 0.15);
+  --color-theme-toggle-icon: #f97316;
+  --color-theme-toggle-focus: rgba(249, 115, 22, 0.3);
 
   /* Overlay colors */
   --color-overlay: rgba(0, 0, 0, 0.5);

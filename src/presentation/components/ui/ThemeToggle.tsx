@@ -14,10 +14,10 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-card-border bg-card-bg backdrop-blur-sm transition-all duration-200 hover:scale-105"
+        className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-theme-toggle-border bg-theme-toggle-bg backdrop-blur-sm transition-all duration-200 hover:scale-105"
         disabled
       >
-        <div className="h-4 w-4 animate-pulse rounded-full bg-foreground/20" />
+        <div className="h-4 w-4 animate-pulse rounded-full bg-theme-toggle-icon/20" />
       </button>
     )
   }
@@ -37,7 +37,7 @@ export function ThemeToggle() {
       case 'light':
         return (
           <svg
-            className="h-4 w-4 text-foreground transition-transform duration-200"
+            className="h-4 w-4 text-theme-toggle-icon transition-transform duration-200"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -53,7 +53,7 @@ export function ThemeToggle() {
       case 'dark':
         return (
           <svg
-            className="h-4 w-4 text-foreground transition-transform duration-200"
+            className="h-4 w-4 text-theme-toggle-icon transition-transform duration-200"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -69,7 +69,7 @@ export function ThemeToggle() {
       default: // system
         return (
           <svg
-            className="h-4 w-4 text-foreground transition-transform duration-200"
+            className="h-4 w-4 text-theme-toggle-icon transition-transform duration-200"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -99,7 +99,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-card-border bg-card-bg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-foreground/20"
+      className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-theme-toggle-border bg-theme-toggle-bg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:bg-theme-toggle-hover-bg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-theme-toggle-focus"
       title={getTooltip()}
       aria-label={getTooltip()}
     >

@@ -132,9 +132,9 @@ export function LandingView({ viewModel }: LandingViewProps) {
             {/* Right Content - Visual Demo */}
             <div className="relative">
               {/* Main Demo Card */}
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl hero-glow">
+              <div className="bg-hero-card-bg backdrop-blur-lg rounded-2xl p-6 border border-hero-card-border shadow-2xl hero-glow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">คิวปัจจุบัน</h3>
+                  <h3 className="text-lg font-semibold text-hero-card-text">คิวปัจจุบัน</h3>
                   <div className="flex items-center text-hero-status-active">
                     <div className="w-2 h-2 bg-hero-status-active rounded-full mr-2 animate-pulse"></div>
                     <span className="text-sm">ออนไลน์</span>
@@ -148,14 +148,14 @@ export function LandingView({ viewModel }: LandingViewProps) {
                     { number: 'A002', name: 'คุณสมหญิง', status: 'รอ 5 นาที', color: 'bg-hero-status-waiting' },
                     { number: 'A003', name: 'คุณสมศักดิ์', status: 'รอ 12 นาที', color: 'bg-hero-status-pending' }
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div key={index} className="flex items-center justify-between p-3 bg-hero-card-bg rounded-lg border border-hero-card-border">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center font-bold text-white mr-3">
+                        <div className="w-10 h-10 bg-hero-card-bg rounded-lg flex items-center justify-center font-bold text-hero-card-text mr-3 border border-hero-card-border">
                           {item.number}
                         </div>
                         <div>
-                          <div className="text-white font-medium">{item.name}</div>
-                          <div className="text-hero-text-light text-sm">{item.status}</div>
+                          <div className="text-hero-card-text font-medium">{item.name}</div>
+                          <div className="text-hero-card-text-muted text-sm">{item.status}</div>
                         </div>
                       </div>
                       <div className={`w-3 h-3 ${item.color} rounded-full`}></div>
@@ -164,18 +164,18 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 </div>
                 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/20">
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-hero-card-border">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">24</div>
-                    <div className="text-xs text-hero-text-light">วันนี้</div>
+                    <div className="text-2xl font-bold text-hero-card-text">24</div>
+                    <div className="text-xs text-hero-card-text-muted">วันนี้</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">8</div>
-                    <div className="text-xs text-hero-text-light">นาที</div>
+                    <div className="text-2xl font-bold text-hero-card-text">8</div>
+                    <div className="text-xs text-hero-card-text-muted">นาที</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">3</div>
-                    <div className="text-xs text-hero-text-light">รอคิว</div>
+                    <div className="text-2xl font-bold text-hero-card-text">3</div>
+                    <div className="text-xs text-hero-card-text-muted">รอคิว</div>
                   </div>
                 </div>
               </div>
