@@ -14,10 +14,10 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ redirectPath }) => {
         <div className="hidden md:block w-1/2 bg-primary relative">
           <div className="absolute inset-0 flex items-center justify-center p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <h2 className="text-2xl font-bold text-hero-card-text mb-4">
                 ยินดีต้อนรับสู่ระบบจัดการคิว
               </h2>
-              <p className="text-white/90 mb-6">
+              <p className="text-hero-card-text-muted mb-6">
                 เข้าร่วมกับเราเพื่อจัดการคิวของร้านคุณอย่างมีประสิทธิภาพ
                 ช่วยให้ลูกค้าของคุณได้รับประสบการณ์ที่ดีที่สุด
               </p>

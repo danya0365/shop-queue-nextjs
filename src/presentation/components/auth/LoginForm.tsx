@@ -68,10 +68,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="email"
             placeholder="your.email@example.com"
             {...register("email")}
-            className={errors.email ? "border-red-500" : ""}
+            className={errors.email ? "border-error" : ""}
           />
           {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
+            <p className="text-error text-sm">{errors.email.message}</p>
           )}
         </div>
 
@@ -91,18 +91,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               type={showPassword ? "text" : "password"}
               placeholder="รหัสผ่าน"
               {...register("password")}
-              className={errors.password ? "border-red-500" : ""}
+              className={errors.password ? "border-error" : ""}
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-sm"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? "ซ่อน" : "แสดง"}
             </button>
           </div>
           {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
+            <p className="text-error text-sm">{errors.password.message}</p>
           )}
         </div>
 
