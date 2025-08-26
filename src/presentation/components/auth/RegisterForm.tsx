@@ -160,18 +160,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <input 
-              type="checkbox" 
-              id="acceptTerms" 
-              {...register("acceptTerms")} 
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              {...register("acceptTerms")}
               className="h-4 w-4 rounded-sm border border-primary focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <Label
             htmlFor="acceptTerms"
-            className={`text-sm font-medium leading-none ${
-              errors.acceptTerms ? "text-error" : ""
-            }`}
+            className={`text-sm font-medium leading-none ${errors.acceptTerms ? "text-error" : ""
+              }`}
           >
             ฉันยอมรับ{" "}
             <Link href="/terms" className="text-primary hover:underline">
@@ -183,8 +182,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <p className="text-error text-sm">{errors.acceptTerms.message}</p>
         )}
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           disabled={isLoading}
         >

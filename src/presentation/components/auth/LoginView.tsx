@@ -9,7 +9,7 @@ interface LoginViewProps {
 
 export const LoginView: React.FC<LoginViewProps> = ({ redirectPath }) => {
   return (
-    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-10">
+    <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-10 mx-auto">
       <div className="flex w-full max-w-5xl shadow-lg rounded-lg overflow-hidden">
         <div className="hidden md:block w-1/2 bg-primary relative">
           <div className="absolute inset-0 flex items-center justify-center p-6">

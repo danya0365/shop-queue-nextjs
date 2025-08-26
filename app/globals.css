@@ -85,9 +85,11 @@
   --color-primary: #f97316;
   --color-primary-light: #fed7aa;
   --color-primary-dark: #ea580c;
+  --color-primary-foreground: #ffffff;
   --color-secondary: #fb923c;
   --color-secondary-light: #ffedd5;
   --color-secondary-dark: #f97316;
+  --color-secondary-foreground: #ffffff;
   
   /* Hero Section Colors */
   --color-hero-text-light: #ffedd5;
