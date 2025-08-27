@@ -54,12 +54,12 @@ export function LandingView({ viewModel }: LandingViewProps) {
       <section className="relative bg-hero-orange-sunset text-white py-20 lg:py-32 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 hero-pattern opacity-30"></div>
-        
+
         {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute top-40 right-20 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-white/10 rounded-full blur-lg animate-pulse delay-500"></div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
@@ -69,7 +69,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 <span className="w-2 h-2 bg-hero-status-active rounded-full mr-2 animate-pulse"></span>
                 ระบบจัดการคิวอัจฉริยะ
               </div>
-              
+
               {/* Main Heading */}
               <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-6">
                 <span className="block">จัดการคิว</span>
@@ -77,20 +77,20 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   อย่างมืออาชีพ
                 </span>
               </h1>
-              
+
               {/* Subtitle */}
               <p className="text-xl lg:text-2xl text-hero-text-light mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                ระบบจัดการคิวที่ทันสมัย ช่วยลดเวลารอ เพิ่มประสิทธิภาพ 
+                ระบบจัดการคิวที่ทันสมัย ช่วยลดเวลารอ เพิ่มประสิทธิภาพ
                 และสร้างประสบการณ์ที่ดีให้กับลูกค้าของคุณ
               </p>
-              
+
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link
-                  href="/dashboard"
+                  href="/getting-started"
                   className="group bg-white text-hero-text-accent px-8 py-4 rounded-xl font-semibold text-lg hover:bg-hero-button-bg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
                 >
-                  เข้าสู่ระบบ
+                  เริ่มต้นใช้งาน
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -105,7 +105,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   </svg>
                 </Link>
               </div>
-              
+
               {/* Trust Indicators */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-hero-text-light">
                 <div className="flex items-center">
@@ -128,7 +128,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 </div>
               </div>
             </div>
-            
+
             {/* Right Content - Visual Demo */}
             <div className="relative">
               {/* Main Demo Card */}
@@ -140,7 +140,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                     <span className="text-sm">ออนไลน์</span>
                   </div>
                 </div>
-                
+
                 {/* Queue Items */}
                 <div className="space-y-3">
                   {[
@@ -162,7 +162,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-hero-card-border">
                   <div className="text-center">
@@ -179,7 +179,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   </div>
                 </div>
               </div>
-              
+
               {/* Floating Cards */}
               <div className="absolute -top-4 -right-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-bounce">
                 <div className="flex items-center text-white">
@@ -189,7 +189,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   <span className="text-sm font-medium">เรียลไทม์</span>
                 </div>
               </div>
-              
+
               <div className="absolute -bottom-4 -left-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-pulse">
                 <div className="flex items-center text-white">
                   <svg className="w-4 h-4 mr-2 text-hero-accent-soft" fill="currentColor" viewBox="0 0 20 20">
@@ -201,7 +201,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
             </div>
           </div>
         </div>
-        
+
         {/* Bottom Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 120" className="w-full h-auto">
