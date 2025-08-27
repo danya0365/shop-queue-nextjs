@@ -1,0 +1,129 @@
+/* 🎨 Theme Tokens */
+@theme {
+  --font-sans: "Kanit", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* Light defaults */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-surface: #ffffff;
+  --color-on-surface: #000000;
+
+  /* Queue status colors -> ใช้ bg-waiting, text-serving ได้เลย */
+  --color-waiting: #f59e0b;
+  --color-serving: #10b981;
+  --color-completed: #6b7280;
+  --color-cancelled: #ef4444;
+  --color-priority: #8b5cf6;
+
+  /* Status colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #047857;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #d97706;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #dc2626;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-info-dark: #1d4ed8;
+
+  /* UI Colors - Gray scale */
+  --color-muted: #6b7280;
+  --color-muted-light: #f9fafb;
+  --color-muted-dark: #374151;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-border-dark: #374151;
+
+  /* Input colors */
+  --color-input: #d1d5db;
+  --color-input-bg: #ffffff;
+  --color-input-focus: #ffffff;
+  --color-input-placeholder: #9ca3af;
+  --color-input-border: #d1d5db;
+  
+  /* Focus and interaction colors */
+  --color-ring: #3b82f6;
+  --color-ring-offset-background: #ffffff;
+
+  /* Alert colors */
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-700: #b91c1c;
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-green-900: #14532d;
+
+  /* Additional gray variants for complete theme system */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Primary brand colors - Shop Queue Theme (Orange) */
+  --color-primary: #f97316;
+  --color-primary-light: #fed7aa;
+  --color-primary-dark: #ea580c;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #fb923c;
+  --color-secondary-light: #ffedd5;
+  --color-secondary-dark: #f97316;
+  --color-secondary-foreground: #ffffff;
+  
+  /* Hero Section Colors */
+  --color-hero-text-light: #ffedd5;
+  --color-hero-text-accent: #ea580c;
+  --color-hero-button-bg: #ffedd5;
+  --color-hero-status-active: #4ade80;
+  --color-hero-status-waiting: #fb923c;
+  --color-hero-status-pending: #fdba74;
+  --color-hero-accent-soft: #fdba74;
+  
+  /* Hero Demo Card Colors - Better Contrast */
+  --color-hero-card-bg: rgba(0, 0, 0, 0.3);
+  --color-hero-card-text: #ffffff;
+  --color-hero-card-text-muted: #e5e7eb;
+  --color-hero-card-border: rgba(255, 255, 255, 0.2);
+  
+  /* Theme Toggle Colors */
+  --color-theme-toggle-bg: rgba(249, 115, 22, 0.1);
+  --color-theme-toggle-border: rgba(249, 115, 22, 0.2);
+  --color-theme-toggle-hover-bg: rgba(249, 115, 22, 0.15);
+  --color-theme-toggle-icon: #f97316;
+  --color-theme-toggle-focus: rgba(249, 115, 22, 0.3);
+
+  /* Overlay colors */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-overlay-light: rgba(255, 255, 255, 0.9);
+  --color-overlay-dark: rgba(0, 0, 0, 0.8);
+
+  /* Header colors (light mode) */
+  --color-header-bg: rgba(255, 255, 255, 0.5);
+  --color-header-border: rgba(229, 231, 235, 0.8);
+  
+  /* Footer colors (light mode) */
+  --color-footer-bg: #ffffff;
+  --color-footer-border: #e5e7eb;
+
+  /* Navigation colors */
+  --color-nav-link: #374151;
+  --color-nav-link-hover: #f97316;
+  --color-nav-link-active: #f97316;
+}

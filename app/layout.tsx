@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
 import { Geist_Mono, Kanit } from "next/font/google";
-import "./globals.css";
+import "../public/styles/index.css";
 
 const kanit = Kanit({
   variable: "--font-sans",

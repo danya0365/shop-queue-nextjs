@@ -12,10 +12,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
     return Array.from({ length: 5 }, (_, index) => (
       <svg
         key={index}
-        className={cn(`w-5 h-5`, {
-          'text-yellow-400': index < rating,
-          'text-gray-300': index >= rating,
-        })}
+        className={cn(index < rating ? 'testimonial-star-filled' : 'testimonial-star-empty')}
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -25,32 +22,32 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-border p-8 hover:shadow-lg transition-all duration-300">
+    <div className="testimonial-card">
       {/* Rating */}
-      <div className="flex items-center mb-4">
+      <div className="testimonial-rating">
         {renderStars(testimonial.rating)}
       </div>
 
       {/* Comment */}
-      <blockquote className="text-foreground mb-6 leading-relaxed">
+      <blockquote className="testimonial-comment">
         &quot;{testimonial.comment}&quot;
       </blockquote>
 
       {/* Feature Tag */}
       <div className="mb-6">
-        <span className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+        <span className="testimonial-feature-tag">
           {testimonial.feature}
         </span>
       </div>
 
       {/* Author */}
-      <div className="flex items-center">
-        <div className="w-12 h-12 bg-primary-gradient rounded-full flex items-center justify-center text-white font-bold mr-4">
+      <div className="testimonial-author-container">
+        <div className="testimonial-author-avatar">
           {testimonial.name.charAt(0)}
         </div>
         <div>
-          <div className="font-semibold text-foreground">{testimonial.name}</div>
-          <div className="text-muted text-sm">{testimonial.business}</div>
+          <div className="testimonial-author-name">{testimonial.name}</div>
+          <div className="testimonial-author-business">{testimonial.business}</div>
         </div>
       </div>
     </div>

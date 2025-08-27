@@ -70,26 +70,26 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
 
   if (variant === 'compact') {
     return (
-      <div className={cn('p-6 bg-surface rounded-2xl border border-border transition-all duration-300 hover:shadow-lg hover:border-primary', feature.isPopular && 'ring-2 ring-primary/20', feature.isPremium && 'ring-2 ring-warning/20')}>
+      <div className={cn('feature-card-compact', feature.isPopular && 'feature-card-popular', feature.isPremium && 'feature-card-premium')}>
         <div className="flex items-start space-x-4">
-          <div className="text-primary flex-shrink-0">
+          <div className="feature-icon-compact">
             {getIcon(feature.icon)}
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-2">
-              <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
+              <h3 className="feature-title-compact">{feature.title}</h3>
               {feature.isPopular && (
-                <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">
+                <span className="feature-badge-popular-small">
                   ยอดนิยม
                 </span>
               )}
               {feature.isPremium && (
-                <span className="bg-warning text-white text-xs px-2 py-1 rounded-full">
+                <span className="feature-badge-premium-small">
                   Premium
                 </span>
               )}
             </div>
-            <p className="text-muted text-sm">{feature.description}</p>
+            <p className="feature-description-compact">{feature.description}</p>
           </div>
         </div>
       </div>
@@ -97,11 +97,11 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
   }
 
   return (
-    <div className={cn('p-8 bg-surface rounded-2xl border border-border transition-all duration-300 hover:shadow-lg hover:border-primary', feature.isPopular && 'ring-2 ring-primary/20', feature.isPremium && 'ring-2 ring-warning/20')}>
+    <div className={cn('feature-card-base', feature.isPopular && 'feature-card-popular', feature.isPremium && 'feature-card-premium')}>
       {/* Popular Badge */}
       {feature.isPopular && (
         <div className="absolute top-4 right-4">
-          <span className="bg-primary text-white text-xs px-3 py-1 rounded-full font-medium">
+          <span className="feature-badge-popular">
             ยอดนิยม
           </span>
         </div>
@@ -110,43 +110,43 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
       {/* Premium Badge */}
       {feature.isPremium && (
         <div className="absolute top-4 left-4">
-          <span className="bg-warning text-white text-xs px-3 py-1 rounded-full font-medium">
+          <span className="feature-badge-premium">
             Premium
           </span>
         </div>
       )}
 
       {/* Icon */}
-      <div className="text-primary mb-6">
+      <div className="feature-icon">
         {getIcon(feature.icon)}
       </div>
 
       {/* Content */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
-        <p className="text-muted mb-4">{feature.description}</p>
+        <h3 className="feature-title">{feature.title}</h3>
+        <p className="feature-description">{feature.description}</p>
 
         {variant === 'detailed' && (
           <div className="space-y-4">
-            <p className="text-sm text-foreground leading-relaxed">
+            <p className="feature-long-description">
               {feature.longDescription}
             </p>
 
             {/* Benefits */}
             {feature.benefits.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-foreground">ประโยชน์ที่ได้รับ:</h4>
-                <div className="space-y-2">
+              <div className="feature-benefits-container">
+                <h4 className="feature-benefits-title">ประโยชน์ที่ได้รับ:</h4>
+                <div className="feature-benefits-list">
                   {feature.benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="w-5 h-5 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div key={index} className="feature-benefit-item">
+                      <div className="feature-benefit-icon">
                         <svg className="w-3 h-3 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">{benefit.title}</p>
-                        <p className="text-xs text-muted">{benefit.description}</p>
+                        <p className="feature-benefit-title">{benefit.title}</p>
+                        <p className="feature-benefit-description">{benefit.description}</p>
                       </div>
                     </div>
                   ))}
@@ -161,7 +161,7 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
       {variant === 'default' && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full text-left text-primary hover:text-primary-dark transition-colors text-sm font-medium"
+          className="feature-expand-button"
         >
           {isExpanded ? 'ดูน้อยลง' : 'ดูรายละเอียด'}
         </button>
@@ -169,25 +169,25 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
 
       {/* Expanded Content */}
       {variant === 'default' && isExpanded && (
-        <div className="mt-4 pt-4 border-t border-border space-y-4">
-          <p className="text-sm text-foreground leading-relaxed">
+        <div className="feature-expanded-content">
+          <p className="feature-long-description">
             {feature.longDescription}
           </p>
 
           {feature.benefits.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">ประโยชน์ที่ได้รับ:</h4>
-              <div className="space-y-2">
+            <div className="feature-benefits-container">
+              <h4 className="feature-benefits-title">ประโยชน์ที่ได้รับ:</h4>
+              <div className="feature-benefits-list">
                 {feature.benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="w-5 h-5 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div key={index} className="feature-benefit-item">
+                    <div className="feature-benefit-icon">
                       <svg className="w-3 h-3 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{benefit.title}</p>
-                      <p className="text-xs text-muted">{benefit.description}</p>
+                      <p className="feature-benefit-title">{benefit.title}</p>
+                      <p className="feature-benefit-description">{benefit.description}</p>
                     </div>
                   </div>
                 ))}

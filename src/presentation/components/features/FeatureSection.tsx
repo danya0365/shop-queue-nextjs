@@ -9,15 +9,15 @@ interface FeatureSectionProps {
 }
 
 export function FeatureSection({ section, variant = 'default' }: FeatureSectionProps) {
-  const getCategoryColor = (category: string) => {
-    const colorMap: Record<string, string> = {
-      queue_management: 'text-blue-600 bg-blue-50',
-      analytics: 'text-green-600 bg-green-50',
-      communication: 'text-purple-600 bg-purple-50',
-      business: 'text-orange-600 bg-orange-50',
-      technical: 'text-gray-600 bg-gray-50'
+  const getCategoryColorClass = (category: string) => {
+    const classMap: Record<string, string> = {
+      queue_management: 'feature-category-queue-management',
+      analytics: 'feature-category-analytics',
+      communication: 'feature-category-communication',
+      business: 'feature-category-business',
+      technical: 'feature-category-technical'
     };
-    return colorMap[category] || 'text-gray-600 bg-gray-50';
+    return classMap[category] || 'feature-category-technical';
   };
 
   const getCategoryIcon = (category: string) => {
@@ -58,24 +58,24 @@ export function FeatureSection({ section, variant = 'default' }: FeatureSectionP
 
   const getGridClasses = () => {
     if (variant === 'compact') {
-      return 'grid grid-cols-1 gap-4';
+      return 'feature-grid-compact';
     }
-    return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
+    return 'feature-grid-default';
   };
 
   return (
-    <div className="mb-16">
+    <div className="feature-section-container">
       {/* Section Header */}
-      <div className="text-center mb-12">
+      <div className="feature-section-header">
         <div className="flex items-center justify-center mb-4">
-          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full ${getCategoryColor(section.category)}`}>
+          <div className={`feature-section-category-badge ${getCategoryColorClass(section.category)}`}>
             {getCategoryIcon(section.category)}
             <span className="text-sm font-medium">{section.title}</span>
           </div>
         </div>
 
-        <h2 className="text-3xl font-bold text-foreground mb-4">{section.title}</h2>
-        <p className="text-xl text-muted max-w-3xl mx-auto">{section.description}</p>
+        <h2 className="feature-section-title">{section.title}</h2>
+        <p className="feature-section-description">{section.description}</p>
       </div>
 
       {/* Features Grid */}

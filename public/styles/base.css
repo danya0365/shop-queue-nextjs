@@ -1,0 +1,22 @@
+@layer base {
+  :root {
+    /* UI Theme */
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(0, 0, 0, 0.1);
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 10px 15px rgba(0,0,0,0.03);
+    
+    /* Hero background colors - Orange Theme */
+    --color-hero-primary: #f97316;
+    --color-hero-secondary: #ea580c;
+    --color-hero-accent: #fb923c;
+    --color-hero-light: #fed7aa;
+    --color-hero-warm: #ffedd5;
+    
+    /* Hero pattern and effects */
+    --hero-pattern-opacity: 0.1;
+    --hero-glow-color: rgba(249, 115, 22, 0.3);
+  }
+
+  /* ใช้ tokens กับ body ผ่าน utilities ของ Tailwind */
+  body { @apply bg-background text-foreground font-sans; }
+}
