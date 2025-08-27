@@ -5,8 +5,8 @@ import Image from "next/image";
 
 export function FrontendFooter() {
   return (
-    <footer className="bg-background border-t border-border py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="footer-bg footer-border border-t py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-1">
@@ -47,22 +47,22 @@ export function FrontendFooter() {
             <h3 className="text-lg font-semibold mb-4">ลิงก์ด่วน</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-muted hover:text-primary transition-colors">
+                <Link href="/" className="nav-link">
                   หน้าหลัก
                 </Link>
               </li>
               <li>
-                <Link href="/features" className="text-muted hover:text-primary transition-colors">
+                <Link href="/features" className="nav-link">
                   ฟีเจอร์
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-muted hover:text-primary transition-colors">
+                <Link href="/pricing" className="nav-link">
                   ราคา
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted hover:text-primary transition-colors">
+                <Link href="/contact" className="nav-link">
                   ติดต่อเรา
                 </Link>
               </li>
@@ -74,22 +74,22 @@ export function FrontendFooter() {
             <h3 className="text-lg font-semibold mb-4">ทรัพยากร</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/blog" className="text-muted hover:text-primary transition-colors">
+                <Link href="/blog" className="nav-link">
                   บล็อก
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="text-muted hover:text-primary transition-colors">
+                <Link href="/help" className="nav-link">
                   ศูนย์ช่วยเหลือ
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-muted hover:text-primary transition-colors">
+                <Link href="/faq" className="nav-link">
                   คำถามที่พบบ่อย
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-muted hover:text-primary transition-colors">
+                <Link href="/docs" className="nav-link">
                   เอกสาร API
                 </Link>
               </li>
@@ -101,22 +101,22 @@ export function FrontendFooter() {
             <h3 className="text-lg font-semibold mb-4">ข้อกฎหมาย</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/privacy" className="text-muted hover:text-primary transition-colors">
+                <Link href="/privacy" className="nav-link">
                   นโยบายความเป็นส่วนตัว
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted hover:text-primary transition-colors">
+                <Link href="/terms" className="nav-link">
                   เงื่อนไขการใช้งาน
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-muted hover:text-primary transition-colors">
+                <Link href="/cookies" className="nav-link">
                   นโยบายคุกกี้
                 </Link>
               </li>
               <li>
-                <Link href="/licenses" className="text-muted hover:text-primary transition-colors">
+                <Link href="/licenses" className="nav-link">
                   ใบอนุญาต
                 </Link>
               </li>

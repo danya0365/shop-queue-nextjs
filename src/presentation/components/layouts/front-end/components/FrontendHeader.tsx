@@ -25,18 +25,18 @@ export function FrontendHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 header-bg header-backdrop border-b header-border shadow-sm">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <Image 
-                src="/logo.png" 
-                alt="Shop Queue" 
-                width={40} 
-                height={40} 
-                className="h-10 w-auto" 
+              <Image
+                src="/logo.png"
+                alt="Shop Queue"
+                width={40}
+                height={40}
+                className="h-10 w-auto"
               />
               <span className="ml-3 text-xl font-bold text-foreground">Shop Queue</span>
             </Link>
@@ -44,16 +44,16 @@ export function FrontendHeader() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-foreground hover:text-primary transition-colors">
+            <Link href="/" className="nav-link">
               หน้าหลัก
             </Link>
-            <Link href="/features" className="text-foreground hover:text-primary transition-colors">
+            <Link href="/features" className="nav-link">
               ฟีเจอร์
             </Link>
-            <Link href="/pricing" className="text-foreground hover:text-primary transition-colors">
+            <Link href="/pricing" className="nav-link">
               ราคา
             </Link>
-            <Link href="/contact" className="text-foreground hover:text-primary transition-colors">
+            <Link href="/contact" className="nav-link">
               ติดต่อเรา
             </Link>
           </nav>
@@ -65,15 +65,15 @@ export function FrontendHeader() {
               <ProfileMenu profile={activeProfile} onLogout={handleLogout} />
             ) : (
               <>
-                <Link 
-                  href="/auth/login" 
-                  className="px-4 py-2 text-foreground hover:text-primary transition-colors"
+                <Link
+                  href="/auth/login"
+                  className="btn-ghost-modern"
                 >
                   เข้าสู่ระบบ
                 </Link>
-                <Link 
-                  href="/auth/register" 
-                  className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
+                <Link
+                  href="/auth/register"
+                  className="btn-primary-modern"
                 >
                   สมัครใช้งาน
                 </Link>
@@ -129,31 +129,31 @@ export function FrontendHeader() {
 
       {/* Mobile Menu */}
       <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-b border-border">
-          <Link 
-            href="/" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted-light hover:text-primary"
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 header-bg header-backdrop border-b header-border">
+          <Link
+            href="/"
+            className="block px-3 py-2 rounded-md text-base font-medium nav-link"
             onClick={() => setIsMenuOpen(false)}
           >
             หน้าหลัก
           </Link>
-          <Link 
-            href="/features" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted-light hover:text-primary"
+          <Link
+            href="/features"
+            className="block px-3 py-2 rounded-md text-base font-medium nav-link"
             onClick={() => setIsMenuOpen(false)}
           >
             ฟีเจอร์
           </Link>
-          <Link 
-            href="/pricing" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted-light hover:text-primary"
+          <Link
+            href="/pricing"
+            className="block px-3 py-2 rounded-md text-base font-medium nav-link"
             onClick={() => setIsMenuOpen(false)}
           >
             ราคา
           </Link>
-          <Link 
-            href="/contact" 
-            className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted-light hover:text-primary"
+          <Link
+            href="/contact"
+            className="block px-3 py-2 rounded-md text-base font-medium nav-link"
             onClick={() => setIsMenuOpen(false)}
           >
             ติดต่อเรา
@@ -241,18 +241,18 @@ export function FrontendHeader() {
             ) : (
               <>
                 <div className="flex items-center px-3">
-                  <Link 
-                    href="/auth/login" 
-                    className="block w-full px-4 py-2 text-center text-foreground border border-border rounded-md hover:bg-muted-light hover:text-primary mb-2"
+                  <Link
+                    href="/auth/login"
+                    className="block w-full px-4 py-2 text-center btn-ghost-modern mb-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     เข้าสู่ระบบ
                   </Link>
                 </div>
                 <div className="flex items-center px-3">
-                  <Link 
-                    href="/auth/register" 
-                    className="block w-full px-4 py-2 text-center bg-primary text-white rounded-md hover:bg-primary-dark"
+                  <Link
+                    href="/auth/register"
+                    className="block w-full px-4 py-2 text-center btn-primary-modern"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     สมัครใช้งาน
