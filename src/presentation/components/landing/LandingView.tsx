@@ -87,10 +87,10 @@ export function LandingView({ viewModel }: LandingViewProps) {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link
-                  href="/getting-started"
+                  href="/dashboard"
                   className="group bg-white text-hero-text-accent px-8 py-4 rounded-xl font-semibold text-lg hover:bg-hero-button-bg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
                 >
-                  สอนการใช้งาน
+                  เข้าสู่ระบบ
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -384,6 +384,58 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Access Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-5xl font-bold mb-6">
+              ทดลองใช้งานระบบ
+            </h2>
+            <p className="text-xl mb-8 max-w-3xl mx-auto">
+              เข้าถึงระบบจัดการคิวในมุมมองต่างๆ เพื่อสัมผัสประสบการณ์การใช้งานจริง
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            {/* Main Demo Card */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+              <div className="text-6xl mb-6">🏪</div>
+              <h3 className="text-3xl font-bold mb-4">ระบบจัดการร้านค้า</h3>
+              <p className="text-white/80 mb-8 leading-relaxed text-lg">
+                เข้าสู่ระบบเพื่อจัดการร้านค้าของคุณ สร้างร้านใหม่ หรือเข้าถึงระบบจัดการที่มีอยู่แล้ว
+              </p>
+              <Link
+                href="/dashboard"
+                className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors transform hover:scale-105 duration-300 text-lg"
+              >
+                เข้าสู่แดชบอร์ด
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Access Info */}
+          <div className="mt-16 text-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-4xl mx-auto border border-white/20">
+              <h4 className="text-xl font-semibold mb-4">🚀 เส้นทางการใช้งาน</h4>
+              <div className="grid md:grid-cols-3 gap-6 text-sm">
+                <div>
+                  <div className="font-semibold text-blue-200 mb-2">1. เข้าสู่ระบบ</div>
+                  <div className="text-white/80">เข้าสู่แดชบอร์ด → เลือกร้าน → เข้าสู่ระบบจัดการ</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-green-200 mb-2">2. จัดการร้าน</div>
+                  <div className="text-white/80">สร้างร้านใหม่ → ตั้งค่าระบบ → เพิ่มพนักงาน</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-orange-200 mb-2">3. เริ่มใช้งาน</div>
+                  <div className="text-white/80">เปิดระบบคิว → รับลูกค้า → ติดตามสถิติ</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

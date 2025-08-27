@@ -8,7 +8,8 @@ interface CustomerRewardsViewProps {
 }
 
 export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
-  const [activeTab, setActiveTab] = useState<'rewards' | 'redeemed' | 'history'>('rewards');
+  type TabType = 'rewards' | 'redeemed' | 'history';
+  const [activeTab, setActiveTab] = useState<TabType>('rewards');
   const [selectedReward, setSelectedReward] = useState<AvailableReward | CustomerReward | null>(null);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
 
@@ -162,7 +163,7 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as TabType)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'

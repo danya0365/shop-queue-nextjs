@@ -37,6 +37,7 @@ export interface Permission {
   category: string;
 }
 
+
 export interface EmployeeFilters {
   status: 'all' | 'active' | 'inactive' | 'on_leave';
   department: string;
@@ -58,17 +59,17 @@ export interface EmployeesViewModel {
 
 // Main Presenter class
 export class EmployeesPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   async getViewModel(shopId: string): Promise<EmployeesViewModel> {
     try {
       this.logger.info('EmployeesPresenter: Getting view model for shop', { shopId });
-      
+
       // Mock data - replace with actual service calls
       const employees = this.getEmployees();
       const departments = this.getDepartments();
       const permissions = this.getPermissions();
-      
+
       return {
         employees,
         departments,

@@ -30,11 +30,10 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
           </div>
           <button
             onClick={toggleDutyStatus}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              dutyStatus 
-                ? 'bg-red-500 text-white hover:bg-red-600' 
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${dutyStatus
+              ? 'bg-red-500 text-white hover:bg-red-600'
+              : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
           >
             {dutyStatus ? '🛑 พักงาน' : '▶️ เริ่มงาน'}
           </button>
@@ -52,7 +51,7 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
                 <div className="text-sm opacity-90">เริ่ม: {currentQueue.startTime}</div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-xl font-semibold mb-2">{currentQueue.customerName}</h3>
@@ -66,7 +65,7 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
                   </ul>
                 </div>
               </div>
-              
+
               <div className="flex flex-col justify-center space-y-4">
                 <div className="text-center">
                   <p className="text-sm opacity-90">เวลาโดยประมาณ</p>
@@ -84,7 +83,7 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
           <div className="p-8 text-center">
             <span className="text-6xl mb-4 block">😴</span>
             <h2 className="text-2xl font-bold text-gray-600 mb-2">ไม่มีคิวที่กำลังให้บริการ</h2>
-            <p className="text-gray-500">คลิก "เรียกคิวถัดไป" เพื่อเริ่มให้บริการ</p>
+            <p className="text-gray-500">คลิก &quot;เรียกคิวถัดไป&quot; เพื่อเริ่มให้บริการ</p>
             <button className="mt-4 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
               📞 เรียกคิวถัดไป
             </button>
@@ -151,13 +150,12 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                      index === 0 ? 'bg-green-500' : index === 1 ? 'bg-blue-500' : 'bg-gray-400'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${index === 0 ? 'bg-green-500' : index === 1 ? 'bg-blue-500' : 'bg-gray-400'
+                      }`}>
                       {queue.queueNumber}
                     </div>
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-medium text-gray-900">{queue.customerName}</h3>
                     <p className="text-sm text-gray-600">บริการ: {queue.services.join(', ')}</p>
@@ -203,11 +201,11 @@ export function EmployeeDashboardView({ viewModel }: EmployeeDashboardViewProps)
           <div className="space-y-2 text-sm">
             <div className="p-3 bg-gray-50 rounded-lg">
               <p className="font-medium">ลูกค้าไม่มา:</p>
-              <p className="text-gray-600">"ขออภัยครับ ลูกค้าไม่มารับบริการ"</p>
+              <p className="text-gray-600">&quot;ขออภัยครับ ลูกค้าไม่มารับบริการ&quot;</p>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg">
               <p className="font-medium">เสร็จสิ้น:</p>
-              <p className="text-gray-600">"ขอบคุณครับ เรียบร้อยแล้ว"</p>
+              <p className="text-gray-600">&quot;ขอบคุณครับ เรียบร้อยแล้ว&quot;</p>
             </div>
           </div>
         </div>

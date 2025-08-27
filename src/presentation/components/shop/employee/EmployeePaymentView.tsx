@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import type { EmployeePaymentViewModel, PaymentQueue, PaymentMethod } from '@/src/presentation/presenters/shop/employee/EmployeePaymentPresenter';
+import type { EmployeePaymentViewModel, PaymentQueue } from '@/src/presentation/presenters/shop/employee/EmployeePaymentPresenter';
+import { useState } from 'react';
 
 interface EmployeePaymentViewProps {
   viewModel: EmployeePaymentViewModel;
@@ -69,21 +69,19 @@ export function EmployeePaymentView({ viewModel }: EmployeePaymentViewProps) {
             <nav className="flex space-x-8 px-6">
               <button
                 onClick={() => setActiveTab('ready')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'ready'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'ready'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 รอชำระเงิน ({viewModel.readyQueues.length})
               </button>
               <button
                 onClick={() => setActiveTab('completed')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'completed'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'completed'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 ชำระแล้ว ({viewModel.completedPayments.length})
               </button>
@@ -114,11 +112,10 @@ export function EmployeePaymentView({ viewModel }: EmployeePaymentViewProps) {
                             <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
                               คิว {queue.queueNumber}
                             </span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              queue.paymentStatus === 'unpaid' 
+                            <span className={`text-xs px-2 py-1 rounded-full ${queue.paymentStatus === 'unpaid'
                                 ? 'bg-red-100 text-red-800'
                                 : 'bg-yellow-100 text-yellow-800'
-                            }`}>
+                              }`}>
                               {queue.paymentStatus === 'unpaid' ? 'ยังไม่ชำระ' : 'ชำระบางส่วน'}
                             </span>
                           </div>
@@ -271,13 +268,12 @@ export function EmployeePaymentView({ viewModel }: EmployeePaymentViewProps) {
                     key={method.id}
                     onClick={() => setPaymentMethod(method.id)}
                     disabled={!method.available}
-                    className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
-                      paymentMethod === method.id
+                    className={`p-3 rounded-lg border text-sm font-medium transition-colors ${paymentMethod === method.id
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : method.available
-                        ? 'border-gray-300 hover:border-gray-400'
-                        : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                    }`}
+                          ? 'border-gray-300 hover:border-gray-400'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                      }`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <span>{method.icon}</span>

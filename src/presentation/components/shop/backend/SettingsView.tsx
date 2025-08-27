@@ -8,7 +8,8 @@ interface SettingsViewProps {
 }
 
 export function SettingsView({ viewModel }: SettingsViewProps) {
-  const [activeTab, setActiveTab] = useState<'shop' | 'queue' | 'payment' | 'notifications' | 'system'>('shop');
+  type TabType = 'shop' | 'queue' | 'payment' | 'notifications' | 'system';
+  const [activeTab, setActiveTab] = useState<TabType>('shop');
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleSave = () => {
@@ -63,7 +64,7 @@ export function SettingsView({ viewModel }: SettingsViewProps) {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as TabType)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'

@@ -36,6 +36,7 @@ export interface DashboardViewModel {
   stats: DashboardStats;
   recentActivity: RecentActivity[];
   hasShops: boolean;
+  shops: ShopDto[];
 }
 
 /**
@@ -74,6 +75,7 @@ export class DashboardPresenter {
         stats,
         recentActivity,
         hasShops,
+        shops,
       };
     } catch (error) {
       this.logger.error("DashboardPresenter: Error getting view model", error);

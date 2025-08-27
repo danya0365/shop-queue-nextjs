@@ -38,7 +38,7 @@ export function EmployeeServeView({ viewModel }: EmployeeServeViewProps) {
       setShowNoteModal(true);
       return;
     }
-    
+
     // Mock action handling
     console.log(`Action: ${actionId}`, serviceId ? `for service: ${serviceId}` : '');
     alert(`ดำเนินการ: ${serviceActions.find(a => a.id === actionId)?.label}`);
@@ -53,9 +53,8 @@ export function EmployeeServeView({ viewModel }: EmployeeServeViewProps) {
             <h1 className="text-3xl font-bold text-gray-900">ให้บริการ</h1>
             <p className="text-gray-600 mt-1">สถานี: {stationNumber} • พนักงาน: {employeeName}</p>
           </div>
-          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            isOnDuty ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${isOnDuty ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
             <div className={`w-3 h-3 rounded-full ${isOnDuty ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className="font-medium">{isOnDuty ? 'พร้อมให้บริการ' : 'พักงาน'}</span>
           </div>
@@ -66,7 +65,7 @@ export function EmployeeServeView({ viewModel }: EmployeeServeViewProps) {
           <div className="p-12 text-center">
             <span className="text-8xl mb-6 block">😴</span>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">ไม่มีคิวที่กำลังให้บริการ</h2>
-            <p className="text-gray-600 mb-8">คลิก "เรียกคิวถัดไป" เพื่อรับคิวใหม่</p>
+            <p className="text-gray-600 mb-8">คลิก &quot;เรียกคิวถัดไป&quot; เพื่อรับคิวใหม่</p>
             <button className="bg-green-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-600 transition-colors text-lg">
               📞 เรียกคิวถัดไป
             </button>
@@ -131,11 +130,10 @@ export function EmployeeServeView({ viewModel }: EmployeeServeViewProps) {
             {currentQueue.services.map((service) => (
               <div
                 key={service.id}
-                className={`border rounded-lg p-6 transition-all ${
-                  selectedService === service.id
+                className={`border rounded-lg p-6 transition-all ${selectedService === service.id
                     ? 'border-green-500 bg-green-50'
                     : 'border-gray-200 hover:border-gray-300'
-                }`}
+                  }`}
                 onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
               >
                 <div className="flex items-center justify-between">

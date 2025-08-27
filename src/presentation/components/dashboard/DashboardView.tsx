@@ -4,13 +4,14 @@ import { DashboardViewModel } from '@/src/presentation/presenters/dashboard/Dash
 import { StatsCard } from './StatsCard';
 import { RecentActivityCard } from './RecentActivityCard';
 import { QuickActionsCard } from './QuickActionsCard';
+import { ShopListCard } from './ShopListCard';
 
 interface DashboardViewProps {
   viewModel: DashboardViewModel;
 }
 
 export function DashboardView({ viewModel }: DashboardViewProps) {
-  const { user, stats, recentActivity, hasShops } = viewModel;
+  const { user, stats, recentActivity, hasShops, shops } = viewModel;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
@@ -126,17 +127,13 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column - Quick Actions */}
-              <div className="lg:col-span-1">
-                <QuickActionsCard hasShops={hasShops} />
-              </div>
-
-              {/* Right Column - Recent Activity */}
-              <div className="lg:col-span-2">
-                <RecentActivityCard activities={recentActivity} />
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <QuickActionsCard hasShops={hasShops} />
+              <RecentActivityCard activities={recentActivity} />
             </div>
+
+            {/* Shop List Section */}
+            <ShopListCard shops={shops} />
           </>
         ) : (
           /* No Shops State */

@@ -57,9 +57,8 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
           <p className="text-gray-600 mt-1">พนักงาน: {employeeName} • คิวทั้งหมด: {totalQueues}</p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-            isOnDuty ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${isOnDuty ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
             <div className={`w-3 h-3 rounded-full ${isOnDuty ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className="font-medium">{isOnDuty ? 'ปฏิบัติงาน' : 'พักงาน'}</span>
           </div>
@@ -75,21 +74,19 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setSelectedTab('my')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                selectedTab === 'my'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${selectedTab === 'my'
+                ? 'border-green-500 text-green-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               คิวของฉัน ({myQueues.length})
             </button>
             <button
               onClick={() => setSelectedTab('waiting')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                selectedTab === 'waiting'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${selectedTab === 'waiting'
+                ? 'border-green-500 text-green-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               คิวรอ ({waitingQueues.length})
             </button>
@@ -104,7 +101,7 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                 <div className="text-center py-12">
                   <span className="text-6xl mb-4 block">😴</span>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">ไม่มีคิวที่กำลังให้บริการ</h3>
-                  <p className="text-gray-500">คลิก "เรียกคิวถัดไป" เพื่อรับคิวใหม่</p>
+                  <p className="text-gray-500">คลิก &quot;เรียกคิวถัดไป&quot; เพื่อรับคิวใหม่</p>
                 </div>
               ) : (
                 myQueues.map((queue) => (
@@ -114,7 +111,7 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
                           <span className="text-white font-bold text-lg">{queue.queueNumber}</span>
                         </div>
-                        
+
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
                             <h3 className="text-xl font-semibold text-gray-900">{queue.customerName}</h3>
@@ -167,12 +164,11 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                   <div key={queue.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
-                          index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-orange-500' : 'bg-gray-400'
-                        }`}>
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-orange-500' : 'bg-gray-400'
+                          }`}>
                           {queue.queueNumber}
                         </div>
-                        
+
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="text-lg font-semibold text-gray-900">{queue.customerName}</h3>
@@ -258,11 +254,11 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
           <div className="space-y-2 text-sm">
             <div className="p-2 bg-gray-50 rounded">
               <p className="font-medium">เรียกคิว:</p>
-              <p className="text-gray-600">"เรียกคิว {myQueues[0]?.queueNumber || 'A000'} ครับ"</p>
+              <p className="text-gray-600">&quot;เรียกคิว {myQueues[0]?.queueNumber || 'A000'} ครับ&quot;</p>
             </div>
             <div className="p-2 bg-gray-50 rounded">
               <p className="font-medium">เสร็จสิ้น:</p>
-              <p className="text-gray-600">"ขอบคุณครับ เรียบร้อยแล้ว"</p>
+              <p className="text-gray-600">&quot;ขอบคุณครับ เรียบร้อยแล้ว&quot;</p>
             </div>
           </div>
         </div>
