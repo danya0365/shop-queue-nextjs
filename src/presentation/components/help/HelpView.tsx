@@ -309,7 +309,7 @@ export function HelpView({ viewModel }: HelpViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-surface text-primary px-8 py-3 rounded-lg font-medium hover:bg-muted-light transition-colors"
             >
               สมัครสมาชิกฟรี

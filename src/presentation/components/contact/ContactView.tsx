@@ -1,7 +1,7 @@
 'use client';
 
 import { ContactViewModel } from '@/src/presentation/presenters/contact/ContactPresenter';
-import { useContactPresenter, ContactFormData } from '@/src/presentation/presenters/contact/useContactPresenter';
+import { ContactFormData, useContactPresenter } from '@/src/presentation/presenters/contact/useContactPresenter';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -103,7 +103,7 @@ export function ContactView({ viewModel }: ContactViewProps) {
             <h2 className="text-3xl font-bold text-foreground mb-6">
               ส่งข้อความหาเรา
             </h2>
-            
+
             {state.success && (
               <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
                 <div className="flex items-center">
@@ -130,7 +130,7 @@ export function ContactView({ viewModel }: ContactViewProps) {
                       {field.label}
                       {field.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
-                    
+
                     {field.type === 'textarea' ? (
                       <textarea
                         name={field.id}
@@ -323,7 +323,7 @@ export function ContactView({ viewModel }: ContactViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
             >
               เริ่มใช้ฟรี

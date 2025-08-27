@@ -97,24 +97,23 @@ export function FeatureCard({ feature, variant = 'default' }: FeatureCardProps) 
   }
 
   return (
-    <div className={cn('feature-card-base', feature.isPopular && 'feature-card-popular', feature.isPremium && 'feature-card-premium')}>
-      {/* Popular Badge */}
-      {feature.isPopular && (
-        <div className="absolute top-4 right-4">
+    <div className={cn('feature-card-base relative', feature.isPopular && 'feature-card-popular', feature.isPremium && 'feature-card-premium')}>
+      {/* Badges Container */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        {/* Popular Badge */}
+        {feature.isPopular && (
           <span className="feature-badge-popular">
             ยอดนิยม
           </span>
-        </div>
-      )}
+        )}
 
-      {/* Premium Badge */}
-      {feature.isPremium && (
-        <div className="absolute top-4 left-4">
+        {/* Premium Badge */}
+        {feature.isPremium && (
           <span className="feature-badge-premium">
             Premium
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Icon */}
       <div className="feature-icon">

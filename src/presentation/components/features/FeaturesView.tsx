@@ -39,7 +39,7 @@ export function FeaturesView({ viewModel }: FeaturesViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               ทดลองใช้ฟรี
@@ -202,7 +202,7 @@ export function FeaturesView({ viewModel }: FeaturesViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
             >
               เริ่มใช้ฟรี

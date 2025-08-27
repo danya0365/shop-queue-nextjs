@@ -1,10 +1,10 @@
 'use client';
 
 import { PricingViewModel } from '@/src/presentation/presenters/pricing/PricingPresenter';
-import { PricingCard } from './PricingCard';
+import { useState } from 'react';
 import { ComparisonTable } from './ComparisonTable';
 import { FAQSection } from './FAQSection';
-import { useState } from 'react';
+import { PricingCard } from './PricingCard';
 
 interface PricingViewProps {
   viewModel: PricingViewModel;
@@ -50,7 +50,7 @@ export function PricingView({ viewModel }: PricingViewProps) {
             เลือกแผนที่เหมาะกับคุณ
           </h1>
           <p className="text-xl text-muted max-w-3xl mx-auto mb-8">
-            เริ่มต้นฟรี หรือเลือกแผนที่เหมาะสมกับขนาดธุรกิจของคุณ 
+            เริ่มต้นฟรี หรือเลือกแผนที่เหมาะสมกับขนาดธุรกิจของคุณ
             อัปเกรดหรือดาวน์เกรดได้ตลอดเวลา
           </p>
 
@@ -61,14 +61,12 @@ export function PricingView({ viewModel }: PricingViewProps) {
             </span>
             <button
               onClick={() => setIsAnnual(!isAnnual)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isAnnual ? 'bg-primary' : 'bg-muted'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isAnnual ? 'bg-primary' : 'bg-muted'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isAnnual ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
             <span className={`text-sm ${isAnnual ? 'text-foreground font-medium' : 'text-muted'}`}>
@@ -113,7 +111,7 @@ export function PricingView({ viewModel }: PricingViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/auth/register"
+              href="/getting-started"
               className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
             >
               เริ่มใช้ฟรี

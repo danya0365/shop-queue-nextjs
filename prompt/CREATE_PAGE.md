@@ -208,7 +208,7 @@ export function [PageName]View({ viewModel }: [PageName]ViewProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/getting-started"
               className="bg-white text-primary px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
             >
               [Primary CTA]
