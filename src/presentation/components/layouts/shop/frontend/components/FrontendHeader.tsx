@@ -4,26 +4,26 @@ import { ThemeToggle } from '@/src/presentation/components/ui/ThemeToggle';
 import Link from 'next/link';
 import React from 'react';
 
-interface ShopBackendHeaderProps {
+interface FrontendHeaderProps {
   shopId: string;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
+const FrontendHeader: React.FC<FrontendHeaderProps> = ({
   shopId,
   sidebarOpen,
   toggleSidebar,
 }) => {
   return (
-    <header className="bg-blue-600 text-white shadow-lg">
+    <header className="bg-purple-600 text-white shadow-lg">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and Menu Button */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg text-blue-100 hover:bg-blue-700 transition-colors"
+              className="p-2 rounded-lg text-purple-100 hover:bg-purple-700 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -33,21 +33,18 @@ const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
             <Link href="/" className="text-xl sm:text-2xl font-bold text-white">
               Shop Queue
             </Link>
-            <span className="hidden sm:inline text-blue-200">|</span>
-            <span className="hidden sm:inline text-sm sm:text-lg font-medium text-blue-100">
-              ระบบจัดการร้าน
+            <span className="hidden sm:inline text-purple-200">|</span>
+            <span className="hidden sm:inline text-sm sm:text-lg font-medium text-purple-100">
+              ร้านกาแฟดีใจ
             </span>
           </div>
 
-          {/* Right side - Shop ID and Logout */}
+          {/* Right side - Login Button */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <div className="hidden md:block text-sm text-blue-100">
-              ร้าน ID: <span className="font-mono">{shopId}</span>
-            </div>
             <ThemeToggle />
-            <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-              <span className="sm:hidden">ออก</span>
+            <button className="bg-white text-purple-600 px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors text-sm font-medium">
+              <span className="hidden sm:inline">เข้าสู่ระบบ</span>
+              <span className="sm:hidden">เข้าสู่ระบบ</span>
             </button>
           </div>
         </div>
@@ -56,4 +53,4 @@ const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
   );
 };
 
-export default ShopBackendHeader;
+export default FrontendHeader;

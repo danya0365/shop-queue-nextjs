@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeToggle } from '@/src/presentation/components/ui/ThemeToggle';
 import Link from 'next/link';
 import React from 'react';
 
@@ -28,7 +29,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            
+
             <Link href="/" className="text-xl sm:text-2xl font-bold text-white">
               Shop Queue
             </Link>
@@ -37,7 +38,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
               ระบบพนักงาน
             </span>
           </div>
-          
+
           {/* Right side - Status and User Info */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             <div className="hidden sm:flex items-center space-x-2">
@@ -47,6 +48,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
             <div className="hidden md:block text-sm text-green-100">
               พนักงาน: <span className="font-medium">สมชาย ใจดี</span>
             </div>
+            <ThemeToggle />
             <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
               <span className="hidden sm:inline">ออกจากระบบ</span>
               <span className="sm:hidden">ออก</span>

@@ -36,8 +36,8 @@ const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
     <>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-30"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -69,11 +69,10 @@ const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.href)
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.href)
                     ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 border-r-2 border-green-700'
                     : 'text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800'
-                }`}
+                  }`}
               >
                 <span className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.label}</span>

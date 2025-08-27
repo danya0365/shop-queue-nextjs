@@ -2,7 +2,6 @@
 
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import React, { ReactNode, useState } from "react";
-import { ThemeToggle } from "../../../ui/ThemeToggle";
 import ShopBackendHeader from "./components/ShopBackendHeader";
 import ShopBackendSidebar from "./components/ShopBackendSidebar";
 
@@ -36,9 +35,6 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children, shopId }) => {
 
           {/* Main Content */}
           <main className="flex-1 w-full lg:w-auto overflow-y-auto p-4 sm:p-6 transition-all duration-300">
-            <div className="flex justify-end mb-4">
-              <ThemeToggle />
-            </div>
             {children}
           </main>
         </div>
