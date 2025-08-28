@@ -1,7 +1,11 @@
 import { AuthUserDto } from "@/src/application/dtos/auth-dto";
+import { ProfileDto } from "@/src/application/dtos/profile-dto";
 import { ShopDto } from "@/src/application/dtos/shop-dto";
+import { SubscriptionTier, SubscriptionLimits, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { IShopService } from "@/src/application/interfaces/shop-service.interface";
+import { ISubscriptionService } from "@/src/application/interfaces/subscription-service.interface";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 
@@ -37,6 +41,12 @@ export interface DashboardViewModel {
   recentActivity: RecentActivity[];
   hasShops: boolean;
   shops: ShopDto[];
+  subscription: {
+    tier: SubscriptionTier;
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    canCreateShop: boolean;
+  };
 }
 
 /**
@@ -47,7 +57,9 @@ export class DashboardPresenter {
   constructor(
     private readonly logger: Logger,
     private readonly authService: IAuthService,
-    private readonly shopService: IShopService
+    private readonly profileService: IProfileService,
+    private readonly shopService: IShopService,
+    private readonly subscriptionService: ISubscriptionService
   ) { }
 
   /**
@@ -60,15 +72,26 @@ export class DashboardPresenter {
         throw new Error("User not authenticated");
       }
 
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
       // Get user's shops
-      const shops = await this.shopService.getShopsByOwnerId(user.id);
+      const shops = await this.shopService.getShopsByOwnerId(profile.id);
       const hasShops = shops.length > 0;
 
       // Calculate dashboard statistics
-      const stats = await this.calculateStats(user.id, shops);
+      const stats = await this.calculateStats(profile.id, shops);
 
       // Get recent activity
-      const recentActivity = await this.getRecentActivity(user.id, shops);
+      const recentActivity = await this.getRecentActivity(profile.id, shops);
+
+      // Get subscription information based on user role
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id);
+      const canCreateShop = limits.maxShops === null || shops.length < limits.maxShops;
 
       return {
         user,
@@ -76,6 +99,12 @@ export class DashboardPresenter {
         recentActivity,
         hasShops,
         shops,
+        subscription: {
+          tier,
+          limits,
+          usage,
+          canCreateShop
+        }
       };
     } catch (error) {
       this.logger.error("DashboardPresenter: Error getting view model", error);
@@ -92,6 +121,7 @@ export class DashboardPresenter {
   ): Promise<DashboardStats> {
     try {
       console.log(userId);
+      console.log(shops);
       // Mock data for now - replace with actual service calls
       return {
         totalShops: shops.length,
@@ -155,12 +185,21 @@ export class DashboardPresenter {
     }
   }
 
-  /**
-   * Get the current authenticated user
-   */
   private async getUser(): Promise<AuthUserDto | null> {
     try {
       return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
     } catch (err) {
       this.logger.error("Error accessing authentication:", err as Error);
       return null;
@@ -183,7 +222,9 @@ export class DashboardPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService = serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
-    return new DashboardPresenter(logger, authService, shopService);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
+    return new DashboardPresenter(logger, authService, profileService, shopService, subscriptionService);
   }
 }

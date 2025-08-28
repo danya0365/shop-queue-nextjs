@@ -1,5 +1,12 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import type { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopInfo } from './PostersPresenter';
 
 // Define interfaces for data structures
 export interface Promotion {
@@ -52,21 +59,49 @@ export interface PromotionsViewModel {
   services: Service[];
   stats: PromotionStats;
   filters: PromotionFilters;
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    isFreeTier: boolean;
+    hasPromotionFeature: boolean;
+  };
 }
 
 // Main Presenter class
 export class PromotionsPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService,
+  ) { }
 
   async getViewModel(shopId: string): Promise<PromotionsViewModel> {
     try {
       this.logger.info('PromotionsPresenter: Getting view model for shop', { shopId });
-      
+
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
+      const isFreeTier = tier === 'free';
+      const hasPromotionFeature = false; // limits.hasPromotions;
+
       // Mock data - replace with actual service calls
       const promotions = this.getPromotions();
       const services = this.getServices();
       const stats = this.getPromotionStats(promotions);
-      
+
       return {
         promotions,
         services,
@@ -76,11 +111,32 @@ export class PromotionsPresenter {
           type: 'all',
           search: '',
         },
+        subscription: {
+          limits,
+          usage,
+          isFreeTier,
+          hasPromotionFeature,
+        },
       };
     } catch (error) {
       this.logger.error('PromotionsPresenter: Error getting view model', error);
       throw error;
     }
+  }
+
+  private async getShopInfo(shopId: string): Promise<ShopInfo> {
+    // Mock data - replace with actual service call
+    return {
+      id: shopId,
+      name: 'กาแฟดีดี',
+      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
+      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+      phone: '02-123-4567',
+      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      logo: '/images/shop-logo.png',
+      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
+      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
+    };
   }
 
   // Private methods for data preparation
@@ -182,7 +238,7 @@ export class PromotionsPresenter {
   private getPromotionStats(promotions: Promotion[]): PromotionStats {
     const activePromotions = promotions.filter(p => p.status === 'active').length;
     const totalUsage = promotions.reduce((sum, p) => sum + p.usedCount, 0);
-    
+
     // Calculate total discount (simplified calculation)
     const totalDiscount = promotions.reduce((sum, p) => {
       if (p.type === 'percentage') {
@@ -193,9 +249,9 @@ export class PromotionsPresenter {
       return sum + (p.usedCount * 30); // Estimated for other types
     }, 0);
 
-    const topPromotion = promotions.reduce((top, current) => 
+    const topPromotion = promotions.reduce((top, current) =>
       current.usedCount > top.usedCount ? current : top
-    , promotions[0]);
+      , promotions[0]);
 
     return {
       totalPromotions: promotions.length,
@@ -205,17 +261,39 @@ export class PromotionsPresenter {
       topPromotion: {
         name: topPromotion.name,
         usageCount: topPromotion.usedCount,
-        discountAmount: topPromotion.type === 'fixed_amount' ? 
-          topPromotion.usedCount * topPromotion.value : 
+        discountAmount: topPromotion.type === 'fixed_amount' ?
+          topPromotion.usedCount * topPromotion.value :
           topPromotion.usedCount * 50,
       },
     };
   }
 
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
   // Metadata generation
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
     return {
-      title: 'จัดการโปรโมชั่น - เจ้าของร้าน | Shop Queue',
+      title: `จัดการโปรโมชั่น - ${shopInfo.name} | Shop Queue`,
       description: 'สร้างและจัดการโปรโมชั่น ส่วนลด และข้อเสนอพิเศษสำหรับลูกค้า',
     };
   }
@@ -226,6 +304,9 @@ export class PromotionsPresenterFactory {
   static async create(): Promise<PromotionsPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new PromotionsPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    return new PromotionsPresenter(logger, subscriptionService, authService, profileService);
   }
 }

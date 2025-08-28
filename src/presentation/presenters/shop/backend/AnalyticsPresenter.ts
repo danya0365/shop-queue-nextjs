@@ -1,5 +1,12 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import type { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopInfo } from './PostersPresenter';
 
 // Define interfaces for data structures
 export interface RevenueData {
@@ -58,25 +65,56 @@ export interface AnalyticsViewModel {
   totalOrders: number;
   avgOrderValue: number;
   growthRate: number;
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    hasDataRetentionLimit: boolean;
+    dataRetentionDays: number;
+    isFreeTier: boolean;
+  };
 }
 
 // Main Presenter class
 export class AnalyticsPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService,
+  ) { }
 
   async getViewModel(shopId: string): Promise<AnalyticsViewModel> {
     try {
       this.logger.info('AnalyticsPresenter: Getting view model for shop', { shopId });
-      
+
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
+      // Check data retention limits
+      const hasDataRetentionLimit = false;// limits.dataRetentionDays !== null;
+      const dataRetentionDays = 365; // limits.maxDataRetentionDays || 365;
+      const isFreeTier = tier === 'free';
+
       // Mock data - replace with actual service calls
-      const revenueData = this.getRevenueData();
+      const revenueData = this.getRevenueData(dataRetentionDays);
       const serviceStats = this.getServiceStats();
       const employeePerformance = this.getEmployeePerformance();
       const customerInsights = this.getCustomerInsights();
-      
+
       const totalRevenue = revenueData.reduce((sum, data) => sum + data.revenue, 0);
       const totalOrders = revenueData.reduce((sum, data) => sum + data.orders, 0);
-      
+
       return {
         revenueData,
         serviceStats,
@@ -90,6 +128,13 @@ export class AnalyticsPresenter {
         totalOrders,
         avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
         growthRate: 12.5, // Mock growth rate
+        subscription: {
+          limits,
+          usage,
+          hasDataRetentionLimit,
+          dataRetentionDays,
+          isFreeTier,
+        },
       };
     } catch (error) {
       this.logger.error('AnalyticsPresenter: Error getting view model', error);
@@ -97,8 +142,32 @@ export class AnalyticsPresenter {
     }
   }
 
+  private async getShopInfo(shopId: string): Promise<ShopInfo> {
+    // Mock data - replace with actual service call
+    return {
+      id: shopId,
+      name: 'กาแฟดีดี',
+      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
+      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+      phone: '02-123-4567',
+      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      logo: '/images/shop-logo.png',
+      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
+      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
+    };
+  }
+
   // Private methods for data preparation
-  private getRevenueData(): RevenueData[] {
+  private getRevenueData(dataRetentionDays: number): RevenueData[] {
+    // Filter data based on retention policy
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - dataRetentionDays);
+
+    const allData = this.getAllRevenueData();
+    return allData.filter(data => new Date(data.date) >= cutoffDate);
+  }
+
+  private getAllRevenueData(): RevenueData[] {
     return [
       { date: '2024-01-01', revenue: 12500, orders: 85, avgOrderValue: 147 },
       { date: '2024-01-02', revenue: 15200, orders: 92, avgOrderValue: 165 },
@@ -231,10 +300,32 @@ export class AnalyticsPresenter {
     };
   }
 
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
   // Metadata generation
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
     return {
-      title: 'รายงานและวิเคราะห์ - เจ้าของร้าน | Shop Queue',
+      title: `รายงานและวิเคราะห์ - ${shopInfo.name} | Shop Queue`,
       description: 'ดูรายงานยอดขาย สถิติการใช้งาน และวิเคราะห์ประสิทธิภาพของร้าน',
     };
   }
@@ -245,6 +336,9 @@ export class AnalyticsPresenterFactory {
   static async create(): Promise<AnalyticsPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new AnalyticsPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    return new AnalyticsPresenter(logger, subscriptionService, authService, profileService);
   }
 }

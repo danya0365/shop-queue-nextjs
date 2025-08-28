@@ -1,9 +1,9 @@
 
 import { Logger } from '@/src/domain/interfaces/logger';
-import { createBackendSupabaseClient } from './supabase-backend-client';
-import { supabase as supabaseClient } from './supabase-browser-client';
-import { SupabaseClientType, SupabaseDatasource } from './supabase-datasource';
-import { createServerSupabaseClient } from './supabase-server-client';
+import { createBackendSupabaseClient } from '../config/supabase-backend-client';
+import { supabase as supabaseClient } from '../config/supabase-browser-client';
+import { createServerSupabaseClient } from '../config/supabase-server-client';
+import { SupabaseClientType, SupabaseDatasource } from '../datasources/supabase-datasource';
 
 /**
  * Factory function สำหรับสร้าง SupabaseDatasource ที่ใช้ใน client-side components

@@ -8,9 +8,10 @@ import { PricingCard } from './PricingCard';
 
 interface PricingViewProps {
   viewModel: PricingViewModel;
+  currentPlan?: string;
 }
 
-export function PricingView({ viewModel }: PricingViewProps) {
+export function PricingView({ viewModel, currentPlan }: PricingViewProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const { plans, comparison } = viewModel;
 
@@ -79,7 +80,12 @@ export function PricingView({ viewModel }: PricingViewProps) {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           {plans.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} isAnnual={isAnnual} />
+            <PricingCard 
+              key={plan.id} 
+              plan={plan} 
+              isAnnual={isAnnual} 
+              currentPlan={currentPlan}
+            />
           ))}
         </div>
 

@@ -5,13 +5,14 @@ import { StatsCard } from './StatsCard';
 import { RecentActivityCard } from './RecentActivityCard';
 import { QuickActionsCard } from './QuickActionsCard';
 import { ShopListCard } from './ShopListCard';
+import { SubscriptionLimitsCard } from './SubscriptionLimitsCard';
 
 interface DashboardViewProps {
   viewModel: DashboardViewModel;
 }
 
 export function DashboardView({ viewModel }: DashboardViewProps) {
-  const { user, stats, recentActivity, hasShops, shops } = viewModel;
+  const { user, stats, recentActivity, hasShops, shops, subscription } = viewModel;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
@@ -127,9 +128,15 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <QuickActionsCard hasShops={hasShops} />
               <RecentActivityCard activities={recentActivity} />
+              <SubscriptionLimitsCard 
+                tier={subscription.tier}
+                limits={subscription.limits}
+                usage={subscription.usage}
+                canCreateShop={subscription.canCreateShop}
+              />
             </div>
 
             {/* Shop List Section */}

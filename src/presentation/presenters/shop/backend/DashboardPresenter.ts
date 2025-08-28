@@ -1,5 +1,12 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopInfo } from './PostersPresenter';
 
 // Define interfaces for data structures
 export interface QueueStats {
@@ -38,22 +45,48 @@ export interface BackendDashboardViewModel {
   recentActivities: RecentActivity[];
   shopName: string;
   currentTime: string;
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    hasDataRetentionLimit: boolean;
+    dataRetentionDays: number;
+    isFreeTier: boolean;
+  };
 }
 
 // Main Presenter class
 export class BackendDashboardPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService,
+  ) { }
 
   async getViewModel(shopId: string): Promise<BackendDashboardViewModel> {
     try {
       this.logger.info('BackendDashboardPresenter: Getting view model for shop', { shopId });
-      
+
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
       // Mock data - replace with actual service calls
       const queueStats = this.getQueueStats();
       const revenueStats = this.getRevenueStats();
       const employeeStats = this.getEmployeeStats();
       const recentActivities = this.getRecentActivities();
-      
+
       return {
         queueStats,
         revenueStats,
@@ -61,11 +94,33 @@ export class BackendDashboardPresenter {
         recentActivities,
         shopName: 'ร้านกาแฟดีใจ',
         currentTime: new Date().toLocaleString('th-TH'),
+        subscription: {
+          limits,
+          usage,
+          hasDataRetentionLimit: false,
+          dataRetentionDays: 365,
+          isFreeTier: false,
+        },
       };
     } catch (error) {
       this.logger.error('BackendDashboardPresenter: Error getting view model', error);
       throw error;
     }
+  }
+
+  private async getShopInfo(shopId: string): Promise<ShopInfo> {
+    // Mock data - replace with actual service call
+    return {
+      id: shopId,
+      name: 'กาแฟดีดี',
+      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
+      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+      phone: '02-123-4567',
+      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      logo: '/images/shop-logo.png',
+      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
+      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
+    };
   }
 
   // Private methods for data preparation
@@ -128,10 +183,33 @@ export class BackendDashboardPresenter {
     ];
   }
 
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
   // Metadata generation
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
+    this.logger.info('BackendDashboardPresenter: Generating metadata for shop', { shopId });
     return {
-      title: 'แดชบอร์ดจัดการร้าน | Shop Queue',
+      title: `แดชบอร์ดจัดการร้าน - ${shopInfo.name} | Shop Queue`,
       description: 'ระบบจัดการร้านค้าและติดตามสถิติการให้บริการแบบเรียลไทม์',
     };
   }
@@ -142,6 +220,9 @@ export class BackendDashboardPresenterFactory {
   static async create(): Promise<BackendDashboardPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new BackendDashboardPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    return new BackendDashboardPresenter(logger, subscriptionService, authService, profileService);
   }
 }

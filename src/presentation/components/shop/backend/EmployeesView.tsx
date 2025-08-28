@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import type { EmployeesViewModel, Employee, EmployeeFilters } from '@/src/presentation/presenters/shop/backend/EmployeesPresenter';
+import { EmployeeLimitsWarning } from './EmployeeLimitsWarning';
 
 interface EmployeesViewProps {
   viewModel: EmployeesViewModel;
@@ -66,7 +67,12 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  viewModel.subscription.canAddEmployee 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={!viewModel.subscription.canAddEmployee}
               >
                 + เพิ่มพนักงาน
               </button>
@@ -77,6 +83,14 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Employee Limits Warning */}
+        <EmployeeLimitsWarning 
+          limits={viewModel.subscription.limits}
+          usage={viewModel.subscription.usage}
+          staffLimitReached={viewModel.subscription.staffLimitReached}
+          canAddEmployee={viewModel.subscription.canAddEmployee}
+        />
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-sm border p-6">

@@ -9,17 +9,18 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 interface QueueJoinPageProps {
-  params: { shopId: string };
+  params: Promise<{ shopId: string }>;
 }
 
 /**
  * Generate metadata for the page
  */
 export async function generateMetadata({ params }: QueueJoinPageProps): Promise<Metadata> {
+  const { shopId } = await params;
   const presenter = await QueueJoinPresenterFactory.create();
 
   try {
-    return presenter.generateMetadata();
+    return presenter.generateMetadata(shopId);
   } catch (error) {
     console.error("Error generating metadata:", error);
 
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: QueueJoinPageProps): Promise<
  * Uses presenter pattern following Clean Architecture
  */
 export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
-  const { shopId } = params;
+  const { shopId } = await params;
   const presenter = await QueueJoinPresenterFactory.create();
 
   try {

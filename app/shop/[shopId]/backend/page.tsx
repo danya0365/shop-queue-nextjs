@@ -9,17 +9,18 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 interface BackendDashboardPageProps {
-  params: { shopId: string };
+  params: Promise<{ shopId: string }>;
 }
 
 /**
  * Generate metadata for the page
  */
 export async function generateMetadata({ params }: BackendDashboardPageProps): Promise<Metadata> {
+  const { shopId } = await params;
   const presenter = await BackendDashboardPresenterFactory.create();
 
   try {
-    return presenter.generateMetadata();
+    return presenter.generateMetadata(shopId);
   } catch (error) {
     console.error("Error generating metadata:", error);
 
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: BackendDashboardPageProps): P
  * Uses presenter pattern following Clean Architecture
  */
 export default async function BackendDashboardPage({ params }: BackendDashboardPageProps) {
-  const { shopId } = params;
+  const { shopId } = await params;
   const presenter = await BackendDashboardPresenterFactory.create();
 
   try {

@@ -2,13 +2,17 @@
 
 import { PricingPlanDto } from '@/src/application/dtos/pricing-dto';
 import Link from 'next/link';
+import { useState } from 'react';
+import { PaymentModal } from './PaymentModal';
 
 interface PricingCardProps {
   plan: PricingPlanDto;
   isAnnual?: boolean;
+  currentPlan?: string;
 }
 
-export function PricingCard({ plan, isAnnual = false }: PricingCardProps) {
+export function PricingCard({ plan, isAnnual = false, currentPlan }: PricingCardProps) {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const formatPrice = (price: number) => {
     if (price === 0) return 'ฟรี';
     return new Intl.NumberFormat('th-TH', {
@@ -105,12 +109,30 @@ export function PricingCard({ plan, isAnnual = false }: PricingCardProps) {
 
         {/* CTA Button */}
         <div className="text-center">
-          <Link
-            href={plan.type === 'enterprise' ? '/contact' : '/getting-started'}
-            className={`${getButtonClasses()} px-6 py-3 rounded-lg font-medium transition-colors inline-block`}
-          >
-            {plan.buttonText}
-          </Link>
+          {plan.type === 'enterprise' ? (
+            <Link
+              href="/contact"
+              className={`${getButtonClasses()} px-6 py-3 rounded-lg font-medium transition-colors inline-block`}
+            >
+              {plan.buttonText}
+            </Link>
+          ) : plan.type === 'free' ? (
+            <Link
+              href="/getting-started"
+              className={`${getButtonClasses()} px-6 py-3 rounded-lg font-medium transition-colors inline-block`}
+            >
+              {plan.buttonText}
+            </Link>
+          ) : (
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className={`${getButtonClasses()} px-6 py-3 rounded-lg font-medium transition-colors w-full`}
+            >
+              {currentPlan === plan.type ? 'แผนปัจจุบัน' : 
+               currentPlan && currentPlan !== 'free' ? 'เปลี่ยนแผน' : 
+               plan.buttonText}
+            </button>
+          )}
         </div>
 
         {/* Additional Info */}
@@ -126,6 +148,15 @@ export function PricingCard({ plan, isAnnual = false }: PricingCardProps) {
           </p>
         )}
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        plan={plan}
+        isAnnual={isAnnual}
+        currentPlan={currentPlan}
+      />
     </div>
   );
 }

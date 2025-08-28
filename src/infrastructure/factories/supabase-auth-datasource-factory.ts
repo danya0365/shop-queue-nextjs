@@ -1,8 +1,8 @@
 
 import { Logger } from '@/src/domain/interfaces/logger';
-import { SupabaseAuthDataSource } from './supabase-auth-datasource';
-import { supabase as supabaseClient } from './supabase-browser-client';
-import { createServerSupabaseClient } from './supabase-server-client';
+import { supabase as supabaseClient } from '../config/supabase-browser-client';
+import { createServerSupabaseClient } from '../config/supabase-server-client';
+import { SupabaseAuthDataSource } from '../datasources/supabase-auth-datasource';
 
 /**
  * Factory function สำหรับสร้าง SupabaseAuthDataSource ที่ใช้ใน client-side components

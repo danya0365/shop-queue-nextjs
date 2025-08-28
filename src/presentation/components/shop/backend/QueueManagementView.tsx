@@ -1,6 +1,7 @@
 'use client';
 
 import { QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
+import { QueueLimitsWarning } from './QueueLimitsWarning';
 import { useState } from 'react';
 
 interface QueueManagementViewProps {
@@ -8,7 +9,7 @@ interface QueueManagementViewProps {
 }
 
 export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
-  const { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime } = viewModel;
+  const { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime, subscription } = viewModel;
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,7 +73,14 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           <p className="text-gray-600 mt-1">ติดตามและจัดการคิวลูกค้าทั้งหมด</p>
         </div>
         <div className="flex space-x-4">
-          <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+          <button 
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              subscription.canCreateQueue 
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={!subscription.canCreateQueue}
+          >
             📝 เพิ่มคิวใหม่
           </button>
           <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
@@ -80,6 +88,14 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           </button>
         </div>
       </div>
+
+      {/* Queue Limits Warning */}
+      <QueueLimitsWarning 
+        limits={subscription.limits}
+        usage={subscription.usage}
+        canCreateQueue={subscription.canCreateQueue}
+        dailyLimitReached={subscription.dailyLimitReached}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

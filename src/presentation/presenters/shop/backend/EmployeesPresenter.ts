@@ -1,5 +1,12 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopInfo } from './PostersPresenter';
 
 // Define interfaces for data structures
 export interface Employee {
@@ -55,20 +62,48 @@ export interface EmployeesViewModel {
   activeEmployees: number;
   onLeaveEmployees: number;
   totalSalaryExpense: number;
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    canAddEmployee: boolean;
+    staffLimitReached: boolean;
+  };
 }
 
 // Main Presenter class
 export class EmployeesPresenter {
-  constructor(private readonly logger: Logger) { }
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService
+  ) { }
 
   async getViewModel(shopId: string): Promise<EmployeesViewModel> {
     try {
       this.logger.info('EmployeesPresenter: Getting view model for shop', { shopId });
 
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
       // Mock data - replace with actual service calls
       const employees = this.getEmployees();
       const departments = this.getDepartments();
       const permissions = this.getPermissions();
+
+      const staffLimitReached = limits.maxStaff !== null && usage.currentStaff >= limits.maxStaff;
+      const canAddEmployee = !staffLimitReached;
 
       return {
         employees,
@@ -84,11 +119,32 @@ export class EmployeesPresenter {
         activeEmployees: employees.filter(e => e.status === 'active').length,
         onLeaveEmployees: employees.filter(e => e.status === 'on_leave').length,
         totalSalaryExpense: employees.reduce((sum, e) => sum + e.salary, 0),
+        subscription: {
+          limits,
+          usage,
+          canAddEmployee,
+          staffLimitReached
+        }
       };
     } catch (error) {
       this.logger.error('EmployeesPresenter: Error getting view model', error);
       throw error;
     }
+  }
+
+  private async getShopInfo(shopId: string): Promise<ShopInfo> {
+    // Mock data - replace with actual service call
+    return {
+      id: shopId,
+      name: 'กาแฟดีดี',
+      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
+      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+      phone: '02-123-4567',
+      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      logo: '/images/shop-logo.png',
+      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
+      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
+    };
   }
 
   // Private methods for data preparation
@@ -241,10 +297,32 @@ export class EmployeesPresenter {
     ];
   }
 
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
   // Metadata generation
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
     return {
-      title: 'จัดการพนักงาน - เจ้าของร้าน | Shop Queue',
+      title: `จัดการพนักงาน - ${shopInfo.name} | Shop Queue`,
       description: 'จัดการข้อมูลพนักงาน สิทธิ์การเข้าถึง และประสิทธิภาพการทำงาน',
     };
   }
@@ -255,6 +333,9 @@ export class EmployeesPresenterFactory {
   static async create(): Promise<EmployeesPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new EmployeesPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    return new EmployeesPresenter(logger, subscriptionService, authService, profileService);
   }
 }

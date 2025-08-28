@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import type { PromotionsViewModel, Promotion, PromotionFilters } from '@/src/presentation/presenters/shop/backend/PromotionsPresenter';
+import Link from 'next/link';
 
 interface PromotionsViewProps {
   viewModel: PromotionsViewModel;
@@ -99,7 +100,12 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  viewModel.subscription.hasPromotionFeature 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                disabled={!viewModel.subscription.hasPromotionFeature}
               >
                 + สร้างโปรโมชั่น
               </button>
@@ -110,6 +116,50 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Free Tier Promotion Feature Warning */}
+        {!viewModel.subscription.hasPromotionFeature && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 mb-6">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 text-blue-500">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-800">
+                      ฟีเจอร์โปรโมชั่นสำหรับแพ็กเกจ Pro และ Enterprise
+                    </h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      สร้างและจัดการโปรโมชั่น ส่วนลด และข้อเสนอพิเศษเพื่อดึงดูดลูกค้า
+                    </p>
+                    <div className="mt-3 text-xs">
+                      <p className="text-blue-600">
+                        💡 <strong>อัปเกรดเพื่อรับสิทธิ์:</strong>
+                      </p>
+                      <ul className="list-disc list-inside text-blue-600 mt-1 space-y-0.5">
+                        <li>สร้างโปรโมชั่นไม่จำกัด</li>
+                        <li>ส่วนลดแบบเปอร์เซ็นต์และจำนวนคงที่</li>
+                        <li>โปรโมชั่นซื้อ X ฟรี Y</li>
+                        <li>การอัปเกรดบริการฟรี</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 ml-4">
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                    >
+                      อัปเกรด
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -229,7 +279,45 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         </div>
 
         {/* Promotions List */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white rounded-lg shadow-sm border relative">
+          {/* Free Tier Blur Overlay */}
+          {viewModel.subscription.isFreeTier && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+              <div className="text-center p-8">
+                <div className="text-6xl mb-4">🎯</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  อัปเกรดเพื่อใช้งานโปรโมชั่น
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  สร้างและจัดการโปรโมชั่นเพื่อเพิ่มยอดขายและดึงดูดลูกค้า
+                </p>
+                <div className="space-y-2 text-sm text-gray-600 mb-6">
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">💰</span>
+                    <span>ส่วนลดแบบเปอร์เซ็นต์และจำนวนคงที่</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">🎁</span>
+                    <span>โปรโมชั่นซื้อ X ฟรี Y</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">⬆️</span>
+                    <span>การอัปเกรดบริการฟรี</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">📊</span>
+                    <span>รายงานการใช้งานโปรโมชั่น</span>
+                  </div>
+                </div>
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  อัปเกรดตอนนี้
+                </Link>
+              </div>
+            </div>
+          )}
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">
               รายการโปรโมชั่น ({filteredPromotions.length})

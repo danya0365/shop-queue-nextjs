@@ -9,18 +9,19 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 interface QueueStatusPageProps {
-  params: { shopId: string };
-  searchParams: { queue?: string };
+  params: Promise<{ shopId: string }>;
+  searchParams: Promise<{ queue?: string }>;
 }
 
 /**
  * Generate metadata for the page
  */
 export async function generateMetadata({ params }: QueueStatusPageProps): Promise<Metadata> {
+  const { shopId } = await params;
   const presenter = await QueueStatusPresenterFactory.create();
 
   try {
-    return presenter.generateMetadata();
+    return presenter.generateMetadata(shopId);
   } catch (error) {
     console.error("Error generating metadata:", error);
 
@@ -37,8 +38,8 @@ export async function generateMetadata({ params }: QueueStatusPageProps): Promis
  * Uses presenter pattern following Clean Architecture
  */
 export default async function QueueStatusPage({ params, searchParams }: QueueStatusPageProps) {
-  const { shopId } = params;
-  const { queue } = searchParams;
+  const { shopId } = await params;
+  const { queue } = await searchParams;
   const presenter = await QueueStatusPresenterFactory.create();
 
   try {

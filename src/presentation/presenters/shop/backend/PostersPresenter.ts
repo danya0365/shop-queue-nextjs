@@ -1,3 +1,9 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
@@ -39,10 +45,24 @@ export interface PosterCustomization {
   qrCodeSize: 'small' | 'medium' | 'large';
 }
 
+export interface PosterUsage {
+  totalPosters: number;
+  freePostersUsed: number;
+  paidPostersUsed: number;
+  remainingFreePosters: number;
+  canCreateFree: boolean;
+}
+
 export interface UserSubscription {
   isPremium: boolean;
   planName: string;
+  tier: string;
   expiresAt?: string;
+  limits: {
+    maxFreePosters: number;
+    hasUnlimitedPosters: boolean;
+  };
+  usage: PosterUsage;
 }
 
 // Define ViewModel interface
@@ -52,20 +72,56 @@ export interface PostersViewModel {
   userSubscription: UserSubscription;
   selectedTemplate: PosterTemplate | null;
   customization: PosterCustomization | null;
+  payPerPosterPrice: number;
+  freeTemplates: PosterTemplate[];
+  premiumTemplates: PosterTemplate[];
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    hasDataRetentionLimit: boolean;
+    dataRetentionDays: number;
+    isFreeTier: boolean;
+  };
 }
 
 // Main Presenter class
 export class PostersPresenter {
-  constructor(private readonly logger: Logger) { }
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService,
+  ) { }
 
   async getViewModel(shopId: string): Promise<PostersViewModel> {
     try {
       this.logger.info(`PostersPresenter: Getting view model for shop ${shopId}`);
 
-      // Mock data - replace with actual service calls
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
+      // Check data retention limits
+      const hasDataRetentionLimit = false;// limits.dataRetentionDays !== null;
+      const dataRetentionDays = 365; // limits.maxDataRetentionDays || 365;
+      const isFreeTier = tier === 'free';
+
       const templates = this.getPosterTemplates();
       const shopInfo = await this.getShopInfo(shopId);
-      const userSubscription = await this.getUserSubscription();
+      const userSubscription = await this.getUserSubscription(user.id, shopId);
+
+      const freeTemplates = templates.filter(t => !t.isPremium);
+      const premiumTemplates = templates.filter(t => t.isPremium);
 
       return {
         templates,
@@ -73,6 +129,16 @@ export class PostersPresenter {
         userSubscription,
         selectedTemplate: null,
         customization: null,
+        payPerPosterPrice: 49, // 49 THB per poster
+        freeTemplates,
+        premiumTemplates,
+        subscription: {
+          limits,
+          usage,
+          hasDataRetentionLimit,
+          dataRetentionDays,
+          isFreeTier,
+        },
       };
     } catch (error) {
       this.logger.error('PostersPresenter: Error getting view model', error);
@@ -256,21 +322,77 @@ export class PostersPresenter {
     };
   }
 
-  private async getUserSubscription(): Promise<UserSubscription> {
-    // Mock data - replace with actual service call
-    return {
-      isPremium: false,
-      planName: 'Basic',
-      expiresAt: undefined
+  private async getUserSubscription(userId: string, shopId?: string): Promise<UserSubscription> {
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const profile = await this.getActiveProfile(user);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    const tier = this.subscriptionService.getTierByRole(profile.role);
+    const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
+    // Calculate poster usage
+    const maxFreePosters = tier === 'free' ? 3 : (tier === 'pro' ? 10 : 999999);
+    const hasUnlimitedPosters = tier === 'enterprise';
+    const freePostersUsed = Math.min(usage.totalPosters || 0, maxFreePosters);
+    const paidPostersUsed = Math.max(0, (usage.totalPosters || 0) - maxFreePosters);
+    const remainingFreePosters = Math.max(0, maxFreePosters - freePostersUsed);
+    const canCreateFree = remainingFreePosters > 0 || hasUnlimitedPosters;
+
+    const posterUsage: PosterUsage = {
+      totalPosters: usage.totalPosters || 0,
+      freePostersUsed,
+      paidPostersUsed,
+      remainingFreePosters,
+      canCreateFree,
     };
+
+    return {
+      isPremium: tier !== 'free',
+      planName: tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Enterprise',
+      tier,
+      expiresAt: undefined,
+      limits: {
+        maxFreePosters,
+        hasUnlimitedPosters,
+      },
+      usage: posterUsage,
+    };
+  }
+
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
   }
 
   /**
    * Generate metadata for the posters page
    */
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
     return {
-      title: 'จัดการโปสเตอร์ | Shop Queue',
+      title: `จัดการโปสเตอร์ร้าน ${shopInfo.name} | Shop Queue`,
       description: 'สร้างและปรินต์โปสเตอร์พร้อม QR Code สำหรับร้านค้าของคุณ',
     };
   }
@@ -280,6 +402,9 @@ export class PostersPresenterFactory {
   static async create(): Promise<PostersPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
-    return new PostersPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService = serverContainer.resolve<IProfileService>("ProfileService");
+    return new PostersPresenter(logger, subscriptionService, authService, profileService);
   }
 }

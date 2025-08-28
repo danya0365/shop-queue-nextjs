@@ -3,10 +3,11 @@ import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
 import { ShopService } from "../application/services/shop-service";
+import { SubscriptionService } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
+import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
-import { createServerSupabaseClient } from "../infrastructure/datasources/supabase-server-client";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { Container, createContainer } from "./container";
@@ -64,6 +65,12 @@ export async function createServerContainer(): Promise<Container> {
     container.register("ShopService", () => {
       return new ShopService(
 
+      );
+    });
+
+    container.register("SubscriptionService", () => {
+      return new SubscriptionService(
+        logger
       );
     });
 

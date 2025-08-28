@@ -5,8 +5,8 @@ import { AuthorizationService } from "../application/services/authorization.serv
 import { ProfileService } from "../application/services/profile-service";
 import { ShopService } from "../application/services/shop-service";
 import { Logger } from "../domain/interfaces/logger";
+import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
-import { supabase } from "../infrastructure/datasources/supabase-browser-client";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";

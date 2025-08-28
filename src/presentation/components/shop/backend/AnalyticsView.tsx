@@ -2,6 +2,8 @@
 
 import type { AnalyticsFilters, AnalyticsViewModel } from '@/src/presentation/presenters/shop/backend/AnalyticsPresenter';
 import { useState } from 'react';
+import { DataRetentionWarning } from './DataRetentionWarning';
+import Link from 'next/link';
 
 // define enum
 enum Tab {
@@ -70,6 +72,15 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Data Retention Warning */}
+        <DataRetentionWarning 
+          limits={viewModel.subscription.limits}
+          usage={viewModel.subscription.usage}
+          hasDataRetentionLimit={viewModel.subscription.hasDataRetentionLimit}
+          dataRetentionDays={viewModel.subscription.dataRetentionDays}
+          isFreeTier={viewModel.subscription.isFreeTier}
+        />
+
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -155,7 +166,45 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
+        <div className="bg-white rounded-lg shadow-sm border mb-6 relative">
+          {/* Free Tier Blur Overlay */}
+          {viewModel.subscription.isFreeTier && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+              <div className="text-center p-8">
+                <div className="text-6xl mb-4">🔒</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  อัปเกรดเพื่อดูรายงานโดยละเอียด
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  รายงานและการวิเคราะห์ขั้นสูงสำหรับแพ็กเกจ Pro และ Enterprise เท่านั้น
+                </p>
+                <div className="space-y-2 text-sm text-gray-600 mb-6">
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">✨</span>
+                    <span>รายงานการขายแบบละเอียด</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">📊</span>
+                    <span>การวิเคราะห์ประสิทธิภาพพนักงาน</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">👥</span>
+                    <span>ข้อมูลลูกค้าเชิงลึก</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2">📈</span>
+                    <span>กราฟและแผนภูมิแบบเรียลไทม์</span>
+                  </div>
+                </div>
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  อัปเกรดตอนนี้
+                </Link>
+              </div>
+            </div>
+          )}
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
               {[

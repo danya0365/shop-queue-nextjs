@@ -1,5 +1,12 @@
+import { AuthUserDto } from '@/src/application/dtos/auth-dto';
+import { ProfileDto } from '@/src/application/dtos/profile-dto';
+import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopInfo } from './PostersPresenter';
 
 // Define interfaces for data structures
 export interface QueueItem {
@@ -30,20 +37,48 @@ export interface QueueManagementViewModel {
   completedToday: number;
   averageWaitTime: number;
   filters: QueueFilter;
+  subscription: {
+    limits: SubscriptionLimits;
+    usage: UsageStatsDto;
+    canCreateQueue: boolean;
+    dailyLimitReached: boolean;
+  };
 }
 
 // Main Presenter class
 export class QueueManagementPresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly subscriptionService: ISubscriptionService,
+    private readonly authService: IAuthService,
+    private readonly profileService: IProfileService,
+  ) { }
 
   async getViewModel(shopId: string): Promise<QueueManagementViewModel> {
     try {
       this.logger.info('QueueManagementPresenter: Getting view model for shop', { shopId });
-      
+
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const tier = this.subscriptionService.getTierByRole(profile.role);
+      const limits = await this.subscriptionService.getLimitsByTier(tier);
+      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+
       // Mock data - replace with actual service calls
       const queues = this.getQueueData();
       const stats = this.calculateStats(queues);
-      
+
+      const dailyLimitReached = limits.maxQueuesPerDay !== null && usage.todayQueues >= limits.maxQueuesPerDay;
+      const canCreateQueue = !dailyLimitReached;
+
       return {
         queues,
         totalQueues: queues.length,
@@ -56,11 +91,32 @@ export class QueueManagementPresenter {
           priority: 'all',
           search: '',
         },
+        subscription: {
+          limits,
+          usage,
+          canCreateQueue,
+          dailyLimitReached
+        }
       };
     } catch (error) {
       this.logger.error('QueueManagementPresenter: Error getting view model', error);
       throw error;
     }
+  }
+
+  private async getShopInfo(shopId: string): Promise<ShopInfo> {
+    // Mock data - replace with actual service call
+    return {
+      id: shopId,
+      name: 'กาแฟดีดี',
+      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
+      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
+      phone: '02-123-4567',
+      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      logo: '/images/shop-logo.png',
+      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
+      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
+    };
   }
 
   // Private methods for data preparation
@@ -122,10 +178,32 @@ export class QueueManagementPresenter {
     };
   }
 
+  private async getUser(): Promise<AuthUserDto | null> {
+    try {
+      return await this.authService.getCurrentUser();
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   */
+  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+    try {
+      return await this.profileService.getActiveProfileByAuthId(user.id);
+    } catch (err) {
+      this.logger.error("Error accessing authentication:", err as Error);
+      return null;
+    }
+  }
+
   // Metadata generation
-  generateMetadata() {
+  async generateMetadata(shopId: string) {
+    const shopInfo = await this.getShopInfo(shopId);
     return {
-      title: 'จัดการคิว | Shop Queue',
+      title: `จัดการคิว - ${shopInfo.name} | Shop Queue`,
       description: 'ระบบจัดการคิวลูกค้าและติดตามสถานะการให้บริการ',
     };
   }
@@ -136,6 +214,9 @@ export class QueueManagementPresenterFactory {
   static async create(): Promise<QueueManagementPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new QueueManagementPresenter(logger);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    return new QueueManagementPresenter(logger, subscriptionService, authService, profileService);
   }
 }

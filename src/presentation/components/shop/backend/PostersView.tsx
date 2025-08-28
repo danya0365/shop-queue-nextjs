@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import type { PostersViewModel, PosterTemplate, PosterCustomization } from '@/src/presentation/presenters/shop/backend/PostersPresenter';
+import { SubscriptionUpgradeButton } from '../../shared/SubscriptionUpgradeButton';
+import { PaymentModal } from '../../pricing/PaymentModal';
 
 interface PostersViewProps {
   viewModel: PostersViewModel;
@@ -10,6 +12,7 @@ interface PostersViewProps {
 export function PostersView({ viewModel }: PostersViewProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<PosterTemplate | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [customization, setCustomization] = useState<Partial<PosterCustomization>>({
     showServices: true,
     showOpeningHours: true,
@@ -25,6 +28,21 @@ export function PostersView({ viewModel }: PostersViewProps) {
       return;
     }
     setSelectedTemplate(template);
+  };
+
+  const handleCreatePoster = () => {
+    if (!selectedTemplate) return;
+    
+    const { usage, limits } = viewModel.userSubscription;
+    
+    // Check if user can create free poster
+    if (usage.canCreateFree || limits.hasUnlimitedPosters) {
+      handlePrint();
+      return;
+    }
+    
+    // Show payment modal for paid poster
+    setShowPaymentModal(true);
   };
 
   const handlePreview = () => {
@@ -76,15 +94,33 @@ export function PostersView({ viewModel }: PostersViewProps) {
                 <p className="text-sm text-gray-600">สร้างและปรินต์โปสเตอร์พร้อม QR Code สำหรับร้านค้าของคุณ</p>
               </div>
               
-              {/* Subscription Status */}
-              <div className={`px-4 py-2 rounded-lg ${
-                viewModel.userSubscription.isPremium 
-                  ? 'bg-yellow-100 text-yellow-800' 
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <span>{viewModel.userSubscription.isPremium ? '👑' : '📦'}</span>
-                  <span className="font-medium">{viewModel.userSubscription.planName}</span>
+              {/* Subscription Status & Poster Usage */}
+              <div className="flex items-center gap-4">
+                <div className={`px-4 py-2 rounded-lg ${
+                  viewModel.userSubscription.isPremium 
+                    ? 'bg-yellow-100 text-yellow-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span>{viewModel.userSubscription.isPremium ? '👑' : '📦'}</span>
+                    <span className="font-medium">{viewModel.userSubscription.planName}</span>
+                  </div>
+                </div>
+                
+                {/* Poster Usage Counter */}
+                <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg">
+                  <div className="text-sm">
+                    <span className="font-medium">โปสเตอร์ฟรี:</span>
+                    <span className="ml-1">
+                      {viewModel.userSubscription.usage.remainingFreePosters} / {viewModel.userSubscription.limits.maxFreePosters}
+                      {viewModel.userSubscription.limits.hasUnlimitedPosters && ' (ไม่จำกัด)'}
+                    </span>
+                  </div>
+                  {viewModel.userSubscription.usage.paidPostersUsed > 0 && (
+                    <div className="text-xs text-blue-600">
+                      ซื้อเพิ่ม: {viewModel.userSubscription.usage.paidPostersUsed} ใบ
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -306,12 +342,56 @@ export function PostersView({ viewModel }: PostersViewProps) {
               >
                 🔍 ดูตัวอย่าง
               </button>
-              <button
-                onClick={handlePrint}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                🖨️ ปรินต์โปสเตอร์
-              </button>
+              
+              {viewModel.userSubscription.usage.canCreateFree || viewModel.userSubscription.limits.hasUnlimitedPosters ? (
+                <button
+                  onClick={handlePrint}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  🖨️ สร้างโปสเตอร์ฟรี
+                </button>
+              ) : (
+                <button
+                  onClick={handleCreatePoster}
+                  className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  💳 สร้างโปสเตอร์ ({viewModel.payPerPosterPrice} บาท)
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Poster Usage Warning */}
+        {!viewModel.userSubscription.usage.canCreateFree && !viewModel.userSubscription.limits.hasUnlimitedPosters && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mt-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-orange-800 mb-2">
+                  โปสเตอร์ฟรีหมดแล้ว
+                </h3>
+                <p className="text-orange-700 mb-4">
+                  คุณได้ใช้โปสเตอร์ฟรี {viewModel.userSubscription.usage.freePostersUsed} ใบจาก {viewModel.userSubscription.limits.maxFreePosters} ใบแล้ว
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => setShowPaymentModal(true)}
+                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    💳 ซื้อโปสเตอร์ ({viewModel.payPerPosterPrice} บาท/ใบ)
+                  </button>
+                  <SubscriptionUpgradeButton
+                    variant="outline"
+                    targetPlan="pro"
+                    currentPlan={viewModel.userSubscription.tier}
+                  >
+                    🚀 อัปเกรดแผน Pro
+                  </SubscriptionUpgradeButton>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -323,19 +403,26 @@ export function PostersView({ viewModel }: PostersViewProps) {
               <div>
                 <h3 className="text-xl font-bold mb-2">🚀 อัพเกรดเป็น Premium</h3>
                 <p className="text-yellow-100">
-                  ปลดล็อคโปสเตอร์พิเศษ 8 แบบ พร้อมฟีเจอร์เพิ่มเติม
+                  ปลดล็อคโปสเตอร์พิเศษ {viewModel.premiumTemplates.length} แบบ พร้อมฟีเจอร์เพิ่มเติม
                 </p>
                 <ul className="mt-2 text-sm text-yellow-100 space-y-1">
-                  <li>• โปสเตอร์ดีไซน์พิเศษ 8 แบบ</li>
+                  <li>• โปสเตอร์ดีไซน์พิเศษ {viewModel.premiumTemplates.length} แบบ</li>
+                  <li>• โปสเตอร์ฟรี {viewModel.userSubscription.tier === 'free' ? '10' : 'ไม่จำกัด'} ใบ/เดือน</li>
                   <li>• ปรับแต่งสีและฟอนต์ได้</li>
                   <li>• อัพโหลดโลโก้ร้านเอง</li>
                   <li>• ไม่มี watermark</li>
                 </ul>
               </div>
               <div>
-                <button className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                <SubscriptionUpgradeButton
+                  variant="secondary"
+                  size="lg"
+                  targetPlan="pro"
+                  currentPlan={viewModel.userSubscription.tier}
+                  className="bg-white text-orange-600 hover:bg-gray-100"
+                >
                   อัพเกรดตอนนี้
-                </button>
+                </SubscriptionUpgradeButton>
               </div>
             </div>
           </div>
@@ -423,16 +510,45 @@ export function PostersView({ viewModel }: PostersViewProps) {
                   ปิด
                 </button>
                 <button
-                  onClick={handlePrint}
+                  onClick={handleCreatePoster}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  🖨️ ปรินต์
+                  {viewModel.userSubscription.usage.canCreateFree || viewModel.userSubscription.limits.hasUnlimitedPosters 
+                    ? '🖨️ สร้างโปสเตอร์ฟรี' 
+                    : `💳 สร้างโปสเตอร์ (${viewModel.payPerPosterPrice} บาท)`
+                  }
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Payment Modal for Pay-per-Poster */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        plan={{
+          id: 'poster-payment',
+          name: 'โปสเตอร์แบบจ่ายต่อใบ',
+          nameEn: 'Pay-per-Poster',
+          description: `สร้างโปสเตอร์ 1 ใบ`,
+          descriptionEn: 'Create 1 poster',
+          price: viewModel.payPerPosterPrice,
+          currency: 'THB',
+          billingPeriod: 'one_time' as any,
+          type: 'one_time' as any,
+          features: ['โปสเตอร์คุณภาพสูง', 'QR Code ที่กำหนดเอง', 'ดาวน์โหลดได้ทันที'],
+          featuresEn: ['High-quality poster', 'Custom QR Code', 'Instant download'],
+          limits: {} as any,
+          isPopular: false,
+          isRecommended: false,
+          buttonText: `จ่าย ${viewModel.payPerPosterPrice} บาท`,
+          buttonTextEn: `Pay ${viewModel.payPerPosterPrice} THB`,
+        }}
+        isAnnual={false}
+        currentPlan={viewModel.userSubscription.tier}
+      />
     </div>
   );
 }
