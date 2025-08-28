@@ -1,9 +1,9 @@
 'use client';
 
+import type { PosterCustomization, PostersViewModel, PosterTemplate } from '@/src/presentation/presenters/shop/backend/PostersPresenter';
 import { useState } from 'react';
-import type { PostersViewModel, PosterTemplate, PosterCustomization } from '@/src/presentation/presenters/shop/backend/PostersPresenter';
-import { SubscriptionUpgradeButton } from '../../shared/SubscriptionUpgradeButton';
 import { PaymentModal } from '../../pricing/PaymentModal';
+import { SubscriptionUpgradeButton } from '../../shared/SubscriptionUpgradeButton';
 
 interface PostersViewProps {
   viewModel: PostersViewModel;
@@ -32,15 +32,15 @@ export function PostersView({ viewModel }: PostersViewProps) {
 
   const handleCreatePoster = () => {
     if (!selectedTemplate) return;
-    
+
     const { usage, limits } = viewModel.userSubscription;
-    
+
     // Check if user can create free poster
     if (usage.canCreateFree || limits.hasUnlimitedPosters) {
       handlePrint();
       return;
     }
-    
+
     // Show payment modal for paid poster
     setShowPaymentModal(true);
   };
@@ -93,20 +93,19 @@ export function PostersView({ viewModel }: PostersViewProps) {
                 <h1 className="text-2xl font-bold text-gray-900">จัดการโปสเตอร์</h1>
                 <p className="text-sm text-gray-600">สร้างและปรินต์โปสเตอร์พร้อม QR Code สำหรับร้านค้าของคุณ</p>
               </div>
-              
+
               {/* Subscription Status & Poster Usage */}
               <div className="flex items-center gap-4">
-                <div className={`px-4 py-2 rounded-lg ${
-                  viewModel.userSubscription.isPremium 
-                    ? 'bg-yellow-100 text-yellow-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                <div className={`px-4 py-2 rounded-lg ${viewModel.userSubscription.isPremium
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-gray-100 text-gray-800'
+                  }`}>
                   <div className="flex items-center gap-2">
                     <span>{viewModel.userSubscription.isPremium ? '👑' : '📦'}</span>
                     <span className="font-medium">{viewModel.userSubscription.planName}</span>
                   </div>
                 </div>
-                
+
                 {/* Poster Usage Counter */}
                 <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg">
                   <div className="text-sm">
@@ -175,15 +174,13 @@ export function PostersView({ viewModel }: PostersViewProps) {
                 {templates.map((template) => (
                   <div
                     key={template.id}
-                    className={`relative border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
-                      selectedTemplate?.id === template.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    } ${
-                      template.isPremium && !viewModel.userSubscription.isPremium
+                    className={`relative border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${selectedTemplate?.id === template.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                      } ${template.isPremium && !viewModel.userSubscription.isPremium
                         ? 'opacity-60'
                         : ''
-                    }`}
+                      }`}
                     onClick={() => handleTemplateSelect(template)}
                   >
                     {/* Premium Badge */}
@@ -195,13 +192,12 @@ export function PostersView({ viewModel }: PostersViewProps) {
                     )}
 
                     {/* Template Preview */}
-                    <div 
-                      className={`w-full h-32 rounded-lg mb-3 flex items-center justify-center text-white font-bold ${
-                        template.layout === 'landscape' ? 'aspect-[4/3]' : 'aspect-[3/4]'
-                      }`}
-                      style={{ 
+                    <div
+                      className={`w-full h-32 rounded-lg mb-3 flex items-center justify-center text-white font-bold ${template.layout === 'landscape' ? 'aspect-[4/3]' : 'aspect-[3/4]'
+                        }`}
+                      style={{
                         background: template.backgroundColor,
-                        color: template.textColor 
+                        color: template.textColor
                       }}
                     >
                       <div className="text-center">
@@ -215,7 +211,7 @@ export function PostersView({ viewModel }: PostersViewProps) {
                     <div>
                       <h4 className="font-medium text-gray-900 mb-1">{template.name}</h4>
                       <p className="text-sm text-gray-600 mb-2">{template.description}</p>
-                      
+
                       {/* Features */}
                       <div className="space-y-1">
                         {template.features.slice(0, 2).map((feature, index) => (
@@ -228,11 +224,10 @@ export function PostersView({ viewModel }: PostersViewProps) {
 
                       {/* Layout Badge */}
                       <div className="mt-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          template.layout === 'portrait' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${template.layout === 'portrait'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                          }`}>
                           {template.layout === 'portrait' ? '📱 แนวตั้ง' : '🖥️ แนวนอน'}
                         </span>
                       </div>
@@ -257,7 +252,7 @@ export function PostersView({ viewModel }: PostersViewProps) {
         {selectedTemplate && (
           <div className="bg-white rounded-lg shadow-sm border p-6 mt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">ปรับแต่งโปสเตอร์</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Display Options */}
               <div>
@@ -267,37 +262,37 @@ export function PostersView({ viewModel }: PostersViewProps) {
                     <input
                       type="checkbox"
                       checked={customization.showServices}
-                      onChange={(e) => setCustomization({...customization, showServices: e.target.checked})}
+                      onChange={(e) => setCustomization({ ...customization, showServices: e.target.checked })}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">แสดงรายการบริการ</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={customization.showOpeningHours}
-                      onChange={(e) => setCustomization({...customization, showOpeningHours: e.target.checked})}
+                      onChange={(e) => setCustomization({ ...customization, showOpeningHours: e.target.checked })}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">แสดงเวลาทำการ</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={customization.showPhone}
-                      onChange={(e) => setCustomization({...customization, showPhone: e.target.checked})}
+                      onChange={(e) => setCustomization({ ...customization, showPhone: e.target.checked })}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">แสดงเบอร์โทรศัพท์</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={customization.showAddress}
-                      onChange={(e) => setCustomization({...customization, showAddress: e.target.checked})}
+                      onChange={(e) => setCustomization({ ...customization, showAddress: e.target.checked })}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">แสดงที่อยู่</span>
@@ -310,7 +305,7 @@ export function PostersView({ viewModel }: PostersViewProps) {
                 <h4 className="font-medium text-gray-900 mb-3">ขนาด QR Code</h4>
                 <select
                   value={customization.qrCodeSize}
-                  onChange={(e) => setCustomization({...customization, qrCodeSize: e.target.value as 'small' | 'medium' | 'large'})}
+                  onChange={(e) => setCustomization({ ...customization, qrCodeSize: e.target.value as 'small' | 'medium' | 'large' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="small">เล็ก</option>
@@ -325,7 +320,7 @@ export function PostersView({ viewModel }: PostersViewProps) {
                   </label>
                   <textarea
                     value={customization.customText}
-                    onChange={(e) => setCustomization({...customization, customText: e.target.value})}
+                    onChange={(e) => setCustomization({ ...customization, customText: e.target.value })}
                     placeholder="เช่น 'สแกน QR Code เพื่อเข้าคิว' หรือ 'ลูกค้าใหม่ลด 10%'"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
@@ -342,7 +337,7 @@ export function PostersView({ viewModel }: PostersViewProps) {
               >
                 🔍 ดูตัวอย่าง
               </button>
-              
+
               {viewModel.userSubscription.usage.canCreateFree || viewModel.userSubscription.limits.hasUnlimitedPosters ? (
                 <button
                   onClick={handlePrint}
@@ -446,13 +441,12 @@ export function PostersView({ viewModel }: PostersViewProps) {
 
               {/* Poster Preview */}
               <div className="flex justify-center mb-6">
-                <div 
-                  className={`${
-                    selectedTemplate.layout === 'portrait' ? 'w-80 h-96' : 'w-96 h-72'
-                  } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between`}
-                  style={{ 
+                <div
+                  className={`${selectedTemplate.layout === 'portrait' ? 'w-80 h-96' : 'w-96 h-72'
+                    } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between`}
+                  style={{
                     background: selectedTemplate.backgroundColor,
-                    color: selectedTemplate.textColor 
+                    color: selectedTemplate.textColor
                   }}
                 >
                   {/* Header */}
@@ -463,10 +457,9 @@ export function PostersView({ viewModel }: PostersViewProps) {
 
                   {/* QR Code Area */}
                   <div className="flex-1 flex items-center justify-center">
-                    <div className={`bg-white rounded-lg flex items-center justify-center ${
-                      customization.qrCodeSize === 'small' ? 'w-20 h-20' :
+                    <div className={`bg-white rounded-lg flex items-center justify-center ${customization.qrCodeSize === 'small' ? 'w-20 h-20' :
                       customization.qrCodeSize === 'large' ? 'w-32 h-32' : 'w-24 h-24'
-                    }`}>
+                      }`}>
                       <span className="text-gray-600 text-xs">QR Code</span>
                     </div>
                   </div>
@@ -484,12 +477,12 @@ export function PostersView({ viewModel }: PostersViewProps) {
                     {customization.showServices && (
                       <div className="flex flex-wrap gap-1 justify-center mt-2">
                         {viewModel.shopInfo.services.slice(0, 3).map((service, index) => (
-                          <span 
-                            key={index} 
+                          <span
+                            key={index}
                             className="px-2 py-1 rounded-full text-xs"
-                            style={{ 
+                            style={{
                               backgroundColor: selectedTemplate.accentColor + '20',
-                              color: selectedTemplate.accentColor 
+                              color: selectedTemplate.accentColor
                             }}
                           >
                             {service}
@@ -513,8 +506,8 @@ export function PostersView({ viewModel }: PostersViewProps) {
                   onClick={handleCreatePoster}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  {viewModel.userSubscription.usage.canCreateFree || viewModel.userSubscription.limits.hasUnlimitedPosters 
-                    ? '🖨️ สร้างโปสเตอร์ฟรี' 
+                  {viewModel.userSubscription.usage.canCreateFree || viewModel.userSubscription.limits.hasUnlimitedPosters
+                    ? '🖨️ สร้างโปสเตอร์ฟรี'
                     : `💳 สร้างโปสเตอร์ (${viewModel.payPerPosterPrice} บาท)`
                   }
                 </button>
@@ -536,11 +529,11 @@ export function PostersView({ viewModel }: PostersViewProps) {
           descriptionEn: 'Create 1 poster',
           price: viewModel.payPerPosterPrice,
           currency: 'THB',
-          billingPeriod: 'one_time' as any,
-          type: 'one_time' as any,
+          billingPeriod: 'one_time',
+          type: 'one_time',
           features: ['โปสเตอร์คุณภาพสูง', 'QR Code ที่กำหนดเอง', 'ดาวน์โหลดได้ทันที'],
           featuresEn: ['High-quality poster', 'Custom QR Code', 'Instant download'],
-          limits: {} as any,
+          limits: undefined,
           isPopular: false,
           isRecommended: false,
           buttonText: `จ่าย ${viewModel.payPerPosterPrice} บาท`,

@@ -254,7 +254,7 @@ export class SubscriptionService implements ISubscriptionService {
   async canPerformAction(profileId: string, action: string, shopId?: string): Promise<boolean> {
     try {
       // Mock implementation - in real app, this would check actual limits
-      this.logger.info(`SubscriptionService: Checking if profile ${profileId} can perform ${action}`);
+      this.logger.info(`SubscriptionService: Checking if profile ${profileId} can perform ${action} for shop ${shopId}`);
 
       // For now, return true for all actions
       return true;
@@ -303,7 +303,7 @@ export class SubscriptionService implements ISubscriptionService {
    */
   async purchaseOneTimeAccess(profileId: string, feature: string, duration: number): Promise<boolean> {
     try {
-      this.logger.info(`SubscriptionService: Purchasing one-time access for profile ${profileId}`);
+      this.logger.info(`SubscriptionService: Purchasing one-time access for profile ${profileId} for feature ${feature} for ${duration} days`);
 
       // Mock implementation - in real app, this would process payment
       return true;
@@ -333,6 +333,7 @@ export class SubscriptionService implements ISubscriptionService {
    */
   async isPosterAccessible(profileId: string, posterId: string): Promise<boolean> {
     try {
+      this.logger.info(`SubscriptionService: Checking if poster ${posterId} is accessible for profile ${profileId}`);
       // Mock implementation - first 3 posters are free, rest require payment
       const posterNumber = parseInt(posterId.replace('poster_', ''));
 

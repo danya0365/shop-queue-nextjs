@@ -15,6 +15,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   sidebarOpen,
   toggleSidebar,
 }) => {
+  console.log('EmployeeHeader', { shopId, sidebarOpen });
   return (
     <header className="bg-green-600 text-white shadow-lg">
       <div className="px-4 sm:px-6 lg:px-8">

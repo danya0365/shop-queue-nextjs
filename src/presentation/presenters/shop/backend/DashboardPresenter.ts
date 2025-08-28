@@ -6,7 +6,7 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopInfo } from './PostersPresenter';
+import { BaseShopPresenter } from '../BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface QueueStats {
@@ -55,13 +55,13 @@ export interface BackendDashboardViewModel {
 }
 
 // Main Presenter class
-export class BackendDashboardPresenter {
+export class BackendDashboardPresenter extends BaseShopPresenter {
   constructor(
-    private readonly logger: Logger,
+    logger: Logger,
     private readonly subscriptionService: ISubscriptionService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
-  ) { }
+  ) { super(logger); }
 
   async getViewModel(shopId: string): Promise<BackendDashboardViewModel> {
     try {
@@ -106,21 +106,6 @@ export class BackendDashboardPresenter {
       this.logger.error('BackendDashboardPresenter: Error getting view model', error);
       throw error;
     }
-  }
-
-  private async getShopInfo(shopId: string): Promise<ShopInfo> {
-    // Mock data - replace with actual service call
-    return {
-      id: shopId,
-      name: 'กาแฟดีดี',
-      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
-      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-      phone: '02-123-4567',
-      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
-      logo: '/images/shop-logo.png',
-      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
-      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
-    };
   }
 
   // Private methods for data preparation
@@ -206,12 +191,12 @@ export class BackendDashboardPresenter {
 
   // Metadata generation
   async generateMetadata(shopId: string) {
-    const shopInfo = await this.getShopInfo(shopId);
     this.logger.info('BackendDashboardPresenter: Generating metadata for shop', { shopId });
-    return {
-      title: `แดชบอร์ดจัดการร้าน - ${shopInfo.name} | Shop Queue`,
-      description: 'ระบบจัดการร้านค้าและติดตามสถิติการให้บริการแบบเรียลไทม์',
-    };
+    return this.generateShopMetadata(
+      shopId,
+      'แดชบอร์ดจัดการร้าน',
+      'ระบบจัดการร้านค้าและติดตามสถิติการให้บริการแบบเรียลไทม์',
+    );
   }
 }
 

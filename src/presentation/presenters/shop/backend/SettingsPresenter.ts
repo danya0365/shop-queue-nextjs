@@ -6,7 +6,7 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopInfo } from './PostersPresenter';
+import { BaseShopPresenter } from '../BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface ShopSettings {
@@ -102,12 +102,13 @@ export interface SettingsViewModel {
 }
 
 // Main Presenter class
-export class SettingsPresenter {
-  constructor(private readonly logger: Logger,
+export class SettingsPresenter extends BaseShopPresenter {
+  constructor(
+    logger: Logger,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
     private readonly subscriptionService: ISubscriptionService,
-  ) { }
+  ) { super(logger); }
 
   async getViewModel(shopId: string): Promise<SettingsViewModel> {
     try {
@@ -159,20 +160,7 @@ export class SettingsPresenter {
     }
   }
 
-  private async getShopInfo(shopId: string): Promise<ShopInfo> {
-    // Mock data - replace with actual service call
-    return {
-      id: shopId,
-      name: 'กาแฟดีดี',
-      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
-      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-      phone: '02-123-4567',
-      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
-      logo: '/images/shop-logo.png',
-      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
-      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
-    };
-  }
+  
 
   // Private methods for data preparation
   private getShopSettings(): ShopSettings {
@@ -283,11 +271,11 @@ export class SettingsPresenter {
 
   // Metadata generation
   async generateMetadata(shopId: string) {
-    const shopInfo = await this.getShopInfo(shopId);
-    return {
-      title: `ตั้งค่าระบบ - ${shopInfo.name} | Shop Queue`,
-      description: 'จัดการการตั้งค่าร้าน ระบบคิว การชำระเงิน และการแจ้งเตือน',
-    };
+    return this.generateShopMetadata(
+      shopId,
+      'ตั้งค่าระบบ',
+      'จัดการการตั้งค่าร้าน ระบบคิว การชำระเงิน และการแจ้งเตือน',
+    );
   }
 }
 

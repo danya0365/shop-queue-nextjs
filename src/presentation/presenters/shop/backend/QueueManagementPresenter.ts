@@ -6,7 +6,7 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopInfo } from './PostersPresenter';
+import { BaseShopPresenter } from '../BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface QueueItem {
@@ -46,13 +46,13 @@ export interface QueueManagementViewModel {
 }
 
 // Main Presenter class
-export class QueueManagementPresenter {
+export class QueueManagementPresenter extends BaseShopPresenter {
   constructor(
-    private readonly logger: Logger,
+    logger: Logger,
     private readonly subscriptionService: ISubscriptionService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
-  ) { }
+  ) { super(logger); }
 
   async getViewModel(shopId: string): Promise<QueueManagementViewModel> {
     try {
@@ -104,20 +104,7 @@ export class QueueManagementPresenter {
     }
   }
 
-  private async getShopInfo(shopId: string): Promise<ShopInfo> {
-    // Mock data - replace with actual service call
-    return {
-      id: shopId,
-      name: 'กาแฟดีดี',
-      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
-      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-      phone: '02-123-4567',
-      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
-      logo: '/images/shop-logo.png',
-      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
-      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
-    };
-  }
+  
 
   // Private methods for data preparation
   private getQueueData(): QueueItem[] {
@@ -201,11 +188,11 @@ export class QueueManagementPresenter {
 
   // Metadata generation
   async generateMetadata(shopId: string) {
-    const shopInfo = await this.getShopInfo(shopId);
-    return {
-      title: `จัดการคิว - ${shopInfo.name} | Shop Queue`,
-      description: 'ระบบจัดการคิวลูกค้าและติดตามสถานะการให้บริการ',
-    };
+    return this.generateShopMetadata(
+      shopId,
+      'จัดการคิว',
+      'ระบบจัดการคิวลูกค้าและติดตามสถานะการให้บริการ',
+    );
   }
 }
 

@@ -1,5 +1,6 @@
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface CustomerQueueHistory {
@@ -52,8 +53,10 @@ export interface CustomerHistoryViewModel {
 }
 
 // Main Presenter class
-export class CustomerHistoryPresenter {
-  constructor(private readonly logger: Logger) {}
+export class CustomerHistoryPresenter extends BaseShopPresenter {
+  constructor(logger: Logger) {
+    super(logger);
+  }
 
   async getViewModel(shopId: string): Promise<CustomerHistoryViewModel> {
     try {
@@ -210,11 +213,12 @@ export class CustomerHistoryPresenter {
   }
 
   // Metadata generation
-  generateMetadata() {
-    return {
-      title: 'ประวัติการใช้บริการ - ลูกค้า | Shop Queue',
-      description: 'ดูประวัติการจองคิวและการใช้บริการของคุณ',
-    };
+  async generateMetadata(shopId: string) {
+    return this.generateShopMetadata(
+      shopId,
+      'ประวัติการใช้บริการ - ลูกค้า',
+      'ดูประวัติการจองคิวและการใช้บริการของคุณ'
+    );
   }
 }
 

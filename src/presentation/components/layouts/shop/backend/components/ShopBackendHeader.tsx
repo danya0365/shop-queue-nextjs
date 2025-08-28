@@ -15,6 +15,7 @@ const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
   sidebarOpen,
   toggleSidebar,
 }) => {
+  console.log('ShopBackendHeader', { shopId, sidebarOpen });
   return (
     <header className="bg-blue-600 text-white shadow-lg">
       <div className="px-4 sm:px-6 lg:px-8">

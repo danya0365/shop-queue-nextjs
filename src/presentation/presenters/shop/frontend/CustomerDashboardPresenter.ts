@@ -1,8 +1,9 @@
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
 
 // Define interfaces for data structures
-export interface ShopInfo {
+export interface LocalShopOverview {
   id: string;
   name: string;
   description: string;
@@ -42,7 +43,7 @@ export interface Promotion {
 
 // Define ViewModel interface
 export interface CustomerDashboardViewModel {
-  shopInfo: ShopInfo;
+  shopInfo: LocalShopOverview;
   queueStatus: QueueStatus;
   popularServices: PopularService[];
   promotions: Promotion[];
@@ -51,15 +52,17 @@ export interface CustomerDashboardViewModel {
 }
 
 // Main Presenter class
-export class CustomerDashboardPresenter {
-  constructor(private readonly logger: Logger) {}
+export class CustomerDashboardPresenter extends BaseShopPresenter {
+  constructor(logger: Logger) {
+    super(logger);
+  }
 
   async getViewModel(shopId: string): Promise<CustomerDashboardViewModel> {
     try {
       this.logger.info('CustomerDashboardPresenter: Getting view model for shop', { shopId });
       
       // Mock data - replace with actual service calls
-      const shopInfo = this.getShopInfo(shopId);
+      const shopInfo = this.getLocalShopOverview(shopId);
       const queueStatus = this.getQueueStatus();
       const popularServices = this.getPopularServices();
       const promotions = this.getPromotions();
@@ -79,7 +82,7 @@ export class CustomerDashboardPresenter {
   }
 
   // Private methods for data preparation
-  private getShopInfo(shopId: string): ShopInfo {
+  private getLocalShopOverview(shopId: string): LocalShopOverview {
     return {
       id: shopId,
       name: 'ร้านกาแฟดีใจ',
@@ -162,11 +165,12 @@ export class CustomerDashboardPresenter {
   }
 
   // Metadata generation
-  generateMetadata() {
-    return {
-      title: 'ร้านกาแฟดีใจ | Shop Queue',
-      description: 'เข้าคิวออนไลน์ ติดตามสถานะคิว และรับโปรโมชันพิเศษ',
-    };
+  async generateMetadata(shopId: string) {
+    return this.generateShopMetadata(
+      shopId,
+      'หน้าร้าน',
+      'เข้าคิวออนไลน์ ติดตามสถานะคิว และรับโปรโมชันพิเศษ'
+    );
   }
 }
 

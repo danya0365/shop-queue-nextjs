@@ -6,6 +6,7 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseShopPresenter, ShopInfo } from '../BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface PosterTemplate {
@@ -22,17 +23,7 @@ export interface PosterTemplate {
   features: string[];
 }
 
-export interface ShopInfo {
-  id: string;
-  name: string;
-  description: string;
-  address: string;
-  phone: string;
-  qrCodeUrl: string;
-  logo?: string;
-  openingHours: string;
-  services: string[];
-}
+// ShopInfo is provided by BaseShopPresenter
 
 export interface PosterCustomization {
   templateId: string;
@@ -85,13 +76,13 @@ export interface PostersViewModel {
 }
 
 // Main Presenter class
-export class PostersPresenter {
+export class PostersPresenter extends BaseShopPresenter {
   constructor(
-    private readonly logger: Logger,
+    logger: Logger,
     private readonly subscriptionService: ISubscriptionService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
-  ) { }
+  ) { super(logger); }
 
   async getViewModel(shopId: string): Promise<PostersViewModel> {
     try {
@@ -307,20 +298,7 @@ export class PostersPresenter {
     ];
   }
 
-  private async getShopInfo(shopId: string): Promise<ShopInfo> {
-    // Mock data - replace with actual service call
-    return {
-      id: shopId,
-      name: 'กาแฟดีดี',
-      description: 'ร้านกาแฟและเบเกอรี่คุณภาพ',
-      address: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-      phone: '02-123-4567',
-      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
-      logo: '/images/shop-logo.png',
-      openingHours: 'จันทร์-อาทิตย์ 07:00-20:00',
-      services: ['กาแฟสด', 'เบเกอรี่', 'เค้กสั่งทำ', 'เครื่องดื่มเย็น']
-    };
-  }
+  
 
   private async getUserSubscription(userId: string, shopId?: string): Promise<UserSubscription> {
     const user = await this.getUser();
@@ -390,11 +368,11 @@ export class PostersPresenter {
    * Generate metadata for the posters page
    */
   async generateMetadata(shopId: string) {
-    const shopInfo = await this.getShopInfo(shopId);
-    return {
-      title: `จัดการโปสเตอร์ร้าน ${shopInfo.name} | Shop Queue`,
-      description: 'สร้างและปรินต์โปสเตอร์พร้อม QR Code สำหรับร้านค้าของคุณ',
-    };
+    return this.generateShopMetadata(
+      shopId,
+      'จัดการโปสเตอร์ร้าน',
+      'สร้างและปรินต์โปสเตอร์พร้อม QR Code สำหรับร้านค้าของคุณ',
+    );
   }
 }
 

@@ -4,7 +4,7 @@ import { GettingStartedViewModel } from '@/src/presentation/presenters/getting-s
 import { useGettingStartedPresenter } from '@/src/presentation/presenters/getting-started/useGettingStartedPresenter';
 import { useAuthStore } from '@/src/presentation/stores/auth-store';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface GettingStartedViewProps {
   viewModel: GettingStartedViewModel;
@@ -20,7 +20,7 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
       actions.markStepComplete(1);
     }
   }, [authAccount, state.completedSteps, actions]);
-  
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -34,16 +34,15 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
           <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
             เรียนรู้วิธีการใช้งานระบบจัดการคิวร้านค้าอย่างละเอียด พร้อมคำแนะนำทีละขั้นตอน
           </p>
-          
+
           {/* Quick Start Toggle */}
           <div className="flex justify-center mb-8">
             <button
               onClick={actions.toggleQuickStart}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                state.showQuickStart
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${state.showQuickStart
                   ? 'bg-white text-primary'
                   : 'bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary'
-              }`}
+                }`}
             >
               {state.showQuickStart ? '📖 ดูคู่มือแบบละเอียด' : '⚡ ดูแบบเริ่มต้นด่วน'}
             </button>
@@ -68,12 +67,11 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
               {viewModel.quickStart.map((step, index) => (
                 <div
                   key={step.id}
-                  className={`bg-card rounded-xl p-6 border-2 transition-all duration-300 cursor-pointer ${
-                    state.completedSteps.includes(step.id)
+                  className={`bg-card rounded-xl p-6 border-2 transition-all duration-300 cursor-pointer ${state.completedSteps.includes(step.id)
                       ? 'border-success bg-success/5'
                       : 'border-border hover:border-primary'
-                  }`}
-                  onClick={() => 
+                    }`}
+                  onClick={() =>
                     state.completedSteps.includes(step.id)
                       ? actions.markStepIncomplete(step.id)
                       : actions.markStepComplete(step.id)
@@ -91,7 +89,7 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
                     </div>
                     <h3 className="font-bold text-foreground mb-2">{step.title}</h3>
                     <p className="text-muted text-sm mb-4">{step.description}</p>
-                    
+
                     <div className="text-left">
                       <ul className="text-xs text-muted space-y-1">
                         {step.details.map((detail, idx) => (
@@ -139,11 +137,10 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
                   <button
                     key={index}
                     onClick={() => actions.setCurrentSection(index)}
-                    className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                      state.currentSection === index
+                    className={`px-4 py-2 rounded-md font-medium transition-colors ${state.currentSection === index
                         ? 'bg-primary text-white'
                         : 'text-muted hover:text-foreground hover:bg-background'
-                    }`}
+                      }`}
                   >
                     {section.title}
                   </button>
@@ -167,11 +164,10 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
                   {viewModel.sections[state.currentSection].steps.map((step) => (
                     <div
                       key={step.id}
-                      className={`bg-card rounded-xl p-8 border-2 transition-all duration-300 ${
-                        state.completedSteps.includes(step.id)
+                      className={`bg-card rounded-xl p-8 border-2 transition-all duration-300 ${state.completedSteps.includes(step.id)
                           ? 'border-success bg-success/5'
                           : 'border-border'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start space-x-6">
                         <div className="text-5xl flex-shrink-0">{step.icon}</div>
@@ -181,23 +177,22 @@ export function GettingStartedView({ viewModel }: GettingStartedViewProps) {
                               {step.title}
                             </h3>
                             <button
-                              onClick={() => 
+                              onClick={() =>
                                 state.completedSteps.includes(step.id)
                                   ? actions.markStepIncomplete(step.id)
                                   : actions.markStepComplete(step.id)
                               }
-                              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                state.completedSteps.includes(step.id)
+                              className={`px-4 py-2 rounded-lg font-medium transition-colors ${state.completedSteps.includes(step.id)
                                   ? 'bg-success text-white'
                                   : 'bg-primary text-white hover:bg-primary-dark'
-                              }`}
+                                }`}
                             >
                               {state.completedSteps.includes(step.id) ? '✅ เสร็จแล้ว' : '✓ ทำเสร็จ'}
                             </button>
                           </div>
-                          
+
                           <p className="text-lg text-muted mb-6">{step.description}</p>
-                          
+
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {step.details.map((detail, idx) => (
                               <div key={idx} className="flex items-start space-x-3">

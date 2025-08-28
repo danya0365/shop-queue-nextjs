@@ -1,5 +1,6 @@
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface CustomerReward {
@@ -59,8 +60,10 @@ export interface CustomerRewardsViewModel {
 }
 
 // Main Presenter class
-export class CustomerRewardsPresenter {
-  constructor(private readonly logger: Logger) {}
+export class CustomerRewardsPresenter extends BaseShopPresenter {
+  constructor(logger: Logger) {
+    super(logger);
+  }
 
   async getViewModel(shopId: string): Promise<CustomerRewardsViewModel> {
     try {
@@ -260,11 +263,12 @@ export class CustomerRewardsPresenter {
   }
 
   // Metadata generation
-  generateMetadata() {
-    return {
-      title: 'รางวัลและแต้มสะสม - ลูกค้า | Shop Queue',
-      description: 'ดูแต้มสะสม แลกของรางวัล และติดตามสิทธิประโยชน์ต่างๆ',
-    };
+  async generateMetadata(shopId: string) {
+    return this.generateShopMetadata(
+      shopId,
+      'รางวัลและแต้มสะสม - ลูกค้า',
+      'ดูแต้มสะสม แลกของรางวัล และติดตามสิทธิประโยชน์ต่างๆ'
+    );
   }
 }
 

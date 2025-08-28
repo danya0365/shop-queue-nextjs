@@ -15,6 +15,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
   sidebarOpen,
   toggleSidebar,
 }) => {
+  console.log('FrontendHeader', { shopId, sidebarOpen });
   return (
     <header className="bg-purple-600 text-white shadow-lg">
       <div className="px-4 sm:px-6 lg:px-8">

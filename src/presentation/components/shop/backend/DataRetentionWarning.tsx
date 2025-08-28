@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
 import type { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
+import Link from 'next/link';
 
 interface DataRetentionWarningProps {
   limits: SubscriptionLimits;
@@ -19,6 +18,13 @@ export function DataRetentionWarning({
   dataRetentionDays,
   isFreeTier
 }: DataRetentionWarningProps) {
+  console.log('DataRetentionWarning', {
+    limits,
+    usage,
+    hasDataRetentionLimit,
+    dataRetentionDays,
+    isFreeTier
+  });
   // Don't show warning if there's no data retention limit
   if (!hasDataRetentionLimit) {
     return null;
@@ -81,7 +87,7 @@ export function DataRetentionWarning({
             </svg>
           )}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <div>
@@ -91,14 +97,14 @@ export function DataRetentionWarning({
               <p className="text-sm mt-1">
                 {getWarningMessage()}
               </p>
-              
+
               {isFreeTier && (
                 <div className="mt-2">
                   <div className="text-xs text-gray-600 mb-2">
                     การเก็บข้อมูล: {dataRetentionDays} วัน (แพ็กเกจฟรี)
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, (30 / dataRetentionDays) * 100)}%` }}
                     ></div>
@@ -109,7 +115,7 @@ export function DataRetentionWarning({
                 </div>
               )}
             </div>
-            
+
             {(isFreeTier || isNearExpiry) && (
               <div className="flex-shrink-0 ml-4">
                 <Link
@@ -121,7 +127,7 @@ export function DataRetentionWarning({
               </div>
             )}
           </div>
-          
+
           {isFreeTier && (
             <div className="mt-3 text-xs">
               <p className="text-gray-600">

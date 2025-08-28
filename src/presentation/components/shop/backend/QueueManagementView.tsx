@@ -1,8 +1,8 @@
 'use client';
 
 import { QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
-import { QueueLimitsWarning } from './QueueLimitsWarning';
 import { useState } from 'react';
+import { QueueLimitsWarning } from './QueueLimitsWarning';
 
 interface QueueManagementViewProps {
   viewModel: QueueManagementViewModel;
@@ -10,6 +10,7 @@ interface QueueManagementViewProps {
 
 export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
   const { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime, subscription } = viewModel;
+  console.log('QueueManagementView props', { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime, subscription });
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,11 +57,11 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
   const filteredQueues = queues.filter(queue => {
     const matchesStatus = selectedStatus === 'all' || queue.status === selectedStatus;
     const matchesPriority = selectedPriority === 'all' || queue.priority === selectedPriority;
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       queue.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       queue.queueNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       queue.customerPhone.includes(searchTerm);
-    
+
     return matchesStatus && matchesPriority && matchesSearch;
   });
 
@@ -73,12 +74,11 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           <p className="text-gray-600 mt-1">ติดตามและจัดการคิวลูกค้าทั้งหมด</p>
         </div>
         <div className="flex space-x-4">
-          <button 
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              subscription.canCreateQueue 
-                ? 'bg-green-500 text-white hover:bg-green-600' 
+          <button
+            className={`px-4 py-2 rounded-lg transition-colors ${subscription.canCreateQueue
+                ? 'bg-green-500 text-white hover:bg-green-600'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
             disabled={!subscription.canCreateQueue}
           >
             📝 เพิ่มคิวใหม่
@@ -90,7 +90,7 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
       </div>
 
       {/* Queue Limits Warning */}
-      <QueueLimitsWarning 
+      <QueueLimitsWarning
         limits={subscription.limits}
         usage={subscription.usage}
         canCreateQueue={subscription.canCreateQueue}
@@ -207,7 +207,7 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
                       <span className="text-blue-600 font-bold">{queue.queueNumber}</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h3 className="text-lg font-medium text-gray-900">{queue.customerName}</h3>
@@ -236,7 +236,7 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
                       <p className="text-xs text-orange-600">รอ ~{queue.estimatedTime} นาที</p>
                     )}
                   </div>
-                  
+
                   <div className="flex flex-col space-y-2">
                     {queue.status === 'waiting' && (
                       <>

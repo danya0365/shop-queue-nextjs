@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: CustomerDashboardPageProps): 
   const presenter = await CustomerDashboardPresenterFactory.create();
 
   try {
-    return presenter.generateMetadata();
+    return presenter.generateMetadata(params.shopId);
   } catch (error) {
     console.error("Error generating metadata:", error);
 

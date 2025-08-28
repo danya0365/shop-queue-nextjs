@@ -1,5 +1,6 @@
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
 
 // Define interfaces for data structures
 export interface EmployeeQueueItem {
@@ -26,8 +27,10 @@ export interface EmployeeQueueViewModel {
 }
 
 // Main Presenter class
-export class EmployeeQueuePresenter {
-  constructor(private readonly logger: Logger) {}
+export class EmployeeQueuePresenter extends BaseShopPresenter {
+  constructor(logger: Logger) {
+    super(logger);
+  }
 
   async getViewModel(shopId: string): Promise<EmployeeQueueViewModel> {
     try {
@@ -111,11 +114,12 @@ export class EmployeeQueuePresenter {
   }
 
   // Metadata generation
-  generateMetadata() {
-    return {
-      title: 'จัดการคิว - พนักงาน | Shop Queue',
-      description: 'จัดการคิวที่รับผิดชอบและติดตามการให้บริการ',
-    };
+  async generateMetadata(shopId: string) {
+    return this.generateShopMetadata(
+      shopId,
+      'จัดการคิว - พนักงาน',
+      'จัดการคิวที่รับผิดชอบและติดตามการให้บริการ'
+    );
   }
 }
 

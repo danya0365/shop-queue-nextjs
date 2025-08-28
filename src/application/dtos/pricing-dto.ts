@@ -1,7 +1,7 @@
 /**
  * Pricing plan types
  */
-export type PlanType = 'free' | 'pro' | 'enterprise';
+export type PlanType = 'free' | 'pro' | 'enterprise' | 'one_time';
 
 /**
  * Feature limitation interface
@@ -30,12 +30,12 @@ export interface PricingPlanDto {
   nameEn: string;
   price: number; // in THB, 0 for free
   currency: string;
-  billingPeriod: 'monthly' | 'yearly';
+  billingPeriod: 'monthly' | 'yearly' | 'one_time';
   description: string;
   descriptionEn: string;
   features: string[];
   featuresEn: string[];
-  limits: PlanLimits;
+  limits?: PlanLimits;
   isPopular: boolean;
   isRecommended: boolean;
   buttonText: string;
