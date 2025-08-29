@@ -2,7 +2,6 @@
 
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import React, { useState } from "react";
-import { ThemeToggle } from "../../ui/ThemeToggle";
 import BackendHeader from "./components/BackendHeader";
 import BackendSidebar from "./components/BackendSidebar";
 
@@ -30,9 +29,6 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children }) => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-y-auto p-6 transition-all duration-300 backend-text">
-            <div className="flex justify-end mb-4">
-              <ThemeToggle />
-            </div>
             {children}
           </main>
         </div>

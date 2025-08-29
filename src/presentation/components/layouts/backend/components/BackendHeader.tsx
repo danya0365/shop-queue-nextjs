@@ -5,19 +5,20 @@ import { LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { ThemeToggle } from '../../../ui/ThemeToggle';
 
 interface BackendHeaderProps {
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
-const BackendHeader: React.FC<BackendHeaderProps> = ({ 
-  sidebarOpen, 
-  toggleSidebar 
+const BackendHeader: React.FC<BackendHeaderProps> = ({
+  sidebarOpen,
+  toggleSidebar
 }) => {
   const router = useRouter();
   const { signOut } = useAuthStore();
-  
+
   const handleLogout = async () => {
     await signOut();
     router.push('/');
@@ -28,7 +29,7 @@ const BackendHeader: React.FC<BackendHeaderProps> = ({
     <header className="backend-header-bg border-b backend-header-border shadow-sm z-10">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
-          <button 
+          <button
             onClick={toggleSidebar}
             className="p-2 mr-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
             aria-label="Toggle sidebar"
@@ -41,14 +42,15 @@ const BackendHeader: React.FC<BackendHeaderProps> = ({
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          <Link 
-            href="/" 
+          <ThemeToggle />
+          <Link
+            href="/"
             className="flex items-center text-sm backend-text-muted backend-primary-hover"
           >
             <span>กลับไปยังเว็บไซต์</span>
           </Link>
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="flex items-center text-sm backend-text-muted backend-danger-hover cursor-pointer"
           >
             <LogOut size={18} className="mr-1" />
