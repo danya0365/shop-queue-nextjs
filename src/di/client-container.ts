@@ -3,7 +3,7 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
-import { ShopService } from "../application/services/shop-service";
+import { ShopService } from "../application/services/shop/shop-service";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";

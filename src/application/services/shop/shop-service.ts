@@ -1,5 +1,5 @@
-import { ShopDto } from "../dtos/shop-dto";
-import { IShopService } from "../interfaces/shop-service.interface";
+import { ShopDto } from "../../dtos/shop-dto";
+import { IShopService } from "../../interfaces/shop-service.interface";
 
 // create mock shop service
 export class ShopService implements IShopService {

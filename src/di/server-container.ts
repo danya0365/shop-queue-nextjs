@@ -2,7 +2,7 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
-import { ShopService } from "../application/services/shop-service";
+import { ShopService } from "../application/services/shop/shop-service";
 import { SubscriptionService } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
