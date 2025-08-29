@@ -1,3 +1,4 @@
+import AuthInitializerWrapper from "@/src/presentation/components/auth/AuthInitializerWrapper";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
 import { Geist_Mono, Kanit } from "next/font/google";
@@ -115,6 +116,7 @@ export default function RootLayout({
       <body
         className={`${kanit.variable} ${geistMono.variable} antialiased`}
       >
+        <AuthInitializerWrapper />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
