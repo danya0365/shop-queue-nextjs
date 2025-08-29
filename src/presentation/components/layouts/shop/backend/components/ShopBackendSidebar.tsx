@@ -20,7 +20,13 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
   const navigationItems = [
     { href: `/shop/${shopId}/backend`, label: 'แดชบอร์ด', icon: '📊' },
     { href: `/shop/${shopId}/backend/queue`, label: 'จัดการคิว', icon: '📋' },
+    { href: `/shop/${shopId}/backend/services`, label: 'จัดการบริการ', icon: '✂️' },
+    { href: `/shop/${shopId}/backend/customers`, label: 'จัดการลูกค้า', icon: '👤' },
     { href: `/shop/${shopId}/backend/employees`, label: 'จัดการพนักงาน', icon: '👥' },
+    { href: `/shop/${shopId}/backend/departments`, label: 'จัดการแผนก', icon: '🏢' },
+    { href: `/shop/${shopId}/backend/payments`, label: 'การชำระเงิน', icon: '💳' },
+    { href: `/shop/${shopId}/backend/rewards`, label: 'รางวัล', icon: '🕐' },
+    { href: `/shop/${shopId}/backend/opening-hours`, label: 'เวลาทำการ', icon: '🕐' },
     { href: `/shop/${shopId}/backend/promotions`, label: 'โปรโมชัน', icon: '🎁' },
     { href: `/shop/${shopId}/backend/posters`, label: 'โปสเตอร์', icon: '🖼️' },
     { href: `/shop/${shopId}/backend/analytics`, label: 'รายงาน', icon: '📈' },

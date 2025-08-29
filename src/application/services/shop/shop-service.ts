@@ -8,7 +8,7 @@ export class ShopService implements IShopService {
     console.log(ownerId);
     const mockShops: ShopDto[] = [
       {
-        id: "1",
+        id: "shop1",
         name: "Shop 1",
         description: "Description 1",
         ownerId: "1",
@@ -18,7 +18,7 @@ export class ShopService implements IShopService {
         updatedAt: "2025-08-25T02:30:37.000Z",
       },
       {
-        id: "2",
+        id: "shop2",
         name: "Shop 2",
         description: "Description 2",
         ownerId: "2",
@@ -28,7 +28,7 @@ export class ShopService implements IShopService {
         updatedAt: "2025-08-25T02:30:37.000Z",
       },
       {
-        id: "3",
+        id: "shop3",
         name: "Shop 3",
         description: "Description 3",
         ownerId: "3",

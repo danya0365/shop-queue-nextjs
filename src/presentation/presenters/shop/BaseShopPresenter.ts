@@ -1,4 +1,5 @@
 import type { Logger } from '@/src/domain/interfaces/logger';
+import type { Metadata } from 'next';
 
 export interface ShopInfo {
   id: string;
@@ -17,7 +18,7 @@ export interface ShopInfo {
  * Provides common helpers for fetching shop info and generating metadata with shop name.
  */
 export abstract class BaseShopPresenter {
-  constructor(protected readonly logger: Logger) {}
+  constructor(protected readonly logger: Logger) { }
 
   protected async getShopInfo(shopId: string): Promise<ShopInfo> {
     // TODO: Replace mock with real service call when backend is ready
@@ -34,7 +35,7 @@ export abstract class BaseShopPresenter {
     };
   }
 
-  protected async generateShopMetadata(shopId: string, pageTitlePrefix: string, description: string) {
+  protected async generateShopMetadata(shopId: string, pageTitlePrefix: string, description: string): Promise<Metadata> {
     const shopInfo = await this.getShopInfo(shopId);
     return {
       title: `${pageTitlePrefix} - ${shopInfo.name} | Shop Queue`,

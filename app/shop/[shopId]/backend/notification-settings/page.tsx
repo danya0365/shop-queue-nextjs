@@ -1,0 +1,69 @@
+import BackendLayout from '@/src/presentation/components/layouts/shop/backend/BackendLayout';
+import NotificationSettingsView from '@/src/presentation/components/shop/backend/NotificationSettingsView';
+import { NotificationSettingsPresenterFactory } from '@/src/presentation/presenters/shop/backend/NotificationSettingsPresenter';
+import { Metadata } from 'next';
+
+interface NotificationSettingsPageProps {
+  params: {
+    shopId: string;
+  };
+}
+
+export async function generateMetadata({ params }: NotificationSettingsPageProps): Promise<Metadata> {
+  const { shopId } = params;
+  const presenter = await NotificationSettingsPresenterFactory.create();
+
+  try {
+    return presenter.generateMetadata(shopId);
+  } catch (error) {
+    console.error('Error generating metadata for notification settings page:', error);
+    return {
+      title: 'การตั้งค่าการแจ้งเตือน - ระบบจัดการร้าน',
+      description: 'จัดการการตั้งค่าการแจ้งเตือนสำหรับร้านของคุณ',
+    };
+  }
+}
+
+export default async function NotificationSettingsPage({ params }: NotificationSettingsPageProps) {
+  const { shopId } = params;
+  const presenter = await NotificationSettingsPresenterFactory.create();
+
+  try {
+    const viewModel = await presenter.getViewModel(shopId);
+
+    return (
+      <BackendLayout shopId={shopId}>
+        <NotificationSettingsView viewModel={viewModel} />
+      </BackendLayout>
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('NotificationSettingsPage: Error rendering page:', {
+      shopId,
+      error: errorMessage,
+    });
+
+    return (
+      <BackendLayout shopId={shopId}>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">เกิดข้อผิดพลาดในการโหลดข้อมูล</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>ไม่สามารถโหลดข้อมูลการตั้งค่าการแจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง</p>
+                  <p className="mt-1 text-xs">รายละเอียดข้อผิดพลาด: {errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </BackendLayout>
+    );
+  }
+}
