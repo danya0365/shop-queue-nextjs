@@ -61,36 +61,6 @@ export async function updateSession(request: NextRequest) {
     console.log('supabase user not found', pathname)
   }
 
-  // เส้นทางที่ต้องการการยืนยันตัวตน
-  const protectedPaths = ['/dashboard', '/submit', '/profile']
-  // เส้นทางที่ต้องการ active profile
-  const requiresProfilePaths = ['/dashboard', '/submit']
-
-  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
-  const requiresProfilePath = requiresProfilePaths.some(path => pathname.startsWith(path))
-
-  // ตรวจสอบว่าเป็นเส้นทางที่ต้องการการยืนยันตัวตนหรือไม่
-  if (isProtectedPath) {
-    // ถ้าไม่มี session และเป็นเส้นทางที่ต้องการการยืนยันตัวตน ให้ redirect ไปหน้า auth
-    if (!user) {
-      const redirectUrl = new URL('/auth', request.url)
-      redirectUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
-
-    // ถ้าเป็นเส้นทางที่ต้องการ active profile
-    if (requiresProfilePath) {
-      // ตรวจสอบว่ามี active profile หรือไม่
-      const { data: profileData } = await supabase.rpc('get_active_profile')
-
-      // ถ้าไม่มี active profile ให้ redirect ไปหน้า account
-      if (!profileData || profileData.length === 0) {
-        const redirectUrl = new URL('/account', request.url)
-        return NextResponse.redirect(redirectUrl)
-      }
-    }
-  }
-
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:
