@@ -1,33 +1,56 @@
 @layer base {
   /* Card styling classes */
-  .card-bg { background-color: var(--card-bg); }
-  .card-border { border-color: var(--card-border); }
-  .card-shadow { box-shadow: var(--card-shadow); }
+  .card-bg {
+    background-color: var(--card-bg);
+  }
+  .card-border {
+    border-color: var(--card-border);
+  }
+  .card-shadow {
+    box-shadow: var(--card-shadow);
+  }
 
-
-
-  .bg-hero-gradient { 
-    background: linear-gradient(135deg, var(--color-hero-primary), var(--color-hero-secondary)); 
+  .bg-hero-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--color-hero-primary),
+      var(--color-hero-secondary)
+    );
   }
-  .bg-hero-modern { 
-    background: linear-gradient(135deg, var(--color-hero-primary) 0%, var(--color-hero-secondary) 50%, var(--color-hero-accent) 100%); 
+  .bg-hero-modern {
+    background: linear-gradient(
+      135deg,
+      var(--color-hero-primary) 0%,
+      var(--color-hero-secondary) 50%,
+      var(--color-hero-accent) 100%
+    );
   }
-  .bg-hero-elegant { 
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); 
+  .bg-hero-elegant {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   }
-  .bg-hero-warm { 
-    background: linear-gradient(135deg, #fb923c 0%, #fed7aa 50%, #ffedd5 100%); 
+  .bg-hero-warm {
+    background: linear-gradient(135deg, #fb923c 0%, #fed7aa 50%, #ffedd5 100%);
   }
-  .bg-hero-cool { 
-    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); 
+  .bg-hero-cool {
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   }
   .bg-queue-gradient {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    background: linear-gradient(
+      135deg,
+      var(--color-primary),
+      var(--color-secondary)
+    );
   }
-  
+
   /* New Orange Hero Gradients */
   .bg-hero-orange-sunset {
-    background: linear-gradient(135deg, #f97316 0%, #fb923c 25%, #fed7aa 75%, #ffedd5 100%);
+    background: linear-gradient(
+      135deg,
+      #f97316 0%,
+      #fb923c 25%,
+      #fed7aa 75%,
+      #ffedd5 100%
+    );
   }
   .bg-hero-orange-vibrant {
     background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
@@ -35,21 +58,26 @@
   .bg-hero-orange-soft {
     background: linear-gradient(135deg, #fb923c 0%, #fed7aa 100%);
   }
-  
+
   /* Hero pattern overlay */
   .hero-pattern {
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%, transparent 50%);
-  }
-  
-  /* Hero glow effect */
-  .hero-glow {
-    box-shadow: 
-      0 0 60px var(--hero-glow-color),
-      0 0 120px var(--hero-glow-color);
+    background-image: radial-gradient(
+        circle at 25% 25%,
+        rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 75%,
+        rgba(255, 255, 255, var(--hero-pattern-opacity)) 0%,
+        transparent 50%
+      );
   }
 
+  /* Hero glow effect */
+  .hero-glow {
+    box-shadow: 0 0 60px var(--hero-glow-color),
+      0 0 120px var(--hero-glow-color);
+  }
 
   /* Header utilities */
   .header-bg {
@@ -61,7 +89,7 @@
   .header-backdrop {
     @apply backdrop-blur-md;
   }
-  
+
   /* Footer utilities */
   .footer-bg {
     background: var(--color-footer-bg);
@@ -69,7 +97,7 @@
   .footer-border {
     border-color: var(--color-footer-border);
   }
-  
+
   /* Navigation utilities */
   .nav-link {
     color: var(--color-nav-link);
@@ -83,8 +111,6 @@
     font-weight: 600;
   }
 
-
-
   /* Button utilities consistent with landing page */
   .btn-primary-modern {
     background: var(--color-primary);
@@ -93,15 +119,17 @@
     border-radius: 0.75rem;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transform: translateY(0);
   }
   .btn-primary-modern:hover {
     background: var(--color-primary-dark);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(-2px);
   }
-  
+
   .btn-secondary-modern {
     border: 2px solid var(--color-primary);
     color: var(--color-primary);
@@ -115,7 +143,7 @@
     background: var(--color-primary);
     color: white;
   }
-  
+
   .btn-ghost-modern {
     color: var(--color-foreground);
     padding: 0.5rem 1rem;
@@ -125,43 +153,5 @@
   .btn-ghost-modern:hover {
     color: var(--color-primary);
     background: var(--color-muted-light);
-  }
-
-  /* Backend Layout utilities */
-  .backend-bg {
-    @apply bg-gray-50 dark:bg-gray-900;
-  }
-  .backend-header-bg {
-    @apply bg-white dark:bg-gray-800;
-  }
-  .backend-header-border {
-    @apply border-gray-200 dark:border-gray-700;
-  }
-  .backend-sidebar-bg {
-    @apply bg-white dark:bg-gray-800;
-  }
-  .backend-sidebar-border {
-    @apply border-gray-200 dark:border-gray-700;
-  }
-  .backend-sidebar-active {
-    @apply bg-gray-100 dark:bg-gray-700;
-  }
-  .backend-sidebar-hover {
-    @apply hover:bg-gray-50 dark:hover:bg-gray-700;
-  }
-  .backend-text {
-    @apply text-gray-900 dark:text-gray-100;
-  }
-  .backend-text-muted {
-    @apply text-gray-700 dark:text-gray-300;
-  }
-  .backend-primary {
-    @apply text-blue-600 dark:text-blue-400;
-  }
-  .backend-primary-hover {
-    @apply hover:text-blue-600 dark:hover:text-blue-400;
-  }
-  .backend-danger-hover {
-    @apply hover:text-red-600 dark:hover:text-red-400;
   }
 }
