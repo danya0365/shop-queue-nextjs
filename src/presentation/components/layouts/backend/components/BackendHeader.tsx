@@ -5,7 +5,7 @@ import { LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { ThemeToggle } from '../../../ui/ThemeToggle';
+import { BackendThemeToggle } from './BackendThemeToggle';
 
 interface BackendHeaderProps {
   sidebarOpen: boolean;
@@ -42,7 +42,7 @@ const BackendHeader: React.FC<BackendHeaderProps> = ({
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          <ThemeToggle />
+          <BackendThemeToggle />
           <Link
             href="/"
             className="flex items-center text-sm backend-text-muted backend-primary-hover"
