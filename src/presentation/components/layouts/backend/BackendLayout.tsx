@@ -21,6 +21,7 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children }) => {
     <ThemeProvider>
       <div
         className="flex flex-col h-screen"
+        style={{ backgroundColor: "var(--backend-bg)" }}
       >
         <BackendHeader
           sidebarOpen={sidebarOpen}
