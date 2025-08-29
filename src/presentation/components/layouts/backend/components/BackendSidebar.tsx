@@ -24,14 +24,10 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
   return (
     <aside
       className={cn(
-        "transition-all duration-300 ease-in-out z-20",
+        "transition-all duration-300 ease-in-out z-20 backend-sidebar-bg border-r backend-sidebar-border",
         sidebarOpen ? "w-64" : "w-0 lg:w-16",
         "fixed lg:static h-full overflow-hidden"
       )}
-      style={{
-        backgroundColor: 'var(--backend-sidebar-bg)',
-        borderRight: '1px solid var(--backend-sidebar-border)'
-      }}
     >
       <div className="h-full overflow-y-auto">
         <nav className="p-4 space-y-1">
@@ -46,14 +42,10 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
                 className={cn(
                   "flex items-center px-3 py-2 rounded-md transition-colors",
                   isActive
-                    ? "text-primary"
-                    : "hover:text-primary hover:bg-backend-sidebar-hover",
+                    ? "backend-sidebar-active backend-primary"
+                    : "backend-text backend-sidebar-hover backend-primary-hover",
                   !sidebarOpen && "lg:justify-center"
                 )}
-                style={{
-                  backgroundColor: isActive ? 'var(--backend-sidebar-active)' : 'transparent',
-                  color: isActive ? 'var(--primary)' : 'var(--foreground)'
-                }}
               >
                 <Icon size={20} className={cn("flex-shrink-0", !sidebarOpen && "lg:mx-0")} />
                 <span className={cn(
@@ -63,7 +55,7 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
                   {item.label}
                 </span>
                 {isActive && (
-                  <div className="absolute left-0 w-1 h-8 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                  <div className="absolute left-0 w-1 h-8 backend-primary rounded-r-full" />
                 )}
               </Link>
             );

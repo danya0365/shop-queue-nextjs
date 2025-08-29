@@ -25,10 +25,7 @@ const BackendHeader: React.FC<BackendHeaderProps> = ({
   };
 
   return (
-    <header style={{
-      backgroundColor: 'var(--backend-header-bg)',
-      borderBottom: '1px solid var(--backend-header-border)',
-    }} className="shadow-sm z-10">
+    <header className="backend-header-bg border-b backend-header-border shadow-sm z-10">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <button 
@@ -39,20 +36,20 @@ const BackendHeader: React.FC<BackendHeaderProps> = ({
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <Link href="/" className="flex items-center">
-            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">FilmNest</span>
+            <span className="text-xl font-bold backend-primary">ShopQueue</span>
             <span className="ml-2 text-sm font-medium px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded">แผงควบคุม</span>
           </Link>
         </div>
         <div className="flex items-center space-x-4">
           <Link 
             href="/" 
-            className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+            className="flex items-center text-sm backend-text-muted backend-primary-hover"
           >
             <span>กลับไปยังเว็บไซต์</span>
           </Link>
           <button 
             onClick={handleLogout} 
-            className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 cursor-pointer"
+            className="flex items-center text-sm backend-text-muted backend-danger-hover cursor-pointer"
           >
             <LogOut size={18} className="mr-1" />
             <span>ออกจากระบบ</span>

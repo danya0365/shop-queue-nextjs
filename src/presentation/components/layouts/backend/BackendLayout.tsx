@@ -19,10 +19,7 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children }) => {
 
   return (
     <ThemeProvider>
-      <div
-        className="flex flex-col h-screen"
-        style={{ backgroundColor: "var(--backend-bg)" }}
-      >
+      <div className="flex flex-col h-screen backend-bg">
         <BackendHeader
           sidebarOpen={sidebarOpen}
           toggleSidebar={toggleSidebar}
@@ -32,9 +29,7 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children }) => {
           <BackendSidebar sidebarOpen={sidebarOpen} />
 
           {/* Main Content */}
-          <main
-            className="flex-1 overflow-y-auto p-6 transition-all duration-300"
-          >
+          <main className="flex-1 overflow-y-auto p-6 transition-all duration-300 backend-text">
             <div className="flex justify-end mb-4">
               <ThemeToggle />
             </div>
