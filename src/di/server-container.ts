@@ -2,6 +2,21 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
+import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
+import { BackendShopsService } from "../application/services/backend/BackendShopsService";
+import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
+import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
+import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
+import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
+import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
+import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
+import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
+import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
+import { GetShopsUseCase } from "../application/usecases/backend/shops/GetShopsUseCase";
+import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
+import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
+import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
+import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
@@ -170,6 +185,86 @@ export async function createServerContainer(): Promise<Container> {
       return new RewardTransactionBackendService(
         logger
       );
+    });
+
+    // Register Backend Dashboard Use Cases
+    container.register("GetDashboardStatsUseCase", () => {
+      return new GetDashboardStatsUseCase(logger);
+    });
+
+    container.register("GetRecentActivitiesUseCase", () => {
+      return new GetRecentActivitiesUseCase(logger);
+    });
+
+    container.register("GetQueueDistributionUseCase", () => {
+      return new GetQueueDistributionUseCase(logger);
+    });
+
+    container.register("GetPopularServicesUseCase", () => {
+      return new GetPopularServicesUseCase(logger);
+    });
+
+    // Register Backend Dashboard Service
+    container.register("BackendDashboardService", () => {
+      const getDashboardStatsUseCase = container.resolve("GetDashboardStatsUseCase") as GetDashboardStatsUseCase;
+      const getRecentActivitiesUseCase = container.resolve("GetRecentActivitiesUseCase") as GetRecentActivitiesUseCase;
+      const getQueueDistributionUseCase = container.resolve("GetQueueDistributionUseCase") as GetQueueDistributionUseCase;
+      const getPopularServicesUseCase = container.resolve("GetPopularServicesUseCase") as GetPopularServicesUseCase;
+      
+      return new BackendDashboardService(
+        getDashboardStatsUseCase,
+        getRecentActivitiesUseCase,
+        getQueueDistributionUseCase,
+        getPopularServicesUseCase,
+        logger
+      );
+    });
+
+    // Register Backend CRUD Use Cases
+    container.register("GetShopsUseCase", () => {
+      return new GetShopsUseCase(logger);
+    });
+
+    container.register("GetQueuesUseCase", () => {
+      return new GetQueuesUseCase(logger);
+    });
+
+    container.register("GetCustomersUseCase", () => {
+      return new GetCustomersUseCase(logger);
+    });
+
+    container.register("GetEmployeesUseCase", () => {
+      return new GetEmployeesUseCase(logger);
+    });
+
+    container.register("GetCategoriesUseCase", () => {
+      return new GetCategoriesUseCase(logger);
+    });
+
+    // Register Backend CRUD Services
+    container.register("BackendShopsService", () => {
+      const getShopsUseCase = container.resolve("GetShopsUseCase") as GetShopsUseCase;
+      return new BackendShopsService(getShopsUseCase, logger);
+    });
+
+    container.register("BackendQueuesService", () => {
+      const getQueuesUseCase = container.resolve("GetQueuesUseCase") as GetQueuesUseCase;
+      return new BackendQueuesService(getQueuesUseCase, logger);
+    });
+
+    container.register("BackendCustomersService", () => {
+      const getCustomersUseCase = container.resolve("GetCustomersUseCase") as GetCustomersUseCase;
+      return new BackendCustomersService(getCustomersUseCase, logger);
+    });
+
+    container.register("BackendEmployeesService", () => {
+      const getEmployeesUseCase = container.resolve("GetEmployeesUseCase") as GetEmployeesUseCase;
+      return new BackendEmployeesService(getEmployeesUseCase, logger);
+    });
+
+    container.register("BackendCategoriesService", () => {
+      const getCategoriesUseCase = container.resolve("GetCategoriesUseCase") as GetCategoriesUseCase;
+      return new BackendCategoriesService(getCategoriesUseCase, logger);
     });
 
     logger.info("Server container initialized successfully");

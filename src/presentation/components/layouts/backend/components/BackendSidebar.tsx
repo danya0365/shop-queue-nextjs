@@ -3,7 +3,11 @@
 import { cn } from '@/src/presentation/utils/tailwind';
 import {
   LayoutDashboard,
-  Settings
+  Store,
+  Clock,
+  Users,
+  UserCheck,
+  FolderOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,7 +22,11 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
 
   const navItems = [
     { href: '/backend', label: 'แดชบอร์ด', icon: LayoutDashboard },
-    { href: '/backend/settings', label: 'ตั้งค่า', icon: Settings },
+    { href: '/backend/shops', label: 'จัดการร้านค้า', icon: Store },
+    { href: '/backend/queues', label: 'จัดการคิว', icon: Clock },
+    { href: '/backend/customers', label: 'จัดการลูกค้า', icon: Users },
+    { href: '/backend/employees', label: 'จัดการพนักงาน', icon: UserCheck },
+    { href: '/backend/categories', label: 'จัดการหมวดหมู่', icon: FolderOpen },
   ];
 
   return (
