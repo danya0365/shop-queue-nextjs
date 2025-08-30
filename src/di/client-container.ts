@@ -18,15 +18,13 @@ import { Container, createContainer } from "./container";
  */
 export function createClientContainer(): Container {
   const container = createContainer();
-
-  // Register logger
   const logger = new ConsoleLogger();
-  container.registerInstance<Logger>("Logger", logger);
 
   try {
+    // Register logger instance
+    container.registerInstance<Logger>("Logger", logger);
 
-    // Create and register client datasources
-    // Register datasources
+    // Initialize dependencies
     const databaseDatasource = new SupabaseDatasource(
       supabase,
       SupabaseClientType.BROWSER,
@@ -34,39 +32,19 @@ export function createClientContainer(): Container {
     );
 
     const authDatasource = new SupabaseAuthDataSource(logger, supabase);
+    const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
+    // Create service instances
+    const authService = new AuthService(authDatasource, logger);
+    const profileService = new ProfileService(profileAdapter, logger);
+    const authorizationService = new AuthorizationService(logger);
+    const shopService = new ShopService();
 
-    const profileAdapter = ProfileRepositoryFactory.createAdapter(
-      databaseDatasource,
-      logger
-    );
-
-    container.register("AuthService", () => {
-      return new AuthService(
-        authDatasource,
-        logger
-      );
-    });
-
-    container.register("ProfileService", () => {
-      return new ProfileService(
-        profileAdapter,
-        logger
-      );
-    });
-
-    // Register AuthorizationService
-    container.register("AuthorizationService", () => {
-      return new AuthorizationService(
-        logger
-      );
-    });
-
-    container.register("ShopService", () => {
-      return new ShopService(
-
-      );
-    });
+    // Register services in the container
+    container.registerInstance("AuthService", authService);
+    container.registerInstance("ProfileService", profileService);
+    container.registerInstance("AuthorizationService", authorizationService);
+    container.registerInstance("ShopService", shopService);
 
     logger.info("Client container initialized successfully");
   } catch (error) {

@@ -1,4 +1,5 @@
-import type { OpeningHour, OpeningHoursBackendService } from '@/src/application/services/shop/backend/opening-hours-backend-service';
+import { OpeningHour } from '@/src/application/dtos/shop-opening-hour-dto';
+import type { OpeningHoursBackendService } from '@/src/application/services/shop/backend/opening-hours-backend-service';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';

@@ -1,3 +1,5 @@
+import { OpeningHour } from "../shop-opening-hour-dto";
+
 export interface ShopDTO {
   id: string;
   name: string;
@@ -10,7 +12,7 @@ export interface ShopDTO {
   owner_id: string;
   owner_name: string;
   status: 'active' | 'inactive' | 'pending';
-  opening_hours: Record<string, { open: string; close: string; is_open: boolean }>;
+  opening_hours: OpeningHour[];
   queue_count: number;
   total_services: number;
   rating: number;

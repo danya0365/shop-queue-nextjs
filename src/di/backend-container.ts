@@ -1,6 +1,27 @@
 
+import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
+import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
+import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
+import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
+import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
+import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
+import { BackendShopsService } from "../application/services/backend/BackendShopsService";
+import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
+import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
+import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
+import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
+import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
+import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
+import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
+import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
+import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
+import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
+import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
 import { Logger } from "../domain/interfaces/logger";
+import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
+import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -10,12 +31,66 @@ import { Container, createContainer } from "./container";
  */
 export async function createBackendContainer(): Promise<Container> {
   const container = createContainer();
-
-  // Register logger
   const logger = new ConsoleLogger();
-  container.registerInstance<Logger>("Logger", logger);
 
   try {
+    // Register logger instance
+    container.registerInstance<Logger>("Logger", logger);
+
+    // Initialize dependencies
+    const supabase = await createBackendSupabaseClient();
+    const databaseDatasource = new SupabaseDatasource(
+      supabase,
+      SupabaseClientType.ADMIN,
+      logger
+    );
+
+    // Create repository instances
+    const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
+
+    // Create use case instances
+    const getDashboardStatsUseCase = new GetDashboardStatsUseCase(logger);
+    const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(logger);
+    const getQueueDistributionUseCase = new GetQueueDistributionUseCase(logger);
+    const getPopularServicesUseCase = new GetPopularServicesUseCase(logger);
+    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository, logger);
+    const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository, logger);
+    const getQueuesUseCase = new GetQueuesUseCase(logger);
+    const getCustomersUseCase = new GetCustomersUseCase(logger);
+    const getEmployeesUseCase = new GetEmployeesUseCase(logger);
+    const getCategoriesUseCase = new GetCategoriesUseCase(logger);
+    const getProfilesUseCase = new GetProfilesUseCase(logger);
+
+    // Create service instances
+    const backendDashboardService = new BackendDashboardService(
+      getDashboardStatsUseCase,
+      getRecentActivitiesUseCase,
+      getQueueDistributionUseCase,
+      getPopularServicesUseCase,
+      logger
+    );
+
+    const backendShopsService = new BackendShopsService(
+      getShopsPaginatedUseCase,
+      getShopStatsUseCase,
+      logger
+    );
+
+    const backendQueuesService = new BackendQueuesService(getQueuesUseCase, logger);
+    const backendCustomersService = new BackendCustomersService(getCustomersUseCase, logger);
+    const backendEmployeesService = new BackendEmployeesService(getEmployeesUseCase, logger);
+    const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
+    const backendProfilesService = new BackendProfilesService(getProfilesUseCase, logger);
+
+    // Register only services in the container
+    container.registerInstance("BackendDashboardService", backendDashboardService);
+    container.registerInstance("BackendShopsService", backendShopsService);
+    container.registerInstance("BackendQueuesService", backendQueuesService);
+    container.registerInstance("BackendCustomersService", backendCustomersService);
+    container.registerInstance("BackendEmployeesService", backendEmployeesService);
+    container.registerInstance("BackendCategoriesService", backendCategoriesService);
+    container.registerInstance("BackendProfilesService", backendProfilesService);
+
     logger.info("Backend container initialized successfully");
   } catch (error) {
     console.error("Failed to initialize backend container:", error);
@@ -33,4 +108,3 @@ export async function getBackendContainer(): Promise<Container> {
   const container = await createBackendContainer();
   return container;
 }
-

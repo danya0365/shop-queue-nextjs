@@ -207,7 +207,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                       </div>
                     </td>
                     <td className="py-3 px-4 backend-text">{queue.shop_name}</td>
-                    <td className="py-3 px-4 backend-text">{queue.service_name}</td>
+                    <td className="py-3 px-4 backend-text">{queue.queue_services[0].service_name}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(queue.priority)}`}>
                         {getPriorityText(queue.priority)}

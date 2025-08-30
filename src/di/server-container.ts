@@ -2,23 +2,6 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
-import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
-import { BackendShopsService } from "../application/services/backend/BackendShopsService";
-import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
-import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
-import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
-import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
-import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
-import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
-import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
-import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
-import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
-import { GetShopsUseCase } from "../application/usecases/backend/shops/GetShopsUseCase";
-import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
-import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
-import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
-import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
-import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
@@ -49,15 +32,16 @@ import { Container, createContainer } from "./container";
  */
 export async function createServerContainer(): Promise<Container> {
   const container = createContainer();
-
-  // Register logger
   const logger = new ConsoleLogger();
-  container.registerInstance<Logger>("Logger", logger);
 
   try {
+    // Register logger instance
+    container.registerInstance<Logger>("Logger", logger);
+
+    // Initialize dependencies
     const supabase = await createServerSupabaseClient();
-    // Create and register server datasources
-    // Register datasources
+
+    // Create datasources
     const databaseDatasource = new SupabaseDatasource(
       supabase,
       SupabaseClientType.SERVER,
@@ -65,218 +49,51 @@ export async function createServerContainer(): Promise<Container> {
     );
 
     const authDatasource = new SupabaseAuthDataSource(logger, supabase);
+    const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
+    // Create service instances
+    const authService = new AuthService(authDatasource, logger);
+    const profileService = new ProfileService(profileAdapter, logger);
+    const authorizationService = new AuthorizationService(logger);
+    const shopService = new ShopService();
+    const subscriptionService = new SubscriptionService(logger);
 
-    const profileAdapter = ProfileRepositoryFactory.createAdapter(
-      databaseDatasource,
-      logger
-    );
+    // Shop Backend services
+    const posterTemplateBackendService = new PosterTemplateBackendService(logger);
+    const servicesBackendService = new ServicesBackendService(logger);
+    const customersBackendService = new CustomersBackendService(logger);
+    const departmentsBackendService = new DepartmentsBackendService(logger);
+    const paymentsBackendService = new PaymentsBackendService(logger);
+    const rewardsBackendService = new RewardsBackendService(logger);
+    const openingHoursBackendService = new OpeningHoursBackendService(logger);
+    const paymentItemsBackendService = new PaymentItemsBackendService(logger);
+    const customerPointsBackendService = new CustomerPointsBackendService(logger);
+    const queueServiceBackendService = new QueueServiceBackendService(logger);
+    const customerPointsTransactionBackendService = new CustomerPointsTransactionBackendService(logger);
+    const shopSettingsBackendService = new ShopSettingsBackendService(logger);
+    const notificationSettingsBackendService = new NotificationSettingsBackendService(logger);
+    const rewardTransactionBackendService = new RewardTransactionBackendService(logger);
 
-    container.register("AuthService", () => {
-      return new AuthService(
-        authDatasource,
-        logger
-      );
-    });
-
-    container.register("ProfileService", () => {
-      return new ProfileService(
-        profileAdapter,
-        logger
-      );
-    });
-
-
-    // Register AuthorizationService
-    container.register("AuthorizationService", () => {
-      return new AuthorizationService(
-        logger
-      );
-    });
-
-    container.register("ShopService", () => {
-      return new ShopService(
-
-      );
-    });
-
-    container.register("SubscriptionService", () => {
-      return new SubscriptionService(
-        logger
-      );
-    });
-
-    // Register Poster Template Backend Service
-    container.register('PosterTemplateBackendService', () => {
-      return new PosterTemplateBackendService(logger);
-    });
-
-    container.register("ServicesBackendService", () => {
-      return new ServicesBackendService(
-        logger
-      );
-    });
-
-    container.register("CustomersBackendService", () => {
-      return new CustomersBackendService(
-        logger
-      );
-    });
-
-    container.register("DepartmentsBackendService", () => {
-      return new DepartmentsBackendService(
-        logger
-      );
-    });
-
-    container.register("PaymentsBackendService", () => {
-      return new PaymentsBackendService(
-        logger
-      );
-    });
-
-    container.register("RewardsBackendService", () => {
-      return new RewardsBackendService(
-        logger
-      );
-    });
-
-    container.register("OpeningHoursBackendService", () => {
-      return new OpeningHoursBackendService(
-        logger
-      );
-    });
-
-    container.register("PaymentItemsBackendService", () => {
-      return new PaymentItemsBackendService(
-        logger
-      );
-    });
-
-    container.register("CustomerPointsBackendService", () => {
-      return new CustomerPointsBackendService(
-        logger
-      );
-    });
-
-    container.register("QueueServiceBackendService", () => {
-      return new QueueServiceBackendService(
-        logger
-      );
-    });
-
-    container.register("CustomerPointsTransactionBackendService", () => {
-      return new CustomerPointsTransactionBackendService(
-        logger
-      );
-    });
-
-    container.register("ShopSettingsBackendService", () => {
-      return new ShopSettingsBackendService(
-        logger
-      );
-    });
-
-    container.register("NotificationSettingsBackendService", () => {
-      return new NotificationSettingsBackendService(
-        logger
-      );
-    });
-
-    container.register("RewardTransactionBackendService", () => {
-      return new RewardTransactionBackendService(
-        logger
-      );
-    });
-
-    // Register Backend Dashboard Use Cases
-    container.register("GetDashboardStatsUseCase", () => {
-      return new GetDashboardStatsUseCase(logger);
-    });
-
-    container.register("GetRecentActivitiesUseCase", () => {
-      return new GetRecentActivitiesUseCase(logger);
-    });
-
-    container.register("GetQueueDistributionUseCase", () => {
-      return new GetQueueDistributionUseCase(logger);
-    });
-
-    container.register("GetPopularServicesUseCase", () => {
-      return new GetPopularServicesUseCase(logger);
-    });
-
-    // Register Backend Dashboard Service
-    container.register("BackendDashboardService", () => {
-      const getDashboardStatsUseCase = container.resolve("GetDashboardStatsUseCase") as GetDashboardStatsUseCase;
-      const getRecentActivitiesUseCase = container.resolve("GetRecentActivitiesUseCase") as GetRecentActivitiesUseCase;
-      const getQueueDistributionUseCase = container.resolve("GetQueueDistributionUseCase") as GetQueueDistributionUseCase;
-      const getPopularServicesUseCase = container.resolve("GetPopularServicesUseCase") as GetPopularServicesUseCase;
-      
-      return new BackendDashboardService(
-        getDashboardStatsUseCase,
-        getRecentActivitiesUseCase,
-        getQueueDistributionUseCase,
-        getPopularServicesUseCase,
-        logger
-      );
-    });
-
-    // Register Backend CRUD Use Cases
-    container.register("GetShopsUseCase", () => {
-      return new GetShopsUseCase(logger);
-    });
-
-    container.register("GetQueuesUseCase", () => {
-      return new GetQueuesUseCase(logger);
-    });
-
-    container.register("GetCustomersUseCase", () => {
-      return new GetCustomersUseCase(logger);
-    });
-
-    container.register("GetEmployeesUseCase", () => {
-      return new GetEmployeesUseCase(logger);
-    });
-
-    container.register("GetCategoriesUseCase", () => {
-      return new GetCategoriesUseCase(logger);
-    });
-
-    container.register("GetProfilesUseCase", () => {
-      return new GetProfilesUseCase(logger);
-    });
-
-    // Register Backend CRUD Services
-    container.register("BackendShopsService", () => {
-      const getShopsUseCase = container.resolve("GetShopsUseCase") as GetShopsUseCase;
-      return new BackendShopsService(getShopsUseCase, logger);
-    });
-
-    container.register("BackendQueuesService", () => {
-      const getQueuesUseCase = container.resolve("GetQueuesUseCase") as GetQueuesUseCase;
-      return new BackendQueuesService(getQueuesUseCase, logger);
-    });
-
-    container.register("BackendCustomersService", () => {
-      const getCustomersUseCase = container.resolve("GetCustomersUseCase") as GetCustomersUseCase;
-      return new BackendCustomersService(getCustomersUseCase, logger);
-    });
-
-    container.register("BackendEmployeesService", () => {
-      const getEmployeesUseCase = container.resolve("GetEmployeesUseCase") as GetEmployeesUseCase;
-      return new BackendEmployeesService(getEmployeesUseCase, logger);
-    });
-
-    container.register("BackendCategoriesService", () => {
-      const getCategoriesUseCase = container.resolve("GetCategoriesUseCase") as GetCategoriesUseCase;
-      return new BackendCategoriesService(getCategoriesUseCase, logger);
-    });
-
-    container.register("BackendProfilesService", () => {
-      const getProfilesUseCase = container.resolve("GetProfilesUseCase") as GetProfilesUseCase;
-      return new BackendProfilesService(getProfilesUseCase, logger);
-    });
+    // Register all services in the container
+    container.registerInstance("AuthService", authService);
+    container.registerInstance("ProfileService", profileService);
+    container.registerInstance("AuthorizationService", authorizationService);
+    container.registerInstance("ShopService", shopService);
+    container.registerInstance("SubscriptionService", subscriptionService);
+    container.registerInstance("PosterTemplateBackendService", posterTemplateBackendService);
+    container.registerInstance("ServicesBackendService", servicesBackendService);
+    container.registerInstance("CustomersBackendService", customersBackendService);
+    container.registerInstance("DepartmentsBackendService", departmentsBackendService);
+    container.registerInstance("PaymentsBackendService", paymentsBackendService);
+    container.registerInstance("RewardsBackendService", rewardsBackendService);
+    container.registerInstance("OpeningHoursBackendService", openingHoursBackendService);
+    container.registerInstance("PaymentItemsBackendService", paymentItemsBackendService);
+    container.registerInstance("CustomerPointsBackendService", customerPointsBackendService);
+    container.registerInstance("QueueServiceBackendService", queueServiceBackendService);
+    container.registerInstance("CustomerPointsTransactionBackendService", customerPointsTransactionBackendService);
+    container.registerInstance("ShopSettingsBackendService", shopSettingsBackendService);
+    container.registerInstance("NotificationSettingsBackendService", notificationSettingsBackendService);
+    container.registerInstance("RewardTransactionBackendService", rewardTransactionBackendService);
 
     logger.info("Server container initialized successfully");
   } catch (error) {

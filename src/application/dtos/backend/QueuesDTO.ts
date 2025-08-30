@@ -1,12 +1,11 @@
 export interface QueueDTO {
   id: string;
   customer_id: string;
-  customer_name: string;
-  customer_phone: string;
+  customer_name: string; // joined from customers table
+  customer_phone: string; // joined from customers table
   shop_id: string;
-  shop_name: string;
-  service_id: string;
-  service_name: string;
+  shop_name: string; // joined from shops table
+  queue_services: QueueServiceDTO[];
   queue_number: number;
   status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   priority: 'normal' | 'high' | 'urgent';
@@ -17,6 +16,14 @@ export interface QueueDTO {
   updated_at: string;
   called_at?: string;
   completed_at?: string;
+}
+
+export interface QueueServiceDTO {
+  service_id: string;
+  service_name: string;
+  quantity: number;
+  price: number;
+  total: number;
 }
 
 export interface QueueStatsDTO {

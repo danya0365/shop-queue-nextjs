@@ -1,7 +1,7 @@
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IBackendCustomersService } from '@/src/application/services/backend/BackendCustomersService';
 import type { CustomersDataDTO } from '@/src/application/dtos/backend/CustomersDTO';
+import type { IBackendCustomersService } from '@/src/application/services/backend/BackendCustomersService';
+import { getBackendContainer } from '@/src/di/backend-container';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 // Define ViewModel interface
 export interface CustomersViewModel {
@@ -13,14 +13,14 @@ export class CustomersPresenter {
   constructor(
     private readonly backendCustomersService: IBackendCustomersService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<CustomersViewModel> {
     try {
       this.logger.info('CustomersPresenter: Getting view model');
-      
+
       const customersData = await this.backendCustomersService.getCustomersData();
-      
+
       return {
         customersData
       };
@@ -42,7 +42,7 @@ export class CustomersPresenter {
 // Factory class
 export class CustomersPresenterFactory {
   static async create(): Promise<CustomersPresenter> {
-    const serverContainer = await getServerContainer();
+    const serverContainer = await getBackendContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const backendCustomersService = serverContainer.resolve<IBackendCustomersService>('BackendCustomersService');
     return new CustomersPresenter(backendCustomersService, logger);

@@ -1,7 +1,7 @@
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IBackendProfilesService } from '@/src/application/services/backend/BackendProfilesService';
 import type { ProfilesDataDTO } from '@/src/application/dtos/backend/ProfilesDTO';
+import type { IBackendProfilesService } from '@/src/application/services/backend/BackendProfilesService';
+import { getBackendContainer } from '@/src/di/backend-container';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 // Define ViewModel interface
 export interface ProfilesViewModel {
@@ -13,14 +13,14 @@ export class ProfilesPresenter {
   constructor(
     private readonly backendProfilesService: IBackendProfilesService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<ProfilesViewModel> {
     try {
       this.logger.info('ProfilesPresenter: Getting view model');
-      
+
       const profilesData = await this.backendProfilesService.getProfilesData();
-      
+
       return {
         profilesData
       };
@@ -42,7 +42,7 @@ export class ProfilesPresenter {
 // Factory class
 export class ProfilesPresenterFactory {
   static async create(): Promise<ProfilesPresenter> {
-    const serverContainer = await getServerContainer();
+    const serverContainer = await getBackendContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const backendProfilesService = serverContainer.resolve<IBackendProfilesService>('BackendProfilesService');
     return new ProfilesPresenter(backendProfilesService, logger);

@@ -1,7 +1,7 @@
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IBackendQueuesService } from '@/src/application/services/backend/BackendQueuesService';
 import type { QueuesDataDTO } from '@/src/application/dtos/backend/QueuesDTO';
+import type { IBackendQueuesService } from '@/src/application/services/backend/BackendQueuesService';
+import { getBackendContainer } from '@/src/di/backend-container';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 // Define ViewModel interface
 export interface QueuesViewModel {
@@ -13,14 +13,14 @@ export class QueuesPresenter {
   constructor(
     private readonly backendQueuesService: IBackendQueuesService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<QueuesViewModel> {
     try {
       this.logger.info('QueuesPresenter: Getting view model');
-      
+
       const queuesData = await this.backendQueuesService.getQueuesData();
-      
+
       return {
         queuesData
       };
@@ -42,7 +42,7 @@ export class QueuesPresenter {
 // Factory class
 export class QueuesPresenterFactory {
   static async create(): Promise<QueuesPresenter> {
-    const serverContainer = await getServerContainer();
+    const serverContainer = await getBackendContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const backendQueuesService = serverContainer.resolve<IBackendQueuesService>('BackendQueuesService');
     return new QueuesPresenter(backendQueuesService, logger);

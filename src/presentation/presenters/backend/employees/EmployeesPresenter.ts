@@ -1,7 +1,7 @@
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IBackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
 import type { EmployeesDataDTO } from '@/src/application/dtos/backend/EmployeesDTO';
+import type { IBackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
+import { getBackendContainer } from '@/src/di/backend-container';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 // Define ViewModel interface
 export interface EmployeesViewModel {
@@ -13,14 +13,14 @@ export class EmployeesPresenter {
   constructor(
     private readonly backendEmployeesService: IBackendEmployeesService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<EmployeesViewModel> {
     try {
       this.logger.info('EmployeesPresenter: Getting view model');
-      
+
       const employeesData = await this.backendEmployeesService.getEmployeesData();
-      
+
       return {
         employeesData
       };
@@ -42,7 +42,7 @@ export class EmployeesPresenter {
 // Factory class
 export class EmployeesPresenterFactory {
   static async create(): Promise<EmployeesPresenter> {
-    const serverContainer = await getServerContainer();
+    const serverContainer = await getBackendContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const backendEmployeesService = serverContainer.resolve<IBackendEmployeesService>('BackendEmployeesService');
     return new EmployeesPresenter(backendEmployeesService, logger);

@@ -1,7 +1,7 @@
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IBackendCategoriesService } from '@/src/application/services/backend/BackendCategoriesService';
 import type { CategoriesDataDTO } from '@/src/application/dtos/backend/CategoriesDTO';
+import type { IBackendCategoriesService } from '@/src/application/services/backend/BackendCategoriesService';
+import { getBackendContainer } from '@/src/di/backend-container';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 // Define ViewModel interface
 export interface CategoriesViewModel {
@@ -13,14 +13,14 @@ export class CategoriesPresenter {
   constructor(
     private readonly backendCategoriesService: IBackendCategoriesService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<CategoriesViewModel> {
     try {
       this.logger.info('CategoriesPresenter: Getting view model');
-      
+
       const categoriesData = await this.backendCategoriesService.getCategoriesData();
-      
+
       return {
         categoriesData
       };
@@ -42,7 +42,7 @@ export class CategoriesPresenter {
 // Factory class
 export class CategoriesPresenterFactory {
   static async create(): Promise<CategoriesPresenter> {
-    const serverContainer = await getServerContainer();
+    const serverContainer = await getBackendContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const backendCategoriesService = serverContainer.resolve<IBackendCategoriesService>('BackendCategoriesService');
     return new CategoriesPresenter(backendCategoriesService, logger);
