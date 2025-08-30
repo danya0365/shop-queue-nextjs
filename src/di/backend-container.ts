@@ -8,6 +8,10 @@ import { BackendQueuesService } from "../application/services/backend/BackendQue
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
 import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
 import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
+import { GetCustomerByIdUseCase } from "../application/usecases/backend/customers/GetCustomerByIdUseCase";
+import { CreateCustomerUseCase } from "../application/usecases/backend/customers/CreateCustomerUseCase";
+import { UpdateCustomerUseCase } from "../application/usecases/backend/customers/UpdateCustomerUseCase";
+import { DeleteCustomerUseCase } from "../application/usecases/backend/customers/DeleteCustomerUseCase";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
 import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
@@ -22,6 +26,7 @@ import { createBackendSupabaseClient } from "../infrastructure/config/supabase-b
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
+import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -47,6 +52,7 @@ export async function createBackendContainer(): Promise<Container> {
 
     // Create repository instances
     const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
+    const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(logger);
@@ -56,7 +62,14 @@ export async function createBackendContainer(): Promise<Container> {
     const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository, logger);
     const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository, logger);
     const getQueuesUseCase = new GetQueuesUseCase(logger);
-    const getCustomersUseCase = new GetCustomersUseCase(logger);
+    
+    // Customer use cases
+    const getCustomersUseCase = new GetCustomersUseCase(customerRepository, logger);
+    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(customerRepository, logger);
+    const createCustomerUseCase = new CreateCustomerUseCase(customerRepository, logger);
+    const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository, logger);
+    const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository, logger);
+    
     const getEmployeesUseCase = new GetEmployeesUseCase(logger);
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
     const getProfilesUseCase = new GetProfilesUseCase(logger);
@@ -77,7 +90,14 @@ export async function createBackendContainer(): Promise<Container> {
     );
 
     const backendQueuesService = new BackendQueuesService(getQueuesUseCase, logger);
-    const backendCustomersService = new BackendCustomersService(getCustomersUseCase, logger);
+    const backendCustomersService = new BackendCustomersService(
+      getCustomersUseCase,
+      getCustomerByIdUseCase,
+      createCustomerUseCase,
+      updateCustomerUseCase,
+      deleteCustomerUseCase,
+      logger
+    );
     const backendEmployeesService = new BackendEmployeesService(getEmployeesUseCase, logger);
     const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
     const backendProfilesService = new BackendProfilesService(getProfilesUseCase, logger);

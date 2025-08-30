@@ -1,17 +1,15 @@
 export interface CustomerDTO {
   id: string;
   name: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
   date_of_birth?: string;
   gender?: 'male' | 'female' | 'other';
   address?: string;
-  total_queues: number;
-  total_points: number;
-  membership_tier: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum';
+  total_queues: number; // joined from queue history
+  total_points: number; // joined from customer points
+  membership_tier: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum';  // joined from customer points
   last_visit?: string;
-  favorite_shops: string[];
-  preferred_services: string[];
   notes?: string;
   is_active: boolean;
   created_at: string;

@@ -45,6 +45,13 @@ CREATE TABLE customers (
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     phone TEXT,
+    email TEXT,
+    date_of_birth DATE,
+    gender TEXT,
+    address TEXT,
+    notes TEXT,
+    last_visit TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT true,
     profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
