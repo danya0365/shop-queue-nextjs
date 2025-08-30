@@ -1,11 +1,9 @@
-
-import { LoggerAdapter } from '@/src/infrastructure/adapters/logger-adapter';
+import { Logger } from '@/src/domain/interfaces/logger';
 import { ErrorHandlingDecorator } from '../decorators/error-handling.decorator';
 import { PaginatedResultDto, PaginationParamsDto } from '../dtos/pagination-dto';
 import { CreateVideoDto, VideoDetailsDto, VideoDto, VideoWithCategoryDto } from '../dtos/video-dto';
 import { VideoUseCaseFactory } from '../factories/video-use-case.factory';
 import type { ICategoryRepositoryAdapter } from '../interfaces/category-repository-adapter.interface';
-import type { ILogger } from '../interfaces/logger.interface';
 import type { IPaginatedVideoService } from '../interfaces/paginated-video-service.interface';
 import type { IProfileRepositoryAdapter } from '../interfaces/profile-repository-adapter.interface';
 import type { IUseCase } from '../interfaces/use-case.interface';
@@ -36,60 +34,57 @@ export class VideoService implements IVideoService, IPaginatedVideoService {
    * @param videoAdapter Adapter for video operations
    * @param categoryAdapter Adapter for category operations
    * @param profileAdapter Adapter for profile operations
-   * @param logger Optional logger for error logging
+   * @param logger Logger for error logging
    */
   constructor(
     private readonly videoAdapter: IVideoRepositoryAdapter,
     private readonly categoryAdapter: ICategoryRepositoryAdapter,
     private readonly profileAdapter: IProfileRepositoryAdapter,
-    private readonly logger?: ILogger
+    private readonly logger: Logger
   ) {
-    // Create logger adapter if logger is provided
-    const loggerAdapter = logger ? new LoggerAdapter(logger) : undefined;
-
     // Create use cases using factory and decorate them with error handling
     this.getVideosUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetVideosUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetVideosUseCase(videoAdapter, logger),
       logger
     );
 
     this.getVideoByIdUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetVideoByIdUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetVideoByIdUseCase(videoAdapter, logger),
       logger
     );
 
     this.createVideoUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createCreateVideoUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createCreateVideoUseCase(videoAdapter, logger),
       logger
     );
 
     this.incrementVideoViewsUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createIncrementVideoViewsUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createIncrementVideoViewsUseCase(videoAdapter, logger),
       logger
     );
 
     this.getVideosByCategoryUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetVideosByCategoryUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetVideosByCategoryUseCase(videoAdapter, logger),
       logger
     );
 
     this.searchVideosUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createSearchVideosUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createSearchVideosUseCase(videoAdapter, logger),
       logger
     );
 
     this.getVideosByUserUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetVideosByUserUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetVideosByUserUseCase(videoAdapter, logger),
       logger
     );
 
     this.getPaginatedVideosByUserUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetPaginatedVideosByUserUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetPaginatedVideosByUserUseCase(videoAdapter, logger),
       logger
     );
 
     this.getPaginatedLikedVideosByUserUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetPaginatedLikedVideosByUserUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetPaginatedLikedVideosByUserUseCase(videoAdapter, logger),
       logger
     );
 
@@ -98,7 +93,7 @@ export class VideoService implements IVideoService, IPaginatedVideoService {
         videoAdapter,
         categoryAdapter,
         profileAdapter,
-        loggerAdapter
+        logger
       ),
       logger
     );
@@ -108,13 +103,13 @@ export class VideoService implements IVideoService, IPaginatedVideoService {
         videoAdapter,
         categoryAdapter,
         profileAdapter,
-        loggerAdapter
+        logger
       ),
       logger
     );
 
     this.getPaginatedVideosByCategoryUseCase = new ErrorHandlingDecorator(
-      VideoUseCaseFactory.createGetPaginatedVideosByCategoryUseCase(videoAdapter, loggerAdapter),
+      VideoUseCaseFactory.createGetPaginatedVideosByCategoryUseCase(videoAdapter, logger),
       logger
     );
   }

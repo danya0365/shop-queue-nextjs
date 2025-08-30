@@ -1,10 +1,9 @@
 import { EmailDataSource } from '@/src/domain/interfaces/datasources/email-datasource';
+import { Logger } from '@/src/domain/interfaces/logger';
 import { EmailUseCaseFactory } from '../../application/factories/email-use-case.factory';
-import type { ILogger } from '../../application/interfaces/logger.interface';
 import { SendEmailUseCase } from '../../application/usecases/email/send-email';
 import { SendTemplateEmailUseCase } from '../../application/usecases/email/send-template-email';
 import { EmailResult, IEmailService } from '../../domain/interfaces/email-service';
-import { LoggerAdapter } from '../adapters/logger-adapter';
 
 /**
  * Service for handling email-related operations
@@ -16,21 +15,18 @@ export class EmailService implements IEmailService {
 
   constructor(
     private emailDataSource: EmailDataSource,
-    private logger?: ILogger
+    private logger?: Logger
   ) {
-    // Create logger adapter if logger is provided
-    const loggerAdapter = logger ? new LoggerAdapter(logger) : undefined;
-
     // Use factory to create use cases with proper dependency injection
     this.sendEmailUseCase = EmailUseCaseFactory.createSendEmailUseCase(
       emailDataSource,
-      loggerAdapter
+      logger
     );
 
     // Use factory to create SendTemplateEmailUseCase with logger
     this.sendTemplateEmailUseCase = EmailUseCaseFactory.createSendTemplateEmailUseCase(
       emailDataSource,
-      loggerAdapter
+      logger
     );
   }
 
