@@ -10,7 +10,7 @@ CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'serving', 'completed'
 CREATE TYPE queue_priority AS ENUM ('normal', 'high', 'vip');
 CREATE TYPE payment_status AS ENUM ('unpaid', 'partial', 'paid');
 CREATE TYPE payment_method AS ENUM ('cash', 'card', 'qr', 'transfer');
-CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'on_leave');
+CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'suspended');
 CREATE TYPE promotion_type AS ENUM ('percentage', 'fixed_amount', 'buy_x_get_y', 'free_item');
 CREATE TYPE promotion_status AS ENUM ('active', 'inactive', 'expired', 'scheduled');
 CREATE TYPE poster_category AS ENUM ('modern', 'classic', 'minimal', 'professional');
@@ -103,7 +103,10 @@ CREATE TABLE employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    employee_code TEXT,
+    employee_code TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT,
+    phone TEXT ,
     position TEXT,
     department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
     salary DECIMAL(10,2),
@@ -113,6 +116,7 @@ CREATE TABLE employees (
     is_on_duty BOOLEAN DEFAULT false,
     last_login TIMESTAMP WITH TIME ZONE,
     permissions TEXT[], -- JSON array of permissions
+    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

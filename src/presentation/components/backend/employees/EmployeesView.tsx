@@ -36,7 +36,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       case 'technical': return 'เทคนิค';
       case 'sales': return 'ขาย';
       case 'other': return 'อื่นๆ';
-      default: return 'อื่นๆ';
+      default: return department;
     }
   };
 
@@ -180,7 +180,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                         <div className="backend-text-muted text-sm">{employee.phone}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text">{getDepartmentText(employee.department)}</td>
+                    <td className="py-3 px-4 backend-text">{getDepartmentText(employee.department_name || '')}</td>
                     <td className="py-3 px-4 backend-text">{employee.position}</td>
                     <td className="py-3 px-4 backend-text-muted">{employee.shop_name || 'ไม่ได้กำหนด'}</td>
                     <td className="py-3 px-4">

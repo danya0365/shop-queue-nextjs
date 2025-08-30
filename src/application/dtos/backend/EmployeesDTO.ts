@@ -1,13 +1,15 @@
 export interface EmployeeDTO {
   id: string;
+  employee_code: string;
   name: string;
-  email: string;
-  phone: string;
-  department: 'management' | 'customer_service' | 'technical' | 'sales' | 'other';
+  email?: string;
+  phone?: string;
+  department_id?: string;
+  department_name?: string; // joined from departments
   position: string;
   shop_id?: string;
-  shop_name?: string;
-  status: 'active' | 'inactive' | 'suspended';
+  shop_name?: string; // joined from shops
+  status: EmployeeStatus;
   hire_date: string;
   last_login?: string;
   permissions: string[];
@@ -15,6 +17,46 @@ export interface EmployeeDTO {
   notes?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface CreateEmployeeParams {
+  employee_code: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  department_id?: string;
+  position: string;
+  shop_id?: string;
+  status: EmployeeStatus;
+  hire_date: string;
+  permissions?: string[];
+  salary?: number;
+  notes?: string;
+}
+
+export interface UpdateEmployeeParams {
+  id: string;
+  employee_code?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  department_id?: string;
+  position?: string;
+  shop_id?: string;
+  status?: EmployeeStatus;
+  hire_date?: string;
+  permissions?: string[];
+  salary?: number;
+  notes?: string;
+}
+
+/**
+ * Employee status enum
+ */
+export enum EmployeeStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
 }
 
 export interface EmployeeStatsDTO {

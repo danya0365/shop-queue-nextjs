@@ -17,6 +17,11 @@ import { GetPopularServicesUseCase } from "../application/usecases/backend/dashb
 import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
 import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
 import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
+import { GetEmployeeByIdUseCase } from "../application/usecases/backend/employees/GetEmployeeByIdUseCase";
+import { CreateEmployeeUseCase } from "../application/usecases/backend/employees/CreateEmployeeUseCase";
+import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
+import { DeleteEmployeeUseCase } from "../application/usecases/backend/employees/DeleteEmployeeUseCase";
+import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employees/GetEmployeeStatsUseCase";
 import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
 import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
@@ -27,6 +32,7 @@ import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/dataso
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
+import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -53,6 +59,7 @@ export async function createBackendContainer(): Promise<Container> {
     // Create repository instances
     const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
+    const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(logger);
@@ -70,7 +77,14 @@ export async function createBackendContainer(): Promise<Container> {
     const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository, logger);
     const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository, logger);
     
+    // Employee use cases
     const getEmployeesUseCase = new GetEmployeesUseCase(logger);
+    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(employeeRepository, logger);
+    const createEmployeeUseCase = new CreateEmployeeUseCase(employeeRepository, logger);
+    const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository, logger);
+    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository, logger);
+    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository, logger);
+    
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
     const getProfilesUseCase = new GetProfilesUseCase(logger);
 
@@ -98,7 +112,15 @@ export async function createBackendContainer(): Promise<Container> {
       deleteCustomerUseCase,
       logger
     );
-    const backendEmployeesService = new BackendEmployeesService(getEmployeesUseCase, logger);
+    const backendEmployeesService = new BackendEmployeesService(
+      getEmployeesUseCase,
+      getEmployeeStatsUseCase,
+      getEmployeeByIdUseCase,
+      createEmployeeUseCase,
+      updateEmployeeUseCase,
+      deleteEmployeeUseCase,
+      logger
+    );
     const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
     const backendProfilesService = new BackendProfilesService(getProfilesUseCase, logger);
 

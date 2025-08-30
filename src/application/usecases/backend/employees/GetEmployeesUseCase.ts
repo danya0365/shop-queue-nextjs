@@ -1,11 +1,8 @@
-import type { EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO } from '@/src/application/dtos/backend/EmployeesDTO';
+import { EmployeeStatus, type EmployeeDTO, type EmployeesDataDTO, type EmployeeStatsDTO } from '@/src/application/dtos/backend/EmployeesDTO';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
-export interface IGetEmployeesUseCase {
-  execute(): Promise<EmployeesDataDTO>;
-}
-
-export class GetEmployeesUseCase implements IGetEmployeesUseCase {
+export class GetEmployeesUseCase implements IUseCase<void, EmployeesDataDTO> {
   constructor(
     private readonly logger: Logger
   ) { }
@@ -18,14 +15,16 @@ export class GetEmployeesUseCase implements IGetEmployeesUseCase {
       const mockEmployees: EmployeeDTO[] = [
         {
           id: '1',
+          employee_code: 'EMP001',
           name: 'นาย วิชัย ขยันดี',
           email: 'wichai@shopqueue.com',
           phone: '081-111-2222',
-          department: 'customer_service',
+          department_id: '1',
+          department_name: 'customer_service',
           position: 'พนักงานบริการลูกค้า',
           shop_id: '1',
           shop_name: 'ร้านตัดผมสไตล์',
-          status: 'active',
+          status: EmployeeStatus.ACTIVE,
           hire_date: '2023-01-15T00:00:00Z',
           last_login: '2024-01-15T10:30:00Z',
           permissions: ['queue_management', 'customer_service'],
@@ -36,14 +35,16 @@ export class GetEmployeesUseCase implements IGetEmployeesUseCase {
         },
         {
           id: '2',
+          employee_code: 'EMP002',
           name: 'นางสาว สุดา ใจดี',
           email: 'suda@shopqueue.com',
           phone: '082-333-4444',
-          department: 'management',
+          department_id: '2',
+          department_name: 'management',
           position: 'ผู้จัดการร้าน',
           shop_id: '2',
           shop_name: 'คลินิกความงาม',
-          status: 'active',
+          status: EmployeeStatus.ACTIVE,
           hire_date: '2022-08-20T00:00:00Z',
           last_login: '2024-01-15T09:15:00Z',
           permissions: ['full_access', 'employee_management', 'financial_reports'],
@@ -54,14 +55,16 @@ export class GetEmployeesUseCase implements IGetEmployeesUseCase {
         },
         {
           id: '3',
+          employee_code: 'EMP003',
           name: 'นาย ประยุทธ มั่นใจ',
           email: 'prayut@shopqueue.com',
           phone: '083-555-6666',
-          department: 'technical',
+          department_id: '3',
+          department_name: 'technical',
           position: 'ช่างเทคนิค',
           shop_id: '3',
           shop_name: 'ศูนย์ซ่อมมือถือ',
-          status: 'inactive',
+          status: EmployeeStatus.INACTIVE,
           hire_date: '2023-05-10T00:00:00Z',
           last_login: '2024-01-10T14:20:00Z',
           permissions: ['technical_support', 'device_repair'],
@@ -72,14 +75,16 @@ export class GetEmployeesUseCase implements IGetEmployeesUseCase {
         },
         {
           id: '4',
+          employee_code: 'EMP004',
           name: 'นางสาว มาลี สวยงาม',
           email: 'malee@shopqueue.com',
           phone: '084-777-8888',
-          department: 'sales',
+          department_id: '4',
+          department_name: 'sales',
           position: 'พนักงานขาย',
           shop_id: '2',
           shop_name: 'คลินิกความงาม',
-          status: 'active',
+          status: EmployeeStatus.ACTIVE,
           hire_date: '2023-11-01T00:00:00Z',
           last_login: '2024-01-15T08:45:00Z',
           permissions: ['sales_management', 'customer_service'],
@@ -90,12 +95,16 @@ export class GetEmployeesUseCase implements IGetEmployeesUseCase {
         },
         {
           id: '5',
+          employee_code: 'EMP005',
           name: 'นาย สมชาย รับผิดชอบ',
           email: 'somchai@shopqueue.com',
           phone: '085-999-0000',
-          department: 'management',
+          department_id: '5',
+          department_name: 'management',
           position: 'ผู้ช่วยผู้จัดการ',
-          status: 'suspended',
+          shop_id: '2',
+          shop_name: 'คลินิกความงาม',
+          status: EmployeeStatus.SUSPENDED,
           hire_date: '2023-03-15T00:00:00Z',
           last_login: '2024-01-05T16:30:00Z',
           permissions: ['employee_management', 'queue_management'],
