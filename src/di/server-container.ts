@@ -1,3 +1,4 @@
+'use server';
 
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
@@ -28,6 +29,7 @@ import { Container, createContainer } from "./container";
 
 /**
  * Initialize a server-side container with all dependencies
+ * This container should ONLY be used in server-side code
  * This function creates a new container instance each time it's called
  */
 export async function createServerContainer(): Promise<Container> {
