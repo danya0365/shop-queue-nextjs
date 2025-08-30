@@ -8,6 +8,7 @@ import { BackendQueuesService } from "../application/services/backend/BackendQue
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
+import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
 import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
@@ -17,6 +18,7 @@ import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueu
 import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
 import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
 import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
+import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
@@ -241,6 +243,10 @@ export async function createServerContainer(): Promise<Container> {
       return new GetCategoriesUseCase(logger);
     });
 
+    container.register("GetProfilesUseCase", () => {
+      return new GetProfilesUseCase(logger);
+    });
+
     // Register Backend CRUD Services
     container.register("BackendShopsService", () => {
       const getShopsUseCase = container.resolve("GetShopsUseCase") as GetShopsUseCase;
@@ -265,6 +271,11 @@ export async function createServerContainer(): Promise<Container> {
     container.register("BackendCategoriesService", () => {
       const getCategoriesUseCase = container.resolve("GetCategoriesUseCase") as GetCategoriesUseCase;
       return new BackendCategoriesService(getCategoriesUseCase, logger);
+    });
+
+    container.register("BackendProfilesService", () => {
+      const getProfilesUseCase = container.resolve("GetProfilesUseCase") as GetProfilesUseCase;
+      return new BackendProfilesService(getProfilesUseCase, logger);
     });
 
     logger.info("Server container initialized successfully");
