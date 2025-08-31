@@ -23,8 +23,39 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   auth_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   username TEXT UNIQUE,
   full_name TEXT,
+  phone TEXT,
   avatar_url TEXT,
-  -- role is now derived from roles table via function
+
+  date_of_birth DATE,
+  gender TEXT CHECK (gender IN ('male', 'female', 'other')),
+  address TEXT,
+  bio TEXT,
+  
+  -- Preferences as JSONB
+  preferences JSONB NOT NULL DEFAULT '{
+    "language": "th",
+    "notifications": true,
+    "theme": "auto"
+  }'::jsonb,
+  
+  -- Social links as JSONB
+  social_links JSONB DEFAULT '{}'::jsonb,
+  
+  -- Verification status
+  verification_status TEXT NOT NULL DEFAULT 'verified' 
+    CHECK (verification_status IN ('pending', 'verified', 'rejected')),
+  
+  -- Privacy settings as JSONB
+  privacy_settings JSONB NOT NULL DEFAULT '{
+    "show_phone": false,
+    "show_email": false,
+    "show_address": false
+  }'::jsonb,
+  
+  -- Login tracking
+  last_login TIMESTAMP WITH TIME ZONE,
+  login_count INTEGER NOT NULL DEFAULT 0,
+
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
