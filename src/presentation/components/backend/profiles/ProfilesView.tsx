@@ -86,19 +86,19 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">โปรไฟล์ทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{profilesData.stats.total_profiles}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{profilesData.stats.totalProfiles}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ยืนยันตัวตนแล้ว</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{profilesData.stats.verified_profiles}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{profilesData.stats.verifiedProfiles}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">รอตรวจสอบ</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{profilesData.stats.pending_verification}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-2">{profilesData.stats.pendingVerification}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ใช้งานวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{profilesData.stats.active_profiles_today}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{profilesData.stats.activeProfilesToday}</p>
         </div>
       </div>
 
@@ -107,19 +107,19 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
         <h3 className="text-lg font-semibold backend-text mb-4">การกระจายตามเพศ</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-blue-600">{profilesData.stats.profiles_by_gender.male}</p>
+            <p className="text-2xl font-bold text-blue-600">{profilesData.stats.profilesByGender.male}</p>
             <p className="backend-text-muted text-sm">ชาย</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-pink-600">{profilesData.stats.profiles_by_gender.female}</p>
+            <p className="text-2xl font-bold text-pink-600">{profilesData.stats.profilesByGender.female}</p>
             <p className="backend-text-muted text-sm">หญิง</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-purple-600">{profilesData.stats.profiles_by_gender.other}</p>
+            <p className="text-2xl font-bold text-purple-600">{profilesData.stats.profilesByGender.other}</p>
             <p className="backend-text-muted text-sm">อื่นๆ</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-600">{profilesData.stats.profiles_by_gender.not_specified}</p>
+            <p className="text-2xl font-bold text-gray-600">{profilesData.stats.profilesByGender.notSpecified}</p>
             <p className="backend-text-muted text-sm">ไม่ระบุ</p>
           </div>
         </div>
@@ -196,17 +196,17 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                   <tr key={profile.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
-                        {profile.avatar_url && (
+                        {profile.avatarUrl && (
                           <Image
-                            src={profile.avatar_url}
-                            alt={profile.full_name}
+                            src={profile.avatarUrl}
+                            alt={profile.fullName}
                             width={40}
                             height={40}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         )}
                         <div>
-                          <div className="backend-text font-medium">{profile.full_name}</div>
+                          <div className="backend-text font-medium">{profile.fullName}</div>
                           {profile.bio && (
                             <div className="backend-text-muted text-sm truncate max-w-xs">{profile.bio}</div>
                           )}
@@ -222,23 +222,23 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                     <td className="py-3 px-4 backend-text">{getGenderText(profile.gender)}</td>
                     <td className="py-3 px-4">
                       <div>
-                        <div className="backend-text text-sm font-medium">{profile.login_count} ครั้ง</div>
+                        <div className="backend-text text-sm font-medium">{profile.loginCount} ครั้ง</div>
                         <div className="backend-text-muted text-sm">
-                          {profile.last_login ? new Date(profile.last_login).toLocaleDateString('th-TH') : 'ไม่เคยเข้าใช้'}
+                          {profile.lastLogin ? new Date(profile.lastLogin).toLocaleDateString('th-TH') : 'ไม่เคยเข้าใช้'}
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getVerificationColor(profile.verification_status)}`}>
-                        {getVerificationText(profile.verification_status)}
+                      <span className={`px-2 py-1 text-xs rounded-full ${getVerificationColor(profile.verificationStatus)}`}>
+                        {getVerificationText(profile.verificationStatus)}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${profile.is_active
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                      <span className={`px-2 py-1 text-xs rounded-full ${profile.isActive
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                         }`}>
-                        {profile.is_active ? 'ใช้งาน' : 'ปิดใช้งาน'}
+                        {profile.isActive ? 'ใช้งาน' : 'ปิดใช้งาน'}
                       </span>
                     </td>
                     <td className="py-3 px-4">
@@ -247,7 +247,7 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                         <button className="text-green-600 hover:text-green-800 text-sm">แก้ไข</button>
 
                         {/* Verification Actions */}
-                        {profile.verification_status === 'pending' && (
+                        {profile.verificationStatus === 'pending' && (
                           <>
                             <button
                               onClick={() => handleVerificationUpdate(profile.id, 'verified')}
@@ -268,14 +268,14 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
 
                         {/* Status Toggle */}
                         <button
-                          onClick={() => handleToggleStatus(profile.id, profile.is_active)}
+                          onClick={() => handleToggleStatus(profile.id, profile.isActive)}
                           disabled={state.isLoading}
-                          className={`text-sm disabled:opacity-50 ${profile.is_active
-                              ? 'text-red-600 hover:text-red-800'
-                              : 'text-green-600 hover:text-green-800'
+                          className={`text-sm disabled:opacity-50 ${profile.isActive
+                            ? 'text-red-600 hover:text-red-800'
+                            : 'text-green-600 hover:text-green-800'
                             }`}
                         >
-                          {profile.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                          {profile.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
                         </button>
 
                         <button
@@ -298,7 +298,7 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{profilesData.profiles.length} จาก {profilesData.total_count} รายการ
+          แสดง 1-{profilesData.profiles.length} จาก {profilesData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

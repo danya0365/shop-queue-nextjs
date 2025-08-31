@@ -1,7 +1,7 @@
 import type { CustomerDTO } from '@/src/application/dtos/backend/CustomersDTO';
+import type { CustomerEntity } from '@/src/domain/entities/backend/backend-customer.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
-import type { CustomerEntity } from '@/src/domain/entities/backend/backend-customer.entity';
 import { BackendCustomerError, BackendCustomerErrorType } from '@/src/domain/repositories/backend/backend-customer-repository';
 
 export interface UpdateCustomerUseCaseParams {
@@ -42,7 +42,7 @@ export class UpdateCustomerUseCase implements IUpdateCustomerUseCase {
 
       // Prepare update data
       const updateData: Partial<Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>> = {};
-      
+
       if (params.name !== undefined) updateData.name = params.name;
       if (params.phone !== undefined) updateData.phone = params.phone;
       if (params.email !== undefined) updateData.email = params.email;
@@ -64,11 +64,11 @@ export class UpdateCustomerUseCase implements IUpdateCustomerUseCase {
       const updatedCustomer = await this.customerRepository.updateCustomer(params.id, updateData);
       const customerDTO = this.mapCustomerEntityToDTO(updatedCustomer);
 
-      this.logger.info('UpdateCustomerUseCase: Successfully updated customer', { 
+      this.logger.info('UpdateCustomerUseCase: Successfully updated customer', {
         id: updatedCustomer.id,
-        name: updatedCustomer.name 
+        name: updatedCustomer.name
       });
-      
+
       return customerDTO;
     } catch (error) {
       this.logger.error('UpdateCustomerUseCase: Error updating customer', {
@@ -85,17 +85,17 @@ export class UpdateCustomerUseCase implements IUpdateCustomerUseCase {
       name: entity.name,
       phone: entity.phone || undefined,
       email: entity.email || undefined,
-      date_of_birth: entity.dateOfBirth || undefined,
+      dateOfBirth: entity.dateOfBirth || undefined,
       gender: entity.gender || undefined,
       address: entity.address || undefined,
-      total_queues: entity.totalQueues,
-      total_points: entity.totalPoints,
-      membership_tier: entity.membershipTier,
-      last_visit: entity.lastVisit || undefined,
+      totalQueues: entity.totalQueues,
+      totalPoints: entity.totalPoints,
+      membershipTier: entity.membershipTier,
+      lastVisit: entity.lastVisit || undefined,
       notes: entity.notes || undefined,
-      is_active: entity.isActive,
-      created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      isActive: entity.isActive,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt
     };
   }
 }

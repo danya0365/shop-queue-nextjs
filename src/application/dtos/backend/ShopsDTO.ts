@@ -1,5 +1,6 @@
 import { OpeningHour } from "../shop-opening-hour-dto";
 
+// TODO: update all key to camelCase
 export interface ShopDTO {
   id: string;
   name: string;
@@ -7,31 +8,31 @@ export interface ShopDTO {
   address: string;
   phone: string;
   email: string;
-  category_id: string;
-  category_name: string;
-  owner_id: string;
-  owner_name: string;
+  categoryId: string;
+  categoryName: string;
+  ownerId: string;
+  ownerName: string;
   status: 'active' | 'inactive' | 'pending';
-  opening_hours: OpeningHour[];
-  queue_count: number;
-  total_services: number;
+  openingHours: OpeningHour[];
+  queueCount: number;
+  totalServices: number;
   rating: number;
-  total_reviews: number;
-  created_at: string;
-  updated_at: string;
+  totalReviews: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ShopStatsDTO {
-  total_shops: number;
-  active_shops: number;
-  pending_approval: number;
-  new_this_month: number;
+  totalShops: number;
+  activeShops: number;
+  pendingApproval: number;
+  newThisMonth: number;
 }
 
 export interface ShopsDataDTO {
   shops: ShopDTO[];
   stats: ShopStatsDTO;
-  total_count: number;
-  current_page: number;
-  per_page: number;
+  totalCount: number;
+  currentPage: number;
+  perPage: number;
 }

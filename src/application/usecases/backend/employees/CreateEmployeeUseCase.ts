@@ -17,7 +17,7 @@ export class CreateEmployeeUseCase implements IUseCase<CreateEmployeeParams, Emp
       this.logger.info('CreateEmployeeUseCase: Creating new employee', { input });
 
       // Validate required fields
-      if (!input.employee_code || !input.name || !input.position || !input.hire_date) {
+      if (!input.employeeCode || !input.name || !input.position || !input.hireDate) {
         throw new BackendEmployeeError(
           BackendEmployeeErrorType.VALIDATION_ERROR,
           'Missing required employee fields',
@@ -28,15 +28,15 @@ export class CreateEmployeeUseCase implements IUseCase<CreateEmployeeParams, Emp
 
       // map params to entity
       const employeeEntity: Omit<CreateEmployeeEntity, 'id' | 'createdAt' | 'updatedAt'> = {
-        employeeCode: input.employee_code,
+        employeeCode: input.employeeCode,
         name: input.name,
         email: input.email,
         phone: input.phone,
-        departmentId: input.department_id,
+        departmentId: input.departmentId,
         position: input.position,
-        shopId: input.shop_id,
+        shopId: input.shopId,
         status: input.status,
-        hireDate: input.hire_date,
+        hireDate: input.hireDate,
         permissions: input.permissions || [],
         salary: input.salary,
         notes: input.notes
@@ -48,21 +48,21 @@ export class CreateEmployeeUseCase implements IUseCase<CreateEmployeeParams, Emp
       // map entity to dto
       const employeeDTO: EmployeeDTO = {
         id: createdEmployee.id,
-        employee_code: createdEmployee.employeeCode,
+        employeeCode: createdEmployee.employeeCode,
         name: createdEmployee.name,
         email: createdEmployee.email || undefined,
         phone: createdEmployee.phone || undefined,
-        department_id: createdEmployee.departmentId || undefined,
+        departmentId: createdEmployee.departmentId || undefined,
         position: createdEmployee.position,
-        shop_id: createdEmployee.shopId || undefined,
+        shopId: createdEmployee.shopId || undefined,
         status: createdEmployee.status as EmployeeStatus,
-        hire_date: createdEmployee.hireDate,
-        last_login: createdEmployee.lastLogin || undefined,
+        hireDate: createdEmployee.hireDate,
+        lastLogin: createdEmployee.lastLogin || undefined,
         permissions: createdEmployee.permissions || [],
         salary: createdEmployee.salary || undefined,
         notes: createdEmployee.notes || undefined,
-        created_at: createdEmployee.createdAt,
-        updated_at: createdEmployee.updatedAt
+        createdAt: createdEmployee.createdAt,
+        updatedAt: createdEmployee.updatedAt
       };
 
       this.logger.info('CreateEmployeeUseCase: Successfully created employee', { id: employeeDTO.id });

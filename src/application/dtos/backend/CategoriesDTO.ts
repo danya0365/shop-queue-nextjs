@@ -4,27 +4,27 @@ export interface CategoryDTO {
   description: string;
   icon: string;
   color: string;
-  shops_count: number;
-  services_count: number;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
+  shopsCount: number;
+  servicesCount: number;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CategoryStatsDTO {
-  total_categories: number;
-  active_categories: number;
-  total_shops: number;
-  total_services: number;
-  most_popular_category: string;
-  least_popular_category: string;
+  totalCategories: number;
+  activeCategories: number;
+  totalShops: number;
+  totalServices: number;
+  mostPopularCategory: string;
+  leastPopularCategory: string;
 }
 
 export interface CategoriesDataDTO {
   categories: CategoryDTO[];
   stats: CategoryStatsDTO;
-  total_count: number;
-  current_page: number;
-  per_page: number;
+  totalCount: number;
+  currentPage: number;
+  perPage: number;
 }

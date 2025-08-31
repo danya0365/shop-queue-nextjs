@@ -1,8 +1,8 @@
 import type { CustomerDTO, CustomersDataDTO, CustomerStatsDTO } from '@/src/application/dtos/backend/CustomersDTO';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
 import type { CustomerEntity, CustomerStatsEntity } from '@/src/domain/entities/backend/backend-customer.entity';
+import type { Logger } from '@/src/domain/interfaces/logger';
 import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
 
 export interface GetCustomersUseCaseParams {
   page?: number;
@@ -25,7 +25,7 @@ export class GetCustomersUseCase implements IGetCustomersUseCase {
   async execute(params: GetCustomersUseCaseParams): Promise<CustomersDataDTO> {
     try {
       this.logger.info('GetCustomersUseCase: Getting customers data');
-      
+
       const paginationParams: PaginationParams = {
         page: params.page || 1,
         limit: params.limit || 10
@@ -41,15 +41,15 @@ export class GetCustomersUseCase implements IGetCustomersUseCase {
       const customersData: CustomersDataDTO = {
         customers: customerDTOs,
         stats: statsDTOs,
-        total_count: paginatedCustomers.pagination.totalItems,
-        current_page: paginatedCustomers.pagination.currentPage,
-        per_page: paginatedCustomers.pagination.itemsPerPage
+        totalCount: paginatedCustomers.pagination.totalItems,
+        currentPage: paginatedCustomers.pagination.currentPage,
+        perPage: paginatedCustomers.pagination.itemsPerPage
       };
 
       this.logger.info('GetCustomersUseCase: Successfully retrieved customers data', {
         totalCount: paginatedCustomers.pagination.totalItems
       });
-      
+
       return customersData;
     } catch (error) {
       this.logger.error('GetCustomersUseCase: Error getting customers data', { error });
@@ -63,29 +63,29 @@ export class GetCustomersUseCase implements IGetCustomersUseCase {
       name: entity.name,
       phone: entity.phone || undefined,
       email: entity.email || undefined,
-      date_of_birth: entity.dateOfBirth || undefined,
+      dateOfBirth: entity.dateOfBirth || undefined,
       gender: entity.gender || undefined,
       address: entity.address || undefined,
-      total_queues: entity.totalQueues,
-      total_points: entity.totalPoints,
-      membership_tier: entity.membershipTier,
-      last_visit: entity.lastVisit || undefined,
+      totalQueues: entity.totalQueues,
+      totalPoints: entity.totalPoints,
+      membershipTier: entity.membershipTier,
+      lastVisit: entity.lastVisit || undefined,
       notes: entity.notes || undefined,
-      is_active: entity.isActive,
-      created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      isActive: entity.isActive,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt
     };
   }
 
   private mapCustomerStatsEntityToDTO(entity: CustomerStatsEntity): CustomerStatsDTO {
     return {
-      total_customers: entity.totalCustomers,
-      new_customers_this_month: entity.newCustomersThisMonth,
-      active_customers_today: entity.activeCustomersToday,
-      gold_members: entity.goldMembers,
-      silver_members: entity.silverMembers,
-      bronze_members: entity.bronzeMembers,
-      regular_members: entity.regularMembers
+      totalCustomers: entity.totalCustomers,
+      newCustomersThisMonth: entity.newCustomersThisMonth,
+      activeCustomersToday: entity.activeCustomersToday,
+      goldMembers: entity.goldMembers,
+      silverMembers: entity.silverMembers,
+      bronzeMembers: entity.bronzeMembers,
+      regularMembers: entity.regularMembers
     };
   }
 }

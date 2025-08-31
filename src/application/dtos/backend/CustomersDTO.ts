@@ -3,33 +3,33 @@ export interface CustomerDTO {
   name: string;
   phone?: string;
   email?: string;
-  date_of_birth?: string;
+  dateOfBirth?: string;
   gender?: 'male' | 'female' | 'other';
   address?: string;
-  total_queues: number; // joined from queue history
-  total_points: number; // joined from customer points
-  membership_tier: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum';  // joined from customer points
-  last_visit?: string;
+  totalQueues: number; // joined from queue history
+  totalPoints: number; // joined from customer points
+  membershipTier: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum';  // joined from customer points
+  lastVisit?: string;
   notes?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CustomerStatsDTO {
-  total_customers: number;
-  new_customers_this_month: number;
-  active_customers_today: number;
-  gold_members: number;
-  silver_members: number;
-  bronze_members: number;
-  regular_members: number;
+  totalCustomers: number;
+  newCustomersThisMonth: number;
+  activeCustomersToday: number;
+  goldMembers: number;
+  silverMembers: number;
+  bronzeMembers: number;
+  regularMembers: number;
 }
 
 export interface CustomersDataDTO {
   customers: CustomerDTO[];
   stats: CustomerStatsDTO;
-  total_count: number;
-  current_page: number;
-  per_page: number;
+  totalCount: number;
+  currentPage: number;
+  perPage: number;
 }

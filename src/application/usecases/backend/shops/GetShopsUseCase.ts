@@ -23,12 +23,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
           phone: '02-123-4567',
           email: 'contact@stylehair.com',
-          category_id: '1',
-          category_name: 'ตัดผม',
-          owner_id: '1',
-          owner_name: 'นาย สมชาย ใจดี',
+          categoryId: '1',
+          categoryName: 'ตัดผม',
+          ownerId: '1',
+          ownerName: 'นาย สมชาย ใจดี',
           status: 'active',
-          opening_hours: [
+          openingHours: [
             { id: '1', shopId: '1', dayOfWeek: 'monday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '2', shopId: '1', dayOfWeek: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '3', shopId: '1', dayOfWeek: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
@@ -37,12 +37,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
             { id: '6', shopId: '1', dayOfWeek: 'saturday', isOpen: true, openTime: '10:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '7', shopId: '1', dayOfWeek: 'sunday', isOpen: false, openTime: null, closeTime: null, breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() }
           ],
-          queue_count: 8,
-          total_services: 15,
+          queueCount: 8,
+          totalServices: 15,
           rating: 4.5,
-          total_reviews: 127,
-          created_at: '2023-01-15T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z'
+          totalReviews: 127,
+          createdAt: '2023-01-15T00:00:00Z',
+          updatedAt: '2024-01-15T00:00:00Z'
         },
         {
           id: '2',
@@ -51,12 +51,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '456 ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
           phone: '02-234-5678',
           email: 'info@beautyclinic.com',
-          category_id: '2',
-          category_name: 'ความงาม',
-          owner_id: '2',
-          owner_name: 'นางสาว มาลี สวยงาม',
+          categoryId: '2',
+          categoryName: 'ความงาม',
+          ownerId: '2',
+          ownerName: 'นางสาว มาลี สวยงาม',
           status: 'active',
-          opening_hours: [
+          openingHours: [
             { id: '1', shopId: '2', dayOfWeek: 'monday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '2', shopId: '2', dayOfWeek: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '3', shopId: '2', dayOfWeek: 'wednesday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
@@ -65,12 +65,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
             { id: '6', shopId: '2', dayOfWeek: 'saturday', isOpen: true, openTime: '10:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', createdAt: new Date(), updatedAt: new Date() },
             { id: '7', shopId: '2', dayOfWeek: 'sunday', isOpen: false, openTime: null, closeTime: null, breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() }
           ],
-          queue_count: 8,
-          total_services: 15,
+          queueCount: 8,
+          totalServices: 15,
           rating: 4.5,
-          total_reviews: 127,
-          created_at: '2023-01-15T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z'
+          totalReviews: 127,
+          createdAt: '2023-01-15T00:00:00Z',
+          updatedAt: '2024-01-15T00:00:00Z'
         },
         {
           id: '2',
@@ -79,12 +79,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '456 ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
           phone: '02-234-5678',
           email: 'info@beautyclinic.com',
-          category_id: '2',
-          category_name: 'ความงาม',
-          owner_id: '2',
-          owner_name: 'นางสาว มาลี สวยงาม',
+          categoryId: '2',
+          categoryName: 'ความงาม',
+          ownerId: '2',
+          ownerName: 'นางสาว มาลี สวยงาม',
           status: 'active',
-          opening_hours: [
+          openingHours: [
             { id: '1', shopId: '2', dayOfWeek: 'monday', isOpen: true, openTime: '10:00', closeTime: '19:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '2', shopId: '2', dayOfWeek: 'tuesday', isOpen: true, openTime: '10:00', closeTime: '19:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '3', shopId: '2', dayOfWeek: 'wednesday', isOpen: true, openTime: '10:00', closeTime: '19:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
@@ -93,12 +93,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
             { id: '6', shopId: '2', dayOfWeek: 'saturday', isOpen: true, openTime: '10:00', closeTime: '18:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '7', shopId: '2', dayOfWeek: 'sunday', isOpen: true, openTime: '10:00', closeTime: '18:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() }
           ],
-          queue_count: 12,
-          total_services: 25,
+          queueCount: 12,
+          totalServices: 25,
           rating: 4.8,
-          total_reviews: 89,
-          created_at: '2023-02-20T00:00:00Z',
-          updated_at: '2024-01-14T00:00:00Z'
+          totalReviews: 89,
+          createdAt: '2023-02-20T00:00:00Z',
+          updatedAt: '2024-01-14T00:00:00Z'
         },
         {
           id: '3',
@@ -107,12 +107,12 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '789 ถนนรัชดาภิเษก แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพฯ 10310',
           phone: '02-345-6789',
           email: 'repair@mobilefix.com',
-          category_id: '3',
-          category_name: 'ซ่อมมือถือ',
-          owner_id: '3',
-          owner_name: 'นาย วิชัย เก่งช่าง',
+          categoryId: '3',
+          categoryName: 'ซ่อมมือถือ',
+          ownerId: '3',
+          ownerName: 'นาย วิชัย เก่งช่าง',
           status: 'pending',
-          opening_hours: [
+          openingHours: [
             { id: '1', shopId: '3', dayOfWeek: 'monday', isOpen: true, openTime: '08:00', closeTime: '20:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '2', shopId: '3', dayOfWeek: 'tuesday', isOpen: true, openTime: '08:00', closeTime: '20:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '3', shopId: '3', dayOfWeek: 'wednesday', isOpen: true, openTime: '08:00', closeTime: '20:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
@@ -121,28 +121,28 @@ export class GetShopsUseCase implements IGetShopsUseCase {
             { id: '6', shopId: '3', dayOfWeek: 'saturday', isOpen: true, openTime: '09:00', closeTime: '18:00', breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() },
             { id: '7', shopId: '3', dayOfWeek: 'sunday', isOpen: false, openTime: null, closeTime: null, breakStart: null, breakEnd: null, createdAt: new Date(), updatedAt: new Date() }
           ],
-          queue_count: 5,
-          total_services: 12,
+          queueCount: 5,
+          totalServices: 12,
           rating: 4.2,
-          total_reviews: 45,
-          created_at: '2023-12-10T00:00:00Z',
-          updated_at: '2024-01-10T00:00:00Z'
+          totalReviews: 45,
+          createdAt: '2023-12-10T00:00:00Z',
+          updatedAt: '2024-01-10T00:00:00Z'
         }
       ];
 
       const mockStats: ShopStatsDTO = {
-        total_shops: 47,
-        active_shops: 42,
-        pending_approval: 3,
-        new_this_month: 5
+        totalShops: 47,
+        activeShops: 42,
+        pendingApproval: 3,
+        newThisMonth: 5
       };
 
       const shopsData: ShopsDataDTO = {
         shops: mockShops,
         stats: mockStats,
-        total_count: mockShops.length,
-        current_page: 1,
-        per_page: 10
+        totalCount: mockShops.length,
+        currentPage: 1,
+        perPage: 10
       };
 
       this.logger.info('GetShopsUseCase: Successfully retrieved shops data');

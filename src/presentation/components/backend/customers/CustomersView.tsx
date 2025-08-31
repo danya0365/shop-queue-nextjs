@@ -74,19 +74,19 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ลูกค้าทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{customersData.stats.total_customers}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{customersData.stats.totalCustomers}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">สมาชิกใหม่เดือนนี้</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{customersData.stats.new_customers_this_month}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{customersData.stats.newCustomersThisMonth}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ลูกค้าที่ใช้บริการวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{customersData.stats.active_customers_today}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{customersData.stats.activeCustomersToday}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">สมาชิกระดับทอง</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{customersData.stats.gold_members}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-2">{customersData.stats.goldMembers}</p>
         </div>
       </div>
 
@@ -175,15 +175,15 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
                         <div className="backend-text-muted text-sm">{customer.email}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text text-center">{customer.total_queues}</td>
-                    <td className="py-3 px-4 backend-text text-center font-medium">{customer.total_points}</td>
+                    <td className="py-3 px-4 backend-text text-center">{customer.totalQueues}</td>
+                    <td className="py-3 px-4 backend-text text-center font-medium">{customer.totalPoints}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getTierColor(customer.membership_tier)}`}>
-                        {getTierText(customer.membership_tier)}
+                      <span className={`px-2 py-1 text-xs rounded-full ${getTierColor(customer.membershipTier)}`}>
+                        {getTierText(customer.membershipTier)}
                       </span>
                     </td>
                     <td className="py-3 px-4 backend-text-muted">
-                      {customer.last_visit ? new Date(customer.last_visit).toLocaleDateString('th-TH') : 'ไม่เคยใช้บริการ'}
+                      {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString('th-TH') : 'ไม่เคยใช้บริการ'}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
@@ -216,7 +216,7 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{customersData.customers.length} จาก {customersData.total_count} รายการ
+          แสดง 1-{customersData.customers.length} จาก {customersData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

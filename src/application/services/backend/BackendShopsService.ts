@@ -37,9 +37,9 @@ export class BackendShopsService implements IBackendShopsService {
       const result: ShopsDataDTO = {
         shops: paginatedData.shops,
         stats: stats.stats,
-        total_count: paginatedData.total_count,
-        current_page: paginatedData.current_page,
-        per_page: paginatedData.per_page
+        totalCount: paginatedData.totalCount,
+        currentPage: paginatedData.currentPage,
+        perPage: paginatedData.perPage
       };
 
       this.logger.info('BackendShopsService: Successfully retrieved shops data');
@@ -71,28 +71,28 @@ export class BackendShopsService implements IBackendShopsService {
           address: shop.address || '',
           phone: shop.phone || '',
           email: shop.email || '',
-          category_id: '',  // Default values for required fields
-          category_name: '',
-          owner_id: shop.ownerId,
-          owner_name: shop.ownerName || '',
+          categoryId: '',
+          categoryName: '',
+          ownerId: shop.ownerId,
+          ownerName: shop.ownerName || '',
           status: shop.status as 'active' | 'inactive' | 'pending',
-          opening_hours: [],
-          queue_count: 0,
-          total_services: 0,
+          openingHours: [],
+          queueCount: 0,
+          totalServices: 0,
           rating: 0,
-          total_reviews: 0,
-          created_at: shop.createdAt,
-          updated_at: shop.updatedAt || ''
+          totalReviews: 0,
+          createdAt: shop.createdAt,
+          updatedAt: shop.updatedAt || ''
         })),
         stats: {
-          total_shops: 0,
-          active_shops: 0,
-          pending_approval: 0,
-          new_this_month: 0
+          totalShops: 0,
+          activeShops: 0,
+          pendingApproval: 0,
+          newThisMonth: 0
         }, // Empty stats
-        total_count: result.pagination.totalItems,
-        current_page: result.pagination.currentPage,
-        per_page: result.pagination.itemsPerPage
+        totalCount: result.pagination.totalItems,
+        currentPage: result.pagination.currentPage,
+        perPage: result.pagination.itemsPerPage
       };
     } catch (error) {
       this.logger.error('BackendShopsService: Error getting paginated shops data', error);
@@ -114,14 +114,14 @@ export class BackendShopsService implements IBackendShopsService {
       return {
         shops: [], // Shops not included in this method
         stats: {
-          total_shops: stats.totalShops,
-          active_shops: stats.activeShops,
-          pending_approval: stats.pendingApproval,
-          new_this_month: stats.newThisMonth
+          totalShops: stats.totalShops,
+          activeShops: stats.activeShops,
+          pendingApproval: stats.pendingApproval,
+          newThisMonth: stats.newThisMonth
         },
-        total_count: 0,
-        current_page: 0,
-        per_page: 0
+        totalCount: 0,
+        currentPage: 0,
+        perPage: 0
       };
     } catch (error) {
       this.logger.error('BackendShopsService: Error getting shop statistics', error);

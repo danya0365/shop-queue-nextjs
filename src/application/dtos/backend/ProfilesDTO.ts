@@ -1,12 +1,12 @@
 export interface ProfileDTO {
   id: string;
-  auth_id: string;
+  authId: string;
   username: string;
-  full_name: string;
+  fullName: string;
   phone: string;
   email: string;
-  avatar_url?: string;
-  date_of_birth?: string;
+  avatarUrl?: string;
+  dateOfBirth?: string;
   gender?: 'male' | 'female' | 'other';
   address?: string;
   bio?: string;
@@ -15,42 +15,42 @@ export interface ProfileDTO {
     notifications: boolean;
     theme: 'light' | 'dark' | 'auto';
   };
-  social_links?: {
+  socialLinks?: {
     facebook?: string;
     line?: string;
     instagram?: string;
   };
-  verification_status: 'pending' | 'verified' | 'rejected';
-  privacy_settings: {
-    show_phone: boolean;
-    show_email: boolean;
-    show_address: boolean;
+  verificationStatus: 'pending' | 'verified' | 'rejected';
+  privacySettings: {
+    showPhone: boolean;
+    showEmail: boolean;
+    showAddress: boolean;
   };
-  last_login?: string;
-  login_count: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  lastLogin?: string;
+  loginCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProfileStatsDTO {
-  total_profiles: number;
-  verified_profiles: number;
-  pending_verification: number;
-  active_profiles_today: number;
-  new_profiles_this_month: number;
-  profiles_by_gender: {
+  totalProfiles: number;
+  verifiedProfiles: number;
+  pendingVerification: number;
+  activeProfilesToday: number;
+  newProfilesThisMonth: number;
+  profilesByGender: {
     male: number;
     female: number;
     other: number;
-    not_specified: number;
+    notSpecified: number;
   };
 }
 
 export interface ProfilesDataDTO {
   profiles: ProfileDTO[];
   stats: ProfileStatsDTO;
-  total_count: number;
-  current_page: number;
-  per_page: number;
+  totalCount: number;
+  currentPage: number;
+  perPage: number;
 }

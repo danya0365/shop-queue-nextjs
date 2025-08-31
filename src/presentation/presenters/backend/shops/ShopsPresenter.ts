@@ -35,14 +35,14 @@ export class ShopsPresenter {
         shopsData: {
           shops: [],
           stats: {
-            total_shops: 0,
-            active_shops: 0,
-            pending_approval: 0,
-            new_this_month: 0
+            totalShops: 0,
+            activeShops: 0,
+            pendingApproval: 0,
+            newThisMonth: 0
           },
-          total_count: 0,
-          current_page: page,
-          per_page: limit
+          totalCount: 0,
+          currentPage: page,
+          perPage: limit
         },
         isLoading: false,
         error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -73,14 +73,14 @@ export class ShopsPresenter {
         shopsData: {
           shops: [],
           stats: {
-            total_shops: 0,
-            active_shops: 0,
-            pending_approval: 0,
-            new_this_month: 0
+            totalShops: 0,
+            activeShops: 0,
+            pendingApproval: 0,
+            newThisMonth: 0
           },
-          total_count: 0,
-          current_page: page,
-          per_page: limit
+          totalCount: 0,
+          currentPage: page,
+          perPage: limit
         },
         isLoading: false,
         error: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -109,14 +109,14 @@ export class ShopsPresenter {
         shopsData: {
           shops: [],
           stats: {
-            total_shops: 0,
-            active_shops: 0,
-            pending_approval: 0,
-            new_this_month: 0
+            totalShops: 0,
+            activeShops: 0,
+            pendingApproval: 0,
+            newThisMonth: 0
           },
-          total_count: 0,
-          current_page: 1,
-          per_page: 10
+          totalCount: 0,
+          currentPage: 1,
+          perPage: 10
         },
         isLoading: false,
         error: error instanceof Error ? error.message : 'An unknown error occurred'

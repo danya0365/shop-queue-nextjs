@@ -59,19 +59,19 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{categoriesData.stats.total_categories}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{categoriesData.stats.totalCategories}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ที่ใช้งาน</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{categoriesData.stats.active_categories}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{categoriesData.stats.activeCategories}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{categoriesData.stats.total_shops}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{categoriesData.stats.totalShops}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">บริการทั้งหมด</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{categoriesData.stats.total_services}</p>
+          <p className="text-2xl font-bold text-purple-600 mt-2">{categoriesData.stats.totalServices}</p>
         </div>
       </div>
 
@@ -130,25 +130,25 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
                   <p className="backend-text-muted text-sm">{category.description}</p>
                 </div>
               </div>
-              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(category.is_active)}`}>
-                {getStatusText(category.is_active)}
+              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(category.isActive)}`}>
+                {getStatusText(category.isActive)}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold backend-text">{category.shops_count}</p>
+                <p className="text-2xl font-bold backend-text">{category.shopsCount}</p>
                 <p className="backend-text-muted text-sm">ร้านค้า</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold backend-text">{category.services_count}</p>
+                <p className="text-2xl font-bold backend-text">{category.servicesCount}</p>
                 <p className="backend-text-muted text-sm">บริการ</p>
               </div>
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t backend-sidebar-border">
               <p className="backend-text-muted text-sm">
-                สร้างเมื่อ {new Date(category.created_at).toLocaleDateString('th-TH')}
+                สร้างเมื่อ {new Date(category.createdAt).toLocaleDateString('th-TH')}
               </p>
               <div className="flex space-x-2">
                 <button className="text-blue-600 hover:text-blue-800 text-sm">แก้ไข</button>
@@ -157,7 +157,7 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
                   disabled={state.isLoading}
                   className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50"
                 >
-                  {category.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                  {category.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
                 </button>
                 <button
                   onClick={() => handleDelete(category.id)}
@@ -207,15 +207,15 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
                       </div>
                     </td>
                     <td className="py-3 px-4 backend-text-muted">{category.description}</td>
-                    <td className="py-3 px-4 backend-text text-center">{category.shops_count}</td>
-                    <td className="py-3 px-4 backend-text text-center">{category.services_count}</td>
+                    <td className="py-3 px-4 backend-text text-center">{category.shopsCount}</td>
+                    <td className="py-3 px-4 backend-text text-center">{category.servicesCount}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(category.is_active)}`}>
-                        {getStatusText(category.is_active)}
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(category.isActive)}`}>
+                        {getStatusText(category.isActive)}
                       </span>
                     </td>
                     <td className="py-3 px-4 backend-text-muted">
-                      {new Date(category.created_at).toLocaleDateString('th-TH')}
+                      {new Date(category.createdAt).toLocaleDateString('th-TH')}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
@@ -235,7 +235,7 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{categoriesData.categories.length} จาก {categoriesData.total_count} รายการ
+          แสดง 1-{categoriesData.categories.length} จาก {categoriesData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

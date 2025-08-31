@@ -69,19 +69,19 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{shopsData.stats.total_shops}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{shopsData.stats.totalShops}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">เปิดให้บริการ</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{shopsData.stats.active_shops}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{shopsData.stats.activeShops}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">รออนุมัติ</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{shopsData.stats.pending_approval}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-2">{shopsData.stats.pendingApproval}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ร้านค้าใหม่เดือนนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{shopsData.stats.new_this_month}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{shopsData.stats.newThisMonth}</p>
         </div>
       </div>
 
@@ -160,15 +160,15 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
                         <div className="backend-text-muted text-sm">{shop.description}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text">{shop.category_name}</td>
-                    <td className="py-3 px-4 backend-text-muted">{shop.owner_name}</td>
+                    <td className="py-3 px-4 backend-text">{shop.categoryName}</td>
+                    <td className="py-3 px-4 backend-text-muted">{shop.ownerName}</td>
                     <td className="py-3 px-4 backend-text-muted">{shop.phone}</td>
-                    <td className="py-3 px-4 backend-text text-center">{shop.queue_count}</td>
+                    <td className="py-3 px-4 backend-text text-center">{shop.queueCount}</td>
                     <td className="py-3 px-4 backend-text text-center">
                       <div className="flex items-center">
                         <span className="text-yellow-500">★</span>
                         <span className="ml-1">{shop.rating}</span>
-                        <span className="backend-text-muted text-sm ml-1">({shop.total_reviews})</span>
+                        <span className="backend-text-muted text-sm ml-1">({shop.totalReviews})</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
@@ -209,7 +209,7 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{shopsData.shops.length} จาก {shopsData.total_count} รายการ
+          แสดง 1-{shopsData.shops.length} จาก {shopsData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

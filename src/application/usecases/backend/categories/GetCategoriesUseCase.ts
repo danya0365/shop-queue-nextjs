@@ -22,12 +22,12 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการตัดแต่งผม',
           icon: '✂️',
           color: '#3B82F6',
-          shops_count: 45,
-          services_count: 120,
-          is_active: true,
-          sort_order: 1,
-          created_at: '2023-01-15T00:00:00Z',
-          updated_at: '2024-01-15T00:00:00Z'
+          shopsCount: 45,
+          servicesCount: 120,
+          isActive: true,
+          sortOrder: 1,
+          createdAt: '2023-01-15T00:00:00Z',
+          updatedAt: '2024-01-15T00:00:00Z'
         },
         {
           id: '2',
@@ -35,12 +35,12 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการดูแลความงาม',
           icon: '💄',
           color: '#EC4899',
-          shops_count: 32,
-          services_count: 89,
-          is_active: true,
-          sort_order: 2,
-          created_at: '2023-02-20T00:00:00Z',
-          updated_at: '2024-01-14T00:00:00Z'
+          shopsCount: 32,
+          servicesCount: 89,
+          isActive: true,
+          sortOrder: 2,
+          createdAt: '2023-02-20T00:00:00Z',
+          updatedAt: '2024-01-14T00:00:00Z'
         },
         {
           id: '3',
@@ -48,12 +48,12 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการซ่อมแซมมือถือ',
           icon: '📱',
           color: '#10B981',
-          shops_count: 28,
-          services_count: 67,
-          is_active: true,
-          sort_order: 3,
-          created_at: '2023-03-10T00:00:00Z',
-          updated_at: '2024-01-13T00:00:00Z'
+          shopsCount: 28,
+          servicesCount: 67,
+          isActive: true,
+          sortOrder: 3,
+          createdAt: '2023-03-10T00:00:00Z',
+          updatedAt: '2024-01-13T00:00:00Z'
         },
         {
           id: '4',
@@ -61,12 +61,12 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการสั่งอาหาร',
           icon: '🍽️',
           color: '#F59E0B',
-          shops_count: 15,
-          services_count: 45,
-          is_active: false,
-          sort_order: 4,
-          created_at: '2023-04-05T00:00:00Z',
-          updated_at: '2024-01-12T00:00:00Z'
+          shopsCount: 15,
+          servicesCount: 45,
+          isActive: false,
+          sortOrder: 4,
+          createdAt: '2023-04-05T00:00:00Z',
+          updatedAt: '2024-01-12T00:00:00Z'
         },
         {
           id: '5',
@@ -74,12 +74,12 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการนวดและสปา',
           icon: '🧘‍♀️',
           color: '#8B5CF6',
-          shops_count: 22,
-          services_count: 78,
-          is_active: true,
-          sort_order: 5,
-          created_at: '2023-05-12T00:00:00Z',
-          updated_at: '2024-01-11T00:00:00Z'
+          shopsCount: 22,
+          servicesCount: 78,
+          isActive: true,
+          sortOrder: 5,
+          createdAt: '2023-05-12T00:00:00Z',
+          updatedAt: '2024-01-11T00:00:00Z'
         },
         {
           id: '6',
@@ -87,30 +87,30 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
           description: 'บริการซักรีดเสื้อผ้า',
           icon: '👕',
           color: '#06B6D4',
-          shops_count: 18,
-          services_count: 34,
-          is_active: true,
-          sort_order: 6,
-          created_at: '2023-06-18T00:00:00Z',
-          updated_at: '2024-01-10T00:00:00Z'
+          shopsCount: 18,
+          servicesCount: 34,
+          isActive: true,
+          sortOrder: 6,
+          createdAt: '2023-06-18T00:00:00Z',
+          updatedAt: '2024-01-10T00:00:00Z'
         }
       ];
 
       const mockStats: CategoryStatsDTO = {
-        total_categories: 24,
-        active_categories: 18,
-        total_shops: 160,
-        total_services: 433,
-        most_popular_category: 'ตัดผม',
-        least_popular_category: 'ร้านอาหาร'
+        totalCategories: 24,
+        activeCategories: 18,
+        totalShops: 160,
+        totalServices: 433,
+        mostPopularCategory: 'ตัดผม',
+        leastPopularCategory: 'ร้านอาหาร'
       };
 
       const categoriesData: CategoriesDataDTO = {
         categories: mockCategories,
         stats: mockStats,
-        total_count: mockCategories.length,
-        current_page: 1,
-        per_page: 10
+        totalCount: mockCategories.length,
+        currentPage: 1,
+        perPage: 10
       };
 
       this.logger.info('GetCategoriesUseCase: Successfully retrieved categories data');

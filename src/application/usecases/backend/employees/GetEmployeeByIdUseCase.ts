@@ -27,23 +27,23 @@ export class GetEmployeeByIdUseCase implements IUseCase<string, EmployeeDTO> {
       // map entity to dto
       const employeeDTO: EmployeeDTO = {
         id: employee.id,
-        employee_code: employee.employeeCode,
+        employeeCode: employee.employeeCode,
         name: employee.name,
         email: employee.email || undefined,
         phone: employee.phone || undefined,
-        department_id: employee.departmentId || undefined,
-        department_name: employee.departmentName || undefined,
+        departmentId: employee.departmentId || undefined,
+        departmentName: employee.departmentName || undefined,
         position: employee.position,
-        shop_id: employee.shopId || undefined,
-        shop_name: employee.shopName || undefined,
+        shopId: employee.shopId || undefined,
+        shopName: employee.shopName || undefined,
         status: employee.status as EmployeeStatus,
-        hire_date: employee.hireDate,
-        last_login: employee.lastLogin || undefined,
+        hireDate: employee.hireDate,
+        lastLogin: employee.lastLogin || undefined,
         permissions: employee.permissions || [],
         salary: employee.salary || undefined,
         notes: employee.notes || undefined,
-        created_at: employee.createdAt,
-        updated_at: employee.updatedAt
+        createdAt: employee.createdAt,
+        updatedAt: employee.updatedAt
       };
 
       this.logger.info(`GetEmployeeByIdUseCase: Successfully retrieved employee with id ${id}`);

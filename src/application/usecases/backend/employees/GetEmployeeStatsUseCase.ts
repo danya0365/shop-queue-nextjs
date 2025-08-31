@@ -18,13 +18,13 @@ export class GetEmployeeStatsUseCase implements IUseCase<void, EmployeeStatsDTO>
 
       // map entity to dto
       const statsDTO: EmployeeStatsDTO = {
-        total_employees: stats.totalEmployees,
-        active_employees: stats.activeEmployees,
-        logged_in_today: stats.loggedInToday,
-        new_employees_this_month: stats.newEmployeesThisMonth,
-        by_department: {
+        totalEmployees: stats.totalEmployees,
+        activeEmployees: stats.activeEmployees,
+        loggedInToday: stats.loggedInToday,
+        newEmployeesThisMonth: stats.newEmployeesThisMonth,
+        byDepartment: {
           management: stats.byDepartment.management,
-          customer_service: stats.byDepartment.customerService,
+          customerService: stats.byDepartment.customerService,
           technical: stats.byDepartment.technical,
           sales: stats.byDepartment.sales,
           other: stats.byDepartment.other

@@ -40,15 +40,15 @@ export class UpdateEmployeeUseCase implements IUseCase<UpdateEmployeeParams, Emp
       // Map DTO to domain entity
       const employeeEntity: Partial<Omit<UpdateEmployeeEntity, 'id' | 'createdAt' | 'updatedAt'>> = {};
 
-      if (input.employee_code !== undefined) employeeEntity.employeeCode = input.employee_code;
+      if (input.employeeCode !== undefined) employeeEntity.employeeCode = input.employeeCode;
       if (input.name !== undefined) employeeEntity.name = input.name;
       if (input.email !== undefined) employeeEntity.email = input.email;
       if (input.phone !== undefined) employeeEntity.phone = input.phone;
-      if (input.department_id !== undefined) employeeEntity.departmentId = input.department_id;
+      if (input.departmentId !== undefined) employeeEntity.departmentId = input.departmentId;
       if (input.position !== undefined) employeeEntity.position = input.position;
-      if (input.shop_id !== undefined) employeeEntity.shopId = input.shop_id;
+      if (input.shopId !== undefined) employeeEntity.shopId = input.shopId;
       if (input.status !== undefined) employeeEntity.status = input.status;
-      if (input.hire_date !== undefined) employeeEntity.hireDate = input.hire_date;
+      if (input.hireDate !== undefined) employeeEntity.hireDate = input.hireDate;
       if (input.permissions !== undefined) employeeEntity.permissions = input.permissions;
       if (input.salary !== undefined) employeeEntity.salary = input.salary;
       if (input.notes !== undefined) employeeEntity.notes = input.notes;
@@ -59,23 +59,23 @@ export class UpdateEmployeeUseCase implements IUseCase<UpdateEmployeeParams, Emp
       // Map domain entity back to DTO
       const employeeDTO: EmployeeDTO = {
         id: updatedEmployee.id,
-        employee_code: updatedEmployee.employeeCode,
+        employeeCode: updatedEmployee.employeeCode,
         name: updatedEmployee.name,
         email: updatedEmployee.email || undefined,
         phone: updatedEmployee.phone || undefined,
-        department_id: updatedEmployee.departmentId || undefined,
-        department_name: updatedEmployee.departmentName || undefined,
+        departmentId: updatedEmployee.departmentId || undefined,
+        departmentName: updatedEmployee.departmentName || undefined,
         position: updatedEmployee.position,
-        shop_id: updatedEmployee.shopId || undefined,
-        shop_name: updatedEmployee.shopName || undefined,
+        shopId: updatedEmployee.shopId || undefined,
+        shopName: updatedEmployee.shopName || undefined,
         status: updatedEmployee.status as EmployeeStatus,
-        hire_date: updatedEmployee.hireDate,
-        last_login: updatedEmployee.lastLogin || undefined,
+        hireDate: updatedEmployee.hireDate,
+        lastLogin: updatedEmployee.lastLogin || undefined,
         permissions: updatedEmployee.permissions || [],
         salary: updatedEmployee.salary || undefined,
         notes: updatedEmployee.notes || undefined,
-        created_at: updatedEmployee.createdAt,
-        updated_at: updatedEmployee.updatedAt
+        createdAt: updatedEmployee.createdAt,
+        updatedAt: updatedEmployee.updatedAt
       };
 
       this.logger.info(`UpdateEmployeeUseCase: Successfully updated employee with id ${input.id}`);

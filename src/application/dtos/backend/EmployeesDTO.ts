@@ -1,34 +1,34 @@
 export interface EmployeeDTO {
   id: string;
-  employee_code: string;
+  employeeCode: string;
   name: string;
   email?: string;
   phone?: string;
-  department_id?: string;
-  department_name?: string; // joined from departments
+  departmentId?: string;
+  departmentName?: string; // joined from departments
   position: string;
-  shop_id?: string;
-  shop_name?: string; // joined from shops
+  shopId?: string;
+  shopName?: string; // joined from shops
   status: EmployeeStatus;
-  hire_date: string;
-  last_login?: string;
+  hireDate: string;
+  lastLogin?: string;
   permissions: string[];
   salary?: number;
   notes?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateEmployeeParams {
-  employee_code: string;
+  employeeCode: string;
   name: string;
   email?: string;
   phone?: string;
-  department_id?: string;
+  departmentId?: string;
   position: string;
-  shop_id?: string;
+  shopId?: string;
   status: EmployeeStatus;
-  hire_date: string;
+  hireDate: string;
   permissions?: string[];
   salary?: number;
   notes?: string;
@@ -36,15 +36,15 @@ export interface CreateEmployeeParams {
 
 export interface UpdateEmployeeParams {
   id: string;
-  employee_code?: string;
+  employeeCode?: string;
   name?: string;
   email?: string;
   phone?: string;
-  department_id?: string;
+  departmentId?: string;
   position?: string;
-  shop_id?: string;
+  shopId?: string;
   status?: EmployeeStatus;
-  hire_date?: string;
+  hireDate?: string;
   permissions?: string[];
   salary?: number;
   notes?: string;
@@ -60,13 +60,13 @@ export enum EmployeeStatus {
 }
 
 export interface EmployeeStatsDTO {
-  total_employees: number;
-  active_employees: number;
-  logged_in_today: number;
-  new_employees_this_month: number;
-  by_department: {
+  totalEmployees: number;
+  activeEmployees: number;
+  loggedInToday: number;
+  newEmployeesThisMonth: number;
+  byDepartment: {
     management: number;
-    customer_service: number;
+    customerService: number;
     technical: number;
     sales: number;
     other: number;
@@ -76,7 +76,7 @@ export interface EmployeeStatsDTO {
 export interface EmployeesDataDTO {
   employees: EmployeeDTO[];
   stats: EmployeeStatsDTO;
-  total_count: number;
-  current_page: number;
-  per_page: number;
+  totalCount: number;
+  currentPage: number;
+  perPage: number;
 }

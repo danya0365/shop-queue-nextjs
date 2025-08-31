@@ -96,27 +96,27 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">คิวทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{queuesData.stats.total_queues}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{queuesData.stats.totalQueues}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">รอคิว</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{queuesData.stats.waiting_queues}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-2">{queuesData.stats.waitingQueues}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">กำลังให้บริการ</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{queuesData.stats.in_progress_queues}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{queuesData.stats.inProgressQueues}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">เสร็จสิ้นวันนี้</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{queuesData.stats.completed_today}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{queuesData.stats.completedToday}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ยกเลิกวันนี้</h3>
-          <p className="text-2xl font-bold text-red-600 mt-2">{queuesData.stats.cancelled_today}</p>
+          <p className="text-2xl font-bold text-red-600 mt-2">{queuesData.stats.cancelledToday}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">เวลารอเฉลี่ย</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{queuesData.stats.average_wait_time} นาที</p>
+          <p className="text-2xl font-bold text-purple-600 mt-2">{queuesData.stats.averageWaitTime} นาที</p>
         </div>
       </div>
 
@@ -197,17 +197,17 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                   <tr key={queue.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold backend-text">{queue.queue_number}</div>
+                        <div className="text-2xl font-bold backend-text">{queue.queueNumber}</div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <div>
-                        <div className="backend-text font-medium">{queue.customer_name}</div>
-                        <div className="backend-text-muted text-sm">{queue.customer_phone}</div>
+                        <div className="backend-text font-medium">{queue.customerName}</div>
+                        <div className="backend-text-muted text-sm">{queue.customerPhone}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text">{queue.shop_name}</td>
-                    <td className="py-3 px-4 backend-text">{queue.queue_services[0].service_name}</td>
+                    <td className="py-3 px-4 backend-text">{queue.shopName}</td>
+                    <td className="py-3 px-4 backend-text">{queue.queueServices[0].serviceName}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(queue.priority)}`}>
                         {getPriorityText(queue.priority)}
@@ -215,9 +215,9 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                     </td>
                     <td className="py-3 px-4 backend-text text-center">
                       <div>
-                        <div className="font-medium">{queue.estimated_wait_time} นาที</div>
-                        {queue.actual_wait_time && (
-                          <div className="text-sm backend-text-muted">จริง: {queue.actual_wait_time} นาที</div>
+                        <div className="font-medium">{queue.estimatedWaitTime} นาที</div>
+                        {queue.actualWaitTime && (
+                          <div className="text-sm backend-text-muted">จริง: {queue.actualWaitTime} นาที</div>
                         )}
                       </div>
                     </td>
@@ -269,7 +269,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{queuesData.queues.length} จาก {queuesData.total_count} รายการ
+          แสดง 1-{queuesData.queues.length} จาก {queuesData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

@@ -78,19 +78,19 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">พนักงานทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{employeesData.stats.total_employees}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{employeesData.stats.totalEmployees}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">ใช้งานอยู่</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{employeesData.stats.active_employees}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{employeesData.stats.activeEmployees}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">เข้าใช้งานวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{employeesData.stats.logged_in_today}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{employeesData.stats.loggedInToday}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">พนักงานใหม่เดือนนี้</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{employeesData.stats.new_employees_this_month}</p>
+          <p className="text-2xl font-bold text-purple-600 mt-2">{employeesData.stats.newEmployeesThisMonth}</p>
         </div>
       </div>
 
@@ -180,16 +180,16 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                         <div className="backend-text-muted text-sm">{employee.phone}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text">{getDepartmentText(employee.department_name || '')}</td>
+                    <td className="py-3 px-4 backend-text">{getDepartmentText(employee.departmentName || '')}</td>
                     <td className="py-3 px-4 backend-text">{employee.position}</td>
-                    <td className="py-3 px-4 backend-text-muted">{employee.shop_name || 'ไม่ได้กำหนด'}</td>
+                    <td className="py-3 px-4 backend-text-muted">{employee.shopName || 'ไม่ได้กำหนด'}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(employee.status)}`}>
                         {getStatusText(employee.status)}
                       </span>
                     </td>
                     <td className="py-3 px-4 backend-text-muted">
-                      {employee.last_login ? new Date(employee.last_login).toLocaleDateString('th-TH') : 'ไม่เคยเข้าใช้'}
+                      {employee.lastLogin ? new Date(employee.lastLogin).toLocaleDateString('th-TH') : 'ไม่เคยเข้าใช้'}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
@@ -234,7 +234,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{employeesData.employees.length} จาก {employeesData.total_count} รายการ
+          แสดง 1-{employeesData.employees.length} จาก {employeesData.totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>
