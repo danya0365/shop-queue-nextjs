@@ -199,14 +199,14 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                         {profile.avatar_url && (
                           <Image
                             src={profile.avatar_url}
-                            alt={profile.name}
+                            alt={profile.full_name}
                             width={40}
                             height={40}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         )}
                         <div>
-                          <div className="backend-text font-medium">{profile.name}</div>
+                          <div className="backend-text font-medium">{profile.full_name}</div>
                           {profile.bio && (
                             <div className="backend-text-muted text-sm truncate max-w-xs">{profile.bio}</div>
                           )}
@@ -234,11 +234,10 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        profile.is_active 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                      <span className={`px-2 py-1 text-xs rounded-full ${profile.is_active
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                      }`}>
+                        }`}>
                         {profile.is_active ? 'ใช้งาน' : 'ปิดใช้งาน'}
                       </span>
                     </td>
@@ -246,7 +245,7 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                       <div className="flex flex-wrap gap-2">
                         <button className="text-blue-600 hover:text-blue-800 text-sm">ดูรายละเอียด</button>
                         <button className="text-green-600 hover:text-green-800 text-sm">แก้ไข</button>
-                        
+
                         {/* Verification Actions */}
                         {profile.verification_status === 'pending' && (
                           <>
@@ -266,20 +265,19 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                             </button>
                           </>
                         )}
-                        
+
                         {/* Status Toggle */}
                         <button
                           onClick={() => handleToggleStatus(profile.id, profile.is_active)}
                           disabled={state.isLoading}
-                          className={`text-sm disabled:opacity-50 ${
-                            profile.is_active 
-                              ? 'text-red-600 hover:text-red-800' 
+                          className={`text-sm disabled:opacity-50 ${profile.is_active
+                              ? 'text-red-600 hover:text-red-800'
                               : 'text-green-600 hover:text-green-800'
-                          }`}
+                            }`}
                         >
                           {profile.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
                         </button>
-                        
+
                         <button
                           onClick={() => handleDelete(profile.id)}
                           disabled={state.isLoading}

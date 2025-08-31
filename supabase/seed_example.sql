@@ -1,0 +1,38 @@
+-- Seed example for profiles table
+INSERT INTO profiles (
+  auth_id,
+  name,
+  phone,
+  email,
+  date_of_birth,
+  gender,
+  address,
+  bio,
+  preferences,
+  social_links,
+  verification_status,
+  privacy_settings,
+  last_login,
+  login_count,
+  is_active,
+  created_at,
+  updated_at
+) VALUES (
+  'auth_id',
+  'name',
+  'phone',
+  'email',
+  'date_of_birth',
+  'gender',
+  'address',
+  'bio',
+  'preferences',
+  'social_links',
+  'verification_status',
+  'privacy_settings',
+  'last_login',
+  'login_count',
+  'is_active',
+  'created_at',
+  'updated_at'
+);

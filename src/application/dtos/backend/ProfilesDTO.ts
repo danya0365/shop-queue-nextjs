@@ -1,7 +1,8 @@
 export interface ProfileDTO {
   id: string;
-  user_id: string;
-  name: string;
+  auth_id: string;
+  username: string;
+  full_name: string;
   phone: string;
   email: string;
   avatar_url?: string;
