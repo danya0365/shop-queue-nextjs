@@ -28,7 +28,8 @@ AS $$
 DECLARE
     result JSON;
 BEGIN
-    IF NOT public.is_shop_manager(shop_id_param) THEN
+    -- Skip permission check for service role
+    IF NOT is_service_role() AND NOT public.is_shop_manager(shop_id_param) THEN
         RAISE EXCEPTION 'insufficient_privilege: manager role required';
     END IF;
 
@@ -69,7 +70,8 @@ DECLARE
     stats_json JSON;
     result JSON;
 BEGIN
-    IF NOT public.is_shop_manager(shop_id_param) THEN
+    -- Skip permission check for service role
+    IF NOT is_service_role() AND NOT public.is_shop_manager(shop_id_param) THEN
         RAISE EXCEPTION 'insufficient_privilege: manager role required';
     END IF;
 
@@ -364,8 +366,3 @@ BEGIN
     RETURN true;
 END;
 $$;
-
--- Add RLS policies for customer_stats_view
-CREATE POLICY "Shop managers can view customer stats"
-  ON customer_stats_view FOR SELECT
-  USING (public.is_shop_manager(shop_id));

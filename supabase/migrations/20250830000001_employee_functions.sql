@@ -79,7 +79,7 @@ RETURNS TABLE (
   phone TEXT,
   department_id UUID,
   department_name TEXT,
-  position TEXT,
+  position_text TEXT,
   shop_id UUID,
   shop_name TEXT,
   status employee_status,
@@ -101,7 +101,7 @@ DECLARE
   v_offset INTEGER;
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 
@@ -125,7 +125,7 @@ BEGIN
     e.phone,
     e.department_id,
     d.name AS department_name,
-    e.position,
+    e.position_text,
     e.shop_id,
     s.name AS shop_name,
     e.status,
@@ -168,7 +168,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 
@@ -255,7 +255,7 @@ RETURNS TABLE (
   phone TEXT,
   department_id UUID,
   department_name TEXT,
-  position TEXT,
+  position_text TEXT,
   shop_id UUID,
   shop_name TEXT,
   status employee_status,
@@ -273,7 +273,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 
@@ -287,7 +287,7 @@ BEGIN
     e.phone,
     e.department_id,
     d.name AS department_name,
-    e.position,
+    e.position_text,
     e.shop_id,
     s.name AS shop_name,
     e.status,
@@ -329,7 +329,7 @@ DECLARE
   v_employee_id UUID;
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 
@@ -340,7 +340,7 @@ BEGIN
     email,
     phone,
     department_id,
-    position,
+    position_text,
     shop_id,
     status,
     hire_date,
@@ -355,7 +355,7 @@ BEGIN
     p_email,
     p_phone,
     p_department_id,
-    p_position,
+    p_position_text,
     p_shop_id,
     p_status,
     p_hire_date,
@@ -378,7 +378,7 @@ CREATE OR REPLACE FUNCTION update_employee(
   p_email TEXT DEFAULT NULL,
   p_phone TEXT DEFAULT NULL,
   p_department_id UUID DEFAULT NULL,
-  p_position TEXT DEFAULT NULL,
+  p_position_text TEXT DEFAULT NULL,
   p_shop_id UUID DEFAULT NULL,
   p_status employee_status DEFAULT NULL,
   p_hire_date DATE DEFAULT NULL,
@@ -393,7 +393,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 
@@ -405,7 +405,7 @@ BEGIN
     email = COALESCE(p_email, email),
     phone = COALESCE(p_phone, phone),
     department_id = COALESCE(p_department_id, department_id),
-    position = COALESCE(p_position, position),
+    position_text = COALESCE(p_position_text, position_text),
     shop_id = COALESCE(p_shop_id, shop_id),
     status = COALESCE(p_status, status),
     hire_date = COALESCE(p_hire_date, hire_date),
@@ -434,7 +434,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Check if user has admin role or service role
-  IF NOT (auth.role() = 'service_role' OR auth.role() = 'authenticated') THEN
+  IF NOT (is_service_role() OR auth.role() = 'authenticated') THEN
     RAISE EXCEPTION 'insufficient_privilege: admin or service role required';
   END IF;
 

@@ -19,7 +19,19 @@ CREATE TYPE membership_tier AS ENUM ('bronze', 'silver', 'gold', 'platinum');
 CREATE TYPE reward_type AS ENUM ('discount', 'free_item', 'cashback', 'special_privilege');
 CREATE TYPE transaction_type AS ENUM ('earned', 'redeemed', 'expired');
 
--- 1. Shops table
+-- 1. Categories table
+CREATE TABLE IF NOT EXISTS public.categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  icon TEXT,
+  color TEXT,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Shops table
 CREATE TABLE shops (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     owner_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -39,7 +51,16 @@ CREATE TABLE shops (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Customers table
+-- 3 Category shops
+CREATE TABLE category_shops (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 4. Customers table
 CREATE TABLE customers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -57,7 +78,7 @@ CREATE TABLE customers (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 3. Shop opening hours
+-- 5. Shop opening hours
 CREATE TABLE shop_opening_hours (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -71,7 +92,7 @@ CREATE TABLE shop_opening_hours (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Services
+-- 6. Services
 CREATE TABLE services (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -87,7 +108,7 @@ CREATE TABLE services (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Departments
+-- 7. Departments
 CREATE TABLE departments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -98,7 +119,7 @@ CREATE TABLE departments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. Employees
+-- 8. Employees
 CREATE TABLE employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -107,7 +128,7 @@ CREATE TABLE employees (
     name TEXT NOT NULL,
     email TEXT,
     phone TEXT ,
-    position TEXT,
+    position_text TEXT,
     department_id UUID REFERENCES departments(id) ON DELETE SET NULL,
     salary DECIMAL(10,2),
     hire_date DATE,
@@ -121,7 +142,7 @@ CREATE TABLE employees (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 7. Queues
+-- 9. Queues
 CREATE TABLE queues (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -141,7 +162,7 @@ CREATE TABLE queues (
     completed_at TIMESTAMP WITH TIME ZONE
 );
 
--- 8. Queue Services (Many-to-Many)
+-- 10. Queue Services (Many-to-Many)
 CREATE TABLE queue_services (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     queue_id UUID NOT NULL REFERENCES queues(id) ON DELETE CASCADE,
@@ -151,7 +172,7 @@ CREATE TABLE queue_services (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 9. Payments
+-- 11. Payments
 CREATE TABLE payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     queue_id UUID NOT NULL REFERENCES queues(id) ON DELETE CASCADE,
@@ -165,7 +186,7 @@ CREATE TABLE payments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 10. Payment Items
+-- 12. Payment Items
 CREATE TABLE payment_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
@@ -177,7 +198,7 @@ CREATE TABLE payment_items (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 11. Promotions
+-- 13. Promotions
 CREATE TABLE promotions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -199,7 +220,7 @@ CREATE TABLE promotions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 12. Poster Templates
+-- 14. Poster Templates
 CREATE TABLE poster_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
@@ -217,7 +238,7 @@ CREATE TABLE poster_templates (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 13. Customer Points
+-- 15. Customer Points
 CREATE TABLE customer_points (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -231,7 +252,7 @@ CREATE TABLE customer_points (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 14. Customer Point Transactions
+-- 16. Customer Point Transactions
 CREATE TABLE customer_point_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_point_id UUID NOT NULL REFERENCES customer_points(id) ON DELETE CASCADE,
@@ -244,7 +265,7 @@ CREATE TABLE customer_point_transactions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 15. Customer Point Expiry
+-- 17. Customer Point Expiry
 CREATE TABLE customer_point_expiry (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_point_transaction_id UUID NOT NULL REFERENCES customer_point_transactions(id) ON DELETE CASCADE,
@@ -253,7 +274,7 @@ CREATE TABLE customer_point_expiry (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 16. Rewards
+-- 18. Rewards
 CREATE TABLE rewards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -270,7 +291,7 @@ CREATE TABLE rewards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 17. Reward Transaction
+-- 19. Reward Transaction
 CREATE TABLE reward_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_point_transaction_id UUID NOT NULL REFERENCES customer_point_transactions(id) ON DELETE CASCADE,
@@ -283,7 +304,7 @@ CREATE TABLE reward_transactions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 18. Shop Settings
+-- 20. Shop Settings
 CREATE TABLE shop_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -305,7 +326,7 @@ CREATE TABLE shop_settings (
     UNIQUE(shop_id)
 );
 
--- 19. Notification Settings
+-- 21. Notification Settings
 CREATE TABLE notification_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -382,7 +403,9 @@ CREATE TRIGGER update_shop_settings_updated_at BEFORE UPDATE ON shop_settings FO
 CREATE TRIGGER update_notification_settings_updated_at BEFORE UPDATE ON notification_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Enable Row Level Security on all shop tables
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shops ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.category_shops ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_opening_hours ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
@@ -436,6 +459,29 @@ BEGIN
   RETURN public.is_shop_manager(shop_id_param);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Table policies
+
+-- Categories table policies
+-- Categories are viewable by everyone
+CREATE POLICY "Categories are viewable by everyone"
+  ON public.categories FOR SELECT
+  USING (true);
+
+-- Only admins can create, update, or delete categories
+CREATE POLICY "Only admins can create categories"
+  ON public.categories FOR INSERT
+  WITH CHECK (is_admin());
+
+CREATE POLICY "Only admins can update categories"
+  ON public.categories FOR UPDATE
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+CREATE POLICY "Only admins can delete categories"
+  ON public.categories FOR DELETE
+  USING (is_admin());
+
 
 -- Shops table policies
 -- Anyone can view shops

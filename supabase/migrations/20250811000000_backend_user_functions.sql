@@ -15,22 +15,8 @@ DECLARE
     v_result JSONB;
     v_users JSONB;
 BEGIN
-    -- Check if using service role or has admin privileges
-    IF current_setting('role') != 'service_role' THEN
-        -- For non-service role, check authentication and admin role
-        IF auth.uid() IS NULL THEN
-            RAISE EXCEPTION 'Authentication required';
-        END IF;
-        
-        IF NOT EXISTS (
-            SELECT 1 FROM public.profile_roles 
-            WHERE profile_id IN (
-                SELECT id FROM public.profiles 
-                WHERE auth_id = auth.uid() AND is_active = true
-            ) AND role = 'admin'::public.profile_role
-        ) THEN
-            RAISE EXCEPTION 'Admin privileges required';
-        END IF;
+    IF NOT is_service_role() AND NOT public.is_admin() THEN
+        RAISE EXCEPTION 'insufficient_privilege: admin role required';
     END IF;
 
     -- Calculate offset
