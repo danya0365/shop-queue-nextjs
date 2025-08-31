@@ -41,7 +41,7 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
       const queryOptions: QueryOptions = {
         select: ['*'],
         joins: [
-          { table: 'queue_history', on: { fromField: 'id', toField: 'customer_id' } },
+          { table: 'queues', on: { fromField: 'id', toField: 'customer_id' } },
           { table: 'customer_points', on: { fromField: 'id', toField: 'customer_id' } }
         ],
         sort: [{ field: 'created_at', direction: SortDirection.DESC }],
