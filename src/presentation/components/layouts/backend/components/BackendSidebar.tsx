@@ -3,6 +3,7 @@
 import { cn } from '@/src/presentation/utils/tailwind';
 import {
   Clock,
+  CreditCard,
   FolderOpen,
   LayoutDashboard,
   Store,
@@ -28,6 +29,7 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
     { href: '/backend/customers', label: 'จัดการลูกค้า', icon: Users },
     { href: '/backend/employees', label: 'จัดการพนักงาน', icon: UserCheck },
     { href: '/backend/categories', label: 'จัดการหมวดหมู่', icon: FolderOpen },
+    { href: '/backend/payments', label: 'จัดการการชำระเงิน', icon: CreditCard },
   ];
 
   return (

@@ -4,6 +4,7 @@ import { BackendCategoriesService } from "../application/services/backend/Backen
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
 import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
+import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
@@ -23,6 +24,7 @@ import { GetEmployeeByIdUseCase } from "../application/usecases/backend/employee
 import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employees/GetEmployeeStatsUseCase";
 import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
 import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
+import { GetPaymentsUseCase } from "../application/usecases/backend/payments/GetPaymentsUseCase";
 import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
 import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
@@ -88,6 +90,7 @@ export async function createBackendContainer(): Promise<Container> {
 
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
     const getProfilesUseCase = new GetProfilesUseCase(logger);
+    const getPaymentsUseCase = new GetPaymentsUseCase(logger);
 
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
@@ -124,6 +127,7 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
     const backendProfilesService = new BackendProfilesService(getProfilesUseCase, logger);
+    const backendPaymentsService = new BackendPaymentsService(getPaymentsUseCase, logger);
 
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);
@@ -133,6 +137,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendEmployeesService", backendEmployeesService);
     container.registerInstance("BackendCategoriesService", backendCategoriesService);
     container.registerInstance("BackendProfilesService", backendProfilesService);
+    container.registerInstance("BackendPaymentsService", backendPaymentsService);
 
     logger.info("Backend container initialized successfully");
   } catch (error) {
