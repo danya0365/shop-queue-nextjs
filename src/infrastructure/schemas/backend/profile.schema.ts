@@ -6,10 +6,11 @@
 /**
  * Profile database schema
  */
-export interface ProfileSchema {
+export interface ProfileSchema extends Record<string, unknown> {
   id: string;
-  user_id: string;
-  name: string;
+  auth_id: string;
+  username: string;
+  full_name: string;
   phone: string;
   email: string;
   avatar_url: string | null;
@@ -43,7 +44,7 @@ export interface ProfileSchema {
 /**
  * Profile stats database schema
  */
-export interface ProfileStatsSchema {
+export interface ProfileStatsSchema extends Record<string, unknown> {
   total_profiles: number;
   verified_profiles: number;
   pending_verification: number;

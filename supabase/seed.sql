@@ -43,7 +43,6 @@ INSERT INTO
         '{
           "username": "admin",
           "full_name": "Admin User",
-          "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
           "role": "admin",
           "is_active": true
         }',
@@ -69,7 +68,6 @@ INSERT INTO
         '{
           "username": "moderator",
           "full_name": "Moderator User",
-          "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=moderator",
           "role": "moderator",
           "is_active": true
         }',
@@ -95,7 +93,6 @@ INSERT INTO
         '{
           "username": "user1",
           "full_name": "Regular User 1",
-          "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=user1",
           "role": "user",
           "is_active": true
         }',
@@ -121,7 +118,6 @@ INSERT INTO
         '{
           "username": "user2",
           "full_name": "Regular User 2",
-          "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
           "role": "user",
           "is_active": true
         }',
@@ -180,7 +176,7 @@ VALUES
     '00000000-0000-0000-0000-000000000001',
     'admin_personal',
     'Admin Personal Account',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=admin_personal',
+    '',
     FALSE,
     NOW() - INTERVAL '15 days',
     NOW() - INTERVAL '15 days'
@@ -192,7 +188,7 @@ VALUES
     '00000000-0000-0000-0000-000000000002',
     'mod_personal',
     'Moderator Personal Account',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=mod_personal',
+    '',
     FALSE,
     NOW() - INTERVAL '10 days',
     NOW() - INTERVAL '10 days'
@@ -204,7 +200,7 @@ VALUES
     '00000000-0000-0000-0000-000000000003',
     'user1_gaming',
     'User1 Gaming Channel',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=user1_gaming',
+    '',
     FALSE,
     NOW() - INTERVAL '18 days',
     NOW() - INTERVAL '18 days'
@@ -214,7 +210,7 @@ VALUES
     '00000000-0000-0000-0000-000000000003',
     'user1_movies',
     'User1 Movie Reviews',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=user1_movies',
+    '',
     FALSE,
     NOW() - INTERVAL '15 days',
     NOW() - INTERVAL '15 days'
@@ -226,7 +222,7 @@ VALUES
     '00000000-0000-0000-0000-000000000004',
     'user2_tech',
     'User2 Tech Channel',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=user2_tech',
+    '',
     FALSE,
     NOW() - INTERVAL '10 days',
     NOW() - INTERVAL '10 days'

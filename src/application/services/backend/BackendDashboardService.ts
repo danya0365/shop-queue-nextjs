@@ -1,5 +1,5 @@
 import type { DashboardDataDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
-import { DashboardMapper } from '@/src/application/mappers/backend/DashboardMapper';
+import { DashboardMapper } from '@/src/application/mappers/backend/dashboard-mapper';
 import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardStatsUseCase';
 import type { IGetPopularServicesUseCase } from '@/src/application/usecases/backend/dashboard/GetPopularServicesUseCase';
 import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/backend/dashboard/GetQueueDistributionUseCase';

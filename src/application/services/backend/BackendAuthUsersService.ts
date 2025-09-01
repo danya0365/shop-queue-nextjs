@@ -28,12 +28,13 @@ export class BackendAuthUsersService implements IBackendAuthUsersService {
 
     // Map entities to DTOs
     const users = usersResult.users.map(user => BackendAuthUsersMapper.toDTO(user));
+    const totalCount = usersResult.totalCount
     const stats = BackendAuthUsersMapper.statsToDTO(statsResult.stats);
 
     return {
       users,
       stats,
-      totalCount: usersResult.totalCount,
+      totalCount,
       currentPage: page,
       perPage
     };

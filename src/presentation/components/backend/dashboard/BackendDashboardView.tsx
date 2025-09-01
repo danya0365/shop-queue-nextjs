@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardMapper } from '@/src/application/mappers/backend/DashboardMapper';
+import { DashboardMapper } from '@/src/application/mappers/backend/dashboard-mapper';
 import { BackendDashboardViewModel } from '@/src/presentation/presenters/backend/dashboard/BackendDashboardPresenter';
 import {
   Activity,

@@ -15,8 +15,9 @@ export class SupabaseBackendProfileMapper {
   public static toDomain(schema: ProfileSchema): ProfileEntity {
     return {
       id: schema.id,
-      userId: schema.user_id,
-      name: schema.name,
+      authId: schema.auth_id,
+      username: schema.username,
+      fullName: schema.full_name,
       phone: schema.phone,
       email: schema.email,
       avatarUrl: schema.avatar_url,
@@ -52,8 +53,9 @@ export class SupabaseBackendProfileMapper {
   public static toSchema(entity: ProfileEntity): ProfileSchema {
     return {
       id: entity.id,
-      user_id: entity.userId,
-      name: entity.name,
+      auth_id: entity.authId,
+      username: entity.username,
+      full_name: entity.fullName,
       phone: entity.phone,
       email: entity.email,
       avatar_url: entity.avatarUrl,
@@ -94,10 +96,10 @@ export class SupabaseBackendProfileMapper {
       activeProfilesToday: schema.active_profiles_today,
       newProfilesThisMonth: schema.new_profiles_this_month,
       profilesByGender: {
-        male: schema.profiles_by_gender_male,
-        female: schema.profiles_by_gender_female,
-        other: schema.profiles_by_gender_other,
-        notSpecified: schema.profiles_by_gender_not_specified
+        male: schema.profiles_by_gender_male || 0,
+        female: schema.profiles_by_gender_female || 0,
+        other: schema.profiles_by_gender_other || 0,
+        notSpecified: schema.profiles_by_gender_not_specified || 0
       }
     };
   }

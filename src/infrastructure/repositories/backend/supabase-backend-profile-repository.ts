@@ -7,10 +7,6 @@ import { SupabaseBackendProfileMapper } from "../../mappers/backend/supabase-bac
 import { ProfileSchema, ProfileStatsSchema } from "../../schemas/backend/profile.schema";
 import { BackendRepository } from "../base/backend-repository";
 
-// Extended types for joined data
-type ProfileSchemaRecord = Record<string, unknown> & ProfileSchema;
-type ProfileStatsSchemaRecord = Record<string, unknown> & ProfileStatsSchema;
-
 /**
  * Supabase implementation of the profile repository
  * Following Clean Architecture principles for repository implementation
@@ -45,10 +41,12 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
-      const profiles = await this.dataSource.getAdvanced<ProfileSchemaRecord>(
+      const profiles = await this.dataSource.getAdvanced<ProfileSchema>(
         'profiles',
         queryOptions
       );
+
+      console.log('raw profiles', profiles);
 
       // Count total items
       const totalItems = await this.dataSource.count('profiles');
@@ -60,6 +58,8 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
 
       // Create pagination metadata
       const pagination = SupabaseBackendProfileMapper.createPaginationMeta(page, limit, totalItems);
+
+      console.log('mapped profiles', mappedProfiles);
 
       return {
         data: mappedProfiles,
@@ -96,7 +96,7 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
 
       // Assuming a view exists for profile statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<ProfileStatsSchemaRecord>(
+      const statsData = await this.dataSource.getAdvanced<ProfileStatsSchema>(
         'profile_stats_view',
         queryOptions
       );
@@ -146,7 +146,7 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
     try {
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
-      const profile = await this.dataSource.getById<ProfileSchemaRecord>(
+      const profile = await this.dataSource.getById<ProfileSchema>(
         'profiles',
         id,
         {
@@ -185,8 +185,9 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
     try {
       // Convert domain entity to database schema
       const profileSchema = {
-        user_id: profile.userId,
-        name: profile.name,
+        auth_id: profile.authId,
+        username: profile.username,
+        full_name: profile.fullName,
         phone: profile.phone,
         email: profile.email,
         avatar_url: profile.avatarUrl,
@@ -204,7 +205,7 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
       };
 
       // Insert new profile
-      const createdProfile = await this.dataSource.insert<ProfileSchemaRecord>(
+      const createdProfile = await this.dataSource.insert<ProfileSchema>(
         'profiles',
         profileSchema
       );
@@ -259,8 +260,9 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
       const updateData: Partial<ProfileSchema> = {};
 
       // Map only the fields that are provided
-      if (profile.userId !== undefined) updateData.user_id = profile.userId;
-      if (profile.name !== undefined) updateData.name = profile.name;
+      if (profile.authId !== undefined) updateData.auth_id = profile.authId;
+      if (profile.username !== undefined) updateData.username = profile.username;
+      if (profile.fullName !== undefined) updateData.full_name = profile.fullName;
       if (profile.phone !== undefined) updateData.phone = profile.phone;
       if (profile.email !== undefined) updateData.email = profile.email;
       if (profile.avatarUrl !== undefined) updateData.avatar_url = profile.avatarUrl;
@@ -283,7 +285,7 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
       if (profile.isActive !== undefined) updateData.is_active = profile.isActive;
 
       // Update profile
-      const updatedProfile = await this.dataSource.update<ProfileSchemaRecord>(
+      const updatedProfile = await this.dataSource.update<ProfileSchema>(
         'profiles',
         id,
         updateData

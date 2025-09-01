@@ -11,8 +11,8 @@ import { BackendQueuesService } from "../application/services/backend/BackendQue
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
 import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-users/DeleteAuthUserUseCase";
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
-import { GetAuthUsersUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersUseCase";
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
+import { GetAuthUsersUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersUseCase";
 import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
 import { CreateCustomerUseCase } from "../application/usecases/backend/customers/CreateCustomerUseCase";
 import { DeleteCustomerUseCase } from "../application/usecases/backend/customers/DeleteCustomerUseCase";
@@ -30,7 +30,14 @@ import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employe
 import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
 import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
 import { GetPaymentsUseCase } from "../application/usecases/backend/payments/GetPaymentsUseCase";
-import { GetProfilesUseCase } from "../application/usecases/backend/profiles/GetProfilesUseCase";
+import { 
+  CreateProfileUseCase,
+  DeleteProfileUseCase,
+  GetProfileByIdUseCase,
+  GetProfilesUseCase,
+  GetProfileStatsUseCase,
+  UpdateProfileUseCase
+} from "../application/usecases/backend/profiles";
 import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
@@ -41,6 +48,7 @@ import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseBackendAuthUsersRepository } from "../infrastructure/repositories/backend/supabase-backend-auth-users-repository";
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
+import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
@@ -70,6 +78,7 @@ export async function createBackendContainer(): Promise<Container> {
     const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
+    const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(logger);
@@ -102,8 +111,15 @@ export async function createBackendContainer(): Promise<Container> {
     const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository, logger);
 
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
-    const getProfilesUseCase = new GetProfilesUseCase(logger);
     const getPaymentsUseCase = new GetPaymentsUseCase(logger);
+    
+    // Profile use cases
+    const getProfilesUseCase = new GetProfilesUseCase(profileRepository);
+    const getProfileStatsUseCase = new GetProfileStatsUseCase(profileRepository);
+    const getProfileByIdUseCase = new GetProfileByIdUseCase(profileRepository);
+    const createProfileUseCase = new CreateProfileUseCase(profileRepository);
+    const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
+    const deleteProfileUseCase = new DeleteProfileUseCase(profileRepository);
 
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
@@ -145,7 +161,15 @@ export async function createBackendContainer(): Promise<Container> {
       deleteAuthUserUseCase
     );
     const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
-    const backendProfilesService = new BackendProfilesService(getProfilesUseCase, logger);
+    const backendProfilesService = new BackendProfilesService(
+      getProfilesUseCase,
+      getProfileStatsUseCase,
+      getProfileByIdUseCase,
+      createProfileUseCase,
+      updateProfileUseCase,
+      deleteProfileUseCase,
+      logger
+    );
     const backendPaymentsService = new BackendPaymentsService(getPaymentsUseCase, logger);
 
     // Register only services in the container

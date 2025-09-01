@@ -6,8 +6,9 @@ import { PaginatedResult } from "../../interfaces/pagination-types";
  */
 export interface ProfileEntity {
   id: string;
-  userId: string;
-  name: string;
+  authId: string;
+  username: string;
+  fullName: string;
   phone: string;
   email: string;
   avatarUrl: string | null;
