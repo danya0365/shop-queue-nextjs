@@ -1,10 +1,10 @@
-import type { 
-  DashboardDataDTO, 
-  DashboardStatsDTO, 
-  RecentActivityDTO, 
-  QueueStatusDistributionDTO, 
-  PopularServicesDTO 
-} from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type {
+  DashboardDataDTO,
+  DashboardStatsDTO,
+  PopularServicesDTO,
+  QueueStatusDistributionDTO,
+  RecentActivityDTO
+} from '@/src/application/dtos/backend/dashboard-stats-dto';
 
 export class DashboardMapper {
   static toDashboardData(
@@ -41,7 +41,7 @@ export class DashboardMapper {
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 
+    return remainingMinutes > 0
       ? `${hours} ชั่วโมง ${remainingMinutes} นาที`
       : `${hours} ชั่วโมง`;
   }
@@ -53,10 +53,10 @@ export class DashboardMapper {
 
     if (diffInMinutes < 1) return 'เมื่อสักครู่';
     if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays} วันที่แล้ว`;
   }

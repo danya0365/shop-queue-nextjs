@@ -1,5 +1,5 @@
 
-import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, UpdateEmployeeParams } from '@/src/application/dtos/backend/EmployeesDTO';
+import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, UpdateEmployeeParams } from '@/src/application/dtos/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
 

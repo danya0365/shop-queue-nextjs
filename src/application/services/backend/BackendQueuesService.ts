@@ -1,5 +1,5 @@
 
-import type { QueuesDataDTO } from '@/src/application/dtos/backend/QueuesDTO';
+import type { QueuesDataDTO } from '@/src/application/dtos/backend/queues-dto';
 import type { IGetQueuesUseCase } from '@/src/application/usecases/backend/queues/GetQueuesUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 

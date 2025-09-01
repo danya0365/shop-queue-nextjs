@@ -1,4 +1,4 @@
-import type { CategoriesDataDTO } from '@/src/application/dtos/backend/CategoriesDTO';
+import type { CategoriesDataDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { IBackendCategoriesService } from '@/src/application/services/backend/BackendCategoriesService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

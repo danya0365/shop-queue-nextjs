@@ -1,5 +1,5 @@
 
-import type { ShopsDataDTO } from '@/src/application/dtos/backend/ShopsDTO';
+import type { ShopsDataDTO } from '@/src/application/dtos/backend/shops-dto';
 import type { GetShopsPaginatedUseCase } from '@/src/application/usecases/backend/shops/GetShopsPaginatedUseCase';
 import type { GetShopStatsUseCase } from '@/src/application/usecases/backend/shops/GetShopStatsUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';

@@ -1,10 +1,10 @@
-import type { DashboardDataDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardStatsUseCase';
-import type { IGetRecentActivitiesUseCase } from '@/src/application/usecases/backend/dashboard/GetRecentActivitiesUseCase';
-import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/backend/dashboard/GetQueueDistributionUseCase';
-import type { IGetPopularServicesUseCase } from '@/src/application/usecases/backend/dashboard/GetPopularServicesUseCase';
+import type { DashboardDataDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import { DashboardMapper } from '@/src/application/mappers/backend/DashboardMapper';
+import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardStatsUseCase';
+import type { IGetPopularServicesUseCase } from '@/src/application/usecases/backend/dashboard/GetPopularServicesUseCase';
+import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/backend/dashboard/GetQueueDistributionUseCase';
+import type { IGetRecentActivitiesUseCase } from '@/src/application/usecases/backend/dashboard/GetRecentActivitiesUseCase';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendDashboardService {
   getDashboardData(): Promise<DashboardDataDTO>;
@@ -17,7 +17,7 @@ export class BackendDashboardService implements IBackendDashboardService {
     private readonly getQueueDistributionUseCase: IGetQueueDistributionUseCase,
     private readonly getPopularServicesUseCase: IGetPopularServicesUseCase,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getDashboardData(): Promise<DashboardDataDTO> {
     try {

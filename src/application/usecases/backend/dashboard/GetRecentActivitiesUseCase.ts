@@ -1,4 +1,4 @@
-import type { RecentActivityDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type { RecentActivityDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetRecentActivitiesUseCase {
@@ -6,7 +6,7 @@ export interface IGetRecentActivitiesUseCase {
 }
 
 export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   async execute(): Promise<RecentActivityDTO[]> {
     try {

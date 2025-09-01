@@ -1,4 +1,4 @@
-import type { ProfileDTO, ProfilesDataDTO, ProfileStatsDTO } from '@/src/application/dtos/backend/ProfilesDTO';
+import type { ProfileDTO, ProfilesDataDTO, ProfileStatsDTO } from '@/src/application/dtos/backend/profiles-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetProfilesUseCase {

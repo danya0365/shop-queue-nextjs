@@ -1,4 +1,4 @@
-import type { QueueStatusDistributionDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type { QueueStatusDistributionDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetQueueDistributionUseCase {
@@ -6,7 +6,7 @@ export interface IGetQueueDistributionUseCase {
 }
 
 export class GetQueueDistributionUseCase implements IGetQueueDistributionUseCase {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   async execute(): Promise<QueueStatusDistributionDTO> {
     try {

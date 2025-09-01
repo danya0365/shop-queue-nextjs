@@ -1,4 +1,4 @@
-import type { CustomersDataDTO } from '@/src/application/dtos/backend/CustomersDTO';
+import type { CustomersDataDTO } from '@/src/application/dtos/backend/customers-dto';
 import type { IBackendCustomersService } from '@/src/application/services/backend/BackendCustomersService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

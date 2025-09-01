@@ -1,4 +1,4 @@
-import type { QueuesDataDTO } from '@/src/application/dtos/backend/QueuesDTO';
+import type { QueuesDataDTO } from '@/src/application/dtos/backend/queues-dto';
 import type { IBackendQueuesService } from '@/src/application/services/backend/BackendQueuesService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

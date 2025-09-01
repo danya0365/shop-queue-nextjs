@@ -1,4 +1,4 @@
-import type { DashboardDataDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type { DashboardDataDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import type { IBackendDashboardService } from '@/src/application/services/backend/BackendDashboardService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

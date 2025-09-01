@@ -1,4 +1,4 @@
-import type { EmployeesDataDTO } from '@/src/application/dtos/backend/EmployeesDTO';
+import type { EmployeesDataDTO } from '@/src/application/dtos/backend/employees-dto';
 import type { IBackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

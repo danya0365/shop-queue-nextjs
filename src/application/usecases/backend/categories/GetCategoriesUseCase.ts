@@ -1,4 +1,4 @@
-import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO } from '@/src/application/dtos/backend/CategoriesDTO';
+import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetCategoriesUseCase {

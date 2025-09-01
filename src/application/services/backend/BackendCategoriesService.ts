@@ -1,5 +1,5 @@
 
-import type { CategoriesDataDTO } from '@/src/application/dtos/backend/CategoriesDTO';
+import type { CategoriesDataDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { IGetCategoriesUseCase } from '@/src/application/usecases/backend/categories/GetCategoriesUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 

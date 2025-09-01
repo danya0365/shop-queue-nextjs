@@ -1,4 +1,4 @@
-import type { ShopsDataDTO } from '@/src/application/dtos/backend/ShopsDTO';
+import type { ShopsDataDTO } from '@/src/application/dtos/backend/shops-dto';
 import type { IBackendShopsService } from '@/src/application/services/backend/BackendShopsService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

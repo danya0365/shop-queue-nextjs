@@ -1,4 +1,4 @@
-import type { CustomerDTO } from '@/src/application/dtos/backend/CustomersDTO';
+import type { CustomerDTO } from '@/src/application/dtos/backend/customers-dto';
 import type { CustomerEntity } from '@/src/domain/entities/backend/backend-customer.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';

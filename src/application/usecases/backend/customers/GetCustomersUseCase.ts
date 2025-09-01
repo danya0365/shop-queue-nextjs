@@ -1,4 +1,4 @@
-import type { CustomerDTO, CustomersDataDTO, CustomerStatsDTO } from '@/src/application/dtos/backend/CustomersDTO';
+import type { CustomerDTO, CustomersDataDTO, CustomerStatsDTO } from '@/src/application/dtos/backend/customers-dto';
 import type { CustomerEntity, CustomerStatsEntity } from '@/src/domain/entities/backend/backend-customer.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';

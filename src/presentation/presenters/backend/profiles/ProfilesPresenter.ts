@@ -1,4 +1,4 @@
-import type { ProfilesDataDTO } from '@/src/application/dtos/backend/ProfilesDTO';
+import type { ProfilesDataDTO } from '@/src/application/dtos/backend/profiles-dto';
 import type { IBackendProfilesService } from '@/src/application/services/backend/BackendProfilesService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

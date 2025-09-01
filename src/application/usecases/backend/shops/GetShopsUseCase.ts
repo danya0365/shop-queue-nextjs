@@ -1,4 +1,4 @@
-import type { ShopDTO, ShopsDataDTO, ShopStatsDTO } from '@/src/application/dtos/backend/ShopsDTO';
+import type { ShopDTO, ShopsDataDTO, ShopStatsDTO } from '@/src/application/dtos/backend/shops-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetShopsUseCase {

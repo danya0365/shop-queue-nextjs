@@ -1,4 +1,4 @@
-import { CreateEmployeeParams, EmployeeDTO, EmployeeStatus } from '@/src/application/dtos/backend/EmployeesDTO';
+import { CreateEmployeeParams, EmployeeDTO, EmployeeStatus } from '@/src/application/dtos/backend/employees-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { CreateEmployeeEntity } from '@/src/domain/entities/backend/backend-employee.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';

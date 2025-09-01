@@ -1,4 +1,4 @@
-import type { DashboardStatsDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type { DashboardStatsDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetDashboardStatsUseCase {
@@ -6,7 +6,7 @@ export interface IGetDashboardStatsUseCase {
 }
 
 export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   async execute(): Promise<DashboardStatsDTO> {
     try {

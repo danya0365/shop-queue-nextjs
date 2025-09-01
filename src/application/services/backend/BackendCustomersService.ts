@@ -1,10 +1,10 @@
 
-import type { CustomerDTO, CustomersDataDTO } from '@/src/application/dtos/backend/CustomersDTO';
-import type { IGetCustomersUseCase } from '@/src/application/usecases/backend/customers/GetCustomersUseCase';
-import type { IGetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
+import type { CustomerDTO, CustomersDataDTO } from '@/src/application/dtos/backend/customers-dto';
 import type { ICreateCustomerUseCase } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
-import type { IUpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
 import type { IDeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
+import type { IGetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
+import type { IGetCustomersUseCase } from '@/src/application/usecases/backend/customers/GetCustomersUseCase';
+import type { IUpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendCustomersService {
@@ -38,13 +38,13 @@ export class BackendCustomersService implements IBackendCustomersService {
       throw error;
     }
   }
-  
+
   async getCustomerById(id: string): Promise<CustomerDTO> {
     try {
       this.logger.info('BackendCustomersService: Getting customer by ID', { id });
-      
+
       const customer = await this.getCustomerByIdUseCase.execute({ id });
-      
+
       this.logger.info('BackendCustomersService: Successfully retrieved customer', { id });
       return customer;
     } catch (error) {
@@ -52,13 +52,13 @@ export class BackendCustomersService implements IBackendCustomersService {
       throw error;
     }
   }
-  
+
   async createCustomer(data: { name: string; phone?: string; email?: string; dateOfBirth?: string; gender?: 'male' | 'female' | 'other'; address?: string; notes?: string; isActive?: boolean }): Promise<CustomerDTO> {
     try {
       this.logger.info('BackendCustomersService: Creating customer', { name: data.name });
-      
+
       const customer = await this.createCustomerUseCase.execute(data);
-      
+
       this.logger.info('BackendCustomersService: Successfully created customer', { id: customer.id });
       return customer;
     } catch (error) {
@@ -66,13 +66,13 @@ export class BackendCustomersService implements IBackendCustomersService {
       throw error;
     }
   }
-  
+
   async updateCustomer(id: string, data: { name?: string; phone?: string | null; email?: string | null; dateOfBirth?: string | null; gender?: 'male' | 'female' | 'other' | null; address?: string | null; notes?: string | null; isActive?: boolean }): Promise<CustomerDTO> {
     try {
       this.logger.info('BackendCustomersService: Updating customer', { id });
-      
+
       const customer = await this.updateCustomerUseCase.execute({ id, ...data });
-      
+
       this.logger.info('BackendCustomersService: Successfully updated customer', { id });
       return customer;
     } catch (error) {
@@ -80,13 +80,13 @@ export class BackendCustomersService implements IBackendCustomersService {
       throw error;
     }
   }
-  
+
   async deleteCustomer(id: string): Promise<void> {
     try {
       this.logger.info('BackendCustomersService: Deleting customer', { id });
-      
+
       await this.deleteCustomerUseCase.execute({ id });
-      
+
       this.logger.info('BackendCustomersService: Successfully deleted customer', { id });
     } catch (error) {
       this.logger.error('BackendCustomersService: Error deleting customer', { error, id });

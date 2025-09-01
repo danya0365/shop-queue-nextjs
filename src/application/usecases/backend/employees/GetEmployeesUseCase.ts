@@ -1,4 +1,4 @@
-import { EmployeeStatus, type EmployeeDTO, type EmployeesDataDTO, type EmployeeStatsDTO } from '@/src/application/dtos/backend/EmployeesDTO';
+import { EmployeeStatus, type EmployeeDTO, type EmployeesDataDTO, type EmployeeStatsDTO } from '@/src/application/dtos/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
 

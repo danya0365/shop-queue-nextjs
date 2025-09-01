@@ -1,4 +1,4 @@
-import type { PopularServicesDTO } from '@/src/application/dtos/backend/DashboardStatsDTO';
+import type { PopularServicesDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetPopularServicesUseCase {
@@ -6,7 +6,7 @@ export interface IGetPopularServicesUseCase {
 }
 
 export class GetPopularServicesUseCase implements IGetPopularServicesUseCase {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   async execute(): Promise<PopularServicesDTO[]> {
     try {
