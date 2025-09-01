@@ -6,6 +6,7 @@ import {
   CreditCard,
   FolderOpen,
   LayoutDashboard,
+  Shield,
   Store,
   UserCheck,
   Users
@@ -23,6 +24,7 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
 
   const navItems = [
     { href: '/backend', label: 'แดชบอร์ด', icon: LayoutDashboard },
+    { href: '/backend/auth-users', label: 'จัดการผู้ใช้งาน', icon: Shield },
     { href: '/backend/profiles', label: 'จัดการโปรไฟล์', icon: UserCheck },
     { href: '/backend/shops', label: 'จัดการร้านค้า', icon: Store },
     { href: '/backend/queues', label: 'จัดการคิว', icon: Clock },

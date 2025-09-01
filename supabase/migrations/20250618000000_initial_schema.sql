@@ -9,8 +9,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE OR REPLACE FUNCTION is_service_role()
 RETURNS BOOLEAN
 LANGUAGE SQL
+SECURITY DEFINER
 AS $$
-  SELECT current_user = 'service_role';
+  SELECT EXISTS (
+    SELECT 1 FROM pg_roles 
+    WHERE rolname = current_user 
+    AND rolbypassrls = true
+  );
 $$;
 
 -- Create custom types
