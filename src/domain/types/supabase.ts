@@ -11,24 +11,30 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
+          color: string | null
           created_at: string | null
           description: string | null
+          icon: string | null
           id: string
           name: string
           slug: string
           updated_at: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
           slug: string
           updated_at?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
           slug?: string
@@ -36,68 +42,48 @@ export type Database = {
         }
         Relationships: []
       }
-      comments: {
+      category_shops: {
         Row: {
-          content: string
+          category_id: string
           created_at: string | null
           id: string
-          parent_id: string | null
-          profile_id: string
+          shop_id: string
           updated_at: string | null
-          video_id: string
         }
         Insert: {
-          content: string
+          category_id: string
           created_at?: string | null
           id?: string
-          parent_id?: string | null
-          profile_id: string
+          shop_id: string
           updated_at?: string | null
-          video_id: string
         }
         Update: {
-          content?: string
+          category_id?: string
           created_at?: string | null
           id?: string
-          parent_id?: string | null
-          profile_id?: string
+          shop_id?: string
           updated_at?: string | null
-          video_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "comments_parent_id_fkey"
-            columns: ["parent_id"]
+            foreignKeyName: "category_shops_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "comments"
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "comments_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "category_shops_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
           },
           {
-            foreignKeyName: "comments_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "category_shops_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "comments_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "videos"
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
         ]
@@ -238,6 +224,13 @@ export type Database = {
             foreignKeyName: "customer_points_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "customer_points_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -245,27 +238,48 @@ export type Database = {
       }
       customers: {
         Row: {
+          address: string | null
           created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          gender: string | null
           id: string
+          is_active: boolean | null
+          last_visit: string | null
           name: string
+          notes: string | null
           phone: string | null
           profile_id: string | null
           shop_id: string
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          gender?: string | null
           id?: string
+          is_active?: boolean | null
+          last_visit?: string | null
           name: string
+          notes?: string | null
           phone?: string | null
           profile_id?: string | null
           shop_id: string
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          gender?: string | null
           id?: string
+          is_active?: boolean | null
+          last_visit?: string | null
           name?: string
+          notes?: string | null
           phone?: string | null
           profile_id?: string | null
           shop_id?: string
@@ -280,11 +294,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customers_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "customers_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
           },
           {
             foreignKeyName: "customers_shop_id_fkey"
@@ -328,6 +342,13 @@ export type Database = {
             foreignKeyName: "departments_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -337,13 +358,17 @@ export type Database = {
         Row: {
           created_at: string | null
           department_id: string | null
-          employee_code: string | null
+          email: string | null
+          employee_code: string
           hire_date: string | null
           id: string
           is_on_duty: boolean | null
           last_login: string | null
+          name: string
+          notes: string | null
           permissions: string[] | null
-          position: string | null
+          phone: string | null
+          position_text: string | null
           profile_id: string
           salary: number | null
           shop_id: string
@@ -354,13 +379,17 @@ export type Database = {
         Insert: {
           created_at?: string | null
           department_id?: string | null
-          employee_code?: string | null
+          email?: string | null
+          employee_code: string
           hire_date?: string | null
           id?: string
           is_on_duty?: boolean | null
           last_login?: string | null
+          name: string
+          notes?: string | null
           permissions?: string[] | null
-          position?: string | null
+          phone?: string | null
+          position_text?: string | null
           profile_id: string
           salary?: number | null
           shop_id: string
@@ -371,13 +400,17 @@ export type Database = {
         Update: {
           created_at?: string | null
           department_id?: string | null
-          employee_code?: string | null
+          email?: string | null
+          employee_code?: string
           hire_date?: string | null
           id?: string
           is_on_duty?: boolean | null
           last_login?: string | null
+          name?: string
+          notes?: string | null
           permissions?: string[] | null
-          position?: string | null
+          phone?: string | null
+          position_text?: string | null
           profile_id?: string
           salary?: number | null
           shop_id?: string
@@ -401,67 +434,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "employees_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "employees_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
           },
           {
             foreignKeyName: "employees_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      likes: {
-        Row: {
-          created_at: string | null
-          id: string
-          profile_id: string
-          video_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          profile_id: string
-          video_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          profile_id?: string
-          video_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "likes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "likes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "likes_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "likes_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "videos"
             referencedColumns: ["id"]
           },
         ]
@@ -507,6 +490,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notification_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
           {
             foreignKeyName: "notification_settings_shop_id_fkey"
             columns: ["shop_id"]
@@ -693,51 +683,77 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_profile_roles_profile_id"
+            foreignKeyName: "profile_roles_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_profile_roles_profile_id"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
         ]
       }
       profiles: {
         Row: {
+          address: string | null
           auth_id: string
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
+          date_of_birth: string | null
           full_name: string | null
+          gender: string | null
           id: string
           is_active: boolean
+          last_login: string | null
+          login_count: number
+          phone: string | null
+          preferences: Json
+          privacy_settings: Json
+          social_links: Json | null
           updated_at: string | null
           username: string | null
+          verification_status: string
         }
         Insert: {
+          address?: string | null
           auth_id: string
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           is_active?: boolean
+          last_login?: string | null
+          login_count?: number
+          phone?: string | null
+          preferences?: Json
+          privacy_settings?: Json
+          social_links?: Json | null
           updated_at?: string | null
           username?: string | null
+          verification_status?: string
         }
         Update: {
+          address?: string | null
           auth_id?: string
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           is_active?: boolean
+          last_login?: string | null
+          login_count?: number
+          phone?: string | null
+          preferences?: Json
+          privacy_settings?: Json
+          social_links?: Json | null
           updated_at?: string | null
           username?: string | null
+          verification_status?: string
         }
         Relationships: []
       }
@@ -811,11 +827,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "promotions_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
           },
           {
             foreignKeyName: "promotions_shop_id_fkey"
@@ -942,6 +958,13 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -1056,6 +1079,13 @@ export type Database = {
             foreignKeyName: "rewards_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -1109,6 +1139,13 @@ export type Database = {
             foreignKeyName: "services_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -1152,6 +1189,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "shop_opening_hours_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
           {
             foreignKeyName: "shop_opening_hours_shop_id_fkey"
             columns: ["shop_id"]
@@ -1224,6 +1268,13 @@ export type Database = {
             foreignKeyName: "shop_settings_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: true
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -1292,181 +1343,158 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "shops_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-        ]
-      }
-      videos: {
-        Row: {
-          category_id: string | null
-          comments_count: number | null
-          created_at: string | null
-          description: string | null
-          duration_seconds: number | null
-          id: string
-          likes_count: number | null
-          profile_id: string
-          title: string
-          updated_at: string | null
-          views_count: number | null
-          youtube_id: string
-        }
-        Insert: {
-          category_id?: string | null
-          comments_count?: number | null
-          created_at?: string | null
-          description?: string | null
-          duration_seconds?: number | null
-          id?: string
-          likes_count?: number | null
-          profile_id: string
-          title: string
-          updated_at?: string | null
-          views_count?: number | null
-          youtube_id: string
-        }
-        Update: {
-          category_id?: string | null
-          comments_count?: number | null
-          created_at?: string | null
-          description?: string | null
-          duration_seconds?: number | null
-          id?: string
-          likes_count?: number | null
-          profile_id?: string
-          title?: string
-          updated_at?: string | null
-          views_count?: number | null
-          youtube_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "videos_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "videos_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "videos_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-        ]
-      }
-      views: {
-        Row: {
-          created_at: string | null
-          id: string
-          ip_address: string | null
-          profile_id: string | null
-          user_agent: string | null
-          video_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          ip_address?: string | null
-          profile_id?: string | null
-          user_agent?: string | null
-          video_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          ip_address?: string | null
-          profile_id?: string | null
-          user_agent?: string | null
-          video_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "views_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "views_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "views_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "video_analytics"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "views_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "videos"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      video_analytics: {
+      category_stats_view: {
         Row: {
-          auth_id: string | null
-          comments_count: number | null
-          created_at: string | null
-          creator_username: string | null
-          id: string | null
-          likes_count: number | null
-          profile_id: string | null
-          title: string | null
-          updated_at: string | null
-          views_count: number | null
-          youtube_id: string | null
+          active_categories: number | null
+          least_popular_category: string | null
+          most_popular_category: string | null
+          total_categories: number | null
+          total_services: number | null
+          total_shops: number | null
+        }
+        Relationships: []
+      }
+      customer_stats_view: {
+        Row: {
+          active_customers_today: number | null
+          bronze_members: number | null
+          gold_members: number | null
+          new_customers_this_month: number | null
+          regular_members: number | null
+          shop_id: string | null
+          silver_members: number | null
+          total_customers: number | null
+        }
+        Relationships: []
+      }
+      dashboard_stats_view: {
+        Row: {
+          active_queues: number | null
+          average_wait_time: number | null
+          completed_queues_today: number | null
+          total_customers: number | null
+          total_employees: number | null
+          total_queues: number | null
+          total_revenue: number | null
+          total_shops: number | null
+        }
+        Relationships: []
+      }
+      employee_stats_view: {
+        Row: {
+          active_employees: number | null
+          customer_service_count: number | null
+          logged_in_today: number | null
+          management_count: number | null
+          new_employees_this_month: number | null
+          other_count: number | null
+          sales_count: number | null
+          technical_count: number | null
+          total_employees: number | null
+        }
+        Relationships: []
+      }
+      profile_stats_view: {
+        Row: {
+          active_profiles_today: number | null
+          new_profiles_this_month: number | null
+          pending_verification: number | null
+          profiles_by_gender: Json | null
+          total_profiles: number | null
+          verified_profiles: number | null
+        }
+        Relationships: []
+      }
+      queue_stats_view: {
+        Row: {
+          average_wait_time: number | null
+          cancelled_today: number | null
+          completed_today: number | null
+          in_progress_queues: number | null
+          total_queues: number | null
+          waiting_queues: number | null
+        }
+        Relationships: []
+      }
+      shop_stats_view: {
+        Row: {
+          active_shops: number | null
+          new_this_month: number | null
+          pending_approval: number | null
+          total_shops: number | null
         }
         Relationships: []
       }
     }
     Functions: {
+      create_customer: {
+        Args: {
+          shop_id_param: string
+          name_param: string
+          phone_param?: string
+          email_param?: string
+          date_of_birth_param?: string
+          gender_param?: string
+          address_param?: string
+          notes_param?: string
+        }
+        Returns: Json
+      }
+      create_employee: {
+        Args: {
+          p_employee_code: string
+          p_name: string
+          p_email: string
+          p_phone: string
+          p_department_id: string
+          p_position: string
+          p_shop_id: string
+          p_status: Database["public"]["Enums"]["employee_status"]
+          p_hire_date: string
+          p_permissions: string[]
+          p_salary: number
+          p_notes: string
+        }
+        Returns: string
+      }
       create_profile: {
         Args: { username: string; full_name?: string; avatar_url?: string }
         Returns: string
       }
-      find_duplicate_videos: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          url: string
-          count: number
-          video_ids: string[]
-        }[]
+      delete_customer: {
+        Args: { shop_id_param: string; customer_id_param: string }
+        Returns: boolean
+      }
+      delete_employee: {
+        Args: { p_employee_id: string }
+        Returns: boolean
       }
       get_active_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
+          address: string | null
           auth_id: string
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
+          date_of_birth: string | null
           full_name: string | null
+          gender: string | null
           id: string
           is_active: boolean
+          last_login: string | null
+          login_count: number
+          phone: string | null
+          preferences: Json
+          privacy_settings: Json
+          social_links: Json | null
           updated_at: string | null
           username: string | null
+          verification_status: string
         }[]
       }
       get_active_profile_id: {
@@ -1477,190 +1505,127 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["profile_role"]
       }
-      get_daily_views: {
-        Args: { days_count?: number }
-        Returns: {
-          date: string
-          count: number
-        }[]
+      get_customer_by_id: {
+        Args: { shop_id_param: string; customer_id_param: string }
+        Returns: Json
       }
-      get_dashboard_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          total_users: number
-          user_growth: number
-          total_videos: number
-          video_growth: number
-          total_categories: number
-          today_views: number
-          views_growth: number
-        }[]
+      get_customer_stats: {
+        Args: { shop_id_param: string }
+        Returns: Json
       }
-      get_database_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          profiles_count: number
-          videos_count: number
-          categories_count: number
-          likes_count: number
-          comments_count: number
-          views_count: number
-        }[]
-      }
-      get_monthly_new_videos: {
-        Args: { months_count?: number }
-        Returns: {
-          month: string
-          count: number
-        }[]
-      }
-      get_most_liked_videos: {
-        Args: { limit_count?: number }
+      get_employee_by_id: {
+        Args: { p_employee_id: string }
         Returns: {
           id: string
-          title: string
-          description: string
-          youtube_id: string
-          category_id: string
-          category_name: string
-          category_slug: string
-          profile_id: string
-          username: string
-          avatar_url: string
-          duration_seconds: number
-          views_count: number
-          likes_count: number
-          comments_count: number
+          employee_code: string
+          name: string
+          email: string
+          phone: string
+          department_id: string
+          department_name: string
+          position_text: string
+          shop_id: string
+          shop_name: string
+          status: Database["public"]["Enums"]["employee_status"]
+          hire_date: string
+          last_login: string
+          permissions: string[]
+          salary: number
+          notes: string
           created_at: string
           updated_at: string
         }[]
       }
-      get_most_viewed_videos: {
-        Args: { p_limit?: number; p_offset?: number }
+      get_employee_stats: {
+        Args: { p_shop_id?: string }
+        Returns: {
+          total_employees: number
+          active_employees: number
+          logged_in_today: number
+          new_employees_this_month: number
+          management_count: number
+          customer_service_count: number
+          technical_count: number
+          sales_count: number
+          other_count: number
+        }[]
+      }
+      get_paginated_customers: {
+        Args: {
+          shop_id_param: string
+          page_param?: number
+          page_size_param?: number
+          search_term?: string
+          sort_by?: string
+          sort_order?: string
+        }
         Returns: Json
+      }
+      get_paginated_employees: {
+        Args: { p_page?: number; p_limit?: number; p_shop_id?: string }
+        Returns: {
+          id: string
+          employee_code: string
+          name: string
+          email: string
+          phone: string
+          department_id: string
+          department_name: string
+          position_text: string
+          shop_id: string
+          shop_name: string
+          status: Database["public"]["Enums"]["employee_status"]
+          hire_date: string
+          last_login: string
+          permissions: string[]
+          salary: number
+          notes: string
+          created_at: string
+          updated_at: string
+          total_count: number
+        }[]
       }
       get_paginated_users: {
         Args: { p_page?: number; p_limit?: number }
         Returns: Json
       }
-      get_popular_videos: {
-        Args: { limit_count?: number }
-        Returns: {
-          id: string
-          title: string
-          profile_name: string
-          views: number
-        }[]
-      }
       get_profile_role: {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
       }
-      get_recent_profiles: {
-        Args: { limit_count?: number }
-        Returns: {
-          id: string
-          name: string
-          email: string
-          created_at: string
-          is_active: boolean
-        }[]
-      }
-      get_recent_videos: {
-        Args: { p_limit?: number; p_offset?: number }
-        Returns: Json
-      }
-      get_related_videos: {
-        Args: { video_id: string; limit_count?: number }
-        Returns: {
-          id: string
-          title: string
-          youtube_id: string
-          views_count: number
-          likes_count: number
-          comments_count: number
-          created_at: string
-        }[]
-      }
-      get_user_activity_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          profile_id: string
-          username: string
-          videos_count: number
-          likes_count: number
-        }[]
-      }
-      get_user_dashboard: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          video_count: number
-          total_views: number
-          total_likes: number
-          total_comments: number
-          recent_videos: Json
-        }[]
-      }
       get_user_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
+          address: string | null
           auth_id: string
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
+          date_of_birth: string | null
           full_name: string | null
+          gender: string | null
           id: string
           is_active: boolean
+          last_login: string | null
+          login_count: number
+          phone: string | null
+          preferences: Json
+          privacy_settings: Json
+          social_links: Json | null
           updated_at: string | null
           username: string | null
+          verification_status: string
         }[]
-      }
-      get_video_details: {
-        Args: { video_id: string }
-        Returns: {
-          id: string
-          title: string
-          description: string
-          youtube_id: string
-          category_id: string
-          category_name: string
-          category_slug: string
-          user_id: string
-          username: string
-          avatar_url: string
-          duration_seconds: number
-          views_count: number
-          likes_count: number
-          comments_count: number
-          created_at: string
-          updated_at: string
-          is_liked: boolean
-        }[]
-      }
-      get_videos_by_category: {
-        Args: { p_category_id: string; p_limit?: number; p_offset?: number }
-        Returns: Json
-      }
-      get_videos_by_profile: {
-        Args: { p_profile_id: string; p_limit?: number; p_offset?: number }
-        Returns: Json
-      }
-      get_videos_liked_by_profile: {
-        Args: {
-          liked_by_profile_id: string
-          p_limit?: number
-          p_offset?: number
-        }
-        Returns: Json
-      }
-      increment_video_view: {
-        Args: { param_video_id: string }
-        Returns: undefined
       }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_moderator_or_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_service_role: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -1687,47 +1652,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      search_videos: {
-        Args: { search_query: string; limit_count?: number }
-        Returns: {
-          id: string
-          title: string
-          description: string
-          youtube_id: string
-          category_id: string
-          category_name: string
-          category_slug: string
-          views_count: number
-          likes_count: number
-          comments_count: number
-          created_at: string
-        }[]
-      }
-      search_videos_extended: {
-        Args: {
-          search_query: string
-          limit_count?: number
-          filter_category_slug?: string
-        }
-        Returns: {
-          id: string
-          title: string
-          description: string
-          youtube_id: string
-          category_id: string
-          category_name: string
-          category_slug: string
-          profile_id: string
-          username: string
-          avatar_url: string
-          duration_seconds: number
-          views_count: number
-          likes_count: number
-          comments_count: number
-          created_at: string
-          updated_at: string
-        }[]
-      }
       set_profile_active: {
         Args: { profile_id: string }
         Returns: boolean
@@ -1739,13 +1663,42 @@ export type Database = {
         }
         Returns: boolean
       }
-      toggle_video_like: {
-        Args: { video_id: string }
+      update_customer: {
+        Args: {
+          shop_id_param: string
+          customer_id_param: string
+          name_param?: string
+          phone_param?: string
+          email_param?: string
+          date_of_birth_param?: string
+          gender_param?: string
+          address_param?: string
+          notes_param?: string
+          is_active_param?: boolean
+        }
+        Returns: Json
+      }
+      update_employee: {
+        Args: {
+          p_employee_id: string
+          p_employee_code?: string
+          p_name?: string
+          p_email?: string
+          p_phone?: string
+          p_department_id?: string
+          p_position_text?: string
+          p_shop_id?: string
+          p_status?: Database["public"]["Enums"]["employee_status"]
+          p_hire_date?: string
+          p_permissions?: string[]
+          p_salary?: number
+          p_notes?: string
+        }
         Returns: boolean
       }
     }
     Enums: {
-      employee_status: "active" | "inactive" | "on_leave"
+      employee_status: "active" | "inactive" | "suspended"
       membership_tier: "bronze" | "silver" | "gold" | "platinum"
       payment_method: "cash" | "card" | "qr" | "transfer"
       payment_status: "unpaid" | "partial" | "paid"
@@ -1883,7 +1836,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      employee_status: ["active", "inactive", "on_leave"],
+      employee_status: ["active", "inactive", "suspended"],
       membership_tier: ["bronze", "silver", "gold", "platinum"],
       payment_method: ["cash", "card", "qr", "transfer"],
       payment_status: ["unpaid", "partial", "paid"],
