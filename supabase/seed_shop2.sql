@@ -385,13 +385,13 @@ SELECT
   p_emp.id AS profile_id,
   emp_info.employee_code,
   p_emp.full_name AS name,
-  p_emp.email,
-  p_emp.phone,
+  emp_info.email,
+  emp_info.phone,
   emp_info.position_text,
   d.id AS department_id,
   emp_info.salary,
   NOW() - emp_info.employed_days * INTERVAL '1 day' AS hire_date,
-  'active'::text AS status,
+  'active'::public.employee_status AS status,
   emp_info.station_number,
   true AS is_on_duty,
   NOW() - INTERVAL '1 day' AS last_login,
@@ -404,9 +404,9 @@ JOIN profiles p ON s.owner_id = p.id
 JOIN departments d ON d.shop_id = s.id
 CROSS JOIN (
   VALUES
-    ('chef'::text, 'EMP001'::text, 'หัวหน้าเชฟ'::text, 35000.00, 180, 1::integer, '{"manage_menu": true, "manage_kitchen": true}'::jsonb, 'เชฟประจำร้าน มีประสบการณ์ 10 ปี'::text, 'ครัว'::text),
-    ('waiter'::text, 'EMP002'::text, 'พนักงานเสิร์ฟ'::text, 18000.00, 90, 2::integer, '{"take_orders": true, "serve_customers": true}'::jsonb, 'พนักงานเสิร์ฟที่มีใจบริการ'::text, 'บริการ'::text)
-) AS emp_info(username, employee_code, position_text, salary, employed_days, station_number, permissions, notes, department)
+    ('chef'::text, 'chef@restaurant.com', '0812345678'::text, 'EMP001'::text, 'หัวหน้าเชฟ'::text, 35000.00, 180, 1::integer, ARRAY['manage_queues','manage_employees','manage_services','manage_customers','manage_settings']::text[], 'เชฟประจำร้าน มีประสบการณ์ 10 ปี'::text, 'ครัว'::text),
+    ('waiter'::text, 'waiter@restaurant.com', '0812345678'::text, 'EMP002'::text, 'พนักงานเสิร์ฟ'::text, 18000.00, 90, 2::integer, ARRAY['manage_queues','manage_employees','manage_services','manage_customers','manage_settings']::text[], 'พนักงานเสิร์ฟที่มีใจบริการ'::text, 'บริการ'::text)
+) AS emp_info(username, email, phone, employee_code, position_text, salary, employed_days, station_number, permissions, notes, department)
 JOIN profiles p_emp ON p_emp.username = emp_info.username
 WHERE p.username = 'restaurant_owner'
 AND d.name = emp_info.department;
@@ -443,13 +443,13 @@ SELECT
   NOW() - INTERVAL '1 day'
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
-LEFT JOIN profiles p_cust ON p_cust.username = customer_info.username
 CROSS JOIN (
   VALUES
     ('customer1'::text, 'สมชาย ใจดี'::text, '0891234567'::text, 'somchai@example.com'::text, '1985-06-15'::date, 'male'::text, '123 ถนนสุขุมวิท กรุงเทพฯ'::text, 'ลูกค้าประจำ ชอบอาหารรสจัด'::text, NOW() - INTERVAL '7 days', true::boolean),
     ('customer2'::text, 'สมหญิง รักสวย'::text, '0891234568'::text, 'somying@example.com'::text, '1990-03-20'::date, 'female'::text, '456 ถนนเพชรบุรี กรุงเทพฯ'::text, 'แพ้อาหารทะเล'::text, NOW() - INTERVAL '14 days', true::boolean),
     ('customer3'::text, 'วิชัย มั่งมี'::text, '0891234569'::text, 'wichai@example.com'::text, '1978-11-05'::date, 'male'::text, '789 ถนนสีลม กรุงเทพฯ'::text, 'ชอบโต๊ะริมหน้าต่าง'::text, NOW() - INTERVAL '30 days', true::boolean)
 ) AS customer_info(username, name, phone, email, date_of_birth, gender, address, notes, last_visit, is_active)
+LEFT JOIN profiles p_cust ON p_cust.username = customer_info.username
 WHERE p.username = 'restaurant_owner';
 
 -- Insert queues for the restaurant
@@ -567,7 +567,7 @@ SELECT
     WHEN q.queue_number = 'R003' THEN 500.00
   END AS paid_amount,
   'paid'::public.payment_status AS payment_status,
-  'credit_card'::public.payment_method AS payment_method,
+  'card'::public.payment_method AS payment_method,
   (SELECT e.id FROM employees e WHERE e.shop_id = sh.id AND e.position_text = 'พนักงานเสิร์ฟ' LIMIT 1) AS processed_by_employee_id,
   q.created_at + INTERVAL '1 hour' AS payment_date,
   q.created_at + INTERVAL '1 hour' AS created_at,
@@ -617,42 +617,63 @@ WHERE p.username = 'restaurant_owner'
 AND pay.payment_status = 'paid';
 
 -- Insert shop settings for the restaurant
-INSERT INTO shop_settings (shop_id, setting_key, setting_value, created_at, updated_at)
+INSERT INTO shop_settings (
+  shop_id,
+  max_queue_size,
+  estimated_service_time,
+  allow_advance_booking,
+  booking_window_hours,
+  auto_confirm_queues,
+  cancellation_deadline,
+  maintenance_mode,
+  allow_registration,
+  require_email_verification,
+  session_timeout,
+  backup_frequency,
+  log_level,
+  data_retention_days,
+  created_at,
+  updated_at
+)
 SELECT
   s.id AS shop_id,
-  setting_info.setting_key,
-  setting_info.setting_value,
+  50 AS max_queue_size,
+  15 AS estimated_service_time,
+  true AS allow_advance_booking,
+  24 AS booking_window_hours,
+  true AS auto_confirm_queues,
+  30 AS cancellation_deadline,
+  false AS maintenance_mode,
+  true AS allow_registration,
+  false AS require_email_verification,
+  30 AS session_timeout,
+  'daily'::text AS backup_frequency,
+  'info'::text AS log_level,
+  365 AS data_retention_days,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
-CROSS JOIN (
-  VALUES
-    ('queue_prefix'::text, 'R'::text),
-    ('auto_queue_number'::text, 'true'::text),
-    ('queue_reset_daily'::text, 'true'::text),
-    ('queue_start_number'::text, '001'::text),
-    ('business_hours_display'::text, 'true'::text),
-    ('enable_online_booking'::text, 'true'::text),
-    ('enable_customer_points'::text, 'true'::text),
-    ('points_per_baht'::text, '0.1'::text),
-    ('points_expiry_days'::text, '365'::text),
-    ('table_reservation_enabled'::text, 'true'::text),
-    ('max_reservation_days_ahead'::text, '30'::text),
-    ('reservation_deposit_required'::text, 'false'::text),
-    ('menu_display_categories'::text, 'main_dish,appetizer,drink,dessert'::text),
-    ('default_table_time_minutes'::text, '90'::text),
-    ('enable_special_requests'::text, 'true'::text)
-) AS setting_info(setting_key, setting_value)
 WHERE p.username = 'restaurant_owner';
 
 -- Insert notification settings for the restaurant
-INSERT INTO notification_settings (shop_id, email_notifications, push_notifications, sms_notifications, new_queue, queue_update, shift_reminder, system_alerts, created_at, updated_at)
+INSERT INTO notification_settings (
+  shop_id,
+  email_notifications,
+  sms_notifications,
+  push_notifications,
+  new_queue,
+  queue_update,
+  shift_reminder,
+  system_alerts,
+  created_at,
+  updated_at
+)
 SELECT
   s.id AS shop_id,
   true AS email_notifications,
-  true AS push_notifications,
   false AS sms_notifications,
+  true AS push_notifications,
   true AS new_queue,
   true AS queue_update,
   true AS shift_reminder,
@@ -691,9 +712,9 @@ JOIN customers c ON c.shop_id = s.id
 JOIN profiles p_cust ON c.profile_id = p_cust.id
 CROSS JOIN (
   VALUES
-    ('customer1'::text, 100::integer, 150::integer, 50::integer, 'gold'::text, '{"discount": 10, "free_items": true}'::jsonb),
-    ('customer2'::text, 75::integer, 75::integer, 0::integer, 'silver'::text, '{"discount": 5, "free_items": false}'::jsonb),
-    ('customer3'::text, 25::integer, 25::integer, 0::integer, 'bronze'::text, '{"discount": 0, "free_items": false}'::jsonb)
+    ('customer1'::text, 100::integer, 150::integer, 50::integer, 'gold'::public.membership_tier, ARRAY['5% discount', 'Birthday gift']::text[]),
+    ('customer2'::text, 75::integer, 75::integer, 0::integer, 'silver'::public.membership_tier, ARRAY['10% discount', 'Birthday gift', 'Priority booking']::text[]),
+    ('customer3'::text, 25::integer, 25::integer, 0::integer, 'bronze'::public.membership_tier, ARRAY['5% discount', 'Birthday gift']::text[])
 ) AS cp_info(username, current_points, total_earned, total_redeemed, membership_tier, tier_benefits)
 WHERE p.username = 'restaurant_owner'
 AND p_cust.username = cp_info.username;
@@ -766,9 +787,9 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES
-    ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการสั่งอาหารครั้งต่อไป'::text, 'discount'::text, 50, 10.0, true, 90, 1, 'discount_icon'::text),
-    ('เครื่องดื่มฟรี'::text, 'รับเครื่องดื่มฟรี 1 แก้วเมื่อสั่งอาหารครบ 500 บาท'::text, 'free_item'::text, 75, 1.0, true, 60, 1, 'drink_icon'::text),
-    ('อาหารฟรี 1 จาน'::text, 'รับอาหารฟรี 1 จาน (ไม่เกิน 200 บาท)'::text, 'free_item'::text, 150, 1.0, true, 30, 1, 'food_icon'::text)
+    ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการสั่งอาหารครั้งต่อไป'::text, 'discount'::public.reward_type, 50, 10.0, true, 90, 1, 'discount_icon'::text),
+    ('เครื่องดื่มฟรี'::text, 'รับเครื่องดื่มฟรี 1 แก้วเมื่อสั่งอาหารครบ 500 บาท'::text, 'free_item'::public.reward_type, 75, 1.0, true, 60, 1, 'drink_icon'::text),
+    ('อาหารฟรี 1 จาน'::text, 'รับอาหารฟรี 1 จาน (ไม่เกิน 200 บาท)'::text, 'free_item'::public.reward_type, 150, 1.0, true, 30, 1, 'food_icon'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon)
 WHERE p.username = 'restaurant_owner';
 
