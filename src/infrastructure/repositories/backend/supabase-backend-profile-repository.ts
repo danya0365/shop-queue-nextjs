@@ -46,8 +46,6 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
         queryOptions
       );
 
-      console.log('raw profiles', profiles);
-
       // Count total items
       const totalItems = await this.dataSource.count('profiles');
 
@@ -58,8 +56,6 @@ export class SupabaseBackendProfileRepository extends BackendRepository implemen
 
       // Create pagination metadata
       const pagination = SupabaseBackendProfileMapper.createPaginationMeta(page, limit, totalItems);
-
-      console.log('mapped profiles', mappedProfiles);
 
       return {
         data: mappedProfiles,

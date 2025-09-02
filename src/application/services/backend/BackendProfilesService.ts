@@ -47,8 +47,6 @@ export class BackendProfilesService implements IBackendProfilesService {
       const profiles = profilesResult.profiles.data.map(profile => ProfileMapper.toDTO(profile));
       const stats = ProfileMapper.statsToDTO(statsResult.stats);
 
-      this.logger.info('Profiles data retrieved', { data: profilesResult.profiles.data });
-
       // Create response DTO
       return {
         profiles,
