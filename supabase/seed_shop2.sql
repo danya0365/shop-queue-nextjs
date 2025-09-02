@@ -1,0 +1,775 @@
+-- Insert username: restaurant_owner for restaurant owner
+INSERT INTO
+    auth.users (
+        instance_id,
+        id,
+        aud,
+        role,
+        email,
+        encrypted_password,
+        email_confirmed_at,
+        recovery_sent_at,
+        last_sign_in_at,
+        raw_app_meta_data,
+        raw_user_meta_data,
+        created_at,
+        updated_at,
+        confirmation_token,
+        email_change,
+        email_change_token_new,
+        recovery_token
+    ) VALUES 
+    -- Restaurant owner user
+    (
+        '91000000-0000-0000-0000-000000000000',
+        '91000000-0000-0000-0000-000000000001',
+        'authenticated',
+        'authenticated',
+        'restaurant_owner@example.com',
+        crypt(current_setting('my.app_password'), gen_salt('bf')),
+        NOW() - INTERVAL '30 days',
+        NULL,
+        NOW() - INTERVAL '1 day',
+        '{"provider":"email","providers":["email"]}',
+        '{
+          "username": "restaurant_owner",
+          "full_name": "Restaurant Owner",
+          "role": "user",
+          "is_active": true
+        }',
+        NOW() - INTERVAL '30 days',
+        NOW() - INTERVAL '30 days',
+        '',
+        '',
+        '',
+        ''
+    );
+
+-- Create identities for the user
+INSERT INTO
+    auth.identities (
+        id,
+        user_id,
+        provider_id,
+        identity_data,
+        provider,
+        last_sign_in_at,
+        created_at,
+        updated_at
+    )
+SELECT
+    uuid_generate_v4(),
+    id,
+    id,
+    format('{"sub":"%s","email":"%s"}', id::text, email)::jsonb,
+    'email',
+    last_sign_in_at,
+    created_at,
+    updated_at
+FROM
+    auth.users
+WHERE
+    email = 'restaurant_owner@example.com'
+ON CONFLICT (provider_id, provider) DO NOTHING;
+
+-- Create username: chef for restaurant employee
+INSERT INTO
+    auth.users (
+        instance_id,
+        id,
+        aud,
+        role,
+        email,
+        encrypted_password,
+        email_confirmed_at,
+        recovery_sent_at,
+        last_sign_in_at,
+        raw_app_meta_data,
+        raw_user_meta_data,
+        created_at,
+        updated_at,
+        confirmation_token,
+        email_change,
+        email_change_token_new,
+        recovery_token
+    ) VALUES 
+    -- Restaurant employee user
+    (
+        '91000000-0000-0000-0000-000000000000',
+        '91000000-0000-0000-0000-000000000002',
+        'authenticated',
+        'authenticated',
+        'chef@thaidelicious.com',
+        crypt(current_setting('my.app_password'), gen_salt('bf')),
+        NOW() - INTERVAL '30 days',
+        NULL,
+        NOW() - INTERVAL '1 day',
+        '{"provider":"email","providers":["email"]}',
+        '{
+          "username": "chef",
+          "full_name": "นายสมศักดิ์ ทำอาหารเก่ง",
+          "role": "user",
+          "is_active": true
+        }',
+        NOW() - INTERVAL '30 days',
+        NOW() - INTERVAL '30 days',
+        '',
+        '',
+        '',
+        ''
+    );
+
+-- Create identities for the user
+INSERT INTO
+    auth.identities (
+        id,
+        user_id,
+        provider_id,
+        identity_data,
+        provider,
+        last_sign_in_at,
+        created_at,
+        updated_at
+    )
+SELECT
+    uuid_generate_v4(),
+    id,
+    id,
+    format('{"sub":"%s","email":"%s"}', id::text, email)::jsonb,
+    'email',
+    last_sign_in_at,
+    created_at,
+    updated_at
+FROM
+    auth.users
+WHERE
+    email = 'chef@thaidelicious.com'
+ON CONFLICT (provider_id, provider) DO NOTHING;
+
+-- Create username: waiter for restaurant employee
+INSERT INTO
+    auth.users (
+        instance_id,
+        id,
+        aud,
+        role,
+        email,
+        encrypted_password,
+        email_confirmed_at,
+        recovery_sent_at,
+        last_sign_in_at,
+        raw_app_meta_data,
+        raw_user_meta_data,
+        created_at,
+        updated_at,
+        confirmation_token,
+        email_change,
+        email_change_token_new,
+        recovery_token
+    ) VALUES 
+    -- Restaurant employee user
+    (
+        '91000000-0000-0000-0000-000000000000',
+        '91000000-0000-0000-0000-000000000003',
+        'authenticated',
+        'authenticated',
+        'waiter@thaidelicious.com',
+        crypt(current_setting('my.app_password'), gen_salt('bf')),
+        NOW() - INTERVAL '30 days',
+        NULL,
+        NOW() - INTERVAL '1 day',
+        '{"provider":"email","providers":["email"]}',
+        '{
+          "username": "waiter",
+          "full_name": "นางสาวสมใจ บริการดี",
+          "role": "user",
+          "is_active": true
+        }',
+        NOW() - INTERVAL '30 days',
+        NOW() - INTERVAL '30 days',
+        '',
+        '',
+        '',
+        ''
+    );
+
+-- Create identities for the user
+INSERT INTO
+    auth.identities (
+        id,
+        user_id,
+        provider_id,
+        identity_data,
+        provider,
+        last_sign_in_at,
+        created_at,
+        updated_at
+    )
+SELECT
+    uuid_generate_v4(),
+    id,
+    id,
+    format('{"sub":"%s","email":"%s"}', id::text, email)::jsonb,
+    'email',
+    last_sign_in_at,
+    created_at,
+    updated_at
+FROM
+    auth.users
+WHERE
+    email = 'waiter@thaidelicious.com'
+ON CONFLICT (provider_id, provider) DO NOTHING;
+
+
+-- Insert a single restaurant shop
+INSERT INTO shops (
+  owner_id,
+  name,
+  description,
+  address,
+  phone,
+  email,
+  website,
+  logo,
+  qr_code_url,
+  timezone,
+  currency,
+  language,
+  status,
+  created_at,
+  updated_at
+)
+SELECT
+  p.id AS owner_id,
+  'ครัวไทยอร่อย',
+  'ร้านอาหารไทยรสชาติดั้งเดิม บรรยากาศอบอุ่น',
+  '456 ถนนสีลม แขวงสีลม เขตบางรัก กรุงเทพฯ 10500',
+  '02-987-6543',
+  'contact@thaidelicious.com',
+  'https://thaidelicious.com',
+  'https://example.com/restaurant-logo.png',
+  'https://example.com/restaurant-qr.png',
+  'Asia/Bangkok',
+  'THB',
+  'th',
+  'active',
+  NOW() - INTERVAL '12 months',
+  NOW() - INTERVAL '1 day'
+FROM profiles p
+WHERE p.username = 'restaurant_owner'
+LIMIT 1;
+
+-- Link shop to categories
+INSERT INTO category_shops (category_id, shop_id, created_at, updated_at)
+SELECT 
+  c.id AS category_id,
+  s.id AS shop_id,
+  NOW(),
+  NOW()
+FROM categories c
+CROSS JOIN shops s
+JOIN profiles p ON s.owner_id = p.id
+WHERE c.slug = 'restaurant'
+AND p.username = 'restaurant_owner';
+
+-- Insert shop opening hours
+INSERT INTO shop_opening_hours (shop_id, day_of_week, is_open, open_time, close_time, break_start, break_end, created_at, updated_at)
+SELECT 
+  s.id AS shop_id,
+  day_info.day_of_week,
+  day_info.is_open,
+  day_info.open_time,
+  day_info.close_time,
+  day_info.break_start,
+  day_info.break_end,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES 
+    ('monday'::text, true, '10:00:00'::time, '22:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('tuesday'::text, true, '10:00:00'::time, '22:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('wednesday'::text, true, '10:00:00'::time, '22:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('thursday'::text, true, '10:00:00'::time, '22:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('friday'::text, true, '10:00:00'::time, '23:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('saturday'::text, true, '10:00:00'::time, '23:00:00'::time, '15:00:00'::time, '16:00:00'::time),
+    ('sunday'::text, true, '10:00:00'::time, '22:00:00'::time, '15:00:00'::time, '16:00:00'::time)
+) AS day_info(day_of_week, is_open, open_time, close_time, break_start, break_end)
+WHERE p.username = 'restaurant_owner';
+
+-- Insert restaurant services (menu items)
+INSERT INTO services (shop_id, name, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
+SELECT
+  s.id AS shop_id,
+  service_info.name,
+  service_info.description,
+  service_info.price,
+  service_info.estimated_duration,
+  service_info.category,
+  service_info.is_available,
+  service_info.icon,
+  service_info.popularity_rank,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES
+    -- Main dishes
+    ('ผัดไทยกุ้งสด'::text, 'ผัดไทยกุ้งสดรสเด็ด เส้นนุ่ม กุ้งสดตัวใหญ่'::text, 120.00, 15, 'main_dish'::text, true, 'food'::text, 1),
+    ('ต้มยำกุ้ง'::text, 'ต้มยำกุ้งน้ำข้น รสจัดจ้าน กุ้งสดตัวใหญ่'::text, 180.00, 15, 'main_dish'::text, true, 'soup'::text, 2),
+    ('แกงเขียวหวานไก่'::text, 'แกงเขียวหวานไก่เนื้อนุ่ม น้ำแกงข้น หอมกลิ่นใบโหระพา'::text, 150.00, 15, 'main_dish'::text, true, 'curry'::text, 3),
+    ('ผัดกระเพราหมูกรอบ'::text, 'ผัดกระเพราหมูกรอบ รสชาติจัดจ้าน เผ็ดร้อน'::text, 120.00, 10, 'main_dish'::text, true, 'food'::text, 4),
+    ('ข้าวผัดปู'::text, 'ข้าวผัดเนื้อปูก้อนใหญ่ หอมกลิ่นใบมะกรูด'::text, 160.00, 15, 'main_dish'::text, true, 'rice'::text, 5),
+    ('สเต็กเนื้อนำเข้า'::text, 'สเต็กเนื้อนำเข้าคุณภาพพรีเมียม เสิร์ฟพร้อมซอสและผักย่าง'::text, 450.00, 25, 'main_dish'::text, true, 'steak'::text, 6),
+    
+    -- Appetizers
+    ('ปอเปี๊ยะทอด'::text, 'ปอเปี๊ยะทอดกรอบ ไส้หมูสับและผัก เสิร์ฟพร้อมน้ำจิ้มรสหวาน'::text, 80.00, 10, 'appetizer'::text, true, 'appetizer'::text, 7),
+    ('ยำวุ้นเส้น'::text, 'ยำวุ้นเส้นกุ้งสด รสเปรี้ยวหวานเผ็ด'::text, 120.00, 15, 'appetizer'::text, true, 'salad'::text, 8),
+    ('ส้มตำไทย'::text, 'ส้มตำไทยรสจัดจ้าน ใส่ถั่วลิสงบด กุ้งแห้ง'::text, 90.00, 10, 'appetizer'::text, true, 'salad'::text, 9),
+    
+    -- Drinks
+    ('น้ำมะนาว'::text, 'น้ำมะนาวสดคั้น หวานเย็นชื่นใจ'::text, 50.00, 5, 'drink'::text, true, 'juice'::text, 10),
+    ('ชาไทยเย็น'::text, 'ชาไทยเย็นรสชาติเข้มข้น หอมกลิ่นชา'::text, 45.00, 5, 'drink'::text, true, 'tea'::text, 11),
+    ('กาแฟดำเย็น'::text, 'กาแฟดำเย็น รสชาติเข้มข้น'::text, 45.00, 5, 'drink'::text, true, 'coffee'::text, 12),
+    
+    -- Desserts
+    ('ข้าวเหนียวมะม่วง'::text, 'ข้าวเหนียวมะม่วงหวานมัน ราดด้วยกะทิสด'::text, 90.00, 10, 'dessert'::text, true, 'dessert'::text, 13),
+    ('ทับทิมกรอบ'::text, 'ทับทิมกรอบเย็นชื่นใจ ราดด้วยกะทิสด'::text, 70.00, 10, 'dessert'::text, true, 'dessert'::text, 14),
+    ('ไอศกรีมกะทิ'::text, 'ไอศกรีมกะทิสดรสหอมมัน เสิร์ฟพร้อมถั่วลิสงคั่ว'::text, 60.00, 5, 'dessert'::text, true, 'ice_cream'::text, 15)
+) AS service_info(name, description, price, estimated_duration, category, is_available, icon, popularity_rank)
+WHERE p.username = 'restaurant_owner';
+
+-- Insert departments for the restaurant
+INSERT INTO departments (shop_id, name, description, created_at, updated_at)
+SELECT
+  s.id AS shop_id,
+  dept_info.name,
+  dept_info.description,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES
+    ('ครัว'::text, 'แผนกครัว รับผิดชอบการปรุงอาหารทั้งหมด'::text),
+    ('บริการ'::text, 'แผนกบริการลูกค้า รับผิดชอบการต้อนรับและเสิร์ฟอาหาร'::text),
+    ('บาร์'::text, 'แผนกบาร์ รับผิดชอบเครื่องดื่มและค็อกเทล'::text)
+) AS dept_info(name, description)
+WHERE p.username = 'restaurant_owner';
+
+-- Insert employees for the restaurant
+INSERT INTO employees (
+  shop_id,
+  profile_id,
+  employee_code,
+  name,
+  email,
+  phone,
+  position_text,
+  department_id,
+  salary,
+  hire_date,
+  status,
+  station_number,
+  is_on_duty,
+  last_login,
+  permissions,
+  notes,
+  created_at,
+  updated_at
+)
+SELECT
+  s.id AS shop_id,
+  p_emp.id AS profile_id,
+  emp_info.employee_code,
+  p_emp.full_name AS name,
+  p_emp.email,
+  p_emp.phone,
+  emp_info.position_text,
+  d.id AS department_id,
+  emp_info.salary,
+  NOW() - emp_info.employed_days * INTERVAL '1 day' AS hire_date,
+  'active'::text AS status,
+  emp_info.station_number,
+  true AS is_on_duty,
+  NOW() - INTERVAL '1 day' AS last_login,
+  emp_info.permissions,
+  emp_info.notes,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+JOIN departments d ON d.shop_id = s.id
+CROSS JOIN (
+  VALUES
+    ('chef'::text, 'EMP001'::text, 'หัวหน้าเชฟ'::text, 35000.00, 180, 1::integer, '{"manage_menu": true, "manage_kitchen": true}'::jsonb, 'เชฟประจำร้าน มีประสบการณ์ 10 ปี'::text, 'ครัว'::text),
+    ('waiter'::text, 'EMP002'::text, 'พนักงานเสิร์ฟ'::text, 18000.00, 90, 2::integer, '{"take_orders": true, "serve_customers": true}'::jsonb, 'พนักงานเสิร์ฟที่มีใจบริการ'::text, 'บริการ'::text)
+) AS emp_info(username, employee_code, position_text, salary, employed_days, station_number, permissions, notes, department)
+JOIN profiles p_emp ON p_emp.username = emp_info.username
+WHERE p.username = 'restaurant_owner'
+AND d.name = emp_info.department;
+
+-- Insert customers for the restaurant
+INSERT INTO customers (
+  shop_id,
+  name,
+  phone,
+  email,
+  date_of_birth,
+  gender,
+  address,
+  notes,
+  last_visit,
+  is_active,
+  profile_id,
+  created_at,
+  updated_at
+)
+SELECT
+  s.id AS shop_id,
+  customer_info.name,
+  customer_info.phone,
+  customer_info.email,
+  customer_info.date_of_birth,
+  customer_info.gender,
+  customer_info.address,
+  customer_info.notes,
+  customer_info.last_visit,
+  customer_info.is_active,
+  p_cust.id AS profile_id,
+  NOW() - INTERVAL '3 months',
+  NOW() - INTERVAL '1 day'
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+LEFT JOIN profiles p_cust ON p_cust.username = customer_info.username
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 'สมชาย ใจดี'::text, '0891234567'::text, 'somchai@example.com'::text, '1985-06-15'::date, 'male'::text, '123 ถนนสุขุมวิท กรุงเทพฯ'::text, 'ลูกค้าประจำ ชอบอาหารรสจัด'::text, NOW() - INTERVAL '7 days', true::boolean),
+    ('customer2'::text, 'สมหญิง รักสวย'::text, '0891234568'::text, 'somying@example.com'::text, '1990-03-20'::date, 'female'::text, '456 ถนนเพชรบุรี กรุงเทพฯ'::text, 'แพ้อาหารทะเล'::text, NOW() - INTERVAL '14 days', true::boolean),
+    ('customer3'::text, 'วิชัย มั่งมี'::text, '0891234569'::text, 'wichai@example.com'::text, '1978-11-05'::date, 'male'::text, '789 ถนนสีลม กรุงเทพฯ'::text, 'ชอบโต๊ะริมหน้าต่าง'::text, NOW() - INTERVAL '30 days', true::boolean)
+) AS customer_info(username, name, phone, email, date_of_birth, gender, address, notes, last_visit, is_active)
+WHERE p.username = 'restaurant_owner';
+
+-- Insert queues for the restaurant
+INSERT INTO queues (
+  shop_id,
+  customer_id,
+  queue_number,
+  status,
+  priority,
+  estimated_duration,
+  estimated_call_time,
+  served_by_employee_id,
+  note,
+  feedback,
+  rating,
+  created_at,
+  updated_at,
+  served_at,
+  completed_at
+)
+SELECT
+  s.id AS shop_id,
+  c.id AS customer_id,
+  queue_info.queue_number,
+  queue_info.status::public.queue_status,
+  'normal'::public.queue_priority AS priority,
+  queue_info.estimated_duration,
+  NOW() - queue_info.minutes_ago * INTERVAL '1 minute' + INTERVAL '30 minutes' AS estimated_call_time,
+  CASE 
+    WHEN queue_info.status = 'completed' OR queue_info.status = 'in_progress' THEN 
+      (SELECT e.id FROM employees e WHERE e.shop_id = s.id AND e.position_text = 'พนักงานเสิร์ฟ' LIMIT 1)
+    ELSE NULL
+  END AS served_by_employee_id,
+  queue_info.note,
+  queue_info.feedback,
+  queue_info.rating,
+  NOW() - queue_info.minutes_ago * INTERVAL '1 minute',
+  NOW() - queue_info.minutes_ago * INTERVAL '1 minute',
+  CASE 
+    WHEN queue_info.status = 'completed' OR queue_info.status = 'in_progress' THEN 
+      NOW() - queue_info.minutes_ago * INTERVAL '1 minute' + INTERVAL '15 minutes'
+    ELSE NULL
+  END AS served_at,
+  CASE 
+    WHEN queue_info.status = 'completed' THEN 
+      NOW() - queue_info.minutes_ago * INTERVAL '1 minute' + INTERVAL '1 hour'
+    ELSE NULL
+  END AS completed_at
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+JOIN customers c ON c.shop_id = s.id
+JOIN profiles p_cust ON p_cust.id = c.profile_id
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 'R001'::text, 'completed'::text, 'โต๊ะสำหรับ 4 ท่าน'::text, 60, 'บริการดีมาก'::text, 5::integer, 120),
+    ('customer2'::text, 'R002'::text, 'in_progress'::text, 'โต๊ะริมหน้าต่าง'::text, 90, NULL::text, NULL::integer, 45),
+    ('customer3'::text, 'R003'::text, 'waiting'::text, 'โต๊ะสำหรับ 2 ท่าน'::text, 45, NULL::text, NULL::integer, 15)
+) AS queue_info(username, queue_number, status, note, estimated_duration, feedback, rating, minutes_ago)
+WHERE p.username = 'restaurant_owner'
+AND p_cust.username = queue_info.username;
+
+-- Insert queue services for the restaurant (menu items ordered)
+INSERT INTO queue_services (queue_id, service_id, quantity, price, created_at)
+SELECT
+  q.id AS queue_id,
+  s.id AS service_id,
+  qs_info.quantity,
+  qs_info.price,
+  q.created_at
+FROM queues q
+JOIN shops sh ON q.shop_id = sh.id
+JOIN profiles p ON sh.owner_id = p.id
+JOIN customers c ON q.customer_id = c.id
+JOIN profiles p_cust ON c.profile_id = p_cust.id
+JOIN services s ON s.shop_id = sh.id
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 'ผัดไทยกุ้งสด'::text, 2, 120.00),
+    ('customer1'::text, 'ต้มยำกุ้ง'::text, 1, 150.00),
+    ('customer1'::text, 'ข้าวสวย'::text, 3, 25.00),
+    ('customer1'::text, 'น้ำมะนาว'::text, 3, 50.00),
+    ('customer2'::text, 'ผัดกะเพราหมูสับ'::text, 1, 90.00),
+    ('customer2'::text, 'ข้าวสวย'::text, 1, 25.00),
+    ('customer2'::text, 'ชาไทยเย็น'::text, 1, 45.00),
+    ('customer3'::text, 'ส้มตำไทย'::text, 1, 80.00),
+    ('customer3'::text, 'ไก่ย่าง'::text, 1, 120.00),
+    ('customer3'::text, 'ข้าวเหนียว'::text, 2, 20.00)
+) AS qs_info(username, service_name, quantity, price)
+WHERE p.username = 'restaurant_owner'
+AND p_cust.username = qs_info.username
+AND s.name = qs_info.service_name;
+
+-- Insert payments for the restaurant
+INSERT INTO payments (
+  queue_id,
+  total_amount,
+  paid_amount,
+  payment_status,
+  payment_method,
+  processed_by_employee_id,
+  payment_date,
+  created_at,
+  updated_at
+)
+SELECT
+  q.id AS queue_id,
+  CASE
+    WHEN q.queue_number = 'R001' THEN 1200.00
+    WHEN q.queue_number = 'R002' THEN 850.00
+    WHEN q.queue_number = 'R003' THEN 500.00
+  END AS total_amount,
+  CASE
+    WHEN q.queue_number = 'R001' THEN 1200.00
+    WHEN q.queue_number = 'R002' THEN 850.00
+    WHEN q.queue_number = 'R003' THEN 500.00
+  END AS paid_amount,
+  'paid'::public.payment_status AS payment_status,
+  'credit_card'::public.payment_method AS payment_method,
+  (SELECT e.id FROM employees e WHERE e.shop_id = sh.id AND e.position_text = 'พนักงานเสิร์ฟ' LIMIT 1) AS processed_by_employee_id,
+  q.created_at + INTERVAL '1 hour' AS payment_date,
+  q.created_at + INTERVAL '1 hour' AS created_at,
+  q.created_at + INTERVAL '1 hour' AS updated_at
+FROM shops sh
+JOIN profiles p ON sh.owner_id = p.id
+JOIN customers c ON c.shop_id = sh.id
+JOIN profiles p_cust ON c.profile_id = p_cust.id
+JOIN queues q ON q.customer_id = c.id
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 'R001'::text),
+    ('customer2'::text, 'R002'::text),
+    ('customer3'::text, 'R003'::text)
+) AS payment_info(username, queue_number)
+WHERE p.username = 'restaurant_owner'
+AND p_cust.username = payment_info.username
+AND q.queue_number = payment_info.queue_number;
+
+-- Insert payment items for the restaurant
+INSERT INTO payment_items (
+  payment_id,
+  service_id,
+  name,
+  price,
+  quantity,
+  total,
+  created_at
+)
+SELECT
+  pay.id AS payment_id,
+  s.id AS service_id,
+  s.name,
+  s.price,
+  qs.quantity,
+  s.price * qs.quantity AS total,
+  pay.created_at
+FROM payments pay
+JOIN queues q ON pay.queue_id = q.id
+JOIN queue_services qs ON qs.queue_id = q.id
+JOIN services s ON qs.service_id = s.id
+JOIN customers c ON q.customer_id = c.id
+JOIN profiles p_cust ON c.profile_id = p_cust.id
+JOIN shops sh ON q.shop_id = sh.id
+JOIN profiles p ON sh.owner_id = p.id
+WHERE p.username = 'restaurant_owner'
+AND pay.payment_status = 'paid';
+
+-- Insert shop settings for the restaurant
+INSERT INTO shop_settings (shop_id, setting_key, setting_value, created_at, updated_at)
+SELECT
+  s.id AS shop_id,
+  setting_info.setting_key,
+  setting_info.setting_value,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES
+    ('queue_prefix'::text, 'R'::text),
+    ('auto_queue_number'::text, 'true'::text),
+    ('queue_reset_daily'::text, 'true'::text),
+    ('queue_start_number'::text, '001'::text),
+    ('business_hours_display'::text, 'true'::text),
+    ('enable_online_booking'::text, 'true'::text),
+    ('enable_customer_points'::text, 'true'::text),
+    ('points_per_baht'::text, '0.1'::text),
+    ('points_expiry_days'::text, '365'::text),
+    ('table_reservation_enabled'::text, 'true'::text),
+    ('max_reservation_days_ahead'::text, '30'::text),
+    ('reservation_deposit_required'::text, 'false'::text),
+    ('menu_display_categories'::text, 'main_dish,appetizer,drink,dessert'::text),
+    ('default_table_time_minutes'::text, '90'::text),
+    ('enable_special_requests'::text, 'true'::text)
+) AS setting_info(setting_key, setting_value)
+WHERE p.username = 'restaurant_owner';
+
+-- Insert notification settings for the restaurant
+INSERT INTO notification_settings (shop_id, email_notifications, push_notifications, sms_notifications, new_queue, queue_update, shift_reminder, system_alerts, created_at, updated_at)
+SELECT
+  s.id AS shop_id,
+  true AS email_notifications,
+  true AS push_notifications,
+  false AS sms_notifications,
+  true AS new_queue,
+  true AS queue_update,
+  true AS shift_reminder,
+  true AS system_alerts,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+WHERE p.username = 'restaurant_owner';
+
+-- Insert customer points for the restaurant
+INSERT INTO customer_points (
+  shop_id,
+  customer_id,
+  current_points,
+  total_earned,
+  total_redeemed,
+  membership_tier,
+  tier_benefits,
+  created_at,
+  updated_at
+)
+SELECT
+  s.id AS shop_id,
+  c.id AS customer_id,
+  cp_info.current_points,
+  cp_info.total_earned,
+  cp_info.total_redeemed,
+  cp_info.membership_tier,
+  cp_info.tier_benefits,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+JOIN customers c ON c.shop_id = s.id
+JOIN profiles p_cust ON c.profile_id = p_cust.id
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 100::integer, 150::integer, 50::integer, 'gold'::text, '{"discount": 10, "free_items": true}'::jsonb),
+    ('customer2'::text, 75::integer, 75::integer, 0::integer, 'silver'::text, '{"discount": 5, "free_items": false}'::jsonb),
+    ('customer3'::text, 25::integer, 25::integer, 0::integer, 'bronze'::text, '{"discount": 0, "free_items": false}'::jsonb)
+) AS cp_info(username, current_points, total_earned, total_redeemed, membership_tier, tier_benefits)
+WHERE p.username = 'restaurant_owner'
+AND p_cust.username = cp_info.username;
+
+-- Insert customer point transactions for the restaurant
+INSERT INTO customer_point_transactions (
+  customer_point_id,
+  type,
+  points,
+  description,
+  related_queue_id,
+  metadata,
+  transaction_date,
+  created_at
+)
+SELECT
+  cp.id AS customer_point_id,
+  pt_info.type,
+  pt_info.points,
+  pt_info.description,
+  q.id AS related_queue_id,
+  pt_info.metadata,
+  pay.created_at AS transaction_date,
+  pay.created_at
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+JOIN customers c ON c.shop_id = s.id
+JOIN profiles p_cust ON c.profile_id = p_cust.id
+JOIN customer_points cp ON cp.customer_id = c.id
+JOIN payments pay ON pay.queue_id IN (SELECT id FROM queues WHERE customer_id = c.id)
+JOIN queues q ON pay.queue_id = q.id
+CROSS JOIN (
+  VALUES
+    ('customer1'::text, 'earned'::public.transaction_type, 50, 'คะแนนจากการใช้บริการร้านอาหาร'::text, '{"order_total": 1200}'::jsonb),
+    ('customer2'::text, 'earned'::public.transaction_type, 25, 'คะแนนจากการใช้บริการร้านอาหาร'::text, '{"order_total": 850}'::jsonb),
+    ('customer3'::text, 'earned'::public.transaction_type, 15, 'คะแนนจากการใช้บริการร้านอาหาร'::text, '{"order_total": 500}'::jsonb)
+) AS pt_info(username, type, points, description, metadata)
+WHERE p.username = 'restaurant_owner'
+AND p_cust.username = pt_info.username;
+
+-- Insert rewards for the restaurant
+INSERT INTO rewards (
+  shop_id,
+  name,
+  description,
+  type,
+  points_required,
+  value,
+  is_available,
+  expiry_days,
+  usage_limit,
+  icon,
+  created_at,
+  updated_at
+)
+SELECT
+  s.id AS shop_id,
+  reward_info.name,
+  reward_info.description,
+  reward_info.type,
+  reward_info.points_required,
+  reward_info.value,
+  reward_info.is_available,
+  reward_info.expiry_days,
+  reward_info.usage_limit,
+  reward_info.icon,
+  NOW(),
+  NOW()
+FROM shops s
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES
+    ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการสั่งอาหารครั้งต่อไป'::text, 'discount'::text, 50, 10.0, true, 90, 1, 'discount_icon'::text),
+    ('เครื่องดื่มฟรี'::text, 'รับเครื่องดื่มฟรี 1 แก้วเมื่อสั่งอาหารครบ 500 บาท'::text, 'free_item'::text, 75, 1.0, true, 60, 1, 'drink_icon'::text),
+    ('อาหารฟรี 1 จาน'::text, 'รับอาหารฟรี 1 จาน (ไม่เกิน 200 บาท)'::text, 'free_item'::text, 150, 1.0, true, 30, 1, 'food_icon'::text)
+) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon)
+WHERE p.username = 'restaurant_owner';
+
+-- Customer rewards table doesn't exist in the schema, so we're skipping this insert

@@ -1092,7 +1092,7 @@ INSERT INTO customer_point_transactions (
 )
 SELECT
   cpd.customer_point_id,
-  'earned' AS type,
+  'earned'::public.transaction_type AS type,
   CASE 
     WHEN cpd.customer_name = 'วิชัย รักสวย' AND trans_data.description = 'คะแนนจากการใช้บริการ' THEN 20
     WHEN cpd.customer_name = 'วิชัย รักสวย' AND trans_data.description = 'คะแนนจากการแนะนำเพื่อน' THEN 30
@@ -1183,4 +1183,3 @@ CROSS JOIN (
     ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการใช้บริการครั้งต่อไป'::text, 'discount'::public.reward_type, 100::integer, 10.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text),
     ('บริการฟรี'::text, 'บริการสระไดร์ฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 200::integer, 150.00::numeric, true::boolean, 90::integer, 1::integer, '🎁'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
-

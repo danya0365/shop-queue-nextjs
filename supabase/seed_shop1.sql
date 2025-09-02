@@ -862,7 +862,7 @@ INSERT INTO customer_point_transactions (
 )
 SELECT
   cpd.customer_point_id,
-  'earned' AS type,
+  'earned'::public.transaction_type as type,
   CASE 
     WHEN cpd.customer_name = 'วิชัย รักสวย' AND trans_data.description = 'คะแนนจากการใช้บริการ' THEN 20
     WHEN cpd.customer_name = 'วิชัย รักสวย' AND trans_data.description = 'คะแนนจากการแนะนำเพื่อน' THEN 30
