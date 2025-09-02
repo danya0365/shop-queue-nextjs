@@ -319,11 +319,11 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ตัดผมชาย'::text, 'บริการตัดผมสำหรับสุภาพบุรุษ'::text, 200.00::numeric, 30::integer, 'ตัดผม'::text, true::boolean, '✂️'::text, 1::integer),
-    ('ตัดผมหญิง'::text, 'บริการตัดผมสำหรับสุภาพสตรี'::text, 300.00::numeric, 45::integer, 'ตัดผม'::text, true::boolean, '✂️'::text, 2::integer),
-    ('สระไดร์'::text, 'บริการสระผมและเป่าแห้ง'::text, 150.00::numeric, 20::integer, 'ตัดผม'::text, true::boolean, '💧'::text, 3::integer),
-    ('ทำสีผม'::text, 'บริการทำสีผม'::text, 1500.00::numeric, 120::integer, 'ตัดผม'::text, true::boolean, '🎨'::text, 4::integer),
-    ('ดัดผม'::text, 'บริการดัดผม'::text, 1200.00::numeric, 90::integer, 'ตัดผม'::text, true::boolean, '🌀'::text, 5::integer)
+    ('ตัดผมชาย'::text, 'บริการตัดผมสำหรับสุภาพบุรุษ'::text, 200.00::numeric, 30::integer, 'haircut'::text, true::boolean, '✂️'::text, 1::integer),
+    ('ตัดผมหญิง'::text, 'บริการตัดผมสำหรับสุภาพสตรี'::text, 300.00::numeric, 45::integer, 'haircut'::text, true::boolean, '✂️'::text, 2::integer),
+    ('สระไดร์'::text, 'บริการสระผมและเป่าแห้ง'::text, 150.00::numeric, 20::integer, 'wash_and_dry'::text, true::boolean, '💧'::text, 3::integer),
+    ('ทำสีผม'::text, 'บริการทำสีผม'::text, 1500.00::numeric, 120::integer, 'coloring'::text, true::boolean, '🎨'::text, 4::integer),
+    ('ดัดผม'::text, 'บริการดัดผม'::text, 1200.00::numeric, 90::integer, 'styling'::text, true::boolean, '🌀'::text, 5::integer)
 ) AS service_info(name, description, price, estimated_duration, category, is_available, icon, popularity_rank)
 WHERE p.username = 'shop_owner1';
 
