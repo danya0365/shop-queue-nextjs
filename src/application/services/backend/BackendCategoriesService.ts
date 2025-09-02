@@ -1,6 +1,6 @@
 
 import type { CategoriesDataDTO } from '@/src/application/dtos/backend/categories-dto';
-import type { IGetCategoriesUseCase } from '@/src/application/usecases/backend/categories/GetCategoriesUseCase';
+import type { IGetCategoriesUseCase } from '@/src/application/usecases/backend/categories/GetMockCategoriesUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendCategoriesService {

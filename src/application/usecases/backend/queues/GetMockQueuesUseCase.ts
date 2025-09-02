@@ -6,7 +6,7 @@ export interface IGetQueuesUseCase {
   execute(): Promise<QueuesDataDTO>;
 }
 
-export class GetQueuesUseCase implements IGetQueuesUseCase {
+export class GetMockQueuesUseCase implements IGetQueuesUseCase {
   constructor(
     private readonly logger: Logger
   ) { }

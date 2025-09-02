@@ -31,8 +31,11 @@ export class GetCustomersUseCase implements IGetCustomersUseCase {
         limit: params.limit || 10
       };
 
-      const paginatedCustomers = await this.customerRepository.getPaginatedCustomers(paginationParams);
-      const stats = await this.customerRepository.getCustomerStats();
+      // use promise.all to get paginated customers and stats in parallel
+      const [paginatedCustomers, stats] = await Promise.all([
+        this.customerRepository.getPaginatedCustomers(paginationParams),
+        this.customerRepository.getCustomerStats()
+      ]);
 
       // Map domain entities to DTOs
       const customerDTOs: CustomerDTO[] = paginatedCustomers.data.map(this.mapCustomerEntityToDTO);

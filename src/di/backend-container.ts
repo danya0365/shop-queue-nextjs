@@ -13,7 +13,7 @@ import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-user
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
 import { GetAuthUsersUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersUseCase";
-import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetCategoriesUseCase";
+import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetMockCategoriesUseCase";
 import { CreateCustomerUseCase } from "../application/usecases/backend/customers/CreateCustomerUseCase";
 import { DeleteCustomerUseCase } from "../application/usecases/backend/customers/DeleteCustomerUseCase";
 import { GetCustomerByIdUseCase } from "../application/usecases/backend/customers/GetCustomerByIdUseCase";
@@ -30,15 +30,15 @@ import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employe
 import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
 import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
 import { GetPaymentsUseCase } from "../application/usecases/backend/payments/GetPaymentsUseCase";
-import { 
+import {
   CreateProfileUseCase,
   DeleteProfileUseCase,
   GetProfileByIdUseCase,
-  GetProfilesUseCase,
   GetProfileStatsUseCase,
+  GetProfilesUseCase,
   UpdateProfileUseCase
 } from "../application/usecases/backend/profiles";
-import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetQueuesUseCase";
+import { GetQueuesUseCase } from "../application/usecases/backend/queues/GetMockQueuesUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
 import { Logger } from "../domain/interfaces/logger";
@@ -112,7 +112,7 @@ export async function createBackendContainer(): Promise<Container> {
 
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
     const getPaymentsUseCase = new GetPaymentsUseCase(logger);
-    
+
     // Profile use cases
     const getProfilesUseCase = new GetProfilesUseCase(profileRepository);
     const getProfileStatsUseCase = new GetProfileStatsUseCase(profileRepository);

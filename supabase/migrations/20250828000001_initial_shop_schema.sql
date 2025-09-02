@@ -159,7 +159,10 @@ CREATE TABLE queues (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     served_at TIMESTAMP WITH TIME ZONE,
-    completed_at TIMESTAMP WITH TIME ZONE
+    completed_at TIMESTAMP WITH TIME ZONE,
+    cancelled_at TIMESTAMP WITH TIME ZONE,
+    cancelled_reason TEXT,
+    cancelled_note TEXT
 );
 
 -- 10. Queue Services (Many-to-Many)
