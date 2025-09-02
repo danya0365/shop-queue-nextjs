@@ -12,7 +12,7 @@ export interface QueueEntity {
   shopId: string;
   shopName: string; // Joined data
   queueServices: QueueServiceEntity[];
-  queueNumber: number;
+  queueNumber: string;
   status: QueueStatus;
   priority: QueuePriority;
   estimatedWaitTime: number; // in minutes
@@ -22,6 +22,41 @@ export interface QueueEntity {
   updatedAt: string;
   calledAt?: string;
   completedAt?: string;
+}
+
+/**
+ * Input DTO for CreateQueueUseCase
+ */
+export interface CreateQueueEntity {
+  customerId: string;
+  shopId: string;
+  queueNumber: number;
+  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  priority: 'normal' | 'high' | 'urgent';
+  estimatedWaitTime: number;
+  notes?: string;
+  queueServices: {
+    serviceId: string;
+    quantity: number;
+    price: number;
+  }[];
+}
+
+/**
+ * Input DTO for UpdateQueueUseCase
+ */
+export interface UpdateQueueEntity {
+  queueNumber?: number;
+  status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  priority?: 'normal' | 'high' | 'urgent';
+  estimatedWaitTime?: number;
+  actualWaitTime?: number;
+  notes?: string;
+  queueServices?: {
+    serviceId: string;
+    quantity: number;
+    price: number;
+  }[];
 }
 
 /**

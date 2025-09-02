@@ -1,4 +1,4 @@
-import { PaginatedQueuesEntity, QueueEntity, QueueStatsEntity } from "../../entities/backend/backend-queue.entity";
+import { CreateQueueEntity, PaginatedQueuesEntity, QueueEntity, QueueStatsEntity, UpdateQueueEntity } from "../../entities/backend/backend-queue.entity";
 import { PaginationParams } from "../../interfaces/pagination-types";
 
 /**
@@ -63,7 +63,7 @@ export interface BackendQueueRepository {
    * @returns Created queue entity
    * @throws BackendQueueError if the operation fails
    */
-  createQueue(queue: Omit<QueueEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<QueueEntity>;
+  createQueue(queue: Omit<CreateQueueEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<QueueEntity>;
 
   /**
    * Update an existing queue
@@ -72,7 +72,7 @@ export interface BackendQueueRepository {
    * @returns Updated queue entity
    * @throws BackendQueueError if the operation fails
    */
-  updateQueue(id: string, queue: Partial<QueueEntity>): Promise<QueueEntity>;
+  updateQueue(id: string, queue: Partial<UpdateQueueEntity>): Promise<QueueEntity>;
 
   /**
    * Delete a queue

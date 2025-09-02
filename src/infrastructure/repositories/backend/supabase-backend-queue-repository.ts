@@ -1,4 +1,4 @@
-import { PaginatedQueuesEntity, QueueEntity, QueueStatsEntity } from "../../../domain/entities/backend/backend-queue.entity";
+import { CreateQueueEntity, PaginatedQueuesEntity, QueueEntity, QueueStatsEntity, UpdateQueueEntity } from "../../../domain/entities/backend/backend-queue.entity";
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
@@ -255,7 +255,7 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
    * @param queue Queue entity to create
    * @returns Created queue entity
    */
-  async createQueue(queue: Omit<QueueEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<QueueEntity> {
+  async createQueue(queue: Omit<CreateQueueEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<QueueEntity> {
     try {
       // Convert domain entity to database schema
       const queueSchema = {
@@ -325,7 +325,7 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
    * @param queue Queue data to update
    * @returns Updated queue entity
    */
-  async updateQueue(id: string, queue: Partial<QueueEntity>): Promise<QueueEntity> {
+  async updateQueue(id: string, queue: Partial<UpdateQueueEntity>): Promise<QueueEntity> {
     try {
       // Check if queue exists
       const existingQueue = await this.getQueueById(id);
@@ -345,8 +345,6 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
       if (queue.priority !== undefined) queueSchema.priority = queue.priority;
       if (queue.estimatedWaitTime !== undefined) queueSchema.estimated_duration = queue.estimatedWaitTime;
       if (queue.notes !== undefined) queueSchema.note = queue.notes || null;
-      if (queue.calledAt !== undefined) queueSchema.served_at = queue.calledAt || null;
-      if (queue.completedAt !== undefined) queueSchema.completed_at = queue.completedAt || null;
 
       // Update queue in database
       await this.dataSource.update<QueueSchemaRecord>(

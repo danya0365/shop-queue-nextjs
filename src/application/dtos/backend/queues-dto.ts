@@ -6,7 +6,7 @@ export interface QueueDTO {
   shopId: string;
   shopName: string; // joined from shops table
   queueServices: QueueServiceDTO[];
-  queueNumber: number;
+  queueNumber: string;
   status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   priority: 'normal' | 'high' | 'urgent';
   estimatedWaitTime: number; // in minutes
@@ -17,6 +17,43 @@ export interface QueueDTO {
   calledAt?: string;
   completedAt?: string;
 }
+
+/**
+ * Input DTO for CreateQueueUseCase
+ */
+export interface CreateQueueInput {
+  customerId: string;
+  shopId: string;
+  queueNumber: number;
+  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  priority: 'normal' | 'high' | 'urgent';
+  estimatedWaitTime: number;
+  notes?: string;
+  queueServices: {
+    serviceId: string;
+    quantity: number;
+    price: number;
+  }[];
+}
+
+/**
+ * Input DTO for UpdateQueueUseCase
+ */
+export interface UpdateQueueInput {
+  id: string;
+  status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  priority?: 'normal' | 'high' | 'urgent';
+  estimatedWaitTime?: number;
+  notes?: string;
+  calledAt?: string | null;
+  completedAt?: string | null;
+  queueServices?: {
+    serviceId: string;
+    quantity: number;
+    price: number;
+  }[];
+}
+
 
 export interface QueueServiceDTO {
   serviceId: string;

@@ -22,7 +22,7 @@ export class SupabaseBackendQueueMapper {
       shopId: schema.shop_id,
       shopName: schema.shop_name || '',
       queueServices: services.map(service => this.serviceToDomain(service)),
-      queueNumber: parseInt(schema.queue_number, 10),
+      queueNumber: schema.queue_number,
       status: schema.status as QueueStatus,
       priority: schema.priority as QueuePriority,
       estimatedWaitTime: schema.estimated_duration,

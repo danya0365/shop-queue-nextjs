@@ -41,7 +41,6 @@ export interface CreateEmployeeEntity {
 }
 
 export interface UpdateEmployeeEntity {
-  id: string;
   employeeCode?: string;
   name?: string;
   email?: string;
