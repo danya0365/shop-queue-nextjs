@@ -18,6 +18,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
       const mockCategories: CategoryDTO[] = [
         {
           id: '1',
+          slug: 'haircut',
           name: 'ตัดผม',
           description: 'บริการตัดแต่งผม',
           icon: '✂️',
@@ -31,6 +32,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
         },
         {
           id: '2',
+          slug: 'beauty',
           name: 'ความงาม',
           description: 'บริการดูแลความงาม',
           icon: '💄',
@@ -44,6 +46,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
         },
         {
           id: '3',
+          slug: 'repair',
           name: 'ซ่อมมือถือ',
           description: 'บริการซ่อมแซมมือถือ',
           icon: '📱',
@@ -57,6 +60,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
         },
         {
           id: '4',
+          slug: 'restaurant',
           name: 'ร้านอาหาร',
           description: 'บริการสั่งอาหาร',
           icon: '🍽️',
@@ -70,9 +74,10 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
         },
         {
           id: '5',
+          slug: 'spa',
           name: 'สปา',
           description: 'บริการนวดและสปา',
-          icon: '🧘‍♀️',
+          icon: '🧘',
           color: '#8B5CF6',
           shopsCount: 22,
           servicesCount: 78,
@@ -83,6 +88,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
         },
         {
           id: '6',
+          slug: 'tailor',
           name: 'ซักรีด',
           description: 'บริการซักรีดเสื้อผ้า',
           icon: '👕',

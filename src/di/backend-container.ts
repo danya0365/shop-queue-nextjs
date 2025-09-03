@@ -1,12 +1,18 @@
 'use server';
 
+import { GetEmployeesPaginatedInput, PaginatedEmployeesDTO } from '@/src/application/dtos/backend/employees-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { BackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
+import { CreateCustomerUseCase } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
+import { DeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
+import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
+import { GetCustomersPaginatedUseCase } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
+import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
+import { UpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
 import { BackendAuthUsersService } from "../application/services/backend/BackendAuthUsersService";
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
-import { BackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
-import { GetEmployeesPaginatedInput, PaginatedEmployeesDTO } from '@/src/application/dtos/backend/employees-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
@@ -15,13 +21,7 @@ import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-user
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
 import { GetAuthUsersPaginatedUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersPaginatedUseCase";
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
-import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetMockCategoriesUseCase";
-import { CreateCustomerUseCase } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
-import { DeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
-import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
-import { GetCustomersPaginatedUseCase } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
-import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
-import { UpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
+import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoriesPaginatedUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from "../application/usecases/backend/categories";
 import { GetDashboardDataUseCase } from "../application/usecases/backend/dashboard/GetDashboardDataUseCase";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
@@ -55,6 +55,7 @@ import { createBackendSupabaseClient } from "../infrastructure/config/supabase-b
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseBackendAuthUsersRepository } from "../infrastructure/repositories/backend/supabase-backend-auth-users-repository";
+import { SupabaseBackendCategoryRepository } from "../infrastructure/repositories/backend/supabase-backend-category-repository";
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
 import { SupabaseBackendDashboardRepository } from "../infrastructure/repositories/backend/supabase-backend-dashboard-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
@@ -92,6 +93,7 @@ export async function createBackendContainer(): Promise<Container> {
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
     const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
+    const categoryRepository = new SupabaseBackendCategoryRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository, logger);
@@ -138,7 +140,12 @@ export async function createBackendContainer(): Promise<Container> {
     const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository);
     const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository);
 
-    const getCategoriesUseCase = new GetCategoriesUseCase(logger);
+    const getCategoryByIdUseCase = new GetCategoryByIdUseCase(categoryRepository);
+    const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(categoryRepository);
+    const getCategoryStatsUseCase = new GetCategoryStatsUseCase(categoryRepository);
+    const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
+    const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository);
+    const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
     const getPaymentsUseCase = new GetPaymentsUseCase(logger);
 
     // Profile use cases
@@ -191,7 +198,7 @@ export async function createBackendContainer(): Promise<Container> {
       getAuthUserStatsUseCase,
       deleteAuthUserUseCase
     );
-    const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
+    const backendCategoriesService = new BackendCategoriesService(getCategoriesPaginatedUseCase, getCategoryStatsUseCase, getCategoryByIdUseCase, createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, logger);
     const backendProfilesService = new BackendProfilesService(
       getProfilesPaginatedUseCase,
       getProfileStatsUseCase,

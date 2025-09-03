@@ -45,3 +45,67 @@ SELECT
   COALESCE(most_popular_category, 'No categories with shops') as most_popular_category,
   COALESCE(least_popular_category, 'No categories with shops') as least_popular_category
 FROM stats_calculation;
+
+CREATE OR REPLACE VIEW public.category_info_stats_view AS
+SELECT 
+    c.id,
+    c.name,
+    c.slug,
+    c.icon,
+    c.color,
+    c.description,
+    c.created_at,
+    c.updated_at,
+    COALESCE(shop_counts.shops_count, 0) as shops_count,
+    COALESCE(service_counts.services_count, 0) as services_count,
+    -- เพิ่มข้อมูลเสริมที่อาจจะมีประโยชน์
+    COALESCE(active_shop_counts.active_shops_count, 0) as active_shops_count,
+    COALESCE(available_service_counts.available_services_count, 0) as available_services_count
+FROM 
+    public.categories c
+    
+-- นับจำนวน shops ทั้งหมดในแต่ละ category
+LEFT JOIN (
+    SELECT 
+        cs.category_id,
+        COUNT(DISTINCT cs.shop_id) as shops_count
+    FROM public.category_shops cs
+    INNER JOIN public.shops s ON cs.shop_id = s.id
+    GROUP BY cs.category_id
+) shop_counts ON c.id = shop_counts.category_id
+
+-- นับจำนวน active shops ในแต่ละ category
+LEFT JOIN (
+    SELECT 
+        cs.category_id,
+        COUNT(DISTINCT cs.shop_id) as active_shops_count
+    FROM public.category_shops cs
+    INNER JOIN public.shops s ON cs.shop_id = s.id
+    WHERE s.status = 'active'
+    GROUP BY cs.category_id
+) active_shop_counts ON c.id = active_shop_counts.category_id
+
+-- นับจำนวน services ทั้งหมดในแต่ละ category
+LEFT JOIN (
+    SELECT 
+        cs.category_id,
+        COUNT(ser.id) as services_count
+    FROM public.category_shops cs
+    INNER JOIN public.shops s ON cs.shop_id = s.id
+    INNER JOIN public.services ser ON s.id = ser.shop_id
+    GROUP BY cs.category_id
+) service_counts ON c.id = service_counts.category_id
+
+-- นับจำนวน available services ในแต่ละ category  
+LEFT JOIN (
+    SELECT 
+        cs.category_id,
+        COUNT(ser.id) as available_services_count
+    FROM public.category_shops cs
+    INNER JOIN public.shops s ON cs.shop_id = s.id
+    INNER JOIN public.services ser ON s.id = ser.shop_id
+    WHERE ser.is_available = true
+    GROUP BY cs.category_id
+) available_service_counts ON c.id = available_service_counts.category_id
+
+ORDER BY c.name;

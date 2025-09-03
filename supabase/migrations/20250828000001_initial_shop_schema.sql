@@ -386,8 +386,16 @@ CREATE TABLE shop_activity_log (
 );
 
 -- Create indexes for performance
+
+CREATE INDEX idx_categories_slug ON categories(slug);
+CREATE INDEX idx_categories_name ON categories(name);
+CREATE INDEX idx_categories_is_active ON categories(is_active);
 CREATE INDEX idx_shops_owner_id ON shops(owner_id);
+CREATE INDEX idx_shops_name ON shops(name);
+CREATE INDEX idx_shops_slug ON shops(slug);
 CREATE INDEX idx_shops_status ON shops(status);
+CREATE INDEX idx_category_shops_category_id ON category_shops(category_id);
+CREATE INDEX idx_category_shops_shop_id ON category_shops(shop_id);
 CREATE INDEX idx_customer_shop_id ON customers(shop_id);
 CREATE INDEX idx_customer_name ON customers(name);
 CREATE INDEX idx_customer_phone ON customers(phone);

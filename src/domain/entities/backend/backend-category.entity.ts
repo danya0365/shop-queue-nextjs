@@ -3,6 +3,7 @@ import { PaginatedResult } from "../../interfaces/pagination-types";
 export interface CategoryEntity {
   id: string;
   name: string;
+  slug: string;
   description: string;
   icon: string;
   color: string;

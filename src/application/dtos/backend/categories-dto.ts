@@ -1,5 +1,6 @@
 export interface CategoryDTO {
   id: string;
+  slug: string;
   name: string;
   description: string;
   icon: string;
@@ -27,4 +28,16 @@ export interface CategoriesDataDTO {
   totalCount: number;
   currentPage: number;
   perPage: number;
+}
+
+export interface PaginationMetadata {
+  totalItems: number;
+  itemsPerPage: number;
+  currentPage: number;
+  totalPages: number;
+}
+
+export interface PaginatedCategoriesDTO {
+  data: CategoryDTO[];
+  pagination: PaginationMetadata;
 }
