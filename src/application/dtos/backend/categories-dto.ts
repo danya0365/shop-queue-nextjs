@@ -4,8 +4,8 @@ export interface CategoryDTO {
   description: string;
   icon: string;
   color: string;
-  shopsCount: number;
-  servicesCount: number;
+  shopsCount: number; // joined from category_shops
+  servicesCount: number; // joined from services
   isActive: boolean;
   sortOrder: number;
   createdAt: string;

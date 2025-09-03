@@ -1,5 +1,5 @@
 
--- Insert username: shop_owner1 for shop owner
+-- Insert username: haircut_owner for shop owner
 INSERT INTO
     auth.users (
         instance_id,
@@ -26,14 +26,14 @@ INSERT INTO
         '90000000-0000-0000-0000-000000000001',
         'authenticated',
         'authenticated',
-        'shop_owner1@example.com',
+        'haircut_owner@example.com',
         crypt(current_setting('my.app_password'), gen_salt('bf')),
         NOW() - INTERVAL '30 days',
         NULL,
         NOW() - INTERVAL '1 day',
         '{"provider":"email","providers":["email"]}',
         '{
-          "username": "shop_owner1",
+          "username": "haircut_owner",
           "full_name": "Shop Owner 1",
           "role": "user",
           "is_active": true
@@ -70,7 +70,7 @@ SELECT
 FROM
     auth.users
 WHERE
-    email = 'shop_owner1@example.com'
+    email = 'haircut_owner@example.com'
 ON CONFLICT (provider_id, provider) DO NOTHING;
 
 -- Create username: somchai for shop employee
@@ -228,6 +228,7 @@ ON CONFLICT (provider_id, provider) DO NOTHING;
 INSERT INTO shops (
   owner_id,
   name,
+  slug,
   description,
   address,
   phone,
@@ -245,6 +246,7 @@ INSERT INTO shops (
 SELECT
   p.id AS owner_id,
   'ร้านตัดผมสไตล์',
+  'stylehair',
   'ร้านตัดผมชาย-หญิง บริการครบครัน',
   '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
   '02-123-4567',
@@ -259,7 +261,7 @@ SELECT
   NOW() - INTERVAL '12 months',
   NOW() - INTERVAL '1 day'
 FROM profiles p
-WHERE p.username = 'shop_owner1'
+WHERE p.username = 'haircut_owner'
 LIMIT 1;
 
 -- Link shop to categories
@@ -273,7 +275,7 @@ FROM categories c
 CROSS JOIN shops s
 JOIN profiles p ON s.owner_id = p.id
 WHERE c.slug = 'haircut'
-AND p.username = 'shop_owner1';
+AND p.username = 'haircut_owner';
 
 -- Insert shop opening hours
 INSERT INTO shop_opening_hours (shop_id, day_of_week, is_open, open_time, close_time, break_start, break_end, created_at, updated_at)
@@ -299,13 +301,14 @@ CROSS JOIN (
     ('saturday'::text, true, '10:00:00'::time, '17:00:00'::time, '12:00:00'::time, '13:00:00'::time),
     ('sunday'::text, false, NULL, NULL, NULL, NULL)
 ) AS day_info(day_of_week, is_open, open_time, close_time, break_start, break_end)
-WHERE p.username = 'shop_owner1';
+WHERE p.username = 'haircut_owner';
 
 -- Insert services for the shop
-INSERT INTO services (shop_id, name, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
+INSERT INTO services (shop_id, name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   service_info.name,
+  service_info.slug,
   service_info.description,
   service_info.price,
   service_info.estimated_duration,
@@ -319,19 +322,20 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ตัดผมชาย'::text, 'บริการตัดผมสำหรับสุภาพบุรุษ'::text, 200.00::numeric, 30::integer, 'haircut'::text, true::boolean, '✂️'::text, 1::integer),
-    ('ตัดผมหญิง'::text, 'บริการตัดผมสำหรับสุภาพสตรี'::text, 300.00::numeric, 45::integer, 'haircut'::text, true::boolean, '✂️'::text, 2::integer),
-    ('สระไดร์'::text, 'บริการสระผมและเป่าแห้ง'::text, 150.00::numeric, 20::integer, 'wash_and_dry'::text, true::boolean, '💧'::text, 3::integer),
-    ('ทำสีผม'::text, 'บริการทำสีผม'::text, 1500.00::numeric, 120::integer, 'coloring'::text, true::boolean, '🎨'::text, 4::integer),
-    ('ดัดผม'::text, 'บริการดัดผม'::text, 1200.00::numeric, 90::integer, 'styling'::text, true::boolean, '🌀'::text, 5::integer)
-) AS service_info(name, description, price, estimated_duration, category, is_available, icon, popularity_rank)
-WHERE p.username = 'shop_owner1';
+    ('ตัดผมชาย'::text, 'haircut_men'::text, 'บริการตัดผมสำหรับสุภาพบุรุษ'::text, 200.00::numeric, 30::integer, 'haircut'::text, true::boolean, '✂️'::text, 1::integer),
+    ('ตัดผมหญิง'::text, 'haircut_women'::text, 'บริการตัดผมสำหรับสุภาพสตรี'::text, 300.00::numeric, 45::integer, 'haircut'::text, true::boolean, '✂️'::text, 2::integer),
+    ('สระไดร์'::text, 'wash_and_dry'::text, 'บริการสระผมและเป่าแห้ง'::text, 150.00::numeric, 20::integer, 'wash_and_dry'::text, true::boolean, '💧'::text, 3::integer),
+    ('ทำสีผม'::text, 'coloring'::text, 'บริการทำสีผม'::text, 1500.00::numeric, 120::integer, 'coloring'::text, true::boolean, '🎨'::text, 4::integer),
+    ('ดัดผม'::text, 'styling'::text, 'บริการดัดผม'::text, 1200.00::numeric, 90::integer, 'styling'::text, true::boolean, '🌀'::text, 5::integer)
+) AS service_info(name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank)
+WHERE p.username = 'haircut_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
+  dept_info.slug,
   dept_info.description,
   dept_info.employee_count,
   NOW(),
@@ -340,11 +344,11 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ตัดผม'::text, 'แผนกตัดผม'::text, 3::integer),
-    ('ทำสีผม'::text, 'แผนกทำสีผม'::text, 2::integer),
-    ('ต้อนรับ'::text, 'แผนกต้อนรับ'::text, 1::integer)
-) AS dept_info(name, description, employee_count)
-WHERE p.username = 'shop_owner1';
+    ('ตัดผม'::text, 'haircut'::text, 'แผนกตัดผม'::text, 3::integer),
+    ('ทำสีผม'::text, 'coloring'::text, 'แผนกทำสีผม'::text, 2::integer),
+    ('ต้อนรับ'::text, 'welcome'::text, 'แผนกต้อนรับ'::text, 1::integer)
+) AS dept_info(name, slug, description, employee_count)
+WHERE p.username = 'haircut_owner';
 
 -- Insert employees
 INSERT INTO employees (
@@ -399,7 +403,7 @@ JOIN departments d ON d.shop_id = s.id AND d.name = CASE
   WHEN emp_info.position_text = 'ช่างทำสีผม' THEN 'ทำสีผม'
   ELSE 'ต้อนรับ'
 END
-WHERE p1.username = 'shop_owner1';
+WHERE p1.username = 'haircut_owner';
 
 
 -- Insert customers
@@ -439,14 +443,14 @@ CROSS JOIN (
     ('วิชัย รักสวย'::text, '083-456-7890'::text, 'wichai@example.com'::text, '1990-05-15'::date, 'male'::text, '456 ถนนสุขุมวิท กรุงเทพฯ'::text, 'ชอบตัดผมทรงสั้น'::text, NOW() - INTERVAL '7 days', true::boolean, NULL::uuid, NOW() - INTERVAL '6 months', NOW() - INTERVAL '7 days'),
     ('สมหญิง ใจงาม'::text, '084-567-8901'::text, 'somying@example.com'::text, '1995-08-20'::date, 'female'::text, '789 ถนนลาดพร้าว กรุงเทพฯ'::text, 'ชอบทำสีผมโทนน้ำตาล'::text, NOW() - INTERVAL '14 days', true::boolean, NULL::uuid, NOW() - INTERVAL '5 months', NOW() - INTERVAL '14 days')
 ) AS cust_info(name, phone, email, date_of_birth, gender, address, notes, last_visit, is_active, profile_id, created_at, updated_at)
-WHERE p.username = 'shop_owner1';
+WHERE p.username = 'haircut_owner';
 
 -- Insert queues
 WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 customer_data AS (
@@ -517,7 +521,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 queue_data AS (
@@ -562,7 +566,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 queue_data AS (
@@ -622,7 +626,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 service_data AS (
@@ -687,7 +691,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 )
 INSERT INTO shop_settings (
@@ -732,7 +736,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 )
 INSERT INTO notification_settings (
@@ -765,7 +769,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 customer_data AS (
@@ -821,7 +825,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 ),
 customer_data AS (
@@ -917,7 +921,7 @@ WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
   JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'shop_owner1'
+  WHERE p.username = 'haircut_owner'
   LIMIT 1
 )
 INSERT INTO rewards (

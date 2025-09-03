@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS public.categories (
   icon TEXT,
   color TEXT,
   description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -60,6 +62,7 @@ CREATE TABLE shops (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     owner_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     description TEXT,
     address TEXT,
     phone TEXT,
@@ -121,6 +124,7 @@ CREATE TABLE services (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
     estimated_duration INTEGER DEFAULT 15, -- minutes
@@ -137,6 +141,7 @@ CREATE TABLE departments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
     description TEXT,
     employee_count INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
