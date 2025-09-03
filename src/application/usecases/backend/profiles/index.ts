@@ -2,6 +2,7 @@
 export * from './CreateProfileUseCase';
 export * from './DeleteProfileUseCase';
 export * from './GetProfileByIdUseCase';
-export * from './GetProfilesUseCase';
+export * from './GetProfilesPaginatedUseCase';
 export * from './GetProfileStatsUseCase';
 export * from './UpdateProfileUseCase';
+

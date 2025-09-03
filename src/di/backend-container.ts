@@ -35,8 +35,8 @@ import {
   CreateProfileUseCase,
   DeleteProfileUseCase,
   GetProfileByIdUseCase,
+  GetProfilesPaginatedUseCase,
   GetProfileStatsUseCase,
-  GetProfilesUseCase,
   UpdateProfileUseCase
 } from "../application/usecases/backend/profiles";
 import { GetQueuesPaginatedUseCase } from "../application/usecases/backend/queues/GetQueuesPaginatedUseCase";
@@ -128,7 +128,7 @@ export async function createBackendContainer(): Promise<Container> {
     const getPaymentsUseCase = new GetPaymentsUseCase(logger);
 
     // Profile use cases
-    const getProfilesUseCase = new GetProfilesUseCase(profileRepository);
+    const getProfilesPaginatedUseCase = new GetProfilesPaginatedUseCase(profileRepository);
     const getProfileStatsUseCase = new GetProfileStatsUseCase(profileRepository);
     const getProfileByIdUseCase = new GetProfileByIdUseCase(profileRepository);
     const createProfileUseCase = new CreateProfileUseCase(profileRepository);
@@ -177,7 +177,7 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const backendCategoriesService = new BackendCategoriesService(getCategoriesUseCase, logger);
     const backendProfilesService = new BackendProfilesService(
-      getProfilesUseCase,
+      getProfilesPaginatedUseCase,
       getProfileStatsUseCase,
       getProfileByIdUseCase,
       createProfileUseCase,

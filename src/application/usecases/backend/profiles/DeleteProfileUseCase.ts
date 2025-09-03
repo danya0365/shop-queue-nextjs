@@ -1,34 +1,19 @@
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { BackendProfileRepository } from '@/src/domain/repositories/backend/backend-profile-repository';
 
-export interface DeleteProfileUseCaseInput {
-  id: string;
-}
-
-export interface DeleteProfileUseCaseOutput {
-  success: boolean;
-}
-
-export interface IDeleteProfileUseCase {
-  execute(input: DeleteProfileUseCaseInput): Promise<DeleteProfileUseCaseOutput>;
-}
-
-export class DeleteProfileUseCase implements IDeleteProfileUseCase {
+export class DeleteProfileUseCase implements IUseCase<string, boolean> {
   constructor(
     private readonly profileRepository: BackendProfileRepository
   ) { }
 
-  async execute(input: DeleteProfileUseCaseInput): Promise<DeleteProfileUseCaseOutput> {
-    const { id } = input;
-
+  async execute(input: string): Promise<boolean> {
     // Validate input
-    if (!id) {
+    if (!input) {
       throw new Error('Profile ID is required');
     }
 
-    const success = await this.profileRepository.deleteProfile(id);
+    const success = await this.profileRepository.deleteProfile(input);
 
-    return {
-      success
-    };
+    return success;
   }
 }

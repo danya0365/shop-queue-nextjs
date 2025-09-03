@@ -1,51 +1,14 @@
-import type { ProfileEntity, ProfileGender, ProfileVerificationStatus } from '@/src/domain/entities/backend/backend-profile.entity';
+import { CreateProfileUseCaseInput, ProfileDTO } from '@/src/application/dtos/backend/profiles-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { ProfileMapper } from '@/src/application/mappers/backend/profile-mapper';
 import type { BackendProfileRepository } from '@/src/domain/repositories/backend/backend-profile-repository';
 
-export interface CreateProfileUseCaseInput {
-  userId: string;
-  name: string;
-  phone: string;
-  email: string;
-  avatarUrl?: string | null;
-  dateOfBirth?: string | null;
-  gender?: ProfileGender | null;
-  address?: string | null;
-  bio?: string | null;
-  preferences: {
-    language: 'th' | 'en';
-    notifications: boolean;
-    theme: 'light' | 'dark' | 'auto';
-  };
-  socialLinks?: {
-    facebook: string | null;
-    line: string | null;
-    instagram: string | null;
-  } | null;
-  verificationStatus: ProfileVerificationStatus;
-  privacySettings: {
-    showPhone: boolean;
-    showEmail: boolean;
-    showAddress: boolean;
-  };
-  lastLogin?: string | null;
-  loginCount?: number;
-  isActive?: boolean;
-}
-
-export interface CreateProfileUseCaseOutput {
-  profile: ProfileEntity;
-}
-
-export interface ICreateProfileUseCase {
-  execute(input: CreateProfileUseCaseInput): Promise<CreateProfileUseCaseOutput>;
-}
-
-export class CreateProfileUseCase implements ICreateProfileUseCase {
+export class CreateProfileUseCase implements IUseCase<CreateProfileUseCaseInput, ProfileDTO> {
   constructor(
     private readonly profileRepository: BackendProfileRepository
   ) { }
 
-  async execute(input: CreateProfileUseCaseInput): Promise<CreateProfileUseCaseOutput> {
+  async execute(input: CreateProfileUseCaseInput): Promise<ProfileDTO> {
     // Validate required fields
     if (!input.userId) {
       throw new Error('User ID is required');
@@ -87,8 +50,6 @@ export class CreateProfileUseCase implements ICreateProfileUseCase {
 
     const profile = await this.profileRepository.createProfile(profileData);
 
-    return {
-      profile
-    };
+    return ProfileMapper.toDTO(profile);
   }
 }

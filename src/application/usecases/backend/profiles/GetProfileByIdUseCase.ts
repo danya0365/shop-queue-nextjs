@@ -1,25 +1,15 @@
-import type { ProfileEntity } from '@/src/domain/entities/backend/backend-profile.entity';
+import { ProfileDTO } from '@/src/application/dtos/backend/profiles-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { ProfileMapper } from '@/src/application/mappers/backend/profile-mapper';
 import type { BackendProfileRepository } from '@/src/domain/repositories/backend/backend-profile-repository';
 
-export interface GetProfileByIdUseCaseInput {
-  id: string;
-}
-
-export interface GetProfileByIdUseCaseOutput {
-  profile: ProfileEntity | null;
-}
-
-export interface IGetProfileByIdUseCase {
-  execute(input: GetProfileByIdUseCaseInput): Promise<GetProfileByIdUseCaseOutput>;
-}
-
-export class GetProfileByIdUseCase implements IGetProfileByIdUseCase {
+export class GetProfileByIdUseCase implements IUseCase<string, ProfileDTO> {
   constructor(
     private readonly profileRepository: BackendProfileRepository
   ) { }
 
-  async execute(input: GetProfileByIdUseCaseInput): Promise<GetProfileByIdUseCaseOutput> {
-    const { id } = input;
+  async execute(input: string): Promise<ProfileDTO> {
+    const id = input;
 
     // Validate input
     if (!id) {
@@ -28,8 +18,10 @@ export class GetProfileByIdUseCase implements IGetProfileByIdUseCase {
 
     const profile = await this.profileRepository.getProfileById(id);
 
-    return {
-      profile
-    };
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+
+    return ProfileMapper.toDTO(profile);
   }
 }

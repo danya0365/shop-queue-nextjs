@@ -1,24 +1,16 @@
-import type { ProfileStatsEntity } from '@/src/domain/entities/backend/backend-profile.entity';
+import { ProfileStatsDTO } from '@/src/application/dtos/backend/profiles-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { ProfileMapper } from '@/src/application/mappers/backend/profile-mapper';
 import type { BackendProfileRepository } from '@/src/domain/repositories/backend/backend-profile-repository';
 
-export interface GetProfileStatsUseCaseOutput {
-  stats: ProfileStatsEntity;
-}
-
-export interface IGetProfileStatsUseCase {
-  execute(): Promise<GetProfileStatsUseCaseOutput>;
-}
-
-export class GetProfileStatsUseCase implements IGetProfileStatsUseCase {
+export class GetProfileStatsUseCase implements IUseCase<void, ProfileStatsDTO> {
   constructor(
     private readonly profileRepository: BackendProfileRepository
   ) { }
 
-  async execute(): Promise<GetProfileStatsUseCaseOutput> {
+  async execute(): Promise<ProfileStatsDTO> {
     const stats = await this.profileRepository.getProfileStats();
-
-    return {
-      stats
-    };
+    const statsDTO = ProfileMapper.statsToDTO(stats);
+    return statsDTO;
   }
 }

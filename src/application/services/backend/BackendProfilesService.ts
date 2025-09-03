@@ -1,12 +1,7 @@
-import type { ProfileDTO, ProfilesDataDTO } from '@/src/application/dtos/backend/profiles-dto';
-import { ProfileMapper } from '@/src/application/mappers/backend/profile-mapper';
-import type { CreateProfileUseCaseInput, ICreateProfileUseCase } from '@/src/application/usecases/backend/profiles/CreateProfileUseCase';
-import type { IDeleteProfileUseCase } from '@/src/application/usecases/backend/profiles/DeleteProfileUseCase';
-import type { IGetProfileByIdUseCase } from '@/src/application/usecases/backend/profiles/GetProfileByIdUseCase';
-import type { IGetProfileStatsUseCase } from '@/src/application/usecases/backend/profiles/GetProfileStatsUseCase';
-import type { IGetProfilesUseCase } from '@/src/application/usecases/backend/profiles/GetProfilesUseCase';
-import type { IUpdateProfileUseCase, UpdateProfileUseCaseInput } from '@/src/application/usecases/backend/profiles/UpdateProfileUseCase';
+import type { CreateProfileUseCaseInput, PaginatedProfilesDTO, ProfileDTO, ProfilesDataDTO, ProfileStatsDTO, UpdateProfileUseCaseInput } from '@/src/application/dtos/backend/profiles-dto';
+import type { GetProfilesPaginatedUseCaseInput } from '@/src/application/usecases/backend/profiles/GetProfilesPaginatedUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { IUseCase } from '../../interfaces/use-case.interface';
 
 export interface IBackendProfilesService {
   getProfilesData(page?: number, perPage?: number): Promise<ProfilesDataDTO>;
@@ -18,12 +13,12 @@ export interface IBackendProfilesService {
 
 export class BackendProfilesService implements IBackendProfilesService {
   constructor(
-    private readonly getProfilesUseCase: IGetProfilesUseCase,
-    private readonly getProfileStatsUseCase: IGetProfileStatsUseCase,
-    private readonly getProfileByIdUseCase: IGetProfileByIdUseCase,
-    private readonly createProfileUseCase: ICreateProfileUseCase,
-    private readonly updateProfileUseCase: IUpdateProfileUseCase,
-    private readonly deleteProfileUseCase: IDeleteProfileUseCase,
+    private readonly getProfilesPaginatedUseCase: IUseCase<GetProfilesPaginatedUseCaseInput, PaginatedProfilesDTO>,
+    private readonly getProfileStatsUseCase: IUseCase<void, ProfileStatsDTO>,
+    private readonly getProfileByIdUseCase: IUseCase<string, ProfileDTO>,
+    private readonly createProfileUseCase: IUseCase<CreateProfileUseCaseInput, ProfileDTO>,
+    private readonly updateProfileUseCase: IUseCase<UpdateProfileUseCaseInput, ProfileDTO>,
+    private readonly deleteProfileUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
   ) { }
 
@@ -38,22 +33,17 @@ export class BackendProfilesService implements IBackendProfilesService {
       this.logger.info('Getting profiles data', { page, perPage });
 
       // Get profiles and stats in parallel
-      const [profilesResult, statsResult] = await Promise.all([
-        this.getProfilesUseCase.execute({ page, perPage }),
+      const [profilesResult, stats] = await Promise.all([
+        this.getProfilesPaginatedUseCase.execute({ page, perPage }),
         this.getProfileStatsUseCase.execute()
       ]);
 
-      // Map domain entities to DTOs
-      const profiles = profilesResult.profiles.data.map(profile => ProfileMapper.toDTO(profile));
-      const stats = ProfileMapper.statsToDTO(statsResult.stats);
-
-      // Create response DTO
       return {
-        profiles,
+        profiles: profilesResult.data,
         stats,
-        totalCount: profilesResult.profiles.pagination.totalItems,
-        currentPage: profilesResult.profiles.pagination.currentPage,
-        perPage: profilesResult.profiles.pagination.itemsPerPage
+        totalCount: profilesResult.pagination.totalItems,
+        currentPage: profilesResult.pagination.currentPage,
+        perPage: profilesResult.pagination.itemsPerPage
       };
     } catch (error) {
       this.logger.error('Error getting profiles data', { error, page, perPage });
@@ -70,11 +60,8 @@ export class BackendProfilesService implements IBackendProfilesService {
     try {
       this.logger.info('Getting profile by ID', { id });
 
-      const result = await this.getProfileByIdUseCase.execute({ id });
-      if (!result.profile) {
-        throw new Error(`Profile with ID ${id} not found`);
-      }
-      return ProfileMapper.toDTO(result.profile);
+      const result = await this.getProfileByIdUseCase.execute(id);
+      return result;
     } catch (error) {
       this.logger.error('Error getting profile by ID', { error, id });
       throw error;
@@ -91,7 +78,7 @@ export class BackendProfilesService implements IBackendProfilesService {
       this.logger.info('Creating profile', { profileData });
 
       const result = await this.createProfileUseCase.execute(profileData);
-      return ProfileMapper.toDTO(result.profile);
+      return result;
     } catch (error) {
       this.logger.error('Error creating profile', { error, profileData });
       throw error;
@@ -110,7 +97,7 @@ export class BackendProfilesService implements IBackendProfilesService {
 
       const updateData = { id, ...profileData };
       const result = await this.updateProfileUseCase.execute(updateData);
-      return ProfileMapper.toDTO(result.profile);
+      return result;
     } catch (error) {
       this.logger.error('Error updating profile', { error, id, profileData });
       throw error;
@@ -126,8 +113,8 @@ export class BackendProfilesService implements IBackendProfilesService {
     try {
       this.logger.info('Deleting profile', { id });
 
-      const result = await this.deleteProfileUseCase.execute({ id });
-      return result.success;
+      const result = await this.deleteProfileUseCase.execute(id);
+      return result;
     } catch (error) {
       this.logger.error('Error deleting profile', { error, id });
       throw error;
