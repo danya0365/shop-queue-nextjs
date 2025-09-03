@@ -1,130 +1,71 @@
-
-import type { ShopsDataDTO } from '@/src/application/dtos/backend/shops-dto';
-import type { GetShopsPaginatedUseCase } from '@/src/application/usecases/backend/shops/GetShopsPaginatedUseCase';
-import type { GetShopStatsUseCase } from '@/src/application/usecases/backend/shops/GetShopStatsUseCase';
+import type { PaginatedShopsDTO, ShopStatsDTO, ShopsDataDTO } from '@/src/application/dtos/backend/shops-dto';
+import type { GetShopsPaginatedUseCaseInput } from '@/src/application/usecases/backend/shops/GetShopsPaginatedUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { IUseCase } from '../../interfaces/use-case.interface';
 
 export interface IBackendShopsService {
-  getShopsData(page?: number, limit?: number): Promise<ShopsDataDTO>;
-  getShopsPaginated(page: number, limit: number): Promise<ShopsDataDTO>;
-  getShopStats(): Promise<ShopsDataDTO>;
+  getShopsData(page?: number, perPage?: number): Promise<ShopsDataDTO>;
+  getShopsPaginated(page?: number, perPage?: number): Promise<PaginatedShopsDTO>;
+  getShopStats(): Promise<ShopStatsDTO>;
 }
 
 export class BackendShopsService implements IBackendShopsService {
   constructor(
-    private readonly getShopsPaginatedUseCase: GetShopsPaginatedUseCase,
-    private readonly getShopStatsUseCase: GetShopStatsUseCase,
+    private readonly getShopsPaginatedUseCase: IUseCase<GetShopsPaginatedUseCaseInput, PaginatedShopsDTO>,
+    private readonly getShopStatsUseCase: IUseCase<void, ShopStatsDTO>,
     private readonly logger: Logger
   ) { }
 
   /**
-   * Get shops data with pagination and stats (legacy method for backward compatibility)
+   * Get shops data including paginated shops and statistics
    * @param page Page number (default: 1)
-   * @param limit Items per page (default: 10)
-   * @returns Combined shops data with pagination and stats
+   * @param perPage Items per page (default: 10)
+   * @returns Shops data DTO
    */
-  async getShopsData(page: number = 1, limit: number = 10): Promise<ShopsDataDTO> {
+  async getShopsData(page: number = 1, perPage: number = 10): Promise<ShopsDataDTO> {
     try {
-      this.logger.info('BackendShopsService: Getting shops data', { page, limit });
+      this.logger.info('Getting shops data', { page, perPage });
 
-      // Get both paginated data and stats in parallel
-      const [paginatedData, stats] = await Promise.all([
-        this.getShopsPaginated(page, limit),
-        this.getShopStats()
+      // Get shops and stats in parallel
+      const [shopsResult, stats] = await Promise.all([
+        this.getShopsPaginatedUseCase.execute({ page, perPage }),
+        this.getShopStatsUseCase.execute()
       ]);
 
-      // Combine the results
-      const result: ShopsDataDTO = {
-        shops: paginatedData.shops,
-        stats: stats.stats,
-        totalCount: paginatedData.totalCount,
-        currentPage: paginatedData.currentPage,
-        perPage: paginatedData.perPage
+      return {
+        shops: shopsResult.data,
+        stats,
+        totalCount: shopsResult.pagination.totalItems,
+        currentPage: shopsResult.pagination.currentPage,
+        perPage: shopsResult.pagination.itemsPerPage
       };
+    } catch (error) {
+      this.logger.error('Error getting shops data', { error, page, perPage });
+      throw error;
+    }
+  }
 
-      this.logger.info('BackendShopsService: Successfully retrieved shops data');
+
+  async getShopsPaginated(page: number = 1, perPage: number = 10): Promise<PaginatedShopsDTO> {
+    try {
+      this.logger.info('Getting paginated shops data', { page, perPage });
+
+      const result = await this.getShopsPaginatedUseCase.execute({ page, perPage });
       return result;
     } catch (error) {
-      this.logger.error('BackendShopsService: Error getting shops data', error);
+      this.logger.error('Error getting paginated shops data', { error, page, perPage });
       throw error;
     }
   }
 
-  /**
-   * Get paginated shops data
-   * @param page Page number
-   * @param limit Items per page
-   * @returns Paginated shops data
-   */
-  async getShopsPaginated(page: number, limit: number): Promise<ShopsDataDTO> {
+  async getShopStats(): Promise<ShopStatsDTO> {
     try {
-      this.logger.info('BackendShopsService: Getting paginated shops data', { page, limit });
+      this.logger.info('Getting shop statistics');
 
-      const result = await this.getShopsPaginatedUseCase.execute({ page, limit });
-
-      // Convert domain entity to DTO
-      return {
-        shops: result.data.map(shop => ({
-          id: shop.id,
-          name: shop.name,
-          description: shop.description || '',
-          address: shop.address || '',
-          phone: shop.phone || '',
-          email: shop.email || '',
-          categoryId: '',
-          categoryName: '',
-          ownerId: shop.ownerId,
-          ownerName: shop.ownerName || '',
-          status: shop.status as 'active' | 'inactive' | 'pending',
-          openingHours: [],
-          queueCount: 0,
-          totalServices: 0,
-          rating: 0,
-          totalReviews: 0,
-          createdAt: shop.createdAt,
-          updatedAt: shop.updatedAt || ''
-        })),
-        stats: {
-          totalShops: 0,
-          activeShops: 0,
-          pendingApproval: 0,
-          newThisMonth: 0
-        }, // Empty stats
-        totalCount: result.pagination.totalItems,
-        currentPage: result.pagination.currentPage,
-        perPage: result.pagination.itemsPerPage
-      };
+      const result = await this.getShopStatsUseCase.execute();
+      return result;
     } catch (error) {
-      this.logger.error('BackendShopsService: Error getting paginated shops data', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get shop statistics
-   * @returns Shop statistics
-   */
-  async getShopStats(): Promise<ShopsDataDTO> {
-    try {
-      this.logger.info('BackendShopsService: Getting shop statistics');
-
-      const stats = await this.getShopStatsUseCase.execute();
-
-      // Convert domain entity to DTO
-      return {
-        shops: [], // Shops not included in this method
-        stats: {
-          totalShops: stats.totalShops,
-          activeShops: stats.activeShops,
-          pendingApproval: stats.pendingApproval,
-          newThisMonth: stats.newThisMonth
-        },
-        totalCount: 0,
-        currentPage: 0,
-        perPage: 0
-      };
-    } catch (error) {
-      this.logger.error('BackendShopsService: Error getting shop statistics', error);
+      this.logger.error('Error getting shop statistics', { error });
       throw error;
     }
   }

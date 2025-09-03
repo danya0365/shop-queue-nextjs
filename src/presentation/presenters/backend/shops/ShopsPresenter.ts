@@ -56,34 +56,25 @@ export class ShopsPresenter {
    * @param limit Items per page
    * @returns View model with only paginated shops data
    */
-  async getShopsPaginatedViewModel(page: number, limit: number): Promise<ShopsViewModel> {
+  async getShopsPaginatedViewModel(page: number, limit: number) {
     try {
       this.logger.info('ShopsPresenter: Getting paginated shops data', { page, limit });
 
       const shopsData = await this.backendShopsService.getShopsPaginated(page, limit);
 
       return {
-        shopsData,
-        isLoading: false,
-        error: null
+        shops: shopsData.data,
+        totalCount: shopsData.pagination.totalItems,
+        currentPage: shopsData.pagination.currentPage,
+        perPage: shopsData.pagination.itemsPerPage
       };
     } catch (error) {
       this.logger.error('ShopsPresenter: Error getting paginated shops data', error);
       return {
-        shopsData: {
-          shops: [],
-          stats: {
-            totalShops: 0,
-            activeShops: 0,
-            pendingApproval: 0,
-            newThisMonth: 0
-          },
-          totalCount: 0,
-          currentPage: page,
-          perPage: limit
-        },
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
+        shops: [],
+        totalCount: 0,
+        currentPage: page,
+        perPage: limit
       };
     }
   }
@@ -92,34 +83,20 @@ export class ShopsPresenter {
    * Get shop statistics without paginated data
    * @returns View model with only shop statistics
    */
-  async getShopStatsViewModel(): Promise<ShopsViewModel> {
+  async getShopStatsViewModel() {
     try {
       this.logger.info('ShopsPresenter: Getting shop statistics');
 
-      const shopsData = await this.backendShopsService.getShopStats();
+      const stats = await this.backendShopsService.getShopStats();
 
-      return {
-        shopsData,
-        isLoading: false,
-        error: null
-      };
+      return stats;
     } catch (error) {
       this.logger.error('ShopsPresenter: Error getting shop statistics', error);
       return {
-        shopsData: {
-          shops: [],
-          stats: {
-            totalShops: 0,
-            activeShops: 0,
-            pendingApproval: 0,
-            newThisMonth: 0
-          },
-          totalCount: 0,
-          currentPage: 1,
-          perPage: 10
-        },
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
+        totalShops: 0,
+        activeShops: 0,
+        pendingApproval: 0,
+        newThisMonth: 0
       };
     }
   }

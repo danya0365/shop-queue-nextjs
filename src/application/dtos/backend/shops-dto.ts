@@ -1,4 +1,5 @@
 import { OpeningHour } from "../shop-opening-hour-dto";
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 
 export interface ShopDTO {
   id: string;
@@ -35,3 +36,5 @@ export interface ShopsDataDTO {
   currentPage: number;
   perPage: number;
 }
+
+export type PaginatedShopsDTO = PaginatedResult<ShopDTO>;

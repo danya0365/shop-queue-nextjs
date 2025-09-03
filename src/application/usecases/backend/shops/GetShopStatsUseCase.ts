@@ -1,29 +1,24 @@
-import { ShopStatsEntity } from "../../../../domain/entities/backend/backend-shop.entity";
-import { Logger } from "../../../../domain/interfaces/logger";
-import { BackendShopRepository } from "../../../../domain/repositories/backend/backend-shop-repository";
-import { IUseCase } from "../../../interfaces/use-case.interface";
+import { ShopStatsDTO } from '@/src/application/dtos/backend/shops-dto';
+import { ShopMapper } from '@/src/application/mappers/backend/shop-mapper';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { BackendShopRepository } from '@/src/domain/repositories/backend/backend-shop-repository';
 
 /**
  * Use case for getting shop statistics
  * Following SOLID principles and Clean Architecture
  */
-export class GetShopStatsUseCase implements IUseCase<void, ShopStatsEntity> {
+export class GetShopStatsUseCase implements IUseCase<void, ShopStatsDTO> {
   constructor(
-    private shopRepository: BackendShopRepository,
-    private logger: Logger
+    private readonly shopRepository: BackendShopRepository
   ) { }
 
   /**
    * Execute the use case to get shop statistics
-   * @returns Shop statistics
+   * @returns Shop statistics DTO
    */
-  async execute(): Promise<ShopStatsEntity> {
-    try {
-      this.logger.info('GetShopStatsUseCase.execute');
-      return await this.shopRepository.getShopStats();
-    } catch (error) {
-      this.logger.error('Error in GetShopStatsUseCase.execute', { error });
-      throw error;
-    }
+  async execute(): Promise<ShopStatsDTO> {
+    const stats = await this.shopRepository.getShopStats();
+    const statsDTO = ShopMapper.statsToDTO(stats);
+    return statsDTO;
   }
 }

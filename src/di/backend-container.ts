@@ -98,8 +98,8 @@ export async function createBackendContainer(): Promise<Container> {
       getRecentActivitiesUseCase,
       logger
     );
-    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository, logger);
-    const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository, logger);
+    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository);
+    const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository);
     const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(queueRepository, logger);
     const getQueueStatsUseCase = new GetQueueStatsUseCase(queueRepository, logger);
 
