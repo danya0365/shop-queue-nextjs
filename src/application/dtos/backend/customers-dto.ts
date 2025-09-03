@@ -1,3 +1,5 @@
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+
 export interface CustomerDTO {
   id: string;
   name: string;
@@ -33,3 +35,5 @@ export interface CustomersDataDTO {
   currentPage: number;
   perPage: number;
 }
+
+export type PaginatedCustomersDTO = PaginatedResult<CustomerDTO>;

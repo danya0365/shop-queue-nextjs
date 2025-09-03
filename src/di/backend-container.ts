@@ -14,11 +14,12 @@ import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-use
 import { GetAuthUsersPaginatedUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersPaginatedUseCase";
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
 import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetMockCategoriesUseCase";
-import { CreateCustomerUseCase } from "../application/usecases/backend/customers/CreateCustomerUseCase";
-import { DeleteCustomerUseCase } from "../application/usecases/backend/customers/DeleteCustomerUseCase";
-import { GetCustomerByIdUseCase } from "../application/usecases/backend/customers/GetCustomerByIdUseCase";
-import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
-import { UpdateCustomerUseCase } from "../application/usecases/backend/customers/UpdateCustomerUseCase";
+import { CreateCustomerUseCase } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
+import { DeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
+import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
+import { GetCustomersPaginatedUseCase } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
+import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
+import { UpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
 import { GetDashboardDataUseCase } from "../application/usecases/backend/dashboard/GetDashboardDataUseCase";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
@@ -120,11 +121,12 @@ export async function createBackendContainer(): Promise<Container> {
     const deleteAuthUserUseCase = new DeleteAuthUserUseCase(authUsersRepository);
 
     // Customer use cases
-    const getCustomersUseCase = new GetCustomersUseCase(customerRepository, logger);
-    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(customerRepository, logger);
-    const createCustomerUseCase = new CreateCustomerUseCase(customerRepository, logger);
-    const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository, logger);
-    const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository, logger);
+    const getCustomersPaginatedUseCase = new GetCustomersPaginatedUseCase(customerRepository);
+    const getCustomerStatsUseCase = new GetCustomerStatsUseCase(customerRepository);
+    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(customerRepository);
+    const createCustomerUseCase = new CreateCustomerUseCase(customerRepository);
+    const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository);
+    const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository);
 
     // Employee use cases
     const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(employeeRepository, logger);
@@ -163,7 +165,8 @@ export async function createBackendContainer(): Promise<Container> {
 
     const backendQueuesService = new BackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
     const backendCustomersService = new BackendCustomersService(
-      getCustomersUseCase,
+      getCustomersPaginatedUseCase,
+      getCustomerStatsUseCase,
       getCustomerByIdUseCase,
       createCustomerUseCase,
       updateCustomerUseCase,

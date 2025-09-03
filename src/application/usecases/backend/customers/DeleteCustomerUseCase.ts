@@ -1,44 +1,34 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { BackendCustomerError, BackendCustomerErrorType } from '@/src/domain/repositories/backend/backend-customer-repository';
+import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
 
-export interface DeleteCustomerUseCaseParams {
-  id: string;
-}
-
-export interface IDeleteCustomerUseCase {
-  execute(params: DeleteCustomerUseCaseParams): Promise<void>;
-}
-
-export class DeleteCustomerUseCase implements IDeleteCustomerUseCase {
+export class DeleteCustomerUseCase implements IUseCase<string, boolean> {
   constructor(
-    private readonly customerRepository: BackendCustomerRepository,
-    private readonly logger: Logger
+    private readonly customerRepository: BackendCustomerRepository
   ) { }
 
-  async execute(params: DeleteCustomerUseCaseParams): Promise<void> {
-    try {
-      this.logger.info('DeleteCustomerUseCase: Deleting customer', { id: params.id });
-
-      // Check if customer exists
-      const existingCustomer = await this.customerRepository.getCustomerById(params.id);
-      if (!existingCustomer) {
-        throw new BackendCustomerError(
-          BackendCustomerErrorType.NOT_FOUND,
-          `Customer with ID ${params.id} not found`,
-          'deleteCustomer'
-        );
-      }
-
-      await this.customerRepository.deleteCustomer(params.id);
-
-      this.logger.info('DeleteCustomerUseCase: Successfully deleted customer', { id: params.id });
-    } catch (error) {
-      this.logger.error('DeleteCustomerUseCase: Error deleting customer', {
-        error,
-        id: params.id
-      });
-      throw error;
+  async execute(input: string): Promise<boolean> {
+    // Validate input
+    if (!input) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.VALIDATION_ERROR,
+        'Customer ID is required',
+        'deleteCustomer'
+      );
     }
+
+    // Check if customer exists
+    const existingCustomer = await this.customerRepository.getCustomerById(input);
+    if (!existingCustomer) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.NOT_FOUND,
+        `Customer with ID ${input} not found`,
+        'deleteCustomer'
+      );
+    }
+
+    await this.customerRepository.deleteCustomer(input);
+    
+    return true;
   }
 }

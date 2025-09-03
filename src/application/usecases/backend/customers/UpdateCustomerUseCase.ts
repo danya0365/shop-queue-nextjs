@@ -1,10 +1,10 @@
-import type { CustomerDTO } from '@/src/application/dtos/backend/customers-dto';
-import type { CustomerEntity } from '@/src/domain/entities/backend/backend-customer.entity';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
+import { CustomerDTO } from '@/src/application/dtos/backend/customers-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { CustomerMapper } from '@/src/application/mappers/backend/customer-mapper';
 import { BackendCustomerError, BackendCustomerErrorType } from '@/src/domain/repositories/backend/backend-customer-repository';
+import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
 
-export interface UpdateCustomerUseCaseParams {
+export interface UpdateCustomerUseCaseInput {
   id: string;
   name?: string;
   phone?: string | null;
@@ -16,86 +16,58 @@ export interface UpdateCustomerUseCaseParams {
   isActive?: boolean;
 }
 
-export interface IUpdateCustomerUseCase {
-  execute(params: UpdateCustomerUseCaseParams): Promise<CustomerDTO>;
-}
-
-export class UpdateCustomerUseCase implements IUpdateCustomerUseCase {
+export class UpdateCustomerUseCase implements IUseCase<UpdateCustomerUseCaseInput, CustomerDTO> {
   constructor(
-    private readonly customerRepository: BackendCustomerRepository,
-    private readonly logger: Logger
+    private readonly customerRepository: BackendCustomerRepository
   ) { }
 
-  async execute(params: UpdateCustomerUseCaseParams): Promise<CustomerDTO> {
-    try {
-      this.logger.info('UpdateCustomerUseCase: Updating customer', { id: params.id });
+  async execute(input: UpdateCustomerUseCaseInput): Promise<CustomerDTO> {
+    const { id } = input;
 
-      // Check if customer exists
-      const existingCustomer = await this.customerRepository.getCustomerById(params.id);
-      if (!existingCustomer) {
-        throw new BackendCustomerError(
-          BackendCustomerErrorType.NOT_FOUND,
-          `Customer with ID ${params.id} not found`,
-          'updateCustomer'
-        );
-      }
-
-      // Prepare update data
-      const updateData: Partial<Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>> = {};
-
-      if (params.name !== undefined) updateData.name = params.name;
-      if (params.phone !== undefined) updateData.phone = params.phone;
-      if (params.email !== undefined) updateData.email = params.email;
-      if (params.dateOfBirth !== undefined) updateData.dateOfBirth = params.dateOfBirth;
-      if (params.gender !== undefined) updateData.gender = params.gender;
-      if (params.address !== undefined) updateData.address = params.address;
-      if (params.notes !== undefined) updateData.notes = params.notes;
-      if (params.isActive !== undefined) updateData.isActive = params.isActive;
-
-      // Validate name if provided
-      if (updateData.name !== undefined && (updateData.name === null || updateData.name.trim() === '')) {
-        throw new BackendCustomerError(
-          BackendCustomerErrorType.VALIDATION_ERROR,
-          'Customer name cannot be empty',
-          'updateCustomer'
-        );
-      }
-
-      const updatedCustomer = await this.customerRepository.updateCustomer(params.id, updateData);
-      const customerDTO = this.mapCustomerEntityToDTO(updatedCustomer);
-
-      this.logger.info('UpdateCustomerUseCase: Successfully updated customer', {
-        id: updatedCustomer.id,
-        name: updatedCustomer.name
-      });
-
-      return customerDTO;
-    } catch (error) {
-      this.logger.error('UpdateCustomerUseCase: Error updating customer', {
-        error,
-        id: params.id
-      });
-      throw error;
+    // Validate input
+    if (!id) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.VALIDATION_ERROR,
+        'Customer ID is required',
+        'updateCustomer'
+      );
     }
-  }
 
-  private mapCustomerEntityToDTO(entity: CustomerEntity): CustomerDTO {
-    return {
-      id: entity.id,
-      name: entity.name,
-      phone: entity.phone || undefined,
-      email: entity.email || undefined,
-      dateOfBirth: entity.dateOfBirth || undefined,
-      gender: entity.gender || undefined,
-      address: entity.address || undefined,
-      totalQueues: entity.totalQueues,
-      totalPoints: entity.totalPoints,
-      membershipTier: entity.membershipTier,
-      lastVisit: entity.lastVisit || undefined,
-      notes: entity.notes || undefined,
-      isActive: entity.isActive,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
-    };
+    // Check if customer exists
+    const existingCustomer = await this.customerRepository.getCustomerById(id);
+    if (!existingCustomer) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.NOT_FOUND,
+        `Customer with ID ${id} not found`,
+        'updateCustomer'
+      );
+    }
+
+    // Create update data object - exclude id from update fields
+    const updateFields = Object.fromEntries(
+      Object.entries(input).filter(([key]) => key !== 'id')
+    );
+
+    // Check if at least one field to update is provided
+    if (Object.keys(updateFields).length === 0) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.VALIDATION_ERROR,
+        'At least one field to update must be provided',
+        'updateCustomer'
+      );
+    }
+
+    // Validate name if provided
+    if (updateFields.name !== undefined && (updateFields.name === null || updateFields.name.trim() === '')) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.VALIDATION_ERROR,
+        'Customer name cannot be empty',
+        'updateCustomer'
+      );
+    }
+
+    const updatedCustomer = await this.customerRepository.updateCustomer(id, updateFields);
+    
+    return CustomerMapper.toDTO(updatedCustomer);
   }
 }

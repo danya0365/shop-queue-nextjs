@@ -1,67 +1,36 @@
-import type { CustomerDTO } from '@/src/application/dtos/backend/customers-dto';
-import type { CustomerEntity } from '@/src/domain/entities/backend/backend-customer.entity';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
+import { CustomerDTO } from '@/src/application/dtos/backend/customers-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { CustomerMapper } from '@/src/application/mappers/backend/customer-mapper';
 import { BackendCustomerError, BackendCustomerErrorType } from '@/src/domain/repositories/backend/backend-customer-repository';
+import type { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
 
-export interface GetCustomerByIdUseCaseParams {
-  id: string;
-}
-
-export interface IGetCustomerByIdUseCase {
-  execute(params: GetCustomerByIdUseCaseParams): Promise<CustomerDTO>;
-}
-
-export class GetCustomerByIdUseCase implements IGetCustomerByIdUseCase {
+export class GetCustomerByIdUseCase implements IUseCase<string, CustomerDTO> {
   constructor(
-    private readonly customerRepository: BackendCustomerRepository,
-    private readonly logger: Logger
+    private readonly customerRepository: BackendCustomerRepository
   ) { }
 
-  async execute(params: GetCustomerByIdUseCaseParams): Promise<CustomerDTO> {
-    try {
-      this.logger.info('GetCustomerByIdUseCase: Getting customer by ID', { id: params.id });
+  async execute(input: string): Promise<CustomerDTO> {
+    const id = input;
 
-      const customer = await this.customerRepository.getCustomerById(params.id);
-
-      if (!customer) {
-        throw new BackendCustomerError(
-          BackendCustomerErrorType.NOT_FOUND,
-          `Customer with ID ${params.id} not found`,
-          'getCustomerById'
-        );
-      }
-
-      const customerDTO = this.mapCustomerEntityToDTO(customer);
-
-      this.logger.info('GetCustomerByIdUseCase: Successfully retrieved customer', { id: params.id });
-      return customerDTO;
-    } catch (error) {
-      this.logger.error('GetCustomerByIdUseCase: Error getting customer by ID', {
-        error,
-        id: params.id
-      });
-      throw error;
+    // Validate input
+    if (!id) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.VALIDATION_ERROR,
+        'Customer ID is required',
+        'getCustomerById'
+      );
     }
-  }
 
-  private mapCustomerEntityToDTO(entity: CustomerEntity): CustomerDTO {
-    return {
-      id: entity.id,
-      name: entity.name,
-      phone: entity.phone || undefined,
-      email: entity.email || undefined,
-      dateOfBirth: entity.dateOfBirth || undefined,
-      gender: entity.gender || undefined,
-      address: entity.address || undefined,
-      totalQueues: entity.totalQueues,
-      totalPoints: entity.totalPoints,
-      membershipTier: entity.membershipTier,
-      lastVisit: entity.lastVisit || undefined,
-      notes: entity.notes || undefined,
-      isActive: entity.isActive,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
-    };
+    const customer = await this.customerRepository.getCustomerById(id);
+
+    if (!customer) {
+      throw new BackendCustomerError(
+        BackendCustomerErrorType.NOT_FOUND,
+        `Customer with ID ${id} not found`,
+        'getCustomerById'
+      );
+    }
+
+    return CustomerMapper.toDTO(customer);
   }
 }
