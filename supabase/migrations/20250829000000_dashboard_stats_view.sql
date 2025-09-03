@@ -130,3 +130,96 @@ $$;
 GRANT SELECT ON public.queue_status_distribution_view TO authenticated;
 GRANT SELECT ON public.queue_status_distribution_flexible_view TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_queue_status_distribution(UUID, DATE, DATE) TO authenticated;
+
+
+-- สร้าง View สำหรับ Popular Services
+CREATE OR REPLACE VIEW popular_services_view AS
+SELECT 
+    s.id,
+    s.name,
+    COALESCE(queue_stats.queue_count, 0) AS queueCount,
+    COALESCE(revenue_stats.revenue, 0) AS revenue,
+    s.category
+FROM 
+    services s
+LEFT JOIN (
+    -- คำนวณจำนวนคิวของแต่ละ service
+    SELECT 
+        qs.service_id,
+        COUNT(DISTINCT qs.queue_id) AS queue_count
+    FROM 
+        queue_services qs
+    INNER JOIN 
+        queues q ON qs.queue_id = q.id
+    WHERE 
+        q.status IN ('waiting', 'serving', 'completed') -- กรองเฉพาะสถานะที่นับได้
+    GROUP BY 
+        qs.service_id
+) queue_stats ON s.id = queue_stats.service_id
+LEFT JOIN (
+    -- คำนวณรายได้ของแต่ละ service
+    SELECT 
+        qs.service_id,
+        SUM(qs.price * qs.quantity) AS revenue
+    FROM 
+        queue_services qs
+    INNER JOIN 
+        queues q ON qs.queue_id = q.id
+    WHERE 
+        q.status = 'completed' -- นับเฉพาะคิวที่เสร็จสิ้นแล้ว
+    GROUP BY 
+        qs.service_id
+) revenue_stats ON s.id = revenue_stats.service_id
+WHERE 
+    s.is_available = true -- แสดงเฉพาะ service ที่ยังใช้งานได้
+ORDER BY 
+    COALESCE(queue_stats.queue_count, 0) DESC, -- เรียงตามจำนวนคิว
+    COALESCE(revenue_stats.revenue, 0) DESC;   -- แล้วตามรายได้
+
+-- สร้าง View แบบ filtered สำหรับ Popular Services (Top 10)
+CREATE OR REPLACE VIEW top_popular_services_view AS
+SELECT * FROM popular_services_view
+LIMIT 10;
+
+-- สร้าง View สำหรับ Popular Services ตาม category
+CREATE OR REPLACE VIEW popular_services_by_category_view AS
+SELECT 
+    s.id,
+    s.name,
+    COALESCE(queue_stats.queue_count, 0) AS queueCount,
+    COALESCE(revenue_stats.revenue, 0) AS revenue,
+    s.category,
+    ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY COALESCE(queue_stats.queue_count, 0) DESC) AS rank_in_category
+FROM 
+    services s
+LEFT JOIN (
+    SELECT 
+        qs.service_id,
+        COUNT(DISTINCT qs.queue_id) AS queue_count
+    FROM 
+        queue_services qs
+    INNER JOIN 
+        queues q ON qs.queue_id = q.id
+    WHERE 
+        q.status IN ('waiting', 'serving', 'completed')
+    GROUP BY 
+        qs.service_id
+) queue_stats ON s.id = queue_stats.service_id
+LEFT JOIN (
+    SELECT 
+        qs.service_id,
+        SUM(qs.price * qs.quantity) AS revenue
+    FROM 
+        queue_services qs
+    INNER JOIN 
+        queues q ON qs.queue_id = q.id
+    WHERE 
+        q.status = 'completed'
+    GROUP BY 
+        qs.service_id
+) revenue_stats ON s.id = revenue_stats.service_id
+WHERE 
+    s.is_available = true
+ORDER BY 
+    s.category, 
+    rank_in_category;
