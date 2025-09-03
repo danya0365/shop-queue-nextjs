@@ -1,10 +1,12 @@
 
 import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, UpdateEmployeeParams } from '@/src/application/dtos/backend/employees-dto';
+import { GetEmployeesPaginatedInput } from '@/src/application/dtos/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { PaginatedEmployeesEntity } from '@/src/domain/entities/backend/backend-employee.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendEmployeesService {
-  getEmployeesData(): Promise<EmployeesDataDTO>;
+  getEmployeesData(page?: number, perPage?: number): Promise<EmployeesDataDTO>;
   getEmployeeStats(): Promise<EmployeeStatsDTO>;
   getEmployeeById(id: string): Promise<EmployeeDTO>;
   createEmployee(params: CreateEmployeeParams): Promise<EmployeeDTO>;
@@ -14,7 +16,7 @@ export interface IBackendEmployeesService {
 
 export class BackendEmployeesService implements IBackendEmployeesService {
   constructor(
-    private readonly getEmployeesUseCase: IUseCase<void, EmployeesDataDTO>,
+    private readonly getEmployeesPaginatedUseCase: IUseCase<GetEmployeesPaginatedInput, PaginatedEmployeesEntity>,
     private readonly getEmployeeStatsUseCase: IUseCase<void, EmployeeStatsDTO>,
     private readonly getEmployeeByIdUseCase: IUseCase<string, EmployeeDTO>,
     private readonly createEmployeeUseCase: IUseCase<CreateEmployeeParams, EmployeeDTO>,
@@ -23,14 +25,37 @@ export class BackendEmployeesService implements IBackendEmployeesService {
     private readonly logger: Logger
   ) { }
 
-  async getEmployeesData(): Promise<EmployeesDataDTO> {
+  async getEmployeesData(page: number = 1, perPage: number = 10): Promise<EmployeesDataDTO> {
     try {
       this.logger.info('BackendEmployeesService: Getting employees data');
 
-      const employeesData = await this.getEmployeesUseCase.execute();
+      const employeesData = await this.getEmployeesPaginatedUseCase.execute({ page, limit: perPage });
+      const employeeStats = await this.getEmployeeStatsUseCase.execute();
+
+      const employees = employeesData.data.map((employee) => ({
+        ...employee,
+        email: employee.email || undefined,
+        phone: employee.phone || undefined,
+        departmentId: employee.departmentId || undefined,
+        departmentName: employee.departmentName || undefined,
+        shopId: employee.shopId || undefined,
+        shopName: employee.shopName || undefined,
+        createdAt: employee.createdAt,
+        updatedAt: employee.updatedAt,
+        lastLogin: employee.lastLogin || undefined,
+        permissions: employee.permissions || [],
+        salary: employee.salary || undefined,
+        notes: employee.notes || undefined,
+      }));
 
       this.logger.info('BackendEmployeesService: Successfully retrieved employees data');
-      return employeesData;
+      return {
+        employees,
+        stats: employeeStats,
+        totalCount: employeesData.pagination.totalItems,
+        currentPage: employeesData.pagination.currentPage,
+        perPage: employeesData.pagination.itemsPerPage
+      };
     } catch (error) {
       this.logger.error('BackendEmployeesService: Error getting employees data', error);
       throw error;

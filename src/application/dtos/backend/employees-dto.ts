@@ -1,3 +1,5 @@
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+
 export interface EmployeeDTO {
   id: string;
   employeeCode: string;
@@ -80,3 +82,13 @@ export interface EmployeesDataDTO {
   currentPage: number;
   perPage: number;
 }
+
+/**
+ * Input DTO for GetShopsPaginatedUseCase
+ */
+export interface GetEmployeesPaginatedInput {
+  page: number;
+  limit: number;
+}
+
+export type PaginatedEmployeesDTO = PaginatedResult<EmployeeDTO>;

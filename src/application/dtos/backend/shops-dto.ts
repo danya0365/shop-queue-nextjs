@@ -1,6 +1,5 @@
 import { OpeningHour } from "../shop-opening-hour-dto";
 
-// TODO: update all key to camelCase
 export interface ShopDTO {
   id: string;
   name: string;

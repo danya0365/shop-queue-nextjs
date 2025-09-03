@@ -27,8 +27,8 @@ import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dash
 import { CreateEmployeeUseCase } from "../application/usecases/backend/employees/CreateEmployeeUseCase";
 import { DeleteEmployeeUseCase } from "../application/usecases/backend/employees/DeleteEmployeeUseCase";
 import { GetEmployeeByIdUseCase } from "../application/usecases/backend/employees/GetEmployeeByIdUseCase";
+import { GetEmployeesPaginatedUseCase } from "../application/usecases/backend/employees/GetEmployeesPaginatedUseCase";
 import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employees/GetEmployeeStatsUseCase";
-import { GetEmployeesUseCase } from "../application/usecases/backend/employees/GetEmployeesUseCase";
 import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
 import { GetPaymentsUseCase } from "../application/usecases/backend/payments/GetPaymentsUseCase";
 import {
@@ -117,7 +117,7 @@ export async function createBackendContainer(): Promise<Container> {
     const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository, logger);
 
     // Employee use cases
-    const getEmployeesUseCase = new GetEmployeesUseCase(logger);
+    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(employeeRepository, logger);
     const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(employeeRepository, logger);
     const createEmployeeUseCase = new CreateEmployeeUseCase(employeeRepository, logger);
     const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository, logger);
@@ -161,7 +161,7 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
     const backendEmployeesService = new BackendEmployeesService(
-      getEmployeesUseCase,
+      getEmployeesPaginatedUseCase,
       getEmployeeStatsUseCase,
       getEmployeeByIdUseCase,
       createEmployeeUseCase,
