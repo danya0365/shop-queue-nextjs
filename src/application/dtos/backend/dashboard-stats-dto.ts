@@ -1,3 +1,5 @@
+import { ActivityType } from "@/src/domain/entities/backend/backend-dashboard.entity";
+
 export interface DashboardStatsDTO {
   totalShops: number;
   totalQueues: number;
@@ -11,7 +13,7 @@ export interface DashboardStatsDTO {
 
 export interface RecentActivityDTO {
   id: string;
-  type: 'queue_created' | 'queue_completed' | 'customer_registered' | 'shop_created';
+  type: ActivityType;
   title: string;
   description: string;
   timestamp: string;

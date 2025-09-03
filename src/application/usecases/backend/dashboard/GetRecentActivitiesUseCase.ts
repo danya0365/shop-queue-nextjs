@@ -1,4 +1,5 @@
 import type { RecentActivityDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
+import { ActivityType } from '@/src/domain/entities/backend/backend-dashboard.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetRecentActivitiesUseCase {
@@ -16,7 +17,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
       const activities: RecentActivityDTO[] = [
         {
           id: '1',
-          type: 'queue_created',
+          type: ActivityType.QUEUE_CREATED,
           title: 'คิวใหม่ถูกสร้าง',
           description: 'ลูกค้า นาย สมชาย ใสใจ สร้างคิวสำหรับบริการตัดผม',
           timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
@@ -24,7 +25,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         },
         {
           id: '2',
-          type: 'queue_completed',
+          type: ActivityType.QUEUE_COMPLETED,
           title: 'คิวเสร็จสิ้น',
           description: 'คิว #Q001 เสร็จสิ้นการให้บริการแล้ว',
           timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
@@ -32,7 +33,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         },
         {
           id: '3',
-          type: 'customer_registered',
+          type: ActivityType.CUSTOMER_REGISTERED,
           title: 'ลูกค้าใหม่ลงทะเบียน',
           description: 'นางสาว มาลี ดีใจ ลงทะเบียนเป็นสมาชิกใหม่',
           timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
@@ -40,7 +41,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         },
         {
           id: '4',
-          type: 'shop_created',
+          type: ActivityType.SHOP_CREATED,
           title: 'ร้านใหม่เปิดให้บริการ',
           description: 'ร้าน "บิวตี้ เซ็นเตอร์" เปิดให้บริการแล้ว',
           timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -48,7 +49,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         },
         {
           id: '5',
-          type: 'queue_created',
+          type: ActivityType.QUEUE_CREATED,
           title: 'คิวใหม่ถูกสร้าง',
           description: 'ลูกค้า นาง สุดา หวานใจ สร้างคิวสำหรับบริการทำเล็บ',
           timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString(),

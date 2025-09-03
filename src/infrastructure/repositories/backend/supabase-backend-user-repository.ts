@@ -1,6 +1,6 @@
 import {
   UserEntity
-} from "@/src/domain/entities/backend/backend-dashboard.entity";
+} from "@/src/domain/entities/backend/backend-user.entity";
 import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { PaginatedResult, PaginationParams } from "@/src/domain/interfaces/pagination-types";

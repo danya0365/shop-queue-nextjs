@@ -1,4 +1,4 @@
-import { UserEntity } from "../../entities/backend/backend-dashboard.entity";
+import { UserEntity } from "../../entities/backend/backend-user.entity";
 import { BaseError } from "../../errors/base-error";
 import { PaginatedResult, PaginationParams } from "../../interfaces/pagination-types";
 
@@ -24,7 +24,7 @@ export class BackendUserError extends BaseError {
     cause?: unknown
   ) {
     super(message, operation, context, cause);
-    this.name = "BackendDashboardError";
+    this.name = "BackendUserError";
   }
 }
 
