@@ -39,8 +39,12 @@ import {
   GetProfileStatsUseCase,
   UpdateProfileUseCase
 } from "../application/usecases/backend/profiles";
+import { CreateQueueUseCase } from "../application/usecases/backend/queues/CreateQueueUseCase";
+import { DeleteQueueUseCase } from "../application/usecases/backend/queues/DeleteQueueUseCase";
+import { GetQueueByIdUseCase } from "../application/usecases/backend/queues/GetQueueByIdUseCase";
 import { GetQueuesPaginatedUseCase } from "../application/usecases/backend/queues/GetQueuesPaginatedUseCase";
 import { GetQueueStatsUseCase } from "../application/usecases/backend/queues/GetQueueStatsUseCase";
+import { UpdateQueueUseCase } from "../application/usecases/backend/queues/UpdateQueueUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
 import { Logger } from "../domain/interfaces/logger";
@@ -100,8 +104,14 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository);
     const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository);
+
+    // Queues use cases
+    const getQueueByIdUseCase = new GetQueueByIdUseCase(queueRepository, logger);
     const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(queueRepository, logger);
     const getQueueStatsUseCase = new GetQueueStatsUseCase(queueRepository, logger);
+    const createQueueUseCase = new CreateQueueUseCase(queueRepository, logger);
+    const updateQueueUseCase = new UpdateQueueUseCase(queueRepository, logger);
+    const deleteQueueUseCase = new DeleteQueueUseCase(queueRepository, logger);
 
     // Auth Users use cases
     const getAuthUsersPaginatedUseCase = new GetAuthUsersPaginatedUseCase(authUsersRepository);
@@ -151,7 +161,7 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
 
-    const backendQueuesService = new BackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, logger);
+    const backendQueuesService = new BackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
     const backendCustomersService = new BackendCustomersService(
       getCustomersUseCase,
       getCustomerByIdUseCase,

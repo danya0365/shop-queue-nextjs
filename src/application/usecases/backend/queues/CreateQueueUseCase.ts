@@ -1,9 +1,9 @@
-import { CreateQueueInput, QueueDTO } from "@/src/application/dtos/backend/queues-dto";
-import { CreateQueueEntity } from "@/src/domain/entities/backend/backend-queue.entity";
-import { Logger } from "../../../../domain/interfaces/logger";
-import { BackendQueueRepository } from "../../../../domain/repositories/backend/backend-queue-repository";
-import { IUseCase } from "../../../interfaces/use-case.interface";
-
+import { CreateQueueInput, QueueDTO } from '@/src/application/dtos/backend/queues-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { QueueMapper } from '@/src/application/mappers/backend/queue-mapper';
+import { CreateQueueEntity } from '@/src/domain/entities/backend/backend-queue.entity';
+import type { Logger } from '@/src/domain/interfaces/logger';
+import type { BackendQueueRepository } from '@/src/domain/repositories/backend/backend-queue-repository';
 
 /**
  * Use case for creating a new queue
@@ -11,8 +11,8 @@ import { IUseCase } from "../../../interfaces/use-case.interface";
  */
 export class CreateQueueUseCase implements IUseCase<CreateQueueInput, QueueDTO> {
   constructor(
-    private queueRepository: BackendQueueRepository,
-    private logger: Logger
+    private readonly queueRepository: BackendQueueRepository,
+    private readonly logger: Logger
   ) { }
 
   /**
@@ -22,6 +22,26 @@ export class CreateQueueUseCase implements IUseCase<CreateQueueInput, QueueDTO> 
    */
   async execute(input: CreateQueueInput): Promise<QueueDTO> {
     try {
+      // Validate required fields
+      if (!input.customerId) {
+        throw new Error('Customer ID is required');
+      }
+      if (!input.shopId) {
+        throw new Error('Shop ID is required');
+      }
+      if (!input.queueNumber) {
+        throw new Error('Queue number is required');
+      }
+      if (!input.status) {
+        throw new Error('Status is required');
+      }
+      if (!input.priority) {
+        throw new Error('Priority is required');
+      }
+      if (!input.queueServices || !Array.isArray(input.queueServices) || input.queueServices.length === 0) {
+        throw new Error('At least one queue service is required');
+      }
+
       // Map input to domain entity format expected by repository
       const queueToCreate: CreateQueueEntity = {
         customerId: input.customerId,
@@ -30,7 +50,7 @@ export class CreateQueueUseCase implements IUseCase<CreateQueueInput, QueueDTO> 
         status: input.status,
         priority: input.priority,
         estimatedWaitTime: input.estimatedWaitTime,
-        notes: input.notes,
+        notes: input.notes || undefined,
         queueServices: input.queueServices.map(service => ({
           serviceId: service.serviceId,
           quantity: service.quantity,
@@ -39,26 +59,7 @@ export class CreateQueueUseCase implements IUseCase<CreateQueueInput, QueueDTO> 
       };
 
       const createdQueue = await this.queueRepository.createQueue(queueToCreate);
-      const queueDTO: QueueDTO = {
-        id: createdQueue.id,
-        customerId: createdQueue.customerId,
-        customerName: createdQueue.customerName,
-        customerPhone: createdQueue.customerPhone,
-        shopId: createdQueue.shopId,
-        shopName: createdQueue.shopName,
-        queueServices: createdQueue.queueServices,
-        queueNumber: createdQueue.queueNumber,
-        status: createdQueue.status,
-        priority: createdQueue.priority,
-        estimatedWaitTime: createdQueue.estimatedWaitTime,
-        actualWaitTime: createdQueue.actualWaitTime,
-        notes: createdQueue.notes,
-        createdAt: createdQueue.createdAt,
-        updatedAt: createdQueue.updatedAt,
-        calledAt: createdQueue.calledAt,
-        completedAt: createdQueue.completedAt
-      };
-      return queueDTO;
+      return QueueMapper.toDTO(createdQueue);
     } catch (error) {
       this.logger.error('Error in CreateQueueUseCase.execute', { error, input });
       throw error;

@@ -79,3 +79,5 @@ export interface QueuesDataDTO {
   currentPage: number;
   perPage: number;
 }
+
+export type PaginatedQueuesDTO = import('@/src/domain/interfaces/pagination-types').PaginatedResult<QueueDTO>;
