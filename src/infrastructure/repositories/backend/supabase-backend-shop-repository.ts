@@ -67,7 +67,7 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         // Only select from category_shops table, we'll get categories data via join
         select: ['shop_id', 'category_id'],
         joins: [
-          { table: 'categories', on: { fromField: 'category_id', toField: 'id' } }
+          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name'] }
         ],
         filters: [{
           field: 'shop_id',
@@ -109,8 +109,6 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         // Handle joined data from profiles table
         const shopWithJoinedData = shop as ShopWithJoinedData;
         const categories = categoriesByShopId[shop.id] || [];
-
-        console.log('categories', categories);
 
         const shopWithOwnerAndCategories = {
           ...shop,

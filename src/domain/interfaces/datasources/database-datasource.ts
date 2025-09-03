@@ -80,6 +80,7 @@ export interface QueryJoin {
     fromField: string;
     toField: string;
   };
+  select?: string[]; // Optional: specific columns to select from joined table
 }
 
 /**

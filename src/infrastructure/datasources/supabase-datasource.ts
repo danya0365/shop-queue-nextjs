@@ -160,7 +160,10 @@ export class SupabaseDatasource
         const foreignTables = options.joins
           .map((join) => {
             const alias = join.alias || join.table;
-            return `${join.table}(*)${alias !== join.table ? `:${alias}` : ""}`;
+            // ถ้ามีการระบุ select columns สำหรับ join table ให้ใช้ columns เหล่านั้น
+            // ถ้าไม่มีให้ใช้ * (select all columns)
+            const joinColumns = join.select ? join.select.join(",") : "*";
+            return `${join.table}(${joinColumns})${alias !== join.table ? `:${alias}` : ""}`;
           })
           .join(",");
 
