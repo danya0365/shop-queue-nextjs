@@ -225,6 +225,7 @@ ON CONFLICT (provider_id, provider) DO NOTHING;
 INSERT INTO shops (
   owner_id,
   name,
+  slug,
   description,
   address,
   phone,
@@ -242,6 +243,7 @@ INSERT INTO shops (
 SELECT
   p.id AS owner_id,
   'ครัวไทยอร่อย',
+  'restaurant',
   'ร้านอาหารไทยรสชาติดั้งเดิม บรรยากาศอบอุ่น',
   '456 ถนนสีลม แขวงสีลม เขตบางรัก กรุงเทพฯ 10500',
   '02-987-6543',
@@ -299,10 +301,11 @@ CROSS JOIN (
 WHERE p.username = 'restaurant_owner';
 
 -- Insert restaurant services (menu items)
-INSERT INTO services (shop_id, name, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
+INSERT INTO services (shop_id, name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
 SELECT
   s.id AS shop_id,
   service_info.name,
+  service_info.slug,
   service_info.description,
   service_info.price,
   service_info.estimated_duration,
@@ -317,35 +320,36 @@ JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES
     -- Main dishes
-    ('ผัดไทยกุ้งสด'::text, 'ผัดไทยกุ้งสดรสเด็ด เส้นนุ่ม กุ้งสดตัวใหญ่'::text, 120.00, 15, 'main_dish'::text, true, 'food'::text, 1),
-    ('ต้มยำกุ้ง'::text, 'ต้มยำกุ้งน้ำข้น รสจัดจ้าน กุ้งสดตัวใหญ่'::text, 180.00, 15, 'main_dish'::text, true, 'soup'::text, 2),
-    ('แกงเขียวหวานไก่'::text, 'แกงเขียวหวานไก่เนื้อนุ่ม น้ำแกงข้น หอมกลิ่นใบโหระพา'::text, 150.00, 15, 'main_dish'::text, true, 'curry'::text, 3),
-    ('ผัดกระเพราหมูกรอบ'::text, 'ผัดกระเพราหมูกรอบ รสชาติจัดจ้าน เผ็ดร้อน'::text, 120.00, 10, 'main_dish'::text, true, 'food'::text, 4),
-    ('ข้าวผัดปู'::text, 'ข้าวผัดเนื้อปูก้อนใหญ่ หอมกลิ่นใบมะกรูด'::text, 160.00, 15, 'main_dish'::text, true, 'rice'::text, 5),
-    ('สเต็กเนื้อนำเข้า'::text, 'สเต็กเนื้อนำเข้าคุณภาพพรีเมียม เสิร์ฟพร้อมซอสและผักย่าง'::text, 450.00, 25, 'main_dish'::text, true, 'steak'::text, 6),
+    ('ผัดไทยกุ้งสด'::text, 'pad-thai-guang-shi'::text, 'ผัดไทยกุ้งสดรสเด็ด เส้นนุ่ม กุ้งสดตัวใหญ่'::text, 120.00, 15, 'main_dish'::text, true, 'food'::text, 1),
+    ('ต้มยำกุ้ง'::text, 'tom-yam-guang-shi'::text, 'ต้มยำกุ้งน้ำข้น รสจัดจ้าน กุ้งสดตัวใหญ่'::text, 180.00, 15, 'main_dish'::text, true, 'soup'::text, 2),
+    ('แกงเขียวหวานไก่'::text, 'green-curry-chicken'::text, 'แกงเขียวหวานไก่เนื้อนุ่ม น้ำแกงข้น หอมกลิ่นใบโหระพา'::text, 150.00, 15, 'main_dish'::text, true, 'curry'::text, 3),
+    ('ผัดกระเพราหมูกรอบ'::text, 'pad-krapao-moo-krob'::text, 'ผัดกระเพราหมูกรอบ รสชาติจัดจ้าน เผ็ดร้อน'::text, 120.00, 10, 'main_dish'::text, true, 'food'::text, 4),
+    ('ข้าวผัดปู'::text, 'pad-pao-poo'::text, 'ข้าวผัดเนื้อปูก้อนใหญ่ หอมกลิ่นใบมะกรูด'::text, 160.00, 15, 'main_dish'::text, true, 'rice'::text, 5),
+    ('สเต็กเนื้อนำเข้า'::text, 'steak-nam-khao'::text, 'สเต็กเนื้อนำเข้าคุณภาพพรีเมียม เสิร์ฟพร้อมซอสและผักย่าง'::text, 450.00, 25, 'main_dish'::text, true, 'steak'::text, 6),
     
     -- Appetizers
-    ('ปอเปี๊ยะทอด'::text, 'ปอเปี๊ยะทอดกรอบ ไส้หมูสับและผัก เสิร์ฟพร้อมน้ำจิ้มรสหวาน'::text, 80.00, 10, 'appetizer'::text, true, 'appetizer'::text, 7),
-    ('ยำวุ้นเส้น'::text, 'ยำวุ้นเส้นกุ้งสด รสเปรี้ยวหวานเผ็ด'::text, 120.00, 15, 'appetizer'::text, true, 'salad'::text, 8),
-    ('ส้มตำไทย'::text, 'ส้มตำไทยรสจัดจ้าน ใส่ถั่วลิสงบด กุ้งแห้ง'::text, 90.00, 10, 'appetizer'::text, true, 'salad'::text, 9),
+    ('ปอเปี๊ยะทอด'::text, 'pad-pao-yao-thai'::text, 'ปอเปี๊ยะทอดกรอบ ไส้หมูสับและผัก เสิร์ฟพร้อมน้ำจิ้มรสหวาน'::text, 80.00, 10, 'appetizer'::text, true, 'appetizer'::text, 7),
+    ('ยำวุ้นเส้น'::text, 'yum-wun-sean'::text, 'ยำวุ้นเส้นกุ้งสด รสเปรี้ยวหวานเผ็ด'::text, 120.00, 15, 'appetizer'::text, true, 'salad'::text, 8),
+    ('ส้มตำไทย'::text, 'som-tam-thai'::text, 'ส้มตำไทยรสจัดจ้าน ใส่ถั่วลิสงบด กุ้งแห้ง'::text, 90.00, 10, 'appetizer'::text, true, 'salad'::text, 9),
     
     -- Drinks
-    ('น้ำมะนาว'::text, 'น้ำมะนาวสดคั้น หวานเย็นชื่นใจ'::text, 50.00, 5, 'drink'::text, true, 'juice'::text, 10),
-    ('ชาไทยเย็น'::text, 'ชาไทยเย็นรสชาติเข้มข้น หอมกลิ่นชา'::text, 45.00, 5, 'drink'::text, true, 'tea'::text, 11),
-    ('กาแฟดำเย็น'::text, 'กาแฟดำเย็น รสชาติเข้มข้น'::text, 45.00, 5, 'drink'::text, true, 'coffee'::text, 12),
+    ('น้ำมะนาว'::text, 'nam-manao'::text, 'น้ำมะนาวสดคั้น หวานเย็นชื่นใจ'::text, 50.00, 5, 'drink'::text, true, 'juice'::text, 10),
+    ('ชาไทยเย็น'::text, 'cha-thai-yen'::text, 'ชาไทยเย็นรสชาติเข้มข้น หอมกลิ่นชา'::text, 45.00, 5, 'drink'::text, true, 'tea'::text, 11),
+    ('กาแฟดำเย็น'::text, 'coffee-black-yen'::text, 'กาแฟดำเย็น รสชาติเข้มข้น'::text, 45.00, 5, 'drink'::text, true, 'coffee'::text, 12),
     
     -- Desserts
-    ('ข้าวเหนียวมะม่วง'::text, 'ข้าวเหนียวมะม่วงหวานมัน ราดด้วยกะทิสด'::text, 90.00, 10, 'dessert'::text, true, 'dessert'::text, 13),
-    ('ทับทิมกรอบ'::text, 'ทับทิมกรอบเย็นชื่นใจ ราดด้วยกะทิสด'::text, 70.00, 10, 'dessert'::text, true, 'dessert'::text, 14),
-    ('ไอศกรีมกะทิ'::text, 'ไอศกรีมกะทิสดรสหอมมัน เสิร์ฟพร้อมถั่วลิสงคั่ว'::text, 60.00, 5, 'dessert'::text, true, 'ice_cream'::text, 15)
-) AS service_info(name, description, price, estimated_duration, category, is_available, icon, popularity_rank)
+    ('ข้าวเหนียวมะม่วง'::text, 'nam-maow-mang'::text, 'ข้าวเหนียวมะม่วงหวานมัน ราดด้วยกะทิสด'::text, 90.00, 10, 'dessert'::text, true, 'dessert'::text, 13),
+    ('ทับทิมกรอบ'::text, 'tap-tim-grab'::text, 'ทับทิมกรอบเย็นชื่นใจ ราดด้วยกะทิสด'::text, 70.00, 10, 'dessert'::text, true, 'dessert'::text, 14),
+    ('ไอศกรีมกะทิ'::text, 'ice-cream-kati'::text, 'ไอศกรีมกะทิสดรสหอมมัน เสิร์ฟพร้อมถั่วลิสงคั่ว'::text, 60.00, 5, 'dessert'::text, true, 'ice_cream'::text, 15)
+) AS service_info(name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank)
 WHERE p.username = 'restaurant_owner';
 
 -- Insert departments for the restaurant
-INSERT INTO departments (shop_id, name, description, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT
   s.id AS shop_id,
   dept_info.name,
+  dept_info.slug,
   dept_info.description,
   NOW(),
   NOW()
@@ -353,10 +357,10 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES
-    ('ครัว'::text, 'แผนกครัว รับผิดชอบการปรุงอาหารทั้งหมด'::text),
-    ('บริการ'::text, 'แผนกบริการลูกค้า รับผิดชอบการต้อนรับและเสิร์ฟอาหาร'::text),
-    ('บาร์'::text, 'แผนกบาร์ รับผิดชอบเครื่องดื่มและค็อกเทล'::text)
-) AS dept_info(name, description)
+    ('ครัว'::text, 'crew'::text, 'แผนกครัว รับผิดชอบการปรุงอาหารทั้งหมด'::text),
+    ('บริการ'::text, 'service'::text, 'แผนกบริการลูกค้า รับผิดชอบการต้อนรับและเสิร์ฟอาหาร'::text),
+    ('บาร์'::text, 'bar'::text, 'แผนกบาร์ รับผิดชอบเครื่องดื่มและค็อกเทล'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'restaurant_owner';
 
 -- Insert employees for the restaurant
