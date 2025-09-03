@@ -16,7 +16,7 @@ export interface RecentActivityDTO {
   type: ActivityType;
   title: string;
   description: string;
-  timestamp: string;
+  createdAt: string;
   metadata?: Record<string, unknown>;
 }
 

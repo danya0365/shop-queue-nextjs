@@ -1,4 +1,5 @@
 import type { DashboardStatsDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
+import type { BackendDashboardRepository } from '@/src/domain/repositories/backend/backend-dashboard-repository';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetDashboardStatsUseCase {
@@ -6,22 +7,28 @@ export interface IGetDashboardStatsUseCase {
 }
 
 export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
-  constructor(private readonly logger: Logger) { }
+  constructor(
+    private readonly dashboardRepository: BackendDashboardRepository,
+    private readonly logger: Logger
+  ) { }
 
   async execute(): Promise<DashboardStatsDTO> {
     try {
       this.logger.info('GetDashboardStatsUseCase: Executing dashboard stats retrieval');
 
-      // Mock data - replace with actual repository calls later
+      // Get dashboard stats from repository
+      const dashboardStats = await this.dashboardRepository.getDashboardStats();
+      
+      // Map domain entity to DTO
       const stats: DashboardStatsDTO = {
-        totalShops: 25,
-        totalQueues: 1250,
-        totalCustomers: 3420,
-        totalEmployees: 85,
-        activeQueues: 45,
-        completedQueuesToday: 120,
-        totalRevenue: 125000,
-        averageWaitTime: 15.5
+        totalShops: dashboardStats.totalShops,
+        totalQueues: dashboardStats.totalQueues,
+        totalCustomers: dashboardStats.totalCustomers,
+        totalEmployees: dashboardStats.totalEmployees,
+        activeQueues: dashboardStats.activeQueues,
+        completedQueuesToday: dashboardStats.completedQueuesToday,
+        totalRevenue: dashboardStats.totalRevenue,
+        averageWaitTime: dashboardStats.averageWaitTime
       };
 
       this.logger.info('GetDashboardStatsUseCase: Successfully retrieved dashboard stats');

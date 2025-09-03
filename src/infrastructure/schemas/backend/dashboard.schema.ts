@@ -19,7 +19,7 @@ export interface RecentActivitySchema {
   type: string;
   title: string;
   description: string;
-  timestamp: string;
+  created_at: string;
   metadata?: Record<string, unknown>;
 }
 

@@ -1,5 +1,5 @@
 import type { DashboardDataDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
-import { DashboardMapper } from '@/src/application/mappers/backend/dashboard-mapper';
+import type { IGetDashboardDataUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardDataUseCase';
 import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardStatsUseCase';
 import type { IGetPopularServicesUseCase } from '@/src/application/usecases/backend/dashboard/GetPopularServicesUseCase';
 import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/backend/dashboard/GetQueueDistributionUseCase';
@@ -16,6 +16,7 @@ export class BackendDashboardService implements IBackendDashboardService {
     private readonly getRecentActivitiesUseCase: IGetRecentActivitiesUseCase,
     private readonly getQueueDistributionUseCase: IGetQueueDistributionUseCase,
     private readonly getPopularServicesUseCase: IGetPopularServicesUseCase,
+    private readonly getDashboardDataUseCase: IGetDashboardDataUseCase,
     private readonly logger: Logger
   ) { }
 
@@ -23,22 +24,9 @@ export class BackendDashboardService implements IBackendDashboardService {
     try {
       this.logger.info('BackendDashboardService: Getting dashboard data');
 
-      // Execute all use cases in parallel for better performance
-      const [stats, recentActivities, queueDistribution, popularServices] = await Promise.all([
-        this.getDashboardStatsUseCase.execute(),
-        this.getRecentActivitiesUseCase.execute(),
-        this.getQueueDistributionUseCase.execute(),
-        this.getPopularServicesUseCase.execute()
-      ]);
-
-      // Map the data using the mapper
-      const dashboardData = DashboardMapper.toDashboardData(
-        stats,
-        recentActivities,
-        queueDistribution,
-        popularServices
-      );
-
+      // Use the combined dashboard data use case
+      const dashboardData = await this.getDashboardDataUseCase.execute();
+      
       this.logger.info('BackendDashboardService: Successfully retrieved dashboard data');
       return dashboardData;
     } catch (error) {

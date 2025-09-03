@@ -61,7 +61,7 @@ export interface RecentActivityEntity {
   type: ActivityType;
   title: string;
   description: string;
-  timestamp: string;
+  created_at: string;
   metadata?: Record<string, unknown>;
 }
 

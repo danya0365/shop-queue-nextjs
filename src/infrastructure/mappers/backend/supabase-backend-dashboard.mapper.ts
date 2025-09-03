@@ -1,14 +1,14 @@
-import { 
-  DashboardStatsEntity, 
-  PopularServiceEntity, 
-  QueueStatusDistributionEntity, 
-  RecentActivityEntity 
+import {
+  DashboardStatsEntity,
+  PopularServiceEntity,
+  QueueStatusDistributionEntity,
+  RecentActivityEntity
 } from "../../../domain/entities/backend/backend-dashboard.entity";
-import { 
-  DashboardStatsSchema, 
-  PopularServiceSchema, 
-  QueueStatusDistributionSchema, 
-  RecentActivitySchema 
+import {
+  DashboardStatsSchema,
+  PopularServiceSchema,
+  QueueStatusDistributionSchema,
+  RecentActivitySchema
 } from "../../schemas/backend/dashboard.schema";
 
 /**
@@ -75,7 +75,7 @@ export class SupabaseBackendDashboardMapper {
       type: schema.type as RecentActivityEntity['type'],
       title: schema.title,
       description: schema.description,
-      timestamp: schema.timestamp,
+      created_at: schema.created_at,
       metadata: schema.metadata
     };
   }

@@ -149,7 +149,7 @@ export function BackendDashboardView({ viewModel }: BackendDashboardViewProps) {
                 <p className="font-medium backend-text">{activity.title}</p>
                 <p className="backend-text-muted text-sm mt-1">{activity.description}</p>
                 <p className="text-xs backend-text-muted mt-2">
-                  {DashboardMapper.formatRelativeTime(activity.timestamp)}
+                  {DashboardMapper.formatRelativeTime(activity.createdAt)}
                 </p>
               </div>
             </div>

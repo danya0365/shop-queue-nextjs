@@ -1,4 +1,5 @@
 import type { QueueStatusDistributionDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
+import type { BackendDashboardRepository } from '@/src/domain/repositories/backend/backend-dashboard-repository';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IGetQueueDistributionUseCase {
@@ -6,19 +7,25 @@ export interface IGetQueueDistributionUseCase {
 }
 
 export class GetQueueDistributionUseCase implements IGetQueueDistributionUseCase {
-  constructor(private readonly logger: Logger) { }
+  constructor(
+    private readonly dashboardRepository: BackendDashboardRepository,
+    private readonly logger: Logger
+  ) { }
 
   async execute(): Promise<QueueStatusDistributionDTO> {
     try {
       this.logger.info('GetQueueDistributionUseCase: Executing queue distribution retrieval');
 
-      // Mock data - replace with actual repository calls later
+      // Get queue distribution from repository
+      const queueDistribution = await this.dashboardRepository.getQueueDistribution();
+      
+      // Map domain entity to DTO
       const distribution: QueueStatusDistributionDTO = {
-        waiting: 25,
-        serving: 12,
-        completed: 180,
-        cancelled: 8,
-        noShow: 5
+        waiting: queueDistribution.waiting,
+        serving: queueDistribution.serving,
+        completed: queueDistribution.completed,
+        cancelled: queueDistribution.cancelled,
+        noShow: queueDistribution.noShow
       };
 
       this.logger.info('GetQueueDistributionUseCase: Successfully retrieved queue distribution');

@@ -19,6 +19,7 @@ import { DeleteCustomerUseCase } from "../application/usecases/backend/customers
 import { GetCustomerByIdUseCase } from "../application/usecases/backend/customers/GetCustomerByIdUseCase";
 import { GetCustomersUseCase } from "../application/usecases/backend/customers/GetCustomersUseCase";
 import { UpdateCustomerUseCase } from "../application/usecases/backend/customers/UpdateCustomerUseCase";
+import { GetDashboardDataUseCase } from "../application/usecases/backend/dashboard/GetDashboardDataUseCase";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
 import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
@@ -48,6 +49,7 @@ import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/dataso
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseBackendAuthUsersRepository } from "../infrastructure/repositories/backend/supabase-backend-auth-users-repository";
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
+import { SupabaseBackendDashboardRepository } from "../infrastructure/repositories/backend/supabase-backend-dashboard-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
@@ -82,12 +84,20 @@ export async function createBackendContainer(): Promise<Container> {
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
+    const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
 
     // Create use case instances
-    const getDashboardStatsUseCase = new GetDashboardStatsUseCase(logger);
-    const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(logger);
-    const getQueueDistributionUseCase = new GetQueueDistributionUseCase(logger);
-    const getPopularServicesUseCase = new GetPopularServicesUseCase(logger);
+    const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository, logger);
+    const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(dashboardRepository, logger);
+    const getQueueDistributionUseCase = new GetQueueDistributionUseCase(dashboardRepository, logger);
+    const getPopularServicesUseCase = new GetPopularServicesUseCase(dashboardRepository, logger);
+    const getDashboardDataUseCase = new GetDashboardDataUseCase(
+      getDashboardStatsUseCase,
+      getPopularServicesUseCase,
+      getQueueDistributionUseCase,
+      getRecentActivitiesUseCase,
+      logger
+    );
     const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository, logger);
     const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository, logger);
     const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(queueRepository, logger);
@@ -131,6 +141,7 @@ export async function createBackendContainer(): Promise<Container> {
       getRecentActivitiesUseCase,
       getQueueDistributionUseCase,
       getPopularServicesUseCase,
+      getDashboardDataUseCase,
       logger
     );
 

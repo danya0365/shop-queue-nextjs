@@ -21,10 +21,52 @@ SELECT
     ),0) AS average_wait_time;
 
 
-    -- View for Queue Status Distribution Dashboard
+-- View for Queue Status Distribution Dashboard
 -- Maps to QueueStatusDistributionDTO
 
 CREATE OR REPLACE VIEW public.queue_status_distribution_view AS
+SELECT 
+    -- Count queues by status for all queues
+    COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
+    COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
+    COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
+    -- Count no-show queues (queues that were never served and are past estimated call time)
+    COUNT(CASE 
+        WHEN q.status = 'waiting' 
+        AND q.estimated_call_time IS NOT NULL 
+        AND q.estimated_call_time < NOW() - INTERVAL '30 minutes'
+        THEN 1 
+    END) as no_show,
+    -- Additional useful metrics
+    COUNT(*) as total_queues,
+    MAX(q.updated_at) as last_queue_update
+FROM public.queues q;
+
+CREATE OR REPLACE VIEW public.queue_status_distribution_today_view AS
+SELECT 
+    -- Count queues by status for today
+    COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
+    COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
+    COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
+    -- Count no-show queues (queues that were never served and are past estimated call time)
+    COUNT(CASE 
+        WHEN q.status = 'waiting' 
+        AND q.estimated_call_time IS NOT NULL 
+        AND q.estimated_call_time < NOW() - INTERVAL '30 minutes'
+        THEN 1 
+    END) as no_show,
+    -- Additional useful metrics
+    COUNT(*) as total_queues_today,
+    MAX(q.updated_at) as last_queue_update
+FROM public.queues q
+WHERE 
+    -- Filter for today's queues
+    q.created_at >= CURRENT_DATE 
+    AND q.created_at < CURRENT_DATE + INTERVAL '1 day';
+
+CREATE OR REPLACE VIEW public.queue_status_distribution_today_by_shop_view AS
 SELECT 
     q.shop_id,
     s.name as shop_name,
@@ -137,7 +179,7 @@ CREATE OR REPLACE VIEW popular_services_view AS
 SELECT 
     s.id,
     s.name,
-    COALESCE(queue_stats.queue_count, 0) AS queueCount,
+    COALESCE(queue_stats.queue_count, 0) AS queue_count,
     COALESCE(revenue_stats.revenue, 0) AS revenue,
     s.category
 FROM 
@@ -186,7 +228,7 @@ CREATE OR REPLACE VIEW popular_services_by_category_view AS
 SELECT 
     s.id,
     s.name,
-    COALESCE(queue_stats.queue_count, 0) AS queueCount,
+    COALESCE(queue_stats.queue_count, 0) AS queue_count,
     COALESCE(revenue_stats.revenue, 0) AS revenue,
     s.category,
     ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY COALESCE(queue_stats.queue_count, 0) DESC) AS rank_in_category

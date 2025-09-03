@@ -18,11 +18,9 @@ import {
   QueueStatusDistributionSchema,
   RecentActivitySchema
 } from "../../schemas/backend/dashboard.schema";
-import { EmployeeStatsSchema } from "../../schemas/backend/employee.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 type DashboardStatsSchemaRecord = Record<string, unknown> & DashboardStatsSchema;
-type EmployeeStatsSchemaRecord = Record<string, unknown> & EmployeeStatsSchema;
 type PopularServiceSchemaRecord = Record<string, unknown> & PopularServiceSchema;
 type QueueStatusDistributionSchemaRecord = Record<string, unknown> & QueueStatusDistributionSchema;
 type RecentActivitySchemaRecord = Record<string, unknown> & RecentActivitySchema;
@@ -103,7 +101,7 @@ export class SupabaseBackendDashboardRepository extends BackendRepository implem
 
       // Assuming a view exists for queue distribution
       const distributionData = await this.dataSource.getAdvanced<QueueStatusDistributionSchemaRecord>(
-        'queue_distribution_view',
+        'queue_status_distribution_view',
         queryOptions
       );
 
@@ -190,7 +188,7 @@ export class SupabaseBackendDashboardRepository extends BackendRepository implem
       // Use getAdvanced to fetch recent activities data
       const queryOptions: QueryOptions = {
         select: ['*'],
-        sort: [{ field: 'timestamp', direction: SortDirection.DESC }],
+        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
         pagination: {
           limit
         }
@@ -198,7 +196,7 @@ export class SupabaseBackendDashboardRepository extends BackendRepository implem
 
       // Assuming a view or table exists for recent activities
       const activitiesData = await this.dataSource.getAdvanced<RecentActivitySchemaRecord>(
-        'recent_activities',
+        'shop_activity_log',
         queryOptions
       );
 
