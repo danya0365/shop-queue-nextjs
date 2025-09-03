@@ -1,5 +1,5 @@
-import { PaginatedShopsEntity, ShopEntity, ShopStatsEntity } from "../../../domain/entities/backend/backend-shop.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
+import { PaginatedShopsEntity, ShopCategoryEntity, ShopEntity, ShopStatsEntity } from "../../../domain/entities/backend/backend-shop.entity";
+import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
 import { BackendShopError, BackendShopErrorType, BackendShopRepository } from "../../../domain/repositories/backend/backend-shop-repository";
@@ -8,7 +8,10 @@ import { ShopSchema, ShopStatsSchema } from "../../schemas/backend/shop.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
-type ShopWithProfile = ShopSchema & { profiles?: { full_name?: string } };
+type ShopWithJoinedData = ShopSchema & {
+  profiles?: { full_name?: string },
+  categories?: ShopCategoryEntity[]
+};
 type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
 type ShopStatsSchemaRecord = Record<string, unknown> & ShopStatsSchema;
 
@@ -34,7 +37,7 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
       const { page, limit } = params;
       const offset = (page - 1) * limit;
 
-      // Use getAdvanced with proper QueryOptions format
+      // First, get shops with owner information
       const queryOptions: QueryOptions = {
         select: ['*'],
         joins: [
@@ -56,16 +59,67 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
       // Count total items
       const totalItems = await this.dataSource.count('shops');
 
+      // Get categories for all shops in a single query
+      const shopIds = shops.map(shop => shop.id);
+
+      // Query to get categories for all shops
+      const categoriesQuery: QueryOptions = {
+        // Only select from category_shops table, we'll get categories data via join
+        select: ['shop_id', 'category_id'],
+        joins: [
+          { table: 'categories', on: { fromField: 'category_id', toField: 'id' } }
+        ],
+        filters: [{
+          field: 'shop_id',
+          operator: FilterOperator.IN,
+          value: shopIds
+        }]
+      };
+
+      const shopCategories = await this.dataSource.getAdvanced<Record<string, unknown>>(
+        'category_shops',
+        categoriesQuery
+      );
+
+      // Group categories by shop_id
+      const categoriesByShopId = shopCategories.reduce<Record<string, ShopCategoryEntity[]>>((acc, category) => {
+        const shopId = category.shop_id as string;
+        if (!acc[shopId]) {
+          acc[shopId] = [];
+        }
+
+        // Get category data from the joined categories table
+        const categoryData = category.categories as Record<string, unknown>;
+        const categoryId = categoryData.id as string;
+
+        // Only add if not already in the array (avoid duplicates)
+        if (!acc[shopId].some(c => c.id === categoryId)) {
+          acc[shopId].push({
+            id: categoryId,
+            name: categoryData.name as string
+          });
+        }
+        return acc;
+      }, {});
+
+      //console.log('categoriesByShopId', categoriesByShopId);
+
       // Map database results to domain entities
       const mappedShops = shops.map(shop => {
-        // Handle joined data from profiles table using our ShopWithProfile type
-        const shopWithJoinedData = shop as ShopWithProfile;
+        // Handle joined data from profiles table
+        const shopWithJoinedData = shop as ShopWithJoinedData;
+        const categories = categoriesByShopId[shop.id] || [];
 
-        const shopWithOwner = {
+        console.log('categories', categories);
+
+        const shopWithOwnerAndCategories = {
           ...shop,
-          owner_name: shopWithJoinedData.profiles?.full_name
+          owner_name: shopWithJoinedData.profiles?.full_name,
+          // Add categories for this shop
+          categories: categories
         };
-        return SupabaseBackendShopMapper.toDomain(shopWithOwner);
+
+        return SupabaseBackendShopMapper.toDomain(shopWithOwnerAndCategories);
       });
 
       // Create pagination metadata
@@ -162,16 +216,54 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         return null;
       }
 
-      // Handle joined data from profiles table using our ShopWithProfile type
-      const shopWithJoinedData = shop as ShopWithProfile;
+      // Get categories for this shop
+      const categoriesQuery: QueryOptions = {
+        // Only select from shop_categories table, we'll get categories data via join
+        select: ['shop_id', 'category_id'],
+        joins: [
+          { table: 'categories', on: { fromField: 'category_id', toField: 'id' } }
+        ],
+        filters: [{
+          field: 'shop_id',
+          operator: FilterOperator.EQ,
+          value: id
+        }]
+      };
 
-      const shopWithOwner = {
+      const shopCategories = await this.dataSource.getAdvanced<Record<string, unknown>>(
+        'shop_categories',
+        categoriesQuery
+      );
+
+      // Format categories - ensure no duplicates
+      const categoriesMap = new Map<string, ShopCategoryEntity>();
+
+      shopCategories.forEach(category => {
+        // Get category data from the joined categories table
+        const categoryData = category.categories as Record<string, unknown>;
+        const categoryId = categoryData.id as string;
+
+        if (!categoriesMap.has(categoryId)) {
+          categoriesMap.set(categoryId, {
+            id: categoryId,
+            name: categoryData.name as string
+          });
+        }
+      });
+
+      const categories = Array.from(categoriesMap.values());
+
+      // Handle joined data from profiles table using our ShopWithProfile type
+      const shopWithJoinedData = shop as ShopWithJoinedData;
+
+      const shopWithOwnerAndCategories = {
         ...shop,
-        owner_name: shopWithJoinedData.profiles?.full_name
+        owner_name: shopWithJoinedData.profiles?.full_name,
+        categories: categories
       };
 
       // Map database result to domain entity
-      return SupabaseBackendShopMapper.toDomain(shopWithOwner);
+      return SupabaseBackendShopMapper.toDomain(shopWithOwnerAndCategories);
     } catch (error) {
       if (error instanceof BackendShopError) {
         throw error;

@@ -12,6 +12,10 @@ export class ShopMapper {
    * @returns Shop DTO
    */
   public static toDTO(entity: ShopEntity): ShopDTO {
+    const categories = entity.categories.map(category => ({
+      id: category.id,
+      name: category.name
+    }));
     return {
       id: entity.id,
       name: entity.name,
@@ -19,8 +23,7 @@ export class ShopMapper {
       address: entity.address || '',
       phone: entity.phone || '',
       email: entity.email || '',
-      categoryId: '', // These fields are not in the entity, consider updating the entity or DTO
-      categoryName: '',
+      categories,
       ownerId: entity.ownerId,
       ownerName: entity.ownerName || '',
       status: this.mapShopStatus(entity.status),

@@ -1,4 +1,5 @@
 import { PaginatedResult } from "../../interfaces/pagination-types";
+import { CategoryEntity } from "./backend-category.entity";
 
 /**
  * Shop entity representing a business in the system
@@ -22,7 +23,13 @@ export interface ShopEntity {
   ownerName?: string; // Joined data
   createdAt: string;
   updatedAt: string;
+  categories: ShopCategoryEntity[];
 }
+
+export type ShopCategoryEntity = Partial<CategoryEntity> & {
+  id: string;
+  name: string;
+};
 
 /**
  * Shop status enum

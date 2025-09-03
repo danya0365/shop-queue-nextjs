@@ -160,7 +160,7 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
                         <div className="backend-text-muted text-sm">{shop.description}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 backend-text">{shop.categoryName}</td>
+                    <td className="py-3 px-4 backend-text">{shop.categories.map(category => category.name).join(', ')}</td>
                     <td className="py-3 px-4 backend-text-muted">{shop.ownerName}</td>
                     <td className="py-3 px-4 backend-text-muted">{shop.phone}</td>
                     <td className="py-3 px-4 backend-text text-center">{shop.queueCount}</td>

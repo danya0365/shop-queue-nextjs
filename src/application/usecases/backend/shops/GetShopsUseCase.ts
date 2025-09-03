@@ -23,8 +23,21 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
           phone: '02-123-4567',
           email: 'contact@stylehair.com',
-          categoryId: '1',
-          categoryName: 'ตัดผม',
+          categories: [
+            {
+              id: '1',
+              name: 'ตัดผม',
+              description: 'ตัดผม',
+              icon: 'haircut',
+              color: '#FF0000',
+              shopsCount: 1,
+              servicesCount: 1,
+              isActive: true,
+              sortOrder: 1,
+              createdAt: '2023-01-15T00:00:00Z',
+              updatedAt: '2024-01-15T00:00:00Z'
+            }
+          ],
           ownerId: '1',
           ownerName: 'นาย สมชาย ใจดี',
           status: 'active',
@@ -51,8 +64,21 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '456 ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
           phone: '02-234-5678',
           email: 'info@beautyclinic.com',
-          categoryId: '2',
-          categoryName: 'ความงาม',
+          categories: [
+            {
+              id: '2',
+              name: 'ความงาม',
+              description: 'ความงาม',
+              icon: 'beauty',
+              color: '#FF0000',
+              shopsCount: 1,
+              servicesCount: 1,
+              isActive: true,
+              sortOrder: 1,
+              createdAt: '2023-01-15T00:00:00Z',
+              updatedAt: '2024-01-15T00:00:00Z'
+            }
+          ],
           ownerId: '2',
           ownerName: 'นางสาว มาลี สวยงาม',
           status: 'active',
@@ -79,8 +105,21 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '456 ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900',
           phone: '02-234-5678',
           email: 'info@beautyclinic.com',
-          categoryId: '2',
-          categoryName: 'ความงาม',
+          categories: [
+            {
+              id: '2',
+              name: 'ความงาม',
+              description: 'ความงาม',
+              icon: 'beauty',
+              color: '#FF0000',
+              shopsCount: 1,
+              servicesCount: 1,
+              isActive: true,
+              sortOrder: 1,
+              createdAt: '2023-01-15T00:00:00Z',
+              updatedAt: '2024-01-15T00:00:00Z'
+            }
+          ],
           ownerId: '2',
           ownerName: 'นางสาว มาลี สวยงาม',
           status: 'active',
@@ -107,8 +146,21 @@ export class GetShopsUseCase implements IGetShopsUseCase {
           address: '789 ถนนรัชดาภิเษก แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพฯ 10310',
           phone: '02-345-6789',
           email: 'repair@mobilefix.com',
-          categoryId: '3',
-          categoryName: 'ซ่อมมือถือ',
+          categories: [
+            {
+              id: '3',
+              name: 'ซ่อมมือถือ',
+              description: 'ซ่อมมือถือ',
+              icon: 'repair',
+              color: '#FF0000',
+              shopsCount: 1,
+              servicesCount: 1,
+              isActive: true,
+              sortOrder: 1,
+              createdAt: '2023-01-15T00:00:00Z',
+              updatedAt: '2024-01-15T00:00:00Z'
+            }
+          ],
           ownerId: '3',
           ownerName: 'นาย วิชัย เก่งช่าง',
           status: 'pending',

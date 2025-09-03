@@ -1,5 +1,11 @@
-import { OpeningHour } from "../shop-opening-hour-dto";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { OpeningHour } from "../shop-opening-hour-dto";
+import { CategoryDTO } from "./categories-dto";
+
+export type ShopCategoryDTO = Partial<CategoryDTO> & {
+  id: string;
+  name: string;
+}
 
 export interface ShopDTO {
   id: string;
@@ -8,8 +14,7 @@ export interface ShopDTO {
   address: string;
   phone: string;
   email: string;
-  categoryId: string;
-  categoryName: string;
+  categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;
   status: 'active' | 'inactive' | 'pending';

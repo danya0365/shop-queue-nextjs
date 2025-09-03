@@ -1,4 +1,4 @@
-import { ShopEntity, ShopStatsEntity, ShopStatus } from "../../../domain/entities/backend/backend-shop.entity";
+import { ShopCategoryEntity, ShopEntity, ShopStatsEntity, ShopStatus } from "../../../domain/entities/backend/backend-shop.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
 import { ShopSchema, ShopStatsSchema } from "../../schemas/backend/shop.schema";
 
@@ -9,10 +9,10 @@ import { ShopSchema, ShopStatsSchema } from "../../schemas/backend/shop.schema";
 export class SupabaseBackendShopMapper {
   /**
    * Map database schema to domain entity
-   * @param schema Shop database schema
+   * @param schema Shop database schema with optional categories
    * @returns Shop domain entity
    */
-  public static toDomain(schema: ShopSchema): ShopEntity {
+  public static toDomain(schema: ShopSchema & { categories?: ShopCategoryEntity[] }): ShopEntity {
     return {
       id: schema.id,
       name: schema.name,
@@ -30,16 +30,17 @@ export class SupabaseBackendShopMapper {
       ownerId: schema.owner_id,
       ownerName: schema.owner_name,
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
+      categories: schema.categories || []
     };
   }
 
   /**
    * Map domain entity to database schema
    * @param entity Shop domain entity
-   * @returns Shop database schema
+   * @returns Shop database schema with categories
    */
-  public static toSchema(entity: ShopEntity): ShopSchema {
+  public static toSchema(entity: ShopEntity): ShopSchema & { categories?: ShopCategoryEntity[] } {
     return {
       id: entity.id,
       name: entity.name,
@@ -57,7 +58,8 @@ export class SupabaseBackendShopMapper {
       owner_id: entity.ownerId,
       owner_name: entity.ownerName,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
+      categories: entity.categories
     };
   }
 
