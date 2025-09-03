@@ -1,4 +1,4 @@
-import { ShopDTO, ShopStatsDTO } from '@/src/application/dtos/backend/shops-dto';
+import { ShopCategoryDTO, ShopDTO, ShopStatsDTO } from '@/src/application/dtos/backend/shops-dto';
 import { ShopEntity, ShopStatsEntity } from '@/src/domain/entities/backend/backend-shop.entity';
 
 /**
@@ -12,10 +12,7 @@ export class ShopMapper {
    * @returns Shop DTO
    */
   public static toDTO(entity: ShopEntity): ShopDTO {
-    const categories = entity.categories.map(category => ({
-      id: category.id,
-      name: category.name
-    }));
+    const categories = this.mapShopCategories(entity);
     return {
       id: entity.id,
       name: entity.name,
@@ -65,5 +62,12 @@ export class ShopMapper {
       default:
         return 'pending';
     }
+  }
+
+  private static mapShopCategories(entity: ShopEntity): ShopCategoryDTO[] {
+    return entity.categories.map(category => ({
+      id: category.id,
+      name: category.name
+    }));
   }
 }
