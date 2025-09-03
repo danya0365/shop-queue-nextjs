@@ -18,6 +18,7 @@ CREATE TYPE poster_layout AS ENUM ('portrait', 'landscape', 'square');
 CREATE TYPE membership_tier AS ENUM ('bronze', 'silver', 'gold', 'platinum');
 CREATE TYPE reward_type AS ENUM ('discount', 'free_item', 'cashback', 'special_privilege');
 CREATE TYPE transaction_type AS ENUM ('earned', 'redeemed', 'expired');
+CREATE TYPE activity_type AS ENUM ('queue_created', 'queue_completed', 'customer_registered', 'shop_created');
 
 -- 1. Categories table
 CREATE TABLE IF NOT EXISTS public.categories (
@@ -345,6 +346,17 @@ CREATE TABLE notification_settings (
     UNIQUE(shop_id)
 );
 
+-- 22. Activity Log
+CREATE TABLE shop_activity_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    type activity_type NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for performance
 CREATE INDEX idx_shops_owner_id ON shops(owner_id);
 CREATE INDEX idx_shops_status ON shops(status);
@@ -387,6 +399,9 @@ CREATE INDEX idx_reward_transactions_reward_id ON reward_transactions(reward_id)
 CREATE INDEX idx_reward_transactions_type ON reward_transactions(type);
 CREATE INDEX idx_reward_transactions_points ON reward_transactions(points);
 CREATE INDEX idx_reward_transactions_transaction_date ON reward_transactions(transaction_date);
+CREATE INDEX idx_shop_activities_shop_id ON shop_activity_log(shop_id);
+CREATE INDEX idx_shop_activities_type ON shop_activity_log(type);
+CREATE INDEX idx_shop_activities_created_at ON shop_activity_log(created_at DESC);
 
 
 -- Apply updated_at triggers to relevant tables
@@ -427,6 +442,7 @@ ALTER TABLE public.rewards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reward_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shop_activity_log ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check if user is shop owner
 CREATE OR REPLACE FUNCTION public.is_shop_owner(shop_id_param UUID)
@@ -518,6 +534,12 @@ REVOKE UPDATE ON TABLE public.shops FROM authenticated;
 GRANT INSERT (owner_id, name, description, address, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
 GRANT UPDATE (name, description, address, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
 
+-- Column-level privileges for shop_activity_log
+CREATE POLICY "Shop managers can view their shop activities"
+    ON public.shop_activity_log FOR SELECT
+    USING (public.is_shop_manager(shop_id));
+
+
 -- Only Owner can update shop status
 CREATE OR REPLACE FUNCTION public.owner_update_shop_status(
   p_shop_id UUID,
@@ -540,5 +562,202 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'shop_not_found: %', p_shop_id;
   END IF;
+END;
+$$;
+
+-- Function to create activity record
+CREATE OR REPLACE FUNCTION public.create_shop_activity(
+    p_shop_id UUID,
+    p_type activity_type,
+    p_title TEXT,
+    p_description TEXT,
+    p_metadata JSONB DEFAULT '{}'
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    activity_id UUID;
+BEGIN
+    INSERT INTO shop_activity_log (shop_id, type, title, description, metadata)
+    VALUES (p_shop_id, p_type, p_title, p_description, p_metadata)
+    RETURNING id INTO activity_id;
+    
+    RETURN activity_id;
+END;
+$$;
+
+-- Trigger functions to automatically create activities
+CREATE OR REPLACE FUNCTION public.trigger_queue_activity()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    customer_name TEXT;
+    queue_number TEXT;
+    activity_title TEXT;
+    activity_description TEXT;
+    activity_metadata JSONB;
+BEGIN
+    -- Get customer name and queue number
+    SELECT c.name, NEW.queue_number 
+    INTO customer_name, queue_number
+    FROM customers c 
+    WHERE c.id = NEW.customer_id;
+    
+    IF TG_OP = 'INSERT' THEN
+        -- Queue created
+        activity_title := 'มีคิวใหม่';
+        activity_description := customer_name || ' เข้าคิวหมายเลข ' || queue_number;
+        activity_metadata := jsonb_build_object(
+            'queue_id', NEW.id,
+            'customer_id', NEW.customer_id,
+            'queue_number', queue_number,
+            'priority', NEW.priority
+        );
+        
+        PERFORM public.create_shop_activity(
+            NEW.shop_id,
+            'queue_created',
+            activity_title,
+            activity_description,
+            activity_metadata
+        );
+        
+    ELSIF TG_OP = 'UPDATE' AND OLD.status != NEW.status AND NEW.status = 'completed' THEN
+        -- Queue completed
+        activity_title := 'คิวเสร็จสิ้น';
+        activity_description := 'คิวหมายเลข ' || queue_number || ' ของ ' || customer_name || ' เสร็จสิ้นแล้ว';
+        activity_metadata := jsonb_build_object(
+            'queue_id', NEW.id,
+            'customer_id', NEW.customer_id,
+            'queue_number', queue_number,
+            'served_by', NEW.served_by_employee_id,
+            'completed_at', NEW.completed_at
+        );
+        
+        PERFORM public.create_shop_activity(
+            NEW.shop_id,
+            'queue_completed',
+            activity_title,
+            activity_description,
+            activity_metadata
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$;
+
+-- Trigger function for customer registration
+CREATE OR REPLACE FUNCTION public.trigger_customer_activity()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    activity_title TEXT;
+    activity_description TEXT;
+    activity_metadata JSONB;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        activity_title := 'ลูกค้าใหม่';
+        activity_description := NEW.name || ' ลงทะเบียนเป็นลูกค้าใหม่';
+        activity_metadata := jsonb_build_object(
+            'customer_id', NEW.id,
+            'customer_name', NEW.name,
+            'phone', NEW.phone,
+            'email', NEW.email
+        );
+        
+        PERFORM public.create_shop_activity(
+            NEW.shop_id,
+            'customer_registered',
+            activity_title,
+            activity_description,
+            activity_metadata
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$;
+
+-- Trigger function for shop creation
+CREATE OR REPLACE FUNCTION public.trigger_shop_activity()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    activity_title TEXT;
+    activity_description TEXT;
+    activity_metadata JSONB;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        activity_title := 'ร้านค้าใหม่';
+        activity_description := 'ร้าน ' || NEW.name || ' ถูกสร้างขึ้นใหม่';
+        activity_metadata := jsonb_build_object(
+            'shop_id', NEW.id,
+            'shop_name', NEW.name,
+            'owner_id', NEW.owner_id,
+            'status', NEW.status
+        );
+        
+        PERFORM public.create_shop_activity(
+            NEW.id,
+            'shop_created',
+            activity_title,
+            activity_description,
+            activity_metadata
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$;
+
+-- Create triggers
+CREATE TRIGGER trigger_queue_activities
+    AFTER INSERT OR UPDATE ON queues
+    FOR EACH ROW
+    EXECUTE FUNCTION public.trigger_queue_activity();
+
+CREATE TRIGGER trigger_customer_activities
+    AFTER INSERT ON customers
+    FOR EACH ROW
+    EXECUTE FUNCTION public.trigger_customer_activity();
+
+CREATE TRIGGER trigger_shop_activities
+    AFTER INSERT ON shops
+    FOR EACH ROW
+    EXECUTE FUNCTION public.trigger_shop_activity();
+
+-- Clean up old activities (optional maintenance function)
+CREATE OR REPLACE FUNCTION public.cleanup_old_activities(
+    p_days_to_keep INTEGER DEFAULT 90
+) RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    deleted_count INTEGER;
+BEGIN
+    -- Check if user has permission to view this shop's activities
+    IF NOT is_service_role() AND NOT public.is_shop_manager(p_shop_id) THEN
+        RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+    END IF;
+
+    DELETE FROM shop_activity_log 
+    WHERE created_at < NOW() - INTERVAL '1 day' * p_days_to_keep;
+    
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    RETURN deleted_count;
 END;
 $$;
