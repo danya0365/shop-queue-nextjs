@@ -221,6 +221,7 @@ ON CONFLICT (provider_id, provider) DO NOTHING;
 INSERT INTO shops (
   owner_id,
   name,
+  slug,
   description,
   address,
   phone,
@@ -238,6 +239,7 @@ INSERT INTO shops (
 SELECT
   p.id AS owner_id,
   'ศูนย์ซ่อมมือถือ',
+  'mobile-repair',
   'ศูนย์บริการซ่อมมือถือและอุปกรณ์อิเล็กทรอนิกส์ครบวงจร',
   '789 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดง กรุงเทพฯ 10400',
   '02-555-1234',
@@ -296,10 +298,11 @@ CROSS JOIN (
 WHERE p.username = 'mobile_repair_owner';
 
 -- Insert services for the mobile repair shop
-INSERT INTO services (shop_id, name, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
+INSERT INTO services (shop_id, name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   service_info.name,
+  service_info.slug,
   service_info.description,
   service_info.price,
   service_info.estimated_duration,
@@ -313,23 +316,24 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('เปลี่ยนจอ iPhone'::text, 'เปลี่ยนจอ iPhone ทุกรุ่น รับประกัน 3 เดือน'::text, 2500.00::numeric, 45::integer, 'screen_repair'::text, true::boolean, '📱'::text, 1::integer),
-    ('เปลี่ยนจอ Samsung'::text, 'เปลี่ยนจอ Samsung ทุกรุ่น รับประกัน 3 เดือน'::text, 2200.00::numeric, 45::integer, 'screen_repair'::text, true::boolean, '📱'::text, 2::integer),
-    ('เปลี่ยนแบตเตอรี่ iPhone'::text, 'เปลี่ยนแบตเตอรี่ iPhone แท้ รับประกัน 6 เดือน'::text, 1200.00::numeric, 30::integer, 'battery'::text, true::boolean, '🔋'::text, 3::integer),
-    ('เปลี่ยนแบตเตอรี่ Samsung'::text, 'เปลี่ยนแบตเตอรี่ Samsung แท้ รับประกัน 6 เดือน'::text, 1000.00::numeric, 30::integer, 'battery'::text, true::boolean, '🔋'::text, 4::integer),
-    ('ซ่อมช่องชาร์จ'::text, 'ซ่อมช่องชาร์จมือถือทุกรุ่น'::text, 700.00::numeric, 60::integer, 'charging_port'::text, true::boolean, '🔌'::text, 5::integer),
-    ('ซ่อมกล้องหลัง'::text, 'ซ่อมกล้องหลังมือถือทุกรุ่น'::text, 1500.00::numeric, 90::integer, 'camera'::text, true::boolean, '📷'::text, 6::integer),
-    ('ซ่อมลำโพง'::text, 'ซ่อมลำโพงมือถือทุกรุ่น'::text, 500.00::numeric, 45::integer, 'speaker'::text, true::boolean, '🔊'::text, 7::integer),
-    ('ติดตั้งระบบปฏิบัติการ'::text, 'ติดตั้งระบบปฏิบัติการใหม่'::text, 300.00::numeric, 60::integer, 'software'::text, true::boolean, '💾'::text, 8::integer),
-    ('ตรวจสอบเครื่อง'::text, 'ตรวจสอบปัญหาเครื่องโดยละเอียด'::text, 100.00::numeric, 15::integer, 'diagnostic'::text, true::boolean, '🔍'::text, 9::integer)
-) AS service_info(name, description, price, estimated_duration, category, is_available, icon, popularity_rank)
+    ('เปลี่ยนจอ iPhone'::text, 'iphone-screen-repair'::text, 'เปลี่ยนจอ iPhone ทุกรุ่น รับประกัน 3 เดือน'::text, 2500.00::numeric, 45::integer, 'screen_repair'::text, true::boolean, '📱'::text, 1::integer),
+    ('เปลี่ยนจอ Samsung'::text, 'samsung-screen-repair'::text, 'เปลี่ยนจอ Samsung ทุกรุ่น รับประกัน 3 เดือน'::text, 2200.00::numeric, 45::integer, 'screen_repair'::text, true::boolean, '📱'::text, 2::integer),
+    ('เปลี่ยนแบตเตอรี่ iPhone'::text, 'iphone-battery-repair'::text, 'เปลี่ยนแบตเตอรี่ iPhone แท้ รับประกัน 6 เดือน'::text, 1200.00::numeric, 30::integer, 'battery'::text, true::boolean, '🔋'::text, 3::integer),
+    ('เปลี่ยนแบตเตอรี่ Samsung'::text, 'samsung-battery-repair'::text, 'เปลี่ยนแบตเตอรี่ Samsung แท้ รับประกัน 6 เดือน'::text, 1000.00::numeric, 30::integer, 'battery'::text, true::boolean, '🔋'::text, 4::integer),
+    ('ซ่อมช่องชาร์จ'::text, 'charging-port-repair'::text, 'ซ่อมช่องชาร์จมือถือทุกรุ่น'::text, 700.00::numeric, 60::integer, 'charging_port'::text, true::boolean, '🔌'::text, 5::integer),
+    ('ซ่อมกล้องหลัง'::text, 'back-camera-repair'::text, 'ซ่อมกล้องหลังมือถือทุกรุ่น'::text, 1500.00::numeric, 90::integer, 'camera'::text, true::boolean, '📷'::text, 6::integer),
+    ('ซ่อมลำโพง'::text, 'speaker-repair'::text, 'ซ่อมลำโพงมือถือทุกรุ่น'::text, 500.00::numeric, 45::integer, 'speaker'::text, true::boolean, '🔊'::text, 7::integer),
+    ('ติดตั้งระบบปฏิบัติการ'::text, 'software-installation'::text, 'ติดตั้งระบบปฏิบัติการใหม่'::text, 300.00::numeric, 60::integer, 'software'::text, true::boolean, '💾'::text, 8::integer),
+    ('ตรวจสอบเครื่อง'::text, 'diagnostic-check'::text, 'ตรวจสอบปัญหาเครื่องโดยละเอียด'::text, 100.00::numeric, 15::integer, 'diagnostic'::text, true::boolean, '🔍'::text, 9::integer)
+) AS service_info(name, slug, description, price, estimated_duration, category, is_available, icon, popularity_rank)
 WHERE p.username = 'mobile_repair_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
+  dept_info.slug,
   dept_info.description,
   dept_info.employee_count,
   NOW(),
@@ -338,10 +342,10 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ซ่อมฮาร์ดแวร์'::text, 'แผนกซ่อมฮาร์ดแวร์ จอ แบตเตอรี่ กล้อง'::text, 2::integer),
-    ('ซ่อมซอฟต์แวร์'::text, 'แผนกซ่อมซอฟต์แวร์ ติดตั้งระบบ'::text, 1::integer),
-    ('ต้อนรับ'::text, 'แผนกต้อนรับลูกค้า'::text, 1::integer)
-) AS dept_info(name, description, employee_count)
+    ('ซ่อมฮาร์ดแวร์'::text, 'hardware-repair'::text, 'แผนกซ่อมฮาร์ดแวร์ จอ แบตเตอรี่ กล้อง'::text, 2::integer),
+    ('ซ่อมซอฟต์แวร์'::text, 'software-repair'::text, 'แผนกซ่อมซอฟต์แวร์ ติดตั้งระบบ'::text, 1::integer),
+    ('ต้อนรับ'::text, 'welcome'::text, 'แผนกต้อนรับลูกค้า'::text, 1::integer)
+) AS dept_info(name, slug, description, employee_count)
 WHERE p.username = 'mobile_repair_owner';
 
 -- Insert employees
