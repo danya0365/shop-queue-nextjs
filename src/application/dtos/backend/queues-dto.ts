@@ -1,3 +1,5 @@
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+
 export interface QueueDTO {
   id: string;
   customerId: string;
@@ -80,4 +82,4 @@ export interface QueuesDataDTO {
   perPage: number;
 }
 
-export type PaginatedQueuesDTO = import('@/src/domain/interfaces/pagination-types').PaginatedResult<QueueDTO>;
+export type PaginatedQueuesDTO = PaginatedResult<QueueDTO>;
