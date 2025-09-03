@@ -11,8 +11,8 @@ import { BackendQueuesService } from "../application/services/backend/BackendQue
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
 import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-users/DeleteAuthUserUseCase";
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
+import { GetAuthUsersPaginatedUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersPaginatedUseCase";
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
-import { GetAuthUsersUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersUseCase";
 import { GetCategoriesUseCase } from "../application/usecases/backend/categories/GetMockCategoriesUseCase";
 import { CreateCustomerUseCase } from "../application/usecases/backend/customers/CreateCustomerUseCase";
 import { DeleteCustomerUseCase } from "../application/usecases/backend/customers/DeleteCustomerUseCase";
@@ -104,7 +104,7 @@ export async function createBackendContainer(): Promise<Container> {
     const getQueueStatsUseCase = new GetQueueStatsUseCase(queueRepository, logger);
 
     // Auth Users use cases
-    const getAuthUsersUseCase = new GetAuthUsersUseCase(authUsersRepository);
+    const getAuthUsersPaginatedUseCase = new GetAuthUsersPaginatedUseCase(authUsersRepository);
     const getAuthUserByIdUseCase = new GetAuthUserByIdUseCase(authUsersRepository);
     const getAuthUserStatsUseCase = new GetAuthUserStatsUseCase(authUsersRepository);
     const deleteAuthUserUseCase = new DeleteAuthUserUseCase(authUsersRepository);
@@ -170,7 +170,7 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
     const backendAuthUsersService = new BackendAuthUsersService(
-      getAuthUsersUseCase,
+      getAuthUsersPaginatedUseCase,
       getAuthUserByIdUseCase,
       getAuthUserStatsUseCase,
       deleteAuthUserUseCase

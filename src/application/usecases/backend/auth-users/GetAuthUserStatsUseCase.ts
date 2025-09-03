@@ -1,20 +1,16 @@
-import type { AuthUserStatsEntity } from '@/src/domain/entities/backend/backend-auth-user.entity';
+import { AuthUserStatsDTO } from '@/src/application/dtos/backend/auth-users-dto';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { IBackendAuthUsersRepository } from '@/src/domain/repositories/backend/backend-auth-user-repository';
+import { BackendAuthUsersMapper } from '@/src/infrastructure/mappers/backend/supabase-backend-auth-user.mapper';
 
-export interface GetAuthUserStatsUseCaseOutput {
-  stats: AuthUserStatsEntity;
-}
-
-export class GetAuthUserStatsUseCase {
+export class GetAuthUserStatsUseCase implements IUseCase<void, AuthUserStatsDTO> {
   constructor(
     private readonly authUsersRepository: IBackendAuthUsersRepository
   ) { }
 
-  async execute(): Promise<GetAuthUserStatsUseCaseOutput> {
+  async execute(): Promise<AuthUserStatsDTO> {
     const stats = await this.authUsersRepository.getAuthUserStats();
-
-    return {
-      stats
-    };
+    const statsDto = BackendAuthUsersMapper.statsToDTO(stats);
+    return statsDto
   }
 }

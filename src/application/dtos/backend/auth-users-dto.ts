@@ -1,3 +1,5 @@
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+
 export interface AuthUserDTO {
   id: string;
   email: string;
@@ -52,3 +54,5 @@ export interface AuthUsersDataDTO {
   currentPage: number;
   perPage: number;
 }
+
+export type PaginatedAuthUsersDTO = PaginatedResult<AuthUserDTO>;
