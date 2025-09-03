@@ -14,7 +14,7 @@ export interface EmployeeSchema {
   phone: string | null;
   department_id: string | null;
   department_name?: string; // Joined data
-  position: string;
+  position_text: string;
   shop_id: string | null;
   shop_name?: string; // Joined data
   status: string;

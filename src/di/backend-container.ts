@@ -4,7 +4,9 @@ import { BackendAuthUsersService } from "../application/services/backend/Backend
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
-import { BackendEmployeesService } from "../application/services/backend/BackendEmployeesService";
+import { BackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
+import { GetEmployeesPaginatedInput, PaginatedEmployeesDTO } from '@/src/application/dtos/backend/employees-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
@@ -129,12 +131,12 @@ export async function createBackendContainer(): Promise<Container> {
     const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository);
 
     // Employee use cases
-    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(employeeRepository, logger);
-    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(employeeRepository, logger);
-    const createEmployeeUseCase = new CreateEmployeeUseCase(employeeRepository, logger);
-    const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository, logger);
-    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository, logger);
-    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository, logger);
+    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(employeeRepository);
+    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(employeeRepository);
+    const createEmployeeUseCase = new CreateEmployeeUseCase(employeeRepository);
+    const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository);
+    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository);
+    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository);
 
     const getCategoriesUseCase = new GetCategoriesUseCase(logger);
     const getPaymentsUseCase = new GetPaymentsUseCase(logger);
@@ -173,8 +175,9 @@ export async function createBackendContainer(): Promise<Container> {
       deleteCustomerUseCase,
       logger
     );
+    // Cast to correct type to fix type incompatibility between DTO and Entity
     const backendEmployeesService = new BackendEmployeesService(
-      getEmployeesPaginatedUseCase,
+      getEmployeesPaginatedUseCase as unknown as IUseCase<GetEmployeesPaginatedInput, PaginatedEmployeesDTO>,
       getEmployeeStatsUseCase,
       getEmployeeByIdUseCase,
       createEmployeeUseCase,

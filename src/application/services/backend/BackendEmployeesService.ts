@@ -1,8 +1,6 @@
-
-import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, UpdateEmployeeParams } from '@/src/application/dtos/backend/employees-dto';
+import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, PaginatedEmployeesDTO, UpdateEmployeeParams } from '@/src/application/dtos/backend/employees-dto';
 import { GetEmployeesPaginatedInput } from '@/src/application/dtos/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { PaginatedEmployeesEntity } from '@/src/domain/entities/backend/backend-employee.entity';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendEmployeesService {
@@ -16,7 +14,7 @@ export interface IBackendEmployeesService {
 
 export class BackendEmployeesService implements IBackendEmployeesService {
   constructor(
-    private readonly getEmployeesPaginatedUseCase: IUseCase<GetEmployeesPaginatedInput, PaginatedEmployeesEntity>,
+    private readonly getEmployeesPaginatedUseCase: IUseCase<GetEmployeesPaginatedInput, PaginatedEmployeesDTO>,
     private readonly getEmployeeStatsUseCase: IUseCase<void, EmployeeStatsDTO>,
     private readonly getEmployeeByIdUseCase: IUseCase<string, EmployeeDTO>,
     private readonly createEmployeeUseCase: IUseCase<CreateEmployeeParams, EmployeeDTO>,
@@ -25,109 +23,117 @@ export class BackendEmployeesService implements IBackendEmployeesService {
     private readonly logger: Logger
   ) { }
 
+  /**
+   * Get employees data including paginated employees and statistics
+   * @param page Page number (default: 1)
+   * @param perPage Items per page (default: 10)
+   * @returns Employees data DTO
+   */
   async getEmployeesData(page: number = 1, perPage: number = 10): Promise<EmployeesDataDTO> {
     try {
-      this.logger.info('BackendEmployeesService: Getting employees data');
+      this.logger.info('Getting employees data', { page, perPage });
 
-      const employeesData = await this.getEmployeesPaginatedUseCase.execute({ page, limit: perPage });
-      const employeeStats = await this.getEmployeeStatsUseCase.execute();
+      // Get employees and stats in parallel
+      const [employeesResult, stats] = await Promise.all([
+        this.getEmployeesPaginatedUseCase.execute({ page, limit: perPage }),
+        this.getEmployeeStatsUseCase.execute()
+      ]);
 
-      const employees = employeesData.data.map((employee) => ({
-        ...employee,
-        email: employee.email || undefined,
-        phone: employee.phone || undefined,
-        departmentId: employee.departmentId || undefined,
-        departmentName: employee.departmentName || undefined,
-        shopId: employee.shopId || undefined,
-        shopName: employee.shopName || undefined,
-        createdAt: employee.createdAt,
-        updatedAt: employee.updatedAt,
-        lastLogin: employee.lastLogin || undefined,
-        permissions: employee.permissions || [],
-        salary: employee.salary || undefined,
-        notes: employee.notes || undefined,
-      }));
-
-      this.logger.info('BackendEmployeesService: Successfully retrieved employees data');
       return {
-        employees,
-        stats: employeeStats,
-        totalCount: employeesData.pagination.totalItems,
-        currentPage: employeesData.pagination.currentPage,
-        perPage: employeesData.pagination.itemsPerPage
+        employees: employeesResult.data,
+        stats,
+        totalCount: employeesResult.pagination.totalItems,
+        currentPage: employeesResult.pagination.currentPage,
+        perPage: employeesResult.pagination.itemsPerPage
       };
     } catch (error) {
-      this.logger.error('BackendEmployeesService: Error getting employees data', error);
+      this.logger.error('Error getting employees data', { error, page, perPage });
       throw error;
     }
   }
 
+  /**
+   * Get employee statistics
+   * @returns Employee stats DTO
+   */
   async getEmployeeStats(): Promise<EmployeeStatsDTO> {
     try {
-      this.logger.info('BackendEmployeesService: Getting employee stats');
+      this.logger.info('Getting employee stats');
 
-      const employeeStats = await this.getEmployeeStatsUseCase.execute();
-
-      this.logger.info('BackendEmployeesService: Successfully retrieved employee stats');
-      return employeeStats;
+      const stats = await this.getEmployeeStatsUseCase.execute();
+      return stats;
     } catch (error) {
-      this.logger.error('BackendEmployeesService: Error getting employee stats', error);
+      this.logger.error('Error getting employee stats', { error });
       throw error;
     }
   }
 
+  /**
+   * Get an employee by ID
+   * @param id Employee ID
+   * @returns Employee DTO
+   */
   async getEmployeeById(id: string): Promise<EmployeeDTO> {
     try {
-      this.logger.info(`BackendEmployeesService: Getting employee with id ${id}`);
+      this.logger.info('Getting employee by ID', { id });
 
-      const employee = await this.getEmployeeByIdUseCase.execute(id);
-
-      this.logger.info(`BackendEmployeesService: Successfully retrieved employee with id ${id}`);
-      return employee;
-    } catch (error) {
-      this.logger.error(`BackendEmployeesService: Error getting employee with id ${id}`, error);
-      throw error;
-    }
-  }
-
-  async createEmployee(params: CreateEmployeeParams): Promise<EmployeeDTO> {
-    try {
-      this.logger.info('BackendEmployeesService: Creating employee');
-
-      const employee = await this.createEmployeeUseCase.execute(params);
-
-      this.logger.info('BackendEmployeesService: Successfully created employee');
-      return employee;
-    } catch (error) {
-      this.logger.error('BackendEmployeesService: Error creating employee', error);
-      throw error;
-    }
-  }
-
-  async updateEmployee(id: string, params: UpdateEmployeeParams): Promise<EmployeeDTO> {
-    try {
-      this.logger.info(`BackendEmployeesService: Updating employee with id ${id}`);
-
-      const employee = await this.updateEmployeeUseCase.execute({ ...params, id });
-
-      this.logger.info(`BackendEmployeesService: Successfully updated employee with id ${id}`);
-      return employee;
-    } catch (error) {
-      this.logger.error(`BackendEmployeesService: Error updating employee with id ${id}`, error);
-      throw error;
-    }
-  }
-
-  async deleteEmployee(id: string): Promise<boolean> {
-    try {
-      this.logger.info(`BackendEmployeesService: Deleting employee with id ${id}`);
-
-      const result = await this.deleteEmployeeUseCase.execute(id);
-
-      this.logger.info(`BackendEmployeesService: Successfully deleted employee with id ${id}`);
+      const result = await this.getEmployeeByIdUseCase.execute(id);
       return result;
     } catch (error) {
-      this.logger.error(`BackendEmployeesService: Error deleting employee with id ${id}`, error);
+      this.logger.error('Error getting employee by ID', { error, id });
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new employee
+   * @param params Employee creation parameters
+   * @returns Created employee DTO
+   */
+  async createEmployee(params: CreateEmployeeParams): Promise<EmployeeDTO> {
+    try {
+      this.logger.info('Creating employee', { params });
+
+      const result = await this.createEmployeeUseCase.execute(params);
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating employee', { error, params });
+      throw error;
+    }
+  }
+
+  /**
+   * Update an existing employee
+   * @param id Employee ID
+   * @param params Employee update parameters
+   * @returns Updated employee DTO
+   */
+  async updateEmployee(id: string, params: UpdateEmployeeParams): Promise<EmployeeDTO> {
+    try {
+      this.logger.info('Updating employee', { id, params });
+
+      const updateData = { ...params, id };
+      const result = await this.updateEmployeeUseCase.execute(updateData);
+      return result;
+    } catch (error) {
+      this.logger.error('Error updating employee', { error, id, params });
+      throw error;
+    }
+  }
+
+  /**
+   * Delete an employee
+   * @param id Employee ID
+   * @returns Success flag
+   */
+  async deleteEmployee(id: string): Promise<boolean> {
+    try {
+      this.logger.info('Deleting employee', { id });
+
+      const result = await this.deleteEmployeeUseCase.execute(id);
+      return result;
+    } catch (error) {
+      this.logger.error('Error deleting employee', { error, id });
       throw error;
     }
   }

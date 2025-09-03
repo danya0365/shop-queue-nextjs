@@ -58,7 +58,7 @@ export class SupabaseBackendEmployeeRepository extends BackendRepository impleme
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count('employees');
+      const totalItems = await this.dataSource.count('employees', queryOptions);
 
       // Map database results to domain entities
       const mappedEmployees = employees.map(employee => {
@@ -286,7 +286,7 @@ export class SupabaseBackendEmployeeRepository extends BackendRepository impleme
       if (employee.email !== undefined) employeeSchema.email = employee.email;
       if (employee.phone !== undefined) employeeSchema.phone = employee.phone;
       if (employee.departmentId !== undefined) employeeSchema.department_id = employee.departmentId;
-      if (employee.position !== undefined) employeeSchema.position = employee.position;
+      if (employee.position !== undefined) employeeSchema.position_text = employee.position;
       if (employee.shopId !== undefined) employeeSchema.shop_id = employee.shopId;
       if (employee.status !== undefined) employeeSchema.status = employee.status;
       if (employee.hireDate !== undefined) employeeSchema.hire_date = employee.hireDate;
