@@ -63,6 +63,14 @@ import { SupabaseBackendProfileRepository } from "../infrastructure/repositories
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
+import { BackendServicesService } from '../application/services/backend/BackendServicesService';
+import { GetServicesUseCase } from '../application/use-cases/backend/services/GetServicesUseCase';
+import { GetServiceByIdUseCase } from '../application/use-cases/backend/services/GetServiceByIdUseCase';
+import { CreateServiceUseCase } from '../application/use-cases/backend/services/CreateServiceUseCase';
+import { UpdateServiceUseCase } from '../application/use-cases/backend/services/UpdateServiceUseCase';
+import { DeleteServiceUseCase } from '../application/use-cases/backend/services/DeleteServiceUseCase';
+import { ToggleServiceAvailabilityUseCase } from '../application/use-cases/backend/services/ToggleServiceAvailabilityUseCase';
+import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/SupabaseBackendServiceRepository';
 
 /**
  * Initialize a backend container with elevated privilege dependencies
@@ -94,6 +102,7 @@ export async function createBackendContainer(): Promise<Container> {
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
     const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
     const categoryRepository = new SupabaseBackendCategoryRepository(databaseDatasource, logger);
+    const serviceRepository = new SupabaseBackendServiceRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository, logger);
@@ -156,6 +165,13 @@ export async function createBackendContainer(): Promise<Container> {
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
     const deleteProfileUseCase = new DeleteProfileUseCase(profileRepository);
 
+    const getServicesUseCase = new GetServicesUseCase(serviceRepository, logger);
+    const getServiceByIdUseCase = new GetServiceByIdUseCase(serviceRepository, logger);
+    const createServiceUseCase = new CreateServiceUseCase(serviceRepository, logger);
+    const updateServiceUseCase = new UpdateServiceUseCase(serviceRepository, logger);
+    const deleteServiceUseCase = new DeleteServiceUseCase(serviceRepository, logger);
+    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(serviceRepository, logger);
+
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
       getDashboardStatsUseCase,
@@ -210,6 +226,15 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const backendPaymentsService = new BackendPaymentsService(getPaymentsUseCase, logger);
 
+    const backendServicesService = new BackendServicesService(
+      getServicesUseCase,
+      getServiceByIdUseCase,
+      createServiceUseCase,
+      updateServiceUseCase,
+      deleteServiceUseCase,
+      toggleServiceAvailabilityUseCase,
+    );
+
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);
     container.registerInstance("BackendShopsService", backendShopsService);
@@ -220,6 +245,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendCategoriesService", backendCategoriesService);
     container.registerInstance("BackendProfilesService", backendProfilesService);
     container.registerInstance("BackendPaymentsService", backendPaymentsService);
+    container.registerInstance("BackendServicesService", backendServicesService);
 
     logger.info("Backend container initialized successfully");
   } catch (error) {
