@@ -3,6 +3,23 @@
 import { ProfilesViewModel } from '@/src/presentation/presenters/backend/profiles/ProfilesPresenter';
 import { useProfilesPresenter } from '@/src/presentation/presenters/backend/profiles/useProfilesPresenter';
 import Image from 'next/image';
+import {
+  User,
+  UserCheck,
+  Clock,
+  Activity,
+  Download,
+  FileText,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  CheckCircle,
+  XCircle,
+  Power,
+  Trash2,
+  Users
+} from 'lucide-react';
 
 interface ProfilesViewProps {
   viewModel: ProfilesViewModel;
@@ -73,11 +90,13 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
           <p className="backend-text-muted mt-2">จัดการข้อมูลโปรไฟล์ผู้ใช้และการตรวจสอบยืนยันตัวตน</p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            ส่งออกข้อมูล
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+            <Download size={16} />
+            <span>ส่งออกข้อมูล</span>
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            รายงานการตรวจสอบ
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <FileText size={16} />
+            <span>รายงานการตรวจสอบ</span>
           </button>
         </div>
       </div>
@@ -85,26 +104,57 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">โปรไฟล์ทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{profilesData.stats.totalProfiles}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">โปรไฟล์ทั้งหมด</h3>
+              <p className="text-2xl font-bold backend-text mt-2">{profilesData.stats.totalProfiles}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Users size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ยืนยันตัวตนแล้ว</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{profilesData.stats.verifiedProfiles}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ยืนยันตัวตนแล้ว</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">{profilesData.stats.verifiedProfiles}</p>
+            </div>
+            <div className="p-3 rounded-full text-green-600 bg-green-50">
+              <UserCheck size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">รอตรวจสอบ</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{profilesData.stats.pendingVerification}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">รอตรวจสอบ</h3>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">{profilesData.stats.pendingVerification}</p>
+            </div>
+            <div className="p-3 rounded-full text-yellow-600 bg-yellow-50">
+              <Clock size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ใช้งานวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{profilesData.stats.activeProfilesToday}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ใช้งานวันนี้</h3>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{profilesData.stats.activeProfilesToday}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Activity size={24} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Gender Distribution */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-        <h3 className="text-lg font-semibold backend-text mb-4">การกระจายตามเพศ</h3>
+        <div className="flex items-center space-x-2 mb-4">
+          <User size={20} className="backend-text-muted" />
+          <h3 className="text-lg font-semibold backend-text">การกระจายตามเพศ</h3>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-blue-600">{profilesData.stats.profilesByGender.male}</p>
@@ -127,14 +177,19 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter size={20} className="backend-text-muted" />
+          <h2 className="text-lg font-semibold backend-text">ค้นหาและกรองข้อมูล</h2>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 backend-text-muted" />
             <input
               type="text"
               placeholder="ค้นหาด้วยชื่อ, เบอร์โทร หรืออีเมล..."
               value={state.searchQuery}
               onChange={(e) => actions.setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
+              className="w-full pl-10 pr-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
             />
           </div>
           <select
@@ -243,8 +298,14 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex flex-wrap gap-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">ดูรายละเอียด</button>
-                        <button className="text-green-600 hover:text-green-800 text-sm">แก้ไข</button>
+                        <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
+                          <Eye size={14} />
+                          <span>ดูรายละเอียด</span>
+                        </button>
+                        <button className="text-green-600 hover:text-green-800 text-sm flex items-center space-x-1">
+                          <Edit size={14} />
+                          <span>แก้ไข</span>
+                        </button>
 
                         {/* Verification Actions */}
                         {profile.verificationStatus === 'pending' && (
@@ -252,16 +313,18 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                             <button
                               onClick={() => handleVerificationUpdate(profile.id, 'verified')}
                               disabled={state.isLoading}
-                              className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50"
+                              className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                             >
-                              อนุมัติ
+                              <CheckCircle size={14} />
+                              <span>อนุมัติ</span>
                             </button>
                             <button
                               onClick={() => handleVerificationUpdate(profile.id, 'rejected')}
                               disabled={state.isLoading}
-                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                             >
-                              ปฏิเสธ
+                              <XCircle size={14} />
+                              <span>ปฏิเสธ</span>
                             </button>
                           </>
                         )}
@@ -270,20 +333,22 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                         <button
                           onClick={() => handleToggleStatus(profile.id, profile.isActive)}
                           disabled={state.isLoading}
-                          className={`text-sm disabled:opacity-50 ${profile.isActive
+                          className={`text-sm disabled:opacity-50 flex items-center space-x-1 ${profile.isActive
                             ? 'text-red-600 hover:text-red-800'
                             : 'text-green-600 hover:text-green-800'
                             }`}
                         >
-                          {profile.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                          <Power size={14} />
+                          <span>{profile.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}</span>
                         </button>
 
                         <button
                           onClick={() => handleDelete(profile.id)}
                           disabled={state.isLoading}
-                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                         >
-                          ลบ
+                          <Trash2 size={14} />
+                          <span>ลบ</span>
                         </button>
                       </div>
                     </td>

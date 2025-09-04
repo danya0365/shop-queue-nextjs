@@ -3,6 +3,22 @@
 import { QueueDTO } from '@/src/application/dtos/backend/queues-dto';
 import { QueuesViewModel } from '@/src/presentation/presenters/backend/queues/QueuesPresenter';
 import { useQueuesPresenter } from '@/src/presentation/presenters/backend/queues/useQueuesPresenter';
+import {
+  Clock,
+  Users,
+  Activity,
+  CheckCircle,
+  XCircle,
+  Timer,
+  Plus,
+  Download,
+  Search,
+  Filter,
+  Phone,
+  CheckCircle2,
+  X,
+  Eye
+} from 'lucide-react';
 
 interface QueuesViewProps {
   viewModel: QueuesViewModel;
@@ -91,53 +107,102 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
           <p className="backend-text-muted mt-2">จัดการคิวและสถานะการให้บริการ</p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            ส่งออกข้อมูล
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+            <Download size={16} />
+            <span>ส่งออกข้อมูล</span>
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            เพิ่มคิวใหม่
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <Plus size={16} />
+            <span>เพิ่มคิวใหม่</span>
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">คิวทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{queuesData.stats.totalQueues}</p>
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">คิวทั้งหมด</h3>
+              <p className="text-xl font-bold backend-text mt-1">{queuesData.stats.totalQueues}</p>
+            </div>
+            <div className="p-2 rounded-full text-blue-600 bg-blue-50">
+              <Users size={20} />
+            </div>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">รอคิว</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{queuesData.stats.waitingQueues}</p>
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">รอคิว</h3>
+              <p className="text-xl font-bold text-yellow-600 mt-1">{queuesData.stats.waitingQueues}</p>
+            </div>
+            <div className="p-2 rounded-full text-yellow-600 bg-yellow-50">
+              <Clock size={20} />
+            </div>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">กำลังให้บริการ</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{queuesData.stats.inProgressQueues}</p>
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">กำลังให้บริการ</h3>
+              <p className="text-xl font-bold text-blue-600 mt-1">{queuesData.stats.inProgressQueues}</p>
+            </div>
+            <div className="p-2 rounded-full text-blue-600 bg-blue-50">
+              <Activity size={20} />
+            </div>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">เสร็จสิ้นวันนี้</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{queuesData.stats.completedToday}</p>
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">เสร็จสิ้นวันนี้</h3>
+              <p className="text-xl font-bold text-green-600 mt-1">{queuesData.stats.completedToday}</p>
+            </div>
+            <div className="p-2 rounded-full text-green-600 bg-green-50">
+              <CheckCircle size={20} />
+            </div>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ยกเลิกวันนี้</h3>
-          <p className="text-2xl font-bold text-red-600 mt-2">{queuesData.stats.cancelledToday}</p>
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">ยกเลิกวันนี้</h3>
+              <p className="text-xl font-bold text-red-600 mt-1">{queuesData.stats.cancelledToday}</p>
+            </div>
+            <div className="p-2 rounded-full text-red-600 bg-red-50">
+              <XCircle size={20} />
+            </div>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">เวลารอเฉลี่ย</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{queuesData.stats.averageWaitTime} นาที</p>
+        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-xs font-medium">เวลารอเฉลี่ย</h3>
+              <p className="text-xl font-bold text-purple-600 mt-1">{queuesData.stats.averageWaitTime} นาที</p>
+            </div>
+            <div className="p-2 rounded-full text-purple-600 bg-purple-50">
+              <Timer size={20} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter size={20} className="backend-text-muted" />
+          <h2 className="text-lg font-semibold backend-text">ค้นหาและกรองข้อมูล</h2>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 backend-text-muted" />
             <input
               type="text"
               placeholder="ค้นหาด้วยชื่อลูกค้า, เบอร์โทร หรือหมายเลขคิว..."
               value={state.searchQuery}
               onChange={(e) => actions.setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
+              className="w-full pl-10 pr-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
             />
           </div>
           <select
@@ -240,30 +305,36 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                           <button
                             onClick={() => handleCallQueue(queue.id)}
                             disabled={state.isLoading}
-                            className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50"
+                            className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                           >
-                            เรียกคิว
+                            <Phone size={14} />
+                            <span>เรียกคิว</span>
                           </button>
                         )}
                         {queue.status === 'in_progress' && (
                           <button
                             onClick={() => handleCompleteQueue(queue.id)}
                             disabled={state.isLoading}
-                            className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50"
+                            className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                           >
-                            เสร็จสิ้น
+                            <CheckCircle2 size={14} />
+                            <span>เสร็จสิ้น</span>
                           </button>
                         )}
                         {(queue.status === 'waiting' || queue.status === 'in_progress') && (
                           <button
                             onClick={() => handleCancelQueue(queue.id)}
                             disabled={state.isLoading}
-                            className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                            className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                           >
-                            ยกเลิก
+                            <X size={14} />
+                            <span>ยกเลิก</span>
                           </button>
                         )}
-                        <button className="text-purple-600 hover:text-purple-800 text-sm">ดูรายละเอียด</button>
+                        <button className="text-purple-600 hover:text-purple-800 text-sm flex items-center space-x-1">
+                          <Eye size={14} />
+                          <span>ดูรายละเอียด</span>
+                        </button>
                       </div>
                     </td>
                   </tr>

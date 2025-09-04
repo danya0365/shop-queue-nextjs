@@ -2,6 +2,21 @@
 
 import { EmployeesViewModel } from '@/src/presentation/presenters/backend/employees/EmployeesPresenter';
 import { useEmployeesPresenter } from '@/src/presentation/presenters/backend/employees/useEmployeesPresenter';
+import {
+  Users,
+  UserCheck,
+  Activity,
+  TrendingUp,
+  Plus,
+  Download,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Shield,
+  Pause,
+  Trash2
+} from 'lucide-react';
 
 interface EmployeesViewProps {
   viewModel: EmployeesViewModel;
@@ -65,11 +80,13 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
           <p className="backend-text-muted mt-2">จัดการข้อมูลพนักงานและสิทธิ์การเข้าถึงระบบ</p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            ส่งออกข้อมูล
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+            <Download size={16} />
+            <span>ส่งออกข้อมูล</span>
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            เพิ่มพนักงานใหม่
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <Plus size={16} />
+            <span>เพิ่มพนักงานใหม่</span>
           </button>
         </div>
       </div>
@@ -77,33 +94,66 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">พนักงานทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{employeesData.stats.totalEmployees}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">พนักงานทั้งหมด</h3>
+              <p className="text-2xl font-bold backend-text mt-2">{employeesData.stats.totalEmployees}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Users size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ใช้งานอยู่</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{employeesData.stats.activeEmployees}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ใช้งานอยู่</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">{employeesData.stats.activeEmployees}</p>
+            </div>
+            <div className="p-3 rounded-full text-green-600 bg-green-50">
+              <UserCheck size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">เข้าใช้งานวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{employeesData.stats.loggedInToday}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">เข้าใช้งานวันนี้</h3>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{employeesData.stats.loggedInToday}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Activity size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">พนักงานใหม่เดือนนี้</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{employeesData.stats.newEmployeesThisMonth}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">พนักงานใหม่เดือนนี้</h3>
+              <p className="text-2xl font-bold text-purple-600 mt-2">{employeesData.stats.newEmployeesThisMonth}</p>
+            </div>
+            <div className="p-3 rounded-full text-purple-600 bg-purple-50">
+              <TrendingUp size={24} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter size={20} className="backend-text-muted" />
+          <h2 className="text-lg font-semibold backend-text">ค้นหาและกรองข้อมูล</h2>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 backend-text-muted" />
             <input
               type="text"
               placeholder="ค้นหาด้วยชื่อ, อีเมล หรือเบอร์โทร..."
               value={state.searchQuery}
               onChange={(e) => actions.setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
+              className="w-full pl-10 pr-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
             />
           </div>
           <select
@@ -193,33 +243,45 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">ดูรายละเอียด</button>
-                        <button className="text-green-600 hover:text-green-800 text-sm">แก้ไข</button>
-                        <button className="text-purple-600 hover:text-purple-800 text-sm">สิทธิ์</button>
+                        <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
+                          <Eye size={14} />
+                          <span>ดูรายละเอียด</span>
+                        </button>
+                        <button className="text-green-600 hover:text-green-800 text-sm flex items-center space-x-1">
+                          <Edit size={14} />
+                          <span>แก้ไข</span>
+                        </button>
+                        <button className="text-purple-600 hover:text-purple-800 text-sm flex items-center space-x-1">
+                          <Shield size={14} />
+                          <span>สิทธิ์</span>
+                        </button>
                         {employee.status === 'suspended' && (
                           <button
                             onClick={() => handleUpdateStatus(employee.id, 'active')}
                             disabled={state.isLoading}
-                            className="text-orange-600 hover:text-orange-800 text-sm disabled:opacity-50"
+                            className="text-orange-600 hover:text-orange-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                           >
-                            ยกเลิกระงับ
+                            <UserCheck size={14} />
+                            <span>ยกเลิกระงับ</span>
                           </button>
                         )}
                         {employee.status === 'active' && (
                           <button
                             onClick={() => handleUpdateStatus(employee.id, 'suspended')}
                             disabled={state.isLoading}
-                            className="text-yellow-600 hover:text-yellow-800 text-sm disabled:opacity-50"
+                            className="text-yellow-600 hover:text-yellow-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                           >
-                            ระงับ
+                            <Pause size={14} />
+                            <span>ระงับ</span>
                           </button>
                         )}
                         <button
                           onClick={() => handleDelete(employee.id)}
                           disabled={state.isLoading}
-                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                         >
-                          ลบ
+                          <Trash2 size={14} />
+                          <span>ลบ</span>
                         </button>
                       </div>
                     </td>

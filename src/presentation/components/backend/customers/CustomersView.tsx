@@ -2,6 +2,20 @@
 
 import { CustomersViewModel } from '@/src/presentation/presenters/backend/customers/CustomersPresenter';
 import { useCustomersPresenter } from '@/src/presentation/presenters/backend/customers/useCustomersPresenter';
+import {
+  Users,
+  UserPlus,
+  Activity,
+  Crown,
+  Plus,
+  Download,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  Award
+} from 'lucide-react';
 
 interface CustomersViewProps {
   viewModel: CustomersViewModel;
@@ -61,11 +75,13 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
           <p className="backend-text-muted mt-2">จัดการข้อมูลลูกค้าและสมาชิกในระบบ</p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            ส่งออกข้อมูล
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+            <Download size={16} />
+            <span>ส่งออกข้อมูล</span>
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            เพิ่มลูกค้าใหม่
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <Plus size={16} />
+            <span>เพิ่มลูกค้าใหม่</span>
           </button>
         </div>
       </div>
@@ -73,33 +89,66 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ลูกค้าทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{customersData.stats.totalCustomers}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ลูกค้าทั้งหมด</h3>
+              <p className="text-2xl font-bold backend-text mt-2">{customersData.stats.totalCustomers}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Users size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">สมาชิกใหม่เดือนนี้</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{customersData.stats.newCustomersThisMonth}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">สมาชิกใหม่เดือนนี้</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">{customersData.stats.newCustomersThisMonth}</p>
+            </div>
+            <div className="p-3 rounded-full text-green-600 bg-green-50">
+              <UserPlus size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ลูกค้าที่ใช้บริการวันนี้</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{customersData.stats.activeCustomersToday}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ลูกค้าที่ใช้บริการวันนี้</h3>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{customersData.stats.activeCustomersToday}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Activity size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">สมาชิกระดับทอง</h3>
-          <p className="text-2xl font-bold text-yellow-600 mt-2">{customersData.stats.goldMembers}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">สมาชิกระดับทอง</h3>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">{customersData.stats.goldMembers}</p>
+            </div>
+            <div className="p-3 rounded-full text-yellow-600 bg-yellow-50">
+              <Crown size={24} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter size={20} className="backend-text-muted" />
+          <h2 className="text-lg font-semibold backend-text">ค้นหาและกรองข้อมูล</h2>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 backend-text-muted" />
             <input
               type="text"
               placeholder="ค้นหาด้วยชื่อ, เบอร์โทร หรืออีเมล..."
               value={state.searchQuery}
               onChange={(e) => actions.setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
+              className="w-full pl-10 pr-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
             />
           </div>
           <select
@@ -187,21 +236,29 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">ดูรายละเอียด</button>
-                        <button className="text-green-600 hover:text-green-800 text-sm">แก้ไข</button>
+                        <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
+                          <Eye size={14} />
+                          <span>ดูรายละเอียด</span>
+                        </button>
+                        <button className="text-green-600 hover:text-green-800 text-sm flex items-center space-x-1">
+                          <Edit size={14} />
+                          <span>แก้ไข</span>
+                        </button>
                         <button
                           onClick={() => handleAddPoints(customer.id)}
                           disabled={state.isLoading}
-                          className="text-purple-600 hover:text-purple-800 text-sm disabled:opacity-50"
+                          className="text-purple-600 hover:text-purple-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                         >
-                          เพิ่มคะแนน
+                          <Award size={14} />
+                          <span>เพิ่มคะแนน</span>
                         </button>
                         <button
                           onClick={() => handleDelete(customer.id)}
                           disabled={state.isLoading}
-                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                          className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                         >
-                          ลบ
+                          <Trash2 size={14} />
+                          <span>ลบ</span>
                         </button>
                       </div>
                     </td>

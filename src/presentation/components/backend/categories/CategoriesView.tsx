@@ -2,6 +2,20 @@
 
 import { CategoriesViewModel } from '@/src/presentation/presenters/backend/categories/CategoriesPresenter';
 import { useCategoriesPresenter } from '@/src/presentation/presenters/backend/categories/useCategoriesPresenter';
+import {
+  FolderOpen,
+  CheckCircle,
+  Store,
+  Wrench,
+  Plus,
+  Download,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Power,
+  Trash2
+} from 'lucide-react';
 
 interface CategoriesViewProps {
   viewModel: CategoriesViewModel;
@@ -46,11 +60,13 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
           <p className="backend-text-muted mt-2">จัดการหมวดหมู่บริการและการจัดกลุ่มร้านค้า</p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            ส่งออกข้อมูล
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+            <Download size={16} />
+            <span>ส่งออกข้อมูล</span>
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            เพิ่มหมวดหมู่ใหม่
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <Plus size={16} />
+            <span>เพิ่มหมวดหมู่ใหม่</span>
           </button>
         </div>
       </div>
@@ -58,33 +74,66 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{categoriesData.stats.totalCategories}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ทั้งหมด</h3>
+              <p className="text-2xl font-bold backend-text mt-2">{categoriesData.stats.totalCategories}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <FolderOpen size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ที่ใช้งาน</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{categoriesData.stats.activeCategories}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">หมวดหมู่ที่ใช้งาน</h3>
+              <p className="text-2xl font-bold text-green-600 mt-2">{categoriesData.stats.activeCategories}</p>
+            </div>
+            <div className="p-3 rounded-full text-green-600 bg-green-50">
+              <CheckCircle size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{categoriesData.stats.totalShops}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{categoriesData.stats.totalShops}</p>
+            </div>
+            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+              <Store size={24} />
+            </div>
+          </div>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">บริการทั้งหมด</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{categoriesData.stats.totalServices}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="backend-text-muted text-sm font-medium">บริการทั้งหมด</h3>
+              <p className="text-2xl font-bold text-purple-600 mt-2">{categoriesData.stats.totalServices}</p>
+            </div>
+            <div className="p-3 rounded-full text-purple-600 bg-purple-50">
+              <Wrench size={24} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter size={20} className="backend-text-muted" />
+          <h2 className="text-lg font-semibold backend-text">ค้นหาและกรองข้อมูล</h2>
+        </div>
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 backend-text-muted" />
             <input
               type="text"
               placeholder="ค้นหาหมวดหมู่..."
               value={state.searchQuery}
               onChange={(e) => actions.setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
+              className="w-full pl-10 pr-4 py-2 border backend-sidebar-border rounded-lg backend-sidebar-bg backend-text"
             />
           </div>
           <select
@@ -151,20 +200,25 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
                 สร้างเมื่อ {new Date(category.createdAt).toLocaleDateString('th-TH')}
               </p>
               <div className="flex space-x-2">
-                <button className="text-blue-600 hover:text-blue-800 text-sm">แก้ไข</button>
+                <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
+                  <Edit size={14} />
+                  <span>แก้ไข</span>
+                </button>
                 <button
                   onClick={() => handleToggleStatus(category.id)}
                   disabled={state.isLoading}
-                  className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50"
+                  className="text-green-600 hover:text-green-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                 >
-                  {category.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                  <Power size={14} />
+                  <span>{category.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}</span>
                 </button>
                 <button
                   onClick={() => handleDelete(category.id)}
                   disabled={state.isLoading}
-                  className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                  className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 flex items-center space-x-1"
                 >
-                  ลบ
+                  <Trash2 size={14} />
+                  <span>ลบ</span>
                 </button>
               </div>
             </div>
@@ -219,9 +273,18 @@ export function CategoriesView({ viewModel }: CategoriesViewProps) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">แก้ไข</button>
-                        <button className="text-green-600 hover:text-green-800 text-sm">ดูร้านค้า</button>
-                        <button className="text-purple-600 hover:text-purple-800 text-sm">สถิติ</button>
+                        <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
+                          <Edit size={14} />
+                          <span>แก้ไข</span>
+                        </button>
+                        <button className="text-green-600 hover:text-green-800 text-sm flex items-center space-x-1">
+                          <Eye size={14} />
+                          <span>ดูร้านค้า</span>
+                        </button>
+                        <button className="text-purple-600 hover:text-purple-800 text-sm flex items-center space-x-1">
+                          <Power size={14} />
+                          <span>สถิติ</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
