@@ -1,4 +1,4 @@
-import { CreatePaymentEntity, PaymentEntity, PaymentStatsEntity, PaginatedPaymentsEntity, UpdatePaymentEntity } from "../../entities/backend/backend-payment.entity";
+import { CreatePaymentEntity, PaymentEntity, PaymentStatsEntity, PaymentMethodStatsEntity, PaginatedPaymentsEntity, UpdatePaymentEntity } from "../../entities/backend/backend-payment.entity";
 import { PaginationParams } from "../../interfaces/pagination-types";
 
 /**
@@ -48,6 +48,13 @@ export interface BackendPaymentRepository {
    * @throws BackendPaymentError if the operation fails
    */
   getPaymentStats(): Promise<PaymentStatsEntity>;
+
+  /**
+   * Get payment method statistics
+   * @returns Payment method statistics data
+   * @throws BackendPaymentError if the operation fails
+   */
+  getPaymentMethodStats(): Promise<PaymentMethodStatsEntity>;
 
   /**
    * Get payment by ID

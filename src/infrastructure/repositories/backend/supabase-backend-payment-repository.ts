@@ -1,10 +1,10 @@
-import { CreatePaymentEntity, PaginatedPaymentsEntity, PaymentEntity, PaymentStatsEntity } from "../../../domain/entities/backend/backend-payment.entity";
+import { CreatePaymentEntity, PaginatedPaymentsEntity, PaymentEntity, PaymentStatsEntity, PaymentMethodStatsEntity } from "../../../domain/entities/backend/backend-payment.entity";
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
 import { BackendPaymentError, BackendPaymentErrorType, BackendPaymentRepository } from "../../../domain/repositories/backend/backend-payment-repository";
 import { SupabaseBackendPaymentMapper } from "../../mappers/backend/supabase-backend-payment.mapper";
-import { PaymentSchema, PaymentStatsSchema } from "../../schemas/backend/payment.schema";
+import { PaymentSchema, PaymentStatsSchema, PaymentMethodStatsSchema } from "../../schemas/backend/payment.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Schema types for database records
@@ -36,6 +36,7 @@ type EmployeeRecord = {
 };
 type PaymentSchemaRecord = Record<string, unknown> & PaymentSchema;
 type PaymentStatsSchemaRecord = Record<string, unknown> & PaymentStatsSchema;
+type PaymentMethodStatsSchemaRecord = Record<string, unknown> & PaymentMethodStatsSchema;
 
 /**
  * Supabase implementation of the payment repository
@@ -214,6 +215,74 @@ export class SupabaseBackendPaymentRepository extends BackendRepository implemen
         'getPaymentStats',
         {},
         error
+      );
+    }
+  }
+
+  /**
+   * Get payment method statistics from database
+   * @returns Payment method statistics
+   */
+  async getPaymentMethodStats(): Promise<PaymentMethodStatsEntity> {
+    try {
+      // Use a custom query to calculate payment method stats
+      const methodStatsData = await this.dataSource.getAdvanced<PaymentMethodStatsSchemaRecord>(
+        'payment_method_stats_summary_view',
+        {
+          select: ['*'],
+          // No joins needed for stats view
+          // No pagination needed, we want all stats
+        }
+      );
+
+      if (!methodStatsData || methodStatsData.length === 0) {
+        // Return default values if no data found
+        return {
+          cash: { count: 0, percentage: 0, totalAmount: 0 },
+          card: { count: 0, percentage: 0, totalAmount: 0 },
+          qr: { count: 0, percentage: 0, totalAmount: 0 },
+          transfer: { count: 0, percentage: 0, totalAmount: 0 },
+          totalTransactions: 0
+        };
+      }
+
+      // Transform array data to structured format
+      const stats = {
+        cash: { count: 0, percentage: 0, totalAmount: 0 },
+        card: { count: 0, percentage: 0, totalAmount: 0 },
+        qr: { count: 0, percentage: 0, totalAmount: 0 },
+        transfer: { count: 0, percentage: 0, totalAmount: 0 },
+        totalTransactions: 0
+      };
+
+      let totalTransactions = 0;
+
+      // Calculate totals first
+      methodStatsData.forEach(item => {
+        totalTransactions += item.count;
+      });
+
+      // Map data to structured format
+      methodStatsData.forEach(item => {
+        const method = item.payment_method as keyof typeof stats;
+        if (method && method !== 'totalTransactions') {
+          stats[method] = {
+            count: item.count,
+            percentage: totalTransactions > 0 ? Math.round((item.count / totalTransactions) * 100) : 0,
+            totalAmount: item.total_amount
+          };
+        }
+      });
+
+      stats.totalTransactions = totalTransactions;
+
+      return SupabaseBackendPaymentMapper.methodStatsToEntity(stats);
+    } catch (error) {
+      this.logger.error('Error in getPaymentMethodStats', { error });
+      throw new BackendPaymentError(
+        BackendPaymentErrorType.OPERATION_FAILED,
+        'Failed to get payment method statistics',
+        error instanceof Error ? error.message : String(error)
       );
     }
   }

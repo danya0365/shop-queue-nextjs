@@ -1,4 +1,4 @@
-import { PaymentEntity, PaymentStatsEntity, PaymentStatus, PaymentMethod } from "../../../domain/entities/backend/backend-payment.entity";
+import { PaymentEntity, PaymentStatsEntity, PaymentMethodStatsEntity, PaymentStatus, PaymentMethod } from "../../../domain/entities/backend/backend-payment.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
 import { PaymentSchema, PaymentStatsSchema } from "../../schemas/backend/payment.schema";
 
@@ -73,6 +73,15 @@ export class SupabaseBackendPaymentMapper {
       averagePaymentAmount: schema.average_payment_amount,
       mostUsedPaymentMethod: schema.most_used_payment_method
     };
+  }
+
+  /**
+   * Map payment method stats to domain entity
+   * @param stats Payment method stats data
+   * @returns Payment method stats domain entity
+   */
+  public static methodStatsToEntity(stats: PaymentMethodStatsEntity): PaymentMethodStatsEntity {
+    return stats;
   }
 
   /**

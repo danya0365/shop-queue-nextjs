@@ -39,6 +39,7 @@ import { DeletePaymentUseCase } from "../application/usecases/backend/payments/D
 import { GetPaymentByIdUseCase } from "../application/usecases/backend/payments/GetPaymentByIdUseCase";
 import { GetPaymentsPaginatedUseCase } from "../application/usecases/backend/payments/GetPaymentsPaginatedUseCase";
 import { GetPaymentStatsUseCase } from "../application/usecases/backend/payments/GetPaymentStatsUseCase";
+import { GetPaymentMethodStatsUseCase } from "../application/usecases/backend/payments/GetPaymentMethodStatsUseCase";
 import { UpdatePaymentUseCase } from "../application/usecases/backend/payments/UpdatePaymentUseCase";
 import {
   CreateProfileUseCase,
@@ -169,6 +170,7 @@ export async function createBackendContainer(): Promise<Container> {
     // Payment use cases
     const getPaymentsPaginatedUseCase = new GetPaymentsPaginatedUseCase(paymentRepository);
     const getPaymentStatsUseCase = new GetPaymentStatsUseCase(paymentRepository);
+    const getPaymentMethodStatsUseCase = new GetPaymentMethodStatsUseCase(paymentRepository);
     const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepository);
     const createPaymentUseCase = new CreatePaymentUseCase(paymentRepository);
     const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepository);
@@ -246,6 +248,7 @@ export async function createBackendContainer(): Promise<Container> {
     const backendPaymentsService = new BackendPaymentsService(
       getPaymentsPaginatedUseCase,
       getPaymentStatsUseCase,
+      getPaymentMethodStatsUseCase,
       getPaymentByIdUseCase,
       createPaymentUseCase,
       updatePaymentUseCase,

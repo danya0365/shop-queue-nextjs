@@ -1,4 +1,4 @@
-import type { CreatePaymentParams, PaymentDTO, PaymentsDataDTO, PaymentStatsDTO, PaginatedPaymentsDTO, UpdatePaymentParams } from '@/src/application/dtos/backend/payments-dto';
+import type { CreatePaymentParams, PaymentDTO, PaymentsDataDTO, PaymentStatsDTO, PaymentMethodStatsDTO, PaginatedPaymentsDTO, UpdatePaymentParams } from '@/src/application/dtos/backend/payments-dto';
 import { GetPaymentsPaginatedInput } from '@/src/application/dtos/backend/payments-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
@@ -6,6 +6,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 export interface IBackendPaymentsService {
   getPaymentsData(page?: number, perPage?: number): Promise<PaymentsDataDTO>;
   getPaymentStats(): Promise<PaymentStatsDTO>;
+  getPaymentMethodStats(): Promise<PaymentMethodStatsDTO>;
   getPaymentById(id: string): Promise<PaymentDTO>;
   createPayment(params: CreatePaymentParams): Promise<PaymentDTO>;
   updatePayment(id: string, params: UpdatePaymentParams): Promise<PaymentDTO>;
@@ -16,6 +17,7 @@ export class BackendPaymentsService implements IBackendPaymentsService {
   constructor(
     private readonly getPaymentsPaginatedUseCase: IUseCase<GetPaymentsPaginatedInput, PaginatedPaymentsDTO>,
     private readonly getPaymentStatsUseCase: IUseCase<void, PaymentStatsDTO>,
+    private readonly getPaymentMethodStatsUseCase: IUseCase<void, PaymentMethodStatsDTO>,
     private readonly getPaymentByIdUseCase: IUseCase<string, PaymentDTO>,
     private readonly createPaymentUseCase: IUseCase<CreatePaymentParams, PaymentDTO>,
     private readonly updatePaymentUseCase: IUseCase<UpdatePaymentParams, PaymentDTO>,
@@ -64,6 +66,22 @@ export class BackendPaymentsService implements IBackendPaymentsService {
       return stats;
     } catch (error) {
       this.logger.error('Error getting payment stats', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get payment method statistics
+   * @returns Payment method stats DTO
+   */
+  async getPaymentMethodStats(): Promise<PaymentMethodStatsDTO> {
+    try {
+      this.logger.info('Getting payment method stats');
+
+      const stats = await this.getPaymentMethodStatsUseCase.execute();
+      return stats;
+    } catch (error) {
+      this.logger.error('Error getting payment method stats', { error });
       throw error;
     }
   }

@@ -9,7 +9,7 @@ interface PaymentsViewProps {
 
 export function PaymentsView({ viewModel }: PaymentsViewProps) {
   const [state, actions] = usePaymentsPresenter();
-  const { paymentsData } = viewModel;
+  const { paymentsData, paymentMethodStats } = viewModel;
 
   const getStatusColor = (status: 'unpaid' | 'partial' | 'paid') => {
     switch (status) {
@@ -287,23 +287,30 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
           <div className="text-center p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
             <div className="text-2xl mb-2">💵</div>
             <p className="text-sm backend-text-muted">เงินสด</p>
-            <p className="text-lg font-bold backend-text">45%</p>
+            <p className="text-lg font-bold backend-text">{paymentMethodStats.cash.percentage}%</p>
+            <p className="text-xs backend-text-muted">{paymentMethodStats.cash.count} รายการ</p>
           </div>
           <div className="text-center p-4 bg-green-50 dark:bg-green-900 rounded-lg">
             <div className="text-2xl mb-2">💳</div>
             <p className="text-sm backend-text-muted">บัตรเครดิต/เดบิต</p>
-            <p className="text-lg font-bold backend-text">30%</p>
+            <p className="text-lg font-bold backend-text">{paymentMethodStats.card.percentage}%</p>
+            <p className="text-xs backend-text-muted">{paymentMethodStats.card.count} รายการ</p>
           </div>
           <div className="text-center p-4 bg-purple-50 dark:bg-purple-900 rounded-lg">
             <div className="text-2xl mb-2">📱</div>
             <p className="text-sm backend-text-muted">QR Code</p>
-            <p className="text-lg font-bold backend-text">20%</p>
+            <p className="text-lg font-bold backend-text">{paymentMethodStats.qr.percentage}%</p>
+            <p className="text-xs backend-text-muted">{paymentMethodStats.qr.count} รายการ</p>
           </div>
           <div className="text-center p-4 bg-orange-50 dark:bg-orange-900 rounded-lg">
             <div className="text-2xl mb-2">🏦</div>
             <p className="text-sm backend-text-muted">โอนเงิน</p>
-            <p className="text-lg font-bold backend-text">5%</p>
+            <p className="text-lg font-bold backend-text">{paymentMethodStats.transfer.percentage}%</p>
+            <p className="text-xs backend-text-muted">{paymentMethodStats.transfer.count} รายการ</p>
           </div>
+        </div>
+        <div className="mt-4 text-center">
+          <p className="text-sm backend-text-muted">รวมทั้งหมด: {paymentMethodStats.totalTransactions} รายการ</p>
         </div>
       </div>
 

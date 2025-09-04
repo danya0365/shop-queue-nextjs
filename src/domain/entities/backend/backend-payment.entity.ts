@@ -82,6 +82,33 @@ export interface PaymentStatsEntity {
 }
 
 /**
+ * Payment method statistics entity
+ */
+export interface PaymentMethodStatsEntity {
+  cash: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  card: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  qr: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  transfer: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  totalTransactions: number;
+}
+
+/**
  * Paginated payments result
  */
 export type PaginatedPaymentsEntity = PaginatedResult<PaymentEntity>;

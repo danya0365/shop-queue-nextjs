@@ -1,4 +1,4 @@
-import type { PaymentsDataDTO } from '@/src/application/dtos/backend/payments-dto';
+import type { PaymentsDataDTO, PaymentMethodStatsDTO } from '@/src/application/dtos/backend/payments-dto';
 import type { IBackendPaymentsService } from '@/src/application/services/backend/BackendPaymentsService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
@@ -6,6 +6,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 // Define ViewModel interface
 export interface PaymentsViewModel {
   paymentsData: PaymentsDataDTO;
+  paymentMethodStats: PaymentMethodStatsDTO;
 }
 
 // Main Presenter class
@@ -19,10 +20,15 @@ export class PaymentsPresenter {
     try {
       this.logger.info('PaymentsPresenter: Getting view model');
 
-      const paymentsData = await this.backendPaymentsService.getPaymentsData();
+      // Fetch payments data and payment method statistics in parallel
+      const [paymentsData, paymentMethodStats] = await Promise.all([
+        this.backendPaymentsService.getPaymentsData(),
+        this.backendPaymentsService.getPaymentMethodStats()
+      ]);
 
       return {
-        paymentsData
+        paymentsData,
+        paymentMethodStats
       };
     } catch (error) {
       this.logger.error('PaymentsPresenter: Error getting view model', error);

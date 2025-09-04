@@ -37,3 +37,13 @@ export interface PaymentStatsSchema {
   average_payment_amount: number;
   most_used_payment_method: string;
 }
+
+/**
+ * Payment method stats database schema
+ */
+export interface PaymentMethodStatsSchema {
+  payment_method: string;
+  count: number;
+  percentage: number;
+  total_amount: number;
+}

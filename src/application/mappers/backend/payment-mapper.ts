@@ -1,5 +1,5 @@
-import { PaymentDTO, PaymentStatsDTO, PaginatedPaymentsDTO } from '@/src/application/dtos/backend/payments-dto';
-import { PaymentEntity, PaymentStatsEntity, PaginatedPaymentsEntity } from '@/src/domain/entities/backend/backend-payment.entity';
+import { PaymentDTO, PaymentStatsDTO, PaymentMethodStatsDTO, PaginatedPaymentsDTO } from '@/src/application/dtos/backend/payments-dto';
+import { PaymentEntity, PaymentStatsEntity, PaymentMethodStatsEntity, PaginatedPaymentsEntity } from '@/src/domain/entities/backend/backend-payment.entity';
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -46,6 +46,37 @@ export class PaymentMapper {
       todayRevenue: entity.todayRevenue,
       averagePaymentAmount: entity.averagePaymentAmount,
       mostUsedPaymentMethod: entity.mostUsedPaymentMethod
+    };
+  }
+
+  /**
+   * Map payment method stats domain entity to DTO
+   * @param entity Payment method stats domain entity
+   * @returns Payment method stats DTO
+   */
+  public static methodStatsToDTO(entity: PaymentMethodStatsEntity): PaymentMethodStatsDTO {
+    return {
+      cash: {
+        count: entity.cash.count,
+        percentage: entity.cash.percentage,
+        totalAmount: entity.cash.totalAmount
+      },
+      card: {
+        count: entity.card.count,
+        percentage: entity.card.percentage,
+        totalAmount: entity.card.totalAmount
+      },
+      qr: {
+        count: entity.qr.count,
+        percentage: entity.qr.percentage,
+        totalAmount: entity.qr.totalAmount
+      },
+      transfer: {
+        count: entity.transfer.count,
+        percentage: entity.transfer.percentage,
+        totalAmount: entity.transfer.totalAmount
+      },
+      totalTransactions: entity.totalTransactions
     };
   }
 

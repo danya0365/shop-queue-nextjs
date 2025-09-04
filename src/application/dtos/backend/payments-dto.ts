@@ -75,6 +75,30 @@ export interface PaymentStatsDTO {
   mostUsedPaymentMethod: string;
 }
 
+export interface PaymentMethodStatsDTO {
+  cash: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  card: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  qr: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  transfer: {
+    count: number;
+    percentage: number;
+    totalAmount: number;
+  };
+  totalTransactions: number;
+}
+
 export interface PaymentsDataDTO {
   payments: PaymentDTO[];
   stats: PaymentStatsDTO;
