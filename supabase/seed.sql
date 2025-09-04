@@ -3391,6 +3391,215 @@ SELECT
 FROM shop_data sd
 CROSS JOIN customer_data cd;
 
+-- Insert queue services
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'laundry_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.created_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+)
+INSERT INTO queue_services (
+  queue_id,
+  service_id,
+  quantity,
+  price,
+  created_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN (SELECT service_id FROM service_data WHERE name = 'ซักรีดเสื้อเชิ้ต')
+    WHEN qd.queue_number = 'L002' THEN (SELECT service_id FROM service_data WHERE name = 'ซักรีดกางเกง')
+    WHEN qd.queue_number = 'L003' THEN (SELECT service_id FROM service_data WHERE name = 'ซักรีดชุดสูท')
+  END AS service_id,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 5
+    WHEN qd.queue_number = 'L002' THEN 3
+    WHEN qd.queue_number = 'L003' THEN 1
+  END AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 40.00
+    WHEN qd.queue_number = 'L002' THEN 50.00
+    WHEN qd.queue_number = 'L003' THEN 200.00
+  END AS price,
+  qd.created_at
+FROM queue_data qd;
+
+-- Insert payments
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'laundry_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'::public.queue_status
+),
+employee_data AS (
+  SELECT 
+    e.id AS employee_id,
+    e.position_text
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+)
+INSERT INTO payments (
+  queue_id,
+  total_amount,
+  paid_amount,
+  payment_status,
+  payment_method,
+  processed_by_employee_id,
+  payment_date,
+  created_at,
+  updated_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 200.00
+    WHEN qd.queue_number = 'L002' THEN 150.00
+  END AS total_amount,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 200.00
+    WHEN qd.queue_number = 'L002' THEN 150.00
+  END AS paid_amount,
+  'paid'::public.payment_status AS payment_status,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 'cash'::public.payment_method
+    WHEN qd.queue_number = 'L002' THEN 'card'::public.payment_method
+  END AS payment_method,
+  (SELECT employee_id FROM employee_data WHERE position_text = 'ช่างซักรีดหลัก' LIMIT 1) AS processed_by_employee_id,
+  qd.completed_at,
+  qd.completed_at,
+  qd.completed_at
+FROM queue_data qd
+WHERE qd.queue_number IN ('L001', 'L002');
+
+-- Insert payment items
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'laundry_owner'
+  LIMIT 1
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+),
+payment_data AS (
+  SELECT 
+    p.id AS payment_id,
+    p.queue_id,
+    p.created_at
+  FROM payments p
+  JOIN queues q ON p.queue_id = q.id
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+)
+INSERT INTO payment_items (
+  payment_id,
+  service_id,
+  name,
+  price,
+  quantity,
+  total,
+  created_at
+)
+SELECT
+  pd.payment_id,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN (SELECT service_id FROM service_data WHERE name = 'ซักรีดเสื้อเชิ้ต')
+    WHEN qd.queue_number = 'L002' THEN (SELECT service_id FROM service_data WHERE name = 'ซักรีดกางเกง')
+  END AS service_id,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 'ซักรีดเสื้อเชิ้ต'
+    WHEN qd.queue_number = 'L002' THEN 'ซักรีดกางเกง'
+  END AS name,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 40.00
+    WHEN qd.queue_number = 'L002' THEN 50.00
+  END AS price,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 5
+    WHEN qd.queue_number = 'L002' THEN 3
+  END AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'L001' THEN 200.00
+    WHEN qd.queue_number = 'L002' THEN 150.00
+  END AS total,
+  pd.created_at
+FROM payment_data pd
+JOIN queue_data qd ON pd.queue_id = qd.queue_id
+WHERE qd.queue_number IN ('L001', 'L002');
+
+-- Insert notification settings
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'laundry_owner'
+  LIMIT 1
+)
+INSERT INTO notification_settings (
+  shop_id,
+  email_notifications,
+  sms_notifications,
+  push_notifications,
+  new_queue,
+  queue_update,
+  shift_reminder,
+  system_alerts,
+  created_at,
+  updated_at
+)
+SELECT
+  sd.shop_id,
+  true AS email_notifications,
+  true AS sms_notifications,
+  true AS push_notifications,
+  true AS new_queue,
+  true AS queue_update,
+  true AS shift_reminder,
+  true AS system_alerts,
+  NOW() - INTERVAL '12 months' AS created_at,
+  NOW() - INTERVAL '1 day' AS updated_at
+FROM shop_data sd;
+
 -- Insert rewards
 WITH shop_data AS (
   SELECT s.id AS shop_id
@@ -3931,6 +4140,208 @@ SELECT
 FROM shop_data sd
 CROSS JOIN customer_data cd;
 
+-- Insert queue services
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'beauty_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.created_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+)
+INSERT INTO queue_services (
+  queue_id,
+  service_id,
+  quantity,
+  price,
+  created_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN (SELECT service_id FROM service_data WHERE name = 'ทำเล็บมือ')
+    WHEN qd.queue_number = 'B002' THEN (SELECT service_id FROM service_data WHERE name = 'ทำผมสี')
+    WHEN qd.queue_number = 'B003' THEN (SELECT service_id FROM service_data WHERE name = 'ขัดผิวหน้า')
+  END AS service_id,
+  1 AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 300.00
+    WHEN qd.queue_number = 'B002' THEN 1500.00
+    WHEN qd.queue_number = 'B003' THEN 500.00
+  END AS price,
+  qd.created_at
+FROM queue_data qd;
+
+-- Insert payments
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'beauty_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'::public.queue_status
+),
+employee_data AS (
+  SELECT 
+    e.id AS employee_id,
+    e.position_text
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+)
+INSERT INTO payments (
+  queue_id,
+  total_amount,
+  paid_amount,
+  payment_status,
+  payment_method,
+  processed_by_employee_id,
+  payment_date,
+  created_at,
+  updated_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 300.00
+    WHEN qd.queue_number = 'B002' THEN 1500.00
+  END AS total_amount,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 300.00
+    WHEN qd.queue_number = 'B002' THEN 1500.00
+  END AS paid_amount,
+  'paid'::public.payment_status AS payment_status,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 'card'::public.payment_method
+    WHEN qd.queue_number = 'B002' THEN 'cash'::public.payment_method
+  END AS payment_method,
+  (SELECT employee_id FROM employee_data WHERE position_text = 'ช่างทำเล็บหลัก' LIMIT 1) AS processed_by_employee_id,
+  qd.completed_at,
+  qd.completed_at,
+  qd.completed_at
+FROM queue_data qd
+WHERE qd.queue_number IN ('B001', 'B002');
+
+-- Insert payment items
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'beauty_owner'
+  LIMIT 1
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+),
+payment_data AS (
+  SELECT 
+    p.id AS payment_id,
+    p.queue_id,
+    p.created_at
+  FROM payments p
+  JOIN queues q ON p.queue_id = q.id
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+)
+INSERT INTO payment_items (
+  payment_id,
+  service_id,
+  name,
+  price,
+  quantity,
+  total,
+  created_at
+)
+SELECT
+  pd.payment_id,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN (SELECT service_id FROM service_data WHERE name = 'ทำเล็บมือ')
+    WHEN qd.queue_number = 'B002' THEN (SELECT service_id FROM service_data WHERE name = 'ทำผมสี')
+  END AS service_id,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 'ทำเล็บมือ'
+    WHEN qd.queue_number = 'B002' THEN 'ทำผมสี'
+  END AS name,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 300.00
+    WHEN qd.queue_number = 'B002' THEN 1500.00
+  END AS price,
+  1 AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'B001' THEN 300.00
+    WHEN qd.queue_number = 'B002' THEN 1500.00
+  END AS total,
+  pd.created_at
+FROM payment_data pd
+JOIN queue_data qd ON pd.queue_id = qd.queue_id
+WHERE qd.queue_number IN ('B001', 'B002');
+
+-- Insert notification settings
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'beauty_owner'
+  LIMIT 1
+)
+INSERT INTO notification_settings (
+  shop_id,
+  email_notifications,
+  sms_notifications,
+  push_notifications,
+  new_queue,
+  queue_update,
+  shift_reminder,
+  system_alerts,
+  created_at,
+  updated_at
+)
+SELECT
+  sd.shop_id,
+  true AS email_notifications,
+  true AS sms_notifications,
+  true AS push_notifications,
+  true AS new_queue,
+  true AS queue_update,
+  true AS shift_reminder,
+  true AS system_alerts,
+  NOW() - INTERVAL '12 months' AS created_at,
+  NOW() - INTERVAL '1 day' AS updated_at
+FROM shop_data sd;
+
 -- Insert rewards
 WITH shop_data AS (
   SELECT s.id AS shop_id
@@ -4470,6 +4881,208 @@ SELECT
   cd.last_visit AS updated_at
 FROM shop_data sd
 CROSS JOIN customer_data cd;
+
+-- Insert queue services
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.created_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+)
+INSERT INTO queue_services (
+  queue_id,
+  service_id,
+  quantity,
+  price,
+  created_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN (SELECT service_id FROM service_data WHERE name = 'นวดแผนไทย')
+    WHEN qd.queue_number = 'S002' THEN (SELECT service_id FROM service_data WHERE name = 'นวดน้ำมันหอมระเหย')
+    WHEN qd.queue_number = 'S003' THEN (SELECT service_id FROM service_data WHERE name = 'สปาแพ็คเกจคู่')
+  END AS service_id,
+  1 AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 800.00
+    WHEN qd.queue_number = 'S002' THEN 1200.00
+    WHEN qd.queue_number = 'S003' THEN 3000.00
+  END AS price,
+  qd.created_at
+FROM queue_data qd;
+
+-- Insert payments
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'::public.queue_status
+),
+employee_data AS (
+  SELECT 
+    e.id AS employee_id,
+    e.position_text
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+)
+INSERT INTO payments (
+  queue_id,
+  total_amount,
+  paid_amount,
+  payment_status,
+  payment_method,
+  processed_by_employee_id,
+  payment_date,
+  created_at,
+  updated_at
+)
+SELECT
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 800.00
+    WHEN qd.queue_number = 'S002' THEN 1200.00
+  END AS total_amount,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 800.00
+    WHEN qd.queue_number = 'S002' THEN 1200.00
+  END AS paid_amount,
+  'paid'::public.payment_status AS payment_status,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 'cash'::public.payment_method
+    WHEN qd.queue_number = 'S002' THEN 'card'::public.payment_method
+  END AS payment_method,
+  (SELECT employee_id FROM employee_data WHERE position_text = 'นักบำบัดหลัก' LIMIT 1) AS processed_by_employee_id,
+  qd.completed_at,
+  qd.completed_at,
+  qd.completed_at
+FROM queue_data qd
+WHERE qd.queue_number IN ('S001', 'S002');
+
+-- Insert payment items
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+  LIMIT 1
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+),
+payment_data AS (
+  SELECT 
+    p.id AS payment_id,
+    p.queue_id,
+    p.created_at
+  FROM payments p
+  JOIN queues q ON p.queue_id = q.id
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+)
+INSERT INTO payment_items (
+  payment_id,
+  service_id,
+  name,
+  price,
+  quantity,
+  total,
+  created_at
+)
+SELECT
+  pd.payment_id,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN (SELECT service_id FROM service_data WHERE name = 'นวดแผนไทย')
+    WHEN qd.queue_number = 'S002' THEN (SELECT service_id FROM service_data WHERE name = 'นวดน้ำมันหอมระเหย')
+  END AS service_id,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 'นวดแผนไทย'
+    WHEN qd.queue_number = 'S002' THEN 'นวดน้ำมันหอมระเหย'
+  END AS name,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 800.00
+    WHEN qd.queue_number = 'S002' THEN 1200.00
+  END AS price,
+  1 AS quantity,
+  CASE 
+    WHEN qd.queue_number = 'S001' THEN 800.00
+    WHEN qd.queue_number = 'S002' THEN 1200.00
+  END AS total,
+  pd.created_at
+FROM payment_data pd
+JOIN queue_data qd ON pd.queue_id = qd.queue_id
+WHERE qd.queue_number IN ('S001', 'S002');
+
+-- Insert notification settings
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+  LIMIT 1
+)
+INSERT INTO notification_settings (
+  shop_id,
+  email_notifications,
+  sms_notifications,
+  push_notifications,
+  new_queue,
+  queue_update,
+  shift_reminder,
+  system_alerts,
+  created_at,
+  updated_at
+)
+SELECT
+  sd.shop_id,
+  true AS email_notifications,
+  true AS sms_notifications,
+  true AS push_notifications,
+  true AS new_queue,
+  true AS queue_update,
+  true AS shift_reminder,
+  true AS system_alerts,
+  NOW() - INTERVAL '12 months' AS created_at,
+  NOW() - INTERVAL '1 day' AS updated_at
+FROM shop_data sd;
 
 -- Insert rewards
 WITH shop_data AS (
