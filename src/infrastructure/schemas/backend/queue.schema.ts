@@ -29,6 +29,7 @@ export interface QueueSchema {
   shop_name?: string;
   // Calculated fields
   actual_wait_time?: number;
+  queue_services?: QueueServiceSchema[];
 }
 
 /**
@@ -41,7 +42,15 @@ export interface QueueServiceSchema {
   quantity: number;
   price: number;
   // Joined data
-  service_name?: string;
+  services?: ServiceSchema;
+}
+
+/**
+ * Service database schema
+ */
+export interface ServiceSchema {
+  id: string;
+  name: string;
 }
 
 /**

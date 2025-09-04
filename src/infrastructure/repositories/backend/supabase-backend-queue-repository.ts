@@ -4,13 +4,14 @@ import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
 import { BackendQueueError, BackendQueueErrorType, BackendQueueRepository } from "../../../domain/repositories/backend/backend-queue-repository";
 import { SupabaseBackendQueueMapper } from "../../mappers/backend/supabase-backend-queue.mapper";
-import { QueueSchema, QueueServiceSchema, QueueStatsSchema } from "../../schemas/backend/queue.schema";
+import { QueueSchema, QueueServiceSchema, QueueStatsSchema, ServiceSchema } from "../../schemas/backend/queue.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
 type QueueWithCustomerAndShop = QueueSchema & {
   customers?: { name?: string; phone?: string };
   shops?: { name?: string };
+  queue_services?: QueueServiceSchema[];
 };
 type QueueSchemaRecord = Record<string, unknown> & QueueSchema;
 type QueueServiceSchemaRecord = Record<string, unknown> & QueueServiceSchema;
@@ -71,18 +72,18 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
       };
 
       // Get all queue services in a single query
-      const queueServices = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+      const queueServices = await this.dataSource.getAdvanced<QueueServiceSchemaRecord & { services: ServiceSchema }>(
         'queue_services',
         queueServicesOptions
       );
 
       // Group queue services by queue_id
-      const servicesByQueueId = queueServices.reduce((acc, service) => {
-        const queueId = service.queue_id as string;
+      const servicesByQueueId = queueServices.reduce((acc, queueService) => {
+        const queueId = queueService.queue_id as string;
         if (!acc[queueId]) {
           acc[queueId] = [];
         }
-        acc[queueId].push(service);
+        acc[queueId].push(queueService);
         return acc;
       }, {} as Record<string, QueueServiceSchemaRecord[]>);
 
@@ -94,17 +95,17 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
         // Handle joined data from customers and shops tables using our QueueWithCustomerAndShop type
         const queueWithJoinedData = queue as QueueWithCustomerAndShop;
 
+        // Get services for this queue
+        const services = servicesByQueueId[queue.id] || [];
+
         const queueWithRelations = {
           ...queue,
           customer_name: queueWithJoinedData.customers?.name,
           customer_phone: queueWithJoinedData.customers?.phone,
-          shop_name: queueWithJoinedData.shops?.name
+          shop_name: queueWithJoinedData.shops?.name,
+          queue_services: services
         };
-
-        // Get services for this queue
-        const services = servicesByQueueId[queue.id] || [];
-
-        return SupabaseBackendQueueMapper.toDomain(queueWithRelations, services);
+        return SupabaseBackendQueueMapper.toDomain(queueWithRelations);
       });
 
       // Create pagination metadata
@@ -229,11 +230,12 @@ export class SupabaseBackendQueueRepository extends BackendRepository implements
         ...queue,
         customer_name: queueWithJoinedData.customers?.name,
         customer_phone: queueWithJoinedData.customers?.phone,
-        shop_name: queueWithJoinedData.shops?.name
+        shop_name: queueWithJoinedData.shops?.name,
+        queue_services: services
       };
 
       // Map database result to domain entity
-      return SupabaseBackendQueueMapper.toDomain(queueWithRelations, services);
+      return SupabaseBackendQueueMapper.toDomain(queueWithRelations);
     } catch (error) {
       if (error instanceof BackendQueueError) {
         throw error;
