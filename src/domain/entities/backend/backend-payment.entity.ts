@@ -1,24 +1,28 @@
-import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { PaginatedResult } from "../../interfaces/pagination-types";
 
-export interface PaymentDTO {
+/**
+ * Payment entity representing a payment transaction in the system
+ * Following Clean Architecture principles - domain entity
+ */
+export interface PaymentEntity {
   id: string;
   queueId: string;
   queueNumber: string;
   customerName: string;
   totalAmount: number;
   paidAmount: number | null;
-  paymentMethod: 'cash' | 'card' | 'qr' | 'transfer' | null;
-  paymentStatus: 'unpaid' | 'partial' | 'paid';
+  paymentMethod: PaymentMethod | null;
+  paymentStatus: PaymentStatus;
   paymentDate: string | null;
   processedByEmployeeId: string | null;
-  processedByEmployeeName: string | null;
+  processedByEmployeeName?: string; // Joined data
   shopId: string;
-  shopName: string;
+  shopName?: string; // Joined data
   createdAt: string;
-  updatedAt: string | null;
+  updatedAt: string;
 }
 
-export interface CreatePaymentParams {
+export interface CreatePaymentEntity {
   queueId: string;
   queueNumber: string;
   customerName: string;
@@ -31,8 +35,7 @@ export interface CreatePaymentParams {
   shopId: string;
 }
 
-export interface UpdatePaymentParams {
-  id: string;
+export interface UpdatePaymentEntity {
   queueId?: string;
   queueNumber?: string;
   customerName?: string;
@@ -64,7 +67,10 @@ export enum PaymentStatus {
   PAID = 'paid'
 }
 
-export interface PaymentStatsDTO {
+/**
+ * Payment statistics entity
+ */
+export interface PaymentStatsEntity {
   totalPayments: number;
   totalRevenue: number;
   paidPayments: number;
@@ -75,20 +81,7 @@ export interface PaymentStatsDTO {
   mostUsedPaymentMethod: string;
 }
 
-export interface PaymentsDataDTO {
-  payments: PaymentDTO[];
-  stats: PaymentStatsDTO;
-  totalCount: number;
-  currentPage: number;
-  perPage: number;
-}
-
 /**
- * Input DTO for GetPaymentsPaginatedUseCase
+ * Paginated payments result
  */
-export interface GetPaymentsPaginatedInput {
-  page: number;
-  limit: number;
-}
-
-export type PaginatedPaymentsDTO = PaginatedResult<PaymentDTO>;
+export type PaginatedPaymentsEntity = PaginatedResult<PaymentEntity>;

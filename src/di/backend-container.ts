@@ -34,7 +34,12 @@ import { GetEmployeeByIdUseCase } from "../application/usecases/backend/employee
 import { GetEmployeesPaginatedUseCase } from "../application/usecases/backend/employees/GetEmployeesPaginatedUseCase";
 import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employees/GetEmployeeStatsUseCase";
 import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
-import { GetPaymentsUseCase } from "../application/usecases/backend/payments/GetPaymentsUseCase";
+import { CreatePaymentUseCase } from "../application/usecases/backend/payments/CreatePaymentUseCase";
+import { DeletePaymentUseCase } from "../application/usecases/backend/payments/DeletePaymentUseCase";
+import { GetPaymentByIdUseCase } from "../application/usecases/backend/payments/GetPaymentByIdUseCase";
+import { GetPaymentsPaginatedUseCase } from "../application/usecases/backend/payments/GetPaymentsPaginatedUseCase";
+import { GetPaymentStatsUseCase } from "../application/usecases/backend/payments/GetPaymentStatsUseCase";
+import { UpdatePaymentUseCase } from "../application/usecases/backend/payments/UpdatePaymentUseCase";
 import {
   CreateProfileUseCase,
   DeleteProfileUseCase,
@@ -69,6 +74,7 @@ import { SupabaseBackendCategoryRepository } from "../infrastructure/repositorie
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
 import { SupabaseBackendDashboardRepository } from "../infrastructure/repositories/backend/supabase-backend-dashboard-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
+import { SupabaseBackendPaymentRepository } from "../infrastructure/repositories/backend/supabase-backend-payment-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
@@ -102,6 +108,7 @@ export async function createBackendContainer(): Promise<Container> {
     const queueRepository = new SupabaseBackendQueueRepository(databaseDatasource, logger);
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
+    const paymentRepository = new SupabaseBackendPaymentRepository(databaseDatasource, logger);
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
     const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
     const categoryRepository = new SupabaseBackendCategoryRepository(databaseDatasource, logger);
@@ -158,7 +165,14 @@ export async function createBackendContainer(): Promise<Container> {
     const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
     const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository);
     const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
-    const getPaymentsUseCase = new GetPaymentsUseCase(logger);
+
+    // Payment use cases
+    const getPaymentsPaginatedUseCase = new GetPaymentsPaginatedUseCase(paymentRepository);
+    const getPaymentStatsUseCase = new GetPaymentStatsUseCase(paymentRepository);
+    const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepository);
+    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepository);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepository);
+    const deletePaymentUseCase = new DeletePaymentUseCase(paymentRepository);
 
     // Profile use cases
     const getProfilesPaginatedUseCase = new GetProfilesPaginatedUseCase(profileRepository);
@@ -229,7 +243,15 @@ export async function createBackendContainer(): Promise<Container> {
       deleteProfileUseCase,
       logger
     );
-    const backendPaymentsService = new BackendPaymentsService(getPaymentsUseCase, logger);
+    const backendPaymentsService = new BackendPaymentsService(
+      getPaymentsPaginatedUseCase,
+      getPaymentStatsUseCase,
+      getPaymentByIdUseCase,
+      createPaymentUseCase,
+      updatePaymentUseCase,
+      deletePaymentUseCase,
+      logger
+    );
 
     const backendServicesService = new BackendServicesService(
       getServicesPaginatedUseCase,
