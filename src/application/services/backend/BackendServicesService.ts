@@ -1,10 +1,10 @@
-import type { ServicesDataDTO, ServiceDTO, CreateServiceInputDTO, UpdateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
-import type { GetServicesUseCase } from '@/src/application/use-cases/backend/services/GetServicesUseCase';
-import type { GetServiceByIdUseCase } from '@/src/application/use-cases/backend/services/GetServiceByIdUseCase';
-import type { CreateServiceUseCase } from '@/src/application/use-cases/backend/services/CreateServiceUseCase';
-import type { UpdateServiceUseCase } from '@/src/application/use-cases/backend/services/UpdateServiceUseCase';
-import type { DeleteServiceUseCase } from '@/src/application/use-cases/backend/services/DeleteServiceUseCase';
-import type { ToggleServiceAvailabilityUseCase } from '@/src/application/use-cases/backend/services/ToggleServiceAvailabilityUseCase';
+import type { CreateServiceInputDTO, ServiceDTO, ServicesDataDTO, UpdateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
+import type { CreateServiceUseCase } from '@/src/application/usecases/backend/services/CreateServiceUseCase';
+import type { DeleteServiceUseCase } from '@/src/application/usecases/backend/services/DeleteServiceUseCase';
+import type { GetServiceByIdUseCase } from '@/src/application/usecases/backend/services/GetServiceByIdUseCase';
+import type { GetServicesUseCase } from '@/src/application/usecases/backend/services/GetServicesUseCase';
+import type { ToggleServiceAvailabilityUseCase } from '@/src/application/usecases/backend/services/ToggleServiceAvailabilityUseCase';
+import type { UpdateServiceUseCase } from '@/src/application/usecases/backend/services/UpdateServiceUseCase';
 
 export interface IBackendServicesService {
   getServicesData(
@@ -17,7 +17,7 @@ export interface IBackendServicesService {
       shopId?: string;
     }
   ): Promise<ServicesDataDTO>;
-  
+
   getServiceById(id: string): Promise<ServiceDTO | null>;
   createService(input: CreateServiceInputDTO): Promise<ServiceDTO>;
   updateService(input: UpdateServiceInputDTO): Promise<ServiceDTO>;
@@ -33,7 +33,7 @@ export class BackendServicesService implements IBackendServicesService {
     private readonly updateServiceUseCase: UpdateServiceUseCase,
     private readonly deleteServiceUseCase: DeleteServiceUseCase,
     private readonly toggleServiceAvailabilityUseCase: ToggleServiceAvailabilityUseCase
-  ) {}
+  ) { }
 
   async getServicesData(
     page: number = 1,

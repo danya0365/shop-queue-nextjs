@@ -16,6 +16,7 @@ import { BackendDashboardService } from "../application/services/backend/Backend
 import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
+import { BackendServicesService } from '../application/services/backend/BackendServicesService';
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
 import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-users/DeleteAuthUserUseCase";
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
@@ -48,6 +49,12 @@ import { GetQueueByIdUseCase } from "../application/usecases/backend/queues/GetQ
 import { GetQueuesPaginatedUseCase } from "../application/usecases/backend/queues/GetQueuesPaginatedUseCase";
 import { GetQueueStatsUseCase } from "../application/usecases/backend/queues/GetQueueStatsUseCase";
 import { UpdateQueueUseCase } from "../application/usecases/backend/queues/UpdateQueueUseCase";
+import { CreateServiceUseCase } from '../application/usecases/backend/services/CreateServiceUseCase';
+import { DeleteServiceUseCase } from '../application/usecases/backend/services/DeleteServiceUseCase';
+import { GetServiceByIdUseCase } from '../application/usecases/backend/services/GetServiceByIdUseCase';
+import { GetServicesUseCase } from '../application/usecases/backend/services/GetServicesUseCase';
+import { ToggleServiceAvailabilityUseCase } from '../application/usecases/backend/services/ToggleServiceAvailabilityUseCase';
+import { UpdateServiceUseCase } from '../application/usecases/backend/services/UpdateServiceUseCase';
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
 import { Logger } from "../domain/interfaces/logger";
@@ -62,15 +69,8 @@ import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositorie
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
-import { Container, createContainer } from "./container";
-import { BackendServicesService } from '../application/services/backend/BackendServicesService';
-import { GetServicesUseCase } from '../application/use-cases/backend/services/GetServicesUseCase';
-import { GetServiceByIdUseCase } from '../application/use-cases/backend/services/GetServiceByIdUseCase';
-import { CreateServiceUseCase } from '../application/use-cases/backend/services/CreateServiceUseCase';
-import { UpdateServiceUseCase } from '../application/use-cases/backend/services/UpdateServiceUseCase';
-import { DeleteServiceUseCase } from '../application/use-cases/backend/services/DeleteServiceUseCase';
-import { ToggleServiceAvailabilityUseCase } from '../application/use-cases/backend/services/ToggleServiceAvailabilityUseCase';
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/SupabaseBackendServiceRepository';
+import { Container, createContainer } from "./container";
 
 /**
  * Initialize a backend container with elevated privilege dependencies
