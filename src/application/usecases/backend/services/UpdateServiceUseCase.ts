@@ -1,36 +1,24 @@
 import type { ServiceDTO, UpdateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
-import { ServiceMapper } from '@/src/application/mappers/backend/ServiceMapper';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { ServiceMapper } from '@/src/application/mappers/backend/service-mapper';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/backend-service-repository';
 
-export class UpdateServiceUseCase {
+export class UpdateServiceUseCase implements IUseCase<UpdateServiceInputDTO, ServiceDTO> {
   constructor(
-    private readonly serviceRepository: BackendServiceRepository,
-    private readonly logger: Logger
+    private readonly serviceRepository: BackendServiceRepository
   ) { }
 
   async execute(input: UpdateServiceInputDTO): Promise<ServiceDTO> {
-    try {
-      this.logger.info('UpdateServiceUseCase: Updating service', { input });
-
-      // Validate price if provided
-      if (input.updates.price !== undefined && input.updates.price < 0) {
-        throw new Error('Price must be non-negative');
-      }
-
-      const updatedService = await this.serviceRepository.updateService(input.id, input.updates);
-
-      const serviceDTO = ServiceMapper.toDTO(updatedService);
-
-      this.logger.info('UpdateServiceUseCase: Successfully updated service', {
-        serviceId: serviceDTO.id,
-        updates: input.updates
-      });
-
-      return serviceDTO;
-    } catch (error) {
-      this.logger.error('UpdateServiceUseCase: Error updating service', error);
-      throw error;
+    // Validate required fields
+    if (!input.id) {
+      throw new Error('Service ID is required');
     }
+
+    if (input.updates.price !== undefined && input.updates.price < 0) {
+      throw new Error('Price must be non-negative');
+    }
+
+    const updatedService = await this.serviceRepository.updateService(input.id, input.updates);
+    return ServiceMapper.toDTO(updatedService);
   }
 }

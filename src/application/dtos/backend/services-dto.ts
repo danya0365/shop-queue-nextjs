@@ -36,7 +36,17 @@ export interface ServicesDataDTO {
   stats: ServiceStatsDTO;
   totalCount: number;
   currentPage: number;
-  totalPages: number;
+  perPage: number;
+}
+
+export interface PaginatedServicesDTO {
+  data: ServiceDTO[];
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
 // Input DTOs for use cases

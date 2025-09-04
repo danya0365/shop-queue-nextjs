@@ -1,8 +1,9 @@
-import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/ServiceEntity';
-import type { ServiceRow, ServiceStatsRow } from '@/src/infrastructure/schemas/backend/service-schema';
+import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/service.entity';
+import type { ServiceSchemaType, ServiceStatsSchemaType } from '@/src/infrastructure/schemas/backend/service.schema';
+import type { PaginationMeta } from '@/src/domain/interfaces/pagination-types';
 
 export class SupabaseBackendServiceMapper {
-  static toDomain(row: ServiceRow): ServiceEntity {
+  static toDomain(row: ServiceSchemaType & { shop_name?: string }): ServiceEntity {
     return {
       id: row.id,
       shopId: row.shop_id,
@@ -20,7 +21,7 @@ export class SupabaseBackendServiceMapper {
     };
   }
 
-  static toDatabase(entity: ServiceEntity): Partial<ServiceRow> {
+  static toDatabase(entity: ServiceEntity): Partial<ServiceSchemaType> {
     return {
       id: entity.id,
       shop_id: entity.shopId,
@@ -38,7 +39,7 @@ export class SupabaseBackendServiceMapper {
     };
   }
 
-  static statsToDomain(row: ServiceStatsRow): ServiceStatsEntity {
+  static statsToEntity(row: ServiceStatsSchemaType): ServiceStatsEntity {
     return {
       totalServices: row.total_services,
       availableServices: row.available_services,
@@ -51,6 +52,26 @@ export class SupabaseBackendServiceMapper {
         name: service.name,
         bookingCount: service.booking_count,
       })),
+    };
+  }
+
+  /**
+   * Create pagination metadata
+   * @param page Current page
+   * @param limit Items per page
+   * @param totalItems Total number of items
+   * @returns Pagination metadata
+   */
+  static createPaginationMeta(page: number, limit: number, totalItems: number): PaginationMeta {
+    const totalPages = Math.ceil(totalItems / limit);
+    
+    return {
+      currentPage: page,
+      itemsPerPage: limit,
+      totalItems,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
     };
   }
 }

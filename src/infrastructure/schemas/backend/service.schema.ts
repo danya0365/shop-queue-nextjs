@@ -31,5 +31,5 @@ export const ServiceStatsSchema = z.object({
   })),
 });
 
-export type ServiceRow = z.infer<typeof ServiceSchema>;
-export type ServiceStatsRow = z.infer<typeof ServiceStatsSchema>;
+export type ServiceSchemaType = z.infer<typeof ServiceSchema>;
+export type ServiceStatsSchemaType = z.infer<typeof ServiceStatsSchema>;

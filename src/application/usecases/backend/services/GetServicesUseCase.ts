@@ -1,41 +1,37 @@
 import type { GetServicesInputDTO, ServicesDataDTO } from '@/src/application/dtos/backend/services-dto';
-import { ServiceMapper } from '@/src/application/mappers/backend/ServiceMapper';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { ServiceMapper } from '@/src/application/mappers/backend/service-mapper';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/backend-service-repository';
 
-export class GetServicesUseCase {
+export class GetServicesUseCase implements IUseCase<GetServicesInputDTO, ServicesDataDTO> {
   constructor(
-    private readonly serviceRepository: BackendServiceRepository,
-    private readonly logger: Logger
+    private readonly serviceRepository: BackendServiceRepository
   ) { }
 
   async execute(input: GetServicesInputDTO): Promise<ServicesDataDTO> {
-    try {
-      this.logger.info('GetServicesUseCase: Getting services with stats', { input });
+    const { page, limit, filters } = input;
 
-      const result = await this.serviceRepository.getServicesWithStats(
-        input.page,
-        input.limit,
-        input.filters
-      );
-
-      const servicesData: ServicesDataDTO = {
-        services: result.services.map(ServiceMapper.toDTO),
-        stats: ServiceMapper.statsToDTO(result.stats),
-        totalCount: result.totalCount,
-        currentPage: result.currentPage,
-        totalPages: result.totalPages
-      };
-
-      this.logger.info('GetServicesUseCase: Successfully retrieved services data', {
-        totalCount: servicesData.totalCount,
-        currentPage: servicesData.currentPage
-      });
-
-      return servicesData;
-    } catch (error) {
-      this.logger.error('GetServicesUseCase: Error getting services data', error);
-      throw error;
+    // Validate input
+    if (page < 1) {
+      throw new Error('Page must be greater than 0');
     }
+
+    if (limit < 1 || limit > 100) {
+      throw new Error('Limit must be between 1 and 100');
+    }
+
+    // Get services and stats in parallel
+    const [servicesResult, stats] = await Promise.all([
+      this.serviceRepository.getPaginatedServices({ page, limit, filters }),
+      this.serviceRepository.getServiceStats()
+    ]);
+
+    return {
+      services: servicesResult.data.map(service => ServiceMapper.toDTO(service)),
+      stats: ServiceMapper.statsToDTO(stats),
+      totalCount: servicesResult.pagination.totalItems,
+      currentPage: servicesResult.pagination.currentPage,
+      perPage: servicesResult.pagination.itemsPerPage
+    };
   }
 }

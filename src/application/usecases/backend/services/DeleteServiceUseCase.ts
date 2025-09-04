@@ -1,28 +1,16 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/backend-service-repository';
 
-export class DeleteServiceUseCase {
+export class DeleteServiceUseCase implements IUseCase<string, boolean> {
   constructor(
-    private readonly serviceRepository: BackendServiceRepository,
-    private readonly logger: Logger
+    private readonly serviceRepository: BackendServiceRepository
   ) { }
 
   async execute(id: string): Promise<boolean> {
-    try {
-      this.logger.info('DeleteServiceUseCase: Deleting service', { id });
-
-      const success = await this.serviceRepository.deleteService(id);
-
-      if (success) {
-        this.logger.info('DeleteServiceUseCase: Successfully deleted service', { id });
-      } else {
-        this.logger.warn('DeleteServiceUseCase: Failed to delete service', { id });
-      }
-
-      return success;
-    } catch (error) {
-      this.logger.error('DeleteServiceUseCase: Error deleting service', error);
-      throw error;
+    if (!id) {
+      throw new Error('Service ID is required');
     }
+
+    return await this.serviceRepository.deleteService(id);
   }
 }

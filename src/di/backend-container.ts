@@ -49,12 +49,15 @@ import { GetQueueByIdUseCase } from "../application/usecases/backend/queues/GetQ
 import { GetQueuesPaginatedUseCase } from "../application/usecases/backend/queues/GetQueuesPaginatedUseCase";
 import { GetQueueStatsUseCase } from "../application/usecases/backend/queues/GetQueueStatsUseCase";
 import { UpdateQueueUseCase } from "../application/usecases/backend/queues/UpdateQueueUseCase";
-import { CreateServiceUseCase } from '../application/usecases/backend/services/CreateServiceUseCase';
-import { DeleteServiceUseCase } from '../application/usecases/backend/services/DeleteServiceUseCase';
-import { GetServiceByIdUseCase } from '../application/usecases/backend/services/GetServiceByIdUseCase';
-import { GetServicesUseCase } from '../application/usecases/backend/services/GetServicesUseCase';
-import { ToggleServiceAvailabilityUseCase } from '../application/usecases/backend/services/ToggleServiceAvailabilityUseCase';
-import { UpdateServiceUseCase } from '../application/usecases/backend/services/UpdateServiceUseCase';
+import {
+  CreateServiceUseCase,
+  DeleteServiceUseCase,
+  GetServiceByIdUseCase,
+  GetServicesPaginatedUseCase,
+  GetServiceStatsUseCase,
+  ToggleServiceAvailabilityUseCase,
+  UpdateServiceUseCase
+} from '../application/usecases/backend/services';
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
 import { Logger } from "../domain/interfaces/logger";
@@ -68,8 +71,8 @@ import { SupabaseBackendDashboardRepository } from "../infrastructure/repositori
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
+import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
-import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/SupabaseBackendServiceRepository';
 import { Container, createContainer } from "./container";
 
 /**
@@ -165,12 +168,14 @@ export async function createBackendContainer(): Promise<Container> {
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
     const deleteProfileUseCase = new DeleteProfileUseCase(profileRepository);
 
-    const getServicesUseCase = new GetServicesUseCase(serviceRepository, logger);
-    const getServiceByIdUseCase = new GetServiceByIdUseCase(serviceRepository, logger);
-    const createServiceUseCase = new CreateServiceUseCase(serviceRepository, logger);
-    const updateServiceUseCase = new UpdateServiceUseCase(serviceRepository, logger);
-    const deleteServiceUseCase = new DeleteServiceUseCase(serviceRepository, logger);
-    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(serviceRepository, logger);
+    // Service use cases
+    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(serviceRepository);
+    const getServiceStatsUseCase = new GetServiceStatsUseCase(serviceRepository);
+    const getServiceByIdUseCase = new GetServiceByIdUseCase(serviceRepository);
+    const createServiceUseCase = new CreateServiceUseCase(serviceRepository);
+    const updateServiceUseCase = new UpdateServiceUseCase(serviceRepository);
+    const deleteServiceUseCase = new DeleteServiceUseCase(serviceRepository);
+    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(serviceRepository);
 
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
@@ -227,12 +232,14 @@ export async function createBackendContainer(): Promise<Container> {
     const backendPaymentsService = new BackendPaymentsService(getPaymentsUseCase, logger);
 
     const backendServicesService = new BackendServicesService(
-      getServicesUseCase,
+      getServicesPaginatedUseCase,
+      getServiceStatsUseCase,
       getServiceByIdUseCase,
       createServiceUseCase,
       updateServiceUseCase,
       deleteServiceUseCase,
       toggleServiceAvailabilityUseCase,
+      logger
     );
 
     // Register only services in the container

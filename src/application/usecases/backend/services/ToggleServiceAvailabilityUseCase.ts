@@ -1,37 +1,21 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/backend-service-repository';
 
-export class ToggleServiceAvailabilityUseCase {
+export interface ToggleServiceAvailabilityUseCaseInput {
+  id: string;
+  isAvailable: boolean;
+}
+
+export class ToggleServiceAvailabilityUseCase implements IUseCase<ToggleServiceAvailabilityUseCaseInput, boolean> {
   constructor(
-    private readonly serviceRepository: BackendServiceRepository,
-    private readonly logger: Logger
+    private readonly serviceRepository: BackendServiceRepository
   ) { }
 
-  async execute(id: string, isAvailable: boolean): Promise<boolean> {
-    try {
-      this.logger.info('ToggleServiceAvailabilityUseCase: Toggling service availability', {
-        id,
-        isAvailable
-      });
-
-      const success = await this.serviceRepository.toggleAvailability(id, isAvailable);
-
-      if (success) {
-        this.logger.info('ToggleServiceAvailabilityUseCase: Successfully toggled service availability', {
-          id,
-          isAvailable
-        });
-      } else {
-        this.logger.warn('ToggleServiceAvailabilityUseCase: Failed to toggle service availability', {
-          id,
-          isAvailable
-        });
-      }
-
-      return success;
-    } catch (error) {
-      this.logger.error('ToggleServiceAvailabilityUseCase: Error toggling service availability', error);
-      throw error;
+  async execute(input: ToggleServiceAvailabilityUseCaseInput): Promise<boolean> {
+    if (!input.id) {
+      throw new Error('Service ID is required');
     }
+
+    return await this.serviceRepository.toggleAvailability(input.id, input.isAvailable);
   }
 }

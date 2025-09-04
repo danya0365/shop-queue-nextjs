@@ -1,4 +1,4 @@
-import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/ServiceEntity';
+import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/service.entity';
 import type { ServiceDTO, ServiceStatsDTO, CreateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
 
 export class ServiceMapper {

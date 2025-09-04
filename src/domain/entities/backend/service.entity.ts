@@ -1,3 +1,5 @@
+import type { PaginationMeta } from '@/src/domain/interfaces/pagination-types';
+
 export interface ServiceEntity {
   id: string;
   shopId: string;
@@ -28,4 +30,9 @@ export interface ServiceStatsEntity {
     name: string;
     bookingCount: number;
   }[];
+}
+
+export interface PaginatedServicesEntity {
+  data: ServiceEntity[];
+  pagination: PaginationMeta;
 }
