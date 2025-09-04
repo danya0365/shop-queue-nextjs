@@ -547,6 +547,29 @@ AND p_cust.username = qs_info.username
 AND s.name = qs_info.service_name;
 
 -- Insert payments for the restaurant
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'restaurant_owner'
+  LIMIT 1
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'::public.queue_status
+),
+employee_data AS (
+  SELECT 
+    e.id AS employee_id,
+    e.position_text
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+)
 INSERT INTO payments (
   queue_id,
   total_amount,
@@ -559,39 +582,59 @@ INSERT INTO payments (
   updated_at
 )
 SELECT
-  q.id AS queue_id,
-  CASE
-    WHEN q.queue_number = 'R001' THEN 1200.00
-    WHEN q.queue_number = 'R002' THEN 850.00
-    WHEN q.queue_number = 'R003' THEN 500.00
+  qd.queue_id,
+  CASE 
+    WHEN qd.queue_number = 'R001' THEN 165.00
+    WHEN qd.queue_number = 'R002' THEN 45.00
   END AS total_amount,
-  CASE
-    WHEN q.queue_number = 'R001' THEN 1200.00
-    WHEN q.queue_number = 'R002' THEN 850.00
-    WHEN q.queue_number = 'R003' THEN 500.00
+  CASE 
+    WHEN qd.queue_number = 'R001' THEN 165.00
+    WHEN qd.queue_number = 'R002' THEN 45.00
   END AS paid_amount,
   'paid'::public.payment_status AS payment_status,
-  'card'::public.payment_method AS payment_method,
-  (SELECT e.id FROM employees e WHERE e.shop_id = sh.id AND e.position_text = 'พนักงานเสิร์ฟ' LIMIT 1) AS processed_by_employee_id,
-  q.created_at + INTERVAL '1 hour' AS payment_date,
-  q.created_at + INTERVAL '1 hour' AS created_at,
-  q.created_at + INTERVAL '1 hour' AS updated_at
-FROM shops sh
-JOIN profiles p ON sh.owner_id = p.id
-JOIN customers c ON c.shop_id = sh.id
-JOIN profiles p_cust ON c.profile_id = p_cust.id
-JOIN queues q ON q.customer_id = c.id
-CROSS JOIN (
-  VALUES
-    ('customer1'::text, 'R001'::text),
-    ('customer2'::text, 'R002'::text),
-    ('customer3'::text, 'R003'::text)
-) AS payment_info(username, queue_number)
-WHERE p.username = 'restaurant_owner'
-AND p_cust.username = payment_info.username
-AND q.queue_number = payment_info.queue_number;
+  CASE 
+    WHEN qd.queue_number = 'R001' THEN 'cash'::public.payment_method
+    WHEN qd.queue_number = 'R002' THEN 'card'::public.payment_method
+  END AS payment_method,
+  (SELECT employee_id FROM employee_data WHERE position_text = 'พนักงานเสิร์ฟ' LIMIT 1) AS processed_by_employee_id,
+  qd.completed_at,
+  qd.completed_at,
+  qd.completed_at
+FROM queue_data qd
+WHERE qd.queue_number IN ('R001', 'R002');
 
 -- Insert payment items for the restaurant
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'restaurant_owner'
+  LIMIT 1
+),
+service_data AS (
+  SELECT 
+    s.id AS service_id,
+    s.name,
+    s.price
+  FROM services s
+  JOIN shop_data sd ON s.shop_id = sd.shop_id
+),
+payment_data AS (
+  SELECT 
+    p.id AS payment_id,
+    p.queue_id,
+    p.created_at
+  FROM payments p
+  JOIN queues q ON p.queue_id = q.id
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.queue_number
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+)
 INSERT INTO payment_items (
   payment_id,
   service_id,
@@ -602,23 +645,24 @@ INSERT INTO payment_items (
   created_at
 )
 SELECT
-  pay.id AS payment_id,
-  s.id AS service_id,
-  s.name,
-  s.price,
-  qs.quantity,
-  s.price * qs.quantity AS total,
-  pay.created_at
-FROM payments pay
-JOIN queues q ON pay.queue_id = q.id
-JOIN queue_services qs ON qs.queue_id = q.id
-JOIN services s ON qs.service_id = s.id
-JOIN customers c ON q.customer_id = c.id
-JOIN profiles p_cust ON c.profile_id = p_cust.id
-JOIN shops sh ON q.shop_id = sh.id
-JOIN profiles p ON sh.owner_id = p.id
-WHERE p.username = 'restaurant_owner'
-AND pay.payment_status = 'paid';
+  pd.payment_id,
+  sd.service_id,
+  pi.name,
+  pi.price,
+  pi.quantity,
+  pi.total,
+  pd.created_at
+FROM payment_data pd
+JOIN queue_data qd ON pd.queue_id = qd.queue_id
+CROSS JOIN (
+  VALUES 
+    ('R001', 'ผัดไทย', 80.00, 1, 80.00),
+    ('R001', 'ต้มยำกุ้ง', 85.00, 1, 85.00),
+    ('R002', 'ชาไทยเย็น', 45.00, 1, 45.00)
+) AS pi(queue_number, name, price, quantity, total)
+JOIN service_data sd ON sd.name = pi.name
+WHERE qd.queue_number = pi.queue_number
+AND qd.queue_number IN ('R001', 'R002');
 
 -- Insert shop settings for the restaurant
 INSERT INTO shop_settings (
