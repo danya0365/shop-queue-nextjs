@@ -1,5 +1,6 @@
 'use client';
 
+import { QueueDTO } from '@/src/application/dtos/backend/queues-dto';
 import { QueuesViewModel } from '@/src/presentation/presenters/backend/queues/QueuesPresenter';
 import { useQueuesPresenter } from '@/src/presentation/presenters/backend/queues/useQueuesPresenter';
 
@@ -10,6 +11,13 @@ interface QueuesViewProps {
 export function QueuesView({ viewModel }: QueuesViewProps) {
   const [state, actions] = useQueuesPresenter();
   const { queuesData } = viewModel;
+
+  const getServiceNames = (queue: QueueDTO) => {
+    if (!queue.queueServices || queue.queueServices.length === 0) {
+      return 'ไม่ระบุบริการ';
+    }
+    return queue.queueServices.map((service) => service.serviceName).join(', ');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -207,7 +215,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                       </div>
                     </td>
                     <td className="py-3 px-4 backend-text">{queue.shopName}</td>
-                    <td className="py-3 px-4 backend-text">{queue.queueServices[0].serviceName}</td>
+                    <td className="py-3 px-4 backend-text">{getServiceNames(queue)}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(queue.priority)}`}>
                         {getPriorityText(queue.priority)}

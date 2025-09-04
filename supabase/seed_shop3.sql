@@ -267,7 +267,7 @@ SELECT
 FROM categories c
 CROSS JOIN shops s
 JOIN profiles p ON s.owner_id = p.id
-WHERE c.slug IN ('electronics', 'repair', 'beauty')
+WHERE c.slug IN ('electronics', 'repair')
 AND p.username = 'mobile_repair_owner'
 LIMIT 1;
 
