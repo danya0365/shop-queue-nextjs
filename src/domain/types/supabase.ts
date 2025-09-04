@@ -16,8 +16,10 @@ export type Database = {
           description: string | null
           icon: string | null
           id: string
+          is_active: boolean | null
           name: string
           slug: string
+          sort_order: number | null
           updated_at: string | null
         }
         Insert: {
@@ -26,8 +28,10 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           slug: string
+          sort_order?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -36,8 +40,10 @@ export type Database = {
           description?: string | null
           icon?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           slug?: string
+          sort_order?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -70,6 +76,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_shops_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "category_info_stats_view"
             referencedColumns: ["id"]
           },
           {
@@ -317,6 +330,7 @@ export type Database = {
           id: string
           name: string
           shop_id: string
+          slug: string
           updated_at: string | null
         }
         Insert: {
@@ -326,6 +340,7 @@ export type Database = {
           id?: string
           name: string
           shop_id: string
+          slug: string
           updated_at?: string | null
         }
         Update: {
@@ -335,6 +350,7 @@ export type Database = {
           id?: string
           name?: string
           shop_id?: string
+          slug?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -549,7 +565,28 @@ export type Database = {
             foreignKeyName: "payment_items_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "popular_services_by_category_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "popular_services_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "top_popular_services_view"
             referencedColumns: ["id"]
           },
         ]
@@ -879,13 +916,37 @@ export type Database = {
             foreignKeyName: "queue_services_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "popular_services_by_category_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "popular_services_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "top_popular_services_view"
             referencedColumns: ["id"]
           },
         ]
       }
       queues: {
         Row: {
+          cancelled_at: string | null
+          cancelled_note: string | null
+          cancelled_reason: string | null
           completed_at: string | null
           created_at: string | null
           customer_id: string
@@ -904,6 +965,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          cancelled_at?: string | null
+          cancelled_note?: string | null
+          cancelled_reason?: string | null
           completed_at?: string | null
           created_at?: string | null
           customer_id: string
@@ -922,6 +986,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          cancelled_at?: string | null
+          cancelled_note?: string | null
+          cancelled_reason?: string | null
           completed_at?: string | null
           created_at?: string | null
           customer_id?: string
@@ -1104,6 +1171,7 @@ export type Database = {
           popularity_rank: number | null
           price: number
           shop_id: string
+          slug: string
           updated_at: string | null
         }
         Insert: {
@@ -1118,6 +1186,7 @@ export type Database = {
           popularity_rank?: number | null
           price: number
           shop_id: string
+          slug: string
           updated_at?: string | null
         }
         Update: {
@@ -1132,6 +1201,7 @@ export type Database = {
           popularity_rank?: number | null
           price?: number
           shop_id?: string
+          slug?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1144,6 +1214,51 @@ export type Database = {
           },
           {
             foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_activity_log: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          shop_id: string
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          shop_id: string
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          shop_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_activity_log_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_activity_log_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -1294,6 +1409,7 @@ export type Database = {
           owner_id: string
           phone: string | null
           qr_code_url: string | null
+          slug: string
           status: Database["public"]["Enums"]["shop_status"] | null
           timezone: string | null
           updated_at: string | null
@@ -1312,6 +1428,7 @@ export type Database = {
           owner_id: string
           phone?: string | null
           qr_code_url?: string | null
+          slug: string
           status?: Database["public"]["Enums"]["shop_status"] | null
           timezone?: string | null
           updated_at?: string | null
@@ -1330,6 +1447,7 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           qr_code_url?: string | null
+          slug?: string
           status?: Database["public"]["Enums"]["shop_status"] | null
           timezone?: string | null
           updated_at?: string | null
@@ -1347,6 +1465,23 @@ export type Database = {
       }
     }
     Views: {
+      category_info_stats_view: {
+        Row: {
+          active_shops_count: number | null
+          available_services_count: number | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string | null
+          name: string | null
+          services_count: number | null
+          shops_count: number | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       category_stats_view: {
         Row: {
           active_categories: number | null
@@ -1398,6 +1533,27 @@ export type Database = {
         }
         Relationships: []
       }
+      popular_services_by_category_view: {
+        Row: {
+          category: string | null
+          id: string | null
+          name: string | null
+          queue_count: number | null
+          rank_in_category: number | null
+          revenue: number | null
+        }
+        Relationships: []
+      }
+      popular_services_view: {
+        Row: {
+          category: string | null
+          id: string | null
+          name: string | null
+          queue_count: number | null
+          revenue: number | null
+        }
+        Relationships: []
+      }
       profile_stats_view: {
         Row: {
           active_profiles_today: number | null
@@ -1420,6 +1576,89 @@ export type Database = {
         }
         Relationships: []
       }
+      queue_status_distribution_flexible_view: {
+        Row: {
+          avg_queue_time_minutes: number | null
+          cancelled: number | null
+          completed: number | null
+          no_show: number | null
+          queue_date: string | null
+          serving: number | null
+          shop_id: string | null
+          shop_name: string | null
+          total_queues: number | null
+          waiting: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_status_distribution_today_by_shop_view: {
+        Row: {
+          cancelled: number | null
+          completed: number | null
+          last_queue_update: string | null
+          no_show: number | null
+          serving: number | null
+          shop_id: string | null
+          shop_name: string | null
+          total_queues_today: number | null
+          waiting: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_status_distribution_today_view: {
+        Row: {
+          cancelled: number | null
+          completed: number | null
+          last_queue_update: string | null
+          no_show: number | null
+          serving: number | null
+          total_queues_today: number | null
+          waiting: number | null
+        }
+        Relationships: []
+      }
+      queue_status_distribution_view: {
+        Row: {
+          cancelled: number | null
+          completed: number | null
+          last_queue_update: string | null
+          no_show: number | null
+          serving: number | null
+          total_queues: number | null
+          waiting: number | null
+        }
+        Relationships: []
+      }
       shop_stats_view: {
         Row: {
           active_shops: number | null
@@ -1429,8 +1668,22 @@ export type Database = {
         }
         Relationships: []
       }
+      top_popular_services_view: {
+        Row: {
+          category: string | null
+          id: string | null
+          name: string | null
+          queue_count: number | null
+          revenue: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cleanup_old_activities: {
+        Args: { p_days_to_keep?: number }
+        Returns: number
+      }
       create_customer: {
         Args: {
           shop_id_param: string
@@ -1463,6 +1716,16 @@ export type Database = {
       }
       create_profile: {
         Args: { username: string; full_name?: string; avatar_url?: string }
+        Returns: string
+      }
+      create_shop_activity: {
+        Args: {
+          p_shop_id: string
+          p_type: Database["public"]["Enums"]["activity_type"]
+          p_title: string
+          p_description: string
+          p_metadata?: Json
+        }
         Returns: string
       }
       delete_customer: {
@@ -1504,6 +1767,14 @@ export type Database = {
       get_active_profile_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["profile_role"]
+      }
+      get_auth_user_by_id: {
+        Args: { p_id: string }
+        Returns: Json
+      }
+      get_auth_user_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_customer_by_id: {
         Args: { shop_id_param: string; customer_id_param: string }
@@ -1592,6 +1863,16 @@ export type Database = {
       get_profile_role: {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
+      }
+      get_queue_status_distribution: {
+        Args: { p_shop_id: string; p_start_date?: string; p_end_date?: string }
+        Returns: {
+          waiting: number
+          serving: number
+          completed: number
+          cancelled: number
+          no_show: number
+        }[]
       }
       get_user_profiles: {
         Args: Record<PropertyKey, never>
@@ -1698,6 +1979,56 @@ export type Database = {
       }
     }
     Enums: {
+      activity_type:
+        | "queue_created"
+        | "queue_updated"
+        | "queue_completed"
+        | "queue_cancelled"
+        | "queue_served"
+        | "queue_confirmed"
+        | "customer_registered"
+        | "customer_updated"
+        | "customer_deleted"
+        | "customer_visit"
+        | "shop_created"
+        | "shop_updated"
+        | "shop_status_changed"
+        | "shop_settings_updated"
+        | "employee_added"
+        | "employee_updated"
+        | "employee_removed"
+        | "employee_login"
+        | "employee_logout"
+        | "employee_duty_start"
+        | "employee_duty_end"
+        | "service_added"
+        | "service_updated"
+        | "service_removed"
+        | "service_availability_changed"
+        | "payment_created"
+        | "payment_completed"
+        | "payment_failed"
+        | "payment_refunded"
+        | "promotion_created"
+        | "promotion_updated"
+        | "promotion_activated"
+        | "promotion_deactivated"
+        | "promotion_used"
+        | "points_earned"
+        | "points_redeemed"
+        | "points_expired"
+        | "reward_claimed"
+        | "membership_upgraded"
+        | "system_backup"
+        | "system_maintenance"
+        | "system_error"
+        | "system_alert"
+        | "department_created"
+        | "department_updated"
+        | "department_removed"
+        | "opening_hours_updated"
+        | "shop_opened"
+        | "shop_closed"
       employee_status: "active" | "inactive" | "suspended"
       membership_tier: "bronze" | "silver" | "gold" | "platinum"
       payment_method: "cash" | "card" | "qr" | "transfer"
@@ -1836,6 +2167,57 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_type: [
+        "queue_created",
+        "queue_updated",
+        "queue_completed",
+        "queue_cancelled",
+        "queue_served",
+        "queue_confirmed",
+        "customer_registered",
+        "customer_updated",
+        "customer_deleted",
+        "customer_visit",
+        "shop_created",
+        "shop_updated",
+        "shop_status_changed",
+        "shop_settings_updated",
+        "employee_added",
+        "employee_updated",
+        "employee_removed",
+        "employee_login",
+        "employee_logout",
+        "employee_duty_start",
+        "employee_duty_end",
+        "service_added",
+        "service_updated",
+        "service_removed",
+        "service_availability_changed",
+        "payment_created",
+        "payment_completed",
+        "payment_failed",
+        "payment_refunded",
+        "promotion_created",
+        "promotion_updated",
+        "promotion_activated",
+        "promotion_deactivated",
+        "promotion_used",
+        "points_earned",
+        "points_redeemed",
+        "points_expired",
+        "reward_claimed",
+        "membership_upgraded",
+        "system_backup",
+        "system_maintenance",
+        "system_error",
+        "system_alert",
+        "department_created",
+        "department_updated",
+        "department_removed",
+        "opening_hours_updated",
+        "shop_opened",
+        "shop_closed",
+      ],
       employee_status: ["active", "inactive", "suspended"],
       membership_tier: ["bronze", "silver", "gold", "platinum"],
       payment_method: ["cash", "card", "qr", "transfer"],
