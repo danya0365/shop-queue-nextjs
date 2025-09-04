@@ -1,13 +1,13 @@
-import type { BackendServiceRepository } from '@/src/domain/interfaces/backend/BackendServiceRepository';
-import type { Logger } from '@/src/domain/interfaces/logger';
 import type { GetServicesInputDTO, ServicesDataDTO } from '@/src/application/dtos/backend/services-dto';
 import { ServiceMapper } from '@/src/application/mappers/backend/ServiceMapper';
+import type { Logger } from '@/src/domain/interfaces/logger';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
 
 export class GetServicesUseCase {
   constructor(
     private readonly serviceRepository: BackendServiceRepository,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async execute(input: GetServicesInputDTO): Promise<ServicesDataDTO> {
     try {

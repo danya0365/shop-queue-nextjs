@@ -1,9 +1,9 @@
 import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/ServiceEntity';
-import type { BackendServiceRepository } from '@/src/domain/interfaces/backend/BackendServiceRepository';
 import { DatabaseDataSource } from '@/src/domain/interfaces/datasources/database-datasource';
 import { Logger } from '@/src/domain/interfaces/logger';
-import { SupabaseBackendServiceMapper } from '@/src/infrastructure/database/mappers/backend/SupabaseBackendServiceMapper';
-import { ServiceSchema } from '@/src/infrastructure/database/schemas/backend/service-schema';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
+import { SupabaseBackendServiceMapper } from '@/src/infrastructure/mappers/backend/SupabaseBackendServiceMapper';
+import { ServiceSchema } from '@/src/infrastructure/schemas/backend/service-schema';
 
 export class SupabaseBackendServiceRepository implements BackendServiceRepository {
   constructor(private readonly dataSource: DatabaseDataSource, private readonly logger: Logger) { }

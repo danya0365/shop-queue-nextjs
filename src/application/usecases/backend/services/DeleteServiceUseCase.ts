@@ -1,11 +1,11 @@
-import type { BackendServiceRepository } from '@/src/domain/interfaces/backend/BackendServiceRepository';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
 
 export class DeleteServiceUseCase {
   constructor(
     private readonly serviceRepository: BackendServiceRepository,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async execute(id: string): Promise<boolean> {
     try {

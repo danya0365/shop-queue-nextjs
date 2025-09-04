@@ -1,5 +1,5 @@
 import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/ServiceEntity';
-import type { ServiceRow, ServiceStatsRow } from '@/src/infrastructure/database/schemas/backend/service-schema';
+import type { ServiceRow, ServiceStatsRow } from '@/src/infrastructure/schemas/backend/service-schema';
 
 export class SupabaseBackendServiceMapper {
   static toDomain(row: ServiceRow): ServiceEntity {

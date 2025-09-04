@@ -1,13 +1,13 @@
-import type { BackendServiceRepository } from '@/src/domain/interfaces/backend/BackendServiceRepository';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { UpdateServiceInputDTO, ServiceDTO } from '@/src/application/dtos/backend/services-dto';
+import type { ServiceDTO, UpdateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
 import { ServiceMapper } from '@/src/application/mappers/backend/ServiceMapper';
+import type { Logger } from '@/src/domain/interfaces/logger';
+import type { BackendServiceRepository } from '@/src/domain/repositories/backend/BackendServiceRepository';
 
 export class UpdateServiceUseCase {
   constructor(
     private readonly serviceRepository: BackendServiceRepository,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async execute(input: UpdateServiceInputDTO): Promise<ServiceDTO> {
     try {
@@ -22,7 +22,7 @@ export class UpdateServiceUseCase {
 
       const serviceDTO = ServiceMapper.toDTO(updatedService);
 
-      this.logger.info('UpdateServiceUseCase: Successfully updated service', { 
+      this.logger.info('UpdateServiceUseCase: Successfully updated service', {
         serviceId: serviceDTO.id,
         updates: input.updates
       });
