@@ -26,12 +26,13 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
     { href: '/backend', label: 'แดชบอร์ด', icon: LayoutDashboard },
     { href: '/backend/auth-users', label: 'จัดการผู้ใช้งาน', icon: Shield },
     { href: '/backend/profiles', label: 'จัดการโปรไฟล์', icon: UserCheck },
+    { href: '/backend/categories', label: 'จัดการหมวดหมู่', icon: FolderOpen },
     { href: '/backend/shops', label: 'จัดการร้านค้า', icon: Store },
     { href: '/backend/queues', label: 'จัดการคิว', icon: Clock },
     { href: '/backend/services', label: 'จัดการบริการ', icon: Clock },
     { href: '/backend/customers', label: 'จัดการลูกค้า', icon: Users },
     { href: '/backend/employees', label: 'จัดการพนักงาน', icon: UserCheck },
-    { href: '/backend/categories', label: 'จัดการหมวดหมู่', icon: FolderOpen },
+    { href: '/backend/promotions', label: 'จัดการโปรโมชั่น', icon: CreditCard },
     { href: '/backend/payments', label: 'จัดการการชำระเงิน', icon: CreditCard },
   ];
 

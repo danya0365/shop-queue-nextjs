@@ -14,6 +14,7 @@ import { BackendCategoriesService } from "../application/services/backend/Backen
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
 import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
+import { BackendPromotionsService } from "../application/services/backend/BackendPromotionsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
 import { BackendServicesService } from '../application/services/backend/BackendServicesService';
@@ -267,6 +268,10 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
 
+    const backendPromotionsService = new BackendPromotionsService(
+      logger
+    );
+
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);
     container.registerInstance("BackendShopsService", backendShopsService);
@@ -277,6 +282,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendCategoriesService", backendCategoriesService);
     container.registerInstance("BackendProfilesService", backendProfilesService);
     container.registerInstance("BackendPaymentsService", backendPaymentsService);
+    container.registerInstance("BackendPromotionsService", backendPromotionsService);
     container.registerInstance("BackendServicesService", backendServicesService);
 
     logger.info("Backend container initialized successfully");
