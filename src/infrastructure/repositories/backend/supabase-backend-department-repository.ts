@@ -109,7 +109,7 @@ export class SupabaseBackendDepartmentRepository extends BackendRepository imple
       // Assuming a view exists for department statistics
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData = await this.dataSource.getAdvanced<DepartmentStatsSchemaRecord>(
-        'department_stats_view',
+        'department_stats_summary_view',
         queryOptions
       );
 
