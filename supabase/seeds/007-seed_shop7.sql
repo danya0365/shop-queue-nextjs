@@ -258,23 +258,22 @@ CROSS JOIN (
 WHERE p.username = 'french_fry_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
   dept_info.slug,
   dept_info.description,
-  dept_info.employee_count,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ครัว'::text, 'kitchen'::text, 'แผนกครัวและเตรียมอาหาร'::text, 2::integer),
-    ('เสิร์ฟ'::text, 'service'::text, 'แผนกเสิร์ฟและบริการลูกค้า'::text, 1::integer),
-    ('เครื่องดื่ม'::text, 'beverage'::text, 'แผนกเครื่องดื่มและบาร์'::text, 1::integer)
-) AS dept_info(name, slug, description, employee_count)
+    ('ครัว'::text, 'kitchen'::text, 'แผนกครัวและเตรียมอาหาร'::text),
+    ('เสิร์ฟ'::text, 'service'::text, 'แผนกเสิร์ฟและบริการลูกค้า'::text),
+    ('เครื่องดื่ม'::text, 'beverage'::text, 'แผนกเครื่องดื่มและบาร์'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'french_fry_owner';
 
 -- Insert employees

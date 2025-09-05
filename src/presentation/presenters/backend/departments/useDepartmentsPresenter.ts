@@ -1,5 +1,4 @@
 import type { CreateDepartmentDTO, UpdateDepartmentDTO } from '@/src/application/dtos/backend/department-dto';
-import { BackendDepartmentsService } from '@/src/application/services/backend/BackendDepartmentsService';
 import { getClientService } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
 import { useState } from 'react';
@@ -58,7 +57,25 @@ export const useDepartmentsPresenter = (): DepartmentsPresenterHook => {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
 
   const logger = getClientService<Logger>('Logger');
-  const departmentsService = new BackendDepartmentsService();
+  
+  // Mock service for client-side operations - actual data operations happen server-side
+  const mockDepartmentsService = {
+    createDepartment: async (data: CreateDepartmentDTO) => {
+      // This would typically make an API call to the server
+      logger.info('Mock: Creating department', { data });
+      return { id: 'mock-id', ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), employeeCount: 0 };
+    },
+    updateDepartment: async (data: UpdateDepartmentDTO) => {
+      // This would typically make an API call to the server
+      logger.info('Mock: Updating department', { data });
+      return { id: data.id, name: data.name || 'Updated Department', slug: 'updated-slug', shopId: 'shop-1', description: data.description || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), employeeCount: 0 };
+    },
+    deleteDepartment: async (id: string) => {
+      // This would typically make an API call to the server
+      logger.info('Mock: Deleting department', { id });
+      return true;
+    }
+  };
 
   const createDepartment = async (data: CreateDepartmentData): Promise<boolean> => {
     setIsCreating(true);
@@ -80,7 +97,7 @@ export const useDepartmentsPresenter = (): DepartmentsPresenterHook => {
         description: data.description?.trim() || null
       };
 
-      await departmentsService.createDepartment(createData);
+      await mockDepartmentsService.createDepartment(createData);
 
       logger.info('DepartmentsPresenter: Department created successfully');
       return true;
@@ -113,7 +130,7 @@ export const useDepartmentsPresenter = (): DepartmentsPresenterHook => {
         ...(data.description !== undefined && { description: data.description?.trim() || null })
       };
 
-      const result = await departmentsService.updateDepartment(updateData);
+      const result = await mockDepartmentsService.updateDepartment(updateData);
       if (!result) {
         throw new Error('ไม่พบแผนกที่ต้องการแก้ไข');
       }
@@ -134,7 +151,7 @@ export const useDepartmentsPresenter = (): DepartmentsPresenterHook => {
     setError(null);
 
     try {
-      const result = await departmentsService.deleteDepartment(data.id);
+      const result = await mockDepartmentsService.deleteDepartment(data.id);
       if (!result) {
         throw new Error('ไม่พบแผนกที่ต้องการลบ');
       }

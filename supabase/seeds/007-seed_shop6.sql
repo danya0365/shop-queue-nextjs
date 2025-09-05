@@ -256,23 +256,22 @@ CROSS JOIN (
 WHERE p.username = 'spa_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
   dept_info.slug,
   dept_info.description,
-  dept_info.employee_count,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('นวด'::text, 'massage'::text, 'แผนกนวดและบำบัด'::text, 3::integer),
-    ('ดูแลผิว'::text, 'skincare'::text, 'แผนกดูแลผิวและทรีทเมนต์'::text, 2::integer),
-    ('ต้อนรับ'::text, 'reception'::text, 'แผนกต้อนรับและให้คำปรึกษา'::text, 1::integer)
-) AS dept_info(name, slug, description, employee_count)
+    ('นวด'::text, 'massage'::text, 'แผนกนวดและบำบัด'::text),
+    ('ดูแลผิว'::text, 'skincare'::text, 'แผนกดูแลผิวและทรีทเมนต์'::text),
+    ('ต้อนรับ'::text, 'reception'::text, 'แผนกต้อนรับและให้คำปรึกษา'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'spa_owner';
 
 -- Insert employees

@@ -256,23 +256,22 @@ CROSS JOIN (
 WHERE p.username = 'beauty_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
   dept_info.slug,
   dept_info.description,
-  dept_info.employee_count,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('เล็บ'::text, 'nail'::text, 'แผนกทำเล็บ'::text, 2::integer),
-    ('ผม'::text, 'hair'::text, 'แผนกทำผม'::text, 2::integer),
-    ('หน้า'::text, 'facial'::text, 'แผนกดูแลผิวหน้า'::text, 1::integer)
-) AS dept_info(name, slug, description, employee_count)
+    ('เล็บ'::text, 'nail'::text, 'แผนกทำเล็บ'::text),
+    ('ผม'::text, 'hair'::text, 'แผนกทำผม'::text),
+    ('หน้า'::text, 'facial'::text, 'แผนกดูแลผิวหน้า'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'beauty_owner';
 
 -- Insert employees

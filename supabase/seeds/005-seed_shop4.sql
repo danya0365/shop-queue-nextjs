@@ -254,22 +254,21 @@ CROSS JOIN (
 WHERE p.username = 'laundry_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
   dept_info.slug,
   dept_info.description,
-  dept_info.employee_count,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ซักรีด'::text, 'wash-iron'::text, 'แผนกซักรีดหลัก'::text, 2::integer),
-    ('ต้อนรับ'::text, 'reception'::text, 'แผนกต้อนรับลูกค้า'::text, 1::integer)
-) AS dept_info(name, slug, description, employee_count)
+    ('ซักรีด'::text, 'wash-iron'::text, 'แผนกซักรีดหลัก'::text),
+    ('ต้อนรับ'::text, 'reception'::text, 'แผนกต้อนรับลูกค้า'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'laundry_owner';
 
 -- Insert employees

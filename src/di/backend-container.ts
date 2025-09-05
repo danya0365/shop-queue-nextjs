@@ -19,6 +19,7 @@ import { BackendAuthUsersService } from "../application/services/backend/Backend
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
 import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
+import { BackendDepartmentsService } from "../application/services/backend/BackendDepartmentsService";
 import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
 import { BackendPromotionsService } from "../application/services/backend/BackendPromotionsService";
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
@@ -31,6 +32,7 @@ import { GetAuthUsersPaginatedUseCase } from "../application/usecases/backend/au
 import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
 import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoriesPaginatedUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from "../application/usecases/backend/categories";
 import { GetDashboardDataUseCase } from "../application/usecases/backend/dashboard/GetDashboardDataUseCase";
+import { CreateDepartmentUseCase, DeleteDepartmentUseCase, GetDepartmentByIdUseCase, GetDepartmentsPaginatedUseCase, GetDepartmentStatsUseCase, UpdateDepartmentUseCase } from "../application/usecases/backend/departments";
 import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
 import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
 import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
@@ -81,6 +83,7 @@ import { SupabaseBackendAuthUsersRepository } from "../infrastructure/repositori
 import { SupabaseBackendCategoryRepository } from "../infrastructure/repositories/backend/supabase-backend-category-repository";
 import { SupabaseBackendCustomerRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-repository";
 import { SupabaseBackendDashboardRepository } from "../infrastructure/repositories/backend/supabase-backend-dashboard-repository";
+import { SupabaseBackendDepartmentRepository } from "../infrastructure/repositories/backend/supabase-backend-department-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
 import { SupabaseBackendPaymentRepository } from "../infrastructure/repositories/backend/supabase-backend-payment-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
@@ -116,6 +119,7 @@ export async function createBackendContainer(): Promise<Container> {
     const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
     const queueRepository = new SupabaseBackendQueueRepository(databaseDatasource, logger);
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
+    const departmentRepository = new SupabaseBackendDepartmentRepository(databaseDatasource, logger);
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
     const paymentRepository = new SupabaseBackendPaymentRepository(databaseDatasource, logger);
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
@@ -168,6 +172,14 @@ export async function createBackendContainer(): Promise<Container> {
     const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository);
     const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository);
     const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository);
+
+    // Department use cases
+    const getDepartmentsPaginatedUseCase = new GetDepartmentsPaginatedUseCase(departmentRepository);
+    const getDepartmentByIdUseCase = new GetDepartmentByIdUseCase(departmentRepository);
+    const createDepartmentUseCase = new CreateDepartmentUseCase(departmentRepository);
+    const updateDepartmentUseCase = new UpdateDepartmentUseCase(departmentRepository);
+    const deleteDepartmentUseCase = new DeleteDepartmentUseCase(departmentRepository);
+    const getDepartmentStatsUseCase = new GetDepartmentStatsUseCase(departmentRepository);
 
     const getCategoryByIdUseCase = new GetCategoryByIdUseCase(categoryRepository);
     const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(categoryRepository);
@@ -246,6 +258,15 @@ export async function createBackendContainer(): Promise<Container> {
       deleteEmployeeUseCase,
       logger
     );
+    const backendDepartmentsService = new BackendDepartmentsService(
+      getDepartmentsPaginatedUseCase,
+      getDepartmentStatsUseCase,
+      getDepartmentByIdUseCase,
+      createDepartmentUseCase,
+      updateDepartmentUseCase,
+      deleteDepartmentUseCase,
+      logger
+    );
     const backendAuthUsersService = new BackendAuthUsersService(
       getAuthUsersPaginatedUseCase,
       getAuthUserByIdUseCase,
@@ -299,6 +320,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendShopsService", backendShopsService);
     container.registerInstance("BackendQueuesService", backendQueuesService);
     container.registerInstance("BackendCustomersService", backendCustomersService);
+    container.registerInstance("BackendDepartmentsService", backendDepartmentsService);
     container.registerInstance("BackendEmployeesService", backendEmployeesService);
     container.registerInstance("BackendAuthUsersService", backendAuthUsersService);
     container.registerInstance("BackendCategoriesService", backendCategoriesService);

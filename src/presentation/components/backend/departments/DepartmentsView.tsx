@@ -1,6 +1,6 @@
 'use client';
 
-import { DepartmentsViewModel } from '@/src/presentation/presenters/backend/departments/DepartmentsPresenter';
+import { DepartmentsViewModel, DepartmentData } from '@/src/presentation/presenters/backend/departments/DepartmentsPresenter';
 import { useDepartmentsPresenter } from '@/src/presentation/presenters/backend/departments/useDepartmentsPresenter';
 
 interface DepartmentsViewProps {
@@ -9,7 +9,7 @@ interface DepartmentsViewProps {
 
 export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
   const [state, actions] = useDepartmentsPresenter();
-  const { departmentsData } = viewModel;
+  const { departments, stats, totalCount, error } = viewModel;
 
   const handleCreateDepartment = async () => {
     // In a real app, this would open a modal or form
@@ -78,19 +78,19 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">แผนกทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{departmentsData.stats.totalDepartments}</p>
+          <p className="text-2xl font-bold backend-text mt-2">{stats.totalDepartments}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">พนักงานทั้งหมด</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{departmentsData.stats.totalEmployees}</p>
+          <p className="text-2xl font-bold text-green-600 mt-2">{stats.totalEmployees}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">แผนกที่มีพนักงาน</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{departmentsData.stats.activeDepartments}</p>
+          <p className="text-2xl font-bold text-blue-600 mt-2">{stats.activeDepartments}</p>
         </div>
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h3 className="backend-text-muted text-sm font-medium">เฉลี่ยพนักงานต่อแผนก</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{departmentsData.stats.averageEmployeesPerDepartment}</p>
+          <p className="text-2xl font-bold text-purple-600 mt-2">{stats.averageEmployeesPerDepartment}</p>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             <div>
               <h3 className="backend-text-muted text-sm font-medium">แผนกขนาดเล็ก</h3>
               <p className="text-2xl font-bold text-blue-600 mt-2">
-                {departmentsData.departments.filter(d => d.employeeCount <= 5).length}
+                {departments.filter((d: DepartmentData) => d.employeeCount <= 5).length}
               </p>
               <p className="text-xs backend-text-muted">1-5 คน</p>
             </div>
@@ -115,7 +115,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             <div>
               <h3 className="backend-text-muted text-sm font-medium">แผนกขนาดกลาง</h3>
               <p className="text-2xl font-bold text-green-600 mt-2">
-                {departmentsData.departments.filter(d => d.employeeCount > 5 && d.employeeCount <= 10).length}
+                {departments.filter((d: DepartmentData) => d.employeeCount > 5 && d.employeeCount <= 10).length}
               </p>
               <p className="text-xs backend-text-muted">6-10 คน</p>
             </div>
@@ -129,7 +129,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             <div>
               <h3 className="backend-text-muted text-sm font-medium">แผนกขนาดใหญ่</h3>
               <p className="text-2xl font-bold text-orange-600 mt-2">
-                {departmentsData.departments.filter(d => d.employeeCount > 10).length}
+                {departments.filter((d: DepartmentData) => d.employeeCount > 10).length}
               </p>
               <p className="text-xs backend-text-muted">มากกว่า 10 คน</p>
             </div>
@@ -167,9 +167,9 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       </div>
 
       {/* Error Message */}
-      {state.error && (
+      {(error || state.error) && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {state.error}
+          {error || state.error}
         </div>
       )}
 
@@ -197,7 +197,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {departmentsData.departments.map((department) => (
+                {departments.map((department: DepartmentData) => (
                   <tr key={department.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <span className="backend-text font-medium">{department.name}</span>
@@ -270,7 +270,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
         <h2 className="text-xl font-semibold backend-text mb-4">การกระจายตัวของแผนก</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {departmentsData.departments.slice(0, 8).map((department) => (
+          {departments.slice(0, 8).map((department: DepartmentData) => (
             <div key={department.id} className="text-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-lg">
               <div className="text-2xl mb-2">
                 {department.employeeCount === 0 
@@ -290,7 +290,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         </div>
         <div className="mt-4 text-center">
           <p className="text-sm backend-text-muted">
-            แสดง {Math.min(8, departmentsData.departments.length)} จาก {departmentsData.totalCount} แผนก
+            แสดง {Math.min(8, departments.length)} จาก {totalCount} แผนก
           </p>
         </div>
       </div>
@@ -298,7 +298,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <p className="backend-text-muted text-sm">
-          แสดง 1-{departmentsData.departments.length} จาก {departmentsData.totalCount} รายการ
+          แสดง 1-{departments.length} จาก {totalCount} รายการ
         </p>
         <div className="flex space-x-2">
           <button className="px-3 py-1 border backend-sidebar-border rounded backend-text-muted hover:backend-text">ก่อนหน้า</button>

@@ -331,23 +331,22 @@ CROSS JOIN (
 WHERE p.username = 'haircut_owner';
 
 -- Insert departments
-INSERT INTO departments (shop_id, name, slug, description, employee_count, created_at, updated_at)
+INSERT INTO departments (shop_id, name, slug, description, created_at, updated_at)
 SELECT 
   s.id AS shop_id,
   dept_info.name,
   dept_info.slug,
   dept_info.description,
-  dept_info.employee_count,
   NOW(),
   NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ตัดผม'::text, 'haircut'::text, 'แผนกตัดผม'::text, 3::integer),
-    ('ทำสีผม'::text, 'coloring'::text, 'แผนกทำสีผม'::text, 2::integer),
-    ('ต้อนรับ'::text, 'welcome'::text, 'แผนกต้อนรับ'::text, 1::integer)
-) AS dept_info(name, slug, description, employee_count)
+    ('ตัดผม'::text, 'haircut'::text, 'แผนกตัดผม'::text),
+    ('ทำสีผม'::text, 'coloring'::text, 'แผนกทำสีผม'::text),
+    ('ต้อนรับ'::text, 'welcome'::text, 'แผนกต้อนรับ'::text)
+) AS dept_info(name, slug, description)
 WHERE p.username = 'haircut_owner';
 
 -- Insert employees
