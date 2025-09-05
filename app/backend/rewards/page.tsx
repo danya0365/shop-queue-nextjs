@@ -1,5 +1,5 @@
-import BackendLayout from "@/src/presentation/components/layouts/backend/BackendLayout";
 import { RewardsView } from "@/src/presentation/components/backend/rewards/RewardsView";
+import BackendLayout from "@/src/presentation/components/layouts/backend/BackendLayout";
 import { RewardsPresenterFactory } from "@/src/presentation/presenters/backend/rewards/RewardsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -12,7 +12,7 @@ export const fetchCache = "force-no-store";
  * Generate metadata for the page
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const presenter = RewardsPresenterFactory.create();
+  const presenter = await RewardsPresenterFactory.create();
 
   try {
     return presenter.getMetadata();
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Uses presenter pattern following Clean Architecture
  */
 export default async function RewardsPage() {
-  const presenter = RewardsPresenterFactory.create();
+  const presenter = await RewardsPresenterFactory.create();
 
   try {
     // Get view model from presenter

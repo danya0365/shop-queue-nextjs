@@ -1,8 +1,9 @@
-import { BackendRewardsService } from '@/src/application/services/BackendRewardsService';
-import type { 
-  RewardsDataDTO, 
-  RewardTypeStatsDTO 
+import type {
+  RewardsDataDTO,
+  RewardTypeStatsDTO
 } from '@/src/application/dtos/RewardDTO';
+import { IBackendRewardsService } from '@/src/application/services/backend/BackendRewardsService';
+import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface RewardsViewModel {
@@ -12,9 +13,9 @@ export interface RewardsViewModel {
 
 export class RewardsPresenter {
   constructor(
-    private readonly rewardsService: BackendRewardsService,
+    private readonly rewardsService: IBackendRewardsService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getViewModel(): Promise<RewardsViewModel> {
     try {
@@ -49,17 +50,11 @@ export class RewardsPresenter {
 }
 
 export class RewardsPresenterFactory {
-  static create(): RewardsPresenter {
-    // Mock logger for now - in real implementation would use DI container
-    const mockLogger: Logger = {
-      info: (message: string, meta?: any) => console.log(`[INFO] ${message}`, meta),
-      error: (message: string, error?: any) => console.error(`[ERROR] ${message}`, error),
-      warn: (message: string, meta?: any) => console.warn(`[WARN] ${message}`, meta),
-      debug: (message: string, meta?: any) => console.debug(`[DEBUG] ${message}`, meta)
-    };
+  static async create(): Promise<RewardsPresenter> {
 
-    const rewardsService = new BackendRewardsService();
-    
-    return new RewardsPresenter(rewardsService, mockLogger);
+    const serverContainer = await getBackendContainer();
+    const logger = serverContainer.resolve<Logger>('Logger');
+    const backendRewardsService = serverContainer.resolve<IBackendRewardsService>('BackendRewardsService');
+    return new RewardsPresenter(backendRewardsService, logger);
   }
 }

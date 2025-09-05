@@ -92,6 +92,7 @@ import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/b
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
+import { BackendRewardsService } from '../application/services/backend/BackendRewardsService';
 
 /**
  * Initialize a backend container with elevated privilege dependencies
@@ -315,6 +316,10 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
 
+    const backendRewardsService = new BackendRewardsService(
+      logger
+    );
+
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);
     container.registerInstance("BackendShopsService", backendShopsService);
@@ -328,6 +333,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendPaymentsService", backendPaymentsService);
     container.registerInstance("BackendPromotionsService", backendPromotionsService);
     container.registerInstance("BackendServicesService", backendServicesService);
+    container.registerInstance("BackendRewardsService", backendRewardsService);
 
     logger.info("Backend container initialized successfully");
   } catch (error) {

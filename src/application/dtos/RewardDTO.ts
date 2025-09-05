@@ -1,4 +1,4 @@
-import type { RewardType } from '@/src/domain/entities/RewardEntity';
+export type RewardType = 'discount' | 'free_item' | 'cashback' | 'special_privilege';
 
 export interface RewardDTO {
   id: string;

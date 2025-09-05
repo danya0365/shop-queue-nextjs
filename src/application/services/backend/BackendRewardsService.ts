@@ -1,16 +1,28 @@
-import type { 
-  RewardsDataDTO, 
-  RewardDTO, 
-  RewardStatsDTO, 
-  RewardUsageDTO, 
-  CreateRewardDTO, 
-  UpdateRewardDTO,
-  RewardTypeStatsDTO 
+import type {
+  CreateRewardDTO,
+  RewardDTO,
+  RewardsDataDTO,
+  RewardStatsDTO,
+  RewardTypeStatsDTO,
+  RewardUsageDTO,
+  UpdateRewardDTO
 } from '@/src/application/dtos/RewardDTO';
-import type { RewardType } from '@/src/domain/entities/RewardEntity';
+import type { Logger } from '@/src/domain/interfaces/logger';
 
-export class BackendRewardsService {
-  
+export interface IBackendRewardsService {
+  getRewardsData(page?: number, perPage?: number): Promise<RewardsDataDTO>;
+  getRewardTypeStats(): Promise<RewardTypeStatsDTO>;
+  getRewardById(id: string): Promise<RewardDTO>;
+  createReward(rewardData: CreateRewardDTO): Promise<RewardDTO>;
+  updateReward(id: string, rewardData: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO>;
+  deleteReward(id: string): Promise<boolean>;
+}
+export class BackendRewardsService implements IBackendRewardsService {
+
+  constructor(
+    private readonly logger: Logger
+  ) { }
+
   async getRewardsData(): Promise<RewardsDataDTO> {
     // Mock data - in real implementation this would call repository
     const mockRewards: RewardDTO[] = [
@@ -171,6 +183,24 @@ export class BackendRewardsService {
     };
   }
 
+  async getRewardById(id: string): Promise<RewardDTO> {
+    return {
+      id,
+      shopId: 'shop-1',
+      name: 'ส่วนลด 10%',
+      description: 'รับส่วนลด 10% สำหรับการใช้บริการครั้งถัดไป',
+      type: 'discount',
+      pointsRequired: 100,
+      value: 10,
+      isAvailable: true,
+      expiryDays: 30,
+      usageLimit: 100,
+      icon: '🎫',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
+    };
+  }
+
   async createReward(data: CreateRewardDTO): Promise<RewardDTO> {
     // Mock implementation - in real app this would call repository
     const newReward: RewardDTO = {
@@ -192,20 +222,20 @@ export class BackendRewardsService {
     return newReward;
   }
 
-  async updateReward(data: UpdateRewardDTO): Promise<RewardDTO> {
+  async updateReward(id: string, rewardData: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO> {
     // Mock implementation - in real app this would call repository
     const updatedReward: RewardDTO = {
-      id: data.id,
+      id,
       shopId: 'shop-1', // Would come from database
-      name: data.name || 'Updated Reward',
-      description: data.description || null,
-      type: data.type || 'discount',
-      pointsRequired: data.pointsRequired || 100,
-      value: data.value || 10,
-      isAvailable: data.isAvailable ?? true,
-      expiryDays: data.expiryDays || null,
-      usageLimit: data.usageLimit || null,
-      icon: data.icon || null,
+      name: rewardData.name || 'Updated Reward',
+      description: rewardData.description || null,
+      type: rewardData.type || 'discount',
+      pointsRequired: rewardData.pointsRequired || 100,
+      value: rewardData.value || 10,
+      isAvailable: rewardData.isAvailable ?? true,
+      expiryDays: rewardData.expiryDays || null,
+      usageLimit: rewardData.usageLimit || null,
+      icon: rewardData.icon || null,
       createdAt: '2024-01-01T00:00:00Z', // Would come from database
       updatedAt: new Date().toISOString()
     };

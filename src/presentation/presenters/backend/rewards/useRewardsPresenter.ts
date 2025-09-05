@@ -1,10 +1,8 @@
+
+import type { RewardType } from '@/src/application/dtos/RewardDTO';
+import { getClientService } from '@/src/di/client-container';
+import { Logger } from '@/src/domain/interfaces/logger';
 import { useState } from 'react';
-import type { 
-  CreateRewardDTO, 
-  UpdateRewardDTO, 
-  RewardType 
-} from '@/src/application/dtos/RewardDTO';
-import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface CreateRewardData {
   name: string;
@@ -68,14 +66,7 @@ export const useRewardsPresenter = (): RewardsPresenterHook => {
   const [isDeletingReward, setIsDeletingReward] = useState(false);
   const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Mock logger - in real implementation would use DI container
-  const logger: Logger = {
-    info: (message: string, meta?: any) => console.log(`[INFO] ${message}`, meta),
-    error: (message: string, error?: any) => console.error(`[ERROR] ${message}`, error),
-    warn: (message: string, meta?: any) => console.warn(`[WARN] ${message}`, meta),
-    debug: (message: string, meta?: any) => console.debug(`[DEBUG] ${message}`, meta)
-  };
+  const logger = getClientService<Logger>('Logger');
 
   const createReward = async (data: CreateRewardData): Promise<boolean> => {
     setIsCreatingReward(true);
@@ -95,7 +86,7 @@ export const useRewardsPresenter = (): RewardsPresenterHook => {
 
       // Mock API call - in real implementation would call service
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       logger.info('RewardsPresenter: Reward created successfully', { name: data.name });
       return true;
     } catch (error) {
@@ -126,7 +117,7 @@ export const useRewardsPresenter = (): RewardsPresenterHook => {
 
       // Mock API call - in real implementation would call service
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       logger.info('RewardsPresenter: Reward updated successfully', { id: data.id });
       return true;
     } catch (error) {
@@ -146,7 +137,7 @@ export const useRewardsPresenter = (): RewardsPresenterHook => {
     try {
       // Mock API call - in real implementation would call service
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       logger.info('RewardsPresenter: Reward deleted successfully', { id: rewardId });
       return true;
     } catch (error) {
@@ -166,10 +157,10 @@ export const useRewardsPresenter = (): RewardsPresenterHook => {
     try {
       // Mock API call - in real implementation would call service
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      logger.info('RewardsPresenter: Reward availability toggled successfully', { 
-        id: data.rewardId, 
-        isAvailable: data.isAvailable 
+
+      logger.info('RewardsPresenter: Reward availability toggled successfully', {
+        id: data.rewardId,
+        isAvailable: data.isAvailable
       });
       return true;
     } catch (error) {
