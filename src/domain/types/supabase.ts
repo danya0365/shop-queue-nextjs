@@ -794,65 +794,159 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_services: {
+        Row: {
+          id: string
+          promotion_id: string
+          service_id: string
+        }
+        Insert: {
+          id?: string
+          promotion_id: string
+          service_id: string
+        }
+        Update: {
+          id?: string
+          promotion_id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_services_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "popular_services_by_category_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "popular_services_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "top_popular_services_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotion_usage_logs: {
+        Row: {
+          customer_id: string | null
+          id: string
+          promotion_id: string
+          queue_id: string | null
+          used_at: string | null
+        }
+        Insert: {
+          customer_id?: string | null
+          id?: string
+          promotion_id: string
+          queue_id?: string | null
+          used_at?: string | null
+        }
+        Update: {
+          customer_id?: string | null
+          id?: string
+          promotion_id?: string
+          queue_id?: string | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_usage_logs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_usage_logs_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_usage_logs_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promotions: {
         Row: {
-          applicable_services: string[] | null
-          conditions: string[] | null
+          conditions: Json | null
           created_at: string | null
           created_by: string
           description: string | null
-          end_date: string
+          end_at: string
           id: string
           max_discount_amount: number | null
           min_purchase_amount: number | null
           name: string
           shop_id: string
-          start_date: string
+          start_at: string
           status: Database["public"]["Enums"]["promotion_status"] | null
           type: Database["public"]["Enums"]["promotion_type"]
           updated_at: string | null
           usage_limit: number | null
-          used_count: number | null
           value: number
         }
         Insert: {
-          applicable_services?: string[] | null
-          conditions?: string[] | null
+          conditions?: Json | null
           created_at?: string | null
           created_by: string
           description?: string | null
-          end_date: string
+          end_at: string
           id?: string
           max_discount_amount?: number | null
           min_purchase_amount?: number | null
           name: string
           shop_id: string
-          start_date: string
+          start_at: string
           status?: Database["public"]["Enums"]["promotion_status"] | null
           type: Database["public"]["Enums"]["promotion_type"]
           updated_at?: string | null
           usage_limit?: number | null
-          used_count?: number | null
           value: number
         }
         Update: {
-          applicable_services?: string[] | null
-          conditions?: string[] | null
+          conditions?: Json | null
           created_at?: string | null
           created_by?: string
           description?: string | null
-          end_date?: string
+          end_at?: string
           id?: string
           max_discount_amount?: number | null
           min_purchase_amount?: number | null
           name?: string
           shop_id?: string
-          start_date?: string
+          start_at?: string
           status?: Database["public"]["Enums"]["promotion_status"] | null
           type?: Database["public"]["Enums"]["promotion_type"]
           updated_at?: string | null
           usage_limit?: number | null
-          used_count?: number | null
           value?: number
         }
         Relationships: [
@@ -1533,6 +1627,86 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_method_stats_by_shop_view: {
+        Row: {
+          count: number | null
+          payment_method: string | null
+          percentage: number | null
+          shop_id: string | null
+          total_amount: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_method_stats_summary_view: {
+        Row: {
+          count: number | null
+          payment_method: string | null
+          percentage: number | null
+          total_amount: number | null
+        }
+        Relationships: []
+      }
+      payment_stats_by_shop_view: {
+        Row: {
+          average_payment_amount: number | null
+          most_used_payment_method:
+            | Database["public"]["Enums"]["payment_method"]
+            | null
+          paid_payments: number | null
+          partial_payments: number | null
+          shop_id: string | null
+          today_revenue: number | null
+          total_payments: number | null
+          total_revenue: number | null
+          unpaid_payments: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_stats_summary_view: {
+        Row: {
+          average_payment_amount: number | null
+          most_used_payment_method:
+            | Database["public"]["Enums"]["payment_method"]
+            | null
+          paid_payments: number | null
+          partial_payments: number | null
+          today_revenue: number | null
+          total_payments: number | null
+          total_revenue: number | null
+          unpaid_payments: number | null
+        }
+        Relationships: []
+      }
       popular_services_by_category_view: {
         Row: {
           category: string | null
@@ -1656,6 +1830,46 @@ export type Database = {
           serving: number | null
           total_queues: number | null
           waiting: number | null
+        }
+        Relationships: []
+      }
+      service_by_shop_stats_view: {
+        Row: {
+          available_services: number | null
+          average_price: number | null
+          popular_services: Json | null
+          services_by_category: Json | null
+          shop_id: string | null
+          total_revenue: number | null
+          total_services: number | null
+          unavailable_services: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_stats_summary_view: {
+        Row: {
+          available_services: number | null
+          average_price: number | null
+          popular_services: Json | null
+          services_by_category: Json | null
+          total_revenue: number | null
+          total_services: number | null
+          unavailable_services: number | null
         }
         Relationships: []
       }

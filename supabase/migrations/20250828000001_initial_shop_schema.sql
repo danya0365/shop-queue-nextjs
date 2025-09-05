@@ -240,17 +240,33 @@ CREATE TABLE promotions (
     value DECIMAL(10,2) NOT NULL,
     min_purchase_amount DECIMAL(10,2) DEFAULT 0,
     max_discount_amount DECIMAL(10,2),
-    applicable_services UUID[], -- Array of service IDs
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    start_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_at TIMESTAMP WITH TIME ZONE NOT NULL,
     usage_limit INTEGER,
-    used_count INTEGER DEFAULT 0,
     status promotion_status DEFAULT 'active',
-    conditions TEXT[],
+    conditions JSONB DEFAULT '[]',
     created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(shop_id, name)
 );
+
+-- Promotion <> Service
+CREATE TABLE promotion_services (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    promotion_id UUID NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
+    service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE
+);
+
+-- Promotion usage log
+CREATE TABLE promotion_usage_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    promotion_id UUID NOT NULL REFERENCES promotions(id) ON DELETE CASCADE,
+    customer_id UUID REFERENCES customers(id),
+    queue_id UUID REFERENCES queues(id),
+    used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 
 -- 14. Poster Templates
 CREATE TABLE poster_templates (
@@ -418,7 +434,18 @@ CREATE INDEX idx_payments_queue_id ON payments(queue_id);
 CREATE INDEX idx_payments_payment_status ON payments(payment_status);
 CREATE INDEX idx_payment_items_payment_id ON payment_items(payment_id);
 CREATE INDEX idx_promotions_shop_id ON promotions(shop_id);
+CREATE INDEX idx_promotions_shop_id_name ON promotions(shop_id, name);
+CREATE INDEX idx_promotions_type ON promotions(type);
+CREATE INDEX idx_promotions_min_purchase_amount ON promotions(min_purchase_amount);
+CREATE INDEX idx_promotions_max_discount_amount ON promotions(max_discount_amount);
+CREATE INDEX idx_promotions_start_at ON promotions(start_at);
+CREATE INDEX idx_promotions_end_at ON promotions(end_at);
+CREATE INDEX idx_promotions_usage_limit ON promotions(usage_limit);
 CREATE INDEX idx_promotions_status ON promotions(status);
+CREATE INDEX idx_promotion_usage_logs_promotion_id ON promotion_usage_logs(promotion_id);
+CREATE INDEX idx_promotion_usage_logs_customer_id ON promotion_usage_logs(customer_id);
+CREATE INDEX idx_promotion_usage_logs_queue_id ON promotion_usage_logs(queue_id);
+CREATE INDEX idx_promotion_usage_logs_used_at ON promotion_usage_logs(used_at);
 CREATE INDEX idx_customer_points_shop_id ON customer_points(shop_id);
 CREATE INDEX idx_customer_points_customer_id ON customer_points(customer_id);
 CREATE INDEX idx_customer_points_membership_tier ON customer_points(membership_tier);
