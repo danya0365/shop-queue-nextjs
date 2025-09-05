@@ -9,6 +9,12 @@ import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/custo
 import { GetCustomersPaginatedUseCase } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
 import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
 import { UpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
+import { CreatePromotionUseCase } from '@/src/application/usecases/backend/promotions/CreatePromotionUseCase';
+import { DeletePromotionUseCase } from '@/src/application/usecases/backend/promotions/DeletePromotionUseCase';
+import { GetPromotionByIdUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionByIdUseCase';
+import { GetPromotionsPaginatedUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionsPaginatedUseCase';
+import { GetPromotionStatsUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionStatsUseCase';
+import { UpdatePromotionUseCase } from '@/src/application/usecases/backend/promotions/UpdatePromotionUseCase';
 import { BackendAuthUsersService } from "../application/services/backend/BackendAuthUsersService";
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
@@ -78,6 +84,7 @@ import { SupabaseBackendDashboardRepository } from "../infrastructure/repositori
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
 import { SupabaseBackendPaymentRepository } from "../infrastructure/repositories/backend/supabase-backend-payment-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
+import { SupabaseBackendPromotionRepository } from "../infrastructure/repositories/backend/supabase-backend-promotion-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
@@ -112,6 +119,7 @@ export async function createBackendContainer(): Promise<Container> {
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
     const paymentRepository = new SupabaseBackendPaymentRepository(databaseDatasource, logger);
     const profileRepository = new SupabaseBackendProfileRepository(databaseDatasource, logger);
+    const promotionRepository = new SupabaseBackendPromotionRepository(databaseDatasource, logger);
     const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
     const categoryRepository = new SupabaseBackendCategoryRepository(databaseDatasource, logger);
     const serviceRepository = new SupabaseBackendServiceRepository(databaseDatasource, logger);
@@ -194,6 +202,14 @@ export async function createBackendContainer(): Promise<Container> {
     const deleteServiceUseCase = new DeleteServiceUseCase(serviceRepository);
     const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(serviceRepository);
 
+    // Promotion use cases
+    const getPromotionsPaginatedUseCase = new GetPromotionsPaginatedUseCase(promotionRepository);
+    const getPromotionStatsUseCase = new GetPromotionStatsUseCase(promotionRepository);
+    const getPromotionByIdUseCase = new GetPromotionByIdUseCase(promotionRepository);
+    const createPromotionUseCase = new CreatePromotionUseCase(promotionRepository);
+    const updatePromotionUseCase = new UpdatePromotionUseCase(promotionRepository);
+    const deletePromotionUseCase = new DeletePromotionUseCase(promotionRepository);
+
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
       getDashboardStatsUseCase,
@@ -269,6 +285,12 @@ export async function createBackendContainer(): Promise<Container> {
     );
 
     const backendPromotionsService = new BackendPromotionsService(
+      getPromotionsPaginatedUseCase,
+      getPromotionStatsUseCase,
+      getPromotionByIdUseCase,
+      createPromotionUseCase,
+      updatePromotionUseCase,
+      deletePromotionUseCase,
       logger
     );
 

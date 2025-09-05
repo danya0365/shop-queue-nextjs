@@ -6,8 +6,8 @@ export interface PromotionCondition {
 
 export interface PromotionDTO {
   id: string;
-  shopId: string;
-  shopName: string;
+  shopId: string; // joined from shop
+  shopName: string; // joined from shop
   name: string;
   description: string | null;
   type: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'free_item';
@@ -19,8 +19,8 @@ export interface PromotionDTO {
   usageLimit: number | null;
   status: 'active' | 'inactive' | 'expired' | 'scheduled';
   conditions: PromotionCondition[] | null;
-  createdBy: string;
-  createdByName: string | null;
+  createdBy: string; // joined from profile
+  createdByName: string | null; // joined from profile
   createdAt: string;
   updatedAt: string | null;
 }
