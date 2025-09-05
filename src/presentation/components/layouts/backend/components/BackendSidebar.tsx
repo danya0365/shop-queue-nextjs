@@ -35,6 +35,7 @@ const BackendSidebar: React.FC<BackendSidebarProps> = ({ sidebarOpen }) => {
     { href: '/backend/services', label: 'จัดการบริการ', icon: Scissors },
     { href: '/backend/customers', label: 'จัดการลูกค้า', icon: Users },
     { href: '/backend/employees', label: 'จัดการพนักงาน', icon: UserCheck },
+    { href: '/backend/rewards', label: 'จัดการรางวัล', icon: Gift },
     { href: '/backend/promotions', label: 'จัดการโปรโมชั่น', icon: Gift },
     { href: '/backend/payments', label: 'จัดการการชำระเงิน', icon: CreditCard },
   ];
