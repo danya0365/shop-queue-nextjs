@@ -1739,6 +1739,54 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_stats_by_shop_view: {
+        Row: {
+          active_promotions: number | null
+          average_discount_amount: number | null
+          expired_promotions: number | null
+          inactive_promotions: number | null
+          most_used_promotion_type:
+            | Database["public"]["Enums"]["promotion_type"]
+            | null
+          scheduled_promotions: number | null
+          shop_id: string | null
+          total_discount_given: number | null
+          total_promotions: number | null
+          total_usage: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotion_stats_summary_view: {
+        Row: {
+          active_promotions: number | null
+          average_discount_amount: number | null
+          expired_promotions: number | null
+          inactive_promotions: number | null
+          most_used_promotion_type:
+            | Database["public"]["Enums"]["promotion_type"]
+            | null
+          scheduled_promotions: number | null
+          total_discount_given: number | null
+          total_promotions: number | null
+          total_usage: number | null
+        }
+        Relationships: []
+      }
       queue_stats_view: {
         Row: {
           average_wait_time: number | null

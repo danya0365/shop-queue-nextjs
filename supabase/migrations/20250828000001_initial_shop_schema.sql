@@ -143,7 +143,6 @@ CREATE TABLE departments (
     name TEXT NOT NULL,
     slug TEXT NOT NULL,
     description TEXT,
-    employee_count INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
