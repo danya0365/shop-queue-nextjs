@@ -739,3 +739,51 @@ CROSS JOIN (
     ('ทำเล็บฟรี'::text, 'บริการทำเล็บมือฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 150::integer, 300.00::numeric, true::boolean, 60::integer, 1::integer, '💅'::text),
     ('ส่วนลด 25%'::text, 'ส่วนลด 25% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 25.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert promotions for the gym
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'gym_owner'
+)
+INSERT INTO promotions (
+  id,
+  shop_id,
+  name,
+  description,
+  type,
+  value,
+  status,
+  start_at,
+  end_at,
+  usage_limit,
+  created_by,
+  created_at,
+  updated_at
+)
+SELECT 
+  gen_random_uuid(),
+  sd.shop_id,
+  promo_info.name,
+  promo_info.description,
+  promo_info.type,
+  promo_info.value,
+  promo_info.status,
+  promo_info.start_at,
+  promo_info.end_at,
+  promo_info.usage_limit,
+  p.id AS created_by,
+  promo_info.created_at,
+  promo_info.updated_at
+FROM shop_data sd
+JOIN shops s ON s.id = sd.shop_id
+JOIN profiles p ON p.id = s.owner_id
+CROSS JOIN (
+  VALUES 
+    ('ส่วนลดความงาม 20%'::text, 'ส่วนลด 20% สำหรับบริการความงามทุกประเภท'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '22 days', NOW() + INTERVAL '38 days', 100::integer, NOW() - INTERVAL '22 days', NOW() - INTERVAL '25 minutes'),
+    ('ลด 150 บาท'::text, 'ส่วนลดเงินสด 150 บาท เมื่อใช้บริการครบ 800 บาท'::text, 'fixed_amount'::public.promotion_type, 150.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '16 days', NOW() + INTERVAL '34 days', 80::integer, NOW() - INTERVAL '16 days', NOW() - INTERVAL '50 minutes'),
+    ('ทำเล็บฟรี'::text, 'บริการทำเล็บมือฟรี เมื่อทำผมครบ 1000 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '12 days', NOW() + INTERVAL '18 days', 60::integer, NOW() - INTERVAL '12 days', NOW() - INTERVAL '10 minutes'),
+    ('โปรโมชั่นวาเลนไทน์'::text, 'ส่วนลด 30% ในช่วงเทศกาลวาเลนไทน์'::text, 'percentage'::public.promotion_type, 30.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '35 days', NOW() + INTERVAL '65 days', 150::integer, NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
+    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 22.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days', 90::integer, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at);

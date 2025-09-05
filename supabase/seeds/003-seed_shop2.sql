@@ -842,3 +842,52 @@ CROSS JOIN (
 WHERE p.username = 'restaurant_owner';
 
 -- Customer rewards table doesn't exist in the schema, so we're skipping this insert
+
+-- Insert promotions for the restaurant
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'restaurant_owner'
+)
+INSERT INTO promotions (
+  id,
+  shop_id,
+  name,
+  description,
+  type,
+  value,
+  status,
+  start_at,
+  end_at,
+  usage_limit,
+  created_by,
+  created_at,
+  updated_at
+)
+SELECT 
+  gen_random_uuid(),
+  sd.shop_id,
+  promo_info.name,
+  promo_info.description,
+  promo_info.type,
+  promo_info.value,
+  promo_info.status,
+  promo_info.start_at,
+  promo_info.end_at,
+  promo_info.usage_limit,
+  p.id AS created_by,
+  promo_info.created_at,
+  promo_info.updated_at
+FROM shop_data sd
+JOIN shops s ON s.id = sd.shop_id
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES 
+    ('ส่วนลดมื้อเที่ยง 15%'::text, 'ส่วนลด 15% สำหรับการสั่งอาหารในช่วงเวลา 11:00-14:00 น.'::text, 'percentage'::public.promotion_type, 15.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '20 days', NOW() + INTERVAL '40 days', 150::integer, NOW() - INTERVAL '20 days', NOW() - INTERVAL '1 hour'),
+    ('ลด 100 บาท'::text, 'ส่วนลดเงินสด 100 บาท เมื่อสั่งอาหารครบ 500 บาท'::text, 'fixed_amount'::public.promotion_type, 100.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '10 days', NOW() + INTERVAL '50 days', 100::integer, NOW() - INTERVAL '10 days', NOW() - INTERVAL '30 minutes'),
+    ('โปรโมชั่นสุดสัปดาห์'::text, 'ส่วนลด 25% ทุกวันเสาร์-อาทิตย์'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '5 days', NOW() + INTERVAL '25 days', 80::integer, NOW() - INTERVAL '5 days', NOW() - INTERVAL '2 hours'),
+    ('เทศกาลอาหาร'::text, 'ส่วนลดพิเศษ 30% ในเทศกาลอาหารประจำปี'::text, 'percentage'::public.promotion_type, 30.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '45 days', NOW() + INTERVAL '75 days', 200::integer, NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
+    ('โปรโมชั่นหมดอายุ'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบระบบ'::text, 'fixed_amount'::public.promotion_type, 75.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '90 days', NOW() - INTERVAL '15 days', 120::integer, NOW() - INTERVAL '90 days', NOW() - INTERVAL '15 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at)
+WHERE p.username = 'restaurant_owner';

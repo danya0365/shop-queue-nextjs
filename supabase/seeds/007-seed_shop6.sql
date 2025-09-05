@@ -739,3 +739,52 @@ CROSS JOIN (
     ('นวดเท้าฟรี'::text, 'บริการนวดเท้าฟรี 60 นาที'::text, 'free_item'::public.reward_type, 200::integer, 500.00::numeric, true::boolean, 60::integer, 1::integer, '🦶'::text),
     ('ส่วนลด 30%'::text, 'ส่วนลด 30% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 300::integer, 30.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert promotions for the spa
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+)
+INSERT INTO promotions (
+  id,
+  shop_id,
+  name,
+  description,
+  type,
+  value,
+  status,
+  start_at,
+  end_at,
+  usage_limit,
+  created_by,
+  created_at,
+  updated_at
+)
+SELECT 
+  gen_random_uuid(),
+  sd.shop_id,
+  promo_info.name,
+  promo_info.description,
+  promo_info.type,
+  promo_info.value,
+  promo_info.status,
+  promo_info.start_at,
+  promo_info.end_at,
+  promo_info.usage_limit,
+  p.id AS created_by,
+  promo_info.created_at,
+  promo_info.updated_at
+FROM shop_data sd
+JOIN shops s ON s.id = sd.shop_id
+JOIN profiles p ON s.owner_id = p.id
+CROSS JOIN (
+  VALUES 
+    ('ส่วนลดสปา 25%'::text, 'ส่วนลด 25% สำหรับบริการสปาทุกประเภท'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '28 days', NOW() + INTERVAL '32 days', 90::integer, NOW() - INTERVAL '28 days', NOW() - INTERVAL '35 minutes'),
+    ('ลด 300 บาท'::text, 'ส่วนลดเงินสด 300 บาท เมื่อใช้บริการครบ 1500 บาท'::text, 'fixed_amount'::public.promotion_type, 300.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '20 days', NOW() + INTERVAL '40 days', 70::integer, NOW() - INTERVAL '20 days', NOW() - INTERVAL '1 hour'),
+    ('นวดฟรี 30 นาที'::text, 'บริการนวดฟรี 30 นาที เมื่อใช้บริการครบ 2000 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '15 days', NOW() + INTERVAL '25 days', 50::integer, NOW() - INTERVAL '15 days', NOW() - INTERVAL '5 minutes'),
+    ('โปรโมชั่นสงกรานต์'::text, 'ส่วนลด 40% ในช่วงเทศกาลสงกรานต์'::text, 'percentage'::public.promotion_type, 40.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '50 days', NOW() + INTERVAL '80 days', 120::integer, NOW() - INTERVAL '8 days', NOW() - INTERVAL '8 days'),
+    ('โปรโมชั่นหมดอายุ'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 28.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '110 days', NOW() - INTERVAL '25 days', 100::integer, NOW() - INTERVAL '110 days', NOW() - INTERVAL '25 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at)
+WHERE p.username = 'spa_owner';

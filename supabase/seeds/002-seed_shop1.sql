@@ -955,6 +955,55 @@ FROM shop_data sd
 CROSS JOIN (
   VALUES 
     ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการใช้บริการครั้งต่อไป'::text, 'discount'::public.reward_type, 100::integer, 10.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text),
-    ('บริการฟรี'::text, 'บริการสระไดร์ฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 200::integer, 150.00::numeric, true::boolean, 90::integer, 1::integer, '🎁'::text)
+    ('บริการฟรี'::text, 'บริการสระไดร์ฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 200::integer, 150.00::numeric, true::boolean, 90::integer, 1::integer, '🎁'::text),
+    ('ส่วนลด 20%'::text, 'ส่วนลด 20% สำหรับการใช้บริการครั้งต่อไป'::text, 'discount'::public.reward_type, 150::integer, 20.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert promotions for the haircut shop
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'haircut_owner'
+)
+INSERT INTO promotions (
+  id,
+  shop_id,
+  name,
+  description,
+  type,
+  value,
+  status,
+  start_at,
+  end_at,
+  usage_limit,
+  created_by,
+  created_at,
+  updated_at
+)
+SELECT 
+  gen_random_uuid(),
+  sd.shop_id,
+  promo_info.name,
+  promo_info.description,
+  promo_info.type,
+  promo_info.value,
+  promo_info.status,
+  promo_info.start_at,
+  promo_info.end_at,
+  promo_info.usage_limit,
+  p.id AS created_by,
+  promo_info.created_at,
+  promo_info.updated_at
+FROM shop_data sd
+JOIN shops s ON s.id = sd.shop_id
+JOIN profiles p ON p.id = s.owner_id
+CROSS JOIN (
+  VALUES 
+    ('ส่วนลดลูกค้าใหม่ 20%'::text, 'ส่วนลด 20% สำหรับลูกค้าใหม่ที่มาใช้บริการครั้งแรก'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '30 days', NOW() + INTERVAL '60 days', 100::integer, NOW() - INTERVAL '30 days', NOW() - INTERVAL '1 day'),
+    ('ลด 50 บาท'::text, 'ส่วนลดเงินสด 50 บาท สำหรับการใช้บริการตั้งแต่ 300 บาทขึ้นไป'::text, 'fixed_amount'::public.promotion_type, 50.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '15 days', NOW() + INTERVAL '45 days', 200::integer, NOW() - INTERVAL '15 days', NOW() - INTERVAL '2 hours'),
+    ('Happy Hour 30%'::text, 'ส่วนลด 30% ในช่วงเวลา 14:00-16:00 น. ทุกวันจันทร์-ศุกร์'::text, 'percentage'::public.promotion_type, 30.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '7 days', NOW() + INTERVAL '30 days', 50::integer, NOW() - INTERVAL '7 days', NOW() - INTERVAL '3 hours'),
+    ('โปรโมชั่นสิ้นปี'::text, 'ส่วนลดพิเศษ 25% สำหรับการใช้บริการในช่วงสิ้นปี'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '30 days', NOW() + INTERVAL '90 days', 150::integer, NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
+    ('ส่วนลดหมดอายุ'::text, 'โปรโมชั่นที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 15.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '60 days', NOW() - INTERVAL '10 days', 100::integer, NOW() - INTERVAL '60 days', NOW() - INTERVAL '10 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at);
 

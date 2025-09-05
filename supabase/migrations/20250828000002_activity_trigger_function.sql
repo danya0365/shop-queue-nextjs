@@ -611,8 +611,8 @@ BEGIN
             'promotion_name', NEW.name,
             'type', NEW.type,
             'value', NEW.value,
-            'start_date', NEW.start_date,
-            'end_date', NEW.end_date
+            'start_date', NEW.start_at,
+            'end_date', NEW.end_at
         );
         
         PERFORM public.create_shop_activity(
@@ -650,26 +650,8 @@ BEGIN
             END CASE;
         END IF;
         
-        -- Promotion usage tracking
-        IF OLD.used_count != NEW.used_count THEN
-            activity_title := 'ใช้โปรโมชั่น';
-            activity_description := 'มีการใช้โปรโมชั่น ' || NEW.name || ' (' || NEW.used_count || '/' || 
-                                   COALESCE(NEW.usage_limit::TEXT, '∞') || ')';
-            activity_metadata := jsonb_build_object(
-                'promotion_id', NEW.id,
-                'promotion_name', NEW.name,
-                'used_count', NEW.used_count,
-                'usage_limit', NEW.usage_limit
-            );
-            
-            PERFORM public.create_shop_activity(
-                NEW.shop_id,
-                'promotion_used',
-                activity_title,
-                activity_description,
-                activity_metadata
-            );
-        END IF;
+        -- Note: Promotion usage tracking is now handled via promotion_usage_logs table
+        -- No need to track usage_count changes here since that column doesn't exist
     END IF;
     
     RETURN NEW;
