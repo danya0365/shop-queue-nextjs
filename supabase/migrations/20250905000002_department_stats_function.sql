@@ -65,3 +65,14 @@ LEFT JOIN (
     AND d.shop_id = dept_employee_count.shop_id
 GROUP BY d.shop_id, s.name
 ORDER BY d.shop_id;
+
+CREATE OR REPLACE VIEW department_employee_counts_view AS
+SELECT
+    d.id AS department_id,
+    d.shop_id,
+    d.name AS department_name,
+    COUNT(e.id) AS employee_count
+FROM departments d
+LEFT JOIN employees e ON e.department_id = d.id
+GROUP BY d.id, d.shop_id, d.name
+ORDER BY d.id;

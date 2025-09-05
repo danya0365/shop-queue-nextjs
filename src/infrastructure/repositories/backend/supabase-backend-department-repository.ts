@@ -58,14 +58,34 @@ export class SupabaseBackendDepartmentRepository extends BackendRepository imple
       // Count total items
       const totalItems = await this.dataSource.count('departments', queryOptions);
 
+      // query employee count for each department into hash map 
+      const employeeCounts = await this.dataSource.getAdvanced<DepartmentSchemaRecord>(
+        'department_employee_counts_view',
+        {
+          select: ['department_id', 'employee_count'],
+        }
+      );
+
+      const employeeCountMap = employeeCounts.reduce((acc, employee) => {
+        const departmentId = employee.department_id as string;
+        if (!acc[departmentId]) {
+          acc[departmentId] = 0;
+        }
+        acc[departmentId] = employee.employee_count as number;
+        return acc;
+      }, {} as Record<string, number>);
+
+
       // Map database results to domain entities
       const mappedDepartments = departments.map(department => {
         // Handle joined data from shops table
         const departmentWithJoinedData = department as DepartmentWithJoins;
+        const employee_count = employeeCountMap[department.id as string] || 0; // separate query to get employee count
 
         const departmentWithJoins = {
           ...department,
-          shop_name: departmentWithJoinedData.shops?.name
+          shop_name: departmentWithJoinedData.shops?.name,
+          employee_count
         };
         return SupabaseBackendDepartmentMapper.toDomain(departmentWithJoins);
       });
