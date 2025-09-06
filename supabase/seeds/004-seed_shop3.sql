@@ -859,8 +859,13 @@ CROSS JOIN (
   VALUES 
     ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการซ่อมครั้งต่อไป'::text, 'discount'::public.reward_type, 100::integer, 10.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text),
     ('ตรวจสอบฟรี'::text, 'บริการตรวจสอบเครื่องฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 50::integer, 100.00::numeric, true::boolean, 60::integer, 1::integer, '🔍'::text),
-    ('ส่วนลด 20%'::text, 'ส่วนลด 20% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 20.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text)
+    ('ส่วนลด 20%'::text, 'ส่วนลด 20% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 20.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text),
+    ('เงินคืน 80 บาท'::text, 'รับเงินคืน 80 บาท สำหรับการซ่อมครั้งต่อไป'::text, 'cashback'::public.reward_type, 180::integer, 80.00::numeric, true::boolean, 90::integer, 1::integer, '💰'::text),
+    ('สิทธิพิเศษ VIP'::text, 'รับสิทธิพิเศษในการจองคิวซ่อมล่วงหน้า'::text, 'special_privilege'::public.reward_type, 250::integer, 0.00::numeric, true::boolean, 365::integer, 1::integer, '👑'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert reward transactions for mobile repair shop
+-- TODO: Insert reward transactions
 
 -- Insert promotions for the coffee shop
 WITH shop_data AS (

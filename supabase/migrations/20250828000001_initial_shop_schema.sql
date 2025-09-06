@@ -341,13 +341,15 @@ CREATE TABLE rewards (
 -- 19. Reward Transaction
 CREATE TABLE reward_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    related_customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
     customer_point_transaction_id UUID NOT NULL REFERENCES customer_point_transactions(id) ON DELETE CASCADE,
-    reward_id UUID REFERENCES rewards(id) ON DELETE SET NULL,
+    reward_id UUID NOT NULL REFERENCES rewards(id) ON DELETE CASCADE,
     type transaction_type NOT NULL,
     points INTEGER NOT NULL,
     description TEXT,
-    related_queue_id UUID REFERENCES queues(id) ON DELETE SET NULL,
+    related_queue_id UUID NOT NULL REFERENCES queues(id) ON DELETE CASCADE,
     transaction_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expiry_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

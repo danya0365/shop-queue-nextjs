@@ -736,8 +736,13 @@ CROSS JOIN (
   VALUES 
     ('ส่วนลด 15%'::text, 'ส่วนลด 15% สำหรับบริการความงาม'::text, 'discount'::public.reward_type, 100::integer, 15.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text),
     ('ทำเล็บฟรี'::text, 'บริการทำเล็บมือฟรี 1 ครั้ง'::text, 'free_item'::public.reward_type, 150::integer, 300.00::numeric, true::boolean, 60::integer, 1::integer, '💅'::text),
-    ('ส่วนลด 25%'::text, 'ส่วนลด 25% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 25.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text)
+    ('ส่วนลด 25%'::text, 'ส่วนลด 25% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 25.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text),
+    ('เงินคืน 150 บาท'::text, 'รับเงินคืน 150 บาท สำหรับบริการความงามครั้งต่อไป'::text, 'cashback'::public.reward_type, 250::integer, 150.00::numeric, true::boolean, 90::integer, 1::integer, '💰'::text),
+    ('สิทธิพิเศษ VIP'::text, 'รับสิทธิพิเศษในการจองคิวความงามล่วงหน้า'::text, 'special_privilege'::public.reward_type, 300::integer, 0.00::numeric, true::boolean, 365::integer, 1::integer, '👑'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert reward transactions for beauty shop
+-- TODO: Insert reward transactions
 
 -- Insert promotions for the gym
 WITH shop_data AS (

@@ -784,9 +784,14 @@ FROM shop_data sd
 CROSS JOIN (
   VALUES 
     ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการซักรีดครั้งต่อไป'::text, 'discount'::public.reward_type, 50::integer, 10.00::numeric, true::boolean, 90::integer, 1::integer, '🏷️'::text),
-    ('รีดฟรี 1 ชิ้น'::text, 'บริการรีดฟรี 1 ชิ้น'::text, 'free_item'::public.reward_type, 100::integer, 20.00::numeric, true::boolean, 60::integer, 1::integer, '🔥'::text),
-    ('ส่วนลด 20%'::text, 'ส่วนลด 20% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 150::integer, 20.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text)
+    ('รีดฟรี 1 ชิ้น'::text, 'บริการรีดฟรี 1 ชิ้น'::text, 'free_item'::public.reward_type, 100::integer, 20.00::numeric, true::boolean, 60::integer, 1::integer, '👔'::text),
+    ('ส่วนลด 20%'::text, 'ส่วนลด 20% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 150::integer, 20.00::numeric, true::boolean, 120::integer, 1::integer, '⭐'::text),
+    ('เงินคืน 30 บาท'::text, 'รับเงินคืน 30 บาท สำหรับการซักรีดครั้งต่อไป'::text, 'cashback'::public.reward_type, 120::integer, 30.00::numeric, true::boolean, 90::integer, 1::integer, '💰'::text),
+    ('สิทธิพิเศษ VIP'::text, 'รับสิทธิพิเศษในการจองคิวซักรีดล่วงหน้า'::text, 'special_privilege'::public.reward_type, 200::integer, 0.00::numeric, true::boolean, 365::integer, 1::integer, '👑'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
+
+-- Insert reward transactions for laundry shop
+-- TODO: Insert reward transactions
 
 -- Insert promotions for the bakery
 WITH shop_data AS (

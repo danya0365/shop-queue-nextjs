@@ -835,13 +835,16 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES
-    ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการสั่งอาหารครั้งต่อไป'::text, 'discount'::public.reward_type, 50, 10.0, true, 90, 1, 'discount_icon'::text),
-    ('เครื่องดื่มฟรี'::text, 'รับเครื่องดื่มฟรี 1 แก้วเมื่อสั่งอาหารครบ 500 บาท'::text, 'free_item'::public.reward_type, 75, 1.0, true, 60, 1, 'drink_icon'::text),
-    ('อาหารฟรี 1 จาน'::text, 'รับอาหารฟรี 1 จาน (ไม่เกิน 200 บาท)'::text, 'free_item'::public.reward_type, 150, 1.0, true, 30, 1, 'food_icon'::text)
+    ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับการสั่งอาหารครั้งต่อไป'::text, 'discount'::public.reward_type, 50, 10.0, true, 90, 1, '🏷️'::text),
+    ('เครื่องดื่มฟรี'::text, 'รับเครื่องดื่มฟรี 1 แก้วเมื่อสั่งอาหารครบ 500 บาท'::text, 'free_item'::public.reward_type, 75, 1.0, true, 60, 1, '🥤'::text),
+    ('อาหารฟรี 1 จาน'::text, 'รับอาหารฟรี 1 จาน (ไม่เกิน 200 บาท)'::text, 'free_item'::public.reward_type, 150, 1.0, true, 30, 1, '🍽️'::text),
+    ('เงินคืน 100 บาท'::text, 'รับเงินคืน 100 บาท สำหรับการสั่งอาหารครั้งต่อไป'::text, 'cashback'::public.reward_type, 200, 100.0, true, 60, 1, '💰'::text),
+    ('สิทธิพิเศษ VIP'::text, 'รับสิทธิพิเศษในการจองโต๊ะล่วงหน้า'::text, 'special_privilege'::public.reward_type, 300, 0.0, true, 365, 1, '👑'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon)
 WHERE p.username = 'restaurant_owner';
 
--- Customer rewards table doesn't exist in the schema, so we're skipping this insert
+-- Insert reward transactions for the restaurant
+-- TODO: Insert reward transactions
 
 -- Insert promotions for the restaurant
 WITH shop_data AS (
