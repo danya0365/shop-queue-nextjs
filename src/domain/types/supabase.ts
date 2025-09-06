@@ -326,7 +326,6 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          employee_count: number | null
           id: string
           name: string
           shop_id: string
@@ -336,7 +335,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          employee_count?: number | null
           id?: string
           name: string
           shop_id: string
@@ -346,7 +344,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
-          employee_count?: number | null
           id?: string
           name?: string
           shop_id?: string
@@ -435,6 +432,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department_employee_counts_view"
+            referencedColumns: ["department_id"]
+          },
           {
             foreignKeyName: "employees_department_id_fkey"
             columns: ["department_id"]
@@ -1136,10 +1140,12 @@ export type Database = {
           created_at: string | null
           customer_point_transaction_id: string
           description: string | null
+          expiry_at: string | null
           id: string
           points: number
-          related_queue_id: string | null
-          reward_id: string | null
+          related_customer_id: string
+          related_queue_id: string
+          reward_id: string
           transaction_date: string | null
           type: Database["public"]["Enums"]["transaction_type"]
         }
@@ -1147,10 +1153,12 @@ export type Database = {
           created_at?: string | null
           customer_point_transaction_id: string
           description?: string | null
+          expiry_at?: string | null
           id?: string
           points: number
-          related_queue_id?: string | null
-          reward_id?: string | null
+          related_customer_id: string
+          related_queue_id: string
+          reward_id: string
           transaction_date?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
         }
@@ -1158,10 +1166,12 @@ export type Database = {
           created_at?: string | null
           customer_point_transaction_id?: string
           description?: string | null
+          expiry_at?: string | null
           id?: string
           points?: number
-          related_queue_id?: string | null
-          reward_id?: string | null
+          related_customer_id?: string
+          related_queue_id?: string
+          reward_id?: string
           transaction_date?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
         }
@@ -1171,6 +1181,13 @@ export type Database = {
             columns: ["customer_point_transaction_id"]
             isOneToOne: false
             referencedRelation: "customer_point_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_transactions_related_customer_id_fkey"
+            columns: ["related_customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
           {
@@ -1613,6 +1630,65 @@ export type Database = {
         }
         Relationships: []
       }
+      department_employee_counts_view: {
+        Row: {
+          department_id: string | null
+          department_name: string | null
+          employee_count: number | null
+          shop_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      department_stats_by_shop_view: {
+        Row: {
+          active_departments: number | null
+          average_employees_per_department: number | null
+          shop_id: string | null
+          shop_name: string | null
+          total_departments: number | null
+          total_employees: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      department_stats_summary_view: {
+        Row: {
+          active_departments: number | null
+          average_employees_per_department: number | null
+          total_departments: number | null
+          total_employees: number | null
+        }
+        Relationships: []
+      }
       employee_stats_view: {
         Row: {
           active_employees: number | null
@@ -1878,6 +1954,29 @@ export type Database = {
           serving: number | null
           total_queues: number | null
           waiting: number | null
+        }
+        Relationships: []
+      }
+      reward_stats_by_shop_view: {
+        Row: {
+          active_rewards: number | null
+          average_redemption_value: number | null
+          popular_reward_type: Database["public"]["Enums"]["reward_type"] | null
+          shop_id: string | null
+          total_points_redeemed: number | null
+          total_redemptions: number | null
+          total_rewards: number | null
+        }
+        Relationships: []
+      }
+      reward_stats_summary_view: {
+        Row: {
+          active_rewards: number | null
+          average_redemption_value: number | null
+          popular_reward_type: Database["public"]["Enums"]["reward_type"] | null
+          total_points_redeemed: number | null
+          total_redemptions: number | null
+          total_rewards: number | null
         }
         Relationships: []
       }
