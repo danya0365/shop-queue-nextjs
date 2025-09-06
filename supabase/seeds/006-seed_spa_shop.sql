@@ -741,107 +741,6 @@ CROSS JOIN (
     ('สิทธิพิเศษสปา'::text, 'รับสิทธิพิเศษในการจองห้องสปาพรีเมียม'::text, 'special_privilege'::public.reward_type, 400::integer, 0.00::numeric, true::boolean, 365::integer, 1::integer, '👑'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
 
--- Insert reward transactions for spa
-WITH shop_data AS (
-  SELECT s.id AS shop_id
-  FROM shops s
-  JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'spa_owner'
-  LIMIT 1
-),
-customer_data AS (
-  SELECT 
-    c.id AS customer_id,
-    c.name,
-    cp.id AS customer_point_id
-  FROM customers c
-  JOIN customer_points cp ON c.id = cp.customer_id
-  JOIN shop_data sd ON c.shop_id = sd.shop_id
-),
-queue_data AS (
-  SELECT 
-    q.id AS queue_id,
-    q.customer_id,
-    q.completed_at
-  FROM queues q
-  JOIN shop_data sd ON q.shop_id = sd.shop_id
-  WHERE q.status = 'completed'
-),
-rewards_data AS (
-  SELECT 
-    r.id AS reward_id,
-    r.name,
-    r.points_required,
-    r.expiry_days
-  FROM rewards r
-  JOIN shop_data sd ON r.shop_id = sd.shop_id
-  WHERE r.is_available = true
-),
--- Create some redeemed point transactions first
-redeemed_transactions AS (
-  INSERT INTO customer_point_transactions (
-    customer_point_id,
-    type,
-    points,
-    description,
-    related_queue_id,
-    metadata,
-    transaction_date,
-    created_at
-  )
-  SELECT
-    cd.customer_point_id,
-    'redeemed'::public.transaction_type,
-    CASE 
-      WHEN cd.name = 'นางสาวรีแลกซ์ สปา' THEN -300  -- Redeem 300 points for VIP privilege
-      WHEN cd.name = 'นายเวลเนส สุขภาพ' THEN -200  -- Redeem 200 points for 20% discount
-    END AS points,
-    CASE 
-      WHEN cd.name = 'นางสาวรีแลกซ์ สปา' THEN 'แลกรางวัลสิทธิพิเศษ VIP'
-      WHEN cd.name = 'นายเวลเนส สุขภาพ' THEN 'แลกรางวัลส่วนลด 20%'
-    END AS description,
-    qd.queue_id,
-    CASE 
-      WHEN cd.name = 'นางสาวรีแลกซ์ สปา' THEN '{"reward_type": "special_privilege", "privilege": "vip_access"}'::jsonb
-      WHEN cd.name = 'นายเวลเนส สุขภาพ' THEN '{"reward_type": "discount", "discount_percent": 20}'::jsonb
-    END AS metadata,
-    NOW() - INTERVAL '7 days' AS transaction_date,
-    NOW() - INTERVAL '7 days' AS created_at
-  FROM customer_data cd
-  JOIN queue_data qd ON cd.customer_id = qd.customer_id
-  WHERE cd.name IN ('นางสาวรีแลกซ์ สปา', 'นายเวลเนส สุขภาพ')
-  LIMIT 2
-  RETURNING id, customer_point_id, related_queue_id, points, transaction_date
-)
-INSERT INTO reward_transactions (
-  related_customer_id,
-  customer_point_transaction_id,
-  reward_id,
-  type,
-  points,
-  description,
-  related_queue_id,
-  transaction_date,
-  expiry_at,
-  created_at
-)
-SELECT
-  cd.customer_id,
-  rt.id,
-  rd.reward_id,
-  'redeemed'::public.transaction_type,
-  ABS(rt.points) AS points,
-  'แลกรางวัล: ' || rd.name,
-  rt.related_queue_id,
-  rt.transaction_date,
-  rt.transaction_date + INTERVAL '1 day' * rd.expiry_days AS expiry_at,
-  rt.transaction_date AS created_at
-FROM redeemed_transactions rt
-JOIN customer_data cd ON rt.customer_point_id = cd.customer_point_id
-JOIN rewards_data rd ON rd.points_required <= ABS(rt.points)
-WHERE (ABS(rt.points) = 300 AND rd.name = 'ส่วนลด 30%') 
-   OR (ABS(rt.points) = 200 AND rd.name = 'นวดเท้าฟรี');
-
 -- Insert promotions for the spa
 WITH shop_data AS (
   SELECT s.id AS shop_id
@@ -890,3 +789,69 @@ CROSS JOIN (
     ('โปรโมชั่นหมดอายุ'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 28.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '110 days', NOW() - INTERVAL '25 days', 100::integer, NOW() - INTERVAL '110 days', NOW() - INTERVAL '25 days')
 ) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at)
 WHERE p.username = 'spa_owner';
+
+
+-- Insert reward transactions for spa
+-- Select all reward transactions based on existing redeemed point transactions
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'spa_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT 
+    c.id AS customer_id,
+    c.name,
+    cp.id AS customer_point_id
+  FROM customers c
+  JOIN customer_points cp ON c.id = cp.customer_id
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.customer_id,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'
+),
+rewards_data AS (
+  SELECT 
+    r.id AS reward_id,
+    r.name,
+    r.points_required,
+    r.expiry_days
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.is_available = true
+),
+redeemed_transactions AS (
+  SELECT 
+    cpt.id,
+    cpt.customer_point_id,
+    cpt.related_queue_id,
+    cpt.points,
+    cpt.transaction_date
+  FROM customer_point_transactions cpt
+  JOIN customer_data cd ON cpt.customer_point_id = cd.customer_point_id
+  JOIN queue_data qd ON cpt.related_queue_id = qd.queue_id
+  WHERE cpt.type = 'redeemed'
+)
+SELECT
+  cd.customer_id AS related_customer_id,
+  rt.id AS customer_point_transaction_id,
+  rd.reward_id,
+  'redeemed'::public.transaction_type AS type,
+  ABS(rt.points) AS points,
+  'แลกรางวัล: ' || rd.name AS description,
+  rt.related_queue_id,
+  rt.transaction_date,
+  rt.transaction_date + INTERVAL '1 day' * rd.expiry_days AS expiry_at,
+  rt.transaction_date AS created_at
+FROM redeemed_transactions rt
+JOIN customer_data cd ON rt.customer_point_id = cd.customer_point_id
+JOIN rewards_data rd ON rd.points_required <= ABS(rt.points)
+ORDER BY rt.transaction_date DESC;
