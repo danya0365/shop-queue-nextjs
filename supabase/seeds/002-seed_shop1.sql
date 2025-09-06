@@ -961,7 +961,100 @@ CROSS JOIN (
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
 
 -- Insert reward transactions for the haircut shop
--- TODO: Insert reward transactions
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'haircut_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT 
+    c.id AS customer_id,
+    c.name,
+    cp.id AS customer_point_id
+  FROM customers c
+  JOIN customer_points cp ON c.id = cp.customer_id
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+),
+queue_data AS (
+  SELECT 
+    q.id AS queue_id,
+    q.customer_id,
+    q.completed_at
+  FROM queues q
+  JOIN shop_data sd ON q.shop_id = sd.shop_id
+  WHERE q.status = 'completed'
+),
+rewards_data AS (
+  SELECT 
+    r.id AS reward_id,
+    r.name,
+    r.points_required,
+    r.expiry_days
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.is_available = true
+),
+-- Create some redeemed point transactions first
+redeemed_transactions AS (
+  INSERT INTO customer_point_transactions (
+    customer_point_id,
+    type,
+    points,
+    description,
+    related_queue_id,
+    metadata,
+    transaction_date,
+    created_at
+  )
+  SELECT
+    cd.customer_point_id,
+    'redeemed'::public.transaction_type,
+    CASE 
+      WHEN cd.name = 'สมหญิง ใจงาม' THEN -100  -- Redeem 100 points for 10% discount
+    END AS points,
+    CASE 
+      WHEN cd.name = 'สมหญิง ใจงาม' THEN 'แลกรางวัลส่วนลด 10%'
+    END AS description,
+    qd.queue_id,
+    '{"reward_type": "discount", "discount_percent": 10}'::jsonb AS metadata,
+    NOW() - INTERVAL '3 days' AS transaction_date,
+    NOW() - INTERVAL '3 days' AS created_at
+  FROM customer_data cd
+  JOIN queue_data qd ON cd.customer_id = qd.customer_id
+  WHERE cd.name = 'สมหญิง ใจงาม'
+  LIMIT 1
+  RETURNING id, customer_point_id, related_queue_id, points, transaction_date
+)
+INSERT INTO reward_transactions (
+  related_customer_id,
+  customer_point_transaction_id,
+  reward_id,
+  type,
+  points,
+  description,
+  related_queue_id,
+  transaction_date,
+  expiry_at,
+  created_at
+)
+SELECT
+  cd.customer_id,
+  rt.id,
+  rd.reward_id,
+  'redeemed'::public.transaction_type,
+  ABS(rt.points) AS points,
+  'แลกรางวัล: ' || rd.name,
+  rt.related_queue_id,
+  rt.transaction_date,
+  rt.transaction_date + INTERVAL '1 day' * rd.expiry_days AS expiry_at,
+  rt.transaction_date AS created_at
+FROM redeemed_transactions rt
+JOIN customer_data cd ON rt.customer_point_id = cd.customer_point_id
+JOIN rewards_data rd ON rd.points_required <= ABS(rt.points)
+WHERE rd.name = 'ส่วนลด 10%'
+LIMIT 1;
 
 -- Insert promotions for the haircut shop
 WITH shop_data AS (
