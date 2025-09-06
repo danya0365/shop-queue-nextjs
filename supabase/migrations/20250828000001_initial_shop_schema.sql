@@ -18,6 +18,7 @@ CREATE TYPE poster_layout AS ENUM ('portrait', 'landscape', 'square');
 CREATE TYPE membership_tier AS ENUM ('bronze', 'silver', 'gold', 'platinum');
 CREATE TYPE reward_type AS ENUM ('discount', 'free_item', 'cashback', 'special_privilege');
 CREATE TYPE transaction_type AS ENUM ('earned', 'redeemed', 'expired');
+CREATE TYPE redemption_type AS ENUM ('points_redemption', 'free_reward', 'special_event', 'promotional_gift', 'loyalty_bonus');
 CREATE TYPE activity_type AS ENUM (
     -- Queue Activities
     'queue_created', 'queue_updated', 'queue_completed', 'queue_cancelled', 'queue_served', 'queue_confirmed',
@@ -338,19 +339,49 @@ CREATE TABLE rewards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 19. Reward Transaction
-CREATE TABLE reward_transactions (
+-- 19. Customer Reward Redemptions (เพิ่ม table ที่หายไป)
+CREATE TABLE customer_reward_redemptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    related_customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    customer_point_transaction_id UUID NOT NULL REFERENCES customer_point_transactions(id) ON DELETE CASCADE,
+    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
     reward_id UUID NOT NULL REFERENCES rewards(id) ON DELETE CASCADE,
-    type transaction_type NOT NULL,
-    points INTEGER NOT NULL,
-    description TEXT,
-    related_queue_id UUID NOT NULL REFERENCES queues(id) ON DELETE CASCADE,
-    transaction_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    expiry_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    customer_point_transaction_id UUID REFERENCES customer_point_transactions(id) ON DELETE CASCADE, -- NULLABLE สำหรับรางวัลฟรี
+    redemption_code TEXT NOT NULL UNIQUE, -- รหัสสำหรับใช้แลกรางวัล เช่น "RW240906001"
+    redemption_type redemption_type DEFAULT 'points_redemption', -- ประเภทการแลกรางวัล
+    source_description TEXT, -- อธิบายที่มาของรางวัลฟรี เช่น "Birthday Gift", "Grand Opening Event"
+    points_used INTEGER NOT NULL DEFAULT 0, -- อนุญาตให้เป็น 0 สำหรับรางวัลฟรี
+    reward_value DECIMAL(10,2) NOT NULL, -- มูลค่ารางวัลที่แลก
+    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'used', 'expired', 'cancelled')),
+    issued_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- วันที่ออกรางวัล
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL, -- วันหมดอายุของรางวัล
+    used_at TIMESTAMP WITH TIME ZONE, -- วันที่ใช้รางวัล
+    used_by_employee_id UUID REFERENCES employees(id) ON DELETE SET NULL, -- พนักงานที่ให้ใช้รางวัล
+    used_queue_id UUID REFERENCES queues(id) ON DELETE SET NULL, -- คิวที่ใช้รางวัล
+    cancelled_at TIMESTAMP WITH TIME ZONE, -- วันที่ยกเลิกรางวัล
+    cancelled_by_employee_id UUID REFERENCES employees(id) ON DELETE SET NULL, -- พนักงานที่ยกเลิก
+    cancelled_reason TEXT, -- เหตุผลในการยกเลิก
+    notes TEXT, -- หมายเหตุเพิ่มเติม
+    metadata JSONB, -- ข้อมูลเพิ่มเติมในรูปแบบ JSON
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- ตรวจสอบว่าวันหมดอายุต้องไม่เก่ากว่าวันที่ออกรางวัล
+    CONSTRAINT valid_expiry_date CHECK (expires_at > issued_at),
+    
+    -- ตรวจสอบว่าวันที่ใช้รางวัลต้องไม่เก่ากว่าวันที่ออกรางวัล
+    CONSTRAINT valid_used_date CHECK (used_at IS NULL OR used_at >= issued_at),
+    
+    -- ตรวจสอบว่าคะแนนที่ใช้ต้องเป็นจำนวนไม่ติดลบ
+    CONSTRAINT non_negative_points_used CHECK (points_used >= 0),
+    
+    -- ตรวจสอบว่ามูลค่ารางวัลต้องเป็นจำนวนบวก
+    CONSTRAINT positive_reward_value CHECK (reward_value > 0),
+    
+    -- ตรวจสอบความสัมพันธ์ระหว่าง redemption_type และ customer_point_transaction_id
+    CONSTRAINT valid_point_transaction CHECK (
+        (redemption_type = 'points_redemption' AND customer_point_transaction_id IS NOT NULL AND points_used > 0) OR
+        (redemption_type != 'points_redemption' AND points_used = 0)
+    )
 );
 
 -- 20. Shop Settings
@@ -458,11 +489,14 @@ CREATE INDEX idx_rewards_shop_id ON rewards(shop_id);
 CREATE INDEX idx_rewards_type ON rewards(type);
 CREATE INDEX idx_rewards_points_required ON rewards(points_required);
 CREATE INDEX idx_rewards_is_available ON rewards(is_available);
-CREATE INDEX idx_reward_transactions_customer_point_transaction_id ON reward_transactions(customer_point_transaction_id);
-CREATE INDEX idx_reward_transactions_reward_id ON reward_transactions(reward_id);
-CREATE INDEX idx_reward_transactions_type ON reward_transactions(type);
-CREATE INDEX idx_reward_transactions_points ON reward_transactions(points);
-CREATE INDEX idx_reward_transactions_transaction_date ON reward_transactions(transaction_date);
+CREATE INDEX idx_customer_reward_redemptions_shop_id ON customer_reward_redemptions(shop_id);
+CREATE INDEX idx_customer_reward_redemptions_customer_id ON customer_reward_redemptions(customer_id);
+CREATE INDEX idx_customer_reward_redemptions_reward_id ON customer_reward_redemptions(reward_id);
+CREATE INDEX idx_customer_reward_redemptions_status ON customer_reward_redemptions(status);
+CREATE INDEX idx_customer_reward_redemptions_redemption_type ON customer_reward_redemptions(redemption_type);
+CREATE INDEX idx_customer_reward_redemptions_issued_at ON customer_reward_redemptions(issued_at);
+CREATE INDEX idx_customer_reward_redemptions_expires_at ON customer_reward_redemptions(expires_at);
+CREATE INDEX idx_customer_reward_redemptions_redemption_code ON customer_reward_redemptions(redemption_code);
 CREATE INDEX idx_shop_activities_shop_id ON shop_activity_log(shop_id);
 CREATE INDEX idx_shop_activities_type ON shop_activity_log(type);
 CREATE INDEX idx_shop_activities_created_at ON shop_activity_log(created_at DESC);
@@ -503,7 +537,7 @@ ALTER TABLE public.customer_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_expiry ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rewards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.reward_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.customer_reward_redemptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_activity_log ENABLE ROW LEVEL SECURITY;
