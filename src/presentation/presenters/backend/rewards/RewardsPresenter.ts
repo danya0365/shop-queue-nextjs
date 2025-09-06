@@ -1,7 +1,7 @@
 import type {
   RewardsDataDTO,
   RewardTypeStatsDTO
-} from '@/src/application/dtos/RewardDTO';
+} from '@/src/application/dtos/reward-dto';
 import { IBackendRewardsService } from '@/src/application/services/backend/BackendRewardsService';
 import { getBackendContainer } from '@/src/di/backend-container';
 import type { Logger } from '@/src/domain/interfaces/logger';

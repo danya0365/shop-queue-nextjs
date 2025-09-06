@@ -6,7 +6,7 @@ import type {
   RewardTypeStatsDTO,
   RewardUsageDTO,
   UpdateRewardDTO
-} from '@/src/application/dtos/RewardDTO';
+} from '@/src/application/dtos/reward-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendRewardsService {
