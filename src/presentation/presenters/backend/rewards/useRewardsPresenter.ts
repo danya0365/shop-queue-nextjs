@@ -1,5 +1,5 @@
 
-import type { RewardType } from '@/src/application/dtos/reward-dto';
+import type { RewardType } from '@/src/application/dtos/backend/reward-dto';
 import { getClientService } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
 import { useState } from 'react';

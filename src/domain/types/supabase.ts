@@ -257,7 +257,7 @@ export type Database = {
           created_at: string | null
           customer_id: string
           customer_point_transaction_id: string | null
-          expires_at: string
+          expires_at: string | null
           id: string
           issued_at: string | null
           metadata: Json | null
@@ -282,7 +282,7 @@ export type Database = {
           created_at?: string | null
           customer_id: string
           customer_point_transaction_id?: string | null
-          expires_at: string
+          expires_at?: string | null
           id?: string
           issued_at?: string | null
           metadata?: Json | null
@@ -309,7 +309,7 @@ export type Database = {
           created_at?: string | null
           customer_id?: string
           customer_point_transaction_id?: string | null
-          expires_at?: string
+          expires_at?: string | null
           id?: string
           issued_at?: string | null
           metadata?: Json | null
@@ -2494,6 +2494,17 @@ export type Database = {
           p_new_status: Database["public"]["Enums"]["shop_status"]
         }
         Returns: undefined
+      }
+      redeem_customer_reward: {
+        Args: {
+          p_shop_id: string
+          p_customer_id: string
+          p_reward_id: string
+          p_redemption_type?: Database["public"]["Enums"]["redemption_type"]
+          p_source_description?: string
+          p_employee_id?: string
+        }
+        Returns: Json
       }
       set_profile_active: {
         Args: { profile_id: string }
