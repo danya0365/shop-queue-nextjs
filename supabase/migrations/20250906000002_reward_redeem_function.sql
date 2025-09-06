@@ -1,4 +1,3 @@
--- RPC Function สำหรับการแลกของรางวัล
 CREATE OR REPLACE FUNCTION redeem_customer_reward(
     p_shop_id UUID,
     p_customer_id UUID,
@@ -108,9 +107,33 @@ BEGIN
         ) RETURNING id INTO v_point_transaction_id;
     END IF;
 
-    -- 4. สร้างรหัสแลกรางวัล (Redemption Code)
-    v_redemption_code := 'RW' || TO_CHAR(NOW(), 'YYMMDD') || 
-                        LPAD((EXTRACT(EPOCH FROM NOW())::BIGINT % 1000000)::TEXT, 6, '0');
+    -- 4. สร้างรหัสแลกรางวัล (Redemption Code) แบบป้องกัน duplicate
+    DECLARE
+        v_attempt INTEGER := 0;
+        v_max_attempts INTEGER := 5;
+        v_code_exists BOOLEAN := true;
+    BEGIN
+        -- ลอง generate code สูงสุด 5 ครั้ง
+        WHILE v_code_exists AND v_attempt < v_max_attempts LOOP
+            v_attempt := v_attempt + 1;
+            
+            -- สร้างรหัสใหม่ (เพิ่ม microsecond และ random)
+            v_redemption_code := 'RW' || TO_CHAR(NOW(), 'YYMMDD') || 
+                               LPAD(FLOOR(RANDOM() * 1000000)::TEXT, 6, '0') ||
+                               LPAD(EXTRACT(MICROSECONDS FROM NOW())::INTEGER::TEXT, 6, '0');
+            
+            -- เช็คว่ามีรหัสนี้อยู่แล้วหรือไม่
+            SELECT EXISTS(
+                SELECT 1 FROM customer_reward_redemptions 
+                WHERE redemption_code = v_redemption_code
+            ) INTO v_code_exists;
+        END LOOP;
+        
+        -- ถ้าลองแล้ว 5 ครั้งยังซ้ำอยู่ ให้ใช้ UUID
+        IF v_code_exists THEN
+            v_redemption_code := 'RW' || REPLACE(uuid_generate_v4()::TEXT, '-', '');
+        END IF;
+    END;
 
     -- 5. คำนวณวันหมดอายุ
     IF v_reward_record.expiry_days IS NOT NULL AND v_reward_record.expiry_days > 0 THEN
@@ -216,23 +239,3 @@ EXCEPTION
         );
 END;
 $$;
-
--- ตัวอย่างการใช้งาน:
-
--- 1. แลกรางวัลด้วยคะแนน
--- SELECT redeem_customer_reward(
---     'shop-uuid-here'::UUID,
---     'customer-uuid-here'::UUID,
---     'reward-uuid-here'::UUID,
---     'points_redemption'::redemption_type
--- );
-
--- 2. มอบรางวัลฟรี (เช่น รางวัลวันเกิด)
--- SELECT redeem_customer_reward(
---     'shop-uuid-here'::UUID,
---     'customer-uuid-here'::UUID,
---     'reward-uuid-here'::UUID,
---     'free_reward'::redemption_type,
---     'Birthday Gift',
---     'employee-uuid-here'::UUID
--- );
