@@ -353,7 +353,7 @@ CREATE TABLE customer_reward_redemptions (
     reward_value DECIMAL(10,2) NOT NULL, -- มูลค่ารางวัลที่แลก
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'used', 'expired', 'cancelled')),
     issued_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- วันที่ออกรางวัล
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL, -- วันหมดอายุของรางวัล
+    expires_at TIMESTAMP WITH TIME ZONE DEFAULT NULL, -- วันหมดอายุของรางวัล
     used_at TIMESTAMP WITH TIME ZONE, -- วันที่ใช้รางวัล
     used_by_employee_id UUID REFERENCES employees(id) ON DELETE SET NULL, -- พนักงานที่ให้ใช้รางวัล
     used_queue_id UUID REFERENCES queues(id) ON DELETE SET NULL, -- คิวที่ใช้รางวัล
@@ -364,9 +364,9 @@ CREATE TABLE customer_reward_redemptions (
     metadata JSONB, -- ข้อมูลเพิ่มเติมในรูปแบบ JSON
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
+
     -- ตรวจสอบว่าวันหมดอายุต้องไม่เก่ากว่าวันที่ออกรางวัล
-    CONSTRAINT valid_expiry_date CHECK (expires_at > issued_at),
+    CONSTRAINT valid_expiry_date CHECK (expires_at IS NULL OR expires_at > issued_at),
     
     -- ตรวจสอบว่าวันที่ใช้รางวัลต้องไม่เก่ากว่าวันที่ออกรางวัล
     CONSTRAINT valid_used_date CHECK (used_at IS NULL OR used_at >= issued_at),
@@ -375,13 +375,7 @@ CREATE TABLE customer_reward_redemptions (
     CONSTRAINT non_negative_points_used CHECK (points_used >= 0),
     
     -- ตรวจสอบว่ามูลค่ารางวัลต้องเป็นจำนวนบวก
-    CONSTRAINT positive_reward_value CHECK (reward_value > 0),
-    
-    -- ตรวจสอบความสัมพันธ์ระหว่าง redemption_type และ customer_point_transaction_id
-    CONSTRAINT valid_point_transaction CHECK (
-        (redemption_type = 'points_redemption' AND customer_point_transaction_id IS NOT NULL AND points_used > 0) OR
-        (redemption_type != 'points_redemption' AND points_used = 0)
-    )
+    CONSTRAINT positive_reward_value CHECK (reward_value >= 0)
 );
 
 -- 20. Shop Settings
@@ -500,6 +494,16 @@ CREATE INDEX idx_customer_reward_redemptions_redemption_code ON customer_reward_
 CREATE INDEX idx_shop_activities_shop_id ON shop_activity_log(shop_id);
 CREATE INDEX idx_shop_activities_type ON shop_activity_log(type);
 CREATE INDEX idx_shop_activities_created_at ON shop_activity_log(created_at DESC);
+
+-- สำหรับเช็ครางวัลที่ใช้ได้
+CREATE INDEX idx_customer_reward_redemptions_active 
+ON customer_reward_redemptions(reward_id, status) 
+WHERE status IN ('active', 'used');
+
+-- สำหรับเช็ครางวัลหมดอายุ
+CREATE INDEX idx_customer_reward_redemptions_expiry 
+ON customer_reward_redemptions(expires_at) 
+WHERE expires_at IS NOT NULL;
 
 
 -- Apply updated_at triggers to relevant tables
