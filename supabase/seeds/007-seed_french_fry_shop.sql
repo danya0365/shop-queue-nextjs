@@ -437,7 +437,6 @@ CROSS JOIN (
 ) AS q(queue_number, status, priority, estimated_duration, estimated_call_time, note, feedback, rating, created_at, updated_at, served_at, completed_at);
 
 -- Insert customer points
--- Insert customer points
 WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
@@ -837,6 +836,7 @@ FROM shop_data sd
 CROSS JOIN (
   VALUES 
     ('ส่วนลด 10%'::text, 'ส่วนลด 10% สำหรับเฟรนช์ฟราย'::text, 'discount'::public.reward_type, 100::integer, 10.00::numeric, true::boolean, 60::integer, 1::integer, '🏷️'::text),
+    ('เงินคืน 20%'::text, 'เงินคืน 20% สำหรับเฟรนช์ฟราย'::text, 'cashback'::public.reward_type, 200::integer, 20.00::numeric, true::boolean, 60::integer, 1::integer, '🏷️'::text),
     ('เครื่องดื่มฟรี'::text, 'เครื่องดื่มฟรี 1 แก้ว'::text, 'free_item'::public.reward_type, 150::integer, 30.00::numeric, true::boolean, 30::integer, 1::integer, '🥤'::text),
     ('ส่วนลด 15%'::text, 'ส่วนลด 15% สำหรับสมาชิก VIP'::text, 'discount'::public.reward_type, 200::integer, 15.00::numeric, true::boolean, 90::integer, 1::integer, '⭐'::text)
 ) AS reward_info(name, description, type, points_required, value, is_available, expiry_days, usage_limit, icon);
@@ -882,10 +882,198 @@ JOIN shops s ON s.id = sd.shop_id
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ส่วนลดเฟรนช์ฟราย 18%'::text, 'ส่วนลด 18% สำหรับเฟรนช์ฟรายทุกเมนู'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '24 days', NOW() + INTERVAL '36 days', 110::integer, NOW() - INTERVAL '24 days', NOW() - INTERVAL '40 minutes'),
-    ('ลด 60 บาท'::text, 'ส่วนลดเงินสด 60 บาท เมื่อสั่งครบ 300 บาท'::text, 'fixed_amount'::public.promotion_type, 60.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '17 days', NOW() + INTERVAL '23 days', 85::integer, NOW() - INTERVAL '17 days', NOW() - INTERVAL '1 hour'),
-    ('เครื่องดื่มฟรี'::text, 'เครื่องดื่มฟรี 1 แก้ว เมื่อสั่งเฟรนช์ฟรายครบ 200 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '11 days', NOW() + INTERVAL '19 days', 75::integer, NOW() - INTERVAL '11 days', NOW() - INTERVAL '8 minutes'),
-    ('โปรโมชั่นฤดูร้อน'::text, 'ส่วนลด 35% ในช่วงฤดูร้อน'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '25 days', NOW() + INTERVAL '55 days', 130::integer, NOW() - INTERVAL '7 days', NOW() - INTERVAL '7 days'),
-    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days', 95::integer, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days')
+    ('ส่วนลดเฟรนช์ฟราย 18%'::text, 'ส่วนลด 18% สำหรับเฟรนช์ฟรายทุกเมนู'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '24 days', NOW() + INTERVAL '36 days', 110, NOW() - INTERVAL '24 days', NOW() - INTERVAL '40 minutes'),
+    ('ลด 60 บาท'::text, 'ส่วนลดเงินสด 60 บาท เมื่อสั่งครบ 300 บาท'::text, 'fixed_amount'::public.promotion_type, 60.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '17 days', NOW() + INTERVAL '23 days', 85, NOW() - INTERVAL '17 days', NOW() - INTERVAL '1 hour'),
+    ('เครื่องดื่มฟรี'::text, 'เครื่องดื่มฟรี 1 แก้ว เมื่อสั่งเฟรนช์ฟรายครบ 200 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '11 days', NOW() + INTERVAL '19 days', 75, NOW() - INTERVAL '11 days', NOW() - INTERVAL '8 minutes'),
+    ('โปรโมชั่นฤดูร้อน'::text, 'ส่วนลด 35% ในช่วงฤดูร้อน'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '25 days', NOW() + INTERVAL '55 days', 130, NOW() - INTERVAL '7 days', NOW() - INTERVAL '7 days'),
+    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days', 95, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days')
 ) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at)
 WHERE p.username = 'french_fry_owner';
+
+-- เรียกใช้ฟังก์ชัน redeem_customer_reward โดยดึงพารามิเตอร์จาก seed data ที่มีอยู่
+
+-- 1. แลกรางวัลด้วยคะแนนสำหรับ คุณนิรันดร์ (แลกส่วนลด 10%)
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'french_fry_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT c.id AS customer_id, c.name
+  FROM customers c
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+  WHERE c.name = 'คุณนิรันดร์ กินอร่อย'
+  LIMIT 1
+),
+reward_data AS (
+  SELECT r.id AS reward_id, r.name
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.name = 'ส่วนลด 10%'
+    AND r.is_available = true
+  LIMIT 1
+)
+SELECT redeem_customer_reward(
+    sd.shop_id,
+    cd.customer_id,
+    rd.reward_id,
+    'points_redemption'::redemption_type
+) AS redemption_result
+FROM shop_data sd
+CROSS JOIN customer_data cd
+CROSS JOIN reward_data rd;
+
+-- 2. แลกรางวัลด้วยคะแนนสำหรับ คุณประเสริฐ (แลกเงินคืน 20%)
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'french_fry_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT c.id AS customer_id, c.name
+  FROM customers c
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+  WHERE c.name = 'คุณประเสริฐ ทานเก่ง'
+  LIMIT 1
+),
+reward_data AS (
+  SELECT r.id AS reward_id, r.name
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.name = 'เงินคืน 20%'
+    AND r.is_available = true
+  LIMIT 1
+)
+SELECT redeem_customer_reward(
+    sd.shop_id,
+    cd.customer_id,
+    rd.reward_id,
+    'points_redemption'::redemption_type
+) AS redemption_result
+FROM shop_data sd
+CROSS JOIN customer_data cd
+CROSS JOIN reward_data rd;
+
+-- 3. มอบรางวัลฟรี (Birthday Gift) สำหรับ คุณสมใส โดยพนักงาน
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'french_fry_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT c.id AS customer_id, c.name
+  FROM customers c
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+  WHERE c.name = 'คุณสมใส ดื่มเก่ง'
+  LIMIT 1
+),
+reward_data AS (
+  SELECT r.id AS reward_id, r.name
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.name = 'เครื่องดื่มฟรี'
+    AND r.is_available = true
+  LIMIT 1
+),
+employee_data AS (
+  SELECT e.id AS employee_id, e.name
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+  WHERE e.status = 'active'
+  LIMIT 1
+)
+SELECT redeem_customer_reward(
+    sd.shop_id,
+    cd.customer_id,
+    rd.reward_id,
+    'free_reward'::redemption_type,
+    'Birthday Special Gift - ขอบคุณที่เป็นลูกค้าของเรา',
+    ed.employee_id
+) AS redemption_result
+FROM shop_data sd
+CROSS JOIN customer_data cd
+CROSS JOIN reward_data rd
+CROSS JOIN employee_data ed;
+
+-- 4. แลกรางวัลส่วนลด 15% สำหรับ คุณนิรันดร์
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'french_fry_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT c.id AS customer_id, c.name
+  FROM customers c
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+  WHERE c.name = 'คุณนิรันดร์ กินอร่อย'
+  LIMIT 1
+),
+reward_data AS (
+  SELECT r.id AS reward_id, r.name
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.name = 'ส่วนลด 15%'
+    AND r.is_available = true
+  LIMIT 1
+)
+SELECT redeem_customer_reward(
+    sd.shop_id,
+    cd.customer_id,
+    rd.reward_id,
+    'points_redemption'::redemption_type
+) AS redemption_result
+FROM shop_data sd
+CROSS JOIN customer_data cd
+CROSS JOIN reward_data rd;
+
+-- 5. มอบเครื่องดื่มฟรี (Promotional Gift) สำหรับ คุณประเสริฐ
+WITH shop_data AS (
+  SELECT s.id AS shop_id
+  FROM shops s
+  JOIN profiles p ON s.owner_id = p.id
+  WHERE p.username = 'french_fry_owner'
+  LIMIT 1
+),
+customer_data AS (
+  SELECT c.id AS customer_id, c.name
+  FROM customers c
+  JOIN shop_data sd ON c.shop_id = sd.shop_id
+  WHERE c.name = 'คุณประเสริฐ ทานเก่ง'
+  LIMIT 1
+),
+reward_data AS (
+  SELECT r.id AS reward_id, r.name
+  FROM rewards r
+  JOIN shop_data sd ON r.shop_id = sd.shop_id
+  WHERE r.name = 'เครื่องดื่มฟรี'
+    AND r.is_available = true
+  LIMIT 1
+),
+employee_data AS (
+  SELECT e.id AS employee_id, e.name
+  FROM employees e
+  JOIN shop_data sd ON e.shop_id = sd.shop_id
+  WHERE e.status = 'active'
+  ORDER BY e.created_at
+  LIMIT 1
+)
+SELECT redeem_customer_reward(
+    sd.shop_id,
+    cd.customer_id,
+    rd.reward_id,
+    'promotional_gift'::redemption_type,
+    'Grand Opening Special - รางวัลพิเศษสำหรับลูกค้าที่รัก',
+    ed.employee_id
+) AS redemption_result
+FROM shop_data sd
+CROSS JOIN customer_data cd
+CROSS JOIN reward_data rd
+CROSS JOIN employee_data ed;

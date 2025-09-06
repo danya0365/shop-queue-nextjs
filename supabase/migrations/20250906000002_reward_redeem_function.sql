@@ -110,7 +110,7 @@ BEGIN
 
     -- 4. สร้างรหัสแลกรางวัล (Redemption Code)
     v_redemption_code := 'RW' || TO_CHAR(NOW(), 'YYMMDD') || 
-                        LPAD(EXTRACT(EPOCH FROM NOW())::BIGINT % 1000000, 6, '0');
+                        LPAD((EXTRACT(EPOCH FROM NOW())::BIGINT % 1000000)::TEXT, 6, '0');
 
     -- 5. คำนวณวันหมดอายุ
     IF v_reward_record.expiry_days IS NOT NULL AND v_reward_record.expiry_days > 0 THEN
