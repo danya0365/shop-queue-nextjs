@@ -437,6 +437,7 @@ CROSS JOIN (
 ) AS q(queue_number, status, priority, estimated_duration, estimated_call_time, note, feedback, rating, created_at, updated_at, served_at, completed_at);
 
 -- Insert customer points
+-- Insert customer points
 WITH shop_data AS (
   SELECT s.id AS shop_id
   FROM shops s
@@ -451,50 +452,152 @@ customer_data AS (
     c.last_visit
   FROM customers c
   JOIN shop_data sd ON c.shop_id = sd.shop_id
+),
+inserted_customer_points AS (
+  INSERT INTO customer_points (
+    shop_id,
+    customer_id,
+    current_points,
+    total_earned,
+    total_redeemed,
+    membership_tier,
+    tier_benefits,
+    created_at,
+    updated_at
+  )
+  SELECT
+    sd.shop_id,
+    cd.customer_id,
+    CASE 
+      WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 120
+      WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 85
+      WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 150
+    END AS current_points,
+    CASE 
+      WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 170  -- 50 welcome + 120 earned
+      WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 135   -- 50 welcome + 85 earned  
+      WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 200  -- 50 welcome + 150 earned
+    END AS total_earned,
+    0 AS total_redeemed,
+    CASE 
+      WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 'silver'::public.membership_tier
+      WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 'bronze'::public.membership_tier
+      WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 'gold'::public.membership_tier
+    END AS membership_tier,
+    CASE 
+      WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN ARRAY['10% discount', 'Free drink upgrade']
+      WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN ARRAY['5% discount', 'Birthday special']
+      WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN ARRAY['15% discount', 'Free combo upgrade', 'Priority queue']
+    END AS tier_benefits,
+    CASE 
+      WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '6 months'
+      WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '4 months'
+      WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '3 months'
+    END AS created_at,
+    cd.last_visit AS updated_at
+  FROM shop_data sd
+  CROSS JOIN customer_data cd
+  RETURNING id, customer_id, shop_id, created_at
 )
-INSERT INTO customer_points (
-  shop_id,
-  customer_id,
-  current_points,
-  total_earned,
-  total_redeemed,
-  membership_tier,
-  tier_benefits,
-  created_at,
-  updated_at
+-- Insert customer point transactions
+INSERT INTO customer_point_transactions (
+  customer_point_id,
+  type,
+  points,
+  description,
+  metadata,
+  transaction_date,
+  created_at
 )
-SELECT
-  sd.shop_id,
-  cd.customer_id,
+SELECT 
+  icp.id AS customer_point_id,
+  'earned'::transaction_type AS type,
+  50 AS points,  -- Welcome points for everyone
+  'ยินดีต้อนรับสู่ร้าน French Fry House! รับแต้มต้อนรับ 50 แต้ม' AS description,
+  jsonb_build_object(
+    'source', 'welcome_bonus',
+    'reason', 'new_customer_registration',
+    'bonus_type', 'welcome'
+  ) AS metadata,
+  icp.created_at AS transaction_date,
+  icp.created_at AS created_at
+FROM inserted_customer_points icp
+
+UNION ALL
+
+-- Additional earned points for each customer based on their activity
+SELECT 
+  icp.id AS customer_point_id,
+  'earned'::transaction_type AS type,
   CASE 
-    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 120
-    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 85
-    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 150
-  END AS current_points,
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 70  -- Additional 70 points from purchases
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 35     -- Additional 35 points from purchases
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 100   -- Additional 100 points from purchases
+  END AS points,
   CASE 
-    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 120
-    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 85
-    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 150
-  END AS total_earned,
-  0 AS total_redeemed,
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 'รับแต้มจากการซื้อสินค้า - ชุดมื้อเช้า'
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 'รับแต้มจากการซื้อสินค้า - เฟรนช์ฟราย + โค้ก'
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 'รับแต้มจากการซื้อสินค้า - ชุดใหญ่พิเศษ'
+  END AS description,
   CASE 
-    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 'silver'::public.membership_tier
-    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 'bronze'::public.membership_tier
-    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 'gold'::public.membership_tier
-  END AS membership_tier,
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN jsonb_build_object(
+      'source', 'purchase',
+      'purchase_amount', 350.00,
+      'points_rate', '1_point_per_5_baht'
+    )
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN jsonb_build_object(
+      'source', 'purchase', 
+      'purchase_amount', 175.00,
+      'points_rate', '1_point_per_5_baht'
+    )
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN jsonb_build_object(
+      'source', 'purchase',
+      'purchase_amount', 500.00,
+      'points_rate', '1_point_per_5_baht'
+    )
+  END AS metadata,
   CASE 
-    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN ARRAY['10% discount', 'Free drink upgrade']
-    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN ARRAY['5% discount', 'Birthday special']
-    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN ARRAY['15% discount', 'Free combo upgrade', 'Priority queue']
-  END AS tier_benefits,
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '2 months'
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '1 month'
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '2 weeks'
+  END AS transaction_date,
   CASE 
-    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '6 months'
-    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '4 months'
-    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '3 months'
-  END AS created_at,
-  cd.last_visit AS updated_at
-FROM shop_data sd
-CROSS JOIN customer_data cd;
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '2 months'
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '1 month'
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '2 weeks'
+  END AS created_at
+FROM inserted_customer_points icp
+JOIN customer_data cd ON icp.customer_id = cd.customer_id
+
+UNION ALL
+
+-- Bonus points for special occasions
+SELECT 
+  icp.id AS customer_point_id,
+  'earned'::transaction_type AS type,
+  CASE 
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN 50   -- Birthday bonus
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN 50      -- Birthday bonus  
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN 50    -- Birthday bonus
+  END AS points,
+  'รับแต้มโบนัสวันเกิด - ขอบคุณที่เป็นลูกค้าของเรา!' AS description,
+  jsonb_build_object(
+    'source', 'birthday_bonus',
+    'event_type', 'birthday_celebration',
+    'bonus_amount', 50
+  ) AS metadata,
+  CASE 
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '3 weeks'
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '5 weeks'
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '1 week'
+  END AS transaction_date,
+  CASE 
+    WHEN cd.name = 'คุณนิรันดร์ กินอร่อย' THEN NOW() - INTERVAL '3 weeks'
+    WHEN cd.name = 'คุณสมใส ดื่มเก่ง' THEN NOW() - INTERVAL '5 weeks'
+    WHEN cd.name = 'คุณประเสริฐ ทานเก่ง' THEN NOW() - INTERVAL '1 week'
+  END AS created_at
+FROM inserted_customer_points icp
+JOIN customer_data cd ON icp.customer_id = cd.customer_id;
 
 -- Insert queue services
 WITH shop_data AS (
