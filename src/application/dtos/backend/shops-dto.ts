@@ -10,10 +10,10 @@ export type ShopCategoryDTO = Partial<CategoryDTO> & {
 export interface ShopDTO {
   id: string;
   name: string;
-  description: string;
-  address: string;
-  phone: string;
-  email: string;
+  description: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
   categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;

@@ -102,18 +102,36 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         return acc;
       }, {});
 
+      // query shop_stats_by_shop_view for each department into hash map 
+      const shopStatsByShopView = await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
+        'shop_stats_by_shop_view',
+        {
+          select: ['shop_id', 'total_queues', 'total_services'],
+          filters: [{
+            field: 'shop_id',
+            operator: FilterOperator.IN,
+            value: shopIds
+          }]
+        }
+      );
+
+      // map shop_stats_by_shop_view to hash map
+      const shopStatsByShopViewMap = shopStatsByShopView.reduce((acc, shopStats) => {
+        acc[shopStats.shop_id as string] = shopStats;
+        return acc;
+      }, {} as Record<string, ShopStatsSchemaRecord>);
+
       // Map database results to domain entities
       const mappedShops = shops.map(shop => {
         // handle joined data from joined tables
         const shopWithJoinedData = shop as ShopWithJoins;
         const categories = categoriesByShopId[shop.id] || [];
+        const shopStats = shopStatsByShopViewMap[shop.id];
 
         const shopWithJoins = {
           ...shop,
-          queue_count: 10,
-          total_services: 10,
-          rating: 4.5,
-          total_reviews: 10,
+          queue_count: Number(shopStats?.total_queues || 0),
+          total_services: Number(shopStats?.total_services || 0),
           owner_name: shopWithJoinedData.profiles?.full_name,
           categories: categories
         };
@@ -160,7 +178,7 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
       // Assuming a view exists for shop statistics
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData = await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
-        'shop_stats_view',
+        'shop_stats_summary_view',
         queryOptions
       );
 
