@@ -242,7 +242,7 @@ export class SupabaseBackendRewardRepository extends BackendRepository implement
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const usageData = await this.dataSource.getAdvanced<RewardUsageSchemaRecord>(
-        'customer_reward_redemptions',
+        'reward_usages',
         queryOptions
       );
 

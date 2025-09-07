@@ -339,8 +339,8 @@ CREATE TABLE rewards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 19. Customer Reward Redemptions (เพิ่ม table ที่หายไป)
-CREATE TABLE customer_reward_redemptions (
+-- 19. Reward Usage
+CREATE TABLE reward_usages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
@@ -483,26 +483,26 @@ CREATE INDEX idx_rewards_shop_id ON rewards(shop_id);
 CREATE INDEX idx_rewards_type ON rewards(type);
 CREATE INDEX idx_rewards_points_required ON rewards(points_required);
 CREATE INDEX idx_rewards_is_available ON rewards(is_available);
-CREATE INDEX idx_customer_reward_redemptions_shop_id ON customer_reward_redemptions(shop_id);
-CREATE INDEX idx_customer_reward_redemptions_customer_id ON customer_reward_redemptions(customer_id);
-CREATE INDEX idx_customer_reward_redemptions_reward_id ON customer_reward_redemptions(reward_id);
-CREATE INDEX idx_customer_reward_redemptions_status ON customer_reward_redemptions(status);
-CREATE INDEX idx_customer_reward_redemptions_redemption_type ON customer_reward_redemptions(redemption_type);
-CREATE INDEX idx_customer_reward_redemptions_issued_at ON customer_reward_redemptions(issued_at);
-CREATE INDEX idx_customer_reward_redemptions_expires_at ON customer_reward_redemptions(expires_at);
-CREATE INDEX idx_customer_reward_redemptions_redemption_code ON customer_reward_redemptions(redemption_code);
+CREATE INDEX idx_reward_usages_shop_id ON reward_usages(shop_id);
+CREATE INDEX idx_reward_usages_customer_id ON reward_usages(customer_id);
+CREATE INDEX idx_reward_usages_reward_id ON reward_usages(reward_id);
+CREATE INDEX idx_reward_usages_status ON reward_usages(status);
+CREATE INDEX idx_reward_usages_redemption_type ON reward_usages(redemption_type);
+CREATE INDEX idx_reward_usages_issued_at ON reward_usages(issued_at);
+CREATE INDEX idx_reward_usages_expires_at ON reward_usages(expires_at);
+CREATE INDEX idx_reward_usages_redemption_code ON reward_usages(redemption_code);
 CREATE INDEX idx_shop_activities_shop_id ON shop_activity_log(shop_id);
 CREATE INDEX idx_shop_activities_type ON shop_activity_log(type);
 CREATE INDEX idx_shop_activities_created_at ON shop_activity_log(created_at DESC);
 
 -- สำหรับเช็ครางวัลที่ใช้ได้
-CREATE INDEX idx_customer_reward_redemptions_active 
-ON customer_reward_redemptions(reward_id, status) 
+CREATE INDEX idx_reward_usages_active 
+ON reward_usages(reward_id, status) 
 WHERE status IN ('active', 'used');
 
 -- สำหรับเช็ครางวัลหมดอายุ
-CREATE INDEX idx_customer_reward_redemptions_expiry 
-ON customer_reward_redemptions(expires_at) 
+CREATE INDEX idx_reward_usages_expiry 
+ON reward_usages(expires_at) 
 WHERE expires_at IS NOT NULL;
 
 
@@ -541,7 +541,7 @@ ALTER TABLE public.customer_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_expiry ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rewards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.customer_reward_redemptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reward_usages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shop_activity_log ENABLE ROW LEVEL SECURITY;

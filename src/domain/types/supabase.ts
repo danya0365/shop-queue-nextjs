@@ -249,145 +249,6 @@ export type Database = {
           },
         ]
       }
-      customer_reward_redemptions: {
-        Row: {
-          cancelled_at: string | null
-          cancelled_by_employee_id: string | null
-          cancelled_reason: string | null
-          created_at: string | null
-          customer_id: string
-          customer_point_transaction_id: string | null
-          expires_at: string | null
-          id: string
-          issued_at: string | null
-          metadata: Json | null
-          notes: string | null
-          points_used: number
-          redemption_code: string
-          redemption_type: Database["public"]["Enums"]["redemption_type"] | null
-          reward_id: string
-          reward_value: number
-          shop_id: string
-          source_description: string | null
-          status: string | null
-          updated_at: string | null
-          used_at: string | null
-          used_by_employee_id: string | null
-          used_queue_id: string | null
-        }
-        Insert: {
-          cancelled_at?: string | null
-          cancelled_by_employee_id?: string | null
-          cancelled_reason?: string | null
-          created_at?: string | null
-          customer_id: string
-          customer_point_transaction_id?: string | null
-          expires_at?: string | null
-          id?: string
-          issued_at?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          points_used?: number
-          redemption_code: string
-          redemption_type?:
-            | Database["public"]["Enums"]["redemption_type"]
-            | null
-          reward_id: string
-          reward_value: number
-          shop_id: string
-          source_description?: string | null
-          status?: string | null
-          updated_at?: string | null
-          used_at?: string | null
-          used_by_employee_id?: string | null
-          used_queue_id?: string | null
-        }
-        Update: {
-          cancelled_at?: string | null
-          cancelled_by_employee_id?: string | null
-          cancelled_reason?: string | null
-          created_at?: string | null
-          customer_id?: string
-          customer_point_transaction_id?: string | null
-          expires_at?: string | null
-          id?: string
-          issued_at?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          points_used?: number
-          redemption_code?: string
-          redemption_type?:
-            | Database["public"]["Enums"]["redemption_type"]
-            | null
-          reward_id?: string
-          reward_value?: number
-          shop_id?: string
-          source_description?: string | null
-          status?: string | null
-          updated_at?: string | null
-          used_at?: string | null
-          used_by_employee_id?: string | null
-          used_queue_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customer_reward_redemptions_cancelled_by_employee_id_fkey"
-            columns: ["cancelled_by_employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_customer_point_transaction_id_fkey"
-            columns: ["customer_point_transaction_id"]
-            isOneToOne: false
-            referencedRelation: "customer_point_transactions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_reward_id_fkey"
-            columns: ["reward_id"]
-            isOneToOne: false
-            referencedRelation: "rewards"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "customer_stats_view"
-            referencedColumns: ["shop_id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_used_by_employee_id_fkey"
-            columns: ["used_by_employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_reward_redemptions_used_queue_id_fkey"
-            columns: ["used_queue_id"]
-            isOneToOne: false
-            referencedRelation: "queues"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       customers: {
         Row: {
           address: string | null
@@ -1274,6 +1135,145 @@ export type Database = {
           },
         ]
       }
+      reward_usages: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by_employee_id: string | null
+          cancelled_reason: string | null
+          created_at: string | null
+          customer_id: string
+          customer_point_transaction_id: string | null
+          expires_at: string | null
+          id: string
+          issued_at: string | null
+          metadata: Json | null
+          notes: string | null
+          points_used: number
+          redemption_code: string
+          redemption_type: Database["public"]["Enums"]["redemption_type"] | null
+          reward_id: string
+          reward_value: number
+          shop_id: string
+          source_description: string | null
+          status: string | null
+          updated_at: string | null
+          used_at: string | null
+          used_by_employee_id: string | null
+          used_queue_id: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by_employee_id?: string | null
+          cancelled_reason?: string | null
+          created_at?: string | null
+          customer_id: string
+          customer_point_transaction_id?: string | null
+          expires_at?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          points_used?: number
+          redemption_code: string
+          redemption_type?:
+            | Database["public"]["Enums"]["redemption_type"]
+            | null
+          reward_id: string
+          reward_value: number
+          shop_id: string
+          source_description?: string | null
+          status?: string | null
+          updated_at?: string | null
+          used_at?: string | null
+          used_by_employee_id?: string | null
+          used_queue_id?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by_employee_id?: string | null
+          cancelled_reason?: string | null
+          created_at?: string | null
+          customer_id?: string
+          customer_point_transaction_id?: string | null
+          expires_at?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          points_used?: number
+          redemption_code?: string
+          redemption_type?:
+            | Database["public"]["Enums"]["redemption_type"]
+            | null
+          reward_id?: string
+          reward_value?: number
+          shop_id?: string
+          source_description?: string | null
+          status?: string | null
+          updated_at?: string | null
+          used_at?: string | null
+          used_by_employee_id?: string | null
+          used_queue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_usages_cancelled_by_employee_id_fkey"
+            columns: ["cancelled_by_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_customer_point_transaction_id_fkey"
+            columns: ["customer_point_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "customer_point_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_used_by_employee_id_fkey"
+            columns: ["used_by_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_usages_used_queue_id_fkey"
+            columns: ["used_queue_id"]
+            isOneToOne: false
+            referencedRelation: "queues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards: {
         Row: {
           created_at: string | null
@@ -1785,14 +1785,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_view"
             referencedColumns: ["shop_id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -1896,21 +1896,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customer_reward_redemptions_reward_id_fkey"
+            foreignKeyName: "reward_usages_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
             referencedRelation: "rewards"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_view"
             referencedColumns: ["shop_id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -2106,14 +2106,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_view"
             referencedColumns: ["shop_id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -2256,21 +2256,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customer_reward_redemptions_customer_id_fkey"
+            foreignKeyName: "reward_usages_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_view"
             referencedColumns: ["shop_id"]
           },
           {
-            foreignKeyName: "customer_reward_redemptions_shop_id_fkey"
+            foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"

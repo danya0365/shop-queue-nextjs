@@ -11,12 +11,12 @@ redemption_summary AS (
         COUNT(*) AS total_redemptions,
         COALESCE(SUM(points_used), 0) AS total_points_redeemed,
         COALESCE(AVG(points_used), 0) AS average_redemption_value
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     WHERE crr.status IN ('used', 'active') -- รวมทั้งที่ใช้แล้วและยังใช้ได้
 ),
 popular_reward_type AS (
     SELECT r.type as popular_type
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     INNER JOIN rewards r ON crr.reward_id = r.id
     WHERE crr.status IN ('used', 'active')
     GROUP BY r.type
@@ -50,7 +50,7 @@ redemption_summary AS (
         COUNT(crr.*) AS total_redemptions,
         COALESCE(SUM(crr.points_used), 0) AS total_points_redeemed,
         COALESCE(AVG(crr.points_used), 0) AS average_redemption_value
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     WHERE crr.status IN ('used', 'active')
     GROUP BY crr.shop_id
 ),
@@ -58,7 +58,7 @@ popular_reward_type AS (
     SELECT DISTINCT ON (crr.shop_id)
         crr.shop_id,
         r.type as popular_type
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     INNER JOIN rewards r ON crr.reward_id = r.id
     WHERE crr.status IN ('used', 'active')
     GROUP BY crr.shop_id, r.type
@@ -88,7 +88,7 @@ WITH redemption_type_summary AS (
         COUNT(*) FILTER (WHERE crr.status = 'active') AS active_redemptions,
         COUNT(*) FILTER (WHERE crr.status = 'used') AS used_redemptions,
         COUNT(*) FILTER (WHERE crr.status = 'expired') AS expired_redemptions
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     GROUP BY crr.shop_id, crr.redemption_type
 )
 SELECT 
@@ -115,7 +115,7 @@ WITH monthly_stats AS (
         COALESCE(SUM(crr.points_used), 0) AS points_used,
         COALESCE(SUM(crr.reward_value), 0) AS total_reward_value,
         COUNT(DISTINCT crr.customer_id) AS unique_customers
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     GROUP BY crr.shop_id, DATE_TRUNC('month', crr.issued_at)
 )
 SELECT 
@@ -144,7 +144,7 @@ WITH customer_stats AS (
         COALESCE(SUM(crr.reward_value), 0) AS total_reward_value,
         MAX(crr.issued_at) AS last_redemption_date,
         COUNT(DISTINCT crr.redemption_type) AS redemption_type_variety
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     INNER JOIN customers c ON crr.customer_id = c.id
     GROUP BY crr.shop_id, crr.customer_id, c.name, c.phone
 ),
@@ -183,7 +183,7 @@ WITH reward_stats AS (
         COALESCE(AVG(crr.points_used), 0) AS avg_points_per_redemption,
         COUNT(DISTINCT crr.customer_id) AS unique_customers,
         MAX(crr.issued_at) AS last_redemption_date
-    FROM customer_reward_redemptions crr
+    FROM reward_usages crr
     INNER JOIN rewards r ON crr.reward_id = r.id
     GROUP BY crr.shop_id, crr.reward_id, r.name, r.type, r.points_required
 ),

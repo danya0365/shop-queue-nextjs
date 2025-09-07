@@ -39,7 +39,7 @@ BEGIN
             v_used_count INTEGER;
         BEGIN
             SELECT COUNT(*) INTO v_used_count
-            FROM customer_reward_redemptions
+            FROM reward_usages
             WHERE reward_id = p_reward_id 
               AND status IN ('active', 'used');
               
@@ -124,7 +124,7 @@ BEGIN
             
             -- เช็คว่ามีรหัสนี้อยู่แล้วหรือไม่
             SELECT EXISTS(
-                SELECT 1 FROM customer_reward_redemptions 
+                SELECT 1 FROM reward_usages 
                 WHERE redemption_code = v_redemption_code
             ) INTO v_code_exists;
         END LOOP;
@@ -145,7 +145,7 @@ BEGIN
     END IF;
 
     -- 6. Insert ข้อมูลการแลกรางวัล
-    INSERT INTO customer_reward_redemptions (
+    INSERT INTO reward_usages (
         shop_id,
         customer_id,
         reward_id,
