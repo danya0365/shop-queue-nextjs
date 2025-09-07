@@ -76,7 +76,7 @@ export class RewardMapper {
         percentage: entity.discount.percentage,
         totalValue: entity.discount.totalValue
       },
-      free_item: {
+      freeItem: {
         count: entity.free_item.count,
         percentage: entity.free_item.percentage,
         totalValue: entity.free_item.totalValue
@@ -86,7 +86,7 @@ export class RewardMapper {
         percentage: entity.cashback.percentage,
         totalValue: entity.cashback.totalValue
       },
-      special_privilege: {
+      specialPrivilege: {
         count: entity.special_privilege.count,
         percentage: entity.special_privilege.percentage,
         totalValue: entity.special_privilege.totalValue

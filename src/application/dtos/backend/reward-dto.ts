@@ -77,7 +77,7 @@ export interface RewardTypeStatsDTO {
     percentage: number;
     totalValue: number;
   };
-  free_item: {
+  freeItem: {
     count: number;
     percentage: number;
     totalValue: number;
@@ -87,7 +87,7 @@ export interface RewardTypeStatsDTO {
     percentage: number;
     totalValue: number;
   };
-  special_privilege: {
+  specialPrivilege: {
     count: number;
     percentage: number;
     totalValue: number;

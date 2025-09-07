@@ -1,8 +1,8 @@
 'use client';
 
+import type { RewardType } from '@/src/domain/entities/backend/backend-reward.entity';
 import { RewardsViewModel } from '@/src/presentation/presenters/backend/rewards/RewardsPresenter';
 import { useRewardsPresenter } from '@/src/presentation/presenters/backend/rewards/useRewardsPresenter';
-import type { RewardType } from '@/src/domain/entities/backend/backend-reward.entity';
 
 interface RewardsViewProps {
   viewModel: RewardsViewModel;
@@ -138,8 +138,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">ของฟรี</h3>
-              <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.typeStats.free_item.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.free_item.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.typeStats.freeItem.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.freeItem.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <span className="text-green-600 text-xl">🎁</span>
@@ -162,8 +162,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">สิทธิพิเศษ</h3>
-              <p className="text-2xl font-bold text-orange-600 mt-2">{rewardsData.typeStats.special_privilege.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.special_privilege.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-orange-600 mt-2">{rewardsData.typeStats.specialPrivilege.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.specialPrivilege.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <span className="text-orange-600 text-xl">👑</span>
@@ -273,19 +273,18 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleToggleAvailability(reward.id, reward.isAvailable)}
                           disabled={state.isLoading}
-                          className={`text-sm disabled:opacity-50 ${
-                            reward.isAvailable 
-                              ? 'text-red-600 hover:text-red-800' 
+                          className={`text-sm disabled:opacity-50 ${reward.isAvailable
+                              ? 'text-red-600 hover:text-red-800'
                               : 'text-green-600 hover:text-green-800'
-                          }`}
+                            }`}
                         >
                           {reward.isAvailable ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
                         </button>
                         <button className="text-blue-600 hover:text-blue-800 text-sm">แก้ไข</button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteReward(reward.id)}
                           disabled={state.isDeletingReward}
                           className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
