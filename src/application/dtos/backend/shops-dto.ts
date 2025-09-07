@@ -42,4 +42,12 @@ export interface ShopsDataDTO {
   perPage: number;
 }
 
+/**
+ * Input DTO for GetShopsPaginatedUseCase
+ */
+export interface GetShopsPaginatedInput {
+  page: number;
+  limit: number;
+}
+
 export type PaginatedShopsDTO = PaginatedResult<ShopDTO>;

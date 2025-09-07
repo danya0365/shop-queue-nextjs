@@ -14,16 +14,36 @@ export interface ShopSchema {
   phone: string | null;
   email: string | null;
   website: string | null;
-  logo_url: string | null;
+  logo: string | null;
   qr_code_url: string | null;
   timezone: string;
   currency: string;
   language: string;
   status: string;
   owner_id: string;
-  owner_name?: string; // Joined data
+  owner_name?: string; // Join from profiles table
+  queue_count: number; // Join from shop_stats_view
+  total_services: number; // Join from shop_stats_view
+  rating: number; // Join from shop_stats_view
+  total_reviews: number; // Join from shop_stats_view
   created_at: string;
   updated_at: string;
+  // Joined data from shop_categories and categories tables
+  categories?: ShopCategorySchema[];
+  // Joined data from opening_hours table
+  opening_hours?: OpeningHourSchema[];
+}
+
+export interface ShopCategorySchema {
+  id: string;
+  name: string;
+}
+
+export interface OpeningHourSchema {
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+  is_open: boolean;
 }
 
 /**

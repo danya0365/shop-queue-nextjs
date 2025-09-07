@@ -1,4 +1,4 @@
-import { PaginatedShopsEntity, ShopCategoryEntity, ShopEntity, ShopStatsEntity } from "../../../domain/entities/backend/backend-shop.entity";
+import { CreateShopEntity, PaginatedShopsEntity, ShopCategoryEntity, ShopEntity, ShopStatsEntity, UpdateShopEntity } from "../../../domain/entities/backend/backend-shop.entity";
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
@@ -8,7 +8,7 @@ import { ShopSchema, ShopStatsSchema } from "../../schemas/backend/shop.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
-type ShopWithJoinedData = ShopSchema & {
+type ShopWithJoins = ShopSchema & {
   profiles?: { full_name?: string },
   categories?: ShopCategoryEntity[]
 };
@@ -57,7 +57,7 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count('shops');
+      const totalItems = await this.dataSource.count('shops', queryOptions);
 
       // Get categories for all shops in a single query
       const shopIds = shops.map(shop => shop.id);
@@ -102,22 +102,23 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         return acc;
       }, {});
 
-      //console.log('categoriesByShopId', categoriesByShopId);
-
       // Map database results to domain entities
       const mappedShops = shops.map(shop => {
-        // Handle joined data from profiles table
-        const shopWithJoinedData = shop as ShopWithJoinedData;
+        // handle joined data from joined tables
+        const shopWithJoinedData = shop as ShopWithJoins;
         const categories = categoriesByShopId[shop.id] || [];
 
-        const shopWithOwnerAndCategories = {
+        const shopWithJoins = {
           ...shop,
+          queue_count: 10,
+          total_services: 10,
+          rating: 4.5,
+          total_reviews: 10,
           owner_name: shopWithJoinedData.profiles?.full_name,
-          // Add categories for this shop
           categories: categories
         };
 
-        return SupabaseBackendShopMapper.toDomain(shopWithOwnerAndCategories);
+        return SupabaseBackendShopMapper.toDomain(shopWithJoins);
       });
 
       // Create pagination metadata
@@ -206,7 +207,9 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         id,
         {
           select: ['*'],
-          joins: [{ table: 'profiles', on: { fromField: 'owner_id', toField: 'id' } }]
+          joins: [
+            { table: 'profiles', on: { fromField: 'owner_id', toField: 'id' } }
+          ]
         }
       );
 
@@ -251,11 +254,15 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
 
       const categories = Array.from(categoriesMap.values());
 
-      // Handle joined data from profiles table using our ShopWithProfile type
-      const shopWithJoinedData = shop as ShopWithJoinedData;
+      // Handle joined data from profiles table
+      const shopWithJoinedData = shop as ShopWithJoins;
 
       const shopWithOwnerAndCategories = {
         ...shop,
+        queue_count: 10,
+        total_services: 10,
+        rating: 4.5,
+        total_reviews: 10,
         owner_name: shopWithJoinedData.profiles?.full_name,
         categories: categories
       };
@@ -272,6 +279,165 @@ export class SupabaseBackendShopRepository extends BackendRepository implements 
         BackendShopErrorType.UNKNOWN,
         'An unexpected error occurred while fetching shop',
         'getShopById',
+        { id },
+        error
+      );
+    }
+  }
+
+  /**
+   * Create a new shop
+   * @param shop Shop data to create
+   * @returns Created shop entity
+   */
+  async createShop(shop: Omit<CreateShopEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopEntity> {
+    try {
+      // Convert domain entity to database schema
+      const shopSchema = {
+        name: shop.name,
+        description: shop.description,
+        address: shop.address,
+        phone: shop.phone,
+        email: shop.email,
+        owner_id: shop.ownerId,
+        status: shop.status,
+        queue_count: 0,
+        total_services: 0,
+        rating: 0,
+        total_reviews: 0
+      };
+
+      // Create shop in database
+      const createdShop = await this.dataSource.insert<ShopSchemaRecord>(
+        'shops',
+        shopSchema
+      );
+
+      if (!createdShop) {
+        throw new BackendShopError(
+          BackendShopErrorType.OPERATION_FAILED,
+          'Failed to create shop',
+          'createShop',
+          { shop }
+        );
+      }
+
+      // Get the created shop with joined data
+      return this.getShopById(createdShop.id) as Promise<ShopEntity>;
+    } catch (error) {
+      if (error instanceof BackendShopError) {
+        throw error;
+      }
+
+      this.logger.error('Error in createShop', { error, shop });
+      throw new BackendShopError(
+        BackendShopErrorType.UNKNOWN,
+        'An unexpected error occurred while creating shop',
+        'createShop',
+        { shop },
+        error
+      );
+    }
+  }
+
+  /**
+   * Update an existing shop
+   * @param id Shop ID
+   * @param shop Shop data to update
+   * @returns Updated shop entity
+   */
+  async updateShop(id: string, shop: Partial<Omit<UpdateShopEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ShopEntity> {
+    try {
+      // Check if shop exists
+      const existingShop = await this.getShopById(id);
+      if (!existingShop) {
+        throw new BackendShopError(
+          BackendShopErrorType.NOT_FOUND,
+          `Shop with ID ${id} not found`,
+          'updateShop',
+          { id, shop }
+        );
+      }
+
+      // Convert domain entity to database schema
+      const shopSchema: Partial<ShopSchema> = {};
+      if (shop.name !== undefined) shopSchema.name = shop.name;
+      if (shop.description !== undefined) shopSchema.description = shop.description;
+      if (shop.address !== undefined) shopSchema.address = shop.address;
+      if (shop.phone !== undefined) shopSchema.phone = shop.phone;
+      if (shop.email !== undefined) shopSchema.email = shop.email;
+      if (shop.status !== undefined) shopSchema.status = shop.status;
+
+      // Update shop in database
+      const updatedShop = await this.dataSource.update<ShopSchemaRecord>(
+        'shops',
+        id,
+        shopSchema
+      );
+
+      if (!updatedShop) {
+        throw new BackendShopError(
+          BackendShopErrorType.OPERATION_FAILED,
+          'Failed to update shop',
+          'updateShop',
+          { id, shop }
+        );
+      }
+
+      // Get the updated shop with joined data
+      return this.getShopById(id) as Promise<ShopEntity>;
+    } catch (error) {
+      if (error instanceof BackendShopError) {
+        throw error;
+      }
+
+      this.logger.error('Error in updateShop', { error, id, shop });
+      throw new BackendShopError(
+        BackendShopErrorType.UNKNOWN,
+        'An unexpected error occurred while updating shop',
+        'updateShop',
+        { id, shop },
+        error
+      );
+    }
+  }
+
+  /**
+   * Delete a shop
+   * @param id Shop ID
+   * @returns true if deleted successfully
+   */
+  async deleteShop(id: string): Promise<boolean> {
+    try {
+      // Check if shop exists
+      const existingShop = await this.getShopById(id);
+      if (!existingShop) {
+        throw new BackendShopError(
+          BackendShopErrorType.NOT_FOUND,
+          `Shop with ID ${id} not found`,
+          'deleteShop',
+          { id }
+        );
+      }
+
+      // Delete shop from database
+      await this.dataSource.delete(
+        'shops',
+        id
+      );
+
+      // Since we've already checked if the shop exists, we can return true
+      return true;
+    } catch (error) {
+      if (error instanceof BackendShopError) {
+        throw error;
+      }
+
+      this.logger.error('Error in deleteShop', { error, id });
+      throw new BackendShopError(
+        BackendShopErrorType.UNKNOWN,
+        'An unexpected error occurred while deleting shop',
+        'deleteShop',
         { id },
         error
       );

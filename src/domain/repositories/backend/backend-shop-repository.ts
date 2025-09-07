@@ -1,4 +1,4 @@
-import { PaginatedShopsEntity, ShopEntity, ShopStatsEntity } from "../../entities/backend/backend-shop.entity";
+import { CreateShopEntity, PaginatedShopsEntity, ShopEntity, ShopStatsEntity, UpdateShopEntity } from "../../entities/backend/backend-shop.entity";
 import { PaginationParams } from "../../interfaces/pagination-types";
 
 /**
@@ -56,4 +56,29 @@ export interface BackendShopRepository {
    * @throws BackendShopError if the operation fails
    */
   getShopById(id: string): Promise<ShopEntity | null>;
+
+  /**
+   * Create a new shop
+   * @param shop Shop data to create
+   * @returns Created shop entity
+   * @throws BackendShopError if the operation fails
+   */
+  createShop(shop: Omit<CreateShopEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopEntity>;
+
+  /**
+   * Update an existing shop
+   * @param id Shop ID
+   * @param shop Shop data to update
+   * @returns Updated shop entity
+   * @throws BackendShopError if the operation fails
+   */
+  updateShop(id: string, shop: Partial<Omit<UpdateShopEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ShopEntity>;
+
+  /**
+   * Delete a shop
+   * @param id Shop ID
+   * @returns true if deleted successfully
+   * @throws BackendShopError if the operation fails
+   */
+  deleteShop(id: string): Promise<boolean>;
 }

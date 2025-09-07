@@ -80,8 +80,12 @@ import {
   ToggleServiceAvailabilityUseCase,
   UpdateServiceUseCase
 } from '../application/usecases/backend/services';
+import { CreateShopUseCase } from "../application/usecases/backend/shops/CreateShopUseCase";
+import { DeleteShopUseCase } from "../application/usecases/backend/shops/DeleteShopUseCase";
+import { GetShopByIdUseCase } from "../application/usecases/backend/shops/GetShopByIdUseCase";
 import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
 import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
+import { UpdateShopUseCase } from "../application/usecases/backend/shops/UpdateShopUseCase";
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
@@ -151,6 +155,10 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository);
     const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository);
+    const getShopByIdUseCase = new GetShopByIdUseCase(shopRepository);
+    const createShopUseCase = new CreateShopUseCase(shopRepository);
+    const updateShopUseCase = new UpdateShopUseCase(shopRepository);
+    const deleteShopUseCase = new DeleteShopUseCase(shopRepository);
 
     // Queues use cases
     const getQueueByIdUseCase = new GetQueueByIdUseCase(queueRepository, logger);
@@ -252,6 +260,10 @@ export async function createBackendContainer(): Promise<Container> {
     const backendShopsService = new BackendShopsService(
       getShopsPaginatedUseCase,
       getShopStatsUseCase,
+      getShopByIdUseCase,
+      createShopUseCase,
+      updateShopUseCase,
+      deleteShopUseCase,
       logger
     );
 

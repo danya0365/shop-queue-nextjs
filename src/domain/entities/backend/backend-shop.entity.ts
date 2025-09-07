@@ -1,5 +1,4 @@
 import { PaginatedResult } from "../../interfaces/pagination-types";
-import { CategoryEntity } from "./backend-category.entity";
 
 /**
  * Shop entity representing a business in the system
@@ -18,18 +17,51 @@ export interface ShopEntity {
   timezone: string;
   currency: string;
   language: string;
-  status: ShopStatus;
+  categories: ShopCategoryEntity[];
   ownerId: string;
-  ownerName?: string; // Joined data
+  ownerName?: string; // Join from profiles table
+  status: ShopStatus;
+  openingHours: OpeningHourEntity[]; // Join from shop_opening_hours table
+  queueCount: number;
+  totalServices: number;
+  rating: number;
+  totalReviews: number;
   createdAt: string;
   updatedAt: string;
-  categories: ShopCategoryEntity[];
 }
 
-export type ShopCategoryEntity = Partial<CategoryEntity> & {
+export interface CreateShopEntity {
+  name: string;
+  description: string;
+  address: string;
+  phone: string;
+  email: string;
+  ownerId: string;
+  status: ShopStatus;
+  openingHours?: OpeningHourEntity[];
+}
+
+export interface UpdateShopEntity {
+  name?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  status?: ShopStatus;
+  openingHours?: OpeningHourEntity[];
+}
+
+export interface ShopCategoryEntity {
   id: string;
   name: string;
-};
+}
+
+export interface OpeningHourEntity {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isOpen: boolean;
+}
 
 /**
  * Shop status enum

@@ -1,24 +1,16 @@
-import { PaginatedShopsDTO } from '@/src/application/dtos/backend/shops-dto';
+import { GetShopsPaginatedInput, PaginatedShopsDTO } from '@/src/application/dtos/backend/shops-dto';
 import { ShopMapper } from '@/src/application/mappers/backend/shop-mapper';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import { BackendShopRepository } from '@/src/domain/repositories/backend/backend-shop-repository';
-
-/**
- * Input DTO for GetShopsPaginatedUseCase
- */
-export interface GetShopsPaginatedUseCaseInput {
-  page: number;
-  perPage: number;
-}
+import { BackendShopRepository, BackendShopError, BackendShopErrorType } from '@/src/domain/repositories/backend/backend-shop-repository';
 
 /**
  * Use case for getting paginated shops data
  * Following SOLID principles and Clean Architecture
  */
-export class GetShopsPaginatedUseCase implements IUseCase<GetShopsPaginatedUseCaseInput, PaginatedShopsDTO> {
+export class GetShopsPaginatedUseCase implements IUseCase<GetShopsPaginatedInput, PaginatedShopsDTO> {
   constructor(
-    private readonly shopRepository: BackendShopRepository
+    private shopRepository: BackendShopRepository
   ) { }
 
   /**
@@ -26,29 +18,27 @@ export class GetShopsPaginatedUseCase implements IUseCase<GetShopsPaginatedUseCa
    * @param input Pagination parameters
    * @returns Paginated shops data
    */
-  async execute(input: GetShopsPaginatedUseCaseInput): Promise<PaginatedShopsDTO> {
-    const { page, perPage } = input;
-    
-    // Validate input
-    if (page < 1) {
-      throw new Error('Page must be greater than 0');
+  async execute(input: GetShopsPaginatedInput): Promise<PaginatedShopsDTO> {
+    try {
+      const paginationParams: PaginationParams = {
+        page: input.page || 1,
+        limit: input.limit || 10
+      };
+
+      const paginatedShops = await this.shopRepository.getPaginatedShops(paginationParams);
+      return ShopMapper.toPaginatedDTO(paginatedShops);
+    } catch (error) {
+      if (error instanceof BackendShopError) {
+        throw error;
+      }
+      
+      throw new BackendShopError(
+        BackendShopErrorType.UNKNOWN,
+        'Failed to get paginated shops',
+        'GetShopsPaginatedUseCase.execute',
+        {},
+        error
+      );
     }
-
-    if (perPage < 1 || perPage > 100) {
-      throw new Error('Per page must be between 1 and 100');
-    }
-
-    const paginationParams: PaginationParams = {
-      page,
-      limit: perPage
-    };
-
-    const shops = await this.shopRepository.getPaginatedShops(paginationParams);
-    const shopsDTO = shops.data.map(shop => ShopMapper.toDTO(shop));
-
-    return {
-      data: shopsDTO,
-      pagination: shops.pagination
-    };
   }
 }
