@@ -17,6 +17,7 @@ import { RewardTransactionBackendService } from "../application/services/shop/ba
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
+import { createShopBackendShopsService } from "../application/services/shop/backend/ShopBackendShopsService";
 import { ShopService } from "../application/services/shop/shop-service";
 import { SubscriptionService } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
@@ -25,6 +26,7 @@ import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-a
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-shop-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -53,6 +55,9 @@ export async function createServerContainer(): Promise<Container> {
     const authDatasource = new SupabaseAuthDataSource(logger, supabase);
     const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
+    // Create repository instances
+    const shopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
+
     // Create service instances
     const authService = new AuthService(authDatasource, logger);
     const profileService = new ProfileService(profileAdapter, logger);
@@ -75,6 +80,7 @@ export async function createServerContainer(): Promise<Container> {
     const shopSettingsBackendService = new ShopSettingsBackendService(logger);
     const notificationSettingsBackendService = new NotificationSettingsBackendService(logger);
     const rewardTransactionBackendService = new RewardTransactionBackendService(logger);
+    const shopBackendShopsService = createShopBackendShopsService(shopRepository, logger);
 
     // Register all services in the container
     container.registerInstance("AuthService", authService);
@@ -96,6 +102,9 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("ShopSettingsBackendService", shopSettingsBackendService);
     container.registerInstance("NotificationSettingsBackendService", notificationSettingsBackendService);
     container.registerInstance("RewardTransactionBackendService", rewardTransactionBackendService);
+
+    // Shop Backend services
+    container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
 
     logger.info("Server container initialized successfully");
   } catch (error) {
