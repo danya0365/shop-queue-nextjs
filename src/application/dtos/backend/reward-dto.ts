@@ -1,4 +1,4 @@
-export type RewardType = 'discount' | 'free_item' | 'cashback' | 'special_privilege';
+import { RewardType } from '@/src/domain/entities/backend/backend-reward.entity';
 
 export interface RewardDTO {
   id: string;
@@ -40,6 +40,7 @@ export interface RewardUsageDTO {
 export interface RewardsDataDTO {
   rewards: RewardDTO[];
   stats: RewardStatsDTO;
+  typeStats: RewardTypeStatsDTO;
   recentUsage: RewardUsageDTO[];
   totalCount: number;
 }

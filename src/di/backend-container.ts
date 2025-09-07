@@ -15,6 +15,12 @@ import { GetPromotionByIdUseCase } from '@/src/application/usecases/backend/prom
 import { GetPromotionsPaginatedUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionsPaginatedUseCase';
 import { GetPromotionStatsUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionStatsUseCase';
 import { UpdatePromotionUseCase } from '@/src/application/usecases/backend/promotions/UpdatePromotionUseCase';
+import { CreateRewardUseCase } from '@/src/application/usecases/backend/rewards/CreateRewardUseCase';
+import { DeleteRewardUseCase } from '@/src/application/usecases/backend/rewards/DeleteRewardUseCase';
+import { GetRewardByIdUseCase } from '@/src/application/usecases/backend/rewards/GetRewardByIdUseCase';
+import { GetRewardsPaginatedUseCase } from '@/src/application/usecases/backend/rewards/GetRewardsPaginatedUseCase';
+import { GetRewardStatsUseCase } from '@/src/application/usecases/backend/rewards/GetRewardStatsUseCase';
+import { UpdateRewardUseCase } from '@/src/application/usecases/backend/rewards/UpdateRewardUseCase';
 import { BackendAuthUsersService } from "../application/services/backend/BackendAuthUsersService";
 import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
@@ -25,6 +31,7 @@ import { BackendPromotionsService } from "../application/services/backend/Backen
 import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
 import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
 import { BackendServicesService } from '../application/services/backend/BackendServicesService';
+import { BackendRewardsService } from "../application/services/backend/BackendRewardsService";
 import { BackendShopsService } from "../application/services/backend/BackendShopsService";
 import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-users/DeleteAuthUserUseCase";
 import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
@@ -90,9 +97,9 @@ import { SupabaseBackendProfileRepository } from "../infrastructure/repositories
 import { SupabaseBackendPromotionRepository } from "../infrastructure/repositories/backend/supabase-backend-promotion-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
+import { SupabaseBackendRewardRepository } from '../infrastructure/repositories/backend/supabase-backend-reward-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
-import { BackendRewardsService } from '../application/services/backend/BackendRewardsService';
 
 /**
  * Initialize a backend container with elevated privilege dependencies
@@ -128,6 +135,7 @@ export async function createBackendContainer(): Promise<Container> {
     const dashboardRepository = new SupabaseBackendDashboardRepository(databaseDatasource, logger);
     const categoryRepository = new SupabaseBackendCategoryRepository(databaseDatasource, logger);
     const serviceRepository = new SupabaseBackendServiceRepository(databaseDatasource, logger);
+    const rewardRepository = new SupabaseBackendRewardRepository(databaseDatasource, logger);
 
     // Create use case instances
     const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository, logger);
@@ -223,6 +231,14 @@ export async function createBackendContainer(): Promise<Container> {
     const updatePromotionUseCase = new UpdatePromotionUseCase(promotionRepository);
     const deletePromotionUseCase = new DeletePromotionUseCase(promotionRepository);
 
+    // Reward use cases
+    const getRewardsPaginatedUseCase = new GetRewardsPaginatedUseCase(rewardRepository);
+    const getRewardStatsUseCase = new GetRewardStatsUseCase(rewardRepository);
+    const getRewardByIdUseCase = new GetRewardByIdUseCase(rewardRepository);
+    const createRewardUseCase = new CreateRewardUseCase(rewardRepository);
+    const updateRewardUseCase = new UpdateRewardUseCase(rewardRepository);
+    const deleteRewardUseCase = new DeleteRewardUseCase(rewardRepository);
+
     // Create service instances
     const backendDashboardService = new BackendDashboardService(
       getDashboardStatsUseCase,
@@ -317,6 +333,12 @@ export async function createBackendContainer(): Promise<Container> {
     );
 
     const backendRewardsService = new BackendRewardsService(
+      getRewardsPaginatedUseCase,
+      getRewardStatsUseCase,
+      getRewardByIdUseCase,
+      createRewardUseCase,
+      updateRewardUseCase,
+      deleteRewardUseCase,
       logger
     );
 

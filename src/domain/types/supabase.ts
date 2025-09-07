@@ -2144,6 +2144,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_type_stats_by_shop_view: {
+        Row: {
+          calculated_at: string | null
+          cashback_count: number | null
+          cashback_percentage: number | null
+          cashback_total_value: number | null
+          discount_count: number | null
+          discount_percentage: number | null
+          discount_total_value: number | null
+          free_item_count: number | null
+          free_item_percentage: number | null
+          free_item_total_value: number | null
+          reward_type_stats: Json | null
+          shop_id: string | null
+          shop_name: string | null
+          shop_slug: string | null
+          special_privilege_count: number | null
+          special_privilege_percentage: number | null
+          special_privilege_total_value: number | null
+          total_rewards: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_by_shop_stats_view: {
         Row: {
           available_services: number | null

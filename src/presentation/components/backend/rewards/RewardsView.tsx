@@ -2,7 +2,7 @@
 
 import { RewardsViewModel } from '@/src/presentation/presenters/backend/rewards/RewardsPresenter';
 import { useRewardsPresenter } from '@/src/presentation/presenters/backend/rewards/useRewardsPresenter';
-import type { RewardType } from '@/src/domain/entities/RewardEntity';
+import type { RewardType } from '@/src/domain/entities/backend/backend-reward.entity';
 
 interface RewardsViewProps {
   viewModel: RewardsViewModel;
@@ -10,7 +10,7 @@ interface RewardsViewProps {
 
 export function RewardsView({ viewModel }: RewardsViewProps) {
   const [state, actions] = useRewardsPresenter();
-  const { rewardsData, rewardTypeStats } = viewModel;
+  const { rewardsData } = viewModel;
 
   const getRewardTypeColor = (type: RewardType) => {
     switch (type) {
@@ -126,8 +126,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">ส่วนลด</h3>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{rewardTypeStats.discount.count}</p>
-              <p className="text-xs backend-text-muted">{rewardTypeStats.discount.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-blue-600 mt-2">{rewardsData.typeStats.discount.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.discount.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-blue-600 text-xl">🎫</span>
@@ -138,8 +138,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">ของฟรี</h3>
-              <p className="text-2xl font-bold text-green-600 mt-2">{rewardTypeStats.free_item.count}</p>
-              <p className="text-xs backend-text-muted">{rewardTypeStats.free_item.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.typeStats.free_item.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.free_item.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <span className="text-green-600 text-xl">🎁</span>
@@ -150,8 +150,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">คืนเงิน</h3>
-              <p className="text-2xl font-bold text-purple-600 mt-2">{rewardTypeStats.cashback.count}</p>
-              <p className="text-xs backend-text-muted">{rewardTypeStats.cashback.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-purple-600 mt-2">{rewardsData.typeStats.cashback.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.cashback.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <span className="text-purple-600 text-xl">💰</span>
@@ -162,8 +162,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="backend-text-muted text-sm font-medium">สิทธิพิเศษ</h3>
-              <p className="text-2xl font-bold text-orange-600 mt-2">{rewardTypeStats.special_privilege.count}</p>
-              <p className="text-xs backend-text-muted">{rewardTypeStats.special_privilege.percentage}% ของทั้งหมด</p>
+              <p className="text-2xl font-bold text-orange-600 mt-2">{rewardsData.typeStats.special_privilege.count}</p>
+              <p className="text-xs backend-text-muted">{rewardsData.typeStats.special_privilege.percentage}% ของทั้งหมด</p>
             </div>
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <span className="text-orange-600 text-xl">👑</span>

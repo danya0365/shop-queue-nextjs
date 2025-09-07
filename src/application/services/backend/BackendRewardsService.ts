@@ -1,255 +1,129 @@
-import type {
-  CreateRewardDTO,
-  RewardDTO,
-  RewardsDataDTO,
-  RewardStatsDTO,
-  RewardTypeStatsDTO,
-  RewardUsageDTO,
-  UpdateRewardDTO
-} from '@/src/application/dtos/backend/reward-dto';
+import type { CreateRewardDTO, RewardDTO, RewardsDataDTO, RewardStatsDTO, UpdateRewardDTO } from '@/src/application/dtos/backend/reward-dto';
+import { GetRewardsPaginatedInput } from '@/src/application/usecases/backend/rewards/GetRewardsPaginatedUseCase';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IBackendRewardsService {
   getRewardsData(page?: number, perPage?: number): Promise<RewardsDataDTO>;
-  getRewardTypeStats(): Promise<RewardTypeStatsDTO>;
+  getRewardStats(): Promise<RewardStatsDTO>;
   getRewardById(id: string): Promise<RewardDTO>;
-  createReward(rewardData: CreateRewardDTO): Promise<RewardDTO>;
-  updateReward(id: string, rewardData: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO>;
+  createReward(params: CreateRewardDTO): Promise<RewardDTO>;
+  updateReward(id: string, params: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO>;
   deleteReward(id: string): Promise<boolean>;
 }
-export class BackendRewardsService implements IBackendRewardsService {
 
+export class BackendRewardsService implements IBackendRewardsService {
   constructor(
+    private readonly getRewardsPaginatedUseCase: IUseCase<GetRewardsPaginatedInput, RewardsDataDTO>,
+    private readonly getRewardStatsUseCase: IUseCase<void, RewardStatsDTO>,
+    private readonly getRewardByIdUseCase: IUseCase<string, RewardDTO>,
+    private readonly createRewardUseCase: IUseCase<CreateRewardDTO, RewardDTO>,
+    private readonly updateRewardUseCase: IUseCase<UpdateRewardDTO, RewardDTO>,
+    private readonly deleteRewardUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
   ) { }
 
-  async getRewardsData(): Promise<RewardsDataDTO> {
-    // Mock data - in real implementation this would call repository
-    const mockRewards: RewardDTO[] = [
-      {
-        id: '1',
-        shopId: 'shop-1',
-        name: 'ส่วนลด 10%',
-        description: 'รับส่วนลด 10% สำหรับการใช้บริการครั้งถัดไป',
-        type: 'discount',
-        pointsRequired: 100,
-        value: 10,
-        isAvailable: true,
-        expiryDays: 30,
-        usageLimit: 100,
-        icon: '🎫',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
-      },
-      {
-        id: '2',
-        shopId: 'shop-1',
-        name: 'เครื่องดื่มฟรี',
-        description: 'รับเครื่องดื่มฟรี 1 แก้ว',
-        type: 'free_item',
-        pointsRequired: 150,
-        value: 50,
-        isAvailable: true,
-        expiryDays: 7,
-        usageLimit: 50,
-        icon: '🥤',
-        createdAt: '2024-01-02T00:00:00Z',
-        updatedAt: '2024-01-02T00:00:00Z'
-      },
-      {
-        id: '3',
-        shopId: 'shop-1',
-        name: 'คืนเงิน 50 บาท',
-        description: 'รับเงินคืน 50 บาท เข้าบัญชี',
-        type: 'cashback',
-        pointsRequired: 200,
-        value: 50,
-        isAvailable: true,
-        expiryDays: 60,
-        usageLimit: null,
-        icon: '💰',
-        createdAt: '2024-01-03T00:00:00Z',
-        updatedAt: '2024-01-03T00:00:00Z'
-      },
-      {
-        id: '4',
-        shopId: 'shop-1',
-        name: 'บริการพิเศษ VIP',
-        description: 'รับบริการในช่วง VIP ไม่ต้องรอคิว',
-        type: 'special_privilege',
-        pointsRequired: 300,
-        value: 100,
-        isAvailable: false,
-        expiryDays: 14,
-        usageLimit: 10,
-        icon: '👑',
-        createdAt: '2024-01-04T00:00:00Z',
-        updatedAt: '2024-01-04T00:00:00Z'
-      },
-      {
-        id: '5',
-        shopId: 'shop-1',
-        name: 'ส่วนลด 20%',
-        description: 'รับส่วนลด 20% สำหรับบริการทั้งหมด',
-        type: 'discount',
-        pointsRequired: 250,
-        value: 20,
-        isAvailable: true,
-        expiryDays: 30,
-        usageLimit: 25,
-        icon: '🎟️',
-        createdAt: '2024-01-05T00:00:00Z',
-        updatedAt: '2024-01-05T00:00:00Z'
-      }
-    ];
+  /**
+   * Get rewards data including paginated rewards and statistics
+   * @param page Page number (default: 1)
+   * @param perPage Items per page (default: 10)
+   * @returns Rewards data DTO
+   */
+  async getRewardsData(page: number = 1, perPage: number = 10): Promise<RewardsDataDTO> {
+    try {
+      this.logger.info('Getting rewards data', { page, perPage });
 
-    const mockStats: RewardStatsDTO = {
-      totalRewards: 5,
-      activeRewards: 4,
-      totalRedemptions: 156,
-      totalPointsRedeemed: 24800,
-      averageRedemptionValue: 65.5,
-      popularRewardType: 'discount'
-    };
-
-    const mockRecentUsage: RewardUsageDTO[] = [
-      {
-        id: 'usage-1',
-        rewardId: '1',
-        customerId: 'customer-1',
-        customerName: 'สมชาย ใจดี',
-        pointsUsed: 100,
-        rewardValue: 10,
-        usedAt: '2024-01-10T10:30:00Z',
-        queueId: 'queue-1',
-        queueNumber: 'Q001'
-      },
-      {
-        id: 'usage-2',
-        rewardId: '2',
-        customerId: 'customer-2',
-        customerName: 'สมหญิง รักสวย',
-        pointsUsed: 150,
-        rewardValue: 50,
-        usedAt: '2024-01-10T11:15:00Z',
-        queueId: 'queue-2',
-        queueNumber: 'Q002'
-      },
-      {
-        id: 'usage-3',
-        rewardId: '3',
-        customerId: 'customer-3',
-        customerName: 'วิชัย เก่งมาก',
-        pointsUsed: 200,
-        rewardValue: 50,
-        usedAt: '2024-01-10T14:20:00Z',
-        queueId: null,
-        queueNumber: null
-      }
-    ];
-
-    return {
-      rewards: mockRewards,
-      stats: mockStats,
-      recentUsage: mockRecentUsage,
-      totalCount: mockRewards.length
-    };
+      const result = await this.getRewardsPaginatedUseCase.execute({ page, limit: perPage });
+      return result;
+    } catch (error) {
+      this.logger.error('Error getting rewards data', { error, page, perPage });
+      throw error;
+    }
   }
 
-  async getRewardTypeStats(): Promise<RewardTypeStatsDTO> {
-    // Mock data for reward type statistics
-    return {
-      discount: {
-        count: 2,
-        percentage: 40,
-        totalValue: 30
-      },
-      free_item: {
-        count: 1,
-        percentage: 20,
-        totalValue: 50
-      },
-      cashback: {
-        count: 1,
-        percentage: 20,
-        totalValue: 50
-      },
-      special_privilege: {
-        count: 1,
-        percentage: 20,
-        totalValue: 100
-      },
-      totalRewards: 5
-    };
+  /**
+   * Get reward statistics
+   * @returns Reward stats DTO
+   */
+  async getRewardStats(): Promise<RewardStatsDTO> {
+    try {
+      this.logger.info('Getting reward stats');
+
+      const stats = await this.getRewardStatsUseCase.execute();
+      return stats;
+    } catch (error) {
+      this.logger.error('Error getting reward stats', { error });
+      throw error;
+    }
   }
 
+  /**
+   * Get a reward by ID
+   * @param id Reward ID
+   * @returns Reward DTO
+   */
   async getRewardById(id: string): Promise<RewardDTO> {
-    return {
-      id,
-      shopId: 'shop-1',
-      name: 'ส่วนลด 10%',
-      description: 'รับส่วนลด 10% สำหรับการใช้บริการครั้งถัดไป',
-      type: 'discount',
-      pointsRequired: 100,
-      value: 10,
-      isAvailable: true,
-      expiryDays: 30,
-      usageLimit: 100,
-      icon: '🎫',
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
-    };
+    try {
+      this.logger.info('Getting reward by ID', { id });
+
+      const result = await this.getRewardByIdUseCase.execute(id);
+      return result;
+    } catch (error) {
+      this.logger.error('Error getting reward by ID', { error, id });
+      throw error;
+    }
   }
 
-  async createReward(data: CreateRewardDTO): Promise<RewardDTO> {
-    // Mock implementation - in real app this would call repository
-    const newReward: RewardDTO = {
-      id: `reward-${Date.now()}`,
-      shopId: data.shopId,
-      name: data.name,
-      description: data.description || null,
-      type: data.type,
-      pointsRequired: data.pointsRequired,
-      value: data.value,
-      isAvailable: data.isAvailable ?? true,
-      expiryDays: data.expiryDays || null,
-      usageLimit: data.usageLimit || null,
-      icon: data.icon || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  /**
+   * Create a new reward
+   * @param params Reward creation parameters
+   * @returns Created reward DTO
+   */
+  async createReward(params: CreateRewardDTO): Promise<RewardDTO> {
+    try {
+      this.logger.info('Creating reward', { params });
 
-    return newReward;
+      const result = await this.createRewardUseCase.execute(params);
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating reward', { error, params });
+      throw error;
+    }
   }
 
-  async updateReward(id: string, rewardData: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO> {
-    // Mock implementation - in real app this would call repository
-    const updatedReward: RewardDTO = {
-      id,
-      shopId: 'shop-1', // Would come from database
-      name: rewardData.name || 'Updated Reward',
-      description: rewardData.description || null,
-      type: rewardData.type || 'discount',
-      pointsRequired: rewardData.pointsRequired || 100,
-      value: rewardData.value || 10,
-      isAvailable: rewardData.isAvailable ?? true,
-      expiryDays: rewardData.expiryDays || null,
-      usageLimit: rewardData.usageLimit || null,
-      icon: rewardData.icon || null,
-      createdAt: '2024-01-01T00:00:00Z', // Would come from database
-      updatedAt: new Date().toISOString()
-    };
+  /**
+   * Update an existing reward
+   * @param id Reward ID
+   * @param params Reward update parameters
+   * @returns Updated reward DTO
+   */
+  async updateReward(id: string, params: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO> {
+    try {
+      this.logger.info('Updating reward', { id, params });
 
-    return updatedReward;
+      const updateData = { ...params, id };
+      const result = await this.updateRewardUseCase.execute(updateData);
+      return result;
+    } catch (error) {
+      this.logger.error('Error updating reward', { error, id, params });
+      throw error;
+    }
   }
 
+  /**
+   * Delete a reward
+   * @param id Reward ID
+   * @returns Success flag
+   */
   async deleteReward(id: string): Promise<boolean> {
-    // Mock implementation - in real app this would call repository
-    return true;
-  }
+    try {
+      this.logger.info('Deleting reward', { id });
 
-  async toggleRewardAvailability(id: string, isAvailable: boolean): Promise<boolean> {
-    // Mock implementation - in real app this would call repository
-    return true;
+      const result = await this.deleteRewardUseCase.execute(id);
+      return result;
+    } catch (error) {
+      this.logger.error('Error deleting reward', { error, id });
+      throw error;
+    }
   }
 }

@@ -1,6 +1,5 @@
 import type {
-  RewardsDataDTO,
-  RewardTypeStatsDTO
+  RewardsDataDTO
 } from '@/src/application/dtos/backend/reward-dto';
 import { IBackendRewardsService } from '@/src/application/services/backend/BackendRewardsService';
 import { getBackendContainer } from '@/src/di/backend-container';
@@ -8,7 +7,6 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface RewardsViewModel {
   rewardsData: RewardsDataDTO;
-  rewardTypeStats: RewardTypeStatsDTO;
 }
 
 export class RewardsPresenter {
@@ -21,10 +19,7 @@ export class RewardsPresenter {
     try {
       this.logger.info('RewardsPresenter: Getting rewards view model');
 
-      const [rewardsData, rewardTypeStats] = await Promise.all([
-        this.rewardsService.getRewardsData(),
-        this.rewardsService.getRewardTypeStats()
-      ]);
+      const rewardsData = await this.rewardsService.getRewardsData();
 
       this.logger.info('RewardsPresenter: Successfully retrieved rewards data', {
         totalRewards: rewardsData.totalCount,
@@ -32,8 +27,7 @@ export class RewardsPresenter {
       });
 
       return {
-        rewardsData,
-        rewardTypeStats
+        rewardsData
       };
     } catch (error) {
       this.logger.error('RewardsPresenter: Error getting view model', error);

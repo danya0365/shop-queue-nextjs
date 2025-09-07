@@ -207,3 +207,135 @@ SELECT
     popularity_rank
 FROM ranked_rewards
 ORDER BY shop_id, popularity_rank;
+
+
+-- View สำหรับสถิติประเภทของรางวัล (Reward Type Stats)
+-- View สำหรับ Global Summary (ไม่แยกตาม shop)
+-- TODO: ต้องแก้ไขให้ตรงกับ DTO
+
+-- แยกตาม shop_id และแสดง summary ของแต่ละประเภทรางวัล
+
+CREATE OR REPLACE VIEW reward_type_stats_by_shop_view AS
+WITH reward_stats_base AS (
+    SELECT 
+        shop_id,
+        type as reward_type,
+        COUNT(*) as count,
+        SUM(value) as total_value
+    FROM public.rewards
+    WHERE is_available = true  -- เฉพาะรางวัลที่ยังใช้งานได้
+    GROUP BY shop_id, type
+),
+shop_totals AS (
+    SELECT 
+        shop_id,
+        SUM(count) as total_rewards
+    FROM reward_stats_base
+    GROUP BY shop_id
+),
+reward_type_details AS (
+    SELECT 
+        st.shop_id,
+        st.total_rewards,
+        
+        -- Discount rewards
+        COALESCE(discount_stats.count, 0) as discount_count,
+        CASE 
+            WHEN st.total_rewards > 0 
+            THEN ROUND((COALESCE(discount_stats.count, 0)::DECIMAL / st.total_rewards * 100), 2)
+            ELSE 0 
+        END as discount_percentage,
+        COALESCE(discount_stats.total_value, 0) as discount_total_value,
+        
+        -- Free item rewards  
+        COALESCE(free_item_stats.count, 0) as free_item_count,
+        CASE 
+            WHEN st.total_rewards > 0 
+            THEN ROUND((COALESCE(free_item_stats.count, 0)::DECIMAL / st.total_rewards * 100), 2)
+            ELSE 0 
+        END as free_item_percentage,
+        COALESCE(free_item_stats.total_value, 0) as free_item_total_value,
+        
+        -- Cashback rewards
+        COALESCE(cashback_stats.count, 0) as cashback_count,
+        CASE 
+            WHEN st.total_rewards > 0 
+            THEN ROUND((COALESCE(cashback_stats.count, 0)::DECIMAL / st.total_rewards * 100), 2)
+            ELSE 0 
+        END as cashback_percentage,
+        COALESCE(cashback_stats.total_value, 0) as cashback_total_value,
+        
+        -- Special privilege rewards
+        COALESCE(special_privilege_stats.count, 0) as special_privilege_count,
+        CASE 
+            WHEN st.total_rewards > 0 
+            THEN ROUND((COALESCE(special_privilege_stats.count, 0)::DECIMAL / st.total_rewards * 100), 2)
+            ELSE 0 
+        END as special_privilege_percentage,
+        COALESCE(special_privilege_stats.total_value, 0) as special_privilege_total_value
+        
+    FROM shop_totals st
+    LEFT JOIN reward_stats_base discount_stats 
+        ON st.shop_id = discount_stats.shop_id 
+        AND discount_stats.reward_type = 'discount'
+    LEFT JOIN reward_stats_base free_item_stats 
+        ON st.shop_id = free_item_stats.shop_id 
+        AND free_item_stats.reward_type = 'free_item'
+    LEFT JOIN reward_stats_base cashback_stats 
+        ON st.shop_id = cashback_stats.shop_id 
+        AND cashback_stats.reward_type = 'cashback'
+    LEFT JOIN reward_stats_base special_privilege_stats 
+        ON st.shop_id = special_privilege_stats.shop_id 
+        AND special_privilege_stats.reward_type = 'special_privilege'
+)
+SELECT 
+    rtd.shop_id,
+    s.name as shop_name,
+    s.slug as shop_slug,
+    
+    -- JSON Object ตาม DTO Structure
+    JSON_BUILD_OBJECT(
+        'discount', JSON_BUILD_OBJECT(
+            'count', rtd.discount_count,
+            'percentage', rtd.discount_percentage,
+            'totalValue', rtd.discount_total_value
+        ),
+        'free_item', JSON_BUILD_OBJECT(
+            'count', rtd.free_item_count,
+            'percentage', rtd.free_item_percentage,
+            'totalValue', rtd.free_item_total_value
+        ),
+        'cashback', JSON_BUILD_OBJECT(
+            'count', rtd.cashback_count,
+            'percentage', rtd.cashback_percentage,
+            'totalValue', rtd.cashback_total_value
+        ),
+        'special_privilege', JSON_BUILD_OBJECT(
+            'count', rtd.special_privilege_count,
+            'percentage', rtd.special_privilege_percentage,
+            'totalValue', rtd.special_privilege_total_value
+        ),
+        'total_rewards', rtd.total_rewards
+    ) as reward_type_stats,
+    
+    -- Individual columns for easier querying
+    rtd.discount_count,
+    rtd.discount_percentage,
+    rtd.discount_total_value,
+    rtd.free_item_count,
+    rtd.free_item_percentage,
+    rtd.free_item_total_value,
+    rtd.cashback_count,
+    rtd.cashback_percentage,
+    rtd.cashback_total_value,
+    rtd.special_privilege_count,
+    rtd.special_privilege_percentage,
+    rtd.special_privilege_total_value,
+    rtd.total_rewards,
+    
+    -- Metadata
+    NOW() as calculated_at
+    
+FROM reward_type_details rtd
+JOIN public.shops s ON rtd.shop_id = s.id
+ORDER BY s.name, rtd.total_rewards DESC;
