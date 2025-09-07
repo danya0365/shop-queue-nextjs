@@ -157,7 +157,6 @@ export class SupabaseBackendRewardRepository extends BackendRepository implement
     try {
       // Use getAdvanced to fetch reward type statistics
       const queryOptions: QueryOptions = {
-        sort: [{ field: 'calculated_at', direction: SortDirection.DESC }],
         pagination: {
           limit: 10,
           offset: 0
@@ -165,45 +164,38 @@ export class SupabaseBackendRewardRepository extends BackendRepository implement
       };
 
       interface TypeStatsResult extends Record<string, unknown> {
-        shop_id: string;
-        shop_name: string;
-        shop_slug: string;
-        reward_type_stats: {
-          discount: { count: number; percentage: number; totalValue: number };
-          free_item: { count: number; percentage: number; totalValue: number };
-          cashback: { count: number; percentage: number; totalValue: number };
-          special_privilege: { count: number; percentage: number; totalValue: number };
-          totalRewards: number;
-        };
-        // Individual columns for direct access
-        discount_count: number;
-        discount_percentage: number;
-        discount_total_value: number;
-        free_item_count: number;
-        free_item_percentage: number;
-        free_item_total_value: number;
-        cashback_count: number;
-        cashback_percentage: number;
-        cashback_total_value: number;
-        special_privilege_count: number;
-        special_privilege_percentage: number;
-        special_privilege_total_value: number;
+        discount: { count: number; percentage: number; totalValue: number };
+        free_item: { count: number; percentage: number; totalValue: number };
+        cashback: { count: number; percentage: number; totalValue: number };
+        special_privilege: { count: number; percentage: number; totalValue: number };
         total_rewards: number;
-        calculated_at: string;
       }
 
-      const typeStatsData = await this.dataSource.getAdvanced<TypeStatsResult>(
-        'reward_type_stats_by_shop_view',
+      const typeStatsDatas = await this.dataSource.getAdvanced<TypeStatsResult>(
+        'reward_type_stats_summary_view',
         queryOptions
       );
 
+      if (!typeStatsDatas || typeStatsDatas.length === 0) {
+        // If no stats are found, return default values
+        return {
+          discount: { count: 0, percentage: 0, totalValue: 0 },
+          free_item: { count: 0, percentage: 0, totalValue: 0 },
+          cashback: { count: 0, percentage: 0, totalValue: 0 },
+          special_privilege: { count: 0, percentage: 0, totalValue: 0 },
+          totalRewards: 0
+        };
+      }
+
+      const typeStatsData = typeStatsDatas[0];
+
       // Initialize default stats structure
       const defaultStats = {
-        discount: { count: 0, percentage: 0, totalValue: 0 },
-        free_item: { count: 0, percentage: 0, totalValue: 0 },
-        cashback: { count: 0, percentage: 0, totalValue: 0 },
-        special_privilege: { count: 0, percentage: 0, totalValue: 0 },
-        totalRewards: 0
+        discount: { count: typeStatsData.discount.count, percentage: typeStatsData.discount.percentage, totalValue: typeStatsData.discount.totalValue },
+        free_item: { count: typeStatsData.free_item.count, percentage: typeStatsData.free_item.percentage, totalValue: typeStatsData.free_item.totalValue },
+        cashback: { count: typeStatsData.cashback.count, percentage: typeStatsData.cashback.percentage, totalValue: typeStatsData.cashback.totalValue },
+        special_privilege: { count: typeStatsData.special_privilege.count, percentage: typeStatsData.special_privilege.percentage, totalValue: typeStatsData.special_privilege.totalValue },
+        totalRewards: typeStatsData.total_rewards
       };
 
       return defaultStats;

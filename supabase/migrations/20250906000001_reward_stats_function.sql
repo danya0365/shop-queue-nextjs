@@ -211,7 +211,170 @@ ORDER BY shop_id, popularity_rank;
 
 -- View สำหรับสถิติประเภทของรางวัล (Reward Type Stats)
 -- View สำหรับ Global Summary (ไม่แยกตาม shop)
--- TODO: ต้องแก้ไขให้ตรงกับ DTO
+CREATE OR REPLACE VIEW public.reward_type_stats_summary_view AS
+WITH reward_stats AS (
+  SELECT 
+    r.type,
+    COUNT(*) as count,
+    SUM(r.value) as total_value,
+    COUNT(*) * 100.0 / (SELECT COUNT(*) FROM rewards WHERE is_available = true) as percentage
+  FROM public.rewards r
+  WHERE r.is_available = true
+  GROUP BY r.type
+),
+total_rewards AS (
+  SELECT COUNT(*) as total_count
+  FROM public.rewards r
+  WHERE r.is_available = true
+)
+SELECT 
+  -- Discount rewards
+  COALESCE(
+    (SELECT jsonb_build_object(
+      'count', rs.count,
+      'percentage', ROUND(rs.percentage, 2),
+      'totalValue', rs.total_value
+    )
+    FROM reward_stats rs 
+    WHERE rs.type = 'discount'), 
+    jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+  ) as discount,
+  
+  -- Free item rewards
+  COALESCE(
+    (SELECT jsonb_build_object(
+      'count', rs.count,
+      'percentage', ROUND(rs.percentage, 2),
+      'totalValue', rs.total_value
+    )
+    FROM reward_stats rs 
+    WHERE rs.type = 'free_item'), 
+    jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+  ) as free_item,
+  
+  -- Cashback rewards
+  COALESCE(
+    (SELECT jsonb_build_object(
+      'count', rs.count,
+      'percentage', ROUND(rs.percentage, 2),
+      'totalValue', rs.total_value
+    )
+    FROM reward_stats rs 
+    WHERE rs.type = 'cashback'), 
+    jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+  ) as cashback,
+  
+  -- Special privilege rewards
+  COALESCE(
+    (SELECT jsonb_build_object(
+      'count', rs.count,
+      'percentage', ROUND(rs.percentage, 2),
+      'totalValue', rs.total_value
+    )
+    FROM reward_stats rs 
+    WHERE rs.type = 'special_privilege'), 
+    jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+  ) as special_privilege,
+  
+  -- Total rewards count
+  tr.total_count as total_rewards
+
+FROM total_rewards tr;
+
+-- Create a function version that can filter by shop_id if needed
+CREATE OR REPLACE FUNCTION public.get_reward_type_stats(
+  p_shop_id UUID DEFAULT NULL
+)
+RETURNS TABLE(
+  discount JSONB,
+  free_item JSONB,
+  cashback JSONB,
+  special_privilege JSONB,
+  total_rewards BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  WITH reward_stats AS (
+    SELECT 
+      r.type,
+      COUNT(*) as count,
+      SUM(r.value) as total_value,
+      COUNT(*) * 100.0 / (
+        SELECT COUNT(*) 
+        FROM rewards r2 
+        WHERE r2.is_available = true 
+        AND (p_shop_id IS NULL OR r2.shop_id = p_shop_id)
+      ) as percentage
+    FROM public.rewards r
+    WHERE r.is_available = true
+    AND (p_shop_id IS NULL OR r.shop_id = p_shop_id)
+    GROUP BY r.type
+  ),
+  total_rewards AS (
+    SELECT COUNT(*) as total_count
+    FROM public.rewards r
+    WHERE r.is_available = true
+    AND (p_shop_id IS NULL OR r.shop_id = p_shop_id)
+  )
+  SELECT 
+    -- Discount rewards
+    COALESCE(
+      (SELECT jsonb_build_object(
+        'count', rs.count,
+        'percentage', ROUND(rs.percentage, 2),
+        'totalValue', rs.total_value
+      )
+      FROM reward_stats rs 
+      WHERE rs.type = 'discount'), 
+      jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+    ) as discount,
+    
+    -- Free item rewards
+    COALESCE(
+      (SELECT jsonb_build_object(
+        'count', rs.count,
+        'percentage', ROUND(rs.percentage, 2),
+        'totalValue', rs.total_value
+      )
+      FROM reward_stats rs 
+      WHERE rs.type = 'free_item'), 
+      jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+    ) as free_item,
+    
+    -- Cashback rewards
+    COALESCE(
+      (SELECT jsonb_build_object(
+        'count', rs.count,
+        'percentage', ROUND(rs.percentage, 2),
+        'totalValue', rs.total_value
+      )
+      FROM reward_stats rs 
+      WHERE rs.type = 'cashback'), 
+      jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+    ) as cashback,
+    
+    -- Special privilege rewards
+    COALESCE(
+      (SELECT jsonb_build_object(
+        'count', rs.count,
+        'percentage', ROUND(rs.percentage, 2),
+        'totalValue', rs.total_value
+      )
+      FROM reward_stats rs 
+      WHERE rs.type = 'special_privilege'), 
+      jsonb_build_object('count', 0, 'percentage', 0, 'totalValue', 0)
+    ) as special_privilege,
+    
+    -- Total rewards count
+    tr.total_count::BIGINT as total_rewards
+
+  FROM total_rewards tr;
+END;
+$$;
 
 -- แยกตาม shop_id และแสดง summary ของแต่ละประเภทรางวัล
 

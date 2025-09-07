@@ -2182,6 +2182,16 @@ export type Database = {
           },
         ]
       }
+      reward_type_stats_summary_view: {
+        Row: {
+          cashback: Json | null
+          discount: Json | null
+          free_item: Json | null
+          special_privilege: Json | null
+          total_rewards: number | null
+        }
+        Relationships: []
+      }
       service_by_shop_stats_view: {
         Row: {
           available_services: number | null
@@ -2472,6 +2482,16 @@ export type Database = {
           completed: number
           cancelled: number
           no_show: number
+        }[]
+      }
+      get_reward_type_stats: {
+        Args: { p_shop_id?: string }
+        Returns: {
+          discount: Json
+          free_item: Json
+          cashback: Json
+          special_privilege: Json
+          total_rewards: number
         }[]
       }
       get_user_profiles: {
