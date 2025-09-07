@@ -23,8 +23,8 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
   const getTierColor = (tier: SubscriptionTier) => {
     const colors = {
       free: 'bg-gray-100 text-gray-800 border-gray-200',
-      pro: 'bg-blue-100 text-blue-800 border-blue-200',
-      enterprise: 'bg-purple-100 text-purple-800 border-purple-200'
+      pro: 'bg-info-light text-info-dark border-info',
+      enterprise: 'bg-priority text-white border-priority'
     };
     return colors[tier];
   };
@@ -44,10 +44,10 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-surface rounded-lg shadow-sm border border-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">แผนการใช้งาน</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">แผนการใช้งาน</h3>
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTierColor(tier)}`}>
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -67,21 +67,21 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
 
       <div className="space-y-4">
         {/* Shop Limits */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted-light rounded-lg">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-muted mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-gray-900">จำนวนร้านค้า</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">จำนวนร้านค้า</p>
+              <p className="text-xs text-muted">
                 {usage.currentShops} / {formatLimit(limits.maxShops)}
               </p>
             </div>
           </div>
           <div className="flex items-center">
             {!canCreateShop && (
-              <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mr-2">
+              <span className="text-xs text-error-dark bg-error-light px-2 py-1 rounded mr-2">
                 เต็มแล้ว
               </span>
             )}
@@ -89,7 +89,7 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
               <div className="w-16 bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    isNearLimit(usage.currentShops, limits.maxShops) ? 'bg-red-500' : 'bg-green-500'
+                    isNearLimit(usage.currentShops, limits.maxShops) ? 'bg-error' : 'bg-success'
                   }`}
                   style={{ width: `${getUsagePercentage(usage.currentShops, limits.maxShops)}%` }}
                 />
@@ -99,21 +99,21 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
         </div>
 
         {/* Queue Limits */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted-light rounded-lg">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-muted mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-gray-900">คิวต่อวัน</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">คิวต่อวัน</p>
+              <p className="text-xs text-muted">
                 {usage.todayQueues} / {formatLimit(limits.maxQueuesPerDay)}
               </p>
             </div>
           </div>
           <div className="flex items-center">
             {limits.maxQueuesPerDay && isNearLimit(usage.todayQueues, limits.maxQueuesPerDay) && (
-              <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded mr-2">
+              <span className="text-xs text-warning-dark bg-warning-light px-2 py-1 rounded mr-2">
                 ใกล้เต็ม
               </span>
             )}
@@ -121,7 +121,7 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
               <div className="w-16 bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    isNearLimit(usage.todayQueues, limits.maxQueuesPerDay) ? 'bg-orange-500' : 'bg-blue-500'
+                    isNearLimit(usage.todayQueues, limits.maxQueuesPerDay) ? 'bg-warning' : 'bg-info'
                   }`}
                   style={{ width: `${getUsagePercentage(usage.todayQueues, limits.maxQueuesPerDay)}%` }}
                 />
@@ -131,21 +131,21 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
         </div>
 
         {/* Staff Limits */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted-light rounded-lg">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-muted mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-gray-900">จำนวนพนักงาน</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">จำนวนพนักงาน</p>
+              <p className="text-xs text-muted">
                 {usage.currentStaff} / {formatLimit(limits.maxStaff)}
               </p>
             </div>
           </div>
           <div className="flex items-center">
             {limits.maxStaff && isNearLimit(usage.currentStaff, limits.maxStaff) && (
-              <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded mr-2">
+              <span className="text-xs text-warning-dark bg-warning-light px-2 py-1 rounded mr-2">
                 ใกล้เต็ม
               </span>
             )}
@@ -153,7 +153,7 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
               <div className="w-16 bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    isNearLimit(usage.currentStaff, limits.maxStaff) ? 'bg-orange-500' : 'bg-green-500'
+                    isNearLimit(usage.currentStaff, limits.maxStaff) ? 'bg-warning' : 'bg-success'
                   }`}
                   style={{ width: `${getUsagePercentage(usage.currentStaff, limits.maxStaff)}%` }}
                 />
@@ -163,48 +163,48 @@ export function SubscriptionLimitsCard({ tier, limits, usage, canCreateShop }: S
         </div>
 
         {/* Data Retention */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-muted-light rounded-lg">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-muted mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-gray-900">เก็บข้อมูล</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">เก็บข้อมูล</p>
+              <p className="text-xs text-muted">
                 {limits.dataRetentionMonths === null ? 'ตลอดชีพ' : `${limits.dataRetentionMonths} เดือน`}
               </p>
             </div>
           </div>
           {limits.dataRetentionMonths === 1 && (
-            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+            <span className="text-xs text-warning-dark bg-warning-light px-2 py-1 rounded">
               จำกัด
             </span>
           )}
         </div>
 
         {/* Premium Features */}
-        <div className="pt-4 border-t border-gray-200">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">ฟีเจอร์พิเศษ</h4>
+        <div className="pt-4 border-t border-border">
+          <h4 className="text-sm font-medium text-foreground mb-3">ฟีเจอร์พิเศษ</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className={`flex items-center ${limits.hasAnalytics ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`flex items-center ${limits.hasAnalytics ? 'text-success-dark' : 'text-muted'}`}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={limits.hasAnalytics ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
               </svg>
               Analytics
             </div>
-            <div className={`flex items-center ${limits.hasPromotionFeatures ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`flex items-center ${limits.hasPromotionFeatures ? 'text-success-dark' : 'text-muted'}`}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={limits.hasPromotionFeatures ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
               </svg>
               โปรโมชัน
             </div>
-            <div className={`flex items-center ${limits.hasAdvancedReports ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`flex items-center ${limits.hasAdvancedReports ? 'text-success-dark' : 'text-muted'}`}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={limits.hasAdvancedReports ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
               </svg>
               รายงานขั้นสูง
             </div>
-            <div className={`flex items-center ${limits.hasApiAccess ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`flex items-center ${limits.hasApiAccess ? 'text-success-dark' : 'text-muted'}`}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={limits.hasApiAccess ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
               </svg>
