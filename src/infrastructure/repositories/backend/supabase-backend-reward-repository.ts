@@ -13,7 +13,11 @@ type RewardWithJoins = RewardSchema & {
 };
 type RewardSchemaRecord = Record<string, unknown> & RewardSchema;
 type RewardStatsSchemaRecord = Record<string, unknown> & RewardStatsSchema;
-type RewardUsageSchemaRecord = Record<string, unknown> & RewardUsageSchema;
+type RewardUsageWithJoins = Record<string, unknown> & RewardUsageSchema & {
+  customers?: { name?: string },
+  rewards?: { name?: string, icon?: string },
+  queues?: { queue_number?: string }
+};
 
 /**
  * Supabase implementation of the reward repository
@@ -231,6 +235,7 @@ export class SupabaseBackendRewardRepository extends BackendRepository implement
         select: ['*'],
         joins: [
           { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
+          { table: 'rewards', on: { fromField: 'reward_id', toField: 'id' } },
           { table: 'queues', on: { fromField: 'queue_id', toField: 'id' } }
         ],
         sort: [{ field: 'used_at', direction: SortDirection.DESC }],
@@ -241,13 +246,22 @@ export class SupabaseBackendRewardRepository extends BackendRepository implement
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
-      const usageData = await this.dataSource.getAdvanced<RewardUsageSchemaRecord>(
+      const usageData = await this.dataSource.getAdvanced<RewardUsageWithJoins>(
         'reward_usages',
         queryOptions
       );
 
       // Map database results to domain entities
-      return usageData.map(usage => SupabaseBackendRewardMapper.usageToDomain(usage));
+      return usageData.map(usage => {
+        const usageWithJoinedData = usage as RewardUsageWithJoins;
+        return SupabaseBackendRewardMapper.usageToDomain({
+          ...usageWithJoinedData,
+          reward_name: usageWithJoinedData.rewards?.name || '',
+          reward_icon: usageWithJoinedData.rewards?.icon || '',
+          customer_name: usageWithJoinedData.customers?.name || '',
+          queue_number: usageWithJoinedData.queues?.queue_number || ''
+        });
+      });
     } catch (error) {
       if (error instanceof BackendRewardError) {
         throw error;

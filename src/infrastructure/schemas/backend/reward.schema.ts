@@ -29,6 +29,8 @@ export interface RewardSchema {
 export interface RewardUsageSchema {
   id: string;
   reward_id: string;
+  reward_name: string; // Joined data from rewards table
+  reward_icon: string; // Joined data from rewards table
   customer_id: string;
   customer_name: string; // Joined data from customers table
   points_used: number;

@@ -277,8 +277,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
                           onClick={() => handleToggleAvailability(reward.id, reward.isAvailable)}
                           disabled={state.isLoading}
                           className={`text-sm disabled:opacity-50 ${reward.isAvailable
-                              ? 'text-red-600 hover:text-red-800'
-                              : 'text-green-600 hover:text-green-800'
+                            ? 'text-red-600 hover:text-red-800'
+                            : 'text-green-600 hover:text-green-800'
                             }`}
                         >
                           {reward.isAvailable ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
@@ -318,14 +318,13 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
             </thead>
             <tbody>
               {rewardsData.recentUsage.map((usage) => {
-                const reward = rewardsData.rewards.find(r => r.id === usage.rewardId);
                 return (
                   <tr key={usage.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4 backend-text">{usage.customerName}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg">{reward?.icon || '🎁'}</span>
-                        <span className="backend-text">{reward?.name || 'ไม่พบข้อมูลรางวัล'}</span>
+                        <span className="text-lg">{usage.rewardIcon || '🎁'}</span>
+                        <span className="backend-text">{usage.rewardName || 'ไม่พบข้อมูลรางวัล'}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 backend-text">{formatPoints(usage.pointsUsed)}</td>

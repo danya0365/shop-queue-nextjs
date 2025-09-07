@@ -64,6 +64,8 @@ export class SupabaseBackendRewardMapper {
     return {
       id: schema.id,
       rewardId: schema.reward_id,
+      rewardName: schema.reward_name,
+      rewardIcon: schema.reward_icon,
       customerId: schema.customer_id,
       customerName: schema.customer_name,
       pointsUsed: schema.points_used,

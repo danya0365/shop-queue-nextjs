@@ -62,6 +62,8 @@ export interface UpdateRewardEntity {
 export interface RewardUsageEntity {
   id: string;
   rewardId: string;
+  rewardName: string;
+  rewardIcon: string;
   customerId: string;
   customerName: string;
   pointsUsed: number;

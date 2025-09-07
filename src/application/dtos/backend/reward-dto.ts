@@ -28,6 +28,8 @@ export interface RewardStatsDTO {
 export interface RewardUsageDTO {
   id: string;
   rewardId: string;
+  rewardName: string;
+  rewardIcon: string;
   customerId: string;
   customerName: string;
   pointsUsed: number;

@@ -38,6 +38,8 @@ export class RewardMapper {
     return {
       id: entity.id,
       rewardId: entity.rewardId,
+      rewardName: entity.rewardName,
+      rewardIcon: entity.rewardIcon,
       customerId: entity.customerId,
       customerName: entity.customerName,
       pointsUsed: entity.pointsUsed,
