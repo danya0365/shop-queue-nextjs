@@ -1,8 +1,8 @@
 'use server';
 
-import { AuthService } from "../application/services/auth-service";
-import { AuthorizationService } from "../application/services/authorization.service";
-import { ProfileService } from "../application/services/profile-service";
+import { AuthServiceFactory } from "../application/services/auth-service";
+import { AuthorizationServiceFactory } from "../application/services/authorization.service";
+import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
@@ -59,9 +59,9 @@ export async function createServerContainer(): Promise<Container> {
 
 
     // Create service instances
-    const authService = new AuthService(authDatasource, logger);
-    const profileService = new ProfileService(profileAdapter, logger);
-    const authorizationService = new AuthorizationService(logger);
+    const authService = AuthServiceFactory.create(authDatasource, logger);
+    const profileService = ProfileServiceFactory.create(profileAdapter, logger);
+    const authorizationService = AuthorizationServiceFactory.create(logger);
     const shopService = new ShopService();
     const subscriptionService = new SubscriptionService(logger);
 
@@ -88,6 +88,9 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
     container.registerInstance("SubscriptionService", subscriptionService);
+
+    // Shop Backend services
+    container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
     container.registerInstance("PosterTemplateBackendService", posterTemplateBackendService);
     container.registerInstance("ServicesBackendService", servicesBackendService);
     container.registerInstance("CustomersBackendService", customersBackendService);
@@ -102,9 +105,6 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("ShopSettingsBackendService", shopSettingsBackendService);
     container.registerInstance("NotificationSettingsBackendService", notificationSettingsBackendService);
     container.registerInstance("RewardTransactionBackendService", rewardTransactionBackendService);
-
-    // Shop Backend services
-    container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
 
     logger.info("Server container initialized successfully");
   } catch (error) {

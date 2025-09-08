@@ -26,3 +26,12 @@ export class AuthorizationService implements IAuthorizationService {
     return role === 'admin' || role === 'moderator';
   }
 }
+
+export class AuthorizationServiceFactory {
+  static create(
+    logger: ILogger
+  ): AuthorizationService {
+    return new AuthorizationService(logger);
+  }
+}
+

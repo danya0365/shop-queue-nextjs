@@ -196,3 +196,12 @@ export class ProfileService implements IProfileService {
     return this.deleteProfileUseCase.execute(payload);
   }
 }
+
+export class ProfileServiceFactory {
+  static create(
+    profileAdapter: IProfileRepositoryAdapter,
+    logger?: ILogger
+  ): ProfileService {
+    return new ProfileService(profileAdapter, logger);
+  }
+}

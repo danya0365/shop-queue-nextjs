@@ -131,6 +131,15 @@ export class AuthService implements IAuthService {
     // Error handling is now managed by the decorator
     return this.signOutUseCase.execute();
   }
-
-
 }
+
+
+export class AuthServiceFactory {
+  static create(
+    authDataSource: AuthDataSource,
+    logger?: ILogger
+  ): AuthService {
+    return new AuthService(authDataSource, logger);
+  }
+}
+
