@@ -1,16 +1,12 @@
+import { ShopCategoryDTO } from '@/src/application/dtos/shop/backend/shops-dto';
+import { ShopBackendShopsService } from '@/src/application/services/shop/backend/ShopBackendShopsService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
-// Define shop category interface
-export interface ShopCategory {
-  id: string;
-  name: string;
-  description: string;
-}
 
 // Define ViewModel interface
 export interface ShopCreateViewModel {
-  categories: ShopCategory[];
+  categories: ShopCategoryDTO[];
   maxShopsAllowed: number;
   currentShopsCount: number;
   canCreateShop: boolean;
@@ -18,20 +14,20 @@ export interface ShopCreateViewModel {
 
 // Main Presenter class
 export class ShopCreatePresenter {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger, private readonly shopBackendShopsService: ShopBackendShopsService) { }
 
   async getViewModel(): Promise<ShopCreateViewModel> {
     try {
       this.logger.info('ShopCreatePresenter: Getting view model');
-      
+
       // Get shop categories
       const categories = this.getShopCategories();
-      
+
       // Get user's current shop limits (mock data for now)
       const maxShopsAllowed = 3; // This would come from subscription service
       const currentShopsCount = 1; // This would come from shop service
       const canCreateShop = currentShopsCount < maxShopsAllowed;
-      
+
       return {
         categories,
         maxShopsAllowed,
@@ -45,7 +41,7 @@ export class ShopCreatePresenter {
   }
 
   // Private method for getting shop categories
-  private getShopCategories(): ShopCategory[] {
+  private getShopCategories(): ShopCategoryDTO[] {
     return [
       {
         id: 'restaurant',
@@ -94,6 +90,7 @@ export class ShopCreatePresenterFactory {
   static async create(): Promise<ShopCreatePresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new ShopCreatePresenter(logger);
+    const shopBackendShopsService = serverContainer.resolve<ShopBackendShopsService>('ShopBackendShopsService');
+    return new ShopCreatePresenter(logger, shopBackendShopsService);
   }
 }
