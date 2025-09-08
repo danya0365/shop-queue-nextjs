@@ -27,14 +27,28 @@ export class ShopMapper {
       openingHours: entity.openingHours.map(hour => ({
         id: `${entity.id}-${hour.dayOfWeek}`,
         shopId: entity.id,
-        dayOfWeek: this.mapDayOfWeekToString(hour.dayOfWeek),
+        dayOfWeek: hour.dayOfWeek,
         isOpen: hour.isOpen,
         openTime: hour.openTime,
         closeTime: hour.closeTime,
-        breakStart: null,
-        breakEnd: null,
+        breakStart: hour.breakStart,
+        breakEnd: hour.breakEnd,
         createdAt: new Date(entity.createdAt),
         updatedAt: new Date(entity.updatedAt)
+      })),
+      services: entity.services.map(service => ({
+        id: service.id,
+        name: service.name,
+        slug: service.slug,
+        description: service.description,
+        price: service.price,
+        estimatedDuration: service.estimatedDuration,
+        category: service.category,
+        isAvailable: service.isAvailable,
+        icon: service.icon,
+        popularityRank: service.popularityRank,
+        createdAt: service.createdAt,
+        updatedAt: service.updatedAt
       })),
       queueCount: entity.queueCount,
       totalServices: entity.totalServices,
@@ -94,15 +108,6 @@ export class ShopMapper {
     }
   }
 
-  /**
-   * Map day of week number to string
-   * @param dayOfWeek Day of week number (0-6)
-   * @returns Day of week string
-   */
-  private static mapDayOfWeekToString(dayOfWeek: number): string {
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    return days[dayOfWeek] || 'sunday';
-  }
 
   private static mapShopCategories(entity: ShopEntity): ShopCategoryDTO[] {
     return entity.categories.map(category => ({

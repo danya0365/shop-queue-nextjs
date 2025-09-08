@@ -1,11 +1,11 @@
 import { AuthUserDto } from "@/src/application/dtos/auth-dto";
 import { ProfileDto } from "@/src/application/dtos/profile-dto";
-import { ShopDto } from "@/src/application/dtos/shop-dto";
-import { SubscriptionTier, SubscriptionLimits, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
+import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
+import { SubscriptionLimits, SubscriptionTier, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { IShopService } from "@/src/application/interfaces/shop-service.interface";
 import { ISubscriptionService } from "@/src/application/interfaces/subscription-service.interface";
+import { IShopService } from "@/src/application/services/shop/ShopService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 
@@ -40,7 +40,7 @@ export interface DashboardViewModel {
   stats: DashboardStats;
   recentActivity: RecentActivity[];
   hasShops: boolean;
-  shops: ShopDto[];
+  shops: ShopDTO[];
   subscription: {
     tier: SubscriptionTier;
     limits: SubscriptionLimits;
@@ -117,7 +117,7 @@ export class DashboardPresenter {
    */
   private async calculateStats(
     userId: string,
-    shops: ShopDto[]
+    shops: ShopDTO[]
   ): Promise<DashboardStats> {
     try {
       console.log(userId);
@@ -149,7 +149,7 @@ export class DashboardPresenter {
    */
   private async getRecentActivity(
     userId: string,
-    shops: ShopDto[]
+    shops: ShopDTO[]
   ): Promise<RecentActivity[]> {
     console.log(userId);
     console.log(shops);

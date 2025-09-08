@@ -34,6 +34,15 @@ export class ShopBackendShopError extends Error {
  * Following Clean Architecture principles and Interface Segregation Principle
  */
 export interface ShopBackendShopRepository {
+
+  /**
+   * Get shops by owner ID
+   * @param ownerId Owner ID
+   * @returns Shops data
+   * @throws ShopBackendShopError if the operation fails
+   */
+  getShopsByOwnerId(ownerId: string): Promise<ShopEntity[]>;
+
   /**
    * Get paginated shops data
    * @param params Pagination parameters

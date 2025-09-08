@@ -4,6 +4,7 @@ import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscr
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '../BaseShopPresenter';
@@ -105,10 +106,11 @@ export interface SettingsViewModel {
 export class SettingsPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
     private readonly subscriptionService: ISubscriptionService,
-  ) { super(logger); }
+  ) { super(logger, shopService); }
 
   async getViewModel(shopId: string): Promise<SettingsViewModel> {
     try {
@@ -160,7 +162,7 @@ export class SettingsPresenter extends BaseShopPresenter {
     }
   }
 
-  
+
 
   // Private methods for data preparation
   private getShopSettings(): ShopSettings {
@@ -287,6 +289,7 @@ export class SettingsPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
     const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
-    return new SettingsPresenter(logger, authService, profileService, subscriptionService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new SettingsPresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }

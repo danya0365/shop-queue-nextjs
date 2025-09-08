@@ -1,3 +1,4 @@
+import { ShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
@@ -34,18 +35,18 @@ export interface QueueJoinViewModel {
 
 // Main Presenter class
 export class QueueJoinPresenter extends BaseShopPresenter {
-  constructor(logger: Logger) {
-    super(logger);
+  constructor(logger: Logger, shopService: ShopService) {
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<QueueJoinViewModel> {
     try {
       this.logger.info('QueueJoinPresenter: Getting view model for shop', { shopId });
-      
+
       // Mock data - replace with actual service calls
       const services = this.getAvailableServices();
       const categories = this.getServiceCategories(services);
-      
+
       return {
         services,
         categories,
@@ -150,6 +151,7 @@ export class QueueJoinPresenterFactory {
   static async create(): Promise<QueueJoinPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new QueueJoinPresenter(logger);
+    const shopService = serverContainer.resolve<ShopService>('ShopService');
+    return new QueueJoinPresenter(logger, shopService);
   }
 }

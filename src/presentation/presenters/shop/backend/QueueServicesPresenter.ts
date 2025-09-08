@@ -1,4 +1,5 @@
 import type { QueueService, QueueServiceBackendService, QueueServiceStats } from '@/src/application/services/shop/backend/queue-services-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';
@@ -17,9 +18,10 @@ export interface QueueServicesViewModel {
 export class QueueServicesPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly queueServiceBackendService: QueueServiceBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<QueueServicesViewModel> {
@@ -104,6 +106,7 @@ export class QueueServicesPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const queueServiceBackendService = serverContainer.resolve<QueueServiceBackendService>('QueueServiceBackendService');
-    return new QueueServicesPresenter(logger, queueServiceBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new QueueServicesPresenter(logger, shopService, queueServiceBackendService);
   }
 }

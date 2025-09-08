@@ -1,10 +1,10 @@
 'use client';
 
+import { ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import Link from 'next/link';
-import { ShopDto } from '@/src/application/dtos/shop-dto';
 
 interface ShopListCardProps {
-  shops: ShopDto[];
+  shops: ShopDTO[];
 }
 
 export function ShopListCard({ shops }: ShopListCardProps) {
@@ -29,7 +29,7 @@ export function ShopListCard({ shops }: ShopListCardProps) {
   return (
     <div className="bg-surface rounded-lg border border-border p-6">
       <h3 className="text-lg font-semibold text-foreground mb-4">ร้านค้าของคุณ</h3>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {shops.map((shop) => (
           <div key={shop.id} className="bg-background rounded-lg border border-border p-4 hover:shadow-md transition-shadow">
@@ -42,7 +42,7 @@ export function ShopListCard({ shops }: ShopListCardProps) {
                 เปิด
               </div>
             </div>
-            
+
             <div className="text-sm text-muted-foreground mb-4">
               <div>📍 {shop.address}</div>
               <div>🏪 ID: {shop.id.slice(0, 8)}...</div>
@@ -56,7 +56,7 @@ export function ShopListCard({ shops }: ShopListCardProps) {
               >
                 ลูกค้า
               </Link>
-              
+
               {/* Employee View */}
               <Link
                 href={`/shop/${shop.id}/employee`}
@@ -64,7 +64,7 @@ export function ShopListCard({ shops }: ShopListCardProps) {
               >
                 พนักงาน
               </Link>
-              
+
               {/* Backend View */}
               <Link
                 href={`/shop/${shop.id}/backend`}

@@ -3,13 +3,14 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
-import { ShopService } from "../application/services/shop/shop-service";
+import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -35,23 +36,19 @@ export function createClientContainer(): Container {
     const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
     // Create repository instances
-    // TODO: Create repository instances
+    const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
 
     // Create service instances
     const authService = new AuthService(authDatasource, logger);
     const profileService = new ProfileService(profileAdapter, logger);
     const authorizationService = new AuthorizationService(logger);
-    const shopService = new ShopService();
-    // TODO: const shopBackendShopsService = createShopBackendShopsService(shopRepository, logger);
+    const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
-
-    // Shop Backend services
-    // TODO: container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
 
     logger.info("Client container initialized successfully");
   } catch (error) {

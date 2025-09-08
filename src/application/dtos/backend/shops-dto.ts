@@ -1,5 +1,5 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
-import { OpeningHour } from "../shop-opening-hour-dto";
+import { OpeningHour } from "../shop/backend/shop-opening-hour-dto";
 import { CategoryDTO } from "./categories-dto";
 
 export type ShopCategoryDTO = Partial<CategoryDTO> & {

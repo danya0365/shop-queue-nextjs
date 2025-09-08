@@ -43,7 +43,23 @@ export class SupabaseShopBackendShopMapper {
         dayOfWeek: hour.day_of_week,
         openTime: hour.open_time,
         closeTime: hour.close_time,
-        isOpen: hour.is_open
+        isOpen: hour.is_open,
+        breakStart: hour.break_start,
+        breakEnd: hour.break_end
+      })) : [],
+      services: schema.services ? schema.services.map(service => ({
+        id: service.id,
+        name: service.name,
+        slug: service.slug,
+        description: service.description || undefined,
+        price: service.price,
+        estimatedDuration: service.estimated_duration || undefined,
+        category: service.category || undefined,
+        isAvailable: service.is_available || undefined,
+        icon: service.icon || undefined,
+        popularityRank: service.popularity_rank || undefined,
+        createdAt: service.created_at || undefined,
+        updatedAt: service.updated_at || undefined
       })) : []
     };
   }
@@ -81,7 +97,9 @@ export class SupabaseShopBackendShopMapper {
         day_of_week: hour.dayOfWeek,
         open_time: hour.openTime,
         close_time: hour.closeTime,
-        is_open: hour.isOpen
+        is_open: hour.isOpen,
+        break_start: hour.breakStart,
+        break_end: hour.breakEnd
       }))
     };
   }

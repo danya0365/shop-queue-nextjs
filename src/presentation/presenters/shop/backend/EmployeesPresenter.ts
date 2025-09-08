@@ -4,6 +4,7 @@ import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscr
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '../BaseShopPresenter';
@@ -74,10 +75,11 @@ export interface EmployeesViewModel {
 export class EmployeesPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly subscriptionService: ISubscriptionService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService
-  ) { super(logger); }
+  ) { super(logger, shopService); }
 
   async getViewModel(shopId: string): Promise<EmployeesViewModel> {
     try {
@@ -132,7 +134,7 @@ export class EmployeesPresenter extends BaseShopPresenter {
     }
   }
 
-  
+
 
   // Private methods for data preparation
   private getEmployees(): Employee[] {
@@ -323,6 +325,7 @@ export class EmployeesPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    return new EmployeesPresenter(logger, subscriptionService, authService, profileService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new EmployeesPresenter(logger, shopService, subscriptionService, authService, profileService);
   }
 }

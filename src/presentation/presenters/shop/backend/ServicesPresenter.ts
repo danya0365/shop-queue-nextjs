@@ -1,4 +1,5 @@
 import type { Service, ServicesBackendService } from '@/src/application/services/shop/backend/services-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '../BaseShopPresenter';
@@ -16,9 +17,10 @@ export interface ServicesViewModel {
 export class ServicesPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly servicesBackendService: ServicesBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<ServicesViewModel> {
@@ -65,6 +67,7 @@ export class ServicesPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const servicesBackendService = serverContainer.resolve<ServicesBackendService>('ServicesBackendService');
-    return new ServicesPresenter(logger, servicesBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new ServicesPresenter(logger, shopService, servicesBackendService);
   }
 }

@@ -1,4 +1,5 @@
 import type { ShopSettings, ShopSettingsBackendService, ShopSettingsStats } from '@/src/application/services/shop/backend/shop-settings-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '../BaseShopPresenter';
@@ -20,9 +21,10 @@ export interface ShopSettingsViewModel {
 export class ShopSettingsPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly shopSettingsBackendService: ShopSettingsBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<ShopSettingsViewModel> {
@@ -123,6 +125,7 @@ export class ShopSettingsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const shopSettingsBackendService = serverContainer.resolve<ShopSettingsBackendService>('ShopSettingsBackendService');
-    return new ShopSettingsPresenter(logger, shopSettingsBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new ShopSettingsPresenter(logger, shopService, shopSettingsBackendService);
   }
 }

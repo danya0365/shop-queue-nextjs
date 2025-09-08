@@ -28,6 +28,44 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
   }
 
   /**
+   * Get shops by owner ID from database
+   * @param ownerId Owner ID
+   * @returns Shops data
+   */
+  async getShopsByOwnerId(ownerId: string): Promise<ShopEntity[]> {
+    try {
+      const queryOptions: QueryOptions = {
+        select: ['*'],
+        filters: [{
+          field: 'owner_id',
+          operator: FilterOperator.EQ,
+          value: ownerId
+        }]
+      };
+
+      const shops = await this.dataSource.getAdvanced<ShopSchemaRecord>(
+        'shops',
+        queryOptions
+      );
+
+      return shops.map(shop => SupabaseShopBackendShopMapper.toDomain(shop));
+    } catch (error) {
+      if (error instanceof ShopBackendShopError) {
+        throw error;
+      }
+
+      this.logger.error('Error in getShopsByOwnerId', { error, ownerId });
+      throw new ShopBackendShopError(
+        ShopBackendShopErrorType.UNKNOWN,
+        'An unexpected error occurred while fetching shops by owner ID',
+        'getShopsByOwnerId',
+        { ownerId },
+        error
+      );
+    }
+  }
+
+  /**
    * Get paginated shops data from database
    * @param params Pagination parameters
    * @returns Paginated shops data

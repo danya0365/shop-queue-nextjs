@@ -1,4 +1,5 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { ServiceEntity } from "./backend-service.entity";
 
 /**
  * Shop entity representing a business in the system
@@ -18,6 +19,7 @@ export interface ShopEntity {
   currency: string;
   language: string;
   categories: ShopCategoryEntity[];
+  services: Partial<ServiceEntity>[];
   ownerId: string;
   ownerName?: string; // Join from profiles table
   status: ShopStatus;
@@ -57,9 +59,11 @@ export interface ShopCategoryEntity {
 }
 
 export interface OpeningHourEntity {
-  dayOfWeek: number;
+  dayOfWeek: string;
   openTime: string;
   closeTime: string;
+  breakStart: string;
+  breakEnd: string;
   isOpen: boolean;
 }
 

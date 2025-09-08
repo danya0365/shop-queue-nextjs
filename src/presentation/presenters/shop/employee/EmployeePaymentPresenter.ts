@@ -1,3 +1,4 @@
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
@@ -46,19 +47,19 @@ export interface EmployeePaymentViewModel {
 
 // Main Presenter class
 export class EmployeePaymentPresenter extends BaseShopPresenter {
-  constructor(logger: Logger) {
-    super(logger);
+  constructor(logger: Logger, shopService: IShopService) {
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<EmployeePaymentViewModel> {
     try {
       this.logger.info('EmployeePaymentPresenter: Getting view model for shop', { shopId });
-      
+
       // Mock data - replace with actual service calls
       const readyQueues = this.getReadyQueues();
       const completedPayments = this.getCompletedPayments();
       const paymentMethods = this.getPaymentMethods();
-      
+
       return {
         readyQueues,
         completedPayments,
@@ -158,6 +159,7 @@ export class EmployeePaymentPresenterFactory {
   static async create(): Promise<EmployeePaymentPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new EmployeePaymentPresenter(logger);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new EmployeePaymentPresenter(logger, shopService);
   }
 }

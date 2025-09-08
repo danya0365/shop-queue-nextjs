@@ -14,7 +14,7 @@ export interface CreateShopParams {
   ownerId: string;
   categoryIds: string[];
   openingHours: Array<{
-    dayOfWeek: number;
+    dayOfWeek: string;
     isOpen: boolean;
     openTime?: string;
     closeTime?: string;
@@ -80,7 +80,9 @@ export class CreateShopUseCase implements IUseCase<CreateShopParams, ShopDTO> {
           dayOfWeek: hour.dayOfWeek,
           isOpen: hour.isOpen,
           openTime: hour.openTime || '',
-          closeTime: hour.closeTime || ''
+          closeTime: hour.closeTime || '',
+          breakStart: hour.breakStart || '',
+          breakEnd: hour.breakEnd || ''
         })) || []
       };
 

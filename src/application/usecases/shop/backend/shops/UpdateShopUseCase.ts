@@ -14,7 +14,7 @@ export interface UpdateShopParams {
   email?: string;
   status?: ShopStatus;
   openingHours?: Array<{
-    dayOfWeek: number;
+    dayOfWeek: string;
     isOpen: boolean;
     openTime?: string;
     closeTime?: string;
@@ -107,7 +107,9 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopParams, ShopDTO> {
           dayOfWeek: hour.dayOfWeek,
           isOpen: hour.isOpen,
           openTime: hour.openTime || '',
-          closeTime: hour.closeTime || ''
+          closeTime: hour.closeTime || '',
+          breakStart: hour.breakStart || '',
+          breakEnd: hour.breakEnd || ''
         }));
       }
 

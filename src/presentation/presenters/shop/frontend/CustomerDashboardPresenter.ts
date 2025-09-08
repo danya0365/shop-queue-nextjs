@@ -1,3 +1,4 @@
+import { ShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
@@ -53,20 +54,20 @@ export interface CustomerDashboardViewModel {
 
 // Main Presenter class
 export class CustomerDashboardPresenter extends BaseShopPresenter {
-  constructor(logger: Logger) {
-    super(logger);
+  constructor(logger: Logger, shopService: ShopService) {
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<CustomerDashboardViewModel> {
     try {
       this.logger.info('CustomerDashboardPresenter: Getting view model for shop', { shopId });
-      
+
       // Mock data - replace with actual service calls
       const shopInfo = this.getLocalShopOverview(shopId);
       const queueStatus = this.getQueueStatus();
       const popularServices = this.getPopularServices();
       const promotions = this.getPromotions();
-      
+
       return {
         shopInfo,
         queueStatus,
@@ -179,6 +180,7 @@ export class CustomerDashboardPresenterFactory {
   static async create(): Promise<CustomerDashboardPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new CustomerDashboardPresenter(logger);
+    const shopService = serverContainer.resolve<ShopService>('ShopService');
+    return new CustomerDashboardPresenter(logger, shopService);
   }
 }

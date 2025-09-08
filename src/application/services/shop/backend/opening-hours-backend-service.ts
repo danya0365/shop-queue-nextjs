@@ -1,4 +1,4 @@
-import { CreateOpeningHourData, OpeningHour, UpdateOpeningHourData } from '@/src/application/dtos/shop-opening-hour-dto';
+import { CreateOpeningHourData, OpeningHour, UpdateOpeningHourData } from '@/src/application/dtos/shop/backend/shop-opening-hour-dto';
 import type { Logger } from '@/src/domain/interfaces/logger';
 
 export interface IOpeningHoursBackendService {

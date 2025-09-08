@@ -1,4 +1,5 @@
 import type { NotificationSettings, NotificationSettingsBackendService, NotificationStats, NotificationTemplate } from '@/src/application/services/shop/backend/notification-settings-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { Metadata } from 'next';
@@ -47,9 +48,10 @@ export interface VariableOption {
 export class NotificationSettingsPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly notificationSettingsService: NotificationSettingsBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<NotificationSettingsViewModel> {
@@ -340,7 +342,8 @@ export class NotificationSettingsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const notificationSettingsService = serverContainer.resolve<NotificationSettingsBackendService>('NotificationSettingsBackendService');
-    return new NotificationSettingsPresenter(logger, notificationSettingsService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new NotificationSettingsPresenter(logger, shopService, notificationSettingsService);
   }
 }
 

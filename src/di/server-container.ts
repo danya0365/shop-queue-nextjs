@@ -18,7 +18,7 @@ import { RewardTransactionBackendService } from "../application/services/shop/ba
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
-import { ShopService } from "../application/services/shop/shop-service";
+import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { SubscriptionService } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
@@ -62,7 +62,7 @@ export async function createServerContainer(): Promise<Container> {
     const authService = AuthServiceFactory.create(authDatasource, logger);
     const profileService = ProfileServiceFactory.create(profileAdapter, logger);
     const authorizationService = AuthorizationServiceFactory.create(logger);
-    const shopService = new ShopService();
+    const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
     const subscriptionService = new SubscriptionService(logger);
 
     // Shop Backend services

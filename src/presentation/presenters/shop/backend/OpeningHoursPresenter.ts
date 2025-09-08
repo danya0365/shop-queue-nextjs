@@ -1,5 +1,6 @@
-import { OpeningHour } from '@/src/application/dtos/shop-opening-hour-dto';
+import { OpeningHour } from '@/src/application/dtos/shop/backend/shop-opening-hour-dto';
 import type { OpeningHoursBackendService } from '@/src/application/services/shop/backend/opening-hours-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';
@@ -20,9 +21,10 @@ export interface OpeningHoursViewModel {
 export class OpeningHoursPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly openingHoursBackendService: OpeningHoursBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<OpeningHoursViewModel> {
@@ -103,6 +105,7 @@ export class OpeningHoursPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const openingHoursBackendService = serverContainer.resolve<OpeningHoursBackendService>('OpeningHoursBackendService');
-    return new OpeningHoursPresenter(logger, openingHoursBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new OpeningHoursPresenter(logger, shopService, openingHoursBackendService);
   }
 }

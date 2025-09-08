@@ -11,15 +11,15 @@ interface QueueJoinViewProps {
 
 export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
   const { services, categories, estimatedWaitTime, currentQueueLength, shopName, isAcceptingQueues } = viewModel;
-  const [state, actions] = useQueueJoinPresenter();
+  const [state, actions] = useQueueJoinPresenter({ shopId });
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
 
-  const filteredServices = selectedCategory === 'ทั้งหมด' 
-    ? services 
+  const filteredServices = selectedCategory === 'ทั้งหมด'
+    ? services
     : services.filter(service => service.category === selectedCategory);
 
   const handleServiceToggle = (serviceId: string) => {
@@ -32,7 +32,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const success = await actions.joinQueue({
       customerName,
       customerPhone,
@@ -59,7 +59,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
             <h1 className="text-3xl font-bold mb-2">เข้าคิวสำเร็จ!</h1>
             <p className="text-green-100">คุณได้รับหมายเลขคิวแล้ว</p>
           </div>
-          
+
           <div className="p-8">
             <div className="text-center mb-8">
               <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -151,17 +151,16 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
             <div className="p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">เลือกบริการ</h2>
             </div>
-            
+
             {/* Category Filter */}
             <div className="p-6 border-b">
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedCategory('ทั้งหมด')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedCategory === 'ทั้งหมด'
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === 'ทั้งหมด'
                       ? 'bg-purple-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   ทั้งหมด
                 </button>
@@ -169,11 +168,10 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      selectedCategory === category
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === category
                         ? 'bg-purple-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {category}
                   </button>
@@ -187,13 +185,12 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                 {filteredServices.map((service) => (
                   <div
                     key={service.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      !service.available
+                    className={`border rounded-lg p-4 cursor-pointer transition-all ${!service.available
                         ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-50'
                         : state.selectedServices.includes(service.id)
-                        ? 'bg-purple-50 border-purple-500 shadow-md'
-                        : 'bg-white border-gray-200 hover:border-purple-300 hover:shadow-sm'
-                    }`}
+                          ? 'bg-purple-50 border-purple-500 shadow-md'
+                          : 'bg-white border-gray-200 hover:border-purple-300 hover:shadow-sm'
+                      }`}
                     onClick={() => service.available && handleServiceToggle(service.id)}
                   >
                     <div className="flex items-start space-x-3">

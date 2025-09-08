@@ -1,4 +1,5 @@
 import type { PaymentItem, PaymentItemsBackendService } from '@/src/application/services/shop/backend/payment-items-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { Metadata } from 'next';
@@ -19,9 +20,10 @@ export interface PaymentItemsViewModel {
 export class PaymentItemsPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly paymentItemsBackendService: PaymentItemsBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<PaymentItemsViewModel> {
@@ -69,6 +71,7 @@ export class PaymentItemsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const paymentItemsBackendService = serverContainer.resolve<PaymentItemsBackendService>('PaymentItemsBackendService');
-    return new PaymentItemsPresenter(logger, paymentItemsBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new PaymentItemsPresenter(logger, shopService, paymentItemsBackendService);
   }
 }

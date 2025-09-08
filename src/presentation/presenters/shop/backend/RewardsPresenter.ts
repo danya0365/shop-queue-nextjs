@@ -1,4 +1,5 @@
 import type { Reward, RewardsBackendService } from '@/src/application/services/shop/backend/rewards-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';
@@ -24,9 +25,10 @@ export interface RewardsViewModel {
 export class RewardsPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly rewardsBackendService: RewardsBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<RewardsViewModel> {
@@ -82,6 +84,7 @@ export class RewardsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const rewardsBackendService = serverContainer.resolve<RewardsBackendService>('RewardsBackendService');
-    return new RewardsPresenter(logger, rewardsBackendService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new RewardsPresenter(logger, shopService, rewardsBackendService);
   }
 }

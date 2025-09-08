@@ -1,3 +1,4 @@
+import { ShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
@@ -54,18 +55,18 @@ export interface CustomerHistoryViewModel {
 
 // Main Presenter class
 export class CustomerHistoryPresenter extends BaseShopPresenter {
-  constructor(logger: Logger) {
-    super(logger);
+  constructor(logger: Logger, shopService: ShopService) {
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string): Promise<CustomerHistoryViewModel> {
     try {
       this.logger.info('CustomerHistoryPresenter: Getting view model for shop', { shopId });
-      
+
       // Mock data - replace with actual service calls
       const queueHistory = this.getQueueHistory();
       const customerStats = this.getCustomerStats(queueHistory);
-      
+
       return {
         queueHistory,
         customerStats,
@@ -183,11 +184,11 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
   private getCustomerStats(history: CustomerQueueHistory[]): CustomerStats {
     const completedQueues = history.filter(q => q.status === 'completed');
     const cancelledQueues = history.filter(q => q.status === 'cancelled');
-    
+
     const totalSpent = completedQueues.reduce((sum, q) => sum + q.totalAmount, 0);
     const ratingsWithValues = completedQueues.filter(q => q.rating);
-    const averageRating = ratingsWithValues.length > 0 
-      ? ratingsWithValues.reduce((sum, q) => sum + (q.rating || 0), 0) / ratingsWithValues.length 
+    const averageRating = ratingsWithValues.length > 0
+      ? ratingsWithValues.reduce((sum, q) => sum + (q.rating || 0), 0) / ratingsWithValues.length
       : 0;
 
     // Calculate favorite service
@@ -197,9 +198,9 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
         serviceCount[service.name] = (serviceCount[service.name] || 0) + service.quantity;
       });
     });
-    
+
     const favoriteService = Object.entries(serviceCount)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'ไม่มีข้อมูล';
+      .sort(([, a], [, b]) => b - a)[0]?.[0] || 'ไม่มีข้อมูล';
 
     return {
       totalQueues: history.length,
@@ -227,6 +228,7 @@ export class CustomerHistoryPresenterFactory {
   static async create(): Promise<CustomerHistoryPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    return new CustomerHistoryPresenter(logger);
+    const shopService = serverContainer.resolve<ShopService>('ShopService');
+    return new CustomerHistoryPresenter(logger, shopService);
   }
 }

@@ -1,4 +1,5 @@
 import type { PosterTemplate, PosterTemplateBackendService, PosterTemplateFilters, PosterTemplateStats } from '@/src/application/services/shop/backend/poster-templates-backend-service';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { Metadata } from 'next';
@@ -39,9 +40,10 @@ export interface DifficultyOption {
 export class PosterTemplatesPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: IShopService,
     private readonly posterTemplateService: PosterTemplateBackendService,
   ) {
-    super(logger);
+    super(logger, shopService);
   }
 
   async getViewModel(shopId: string, filters?: PosterTemplateFilters): Promise<PosterTemplatesViewModel> {
@@ -193,6 +195,7 @@ export class PosterTemplatesPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const posterTemplateService = serverContainer.resolve<PosterTemplateBackendService>('PosterTemplateBackendService');
-    return new PosterTemplatesPresenter(logger, posterTemplateService);
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
+    return new PosterTemplatesPresenter(logger, shopService, posterTemplateService);
   }
 }

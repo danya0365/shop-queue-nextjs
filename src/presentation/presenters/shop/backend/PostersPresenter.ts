@@ -4,6 +4,7 @@ import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscr
 import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
+import { ShopService } from '@/src/application/services/shop/ShopService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter, ShopInfo } from '../BaseShopPresenter';
@@ -79,10 +80,11 @@ export interface PostersViewModel {
 export class PostersPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
+    shopService: ShopService,
     private readonly subscriptionService: ISubscriptionService,
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
-  ) { super(logger); }
+  ) { super(logger, shopService); }
 
   async getViewModel(shopId: string): Promise<PostersViewModel> {
     try {
@@ -298,7 +300,7 @@ export class PostersPresenter extends BaseShopPresenter {
     ];
   }
 
-  
+
 
   private async getUserSubscription(userId: string, shopId?: string): Promise<UserSubscription> {
     const user = await this.getUser();
@@ -383,6 +385,7 @@ export class PostersPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
-    return new PostersPresenter(logger, subscriptionService, authService, profileService);
+    const shopService = serverContainer.resolve<ShopService>("ShopService");
+    return new PostersPresenter(logger, shopService, subscriptionService, authService, profileService);
   }
 }

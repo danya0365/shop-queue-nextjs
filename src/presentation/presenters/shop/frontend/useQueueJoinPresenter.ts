@@ -1,6 +1,8 @@
+import { ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
+import { ShopService } from '@/src/application/services/shop/ShopService';
 import { getClientService } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Define form/action data interfaces
 export interface QueueJoinData {
@@ -13,6 +15,7 @@ export interface QueueJoinData {
 
 // Define state interface
 export interface QueueJoinPresenterState {
+  shopInfo: ShopDTO | null;
   isLoading: boolean;
   error: string | null;
   selectedServices: string[];
@@ -38,7 +41,7 @@ export type QueueJoinPresenterHook = [
 ];
 
 // Custom hook implementation
-export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
+export const useQueueJoinPresenter = ({ shopId }: { shopId: string }): QueueJoinPresenterHook => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -47,6 +50,21 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
   const [queueNumber, setQueueNumber] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const logger = getClientService<Logger>('Logger');
+  const [shopInfo, setShopInfo] = useState<ShopDTO | null>(null);
+  const shopService = getClientService<ShopService>('ShopService');
+
+  useEffect(() => {
+    const fetchShopInfo = async () => {
+      try {
+        const shopInfo = await shopService.getShopById(shopId);
+        setShopInfo(shopInfo);
+      } catch (error) {
+        logger.error('QueueJoinPresenter: Error fetching shop info', error);
+        setError('เกิดข้อผิดพลาดในการดึงข้อมูลร้านค้า');
+      }
+    };
+    fetchShopInfo();
+  }, [shopId]);
 
   const joinQueue = async (data: QueueJoinData): Promise<boolean> => {
     setIsLoading(true);
@@ -57,7 +75,7 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
       if (!data.customerName.trim()) {
         throw new Error('กรุณากรอกชื่อ');
       }
-      
+
       if (!data.customerPhone.trim()) {
         throw new Error('กรุณากรอกเบอร์โทรศัพท์');
       }
@@ -74,17 +92,17 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
 
       // Mock API call - replace with actual service
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Mock success response
       const mockQueueNumber = 'A' + String(Math.floor(Math.random() * 900) + 100);
       setQueueNumber(mockQueueNumber);
       setIsSuccess(true);
-      
-      logger.info('QueueJoinPresenter: Queue joined successfully', { 
+
+      logger.info('QueueJoinPresenter: Queue joined successfully', {
         queueNumber: mockQueueNumber,
-        services: data.services 
+        services: data.services
       });
-      
+
       return true;
     } catch (error) {
       logger.error('QueueJoinPresenter: Error joining queue', error);
@@ -100,13 +118,13 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
     if (!selectedServices.includes(serviceId)) {
       const newServices = [...selectedServices, serviceId];
       setSelectedServices(newServices);
-      
+
       // Mock price calculation - replace with actual service
       const mockPrice = Math.floor(Math.random() * 100) + 50;
       const mockTime = Math.floor(Math.random() * 10) + 5;
       setTotalPrice(prev => prev + mockPrice);
       setEstimatedTime(prev => prev + mockTime);
-      
+
       logger.info('QueueJoinPresenter: Service added', { serviceId });
     }
   };
@@ -114,13 +132,13 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
   const removeService = (serviceId: string) => {
     const newServices = selectedServices.filter(id => id !== serviceId);
     setSelectedServices(newServices);
-    
+
     // Mock price calculation - replace with actual service
     const mockPrice = Math.floor(Math.random() * 100) + 50;
     const mockTime = Math.floor(Math.random() * 10) + 5;
     setTotalPrice(prev => Math.max(0, prev - mockPrice));
     setEstimatedTime(prev => Math.max(0, prev - mockTime));
-    
+
     logger.info('QueueJoinPresenter: Service removed', { serviceId });
   };
 
@@ -136,14 +154,15 @@ export const useQueueJoinPresenter = (): QueueJoinPresenterHook => {
   };
 
   return [
-    { 
-      isLoading, 
-      error, 
-      selectedServices, 
-      totalPrice, 
-      estimatedTime, 
-      queueNumber, 
-      isSuccess 
+    {
+      shopInfo,
+      isLoading,
+      error,
+      selectedServices,
+      totalPrice,
+      estimatedTime,
+      queueNumber,
+      isSuccess
     },
     { joinQueue, addService, removeService, reset, setError },
   ];

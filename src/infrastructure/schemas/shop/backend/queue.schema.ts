@@ -51,6 +51,16 @@ export interface QueueServiceSchema {
 export interface ServiceSchema {
   id: string;
   name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  estimated_duration: number | null;
+  category: string | null;
+  is_available: boolean | null;
+  icon: string | null;
+  popularity_rank: number | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /**
