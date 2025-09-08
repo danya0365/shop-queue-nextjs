@@ -1,59 +1,56 @@
 #!/bin/bash
 
-# Source and target base directories
-SRC_BASE="/Users/marosdeeuma/shop-queue-nextjs/src"
-TARGET_BASE="$SRC_BASE/shop/backend"
-
-# Create target directories if they don't exist
-mkdir -p "$TARGET_BASE/application/dtos"
-mkdir -p "$TARGET_BASE/application/mappers"
-mkdir -p "$TARGET_BASE/application/services"
-mkdir -p "$TARGET_BASE/application/usecases"
-mkdir -p "$TARGET_BASE/domain/entities"
-mkdir -p "$TARGET_BASE/domain/repositories"
-mkdir -p "$TARGET_BASE/infrastructure/mappers"
-mkdir -p "$TARGET_BASE/infrastructure/repositories"
-mkdir -p "$TARGET_BASE/infrastructure/schemas"
-
 # Function to copy and update files
 copy_and_update() {
     local src_dir="$1"
-    local target_dir="$2"
+    local dest_dir="${src_dir//backend/shop\/backend}"
     
-    # Create target directory if it doesn't exist
-    mkdir -p "$target_dir"
+    echo "Processing: $src_dir -> $dest_dir"
     
-    # Copy files from source to target
-    if [ -d "$src_dir" ]; then
-        find "$src_dir" -type f -name "*.ts" | while read -r file; do
-            # Get relative path
-            rel_path="${file#$src_dir/}"
-            target_file="$target_dir/$rel_path"
-            
-            # Create target directory if it doesn't exist
-            mkdir -p "$(dirname "$target_file")"
-            
-            # Only copy if target file doesn't exist
-            if [ ! -f "$target_file" ]; then
-                echo "Copying $file to $target_file"
-                # Replace 'Backend' with 'ShopBackend' during copy
-                sed 's/\bBackend\b/ShopBackend/g' "$file" > "$target_file"
-            else
-                echo "Skipping existing file: $target_file"
-            fi
-        done
-    fi
+    # Create destination directory if it doesn't exist
+    mkdir -p "$dest_dir"
+    
+    # Copy files from source to destination, skipping existing files
+    find "$src_dir" -type f | while read -r src_file; do
+        # Get relative path
+        rel_path="${src_file#$src_dir/}"
+        dest_file="$dest_dir/$rel_path"
+        
+        # Skip if destination file exists
+        if [ -f "$dest_file" ]; then
+            echo "Skipping existing file: $dest_file"
+            continue
+        fi
+        
+        # Create parent directory if it doesn't exist
+        mkdir -p "$(dirname "$dest_file")"
+        
+        # Copy file and replace content
+        sed 's/Backend/ShopBackend/g' "$src_file" > "$dest_file"
+        echo "Created: $dest_file"
+    done
 }
 
-# Copy and update files from each source directory
-copy_and_update "$SRC_BASE/application/dtos/backend" "$TARGET_BASE/application/dtos"
-copy_and_update "$SRC_BASE/application/mappers/backend" "$TARGET_BASE/application/mappers"
-copy_and_update "$SRC_BASE/application/services/backend" "$TARGET_BASE/application/services"
-copy_and_update "$SRC_BASE/application/usecases/backend" "$TARGET_BASE/application/usecases"
-copy_and_update "$SRC_BASE/domain/entities/backend" "$TARGET_BASE/domain/entities"
-copy_and_update "$SRC_BASE/domain/repositories/backend" "$TARGET_BASE/domain/repositories"
-copy_and_update "$SRC_BASE/infrastructure/mappers/backend" "$TARGET_BASE/infrastructure/mappers"
-copy_and_update "$SRC_BASE/infrastructure/repositories/backend" "$TARGET_BASE/infrastructure/repositories"
-copy_and_update "$SRC_BASE/infrastructure/schemas/backend" "$TARGET_BASE/infrastructure/schemas"
+# List of directories to process
+directories=(
+    "/Users/marosdeeuma/shop-queue-nextjs/src/application/dtos/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/application/mappers/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/application/services/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/application/usecases/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/domain/entities/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/domain/repositories/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/infrastructure/mappers/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/infrastructure/repositories/backend"
+    "/Users/marosdeeuma/shop-queue-nextjs/src/infrastructure/schemas/backend"
+)
 
-echo "Cloning and updating complete!"
+# Process each directory
+for dir in "${directories[@]}"; do
+    if [ -d "$dir" ]; then
+        copy_and_update "$dir"
+    else
+        echo "Warning: Directory not found - $dir"
+    fi
+done
+
+echo "Cloning process completed."
