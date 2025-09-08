@@ -1,6 +1,6 @@
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
-import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
+import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
+import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 
 export class DeleteShopUseCase implements IUseCase<string, boolean> {
   constructor(

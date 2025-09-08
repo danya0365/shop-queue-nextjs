@@ -1,5 +1,5 @@
-import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/service.entity';
-import type { ServiceDTO, ServiceStatsDTO, CreateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
+import type { CreateServiceInputDTO, ServiceDTO, ServiceStatsDTO } from '@/src/application/dtos/backend/services-dto';
+import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/backend-service.entity';
 
 export class ServiceMapper {
   static toDTO(entity: ServiceEntity): ServiceDTO {

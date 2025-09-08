@@ -1,9 +1,9 @@
 import { ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { ShopMapper } from '@/src/application/mappers/backend/shop-mapper';
-import { ShopStatus, UpdateShopEntity } from '@/src/domain/entities/backend/backend-shop.entity';
-import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
-import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
+import { ShopMapper } from '@/src/application/mappers/shop/backend/shop-mapper';
+import { ShopStatus, UpdateShopEntity } from '@/src/domain/entities/shop/backend/backend-shop.entity';
+import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
+import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 
 export interface UpdateShopParams {
   id: string;

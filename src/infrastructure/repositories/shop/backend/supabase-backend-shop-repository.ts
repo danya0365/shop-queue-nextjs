@@ -2,9 +2,9 @@ import { CreateShopEntity, PaginatedShopsEntity, ShopCategoryEntity, ShopEntity,
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendShopError, ShopBackendShopErrorType, ShopBackendShopRepository } from "@/src/domain/repositories/shop/backend/shop-backend-shop-repository";
-import { SupabaseShopBackendShopMapper } from "../../../mappers/shop/backend/supabase-shop-backend-shop.mapper";
-import { ShopSchema, ShopStatsSchema } from "../../../schemas/shop/backend/shop.schema";
+import { ShopBackendShopError, ShopBackendShopErrorType, ShopBackendShopRepository } from "@/src/domain/repositories/shop/backend/backend-shop-repository";
+import { SupabaseShopBackendShopMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-shop.mapper";
+import { ShopSchema, ShopStatsSchema } from "@/src/infrastructure/schemas/shop/backend/shop.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data

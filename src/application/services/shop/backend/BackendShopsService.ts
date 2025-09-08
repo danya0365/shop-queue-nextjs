@@ -1,5 +1,5 @@
 import type { GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO } from '@/src/application/dtos/shop/backend/shops-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { CreateShopUseCase, type CreateShopParams } from '@/src/application/usecases/shop/backend/shops/CreateShopUseCase';
 import { DeleteShopUseCase } from '@/src/application/usecases/shop/backend/shops/DeleteShopUseCase';
 import { GetShopByIdUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopByIdUseCase';
@@ -7,7 +7,7 @@ import { GetShopsPaginatedUseCase } from '@/src/application/usecases/shop/backen
 import { GetShopStatsUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopStatsUseCase';
 import { UpdateShopUseCase, type UpdateShopParams } from '@/src/application/usecases/shop/backend/shops/UpdateShopUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
+import { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 
 export interface IShopBackendShopsService {
   getShopsData(page?: number, perPage?: number): Promise<ShopsDataDTO>;
@@ -58,6 +58,7 @@ export class ShopBackendShopsService implements IShopBackendShopsService {
       throw error;
     }
   }
+
 
   async getShopsPaginated(page: number = 1, perPage: number = 10): Promise<PaginatedShopsDTO> {
     try {
@@ -132,13 +133,14 @@ export class ShopBackendShopsService implements IShopBackendShopsService {
   }
 }
 
-// create ShopBackendShopsService factory
-export const createShopBackendShopsService = (shopRepository: ShopBackendShopRepository, logger: Logger): ShopBackendShopsService => {
-  const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository);
-  const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository);
-  const getShopByIdUseCase = new GetShopByIdUseCase(shopRepository);
-  const createShopUseCase = new CreateShopUseCase(shopRepository);
-  const updateShopUseCase = new UpdateShopUseCase(shopRepository);
-  const deleteShopUseCase = new DeleteShopUseCase(shopRepository);
-  return new ShopBackendShopsService(getShopsPaginatedUseCase, getShopStatsUseCase, getShopByIdUseCase, createShopUseCase, updateShopUseCase, deleteShopUseCase, logger);
-};
+export class ShopBackendShopsServiceFactory {
+  static create(repository: ShopBackendShopRepository, logger: Logger): ShopBackendShopsService {
+    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(repository);
+    const getShopStatsUseCase = new GetShopStatsUseCase(repository);
+    const getShopByIdUseCase = new GetShopByIdUseCase(repository);
+    const createShopUseCase = new CreateShopUseCase(repository);
+    const updateShopUseCase = new UpdateShopUseCase(repository);
+    const deleteShopUseCase = new DeleteShopUseCase(repository);
+    return new ShopBackendShopsService(getShopsPaginatedUseCase, getShopStatsUseCase, getShopByIdUseCase, createShopUseCase, updateShopUseCase, deleteShopUseCase, logger);
+  }
+}

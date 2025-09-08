@@ -1,6 +1,6 @@
-import { ShopEntity, ShopStatsEntity, ShopStatus } from "../../../../domain/entities/shop/backend/backend-shop.entity";
-import { PaginationMeta } from "../../../../domain/interfaces/pagination-types";
-import { ShopSchema, ShopStatsSchema } from "../../../schemas/shop/backend/shop.schema";
+import { ShopEntity, ShopStatsEntity, ShopStatus } from "@/src/domain/entities/shop/backend/backend-shop.entity";
+import { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
+import { ShopSchema, ShopStatsSchema } from "@/src/infrastructure/schemas/shop/backend/shop.schema";
 
 /**
  * Mapper class for converting between shop database schema and domain entities

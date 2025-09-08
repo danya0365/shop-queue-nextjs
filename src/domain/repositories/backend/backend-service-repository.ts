@@ -1,4 +1,4 @@
-import type { ServiceEntity, ServiceStatsEntity, PaginatedServicesEntity } from '@/src/domain/entities/backend/service.entity';
+import type { PaginatedServicesEntity, ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/backend-service.entity';
 import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
 
 export enum BackendServiceErrorType {

@@ -3,6 +3,7 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { ProfileService } from "../application/services/profile-service";
+import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
@@ -17,7 +18,6 @@ import { RewardTransactionBackendService } from "../application/services/shop/ba
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
-import { createShopBackendShopsService } from "../application/services/shop/backend/ShopBackendShopsService";
 import { ShopService } from "../application/services/shop/shop-service";
 import { SubscriptionService } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
@@ -26,7 +26,7 @@ import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-a
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
-import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-shop-backend-shop-repository";
+import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -55,8 +55,8 @@ export async function createServerContainer(): Promise<Container> {
     const authDatasource = new SupabaseAuthDataSource(logger, supabase);
     const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
-    // Create repository instances
-    const shopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
+    const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
+
 
     // Create service instances
     const authService = new AuthService(authDatasource, logger);
@@ -80,7 +80,7 @@ export async function createServerContainer(): Promise<Container> {
     const shopSettingsBackendService = new ShopSettingsBackendService(logger);
     const notificationSettingsBackendService = new NotificationSettingsBackendService(logger);
     const rewardTransactionBackendService = new RewardTransactionBackendService(logger);
-    const shopBackendShopsService = createShopBackendShopsService(shopRepository, logger);
+    const shopBackendShopsService = ShopBackendShopsServiceFactory.create(shopBackendShopRepository, logger);
 
     // Register all services in the container
     container.registerInstance("AuthService", authService);

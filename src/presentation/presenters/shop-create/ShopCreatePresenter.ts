@@ -1,5 +1,5 @@
 import { ShopCategoryDTO } from '@/src/application/dtos/shop/backend/shops-dto';
-import { ShopBackendShopsService } from '@/src/application/services/shop/backend/ShopBackendShopsService';
+import { ShopBackendShopsService } from '@/src/application/services/shop/backend/BackendShopsService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 

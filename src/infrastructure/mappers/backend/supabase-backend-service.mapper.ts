@@ -1,6 +1,6 @@
-import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/service.entity';
-import type { ServiceSchemaType, ServiceStatsSchemaType } from '@/src/infrastructure/schemas/backend/service.schema';
+import type { ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/backend-service.entity';
 import type { PaginationMeta } from '@/src/domain/interfaces/pagination-types';
+import type { ServiceSchemaType, ServiceStatsSchemaType } from '@/src/infrastructure/schemas/backend/service.schema';
 
 export class SupabaseBackendServiceMapper {
   static toDomain(row: ServiceSchemaType & { shop_name?: string }): ServiceEntity {
@@ -64,7 +64,7 @@ export class SupabaseBackendServiceMapper {
    */
   static createPaginationMeta(page: number, limit: number, totalItems: number): PaginationMeta {
     const totalPages = Math.ceil(totalItems / limit);
-    
+
     return {
       currentPage: page,
       itemsPerPage: limit,

@@ -1,6 +1,5 @@
-
-import { CreateShopEntity, PaginatedShopsEntity, ShopEntity, ShopStatsEntity, UpdateShopEntity } from "@/src/domain/entities/shop/backend/backend-shop.entity";
-import { PaginationParams } from "../../../interfaces/pagination-types";
+import type { CreateShopEntity, PaginatedShopsEntity, ShopEntity, ShopStatsEntity, UpdateShopEntity } from '@/src/domain/entities/shop/backend/backend-shop.entity';
+import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
 
 /**
  * Shop repository error types

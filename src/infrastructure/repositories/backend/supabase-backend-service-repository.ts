@@ -1,4 +1,4 @@
-import { PaginatedServicesEntity, ServiceEntity, ServiceStatsEntity } from "../../../domain/entities/backend/service.entity";
+import { PaginatedServicesEntity, ServiceEntity, ServiceStatsEntity } from "../../../domain/entities/backend/backend-service.entity";
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";

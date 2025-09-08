@@ -1,9 +1,9 @@
 import { GetShopsPaginatedInput, PaginatedShopsDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { ShopMapper } from '@/src/application/mappers/backend/shop-mapper';
+import { ShopMapper } from '@/src/application/mappers/shop/backend/shop-mapper';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
-import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/shop-backend-shop-repository';
+import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
+import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 
 /**
  * Use case for getting paginated shops data
