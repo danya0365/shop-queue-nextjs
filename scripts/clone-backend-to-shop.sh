@@ -3,7 +3,7 @@
 # Function to copy and update files
 copy_and_update() {
     local src_dir="$1"
-    local dest_dir="${src_dir//backend/shop\/backend}"
+    local dest_dir="${src_dir//backend/shop/backend}"
     
     echo "Processing: $src_dir -> $dest_dir"
     
