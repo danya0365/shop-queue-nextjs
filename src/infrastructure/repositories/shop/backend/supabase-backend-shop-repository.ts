@@ -288,7 +288,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
       };
 
       const shopCategories = await this.dataSource.getAdvanced<Record<string, unknown>>(
-        'shop_categories',
+        'category_shops',
         categoriesQuery
       );
 
