@@ -1,8 +1,13 @@
 import type { GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO } from '@/src/application/dtos/backend/shops-dto';
-import type { CreateShopParams } from '@/src/application/usecases/backend/shops/CreateShopUseCase';
-import type { UpdateShopParams } from '@/src/application/usecases/backend/shops/UpdateShopUseCase';
+import { CreateShopUseCase, type CreateShopParams } from '@/src/application/usecases/backend/shops/CreateShopUseCase';
+import { UpdateShopUseCase, type UpdateShopParams } from '@/src/application/usecases/backend/shops/UpdateShopUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendShopRepository } from '@/src/domain/repositories/backend/backend-shop-repository';
 import { IUseCase } from '../../interfaces/use-case.interface';
+import { DeleteShopUseCase } from '../../usecases/backend/shops/DeleteShopUseCase';
+import { GetShopByIdUseCase } from '../../usecases/backend/shops/GetShopByIdUseCase';
+import { GetShopsPaginatedUseCase } from '../../usecases/backend/shops/GetShopsPaginatedUseCase';
+import { GetShopStatsUseCase } from '../../usecases/backend/shops/GetShopStatsUseCase';
 
 export interface IBackendShopsService {
   getShopsData(page?: number, perPage?: number): Promise<ShopsDataDTO>;
@@ -127,3 +132,16 @@ export class BackendShopsService implements IBackendShopsService {
     }
   }
 }
+
+export class BackendShopsServiceFactory {
+  static create(repository: BackendShopRepository, logger: Logger): BackendShopsService {
+    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(repository);
+    const getShopStatsUseCase = new GetShopStatsUseCase(repository);
+    const getShopByIdUseCase = new GetShopByIdUseCase(repository);
+    const createShopUseCase = new CreateShopUseCase(repository);
+    const updateShopUseCase = new UpdateShopUseCase(repository);
+    const deleteShopUseCase = new DeleteShopUseCase(repository);
+    return new BackendShopsService(getShopsPaginatedUseCase, getShopStatsUseCase, getShopByIdUseCase, createShopUseCase, updateShopUseCase, deleteShopUseCase, logger);
+  }
+}
+

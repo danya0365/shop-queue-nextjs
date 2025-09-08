@@ -1,7 +1,14 @@
 import type { CreatePromotionParams, PromotionDTO, PromotionsDataDTO, PromotionStatsDTO, UpdatePromotionParams } from '@/src/application/dtos/shop/backend/promotions-dto';
 import { GetPromotionsPaginatedInput, PaginatedPromotionsDTO } from '@/src/application/dtos/shop/backend/promotions-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { CreatePromotionUseCase } from '@/src/application/usecases/backend/promotions/CreatePromotionUseCase';
+import { DeletePromotionUseCase } from '@/src/application/usecases/backend/promotions/DeletePromotionUseCase';
+import { GetPromotionByIdUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionByIdUseCase';
+import { GetPromotionsPaginatedUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionsPaginatedUseCase';
+import { GetPromotionStatsUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionStatsUseCase';
+import { UpdatePromotionUseCase } from '@/src/application/usecases/backend/promotions/UpdatePromotionUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendPromotionRepository } from '@/src/domain/repositories/shop/backend/backend-promotion-repository';
 
 export interface IShopBackendPromotionsService {
   getPromotionsData(page?: number, perPage?: number): Promise<PromotionsDataDTO>;
@@ -137,5 +144,17 @@ export class ShopBackendPromotionsService implements IShopBackendPromotionsServi
       this.logger.error('Error deleting promotion', { error, id });
       throw error;
     }
+  }
+}
+
+export class ShopBackendPromotionsServiceFactory {
+  static create(repository: ShopBackendPromotionRepository, logger: Logger): ShopBackendPromotionsService {
+    const getPromotionsPaginatedUseCase = new GetPromotionsPaginatedUseCase(repository);
+    const getPromotionStatsUseCase = new GetPromotionStatsUseCase(repository);
+    const getPromotionByIdUseCase = new GetPromotionByIdUseCase(repository);
+    const createPromotionUseCase = new CreatePromotionUseCase(repository);
+    const updatePromotionUseCase = new UpdatePromotionUseCase(repository);
+    const deletePromotionUseCase = new DeletePromotionUseCase(repository);
+    return new ShopBackendPromotionsService(getPromotionsPaginatedUseCase, getPromotionStatsUseCase, getPromotionByIdUseCase, createPromotionUseCase, updatePromotionUseCase, deletePromotionUseCase, logger);
   }
 }

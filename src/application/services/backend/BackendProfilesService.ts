@@ -1,7 +1,9 @@
 import type { CreateProfileUseCaseInput, PaginatedProfilesDTO, ProfileDTO, ProfilesDataDTO, ProfileStatsDTO, UpdateProfileUseCaseInput } from '@/src/application/dtos/backend/profiles-dto';
-import type { GetProfilesPaginatedUseCaseInput } from '@/src/application/usecases/backend/profiles/GetProfilesPaginatedUseCase';
+import { GetProfilesPaginatedUseCase, type GetProfilesPaginatedUseCaseInput } from '@/src/application/usecases/backend/profiles/GetProfilesPaginatedUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendProfileRepository } from '@/src/domain/repositories/backend/backend-profile-repository';
 import { IUseCase } from '../../interfaces/use-case.interface';
+import { CreateProfileUseCase, DeleteProfileUseCase, GetProfileByIdUseCase, GetProfileStatsUseCase, UpdateProfileUseCase } from '../../usecases/backend/profiles';
 
 export interface IBackendProfilesService {
   getProfilesData(page?: number, perPage?: number): Promise<ProfilesDataDTO>;
@@ -121,3 +123,16 @@ export class BackendProfilesService implements IBackendProfilesService {
     }
   }
 }
+
+export class BackendProfilesServiceFactory {
+  static create(repository: BackendProfileRepository, logger: Logger): BackendProfilesService {
+    const getProfilesPaginatedUseCase = new GetProfilesPaginatedUseCase(repository);
+    const getProfileStatsUseCase = new GetProfileStatsUseCase(repository);
+    const getProfileByIdUseCase = new GetProfileByIdUseCase(repository);
+    const createProfileUseCase = new CreateProfileUseCase(repository);
+    const updateProfileUseCase = new UpdateProfileUseCase(repository);
+    const deleteProfileUseCase = new DeleteProfileUseCase(repository);
+    return new BackendProfilesService(getProfilesPaginatedUseCase, getProfileStatsUseCase, getProfileByIdUseCase, createProfileUseCase, updateProfileUseCase, deleteProfileUseCase, logger);
+  }
+}
+

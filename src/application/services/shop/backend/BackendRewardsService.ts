@@ -1,7 +1,13 @@
 import type { CreateRewardDTO, RewardDTO, RewardsDataDTO, RewardStatsDTO, UpdateRewardDTO } from '@/src/application/dtos/shop/backend/reward-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { GetRewardsPaginatedInput } from '@/src/application/usecases/shop/backend/rewards/GetRewardsPaginatedUseCase';
+import { CreateRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/CreateRewardUseCase';
+import { DeleteRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/DeleteRewardUseCase';
+import { GetRewardByIdUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardByIdUseCase';
+import { GetRewardsPaginatedInput, GetRewardsPaginatedUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardsPaginatedUseCase';
+import { GetRewardStatsUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardStatsUseCase';
+import { UpdateRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/UpdateRewardUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendRewardRepository } from '@/src/domain/repositories/shop/backend/backend-reward-repository';
 
 export interface IShopBackendRewardsService {
   getRewardsData(page?: number, perPage?: number): Promise<RewardsDataDTO>;
@@ -125,5 +131,17 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
       this.logger.error('Error deleting reward', { error, id });
       throw error;
     }
+  }
+}
+
+export class ShopBackendRewardsServiceFactory {
+  static create(repository: ShopBackendRewardRepository, logger: Logger): ShopBackendRewardsService {
+    const getRewardsPaginatedUseCase = new GetRewardsPaginatedUseCase(repository);
+    const getRewardStatsUseCase = new GetRewardStatsUseCase(repository);
+    const getRewardByIdUseCase = new GetRewardByIdUseCase(repository);
+    const createRewardUseCase = new CreateRewardUseCase(repository);
+    const updateRewardUseCase = new UpdateRewardUseCase(repository);
+    const deleteRewardUseCase = new DeleteRewardUseCase(repository);
+    return new ShopBackendRewardsService(getRewardsPaginatedUseCase, getRewardStatsUseCase, getRewardByIdUseCase, createRewardUseCase, updateRewardUseCase, deleteRewardUseCase, logger);
   }
 }

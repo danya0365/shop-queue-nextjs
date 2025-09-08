@@ -1,91 +1,18 @@
 'use server';
 
-import { GetEmployeesPaginatedInput, PaginatedEmployeesDTO } from '@/src/application/dtos/backend/employees-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { BackendEmployeesService } from '@/src/application/services/backend/BackendEmployeesService';
-import { CreateCustomerUseCase } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
-import { DeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
-import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
-import { GetCustomersPaginatedUseCase } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
-import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
-import { UpdateCustomerUseCase } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
-import { CreatePromotionUseCase } from '@/src/application/usecases/backend/promotions/CreatePromotionUseCase';
-import { DeletePromotionUseCase } from '@/src/application/usecases/backend/promotions/DeletePromotionUseCase';
-import { GetPromotionByIdUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionByIdUseCase';
-import { GetPromotionsPaginatedUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionsPaginatedUseCase';
-import { GetPromotionStatsUseCase } from '@/src/application/usecases/backend/promotions/GetPromotionStatsUseCase';
-import { UpdatePromotionUseCase } from '@/src/application/usecases/backend/promotions/UpdatePromotionUseCase';
-import { CreateRewardUseCase } from '@/src/application/usecases/backend/rewards/CreateRewardUseCase';
-import { DeleteRewardUseCase } from '@/src/application/usecases/backend/rewards/DeleteRewardUseCase';
-import { GetRewardByIdUseCase } from '@/src/application/usecases/backend/rewards/GetRewardByIdUseCase';
-import { GetRewardsPaginatedUseCase } from '@/src/application/usecases/backend/rewards/GetRewardsPaginatedUseCase';
-import { GetRewardStatsUseCase } from '@/src/application/usecases/backend/rewards/GetRewardStatsUseCase';
-import { UpdateRewardUseCase } from '@/src/application/usecases/backend/rewards/UpdateRewardUseCase';
-import { BackendAuthUsersService } from "../application/services/backend/BackendAuthUsersService";
-import { BackendCategoriesService } from "../application/services/backend/BackendCategoriesService";
-import { BackendCustomersService } from "../application/services/backend/BackendCustomersService";
-import { BackendDashboardService } from "../application/services/backend/BackendDashboardService";
-import { BackendDepartmentsService } from "../application/services/backend/BackendDepartmentsService";
-import { BackendPaymentsService } from "../application/services/backend/BackendPaymentsService";
-import { BackendPromotionsService } from "../application/services/backend/BackendPromotionsService";
-import { BackendProfilesService } from "../application/services/backend/BackendProfilesService";
-import { BackendQueuesService } from "../application/services/backend/BackendQueuesService";
-import { BackendServicesService } from '../application/services/backend/BackendServicesService';
-import { BackendRewardsService } from "../application/services/backend/BackendRewardsService";
-import { BackendShopsService } from "../application/services/backend/BackendShopsService";
-import { DeleteAuthUserUseCase } from "../application/usecases/backend/auth-users/DeleteAuthUserUseCase";
-import { GetAuthUserByIdUseCase } from "../application/usecases/backend/auth-users/GetAuthUserByIdUseCase";
-import { GetAuthUsersPaginatedUseCase } from "../application/usecases/backend/auth-users/GetAuthUsersPaginatedUseCase";
-import { GetAuthUserStatsUseCase } from "../application/usecases/backend/auth-users/GetAuthUserStatsUseCase";
-import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoriesPaginatedUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from "../application/usecases/backend/categories";
-import { GetDashboardDataUseCase } from "../application/usecases/backend/dashboard/GetDashboardDataUseCase";
-import { CreateDepartmentUseCase, DeleteDepartmentUseCase, GetDepartmentByIdUseCase, GetDepartmentsPaginatedUseCase, GetDepartmentStatsUseCase, UpdateDepartmentUseCase } from "../application/usecases/backend/departments";
-import { GetDashboardStatsUseCase } from "../application/usecases/backend/dashboard/GetDashboardStatsUseCase";
-import { GetPopularServicesUseCase } from "../application/usecases/backend/dashboard/GetPopularServicesUseCase";
-import { GetQueueDistributionUseCase } from "../application/usecases/backend/dashboard/GetQueueDistributionUseCase";
-import { GetRecentActivitiesUseCase } from "../application/usecases/backend/dashboard/GetRecentActivitiesUseCase";
-import { CreateEmployeeUseCase } from "../application/usecases/backend/employees/CreateEmployeeUseCase";
-import { DeleteEmployeeUseCase } from "../application/usecases/backend/employees/DeleteEmployeeUseCase";
-import { GetEmployeeByIdUseCase } from "../application/usecases/backend/employees/GetEmployeeByIdUseCase";
-import { GetEmployeesPaginatedUseCase } from "../application/usecases/backend/employees/GetEmployeesPaginatedUseCase";
-import { GetEmployeeStatsUseCase } from "../application/usecases/backend/employees/GetEmployeeStatsUseCase";
-import { UpdateEmployeeUseCase } from "../application/usecases/backend/employees/UpdateEmployeeUseCase";
-import { CreatePaymentUseCase } from "../application/usecases/backend/payments/CreatePaymentUseCase";
-import { DeletePaymentUseCase } from "../application/usecases/backend/payments/DeletePaymentUseCase";
-import { GetPaymentByIdUseCase } from "../application/usecases/backend/payments/GetPaymentByIdUseCase";
-import { GetPaymentsPaginatedUseCase } from "../application/usecases/backend/payments/GetPaymentsPaginatedUseCase";
-import { GetPaymentStatsUseCase } from "../application/usecases/backend/payments/GetPaymentStatsUseCase";
-import { GetPaymentMethodStatsUseCase } from "../application/usecases/backend/payments/GetPaymentMethodStatsUseCase";
-import { UpdatePaymentUseCase } from "../application/usecases/backend/payments/UpdatePaymentUseCase";
-import {
-  CreateProfileUseCase,
-  DeleteProfileUseCase,
-  GetProfileByIdUseCase,
-  GetProfilesPaginatedUseCase,
-  GetProfileStatsUseCase,
-  UpdateProfileUseCase
-} from "../application/usecases/backend/profiles";
-import { CreateQueueUseCase } from "../application/usecases/backend/queues/CreateQueueUseCase";
-import { DeleteQueueUseCase } from "../application/usecases/backend/queues/DeleteQueueUseCase";
-import { GetQueueByIdUseCase } from "../application/usecases/backend/queues/GetQueueByIdUseCase";
-import { GetQueuesPaginatedUseCase } from "../application/usecases/backend/queues/GetQueuesPaginatedUseCase";
-import { GetQueueStatsUseCase } from "../application/usecases/backend/queues/GetQueueStatsUseCase";
-import { UpdateQueueUseCase } from "../application/usecases/backend/queues/UpdateQueueUseCase";
-import {
-  CreateServiceUseCase,
-  DeleteServiceUseCase,
-  GetServiceByIdUseCase,
-  GetServicesPaginatedUseCase,
-  GetServiceStatsUseCase,
-  ToggleServiceAvailabilityUseCase,
-  UpdateServiceUseCase
-} from '../application/usecases/backend/services';
-import { CreateShopUseCase } from "../application/usecases/backend/shops/CreateShopUseCase";
-import { DeleteShopUseCase } from "../application/usecases/backend/shops/DeleteShopUseCase";
-import { GetShopByIdUseCase } from "../application/usecases/backend/shops/GetShopByIdUseCase";
-import { GetShopsPaginatedUseCase } from "../application/usecases/backend/shops/GetShopsPaginatedUseCase";
-import { GetShopStatsUseCase } from "../application/usecases/backend/shops/GetShopStatsUseCase";
-import { UpdateShopUseCase } from "../application/usecases/backend/shops/UpdateShopUseCase";
+import { BackendEmployeesServiceFactory } from '@/src/application/services/backend/BackendEmployeesService';
+import { BackendAuthUsersServiceFactory } from "../application/services/backend/BackendAuthUsersService";
+import { BackendCategoriesServiceFactory } from "../application/services/backend/BackendCategoriesService";
+import { BackendCustomersServiceFactory } from "../application/services/backend/BackendCustomersService";
+import { BackendDepartmentsServiceFactory } from "../application/services/backend/BackendDepartmentsService";
+import { BackendPaymentsServiceFactory } from "../application/services/backend/BackendPaymentsService";
+import { BackendProfilesServiceFactory } from "../application/services/backend/BackendProfilesService";
+import { BackendPromotionsServiceFactory } from "../application/services/backend/BackendPromotionsService";
+import { BackendQueuesServiceFactory } from "../application/services/backend/BackendQueuesService";
+import { BackendRewardsServiceFactory } from "../application/services/backend/BackendRewardsService";
+import { BackendServicesServiceFactory } from '../application/services/backend/BackendServicesService';
+import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
+import { ShopBackendDashboardServiceFactory } from '../application/services/shop/backend/BackendDashboardService';
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
@@ -100,8 +27,8 @@ import { SupabaseBackendPaymentRepository } from "../infrastructure/repositories
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
 import { SupabaseBackendPromotionRepository } from "../infrastructure/repositories/backend/supabase-backend-promotion-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
-import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendRewardRepository } from '../infrastructure/repositories/backend/supabase-backend-reward-repository';
+import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
@@ -141,218 +68,20 @@ export async function createBackendContainer(): Promise<Container> {
     const serviceRepository = new SupabaseBackendServiceRepository(databaseDatasource, logger);
     const rewardRepository = new SupabaseBackendRewardRepository(databaseDatasource, logger);
 
-    // Create use case instances
-    const getDashboardStatsUseCase = new GetDashboardStatsUseCase(dashboardRepository, logger);
-    const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(dashboardRepository, logger);
-    const getQueueDistributionUseCase = new GetQueueDistributionUseCase(dashboardRepository, logger);
-    const getPopularServicesUseCase = new GetPopularServicesUseCase(dashboardRepository, logger);
-    const getDashboardDataUseCase = new GetDashboardDataUseCase(
-      getDashboardStatsUseCase,
-      getPopularServicesUseCase,
-      getQueueDistributionUseCase,
-      getRecentActivitiesUseCase,
-      logger
-    );
-    const getShopsPaginatedUseCase = new GetShopsPaginatedUseCase(shopRepository);
-    const getShopStatsUseCase = new GetShopStatsUseCase(shopRepository);
-    const getShopByIdUseCase = new GetShopByIdUseCase(shopRepository);
-    const createShopUseCase = new CreateShopUseCase(shopRepository);
-    const updateShopUseCase = new UpdateShopUseCase(shopRepository);
-    const deleteShopUseCase = new DeleteShopUseCase(shopRepository);
-
-    // Queues use cases
-    const getQueueByIdUseCase = new GetQueueByIdUseCase(queueRepository, logger);
-    const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(queueRepository, logger);
-    const getQueueStatsUseCase = new GetQueueStatsUseCase(queueRepository, logger);
-    const createQueueUseCase = new CreateQueueUseCase(queueRepository, logger);
-    const updateQueueUseCase = new UpdateQueueUseCase(queueRepository, logger);
-    const deleteQueueUseCase = new DeleteQueueUseCase(queueRepository, logger);
-
-    // Auth Users use cases
-    const getAuthUsersPaginatedUseCase = new GetAuthUsersPaginatedUseCase(authUsersRepository);
-    const getAuthUserByIdUseCase = new GetAuthUserByIdUseCase(authUsersRepository);
-    const getAuthUserStatsUseCase = new GetAuthUserStatsUseCase(authUsersRepository);
-    const deleteAuthUserUseCase = new DeleteAuthUserUseCase(authUsersRepository);
-
-    // Customer use cases
-    const getCustomersPaginatedUseCase = new GetCustomersPaginatedUseCase(customerRepository);
-    const getCustomerStatsUseCase = new GetCustomerStatsUseCase(customerRepository);
-    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(customerRepository);
-    const createCustomerUseCase = new CreateCustomerUseCase(customerRepository);
-    const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository);
-    const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepository);
-
-    // Employee use cases
-    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(employeeRepository);
-    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(employeeRepository);
-    const createEmployeeUseCase = new CreateEmployeeUseCase(employeeRepository);
-    const updateEmployeeUseCase = new UpdateEmployeeUseCase(employeeRepository);
-    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(employeeRepository);
-    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(employeeRepository);
-
-    // Department use cases
-    const getDepartmentsPaginatedUseCase = new GetDepartmentsPaginatedUseCase(departmentRepository);
-    const getDepartmentByIdUseCase = new GetDepartmentByIdUseCase(departmentRepository);
-    const createDepartmentUseCase = new CreateDepartmentUseCase(departmentRepository);
-    const updateDepartmentUseCase = new UpdateDepartmentUseCase(departmentRepository);
-    const deleteDepartmentUseCase = new DeleteDepartmentUseCase(departmentRepository);
-    const getDepartmentStatsUseCase = new GetDepartmentStatsUseCase(departmentRepository);
-
-    const getCategoryByIdUseCase = new GetCategoryByIdUseCase(categoryRepository);
-    const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(categoryRepository);
-    const getCategoryStatsUseCase = new GetCategoryStatsUseCase(categoryRepository);
-    const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
-    const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository);
-    const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
-
-    // Payment use cases
-    const getPaymentsPaginatedUseCase = new GetPaymentsPaginatedUseCase(paymentRepository);
-    const getPaymentStatsUseCase = new GetPaymentStatsUseCase(paymentRepository);
-    const getPaymentMethodStatsUseCase = new GetPaymentMethodStatsUseCase(paymentRepository);
-    const getPaymentByIdUseCase = new GetPaymentByIdUseCase(paymentRepository);
-    const createPaymentUseCase = new CreatePaymentUseCase(paymentRepository);
-    const updatePaymentUseCase = new UpdatePaymentUseCase(paymentRepository);
-    const deletePaymentUseCase = new DeletePaymentUseCase(paymentRepository);
-
-    // Profile use cases
-    const getProfilesPaginatedUseCase = new GetProfilesPaginatedUseCase(profileRepository);
-    const getProfileStatsUseCase = new GetProfileStatsUseCase(profileRepository);
-    const getProfileByIdUseCase = new GetProfileByIdUseCase(profileRepository);
-    const createProfileUseCase = new CreateProfileUseCase(profileRepository);
-    const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
-    const deleteProfileUseCase = new DeleteProfileUseCase(profileRepository);
-
-    // Service use cases
-    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(serviceRepository);
-    const getServiceStatsUseCase = new GetServiceStatsUseCase(serviceRepository);
-    const getServiceByIdUseCase = new GetServiceByIdUseCase(serviceRepository);
-    const createServiceUseCase = new CreateServiceUseCase(serviceRepository);
-    const updateServiceUseCase = new UpdateServiceUseCase(serviceRepository);
-    const deleteServiceUseCase = new DeleteServiceUseCase(serviceRepository);
-    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(serviceRepository);
-
-    // Promotion use cases
-    const getPromotionsPaginatedUseCase = new GetPromotionsPaginatedUseCase(promotionRepository);
-    const getPromotionStatsUseCase = new GetPromotionStatsUseCase(promotionRepository);
-    const getPromotionByIdUseCase = new GetPromotionByIdUseCase(promotionRepository);
-    const createPromotionUseCase = new CreatePromotionUseCase(promotionRepository);
-    const updatePromotionUseCase = new UpdatePromotionUseCase(promotionRepository);
-    const deletePromotionUseCase = new DeletePromotionUseCase(promotionRepository);
-
-    // Reward use cases
-    const getRewardsPaginatedUseCase = new GetRewardsPaginatedUseCase(rewardRepository);
-    const getRewardStatsUseCase = new GetRewardStatsUseCase(rewardRepository);
-    const getRewardByIdUseCase = new GetRewardByIdUseCase(rewardRepository);
-    const createRewardUseCase = new CreateRewardUseCase(rewardRepository);
-    const updateRewardUseCase = new UpdateRewardUseCase(rewardRepository);
-    const deleteRewardUseCase = new DeleteRewardUseCase(rewardRepository);
-
     // Create service instances
-    const backendDashboardService = new BackendDashboardService(
-      getDashboardStatsUseCase,
-      getRecentActivitiesUseCase,
-      getQueueDistributionUseCase,
-      getPopularServicesUseCase,
-      getDashboardDataUseCase,
-      logger
-    );
-
-    const backendShopsService = new BackendShopsService(
-      getShopsPaginatedUseCase,
-      getShopStatsUseCase,
-      getShopByIdUseCase,
-      createShopUseCase,
-      updateShopUseCase,
-      deleteShopUseCase,
-      logger
-    );
-
-    const backendQueuesService = new BackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
-    const backendCustomersService = new BackendCustomersService(
-      getCustomersPaginatedUseCase,
-      getCustomerStatsUseCase,
-      getCustomerByIdUseCase,
-      createCustomerUseCase,
-      updateCustomerUseCase,
-      deleteCustomerUseCase,
-      logger
-    );
-    // Cast to correct type to fix type incompatibility between DTO and Entity
-    const backendEmployeesService = new BackendEmployeesService(
-      getEmployeesPaginatedUseCase as unknown as IUseCase<GetEmployeesPaginatedInput, PaginatedEmployeesDTO>,
-      getEmployeeStatsUseCase,
-      getEmployeeByIdUseCase,
-      createEmployeeUseCase,
-      updateEmployeeUseCase,
-      deleteEmployeeUseCase,
-      logger
-    );
-    const backendDepartmentsService = new BackendDepartmentsService(
-      getDepartmentsPaginatedUseCase,
-      getDepartmentStatsUseCase,
-      getDepartmentByIdUseCase,
-      createDepartmentUseCase,
-      updateDepartmentUseCase,
-      deleteDepartmentUseCase,
-      logger
-    );
-    const backendAuthUsersService = new BackendAuthUsersService(
-      getAuthUsersPaginatedUseCase,
-      getAuthUserByIdUseCase,
-      getAuthUserStatsUseCase,
-      deleteAuthUserUseCase
-    );
-    const backendCategoriesService = new BackendCategoriesService(getCategoriesPaginatedUseCase, getCategoryStatsUseCase, getCategoryByIdUseCase, createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, logger);
-    const backendProfilesService = new BackendProfilesService(
-      getProfilesPaginatedUseCase,
-      getProfileStatsUseCase,
-      getProfileByIdUseCase,
-      createProfileUseCase,
-      updateProfileUseCase,
-      deleteProfileUseCase,
-      logger
-    );
-    const backendPaymentsService = new BackendPaymentsService(
-      getPaymentsPaginatedUseCase,
-      getPaymentStatsUseCase,
-      getPaymentMethodStatsUseCase,
-      getPaymentByIdUseCase,
-      createPaymentUseCase,
-      updatePaymentUseCase,
-      deletePaymentUseCase,
-      logger
-    );
-
-    const backendServicesService = new BackendServicesService(
-      getServicesPaginatedUseCase,
-      getServiceStatsUseCase,
-      getServiceByIdUseCase,
-      createServiceUseCase,
-      updateServiceUseCase,
-      deleteServiceUseCase,
-      toggleServiceAvailabilityUseCase,
-      logger
-    );
-
-    const backendPromotionsService = new BackendPromotionsService(
-      getPromotionsPaginatedUseCase,
-      getPromotionStatsUseCase,
-      getPromotionByIdUseCase,
-      createPromotionUseCase,
-      updatePromotionUseCase,
-      deletePromotionUseCase,
-      logger
-    );
-
-    const backendRewardsService = new BackendRewardsService(
-      getRewardsPaginatedUseCase,
-      getRewardStatsUseCase,
-      getRewardByIdUseCase,
-      createRewardUseCase,
-      updateRewardUseCase,
-      deleteRewardUseCase,
-      logger
-    );
+    const backendDashboardService = ShopBackendDashboardServiceFactory.create(dashboardRepository, logger);
+    const backendAuthUsersService = BackendAuthUsersServiceFactory.create(authUsersRepository, logger);
+    const backendCategoriesService = BackendCategoriesServiceFactory.create(categoryRepository, logger);
+    const backendProfilesService = BackendProfilesServiceFactory.create(profileRepository, logger);
+    const backendPaymentsService = BackendPaymentsServiceFactory.create(paymentRepository, logger);
+    const backendPromotionsService = BackendPromotionsServiceFactory.create(promotionRepository, logger);
+    const backendQueuesService = BackendQueuesServiceFactory.create(queueRepository, logger);
+    const backendRewardsService = BackendRewardsServiceFactory.create(rewardRepository, logger);
+    const backendServicesService = BackendServicesServiceFactory.create(serviceRepository, logger);
+    const backendShopsService = BackendShopsServiceFactory.create(shopRepository, logger);
+    const backendEmployeesService = BackendEmployeesServiceFactory.create(employeeRepository, logger);
+    const backendDepartmentsService = BackendDepartmentsServiceFactory.create(departmentRepository, logger);
+    const backendCustomersService = BackendCustomersServiceFactory.create(customerRepository, logger);
 
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);

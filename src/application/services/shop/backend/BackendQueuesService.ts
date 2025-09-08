@@ -1,7 +1,13 @@
 import type { CreateQueueInput, PaginatedQueuesDTO, QueueDTO, QueuesDataDTO, QueueStatsDTO, UpdateQueueInput } from '@/src/application/dtos/shop/backend/queues-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { GetQueuesPaginatedInput } from '@/src/application/usecases/shop/backend/queues/GetQueuesPaginatedUseCase';
+import { CreateQueueUseCase } from '@/src/application/usecases/shop/backend/queues/CreateQueueUseCase';
+import { DeleteQueueUseCase } from '@/src/application/usecases/shop/backend/queues/DeleteQueueUseCase';
+import { GetQueueByIdUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueueByIdUseCase';
+import { GetQueuesPaginatedInput, GetQueuesPaginatedUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueuesPaginatedUseCase';
+import { GetQueueStatsUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueueStatsUseCase';
+import { UpdateQueueUseCase } from '@/src/application/usecases/shop/backend/queues/UpdateQueueUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
 
 export interface IShopBackendQueuesService {
   getQueuesData(page?: number, perPage?: number): Promise<QueuesDataDTO>;
@@ -121,3 +127,16 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
     }
   }
 }
+
+export class ShopBackendQueuesServiceFactory {
+  static create(repository: ShopBackendQueueRepository, logger: Logger): ShopBackendQueuesService {
+    const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(repository, logger);
+    const getQueueStatsUseCase = new GetQueueStatsUseCase(repository, logger);
+    const getQueueByIdUseCase = new GetQueueByIdUseCase(repository, logger);
+    const createQueueUseCase = new CreateQueueUseCase(repository, logger);
+    const updateQueueUseCase = new UpdateQueueUseCase(repository, logger);
+    const deleteQueueUseCase = new DeleteQueueUseCase(repository, logger);
+    return new ShopBackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
+  }
+}
+

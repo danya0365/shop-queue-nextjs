@@ -1,7 +1,13 @@
 import type { CreateRewardDTO, RewardDTO, RewardsDataDTO, RewardStatsDTO, UpdateRewardDTO } from '@/src/application/dtos/backend/reward-dto';
-import { GetRewardsPaginatedInput } from '@/src/application/usecases/backend/rewards/GetRewardsPaginatedUseCase';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { GetRewardsPaginatedInput, GetRewardsPaginatedUseCase } from '@/src/application/usecases/backend/rewards/GetRewardsPaginatedUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendRewardRepository } from '@/src/domain/repositories/backend/backend-reward-repository';
+import { CreateRewardUseCase } from '../../usecases/backend/rewards/CreateRewardUseCase';
+import { DeleteRewardUseCase } from '../../usecases/backend/rewards/DeleteRewardUseCase';
+import { GetRewardByIdUseCase } from '../../usecases/backend/rewards/GetRewardByIdUseCase';
+import { GetRewardStatsUseCase } from '../../usecases/backend/rewards/GetRewardStatsUseCase';
+import { UpdateRewardUseCase } from '../../usecases/backend/rewards/UpdateRewardUseCase';
 
 export interface IBackendRewardsService {
   getRewardsData(page?: number, perPage?: number): Promise<RewardsDataDTO>;
@@ -127,3 +133,16 @@ export class BackendRewardsService implements IBackendRewardsService {
     }
   }
 }
+
+export class BackendRewardsServiceFactory {
+  static create(repository: BackendRewardRepository, logger: Logger): BackendRewardsService {
+    const getRewardsPaginatedUseCase = new GetRewardsPaginatedUseCase(repository);
+    const getRewardStatsUseCase = new GetRewardStatsUseCase(repository);
+    const getRewardByIdUseCase = new GetRewardByIdUseCase(repository);
+    const createRewardUseCase = new CreateRewardUseCase(repository);
+    const updateRewardUseCase = new UpdateRewardUseCase(repository);
+    const deleteRewardUseCase = new DeleteRewardUseCase(repository);
+    return new BackendRewardsService(getRewardsPaginatedUseCase, getRewardStatsUseCase, getRewardByIdUseCase, createRewardUseCase, updateRewardUseCase, deleteRewardUseCase, logger);
+  }
+}
+

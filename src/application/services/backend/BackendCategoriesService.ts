@@ -1,9 +1,11 @@
 import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO, PaginatedCategoriesDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { CreateCategoryUseCaseInput } from '@/src/application/usecases/backend/categories/CreateCategoryUseCase';
-import type { GetCategoriesPaginatedUseCaseInput } from '@/src/application/usecases/backend/categories/GetCategoriesPaginatedUseCase';
+import { GetCategoriesPaginatedUseCase, type GetCategoriesPaginatedUseCaseInput } from '@/src/application/usecases/backend/categories/GetCategoriesPaginatedUseCase';
 import type { UpdateCategoryUseCaseInput } from '@/src/application/usecases/backend/categories/UpdateCategoryUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { IUseCase } from '../../interfaces/use-case.interface';
+import { BackendCategoryRepository } from '@/src/domain/repositories/backend/backend-category-repository';
+import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from '../../usecases/backend/categories';
 
 export interface IBackendCategoriesService {
   getCategoriesData(page?: number, perPage?: number): Promise<CategoriesDataDTO>;
@@ -121,5 +123,17 @@ export class BackendCategoriesService implements IBackendCategoriesService {
       this.logger.error('Error deleting category', { error, id });
       throw error;
     }
+  }
+}
+
+export class BackendCategoriesServiceFactory {
+  static create(repository: BackendCategoryRepository, logger: Logger): BackendCategoriesService {
+    const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(repository);
+    const getCategoryStatsUseCase = new GetCategoryStatsUseCase(repository);
+    const getCategoryByIdUseCase = new GetCategoryByIdUseCase(repository);
+    const createCategoryUseCase = new CreateCategoryUseCase(repository);
+    const updateCategoryUseCase = new UpdateCategoryUseCase(repository);
+    const deleteCategoryUseCase = new DeleteCategoryUseCase(repository);
+    return new BackendCategoriesService(getCategoriesPaginatedUseCase, getCategoryStatsUseCase, getCategoryByIdUseCase, createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, logger);
   }
 }

@@ -2,6 +2,13 @@ import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStats
 import { GetEmployeesPaginatedInput } from '@/src/application/dtos/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendEmployeeRepository } from '@/src/domain/repositories/backend/backend-employee-repository';
+import { CreateEmployeeUseCase } from '../../usecases/backend/employees/CreateEmployeeUseCase';
+import { DeleteEmployeeUseCase } from '../../usecases/backend/employees/DeleteEmployeeUseCase';
+import { GetEmployeeByIdUseCase } from '../../usecases/backend/employees/GetEmployeeByIdUseCase';
+import { GetEmployeesPaginatedUseCase } from '../../usecases/backend/employees/GetEmployeesPaginatedUseCase';
+import { GetEmployeeStatsUseCase } from '../../usecases/backend/employees/GetEmployeeStatsUseCase';
+import { UpdateEmployeeUseCase } from '../../usecases/backend/employees/UpdateEmployeeUseCase';
 
 export interface IBackendEmployeesService {
   getEmployeesData(page?: number, perPage?: number): Promise<EmployeesDataDTO>;
@@ -138,3 +145,16 @@ export class BackendEmployeesService implements IBackendEmployeesService {
     }
   }
 }
+
+export class BackendEmployeesServiceFactory {
+  static create(repository: BackendEmployeeRepository, logger: Logger): BackendEmployeesService {
+    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(repository);
+    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(repository);
+    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(repository);
+    const createEmployeeUseCase = new CreateEmployeeUseCase(repository);
+    const updateEmployeeUseCase = new UpdateEmployeeUseCase(repository);
+    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(repository);
+    return new BackendEmployeesService(getEmployeesPaginatedUseCase, getEmployeeStatsUseCase, getEmployeeByIdUseCase, createEmployeeUseCase, updateEmployeeUseCase, deleteEmployeeUseCase, logger);
+  }
+}
+

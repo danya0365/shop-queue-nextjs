@@ -1,7 +1,15 @@
-import type { CreatePaymentParams, PaymentDTO, PaymentsDataDTO, PaymentStatsDTO, PaymentMethodStatsDTO, PaginatedPaymentsDTO, UpdatePaymentParams } from '@/src/application/dtos/backend/payments-dto';
+import type { CreatePaymentParams, PaginatedPaymentsDTO, PaymentDTO, PaymentMethodStatsDTO, PaymentsDataDTO, PaymentStatsDTO, UpdatePaymentParams } from '@/src/application/dtos/backend/payments-dto';
 import { GetPaymentsPaginatedInput } from '@/src/application/dtos/backend/payments-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendPaymentRepository } from '@/src/domain/repositories/backend/backend-payment-repository';
+import { CreatePaymentUseCase } from '../../usecases/backend/payments/CreatePaymentUseCase';
+import { DeletePaymentUseCase } from '../../usecases/backend/payments/DeletePaymentUseCase';
+import { GetPaymentByIdUseCase } from '../../usecases/backend/payments/GetPaymentByIdUseCase';
+import { GetPaymentMethodStatsUseCase } from '../../usecases/backend/payments/GetPaymentMethodStatsUseCase';
+import { GetPaymentsPaginatedUseCase } from '../../usecases/backend/payments/GetPaymentsPaginatedUseCase';
+import { GetPaymentStatsUseCase } from '../../usecases/backend/payments/GetPaymentStatsUseCase';
+import { UpdatePaymentUseCase } from '../../usecases/backend/payments/UpdatePaymentUseCase';
 
 export interface IBackendPaymentsService {
   getPaymentsData(page?: number, perPage?: number): Promise<PaymentsDataDTO>;
@@ -154,5 +162,18 @@ export class BackendPaymentsService implements IBackendPaymentsService {
       this.logger.error('Error deleting payment', { error, id });
       throw error;
     }
+  }
+}
+
+export class BackendPaymentsServiceFactory {
+  static create(repository: BackendPaymentRepository, logger: Logger): BackendPaymentsService {
+    const getPaymentsPaginatedUseCase = new GetPaymentsPaginatedUseCase(repository);
+    const getPaymentStatsUseCase = new GetPaymentStatsUseCase(repository);
+    const getPaymentMethodStatsUseCase = new GetPaymentMethodStatsUseCase(repository);
+    const getPaymentByIdUseCase = new GetPaymentByIdUseCase(repository);
+    const createPaymentUseCase = new CreatePaymentUseCase(repository);
+    const updatePaymentUseCase = new UpdatePaymentUseCase(repository);
+    const deletePaymentUseCase = new DeletePaymentUseCase(repository);
+    return new BackendPaymentsService(getPaymentsPaginatedUseCase, getPaymentStatsUseCase, getPaymentMethodStatsUseCase, getPaymentByIdUseCase, createPaymentUseCase, updatePaymentUseCase, deletePaymentUseCase, logger);
   }
 }

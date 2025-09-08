@@ -1,9 +1,11 @@
 import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO, PaginatedCategoriesDTO } from '@/src/application/dtos/shop/backend/categories-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from '@/src/application/usecases/backend/categories';
 import type { CreateCategoryUseCaseInput } from '@/src/application/usecases/shop/backend/categories/CreateCategoryUseCase';
-import type { GetCategoriesPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/categories/GetCategoriesPaginatedUseCase';
+import { GetCategoriesPaginatedUseCase, type GetCategoriesPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/categories/GetCategoriesPaginatedUseCase';
 import type { UpdateCategoryUseCaseInput } from '@/src/application/usecases/shop/backend/categories/UpdateCategoryUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendCategoryRepository } from '@/src/domain/repositories/shop/backend/backend-category-repository';
 
 export interface IShopBackendCategoriesService {
   getCategoriesData(page?: number, perPage?: number): Promise<CategoriesDataDTO>;
@@ -121,5 +123,17 @@ export class ShopBackendCategoriesService implements IShopBackendCategoriesServi
       this.logger.error('Error deleting category', { error, id });
       throw error;
     }
+  }
+}
+
+export class ShopBackendCategoriesServiceFactory {
+  static create(repository: ShopBackendCategoryRepository, logger: Logger): ShopBackendCategoriesService {
+    const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(repository);
+    const getCategoryStatsUseCase = new GetCategoryStatsUseCase(repository);
+    const getCategoryByIdUseCase = new GetCategoryByIdUseCase(repository);
+    const createCategoryUseCase = new CreateCategoryUseCase(repository);
+    const updateCategoryUseCase = new UpdateCategoryUseCase(repository);
+    const deleteCategoryUseCase = new DeleteCategoryUseCase(repository);
+    return new ShopBackendCategoriesService(getCategoriesPaginatedUseCase, getCategoryStatsUseCase, getCategoryByIdUseCase, createCategoryUseCase, updateCategoryUseCase, deleteCategoryUseCase, logger);
   }
 }

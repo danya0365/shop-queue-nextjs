@@ -1,8 +1,10 @@
 import type { CreateServiceInputDTO, PaginatedServicesDTO, ServiceDTO, ServiceStatsDTO, ServicesDataDTO, UpdateServiceInputDTO } from '@/src/application/dtos/backend/services-dto';
-import type { GetServicesPaginatedUseCaseInput } from '@/src/application/usecases/backend/services/GetServicesPaginatedUseCase';
+import { GetServicesPaginatedUseCase, type GetServicesPaginatedUseCaseInput } from '@/src/application/usecases/backend/services/GetServicesPaginatedUseCase';
 import type { ToggleServiceAvailabilityUseCaseInput } from '@/src/application/usecases/backend/services/ToggleServiceAvailabilityUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendServiceRepository } from '@/src/domain/repositories/backend/backend-service-repository';
 import { IUseCase } from '../../interfaces/use-case.interface';
+import { CreateServiceUseCase, DeleteServiceUseCase, GetServiceByIdUseCase, GetServiceStatsUseCase, ToggleServiceAvailabilityUseCase, UpdateServiceUseCase } from '../../usecases/backend/services';
 
 export interface IBackendServicesService {
   getServicesData(page?: number, perPage?: number, filters?: {
@@ -38,8 +40,8 @@ export class BackendServicesService implements IBackendServicesService {
    * @returns Services data DTO
    */
   async getServicesData(
-    page: number = 1, 
-    perPage: number = 20, 
+    page: number = 1,
+    perPage: number = 20,
     filters?: {
       searchQuery?: string;
       categoryFilter?: string;
@@ -157,3 +159,17 @@ export class BackendServicesService implements IBackendServicesService {
     }
   }
 }
+
+export class BackendServicesServiceFactory {
+  static create(repository: BackendServiceRepository, logger: Logger): BackendServicesService {
+    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(repository);
+    const getServiceStatsUseCase = new GetServiceStatsUseCase(repository);
+    const getServiceByIdUseCase = new GetServiceByIdUseCase(repository);
+    const createServiceUseCase = new CreateServiceUseCase(repository);
+    const updateServiceUseCase = new UpdateServiceUseCase(repository);
+    const deleteServiceUseCase = new DeleteServiceUseCase(repository);
+    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(repository);
+    return new BackendServicesService(getServicesPaginatedUseCase, getServiceStatsUseCase, getServiceByIdUseCase, createServiceUseCase, updateServiceUseCase, deleteServiceUseCase, toggleServiceAvailabilityUseCase, logger);
+  }
+}
+

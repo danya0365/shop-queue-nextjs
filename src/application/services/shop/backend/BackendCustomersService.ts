@@ -1,9 +1,13 @@
 import type { CustomerDTO, CustomersDataDTO, CustomerStatsDTO, PaginatedCustomersDTO } from '@/src/application/dtos/shop/backend/customers-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { CreateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase';
-import type { GetCustomersPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/customers/GetCustomersPaginatedUseCase';
-import type { UpdateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/UpdateCustomerUseCase';
+import { DeleteCustomerUseCase } from '@/src/application/usecases/backend/customers/DeleteCustomerUseCase';
+import { GetCustomerByIdUseCase } from '@/src/application/usecases/backend/customers/GetCustomerByIdUseCase';
+import { GetCustomerStatsUseCase } from '@/src/application/usecases/backend/customers/GetCustomerStatsUseCase';
+import { CreateCustomerUseCase, type CreateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase';
+import { GetCustomersPaginatedUseCase, type GetCustomersPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/customers/GetCustomersPaginatedUseCase';
+import { UpdateCustomerUseCase, type UpdateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/UpdateCustomerUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendCustomerRepository } from '@/src/domain/repositories/shop/backend/backend-customer-repository';
 
 export interface IShopBackendCustomersService {
   getCustomersData(page?: number, perPage?: number, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<CustomersDataDTO>;
@@ -109,3 +113,16 @@ export class ShopBackendCustomersService implements IShopBackendCustomersService
     }
   }
 }
+
+export class ShopBackendCustomersServiceFactory {
+  static create(repository: ShopBackendCustomerRepository, logger: Logger): ShopBackendCustomersService {
+    const getCustomersPaginatedUseCase = new GetCustomersPaginatedUseCase(repository);
+    const getCustomerStatsUseCase = new GetCustomerStatsUseCase(repository);
+    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(repository);
+    const createCustomerUseCase = new CreateCustomerUseCase(repository);
+    const updateCustomerUseCase = new UpdateCustomerUseCase(repository);
+    const deleteCustomerUseCase = new DeleteCustomerUseCase(repository);
+    return new ShopBackendCustomersService(getCustomersPaginatedUseCase, getCustomerStatsUseCase, getCustomerByIdUseCase, createCustomerUseCase, updateCustomerUseCase, deleteCustomerUseCase, logger);
+  }
+}
+

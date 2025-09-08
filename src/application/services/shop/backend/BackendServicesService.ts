@@ -1,8 +1,10 @@
 import type { CreateServiceInputDTO, PaginatedServicesDTO, ServiceDTO, ServiceStatsDTO, ServicesDataDTO, UpdateServiceInputDTO } from '@/src/application/dtos/shop/backend/services-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { GetServicesPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/services/GetServicesPaginatedUseCase';
-import type { ToggleServiceAvailabilityUseCaseInput } from '@/src/application/usecases/shop/backend/services/ToggleServiceAvailabilityUseCase';
+import { CreateServiceUseCase, DeleteServiceUseCase, GetServiceByIdUseCase, GetServiceStatsUseCase, UpdateServiceUseCase } from '@/src/application/usecases/shop/backend/services';
+import { GetServicesPaginatedUseCase, type GetServicesPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/services/GetServicesPaginatedUseCase';
+import { ToggleServiceAvailabilityUseCase, type ToggleServiceAvailabilityUseCaseInput } from '@/src/application/usecases/shop/backend/services/ToggleServiceAvailabilityUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendServiceRepository } from '@/src/domain/repositories/shop/backend/backend-service-repository';
 
 export interface IShopBackendServicesService {
   getServicesData(page?: number, perPage?: number, filters?: {
@@ -155,5 +157,18 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
       this.logger.error('Error toggling service availability', { error, id, isAvailable });
       throw error;
     }
+  }
+}
+
+export class ShopBackendServicesServiceFactory {
+  static create(repository: ShopBackendServiceRepository, logger: Logger): ShopBackendServicesService {
+    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(repository);
+    const getServiceStatsUseCase = new GetServiceStatsUseCase(repository);
+    const getServiceByIdUseCase = new GetServiceByIdUseCase(repository);
+    const createServiceUseCase = new CreateServiceUseCase(repository);
+    const updateServiceUseCase = new UpdateServiceUseCase(repository);
+    const deleteServiceUseCase = new DeleteServiceUseCase(repository);
+    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(repository);
+    return new ShopBackendServicesService(getServicesPaginatedUseCase, getServiceStatsUseCase, getServiceByIdUseCase, createServiceUseCase, updateServiceUseCase, deleteServiceUseCase, toggleServiceAvailabilityUseCase, logger);
   }
 }

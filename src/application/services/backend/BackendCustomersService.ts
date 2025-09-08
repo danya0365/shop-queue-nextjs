@@ -1,9 +1,13 @@
 import type { CustomerDTO, CustomersDataDTO, CustomerStatsDTO, PaginatedCustomersDTO } from '@/src/application/dtos/backend/customers-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { CreateCustomerUseCaseInput } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
-import type { GetCustomersPaginatedUseCaseInput } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
-import type { UpdateCustomerUseCaseInput } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
+import { CreateCustomerUseCase, type CreateCustomerUseCaseInput } from '@/src/application/usecases/backend/customers/CreateCustomerUseCase';
+import { GetCustomersPaginatedUseCase, type GetCustomersPaginatedUseCaseInput } from '@/src/application/usecases/backend/customers/GetCustomersPaginatedUseCase';
+import { UpdateCustomerUseCase, type UpdateCustomerUseCaseInput } from '@/src/application/usecases/backend/customers/UpdateCustomerUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendCustomerRepository } from '@/src/domain/repositories/backend/backend-customer-repository';
+import { DeleteCustomerUseCase } from '../../usecases/backend/customers/DeleteCustomerUseCase';
+import { GetCustomerByIdUseCase } from '../../usecases/backend/customers/GetCustomerByIdUseCase';
+import { GetCustomerStatsUseCase } from '../../usecases/backend/customers/GetCustomerStatsUseCase';
 
 export interface IBackendCustomersService {
   getCustomersData(page?: number, perPage?: number, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<CustomersDataDTO>;
@@ -107,5 +111,17 @@ export class BackendCustomersService implements IBackendCustomersService {
       this.logger.error('BackendCustomersService: Error deleting customer', { error, id });
       throw error;
     }
+  }
+}
+
+export class BackendCustomersServiceFactory {
+  static create(repository: BackendCustomerRepository, logger: Logger): BackendCustomersService {
+    const getCustomersPaginatedUseCase = new GetCustomersPaginatedUseCase(repository);
+    const getCustomerStatsUseCase = new GetCustomerStatsUseCase(repository);
+    const getCustomerByIdUseCase = new GetCustomerByIdUseCase(repository);
+    const createCustomerUseCase = new CreateCustomerUseCase(repository);
+    const updateCustomerUseCase = new UpdateCustomerUseCase(repository);
+    const deleteCustomerUseCase = new DeleteCustomerUseCase(repository);
+    return new BackendCustomersService(getCustomersPaginatedUseCase, getCustomerStatsUseCase, getCustomerByIdUseCase, createCustomerUseCase, updateCustomerUseCase, deleteCustomerUseCase, logger);
   }
 }

@@ -1,7 +1,13 @@
 import type { CreateQueueInput, PaginatedQueuesDTO, QueueDTO, QueuesDataDTO, QueueStatsDTO, UpdateQueueInput } from '@/src/application/dtos/backend/queues-dto';
-import type { GetQueuesPaginatedInput } from '@/src/application/usecases/backend/queues/GetQueuesPaginatedUseCase';
+import { GetQueuesPaginatedUseCase, type GetQueuesPaginatedInput } from '@/src/application/usecases/backend/queues/GetQueuesPaginatedUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendQueueRepository } from '@/src/domain/repositories/backend/backend-queue-repository';
 import { IUseCase } from '../../interfaces/use-case.interface';
+import { CreateQueueUseCase } from '../../usecases/backend/queues/CreateQueueUseCase';
+import { DeleteQueueUseCase } from '../../usecases/backend/queues/DeleteQueueUseCase';
+import { GetQueueByIdUseCase } from '../../usecases/backend/queues/GetQueueByIdUseCase';
+import { GetQueueStatsUseCase } from '../../usecases/backend/queues/GetQueueStatsUseCase';
+import { UpdateQueueUseCase } from '../../usecases/backend/queues/UpdateQueueUseCase';
 
 export interface IBackendQueuesService {
   getQueuesData(page?: number, perPage?: number): Promise<QueuesDataDTO>;
@@ -119,5 +125,17 @@ export class BackendQueuesService implements IBackendQueuesService {
       this.logger.error('Error deleting queue', { error, id });
       throw error;
     }
+  }
+}
+
+export class BackendQueuesServiceFactory {
+  static create(repository: BackendQueueRepository, logger: Logger): BackendQueuesService {
+    const getQueuesPaginatedUseCase = new GetQueuesPaginatedUseCase(repository, logger);
+    const getQueueStatsUseCase = new GetQueueStatsUseCase(repository, logger);
+    const getQueueByIdUseCase = new GetQueueByIdUseCase(repository, logger);
+    const createQueueUseCase = new CreateQueueUseCase(repository, logger);
+    const updateQueueUseCase = new UpdateQueueUseCase(repository, logger);
+    const deleteQueueUseCase = new DeleteQueueUseCase(repository, logger);
+    return new BackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
   }
 }

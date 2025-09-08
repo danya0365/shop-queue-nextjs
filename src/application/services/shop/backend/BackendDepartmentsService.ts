@@ -1,7 +1,8 @@
 import type { CreateDepartmentDTO, DepartmentDTO, DepartmentsDataDTO, DepartmentStatsDTO, UpdateDepartmentDTO } from '@/src/application/dtos/shop/backend/department-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { GetDepartmentsPaginatedInput, PaginatedDepartmentsDTO } from '@/src/application/usecases/shop/backend/departments';
+import { CreateDepartmentUseCase, DeleteDepartmentUseCase, GetDepartmentByIdUseCase, GetDepartmentsPaginatedUseCase, GetDepartmentStatsUseCase, UpdateDepartmentUseCase, type GetDepartmentsPaginatedInput, type PaginatedDepartmentsDTO } from '@/src/application/usecases/shop/backend/departments';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendDepartmentRepository } from '@/src/domain/repositories/shop/backend/backend-department-repository';
 
 export interface IShopBackendDepartmentsService {
   getDepartmentsData(page?: number, perPage?: number): Promise<DepartmentsDataDTO>;
@@ -134,5 +135,17 @@ export class ShopBackendDepartmentsService implements IShopBackendDepartmentsSer
       this.logger.error('Error deleting department', { error, id });
       throw error;
     }
+  }
+}
+
+export class ShopBackendDepartmentsServiceFactory {
+  static create(repository: ShopBackendDepartmentRepository, logger: Logger): ShopBackendDepartmentsService {
+    const getDepartmentsPaginatedUseCase = new GetDepartmentsPaginatedUseCase(repository);
+    const getDepartmentStatsUseCase = new GetDepartmentStatsUseCase(repository);
+    const getDepartmentByIdUseCase = new GetDepartmentByIdUseCase(repository);
+    const createDepartmentUseCase = new CreateDepartmentUseCase(repository);
+    const updateDepartmentUseCase = new UpdateDepartmentUseCase(repository);
+    const deleteDepartmentUseCase = new DeleteDepartmentUseCase(repository);
+    return new ShopBackendDepartmentsService(getDepartmentsPaginatedUseCase, getDepartmentStatsUseCase, getDepartmentByIdUseCase, createDepartmentUseCase, updateDepartmentUseCase, deleteDepartmentUseCase, logger);
   }
 }

@@ -1,7 +1,8 @@
 import type { CreateDepartmentDTO, DepartmentDTO, DepartmentsDataDTO, DepartmentStatsDTO, UpdateDepartmentDTO } from '@/src/application/dtos/backend/department-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import type { GetDepartmentsPaginatedInput, PaginatedDepartmentsDTO } from '../../usecases/backend/departments';
+import { BackendDepartmentRepository } from '@/src/domain/repositories/backend/backend-department-repository';
+import { CreateDepartmentUseCase, DeleteDepartmentUseCase, GetDepartmentByIdUseCase, GetDepartmentsPaginatedUseCase, GetDepartmentStatsUseCase, UpdateDepartmentUseCase, type GetDepartmentsPaginatedInput, type PaginatedDepartmentsDTO } from '../../usecases/backend/departments';
 
 export interface IBackendDepartmentsService {
   getDepartmentsData(page?: number, perPage?: number): Promise<DepartmentsDataDTO>;
@@ -134,5 +135,17 @@ export class BackendDepartmentsService implements IBackendDepartmentsService {
       this.logger.error('Error deleting department', { error, id });
       throw error;
     }
+  }
+}
+
+export class BackendDepartmentsServiceFactory {
+  static create(repository: BackendDepartmentRepository, logger: Logger): BackendDepartmentsService {
+    const getDepartmentsPaginatedUseCase = new GetDepartmentsPaginatedUseCase(repository);
+    const getDepartmentStatsUseCase = new GetDepartmentStatsUseCase(repository);
+    const getDepartmentByIdUseCase = new GetDepartmentByIdUseCase(repository);
+    const createDepartmentUseCase = new CreateDepartmentUseCase(repository);
+    const updateDepartmentUseCase = new UpdateDepartmentUseCase(repository);
+    const deleteDepartmentUseCase = new DeleteDepartmentUseCase(repository);
+    return new BackendDepartmentsService(getDepartmentsPaginatedUseCase, getDepartmentStatsUseCase, getDepartmentByIdUseCase, createDepartmentUseCase, updateDepartmentUseCase, deleteDepartmentUseCase, logger);
   }
 }

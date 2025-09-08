@@ -1,5 +1,4 @@
 import type { DashboardDataDTO } from '@/src/application/dtos/backend/dashboard-stats-dto';
-import type { IGetDashboardDataUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardDataUseCase';
 import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/backend/dashboard/GetDashboardStatsUseCase';
 import type { IGetPopularServicesUseCase } from '@/src/application/usecases/backend/dashboard/GetPopularServicesUseCase';
 import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/backend/dashboard/GetQueueDistributionUseCase';
@@ -16,21 +15,34 @@ export class BackendDashboardService implements IBackendDashboardService {
     private readonly getRecentActivitiesUseCase: IGetRecentActivitiesUseCase,
     private readonly getQueueDistributionUseCase: IGetQueueDistributionUseCase,
     private readonly getPopularServicesUseCase: IGetPopularServicesUseCase,
-    private readonly getDashboardDataUseCase: IGetDashboardDataUseCase,
     private readonly logger: Logger
   ) { }
 
   async getDashboardData(): Promise<DashboardDataDTO> {
     try {
-      this.logger.info('BackendDashboardService: Getting dashboard data');
+      this.logger.info('GetDashboardDataUseCase: Executing dashboard data retrieval');
 
-      // Use the combined dashboard data use case
-      const dashboardData = await this.getDashboardDataUseCase.execute();
-      
-      this.logger.info('BackendDashboardService: Successfully retrieved dashboard data');
+      // Execute all use cases in parallel for better performance
+      const [stats, popularServices, queueDistribution, recentActivities] = await Promise.all([
+        this.getDashboardStatsUseCase.execute(),
+        this.getPopularServicesUseCase.execute(),
+        this.getQueueDistributionUseCase.execute(),
+        this.getRecentActivitiesUseCase.execute()
+      ]);
+
+      // Combine all data into a single DTO
+      const dashboardData: DashboardDataDTO = {
+        stats,
+        popularServices,
+        queueDistribution,
+        recentActivities,
+        lastUpdated: new Date().toISOString()
+      };
+
+      this.logger.info('GetDashboardDataUseCase: Successfully retrieved all dashboard data');
       return dashboardData;
     } catch (error) {
-      this.logger.error('BackendDashboardService: Error getting dashboard data', error);
+      this.logger.error('GetDashboardDataUseCase: Error retrieving dashboard data', error);
       throw error;
     }
   }

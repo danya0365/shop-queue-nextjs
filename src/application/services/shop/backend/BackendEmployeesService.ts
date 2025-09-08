@@ -1,7 +1,14 @@
 import type { CreateEmployeeParams, EmployeeDTO, EmployeesDataDTO, EmployeeStatsDTO, PaginatedEmployeesDTO, UpdateEmployeeParams } from '@/src/application/dtos/shop/backend/employees-dto';
 import { GetEmployeesPaginatedInput } from '@/src/application/dtos/shop/backend/employees-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { CreateEmployeeUseCase } from '@/src/application/usecases/shop/backend/employees/CreateEmployeeUseCase';
+import { DeleteEmployeeUseCase } from '@/src/application/usecases/shop/backend/employees/DeleteEmployeeUseCase';
+import { GetEmployeeByIdUseCase } from '@/src/application/usecases/shop/backend/employees/GetEmployeeByIdUseCase';
+import { GetEmployeesPaginatedUseCase } from '@/src/application/usecases/shop/backend/employees/GetEmployeesPaginatedUseCase';
+import { GetEmployeeStatsUseCase } from '@/src/application/usecases/shop/backend/employees/GetEmployeeStatsUseCase';
+import { UpdateEmployeeUseCase } from '@/src/application/usecases/shop/backend/employees/UpdateEmployeeUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendEmployeeRepository } from '@/src/domain/repositories/shop/backend/backend-employee-repository';
 
 export interface IShopBackendEmployeesService {
   getEmployeesData(page?: number, perPage?: number): Promise<EmployeesDataDTO>;
@@ -138,3 +145,16 @@ export class ShopBackendEmployeesService implements IShopBackendEmployeesService
     }
   }
 }
+
+export class ShopBackendEmployeesServiceFactory {
+  static create(repository: ShopBackendEmployeeRepository, logger: Logger): ShopBackendEmployeesService {
+    const getEmployeesPaginatedUseCase = new GetEmployeesPaginatedUseCase(repository);
+    const getEmployeeStatsUseCase = new GetEmployeeStatsUseCase(repository);
+    const getEmployeeByIdUseCase = new GetEmployeeByIdUseCase(repository);
+    const createEmployeeUseCase = new CreateEmployeeUseCase(repository);
+    const updateEmployeeUseCase = new UpdateEmployeeUseCase(repository);
+    const deleteEmployeeUseCase = new DeleteEmployeeUseCase(repository);
+    return new ShopBackendEmployeesService(getEmployeesPaginatedUseCase, getEmployeeStatsUseCase, getEmployeeByIdUseCase, createEmployeeUseCase, updateEmployeeUseCase, deleteEmployeeUseCase, logger);
+  }
+}
+

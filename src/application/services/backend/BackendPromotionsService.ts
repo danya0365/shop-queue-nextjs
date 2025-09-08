@@ -2,6 +2,13 @@ import type { CreatePromotionParams, PromotionDTO, PromotionsDataDTO, PromotionS
 import { GetPromotionsPaginatedInput, PaginatedPromotionsDTO } from '@/src/application/dtos/backend/promotions-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendPromotionRepository } from '@/src/domain/repositories/backend/backend-promotion-repository';
+import { CreatePromotionUseCase } from '../../usecases/backend/promotions/CreatePromotionUseCase';
+import { DeletePromotionUseCase } from '../../usecases/backend/promotions/DeletePromotionUseCase';
+import { GetPromotionByIdUseCase } from '../../usecases/backend/promotions/GetPromotionByIdUseCase';
+import { GetPromotionsPaginatedUseCase } from '../../usecases/backend/promotions/GetPromotionsPaginatedUseCase';
+import { GetPromotionStatsUseCase } from '../../usecases/backend/promotions/GetPromotionStatsUseCase';
+import { UpdatePromotionUseCase } from '../../usecases/backend/promotions/UpdatePromotionUseCase';
 
 export interface IBackendPromotionsService {
   getPromotionsData(page?: number, perPage?: number): Promise<PromotionsDataDTO>;
@@ -139,3 +146,16 @@ export class BackendPromotionsService implements IBackendPromotionsService {
     }
   }
 }
+
+export class BackendPromotionsServiceFactory {
+  static create(repository: BackendPromotionRepository, logger: Logger): BackendPromotionsService {
+    const getPromotionsPaginatedUseCase = new GetPromotionsPaginatedUseCase(repository);
+    const getPromotionStatsUseCase = new GetPromotionStatsUseCase(repository);
+    const getPromotionByIdUseCase = new GetPromotionByIdUseCase(repository);
+    const createPromotionUseCase = new CreatePromotionUseCase(repository);
+    const updatePromotionUseCase = new UpdatePromotionUseCase(repository);
+    const deletePromotionUseCase = new DeletePromotionUseCase(repository);
+    return new BackendPromotionsService(getPromotionsPaginatedUseCase, getPromotionStatsUseCase, getPromotionByIdUseCase, createPromotionUseCase, updatePromotionUseCase, deletePromotionUseCase, logger);
+  }
+}
+

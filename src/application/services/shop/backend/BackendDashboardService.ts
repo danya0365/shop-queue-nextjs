@@ -1,10 +1,10 @@
 import type { DashboardDataDTO } from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
-import type { IGetDashboardDataUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetDashboardDataUseCase';
-import type { IGetDashboardStatsUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetDashboardStatsUseCase';
-import type { IGetPopularServicesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetPopularServicesUseCase';
-import type { IGetQueueDistributionUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetQueueDistributionUseCase';
-import type { IGetRecentActivitiesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetRecentActivitiesUseCase';
+import { GetDashboardStatsUseCase, type IGetDashboardStatsUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetDashboardStatsUseCase';
+import { GetPopularServicesUseCase, type IGetPopularServicesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetPopularServicesUseCase';
+import { GetQueueDistributionUseCase, type IGetQueueDistributionUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetQueueDistributionUseCase';
+import { GetRecentActivitiesUseCase, type IGetRecentActivitiesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetRecentActivitiesUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/backend/backend-dashboard-repository';
 
 export interface IShopBackendDashboardService {
   getDashboardData(): Promise<DashboardDataDTO>;
@@ -16,22 +16,46 @@ export class ShopBackendDashboardService implements IShopBackendDashboardService
     private readonly getRecentActivitiesUseCase: IGetRecentActivitiesUseCase,
     private readonly getQueueDistributionUseCase: IGetQueueDistributionUseCase,
     private readonly getPopularServicesUseCase: IGetPopularServicesUseCase,
-    private readonly getDashboardDataUseCase: IGetDashboardDataUseCase,
     private readonly logger: Logger
   ) { }
 
   async getDashboardData(): Promise<DashboardDataDTO> {
     try {
-      this.logger.info('ShopBackendDashboardService: Getting dashboard data');
+      this.logger.info('GetDashboardDataUseCase: Executing dashboard data retrieval');
 
-      // Use the combined dashboard data use case
-      const dashboardData = await this.getDashboardDataUseCase.execute();
+      // Execute all use cases in parallel for better performance
+      const [stats, popularServices, queueDistribution, recentActivities] = await Promise.all([
+        this.getDashboardStatsUseCase.execute(),
+        this.getPopularServicesUseCase.execute(),
+        this.getQueueDistributionUseCase.execute(),
+        this.getRecentActivitiesUseCase.execute()
+      ]);
 
-      this.logger.info('ShopBackendDashboardService: Successfully retrieved dashboard data');
+      // Combine all data into a single DTO
+      const dashboardData: DashboardDataDTO = {
+        stats,
+        popularServices,
+        queueDistribution,
+        recentActivities,
+        lastUpdated: new Date().toISOString()
+      };
+
+      this.logger.info('GetDashboardDataUseCase: Successfully retrieved all dashboard data');
       return dashboardData;
     } catch (error) {
-      this.logger.error('ShopBackendDashboardService: Error getting dashboard data', error);
+      this.logger.error('GetDashboardDataUseCase: Error retrieving dashboard data', error);
       throw error;
     }
   }
 }
+
+export class ShopBackendDashboardServiceFactory {
+  static create(repository: ShopBackendDashboardRepository, logger: Logger): ShopBackendDashboardService {
+    const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(repository, logger);
+    const getQueueDistributionUseCase = new GetQueueDistributionUseCase(repository, logger);
+    const getPopularServicesUseCase = new GetPopularServicesUseCase(repository, logger);
+    const getDashboardStatsUseCase = new GetDashboardStatsUseCase(repository, logger);
+    return new ShopBackendDashboardService(getDashboardStatsUseCase, getRecentActivitiesUseCase, getQueueDistributionUseCase, getPopularServicesUseCase, logger);
+  }
+}
+
