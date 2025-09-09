@@ -1,4 +1,5 @@
 import { OpeningHour } from "@/src/application/dtos/shop/backend/shop-opening-hour-dto";
+import { ShopStatus } from "@/src/domain/entities/backend/backend-shop.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 import { CategoryDTO } from "./categories-dto";
 import { ServiceDTO } from "./services-dto";
@@ -27,6 +28,42 @@ export interface ShopDTO {
   totalReviews: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateShopInputDTO {
+  name: string;
+  description?: string;
+  address: string;
+  phone: string;
+  email?: string;
+  ownerId: string;
+  categoryIds: string[];
+  openingHours: Array<{
+    dayOfWeek: string;
+    isOpen: boolean;
+    openTime?: string;
+    closeTime?: string;
+    breakStart?: string;
+    breakEnd?: string;
+  }>;
+}
+
+export interface UpdateShopInputDTO {
+  id: string;
+  name?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  status?: ShopStatus;
+  openingHours?: Array<{
+    dayOfWeek: string;
+    isOpen: boolean;
+    openTime?: string;
+    closeTime?: string;
+    breakStart?: string;
+    breakEnd?: string;
+  }>;
 }
 
 export interface ShopStatsDTO {

@@ -1,14 +1,14 @@
-import type { GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO } from '@/src/application/dtos/shop/backend/shops-dto';
+import type { CreateShopInputDTO, GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO, UpdateShopInputDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { CreateShopUseCase, type CreateShopParams } from '@/src/application/usecases/shop/backend/shops/CreateShopUseCase';
-import { UpdateShopUseCase, type UpdateShopParams } from '@/src/application/usecases/shop/backend/shops/UpdateShopUseCase';
+import { CreateShopUseCase } from '@/src/application/usecases/shop/backend/shops/CreateShopUseCase';
+import { DeleteShopUseCase } from '@/src/application/usecases/shop/backend/shops/DeleteShopUseCase';
+import { GetShopByIdUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopByIdUseCase';
+import { GetShopStatsUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopStatsUseCase';
+import { GetShopsByOwnerIdUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopsByOwnerIdUseCase';
+import { GetShopsPaginatedUseCase } from '@/src/application/usecases/shop/backend/shops/GetShopsPaginatedUseCase';
+import { UpdateShopUseCase } from '@/src/application/usecases/shop/backend/shops/UpdateShopUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
-import { DeleteShopUseCase } from '../../usecases/shop/backend/shops/DeleteShopUseCase';
-import { GetShopByIdUseCase } from '../../usecases/shop/backend/shops/GetShopByIdUseCase';
-import { GetShopStatsUseCase } from '../../usecases/shop/backend/shops/GetShopStatsUseCase';
-import { GetShopsByOwnerIdUseCase } from '../../usecases/shop/backend/shops/GetShopsByOwnerIdUseCase';
-import { GetShopsPaginatedUseCase } from '../../usecases/shop/backend/shops/GetShopsPaginatedUseCase';
 
 export interface IShopService {
   getShopsByOwnerId(ownerId: string): Promise<ShopDTO[]>;
@@ -16,8 +16,8 @@ export interface IShopService {
   getShopsPaginated(page?: number, perPage?: number): Promise<PaginatedShopsDTO>;
   getShopStats(): Promise<ShopStatsDTO>;
   getShopById(id: string): Promise<ShopDTO>;
-  createShop(params: CreateShopParams): Promise<ShopDTO>;
-  updateShop(params: UpdateShopParams): Promise<ShopDTO>;
+  createShop(params: CreateShopInputDTO): Promise<ShopDTO>;
+  updateShop(params: UpdateShopInputDTO): Promise<ShopDTO>;
   deleteShop(id: string): Promise<boolean>;
 }
 
@@ -27,8 +27,8 @@ export class ShopService implements IShopService {
     private readonly getShopStatsUseCase: IUseCase<void, ShopStatsDTO>,
     private readonly getShopByIdUseCase: IUseCase<string, ShopDTO>,
     private readonly getShopsByOwnerIdUseCase: IUseCase<string, ShopDTO[]>,
-    private readonly createShopUseCase: IUseCase<CreateShopParams, ShopDTO>,
-    private readonly updateShopUseCase: IUseCase<UpdateShopParams, ShopDTO>,
+    private readonly createShopUseCase: IUseCase<CreateShopInputDTO, ShopDTO>,
+    private readonly updateShopUseCase: IUseCase<UpdateShopInputDTO, ShopDTO>,
     private readonly deleteShopUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
   ) { }
@@ -111,7 +111,7 @@ export class ShopService implements IShopService {
     }
   }
 
-  async createShop(params: CreateShopParams): Promise<ShopDTO> {
+  async createShop(params: CreateShopInputDTO): Promise<ShopDTO> {
     try {
       this.logger.info('Creating shop', { params: { ...params, email: params.email ? '[REDACTED]' : undefined } });
 
@@ -123,7 +123,7 @@ export class ShopService implements IShopService {
     }
   }
 
-  async updateShop(params: UpdateShopParams): Promise<ShopDTO> {
+  async updateShop(params: UpdateShopInputDTO): Promise<ShopDTO> {
     try {
       this.logger.info('Updating shop', { params: { ...params, email: params.email ? '[REDACTED]' : undefined } });
 

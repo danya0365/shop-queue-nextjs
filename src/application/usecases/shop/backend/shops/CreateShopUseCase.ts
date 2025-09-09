@@ -1,34 +1,16 @@
-import { ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
+import { CreateShopInputDTO, ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { ShopMapper } from '@/src/application/mappers/shop/backend/shop-mapper';
 import { CreateShopEntity, ShopStatus } from '@/src/domain/entities/shop/backend/backend-shop.entity';
 import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
 
-export interface CreateShopParams {
-  name: string;
-  description?: string;
-  address: string;
-  phone: string;
-  email?: string;
-  ownerId: string;
-  categoryIds: string[];
-  openingHours: Array<{
-    dayOfWeek: string;
-    isOpen: boolean;
-    openTime?: string;
-    closeTime?: string;
-    breakStart?: string;
-    breakEnd?: string;
-  }>;
-}
-
-export class CreateShopUseCase implements IUseCase<CreateShopParams, ShopDTO> {
+export class CreateShopUseCase implements IUseCase<CreateShopInputDTO, ShopDTO> {
   constructor(
     private readonly shopRepository: ShopBackendShopRepository
   ) { }
 
-  async execute(params: CreateShopParams): Promise<ShopDTO> {
+  async execute(params: CreateShopInputDTO): Promise<ShopDTO> {
     try {
       // Validate required fields
       if (!params.name?.trim()) {
