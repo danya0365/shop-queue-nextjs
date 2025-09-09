@@ -2,7 +2,6 @@
 
 import { AuthServiceFactory } from "../application/services/auth-service";
 import { AuthorizationServiceFactory } from "../application/services/authorization.service";
-import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/backend/BackendSubscriptionService";
 import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
@@ -20,6 +19,7 @@ import { RewardsBackendService } from "../application/services/shop/backend/rewa
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
+import { SubscriptionServiceFactory } from "../application/services/subscription-service";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -72,11 +72,7 @@ export async function createServerContainer(): Promise<Container> {
     const profileService = ProfileServiceFactory.create(profileAdapter, logger);
     const authorizationService = AuthorizationServiceFactory.create(logger);
     const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
-    const subscriptionService = SubscriptionBackendSubscriptionServiceFactory.create(
-      subscriptionPlanRepository,
-      profileSubscriptionRepository,
-      subscriptionUsageRepository,
-      featureAccessRepository,
+    const subscriptionService = SubscriptionServiceFactory.create(
       logger
     );
 
