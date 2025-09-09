@@ -19,7 +19,7 @@ import { RewardsBackendService } from "../application/services/shop/backend/rewa
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
-import { SubscriptionService } from "../application/services/subscription-service";
+import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/subscription/backend/BackendSubscriptionServiceFactory";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -27,6 +27,10 @@ import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/dataso
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
+import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-subscription-plan-repository";
+import { SupabaseBackendProfileSubscriptionRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-profile-subscription-repository";
+import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-subscription-usage-repository";
+import { SupabaseBackendFeatureAccessRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-feature-access-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -57,13 +61,24 @@ export async function createServerContainer(): Promise<Container> {
 
     const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
 
+    // Create subscription repositories
+    const subscriptionPlanRepository = new SupabaseBackendSubscriptionPlanRepository(databaseDatasource, logger);
+    const profileSubscriptionRepository = new SupabaseBackendProfileSubscriptionRepository(databaseDatasource, logger);
+    const subscriptionUsageRepository = new SupabaseBackendSubscriptionUsageRepository(databaseDatasource, logger);
+    const featureAccessRepository = new SupabaseBackendFeatureAccessRepository(databaseDatasource, logger);
 
     // Create service instances
     const authService = AuthServiceFactory.create(authDatasource, logger);
     const profileService = ProfileServiceFactory.create(profileAdapter, logger);
     const authorizationService = AuthorizationServiceFactory.create(logger);
     const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
-    const subscriptionService = new SubscriptionService(logger);
+    const subscriptionService = SubscriptionBackendSubscriptionServiceFactory.create(
+      subscriptionPlanRepository,
+      profileSubscriptionRepository,
+      subscriptionUsageRepository,
+      featureAccessRepository,
+      logger
+    );
 
     // Shop Backend services
     const posterTemplateBackendService = new PosterTemplateBackendService(logger);
