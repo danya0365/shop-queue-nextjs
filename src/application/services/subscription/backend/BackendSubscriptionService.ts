@@ -36,7 +36,9 @@ import type {
 import type {
   SubscriptionLimits,
   SubscriptionTier,
-  UsageStatsDto
+  SubscriptionUpgradeDto,
+  UsageStatsDto,
+  UserSubscriptionDto
 } from '@/src/application/dtos/subscription-dto';
 
 /**
@@ -52,29 +54,50 @@ export interface ISubscriptionBackendSubscriptionService {
   updateSubscriptionPlan(params: UpdateSubscriptionPlanInputDTO): Promise<SubscriptionPlanDTO>;
   deleteSubscriptionPlan(id: string): Promise<boolean>;
   
-  // Profile Subscriptions
+  // Profile Subscriptions - Internal use only, should not be exposed to business logic
+  /** @deprecated Use getUserSubscription() instead for business logic */
   getProfileSubscriptionsPaginated(page?: number, perPage?: number, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO>;
+  /** @deprecated Internal use only - should not be used directly in business logic */
   getProfileSubscriptionById(id: string): Promise<ProfileSubscriptionDTO>;
+  /** @deprecated Use upgradeSubscription() instead for business logic */
   createProfileSubscription(params: CreateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO>;
+  /** @deprecated Internal use only - should not be used directly in business logic */
   updateProfileSubscription(params: UpdateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO>;
+  /** @deprecated Internal use only - should not be used directly in business logic */
   deleteProfileSubscription(id: string): Promise<boolean>;
   
-  // Subscription Usage
+  // Subscription Usage - Mixed: some for internal use, some for business logic
+  /** @deprecated Use getUsageStats() instead for business logic */
   getCurrentUsageStats(profileId: string): Promise<CurrentUsageStatsDTO>;
+  /** @deprecated Should be handled automatically by system events */
   recordUsage(params: RecordUsageInputDTO): Promise<boolean>;
+  /** @deprecated Use canPerformActionByLimits() instead for better API */
   canPerformAction(params: CanPerformActionInputDTO): Promise<boolean>;
+  /** @deprecated Admin-only feature, should be in separate admin service */
   getSubscriptionUsagePaginated(page?: number, perPage?: number, profileId?: string, shopId?: string): Promise<PaginatedSubscriptionUsageDTO>;
   
-  // Feature Access
+  // Feature Access - Mixed: some for business logic, some for internal use
+  /** @deprecated Use purchaseOneTimeAccess() or purchasePosterDesign() instead */
   grantFeatureAccess(params: GrantFeatureAccessInputDTO): Promise<FeatureAccessDTO>;
-  hasFeatureAccess(params: HasFeatureAccessInputDTO): Promise<boolean>;
+  hasFeatureAccess(params: HasFeatureAccessInputDTO): Promise<boolean>; // Keep - used in business logic
+  /** @deprecated Should be handled by subscription expiry or admin actions */
   revokeFeatureAccess(params: RevokeFeatureAccessInputDTO): Promise<boolean>;
+  /** @deprecated Admin-only feature, should be in separate admin service */
   getFeatureAccessPaginated(page?: number, perPage?: number, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO>;
   
   // Legacy compatibility methods
   getTierByProfile(profileId: string): Promise<SubscriptionTier>;
   getLimitsByTier(tier: SubscriptionTier): Promise<SubscriptionLimits>;
   getUsageStats(profileId: string, shopId?: string): Promise<UsageStatsDto>;
+  
+  // Additional subscription management methods
+  getUserSubscription(profileId: string): Promise<UserSubscriptionDto | null>;
+  getUpgradeOptions(currentTier: SubscriptionTier): Promise<SubscriptionUpgradeDto[]>;
+  canPerformActionByLimits(profileId: string, action: string, shopId?: string): Promise<boolean>;
+  upgradeSubscription(profileId: string, tier: SubscriptionTier, billingPeriod: 'monthly' | 'yearly'): Promise<UserSubscriptionDto>;
+  purchaseOneTimeAccess(profileId: string, feature: string, duration: number): Promise<boolean>;
+  purchasePosterDesign(profileId: string, posterId: string): Promise<boolean>;
+  isPosterAccessible(profileId: string, posterId: string): Promise<boolean>;
 }
 
 /**
@@ -238,6 +261,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated profile subscriptions
+   * @deprecated Use getUserSubscription() instead for business logic
+   * This method exposes internal data structure and should only be used internally
    * Default page size can be configured via environment or database settings
    */
   async getProfileSubscriptionsPaginated(page: number = 1, perPage: number = 20, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO> {
@@ -254,6 +279,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get profile subscription by ID
+   * @deprecated Internal use only - should not be used directly in business logic
+   * Use getUserSubscription() for business needs
    */
   async getProfileSubscriptionById(id: string): Promise<ProfileSubscriptionDTO> {
     try {
@@ -269,6 +296,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Create profile subscription
+   * @deprecated Use upgradeSubscription() instead for business logic
+   * This method is too low-level and doesn't handle business rules
    */
   async createProfileSubscription(params: CreateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO> {
     try {
@@ -298,6 +327,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Update profile subscription
+   * @deprecated Internal use only - should not be used directly in business logic
+   * Subscription updates should go through proper business logic methods
    */
   async updateProfileSubscription(params: UpdateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO> {
     try {
@@ -326,6 +357,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Delete profile subscription
+   * @deprecated Internal use only - should not be used directly in business logic
+   * Subscription cancellation should go through proper business logic
    */
   async deleteProfileSubscription(id: string): Promise<boolean> {
     try {
@@ -343,6 +376,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get current usage statistics for a profile
+   * @deprecated Use getUsageStats() instead for business logic
+   * This method returns internal DTO format, not business-friendly format
    */
   async getCurrentUsageStats(profileId: string): Promise<CurrentUsageStatsDTO> {
     try {
@@ -358,6 +393,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Record usage for a profile
+   * @deprecated Should be handled automatically by system events
+   * Manual usage recording can lead to inconsistencies
    */
   async recordUsage(params: RecordUsageInputDTO): Promise<boolean> {
     try {
@@ -380,6 +417,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Check if profile can perform an action
+   * @deprecated Use canPerformActionByLimits() instead for better API
+   * This method uses complex DTO input, the new method has simpler parameters
    */
   async canPerformAction(params: CanPerformActionInputDTO): Promise<boolean> {
     try {
@@ -401,6 +440,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated subscription usage
+   * @deprecated Admin-only feature, should be in separate admin service
+   * This creates unnecessary coupling in business service
    * Default page size can be configured via environment or database settings
    */
   async getSubscriptionUsagePaginated(page: number = 1, perPage: number = 20, profileId?: string, shopId?: string): Promise<PaginatedSubscriptionUsageDTO> {
@@ -419,6 +460,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Grant feature access to a profile
+   * @deprecated Use purchaseOneTimeAccess() or purchasePosterDesign() instead
+   * This method is too low-level and doesn't handle payment logic
    */
   async grantFeatureAccess(params: GrantFeatureAccessInputDTO): Promise<FeatureAccessDTO> {
     try {
@@ -462,6 +505,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Revoke feature access from a profile
+   * @deprecated Should be handled by subscription expiry or admin actions
+   * Manual revocation can lead to business logic inconsistencies
    */
   async revokeFeatureAccess(params: RevokeFeatureAccessInputDTO): Promise<boolean> {
     try {
@@ -483,6 +528,8 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated feature access
+   * @deprecated Admin-only feature, should be in separate admin service
+   * This creates unnecessary coupling in business service
    * Default page size can be configured via environment or database settings
    */
   async getFeatureAccessPaginated(page: number = 1, perPage: number = 20, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO> {
@@ -635,6 +682,356 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
         totalPosters: 0,
         dataRetentionMonths: 1, // Minimal fallback
       };
+    }
+  }
+
+  // ===== Additional Subscription Management Methods =====
+
+  /**
+   * Get user's current subscription from database
+   * Replaces mock implementation with real database query
+   */
+  async getUserSubscription(profileId: string): Promise<UserSubscriptionDto | null> {
+    try {
+      this.logger.info('Getting user subscription from database', { profileId });
+
+      // Get active subscription for the profile
+      const subscriptions = await this.getProfileSubscriptionsPaginated(1, 1, profileId);
+      
+      if (subscriptions.data.length === 0) {
+        this.logger.info('No subscription found for profile', { profileId });
+        return null;
+      }
+
+      const activeSubscription = subscriptions.data.find(sub => sub.status === 'active');
+      if (!activeSubscription) {
+        this.logger.info('No active subscription found for profile', { profileId });
+        return null;
+      }
+
+      // Get the plan details
+      const plan = await this.getSubscriptionPlanById(activeSubscription.planId);
+      const limits = await this.getLimitsByTier(plan.tier as SubscriptionTier);
+
+      // Map to UserSubscriptionDto format
+      return {
+        id: activeSubscription.id,
+        profileId: activeSubscription.profileId,
+        tier: plan.tier as SubscriptionTier,
+        status: activeSubscription.status as 'active' | 'cancelled' | 'expired',
+        billingPeriod: activeSubscription.billingPeriod as 'monthly' | 'yearly',
+        startDate: activeSubscription.startDate,
+        endDate: activeSubscription.endDate || '',
+        autoRenew: activeSubscription.autoRenew || false,
+        limits,
+        pricePerMonth: activeSubscription.pricePerPeriod,
+        currency: activeSubscription.currency || 'THB',
+        createdAt: activeSubscription.createdAt || '',
+        updatedAt: activeSubscription.updatedAt || ''
+      };
+    } catch (error) {
+      this.logger.error('Error getting user subscription from database', { error, profileId });
+      return null;
+    }
+  }
+
+  /**
+   * Get available upgrade options from database
+   * Replaces hardcoded options with database-driven plans
+   */
+  async getUpgradeOptions(currentTier: SubscriptionTier): Promise<SubscriptionUpgradeDto[]> {
+    try {
+      this.logger.info('Getting upgrade options from database', { currentTier });
+
+      // Get all active subscription plans
+      const plans = await this.getSubscriptionPlansPaginated(1, 50);
+      const activePlans = plans.data.filter(plan => plan.isActive);
+
+      // Define tier order for comparison
+      const tierOrder: SubscriptionTier[] = ['free', 'pro', 'enterprise'];
+      const currentIndex = tierOrder.indexOf(currentTier);
+
+      // Filter plans higher than current tier
+      const upgradeOptions: SubscriptionUpgradeDto[] = [];
+
+      for (const plan of activePlans) {
+        const planTier = plan.tier as SubscriptionTier;
+        const planIndex = tierOrder.indexOf(planTier);
+        
+        if (planIndex > currentIndex) {
+          const limits = await this.getLimitsByTier(planTier);
+          
+          // Calculate discount percentage
+          const monthlyPrice = plan.monthlyPrice || 0;
+          const yearlyPrice = plan.yearlyPrice || 0;
+          const discountPercentage = yearlyPrice > 0 && monthlyPrice > 0 
+            ? Math.round((1 - (yearlyPrice / 12) / monthlyPrice) * 100)
+            : 0;
+
+          upgradeOptions.push({
+            tier: planTier,
+            name: plan.name,
+            nameEn: plan.nameEn,
+            description: plan.description || '',
+            descriptionEn: plan.descriptionEn || '',
+            monthlyPrice: monthlyPrice,
+            yearlyPrice: yearlyPrice,
+            oneTimePrice: plan.lifetimePrice || 0,
+            currency: plan.currency || 'THB',
+            limits,
+            features: Array.isArray(plan.features) ? plan.features as string[] : [],
+            featuresEn: Array.isArray(plan.featuresEn) ? plan.featuresEn as string[] : [],
+            isRecommended: planTier === 'pro', // Pro is typically recommended
+            discountPercentage
+          });
+        }
+      }
+
+      // Sort by tier order
+      upgradeOptions.sort((a, b) => {
+        const aIndex = tierOrder.indexOf(a.tier);
+        const bIndex = tierOrder.indexOf(b.tier);
+        return aIndex - bIndex;
+      });
+
+      return upgradeOptions;
+    } catch (error) {
+      this.logger.error('Error getting upgrade options from database', { error, currentTier });
+      return [];
+    }
+  }
+
+  /**
+   * Check if user can perform action based on actual limits and usage
+   * Replaces mock implementation with real database checks
+   */
+  async canPerformActionByLimits(profileId: string, action: string, shopId?: string): Promise<boolean> {
+    try {
+      this.logger.info('Checking action permission against limits', { profileId, action, shopId });
+
+      // Get user's current tier and limits
+      const tier = await this.getTierByProfile(profileId);
+      const limits = await this.getLimitsByTier(tier);
+      const usage = await this.getCurrentUsageStats(profileId);
+
+      // Check specific action limits
+      switch (action) {
+        case 'create_shop':
+          if (limits.maxShops === null) return true; // Unlimited
+          return usage.currentShops < limits.maxShops;
+
+        case 'create_queue':
+          if (limits.maxQueuesPerDay === null) return true; // Unlimited
+          return usage.todayQueues < limits.maxQueuesPerDay;
+
+        case 'add_staff':
+          if (limits.maxStaff === null) return true; // Unlimited
+          return usage.currentStaff < limits.maxStaff;
+
+        case 'send_sms':
+          if (limits.maxSmsPerMonth === null) return true; // Unlimited
+          return usage.monthlySmsSent < limits.maxSmsPerMonth;
+
+        case 'create_promotion':
+          if (limits.maxPromotions === null) return true; // Unlimited
+          return usage.activePromotions < limits.maxPromotions;
+
+        case 'access_advanced_reports':
+          return limits.hasAdvancedReports;
+
+        case 'access_analytics':
+          return limits.hasAnalytics;
+
+        case 'access_api':
+          return limits.hasApiAccess;
+
+        case 'custom_branding':
+          return limits.hasCustomBranding;
+
+        case 'custom_qr_code':
+          return limits.hasCustomQrCode;
+
+        case 'priority_support':
+          return limits.hasPrioritySupport;
+
+        case 'promotion_features':
+          return limits.hasPromotionFeatures;
+
+        default:
+          this.logger.warn('Unknown action for permission check', { action });
+          return true; // Allow unknown actions by default
+      }
+    } catch (error) {
+      this.logger.error('Error checking action permission', { error, profileId, action, shopId });
+      return false; // Deny on error for safety
+    }
+  }
+
+  /**
+   * Upgrade subscription - creates actual subscription in database
+   * Replaces mock implementation with real database operations
+   */
+  async upgradeSubscription(profileId: string, tier: SubscriptionTier, billingPeriod: 'monthly' | 'yearly'): Promise<UserSubscriptionDto> {
+    try {
+      this.logger.info('Upgrading subscription in database', { profileId, tier, billingPeriod });
+
+      // Get the subscription plan for the tier
+      const plans = await this.getSubscriptionPlansPaginated(1, 50);
+      const plan = plans.data.find(p => p.tier === tier && p.isActive);
+      
+      if (!plan) {
+        throw new Error(`No active subscription plan found for tier: ${tier}`);
+      }
+
+      // Calculate price and dates
+      const pricePerPeriod = billingPeriod === 'monthly' 
+        ? (plan.monthlyPrice || 0)
+        : (plan.yearlyPrice || 0);
+      
+      const startDate = new Date().toISOString();
+      const endDate = billingPeriod === 'monthly'
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Create profile subscription
+      const subscription = await this.createProfileSubscription({
+        profileId,
+        planId: plan.id,
+        billingPeriod: billingPeriod as 'monthly' | 'yearly',
+        pricePerPeriod,
+        startDate,
+        endDate,
+        currency: plan.currency || 'THB',
+        autoRenew: true
+      });
+
+      // Get limits for the new tier
+      const limits = await this.getLimitsByTier(tier);
+
+      // Return UserSubscriptionDto format
+      return {
+        id: subscription.id,
+        profileId: subscription.profileId,
+        tier,
+        status: 'active',
+        billingPeriod,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate || '',
+        autoRenew: subscription.autoRenew || false,
+        limits,
+        pricePerMonth: subscription.pricePerPeriod,
+        currency: subscription.currency || 'THB',
+        createdAt: subscription.createdAt || '',
+        updatedAt: subscription.updatedAt || ''
+      };
+    } catch (error) {
+      this.logger.error('Error upgrading subscription', { error, profileId, tier, billingPeriod });
+      throw error;
+    }
+  }
+
+  /**
+   * Purchase one-time access - creates feature access in database
+   * Replaces mock implementation with real database operations
+   */
+  async purchaseOneTimeAccess(profileId: string, feature: string, duration: number): Promise<boolean> {
+    try {
+      this.logger.info('Purchasing one-time access', { profileId, feature, duration });
+
+      // Map feature to feature type
+      const featureTypeMap: Record<string, 'poster_design' | 'api_access' | 'custom_branding' | 'priority_support'> = {
+        'poster_design': 'poster_design',
+        'api_access': 'api_access',
+        'custom_branding': 'custom_branding',
+        'priority_support': 'priority_support'
+      };
+
+      const featureType = featureTypeMap[feature];
+      if (!featureType) {
+        throw new Error(`Unknown feature type: ${feature}`);
+      }
+
+      // Calculate expiry date
+      const expiresAt = new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString();
+
+      // Grant feature access
+      await this.grantFeatureAccess({
+        profileId,
+        featureType,
+        featureId: `${feature}_${Date.now()}`,
+        price: 99, // Default price, should be configurable
+        expiresAt
+      });
+
+      return true;
+    } catch (error) {
+      this.logger.error('Error purchasing one-time access', { error, profileId, feature, duration });
+      return false;
+    }
+  }
+
+  /**
+   * Purchase poster design - creates feature access for specific poster
+   * Replaces mock implementation with real database operations
+   */
+  async purchasePosterDesign(profileId: string, posterId: string): Promise<boolean> {
+    try {
+      this.logger.info('Purchasing poster design', { profileId, posterId });
+
+      // Grant feature access for the specific poster
+      await this.grantFeatureAccess({
+        profileId,
+        featureType: 'poster_design',
+        featureId: posterId,
+        price: 49 // Default poster price, should be configurable
+      });
+
+      return true;
+    } catch (error) {
+      this.logger.error('Error purchasing poster design', { error, profileId, posterId });
+      return false;
+    }
+  }
+
+  /**
+   * Check if poster is accessible - checks feature access from database
+   * Replaces mock implementation with real database checks
+   */
+  async isPosterAccessible(profileId: string, posterId: string): Promise<boolean> {
+    try {
+      this.logger.info('Checking poster accessibility', { profileId, posterId });
+
+      // Check if user has feature access for this poster
+      const hasAccess = await this.hasFeatureAccess({
+        profileId,
+        featureType: 'poster_design',
+        featureId: posterId
+      });
+
+      if (hasAccess) {
+        return true;
+      }
+
+      // Check if poster is in free tier (first 3 posters)
+      const posterNumber = parseInt(posterId.replace(/\D/g, ''));
+      if (posterNumber <= 3) {
+        return true; // First 3 are free
+      }
+
+      // Check user's subscription tier limits
+      const tier = await this.getTierByProfile(profileId);
+      const limits = await this.getLimitsByTier(tier);
+      
+      // If user has unlimited poster designs (enterprise tier)
+      if (limits.maxFreePosterDesigns === null) {
+        return true;
+      }
+
+      // Check if within free poster limit
+      return posterNumber <= (limits.maxFreePosterDesigns || 0);
+    } catch (error) {
+      this.logger.error('Error checking poster accessibility', { error, profileId, posterId });
+      return false; // Deny access on error for safety
     }
   }
 }
