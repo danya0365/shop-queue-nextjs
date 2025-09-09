@@ -8,21 +8,21 @@ import type {
   SubscriptionPlanDTO,
   PaginatedSubscriptionPlansDTO,
   SubscriptionStatsDTO,
-  
+
   // Profile Subscriptions
   CreateProfileSubscriptionInputDTO,
   UpdateProfileSubscriptionInputDTO,
   GetProfileSubscriptionsPaginatedInputDTO,
   ProfileSubscriptionDTO,
   PaginatedProfileSubscriptionsDTO,
-  
+
   // Subscription Usage
   GetSubscriptionUsagePaginatedInputDTO,
   PaginatedSubscriptionUsageDTO,
   CurrentUsageStatsDTO,
   RecordUsageInputDTO,
   CanPerformActionInputDTO,
-  
+
   // Feature Access
   GrantFeatureAccessInputDTO,
   HasFeatureAccessInputDTO,
@@ -53,7 +53,7 @@ export interface ISubscriptionBackendSubscriptionService {
   createSubscriptionPlan(params: CreateSubscriptionPlanInputDTO): Promise<SubscriptionPlanDTO>;
   updateSubscriptionPlan(params: UpdateSubscriptionPlanInputDTO): Promise<SubscriptionPlanDTO>;
   deleteSubscriptionPlan(id: string): Promise<boolean>;
-  
+
   // Profile Subscriptions - Internal use only, should not be exposed to business logic
   /** @deprecated Use getUserSubscription() instead for business logic */
   getProfileSubscriptionsPaginated(page?: number, perPage?: number, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO>;
@@ -65,7 +65,7 @@ export interface ISubscriptionBackendSubscriptionService {
   updateProfileSubscription(params: UpdateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO>;
   /** @deprecated Internal use only - should not be used directly in business logic */
   deleteProfileSubscription(id: string): Promise<boolean>;
-  
+
   // Subscription Usage - Mixed: some for internal use, some for business logic
   /** @deprecated Use getUsageStats() instead for business logic */
   getCurrentUsageStats(profileId: string): Promise<CurrentUsageStatsDTO>;
@@ -75,7 +75,7 @@ export interface ISubscriptionBackendSubscriptionService {
   canPerformAction(params: CanPerformActionInputDTO): Promise<boolean>;
   /** @deprecated Admin-only feature, should be in separate admin service */
   getSubscriptionUsagePaginated(page?: number, perPage?: number, profileId?: string, shopId?: string): Promise<PaginatedSubscriptionUsageDTO>;
-  
+
   // Feature Access - Mixed: some for business logic, some for internal use
   /** @deprecated Use purchaseOneTimeAccess() or purchasePosterDesign() instead */
   grantFeatureAccess(params: GrantFeatureAccessInputDTO): Promise<FeatureAccessDTO>;
@@ -84,12 +84,12 @@ export interface ISubscriptionBackendSubscriptionService {
   revokeFeatureAccess(params: RevokeFeatureAccessInputDTO): Promise<boolean>;
   /** @deprecated Admin-only feature, should be in separate admin service */
   getFeatureAccessPaginated(page?: number, perPage?: number, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO>;
-  
+
   // Legacy compatibility methods
   getTierByProfile(profileId: string): Promise<SubscriptionTier>;
   getLimitsByTier(tier: SubscriptionTier): Promise<SubscriptionLimits>;
   getUsageStats(profileId: string, shopId?: string): Promise<UsageStatsDto>;
-  
+
   // Additional subscription management methods
   getUserSubscription(profileId: string): Promise<UserSubscriptionDto | null>;
   getUpgradeOptions(currentTier: SubscriptionTier): Promise<SubscriptionUpgradeDto[]>;
@@ -113,26 +113,26 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
     private readonly createSubscriptionPlanUseCase: IUseCase<CreateSubscriptionPlanInputDTO, SubscriptionPlanDTO>,
     private readonly updateSubscriptionPlanUseCase: IUseCase<UpdateSubscriptionPlanInputDTO, SubscriptionPlanDTO>,
     private readonly deleteSubscriptionPlanUseCase: IUseCase<string, boolean>,
-    
+
     // Profile Subscription Use Cases
     private readonly getProfileSubscriptionsPaginatedUseCase: IUseCase<GetProfileSubscriptionsPaginatedInputDTO, PaginatedProfileSubscriptionsDTO>,
     private readonly getProfileSubscriptionByIdUseCase: IUseCase<string, ProfileSubscriptionDTO>,
     private readonly createProfileSubscriptionUseCase: IUseCase<CreateProfileSubscriptionInputDTO, ProfileSubscriptionDTO>,
     private readonly updateProfileSubscriptionUseCase: IUseCase<UpdateProfileSubscriptionInputDTO, ProfileSubscriptionDTO>,
     private readonly deleteProfileSubscriptionUseCase: IUseCase<string, boolean>,
-    
+
     // Subscription Usage Use Cases
     private readonly getCurrentUsageStatsUseCase: IUseCase<string, CurrentUsageStatsDTO>,
     private readonly recordUsageUseCase: IUseCase<RecordUsageInputDTO, boolean>,
     private readonly canPerformActionUseCase: IUseCase<CanPerformActionInputDTO, boolean>,
     private readonly getSubscriptionUsagePaginatedUseCase: IUseCase<GetSubscriptionUsagePaginatedInputDTO, PaginatedSubscriptionUsageDTO>,
-    
+
     // Feature Access Use Cases
     private readonly grantFeatureAccessUseCase: IUseCase<GrantFeatureAccessInputDTO, FeatureAccessDTO>,
     private readonly hasFeatureAccessUseCase: IUseCase<HasFeatureAccessInputDTO, boolean>,
     private readonly revokeFeatureAccessUseCase: IUseCase<RevokeFeatureAccessInputDTO, boolean>,
     private readonly getFeatureAccessPaginatedUseCase: IUseCase<GetFeatureAccessPaginatedInputDTO, PaginatedFeatureAccessDTO>,
-    
+
     private readonly logger: Logger
   ) { }
 
@@ -189,26 +189,26 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async createSubscriptionPlan(params: CreateSubscriptionPlanInputDTO): Promise<SubscriptionPlanDTO> {
     try {
-      this.logger.info('Creating subscription plan', { 
-        params: { 
+      this.logger.info('Creating subscription plan', {
+        params: {
           ...params,
           // Log key fields without sensitive data
           tier: params.tier,
           name: params.name,
           monthlyPrice: params.monthlyPrice,
           yearlyPrice: params.yearlyPrice
-        } 
+        }
       });
 
       const result = await this.createSubscriptionPlanUseCase.execute(params);
       return result;
     } catch (error) {
-      this.logger.error('Error creating subscription plan', { 
-        error, 
-        params: { 
+      this.logger.error('Error creating subscription plan', {
+        error,
+        params: {
           tier: params.tier,
           name: params.name
-        } 
+        }
       });
       throw error;
     }
@@ -219,24 +219,24 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async updateSubscriptionPlan(params: UpdateSubscriptionPlanInputDTO): Promise<SubscriptionPlanDTO> {
     try {
-      this.logger.info('Updating subscription plan', { 
-        params: { 
+      this.logger.info('Updating subscription plan', {
+        params: {
           id: params.id,
           name: params.name,
           monthlyPrice: params.monthlyPrice,
           yearlyPrice: params.yearlyPrice
-        } 
+        }
       });
 
       const result = await this.updateSubscriptionPlanUseCase.execute(params);
       return result;
     } catch (error) {
-      this.logger.error('Error updating subscription plan', { 
-        error, 
-        params: { 
+      this.logger.error('Error updating subscription plan', {
+        error,
+        params: {
           id: params.id,
           name: params.name
-        } 
+        }
       });
       throw error;
     }
@@ -301,25 +301,25 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async createProfileSubscription(params: CreateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO> {
     try {
-      this.logger.info('Creating profile subscription', { 
-        params: { 
+      this.logger.info('Creating profile subscription', {
+        params: {
           profileId: params.profileId,
           planId: params.planId,
           billingPeriod: params.billingPeriod,
           pricePerPeriod: params.pricePerPeriod
-        } 
+        }
       });
 
       const result = await this.createProfileSubscriptionUseCase.execute(params);
       return result;
     } catch (error) {
-      this.logger.error('Error creating profile subscription', { 
-        error, 
-        params: { 
+      this.logger.error('Error creating profile subscription', {
+        error,
+        params: {
           profileId: params.profileId,
           planId: params.planId,
           billingPeriod: params.billingPeriod
-        } 
+        }
       });
       throw error;
     }
@@ -332,24 +332,24 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async updateProfileSubscription(params: UpdateProfileSubscriptionInputDTO): Promise<ProfileSubscriptionDTO> {
     try {
-      this.logger.info('Updating profile subscription', { 
-        params: { 
+      this.logger.info('Updating profile subscription', {
+        params: {
           id: params.id,
           planId: params.planId,
           status: params.status,
           billingPeriod: params.billingPeriod
-        } 
+        }
       });
 
       const result = await this.updateProfileSubscriptionUseCase.execute(params);
       return result;
     } catch (error) {
-      this.logger.error('Error updating profile subscription', { 
-        error, 
-        params: { 
+      this.logger.error('Error updating profile subscription', {
+        error,
+        params: {
           id: params.id,
           status: params.status
-        } 
+        }
       });
       throw error;
     }
@@ -398,7 +398,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async recordUsage(params: RecordUsageInputDTO): Promise<boolean> {
     try {
-      this.logger.info('Recording usage', { 
+      this.logger.info('Recording usage', {
         params: {
           profileId: params.profileId,
           usageType: params.usageType,
@@ -422,7 +422,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async canPerformAction(params: CanPerformActionInputDTO): Promise<boolean> {
     try {
-      this.logger.info('Checking if action can be performed', { 
+      this.logger.info('Checking if action can be performed', {
         params: {
           profileId: params.profileId,
           action: params.action,
@@ -465,7 +465,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async grantFeatureAccess(params: GrantFeatureAccessInputDTO): Promise<FeatureAccessDTO> {
     try {
-      this.logger.info('Granting feature access', { 
+      this.logger.info('Granting feature access', {
         params: {
           profileId: params.profileId,
           featureType: params.featureType,
@@ -487,7 +487,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async hasFeatureAccess(params: HasFeatureAccessInputDTO): Promise<boolean> {
     try {
-      this.logger.info('Checking feature access', { 
+      this.logger.info('Checking feature access', {
         params: {
           profileId: params.profileId,
           featureType: params.featureType,
@@ -510,7 +510,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
    */
   async revokeFeatureAccess(params: RevokeFeatureAccessInputDTO): Promise<boolean> {
     try {
-      this.logger.info('Revoking feature access', { 
+      this.logger.info('Revoking feature access', {
         params: {
           profileId: params.profileId,
           featureType: params.featureType,
@@ -536,10 +536,10 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
     try {
       this.logger.info('Getting paginated feature access', { page, perPage, profileId, featureType });
 
-      const result = await this.getFeatureAccessPaginatedUseCase.execute({ 
-        page, 
-        limit: perPage, 
-        profileId, 
+      const result = await this.getFeatureAccessPaginatedUseCase.execute({
+        page,
+        limit: perPage,
+        profileId,
         featureType: featureType as 'poster_design' | 'api_access' | 'custom_branding' | 'priority_support' | undefined
       });
       return result;
@@ -561,7 +561,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
       // Get active subscription for the profile
       const subscriptions = await this.getProfileSubscriptionsPaginated(1, 1, profileId);
-      
+
       if (subscriptions.data.length > 0) {
         const activeSubscription = subscriptions.data.find(sub => sub.status === 'active');
         if (activeSubscription) {
@@ -646,7 +646,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
       // Get current usage stats from the backend
       const currentUsage = await this.getCurrentUsageStats(profileId);
-      
+
       // Get user's tier to determine data retention period
       const tier = await this.getTierByProfile(profileId);
       const limits = await this.getLimitsByTier(tier);
@@ -667,7 +667,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
       };
     } catch (error) {
       this.logger.error('Error getting usage stats', { error, profileId, shopId });
-      
+
       // Return fallback data with minimal retention period
       return {
         profileId: profileId,
@@ -697,7 +697,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
       // Get active subscription for the profile
       const subscriptions = await this.getProfileSubscriptionsPaginated(1, 1, profileId);
-      
+
       if (subscriptions.data.length === 0) {
         this.logger.info('No subscription found for profile', { profileId });
         return null;
@@ -757,14 +757,14 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
       for (const plan of activePlans) {
         const planTier = plan.tier as SubscriptionTier;
         const planIndex = tierOrder.indexOf(planTier);
-        
+
         if (planIndex > currentIndex) {
           const limits = await this.getLimitsByTier(planTier);
-          
+
           // Calculate discount percentage
           const monthlyPrice = plan.monthlyPrice || 0;
           const yearlyPrice = plan.yearlyPrice || 0;
-          const discountPercentage = yearlyPrice > 0 && monthlyPrice > 0 
+          const discountPercentage = yearlyPrice > 0 && monthlyPrice > 0
             ? Math.round((1 - (yearlyPrice / 12) / monthlyPrice) * 100)
             : 0;
 
@@ -878,16 +878,16 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
       // Get the subscription plan for the tier
       const plans = await this.getSubscriptionPlansPaginated(1, 50);
       const plan = plans.data.find(p => p.tier === tier && p.isActive);
-      
+
       if (!plan) {
         throw new Error(`No active subscription plan found for tier: ${tier}`);
       }
 
       // Calculate price and dates
-      const pricePerPeriod = billingPeriod === 'monthly' 
+      const pricePerPeriod = billingPeriod === 'monthly'
         ? (plan.monthlyPrice || 0)
         : (plan.yearlyPrice || 0);
-      
+
       const startDate = new Date().toISOString();
       const endDate = billingPeriod === 'monthly'
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -1021,7 +1021,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
       // Check user's subscription tier limits
       const tier = await this.getTierByProfile(profileId);
       const limits = await this.getLimitsByTier(tier);
-      
+
       // If user has unlimited poster designs (enterprise tier)
       if (limits.maxFreePosterDesigns === null) {
         return true;
