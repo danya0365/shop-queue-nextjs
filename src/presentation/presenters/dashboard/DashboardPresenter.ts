@@ -4,7 +4,7 @@ import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { SubscriptionLimits, SubscriptionTier, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { ISubscriptionBackendSubscriptionService } from "@/src/application/services/subscription/backend/BackendSubscriptionService";
+import { ISubscriptionBackendSubscriptionService } from "@/src/application/services/backend/BackendSubscriptionService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";

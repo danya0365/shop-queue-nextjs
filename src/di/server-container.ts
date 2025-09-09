@@ -2,6 +2,7 @@
 
 import { AuthServiceFactory } from "../application/services/auth-service";
 import { AuthorizationServiceFactory } from "../application/services/authorization.service";
+import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/backend/BackendSubscriptionService";
 import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
@@ -19,18 +20,17 @@ import { RewardsBackendService } from "../application/services/shop/backend/rewa
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
-import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/subscription/backend/BackendSubscriptionServiceFactory";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseBackendFeatureAccessRepository } from "../infrastructure/repositories/backend/supabase-backend-feature-access-repository";
+import { SupabaseBackendProfileSubscriptionRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-subscription-repository";
+import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository";
+import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
-import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-subscription-plan-repository";
-import { SupabaseBackendProfileSubscriptionRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-profile-subscription-repository";
-import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-subscription-usage-repository";
-import { SupabaseBackendFeatureAccessRepository } from "../infrastructure/repositories/subscription/backend/supabase-backend-feature-access-repository";
 import { Container, createContainer } from "./container";
 
 /**

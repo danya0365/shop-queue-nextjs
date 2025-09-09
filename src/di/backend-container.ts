@@ -12,8 +12,8 @@ import { BackendQueuesServiceFactory } from "../application/services/backend/Bac
 import { BackendRewardsServiceFactory } from "../application/services/backend/BackendRewardsService";
 import { BackendServicesServiceFactory } from '../application/services/backend/BackendServicesService';
 import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
+import { SubscriptionBackendSubscriptionServiceFactory } from '../application/services/backend/BackendSubscriptionService';
 import { ShopBackendDashboardServiceFactory } from '../application/services/shop/backend/BackendDashboardService';
-import { SubscriptionBackendSubscriptionServiceFactory } from '../application/services/subscription/backend/BackendSubscriptionServiceFactory';
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
@@ -24,17 +24,17 @@ import { SupabaseBackendCustomerRepository } from "../infrastructure/repositorie
 import { SupabaseBackendDashboardRepository } from "../infrastructure/repositories/backend/supabase-backend-dashboard-repository";
 import { SupabaseBackendDepartmentRepository } from "../infrastructure/repositories/backend/supabase-backend-department-repository";
 import { SupabaseBackendEmployeeRepository } from "../infrastructure/repositories/backend/supabase-backend-employee-repository";
+import { SupabaseBackendFeatureAccessRepository } from '../infrastructure/repositories/backend/supabase-backend-feature-access-repository';
 import { SupabaseBackendPaymentRepository } from "../infrastructure/repositories/backend/supabase-backend-payment-repository";
 import { SupabaseBackendProfileRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-repository";
+import { SupabaseBackendProfileSubscriptionRepository } from '../infrastructure/repositories/backend/supabase-backend-profile-subscription-repository';
 import { SupabaseBackendPromotionRepository } from "../infrastructure/repositories/backend/supabase-backend-promotion-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
 import { SupabaseBackendRewardRepository } from '../infrastructure/repositories/backend/supabase-backend-reward-repository';
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
-import { SupabaseBackendSubscriptionPlanRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-subscription-plan-repository';
-import { SupabaseBackendProfileSubscriptionRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-profile-subscription-repository';
-import { SupabaseBackendSubscriptionUsageRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-subscription-usage-repository';
-import { SupabaseBackendFeatureAccessRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-feature-access-repository';
+import { SupabaseBackendSubscriptionPlanRepository } from '../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository';
+import { SupabaseBackendSubscriptionUsageRepository } from '../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository';
 import { Container, createContainer } from "./container";
 
 /**
