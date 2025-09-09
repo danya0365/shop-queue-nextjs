@@ -1,4 +1,4 @@
-import { GetFeatureAccessPaginatedInputDTO, PaginatedFeatureAccessDTO } from '@/src/application/dtos/backend/subscription-dto';
+import { GetFeatureAccessPaginatedInputDTO, PaginatedFeatureAccessDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';

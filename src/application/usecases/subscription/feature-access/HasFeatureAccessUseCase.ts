@@ -1,4 +1,4 @@
-import { HasFeatureAccessInputDTO } from '@/src/application/dtos/backend/subscription-dto';
+import { HasFeatureAccessInputDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';
 import type { BackendFeatureAccessRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';

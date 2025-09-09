@@ -1,4 +1,4 @@
-import { SubscriptionPlanDTO } from '@/src/application/dtos/backend/subscription-dto';
+import { SubscriptionPlanDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import type { BackendSubscriptionPlanRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
