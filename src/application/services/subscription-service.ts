@@ -11,6 +11,7 @@ import type {
 import type { ISubscriptionService } from '../interfaces/subscription-service.interface';
 
 /**
+ * @deprecated This service is deprecated. Use BackendSubscriptionService instead.
  * SubscriptionService handles subscription and pricing logic
  * Following SOLID principles and Clean Architecture
  */

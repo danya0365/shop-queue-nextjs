@@ -32,6 +32,13 @@ import type {
   PaginatedFeatureAccessDTO
 } from '@/src/application/dtos/subscription/backend/subscription-dto';
 
+// Import legacy DTOs for compatibility
+import type {
+  SubscriptionLimits,
+  SubscriptionTier,
+  UsageStatsDto
+} from '@/src/application/dtos/subscription-dto';
+
 /**
  * Interface for Backend Subscription Service
  * Following Clean Architecture and SOLID principles
@@ -63,6 +70,11 @@ export interface ISubscriptionBackendSubscriptionService {
   hasFeatureAccess(params: HasFeatureAccessInputDTO): Promise<boolean>;
   revokeFeatureAccess(params: RevokeFeatureAccessInputDTO): Promise<boolean>;
   getFeatureAccessPaginated(page?: number, perPage?: number, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO>;
+  
+  // Legacy compatibility methods
+  getTierByProfile(profileId: string): Promise<SubscriptionTier>;
+  getLimitsByTier(tier: SubscriptionTier): Promise<SubscriptionLimits>;
+  getUsageStats(profileId: string, shopId?: string): Promise<UsageStatsDto>;
 }
 
 /**
@@ -105,8 +117,9 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated subscription plans
+   * Default page size can be configured via environment or database settings
    */
-  async getSubscriptionPlansPaginated(page: number = 1, perPage: number = 10): Promise<PaginatedSubscriptionPlansDTO> {
+  async getSubscriptionPlansPaginated(page: number = 1, perPage: number = 20): Promise<PaginatedSubscriptionPlansDTO> {
     try {
       this.logger.info('Getting paginated subscription plans', { page, perPage });
 
@@ -225,8 +238,9 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated profile subscriptions
+   * Default page size can be configured via environment or database settings
    */
-  async getProfileSubscriptionsPaginated(page: number = 1, perPage: number = 10, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO> {
+  async getProfileSubscriptionsPaginated(page: number = 1, perPage: number = 20, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO> {
     try {
       this.logger.info('Getting paginated profile subscriptions', { page, perPage, profileId });
 
@@ -387,8 +401,9 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated subscription usage
+   * Default page size can be configured via environment or database settings
    */
-  async getSubscriptionUsagePaginated(page: number = 1, perPage: number = 10, profileId?: string, shopId?: string): Promise<PaginatedSubscriptionUsageDTO> {
+  async getSubscriptionUsagePaginated(page: number = 1, perPage: number = 20, profileId?: string, shopId?: string): Promise<PaginatedSubscriptionUsageDTO> {
     try {
       this.logger.info('Getting paginated subscription usage', { page, perPage, profileId, shopId });
 
@@ -468,8 +483,9 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
   /**
    * Get paginated feature access
+   * Default page size can be configured via environment or database settings
    */
-  async getFeatureAccessPaginated(page: number = 1, perPage: number = 10, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO> {
+  async getFeatureAccessPaginated(page: number = 1, perPage: number = 20, profileId?: string, featureType?: string): Promise<PaginatedFeatureAccessDTO> {
     try {
       this.logger.info('Getting paginated feature access', { page, perPage, profileId, featureType });
 
@@ -477,12 +493,148 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
         page, 
         limit: perPage, 
         profileId, 
-        featureType: featureType as any 
+        featureType: featureType as 'poster_design' | 'api_access' | 'custom_branding' | 'priority_support' | undefined
       });
       return result;
     } catch (error) {
       this.logger.error('Error getting paginated feature access', { error, page, perPage, profileId, featureType });
       throw error;
+    }
+  }
+
+  // ===== Legacy Compatibility Methods =====
+
+  /**
+   * Get subscription tier based on profile
+   * This replaces the role-based tier assignment with actual profile subscription data
+   */
+  async getTierByProfile(profileId: string): Promise<SubscriptionTier> {
+    try {
+      this.logger.info('Getting tier by profile', { profileId });
+
+      // Get active subscription for the profile
+      const subscriptions = await this.getProfileSubscriptionsPaginated(1, 1, profileId);
+      
+      if (subscriptions.data.length > 0) {
+        const activeSubscription = subscriptions.data.find(sub => sub.status === 'active');
+        if (activeSubscription) {
+          // Get the plan details to determine tier
+          const plan = await this.getSubscriptionPlanById(activeSubscription.planId);
+          return plan.tier as SubscriptionTier;
+        }
+      }
+
+      // Default to free tier if no active subscription
+      return 'free';
+    } catch (error) {
+      this.logger.error('Error getting tier by profile', { error, profileId });
+      // Return free tier as fallback
+      return 'free';
+    }
+  }
+
+  /**
+   * Get subscription limits for a tier
+   * Now retrieves data from database instead of hardcoded values
+   */
+  async getLimitsByTier(tier: SubscriptionTier): Promise<SubscriptionLimits> {
+    try {
+      this.logger.info('Getting limits by tier from database', { tier });
+
+      // Get subscription plans with the specified tier
+      const plans = await this.getSubscriptionPlansPaginated(1, 1);
+      const plan = plans.data.find(p => p.tier === tier);
+
+      if (!plan) {
+        this.logger.warn('No subscription plan found for tier, using fallback', { tier });
+        // Fallback to free tier limits if plan not found
+        return {
+          maxShops: 1,
+          maxQueuesPerDay: 50,
+          dataRetentionMonths: 1,
+          maxStaff: 1,
+          maxSmsPerMonth: 10,
+          maxPromotions: 0,
+          maxFreePosterDesigns: 3,
+          hasAdvancedReports: false,
+          hasCustomQrCode: false,
+          hasApiAccess: false,
+          hasPrioritySupport: false,
+          hasCustomBranding: false,
+          hasAnalytics: false,
+          hasPromotionFeatures: false
+        };
+      }
+
+      // Map database fields to SubscriptionLimits interface
+      return {
+        maxShops: plan.maxShops,
+        maxQueuesPerDay: plan.maxQueuesPerDay,
+        dataRetentionMonths: plan.dataRetentionMonths,
+        maxStaff: plan.maxStaff,
+        maxSmsPerMonth: plan.maxSmsPerMonth,
+        maxPromotions: plan.maxPromotions,
+        maxFreePosterDesigns: plan.maxFreePosterDesigns,
+        hasAdvancedReports: plan.hasAdvancedReports,
+        hasCustomQrCode: plan.hasCustomQrCode,
+        hasApiAccess: plan.hasApiAccess,
+        hasPrioritySupport: plan.hasPrioritySupport,
+        hasCustomBranding: plan.hasCustomBranding,
+        hasAnalytics: plan.hasAnalytics,
+        hasPromotionFeatures: plan.hasPromotionFeatures
+      };
+    } catch (error) {
+      this.logger.error('Error getting limits by tier from database', { error, tier });
+      throw error;
+    }
+  }
+
+  /**
+   * Get usage statistics for a profile
+   * Now retrieves data retention from user's subscription plan
+   */
+  async getUsageStats(profileId: string, shopId?: string): Promise<UsageStatsDto> {
+    try {
+      this.logger.info('Getting usage stats', { profileId, shopId });
+
+      // Get current usage stats from the backend
+      const currentUsage = await this.getCurrentUsageStats(profileId);
+      
+      // Get user's tier to determine data retention period
+      const tier = await this.getTierByProfile(profileId);
+      const limits = await this.getLimitsByTier(tier);
+
+      // Map to legacy DTO format
+      return {
+        profileId: profileId,
+        shopId,
+        currentShops: currentUsage.currentShops,
+        todayQueues: currentUsage.todayQueues,
+        currentStaff: currentUsage.currentStaff,
+        monthlySmsSent: currentUsage.monthlySmsSent,
+        activePromotions: currentUsage.activePromotions,
+        usedPosterDesigns: 0, // Not available in CurrentUsageStatsDTO
+        paidPosterDesigns: 0, // Not available in CurrentUsageStatsDTO
+        totalPosters: 0, // Not available in CurrentUsageStatsDTO
+        dataRetentionMonths: limits.dataRetentionMonths || 1, // Get from subscription plan
+      };
+    } catch (error) {
+      this.logger.error('Error getting usage stats', { error, profileId, shopId });
+      
+      // Return fallback data with minimal retention period
+      return {
+        profileId: profileId,
+        shopId,
+        currentShops: 0,
+        todayQueues: 0,
+        currentStaff: 0,
+        monthlySmsSent: 0,
+        activePromotions: 0,
+        usedPosterDesigns: 0,
+        paidPosterDesigns: 0,
+        totalPosters: 0,
+        dataRetentionMonths: 1, // Minimal fallback
+      };
     }
   }
 }

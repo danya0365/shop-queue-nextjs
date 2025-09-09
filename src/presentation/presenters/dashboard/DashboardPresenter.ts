@@ -4,7 +4,7 @@ import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { SubscriptionLimits, SubscriptionTier, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { ISubscriptionService } from "@/src/application/interfaces/subscription-service.interface";
+import { ISubscriptionBackendSubscriptionService } from "@/src/application/services/subscription/backend/BackendSubscriptionService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
@@ -59,7 +59,7 @@ export class DashboardPresenter {
     private readonly authService: IAuthService,
     private readonly profileService: IProfileService,
     private readonly shopService: IShopService,
-    private readonly subscriptionService: ISubscriptionService
+    private readonly subscriptionService: ISubscriptionBackendSubscriptionService
   ) { }
 
   /**
@@ -87,8 +87,8 @@ export class DashboardPresenter {
       // Get recent activity
       const recentActivity = await this.getRecentActivity(profile.id, shops);
 
-      // Get subscription information based on user role
-      const tier = this.subscriptionService.getTierByRole(profile.role);
+      // Get subscription information based on profile
+      const tier = await this.subscriptionService.getTierByProfile(profile.id);
       const limits = await this.subscriptionService.getLimitsByTier(tier);
       const usage = await this.subscriptionService.getUsageStats(profile.id);
       const canCreateShop = limits.maxShops === null || shops.length < limits.maxShops;
@@ -224,7 +224,7 @@ export class DashboardPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
+    const subscriptionService = serverContainer.resolve<ISubscriptionBackendSubscriptionService>("BackendSubscriptionService");
     return new DashboardPresenter(logger, authService, profileService, shopService, subscriptionService);
   }
 }
