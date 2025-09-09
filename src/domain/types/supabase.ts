@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       categories: {
@@ -504,6 +529,65 @@ export type Database = {
           },
         ]
       }
+      feature_access: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          external_payment_id: string | null
+          feature_id: string
+          feature_type: Database["public"]["Enums"]["feature_type"]
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          payment_provider: string | null
+          price: number | null
+          profile_id: string
+          purchased_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          external_payment_id?: string | null
+          feature_id: string
+          feature_type: Database["public"]["Enums"]["feature_type"]
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          payment_provider?: string | null
+          price?: number | null
+          profile_id: string
+          purchased_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          external_payment_id?: string | null
+          feature_id?: string
+          feature_type?: Database["public"]["Enums"]["feature_type"]
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          payment_provider?: string | null
+          price?: number | null
+          profile_id?: string
+          purchased_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_access_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string | null
@@ -769,6 +853,81 @@ export type Database = {
             foreignKeyName: "profile_roles_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          billing_period: Database["public"]["Enums"]["billing_period"]
+          cancelled_at: string | null
+          created_at: string | null
+          currency: string | null
+          end_date: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json | null
+          payment_provider: string | null
+          plan_id: string
+          price_per_period: number
+          profile_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          billing_period: Database["public"]["Enums"]["billing_period"]
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          end_date?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_provider?: string | null
+          plan_id: string
+          price_per_period: number
+          profile_id: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          billing_period?: Database["public"]["Enums"]["billing_period"]
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          end_date?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_provider?: string | null
+          plan_id?: string
+          price_per_period?: number
+          profile_id?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1740,6 +1899,238 @@ export type Database = {
           },
         ]
       }
+      subscription_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          due_date: string | null
+          external_payment_id: string | null
+          id: string
+          metadata: Json | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_provider: string | null
+          payment_status: string | null
+          subscription_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          external_payment_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          subscription_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          external_payment_id?: string | null
+          id?: string
+          metadata?: Json | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          subscription_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "profile_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          data_retention_months: number | null
+          description: string | null
+          description_en: string | null
+          features: Json | null
+          features_en: Json | null
+          has_advanced_reports: boolean | null
+          has_analytics: boolean | null
+          has_api_access: boolean | null
+          has_custom_branding: boolean | null
+          has_custom_qr_code: boolean | null
+          has_priority_support: boolean | null
+          has_promotion_features: boolean | null
+          id: string
+          is_active: boolean | null
+          lifetime_price: number | null
+          max_free_poster_designs: number | null
+          max_promotions: number | null
+          max_queues_per_day: number | null
+          max_shops: number | null
+          max_sms_per_month: number | null
+          max_staff: number | null
+          monthly_price: number | null
+          name: string
+          name_en: string
+          sort_order: number | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string | null
+          yearly_price: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          data_retention_months?: number | null
+          description?: string | null
+          description_en?: string | null
+          features?: Json | null
+          features_en?: Json | null
+          has_advanced_reports?: boolean | null
+          has_analytics?: boolean | null
+          has_api_access?: boolean | null
+          has_custom_branding?: boolean | null
+          has_custom_qr_code?: boolean | null
+          has_priority_support?: boolean | null
+          has_promotion_features?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          lifetime_price?: number | null
+          max_free_poster_designs?: number | null
+          max_promotions?: number | null
+          max_queues_per_day?: number | null
+          max_shops?: number | null
+          max_sms_per_month?: number | null
+          max_staff?: number | null
+          monthly_price?: number | null
+          name: string
+          name_en: string
+          sort_order?: number | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          data_retention_months?: number | null
+          description?: string | null
+          description_en?: string | null
+          features?: Json | null
+          features_en?: Json | null
+          has_advanced_reports?: boolean | null
+          has_analytics?: boolean | null
+          has_api_access?: boolean | null
+          has_custom_branding?: boolean | null
+          has_custom_qr_code?: boolean | null
+          has_priority_support?: boolean | null
+          has_promotion_features?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          lifetime_price?: number | null
+          max_free_poster_designs?: number | null
+          max_promotions?: number | null
+          max_queues_per_day?: number | null
+          max_shops?: number | null
+          max_sms_per_month?: number | null
+          max_staff?: number | null
+          monthly_price?: number | null
+          name?: string
+          name_en?: string
+          sort_order?: number | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Relationships: []
+      }
+      subscription_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          profile_id: string
+          promotions_count: number | null
+          queues_count: number | null
+          shop_id: string | null
+          shops_count: number | null
+          sms_sent_count: number | null
+          staff_count: number | null
+          updated_at: string | null
+          usage_date: string
+          usage_month: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id: string
+          promotions_count?: number | null
+          queues_count?: number | null
+          shop_id?: string | null
+          shops_count?: number | null
+          sms_sent_count?: number | null
+          staff_count?: number | null
+          updated_at?: string | null
+          usage_date?: string
+          usage_month?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          profile_id?: string
+          promotions_count?: number | null
+          queues_count?: number | null
+          shop_id?: string | null
+          shops_count?: number | null
+          sms_sent_count?: number | null
+          staff_count?: number | null
+          updated_at?: string | null
+          usage_date?: string
+          usage_month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_usage_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       category_info_stats_view: {
@@ -2539,6 +2930,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_perform_action: {
+        Args: { p_profile_id: string; p_action: string; p_shop_id?: string }
+        Returns: boolean
+      }
       cleanup_old_activities: {
         Args: { p_days_to_keep?: number }
         Returns: number
@@ -2627,6 +3022,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["profile_role"]
       }
+      get_active_subscription: {
+        Args: { p_profile_id: string }
+        Returns: {
+          subscription_id: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          status: Database["public"]["Enums"]["subscription_status"]
+          end_date: string
+          plan_limits: Json
+        }[]
+      }
       get_auth_user_by_id: {
         Args: { p_id: string }
         Returns: Json
@@ -2634,6 +3039,16 @@ export type Database = {
       get_auth_user_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_current_usage: {
+        Args: { p_profile_id: string; p_shop_id?: string }
+        Returns: {
+          today_queues: number
+          current_shops: number
+          current_staff: number
+          monthly_sms: number
+          active_promotions: number
+        }[]
       }
       get_customer_by_id: {
         Args: { shop_id_param: string; customer_id_param: string }
@@ -2909,7 +3324,13 @@ export type Database = {
         | "opening_hours_updated"
         | "shop_opened"
         | "shop_closed"
+      billing_period: "monthly" | "yearly" | "lifetime"
       employee_status: "active" | "inactive" | "suspended"
+      feature_type:
+        | "poster_design"
+        | "api_access"
+        | "custom_branding"
+        | "priority_support"
       membership_tier: "bronze" | "silver" | "gold" | "platinum"
       payment_method: "cash" | "card" | "qr" | "transfer"
       payment_status: "unpaid" | "partial" | "paid"
@@ -2937,6 +3358,13 @@ export type Database = {
         | "loyalty_bonus"
       reward_type: "discount" | "free_item" | "cashback" | "special_privilege"
       shop_status: "draft" | "active" | "inactive" | "suspended"
+      subscription_status:
+        | "active"
+        | "cancelled"
+        | "expired"
+        | "pending"
+        | "suspended"
+      subscription_tier: "free" | "pro" | "enterprise"
       transaction_type: "earned" | "redeemed" | "expired"
     }
     CompositeTypes: {
@@ -3051,6 +3479,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       activity_type: [
@@ -3104,7 +3535,14 @@ export const Constants = {
         "shop_opened",
         "shop_closed",
       ],
+      billing_period: ["monthly", "yearly", "lifetime"],
       employee_status: ["active", "inactive", "suspended"],
+      feature_type: [
+        "poster_design",
+        "api_access",
+        "custom_branding",
+        "priority_support",
+      ],
       membership_tier: ["bronze", "silver", "gold", "platinum"],
       payment_method: ["cash", "card", "qr", "transfer"],
       payment_status: ["unpaid", "partial", "paid"],
@@ -3135,6 +3573,14 @@ export const Constants = {
       ],
       reward_type: ["discount", "free_item", "cashback", "special_privilege"],
       shop_status: ["draft", "active", "inactive", "suspended"],
+      subscription_status: [
+        "active",
+        "cancelled",
+        "expired",
+        "pending",
+        "suspended",
+      ],
+      subscription_tier: ["free", "pro", "enterprise"],
       transaction_type: ["earned", "redeemed", "expired"],
     },
   },
