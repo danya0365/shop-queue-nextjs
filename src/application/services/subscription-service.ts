@@ -11,7 +11,6 @@ import type {
 import type { ISubscriptionService } from '../interfaces/subscription-service.interface';
 
 /**
- * @deprecated This service is deprecated. Use BackendSubscriptionService instead.
  * SubscriptionService handles subscription and pricing logic
  * Following SOLID principles and Clean Architecture
  */
@@ -349,5 +348,11 @@ export class SubscriptionService implements ISubscriptionService {
       this.logger.error('SubscriptionService: Error checking poster accessibility', error);
       return false;
     }
+  }
+}
+
+export class SubscriptionServiceFactory {
+  static create(logger: Logger): SubscriptionService {
+    return new SubscriptionService(logger);
   }
 }
