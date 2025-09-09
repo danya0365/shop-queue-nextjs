@@ -13,6 +13,7 @@ import { BackendRewardsServiceFactory } from "../application/services/backend/Ba
 import { BackendServicesServiceFactory } from '../application/services/backend/BackendServicesService';
 import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
 import { ShopBackendDashboardServiceFactory } from '../application/services/shop/backend/BackendDashboardService';
+import { SubscriptionBackendSubscriptionServiceFactory } from '../application/services/subscription/backend/BackendSubscriptionServiceFactory';
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
@@ -30,6 +31,10 @@ import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/b
 import { SupabaseBackendRewardRepository } from '../infrastructure/repositories/backend/supabase-backend-reward-repository';
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
+import { SupabaseBackendSubscriptionPlanRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-subscription-plan-repository';
+import { SupabaseBackendProfileSubscriptionRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-profile-subscription-repository';
+import { SupabaseBackendSubscriptionUsageRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-subscription-usage-repository';
+import { SupabaseBackendFeatureAccessRepository } from '../infrastructure/repositories/subscription/backend/supabase-backend-feature-access-repository';
 import { Container, createContainer } from "./container";
 
 /**
@@ -68,6 +73,12 @@ export async function createBackendContainer(): Promise<Container> {
     const serviceRepository = new SupabaseBackendServiceRepository(databaseDatasource, logger);
     const rewardRepository = new SupabaseBackendRewardRepository(databaseDatasource, logger);
 
+    // Create subscription repository instances
+    const subscriptionPlanRepository = new SupabaseBackendSubscriptionPlanRepository(databaseDatasource, logger);
+    const profileSubscriptionRepository = new SupabaseBackendProfileSubscriptionRepository(databaseDatasource, logger);
+    const subscriptionUsageRepository = new SupabaseBackendSubscriptionUsageRepository(databaseDatasource, logger);
+    const featureAccessRepository = new SupabaseBackendFeatureAccessRepository(databaseDatasource, logger);
+
     // Create service instances
     const backendDashboardService = ShopBackendDashboardServiceFactory.create(dashboardRepository, logger);
     const backendAuthUsersService = BackendAuthUsersServiceFactory.create(authUsersRepository, logger);
@@ -83,6 +94,15 @@ export async function createBackendContainer(): Promise<Container> {
     const backendDepartmentsService = BackendDepartmentsServiceFactory.create(departmentRepository, logger);
     const backendCustomersService = BackendCustomersServiceFactory.create(customerRepository, logger);
 
+    // Create subscription service instance
+    const backendSubscriptionService = SubscriptionBackendSubscriptionServiceFactory.create(
+      subscriptionPlanRepository,
+      profileSubscriptionRepository,
+      subscriptionUsageRepository,
+      featureAccessRepository,
+      logger
+    );
+
     // Register only services in the container
     container.registerInstance("BackendDashboardService", backendDashboardService);
     container.registerInstance("BackendShopsService", backendShopsService);
@@ -97,6 +117,7 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance("BackendPromotionsService", backendPromotionsService);
     container.registerInstance("BackendServicesService", backendServicesService);
     container.registerInstance("BackendRewardsService", backendRewardsService);
+    container.registerInstance("BackendSubscriptionService", backendSubscriptionService);
 
     logger.info("Backend container initialized successfully");
   } catch (error) {
