@@ -1,8 +1,7 @@
 import { ProfileSubscriptionDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
-import type { BackendProfileSubscriptionRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { ProfileSubscriptionRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting profile subscription by ID
@@ -10,7 +9,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetProfileSubscriptionByIdUseCase implements IUseCase<string, ProfileSubscriptionDTO> {
   constructor(
-    private readonly profileSubscriptionRepository: BackendProfileSubscriptionRepository
+    private readonly profileSubscriptionRepository: ProfileSubscriptionRepository
   ) { }
 
   /**
@@ -22,8 +21,8 @@ export class GetProfileSubscriptionByIdUseCase implements IUseCase<string, Profi
     try {
       // Validate input
       if (!id?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile subscription ID is required',
           'GetProfileSubscriptionByIdUseCase.execute',
           { id }
@@ -32,8 +31,8 @@ export class GetProfileSubscriptionByIdUseCase implements IUseCase<string, Profi
 
       const profileSubscription = await this.profileSubscriptionRepository.getSubscriptionById(id);
       if (!profileSubscription) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.NOT_FOUND,
+        throw new SubscriptionError(
+          SubscriptionErrorType.NOT_FOUND,
           'Profile subscription not found',
           'GetProfileSubscriptionByIdUseCase.execute',
           { id }
@@ -41,12 +40,12 @@ export class GetProfileSubscriptionByIdUseCase implements IUseCase<string, Profi
       }
       return SubscriptionMapper.profileSubscriptionToDTO(profileSubscription);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get profile subscription by ID',
         'GetProfileSubscriptionByIdUseCase.execute',
         { id },

@@ -8,13 +8,13 @@ import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from 
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import {
-  BackendProfileSubscriptionRepository,
-  BackendSubscriptionError,
-  BackendSubscriptionErrorType
-} from "@/src/domain/repositories/backend/backend-subscription-repository";
+  ProfileSubscriptionRepository,
+  SubscriptionError,
+  SubscriptionErrorType
+} from "@/src/domain/repositories/subscription-repository";
 import { SupabaseBackendSubscriptionMapper } from "@/src/infrastructure/mappers/backend/supabase-backend-subscription.mapper";
 import { ProfileSubscriptionSchema } from "@/src/infrastructure/schemas/subscription/backend/subscription.schema";
-import { BackendRepository } from "../base/backend-repository";
+import { StandardRepository } from "./base/standard-repository";
 
 // Extended types for joined data
 type ProfileSubscriptionSchemaRecord = Record<string, unknown> & ProfileSubscriptionSchema;
@@ -23,12 +23,12 @@ type ProfileSubscriptionSchemaRecord = Record<string, unknown> & ProfileSubscrip
  * Supabase implementation of Profile Subscription Repository
  * Following Clean Architecture and SOLID principles
  */
-export class SupabaseBackendProfileSubscriptionRepository extends BackendRepository implements BackendProfileSubscriptionRepository {
+export class SupabaseProfileSubscriptionRepository extends StandardRepository implements ProfileSubscriptionRepository {
   constructor(
     dataSource: DatabaseDataSource,
     logger: Logger
   ) {
-    super(dataSource, logger, "BackendProfileSubscription");
+    super(dataSource, logger, "ProfileSubscription");
   }
 
   /**
@@ -71,8 +71,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       };
     } catch (error) {
       this.logger.error('Error getting paginated profile subscriptions', { params, profileId, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get paginated profile subscriptions',
         'getPaginatedSubscriptions',
         { params, profileId }
@@ -105,8 +105,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       return SupabaseBackendSubscriptionMapper.profileSubscriptionSchemaToEntity(results[0]);
     } catch (error) {
       this.logger.error('Error getting profile subscription by ID', { id, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get profile subscription by ID',
         'getSubscriptionById',
         { id }
@@ -143,8 +143,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       return SupabaseBackendSubscriptionMapper.profileSubscriptionSchemaToEntity(results[0]);
     } catch (error) {
       this.logger.error('Error getting active subscription by profile ID', { profileId, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get active subscription by profile ID',
         'getActiveSubscriptionByProfileId',
         { profileId }
@@ -191,8 +191,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       };
     } catch (error) {
       this.logger.error('Error getting subscription history by profile ID', { profileId, params, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get subscription history by profile ID',
         'getSubscriptionHistoryByProfileId',
         { profileId, params }
@@ -217,8 +217,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       return SupabaseBackendSubscriptionMapper.profileSubscriptionSchemaToEntity(result);
     } catch (error) {
       this.logger.error('Error creating profile subscription', { subscription, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to create profile subscription',
         'createSubscription',
         { subscription }
@@ -244,8 +244,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       return SupabaseBackendSubscriptionMapper.profileSubscriptionSchemaToEntity(result);
     } catch (error) {
       this.logger.error('Error updating profile subscription', { id, subscription, error });
-      throw error instanceof BackendSubscriptionError ? error : new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw error instanceof SubscriptionError ? error : new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to update profile subscription',
         'updateSubscription',
         { id, subscription }
@@ -271,8 +271,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
       );
 
       if (!updatedData) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.NOT_FOUND,
+        throw new SubscriptionError(
+          SubscriptionErrorType.NOT_FOUND,
           'Profile subscription not found',
           'cancelSubscription'
         );
@@ -284,8 +284,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
         error: error instanceof Error ? error.message : 'Unknown error',
         id
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to cancel profile subscription',
         'cancelSubscription'
       );
@@ -304,8 +304,8 @@ export class SupabaseBackendProfileSubscriptionRepository extends BackendReposit
         error: error instanceof Error ? error.message : 'Unknown error',
         id
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to delete profile subscription',
         'deleteSubscription'
       );

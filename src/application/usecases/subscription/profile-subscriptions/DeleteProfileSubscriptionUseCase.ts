@@ -1,6 +1,6 @@
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { BackendProfileSubscriptionRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { ProfileSubscriptionRepository } from '@/src/domain/repositories/subscription-repository';
+import { SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for deleting profile subscription
@@ -8,7 +8,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class DeleteProfileSubscriptionUseCase implements IUseCase<string, boolean> {
   constructor(
-    private readonly profileSubscriptionRepository: BackendProfileSubscriptionRepository
+    private readonly profileSubscriptionRepository: ProfileSubscriptionRepository
   ) { }
 
   /**
@@ -20,8 +20,8 @@ export class DeleteProfileSubscriptionUseCase implements IUseCase<string, boolea
     try {
       // Validate input
       if (!id?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile subscription ID is required',
           'DeleteProfileSubscriptionUseCase.execute',
           { id }
@@ -31,8 +31,8 @@ export class DeleteProfileSubscriptionUseCase implements IUseCase<string, boolea
       // Check if profile subscription exists
       const existingProfileSubscription = await this.profileSubscriptionRepository.getSubscriptionById(id);
       if (!existingProfileSubscription) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.NOT_FOUND,
+        throw new SubscriptionError(
+          SubscriptionErrorType.NOT_FOUND,
           'Profile subscription not found',
           'DeleteProfileSubscriptionUseCase.execute',
           { id }
@@ -42,12 +42,12 @@ export class DeleteProfileSubscriptionUseCase implements IUseCase<string, boolea
       const result = await this.profileSubscriptionRepository.deleteSubscription(id);
       return result;
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to delete profile subscription',
         'DeleteProfileSubscriptionUseCase.execute',
         { id },

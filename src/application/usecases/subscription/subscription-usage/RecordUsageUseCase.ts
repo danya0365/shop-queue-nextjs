@@ -1,7 +1,6 @@
 import { RecordUsageInputDTO } from '@/src/application/dtos/backend/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { BackendSubscriptionUsageRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { SubscriptionError, SubscriptionErrorType, SubscriptionUsageRepository } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for recording subscription usage
@@ -9,7 +8,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class RecordUsageUseCase implements IUseCase<RecordUsageInputDTO, boolean> {
   constructor(
-    private readonly subscriptionUsageRepository: BackendSubscriptionUsageRepository
+    private readonly subscriptionUsageRepository: SubscriptionUsageRepository
   ) { }
 
   /**
@@ -21,8 +20,8 @@ export class RecordUsageUseCase implements IUseCase<RecordUsageInputDTO, boolean
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'RecordUsageUseCase.execute',
           { params }
@@ -30,8 +29,8 @@ export class RecordUsageUseCase implements IUseCase<RecordUsageInputDTO, boolean
       }
 
       if (!params.usageType?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Usage type is required',
           'RecordUsageUseCase.execute',
           { params }
@@ -39,8 +38,8 @@ export class RecordUsageUseCase implements IUseCase<RecordUsageInputDTO, boolean
       }
 
       if (params.count === undefined || params.count < 0) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Count is required and must be non-negative',
           'RecordUsageUseCase.execute',
           { params }
@@ -56,12 +55,12 @@ export class RecordUsageUseCase implements IUseCase<RecordUsageInputDTO, boolean
 
       return true; // Return success status
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to record usage',
         'RecordUsageUseCase.execute',
         { params },

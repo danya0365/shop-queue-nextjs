@@ -27,12 +27,12 @@ import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-a
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
-import { SupabaseBackendFeatureAccessRepository } from "../infrastructure/repositories/backend/supabase-backend-feature-access-repository";
-import { SupabaseBackendProfileSubscriptionRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-subscription-repository";
-import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository";
-import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
+import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
+import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
+import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
+import { SupabaseSubscriptionUsageRepository } from "../infrastructure/repositories/supabase-subscription-usage-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -66,10 +66,10 @@ export async function createServerContainer(): Promise<Container> {
 
 
     // Create subscription repositories
-    const subscriptionPlanRepository = new SupabaseBackendSubscriptionPlanRepository(databaseDatasource, logger);
-    const profileSubscriptionRepository = new SupabaseBackendProfileSubscriptionRepository(databaseDatasource, logger);
-    const subscriptionUsageRepository = new SupabaseBackendSubscriptionUsageRepository(databaseDatasource, logger);
-    const featureAccessRepository = new SupabaseBackendFeatureAccessRepository(databaseDatasource, logger);
+    const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(databaseDatasource, logger);
+    const profileSubscriptionRepository = new SupabaseProfileSubscriptionRepository(databaseDatasource, logger);
+    const subscriptionUsageRepository = new SupabaseSubscriptionUsageRepository(databaseDatasource, logger);
+    const featureAccessRepository = new SupabaseFeatureAccessRepository(databaseDatasource, logger);
 
     // Create service instances
     const authService = AuthServiceFactory.create(authDatasource, logger);

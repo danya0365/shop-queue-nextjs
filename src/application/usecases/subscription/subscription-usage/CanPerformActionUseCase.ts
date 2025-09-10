@@ -1,10 +1,6 @@
 import { CanPerformActionInputDTO } from '@/src/application/dtos/backend/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import {
-  BackendSubscriptionError,
-  BackendSubscriptionErrorType,
-  BackendSubscriptionUsageRepository
-} from "@/src/domain/repositories/backend/backend-subscription-repository";
+import { SubscriptionError, SubscriptionErrorType, SubscriptionUsageRepository } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for checking if a profile can perform an action
@@ -12,7 +8,7 @@ import {
  */
 export class CanPerformActionUseCase implements IUseCase<CanPerformActionInputDTO, boolean> {
   constructor(
-    private subscriptionUsageRepository: BackendSubscriptionUsageRepository,
+    private subscriptionUsageRepository: SubscriptionUsageRepository,
   ) { }
 
   /**
@@ -24,8 +20,8 @@ export class CanPerformActionUseCase implements IUseCase<CanPerformActionInputDT
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'CanPerformActionUseCase.execute',
           { params }
@@ -33,8 +29,8 @@ export class CanPerformActionUseCase implements IUseCase<CanPerformActionInputDT
       }
 
       if (!params.action?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Action is required',
           'CanPerformActionUseCase.execute',
           { params }
@@ -49,12 +45,12 @@ export class CanPerformActionUseCase implements IUseCase<CanPerformActionInputDT
 
       return canPerform;
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to check if action can be performed',
         'CanPerformActionUseCase.execute',
         { params },

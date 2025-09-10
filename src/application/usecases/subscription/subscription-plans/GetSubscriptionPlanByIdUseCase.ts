@@ -1,8 +1,7 @@
 import { SubscriptionPlanDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
-import type { BackendSubscriptionPlanRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { SubscriptionError, SubscriptionErrorType, SubscriptionPlanRepository } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting subscription plan by ID
@@ -10,7 +9,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetSubscriptionPlanByIdUseCase implements IUseCase<string, SubscriptionPlanDTO> {
   constructor(
-    private readonly subscriptionPlanRepository: BackendSubscriptionPlanRepository
+    private readonly subscriptionPlanRepository: SubscriptionPlanRepository
   ) { }
 
   /**
@@ -22,8 +21,8 @@ export class GetSubscriptionPlanByIdUseCase implements IUseCase<string, Subscrip
     try {
       // Validate input
       if (!id?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Subscription plan ID is required',
           'GetSubscriptionPlanByIdUseCase.execute',
           { id }
@@ -32,8 +31,8 @@ export class GetSubscriptionPlanByIdUseCase implements IUseCase<string, Subscrip
 
       const subscriptionPlan = await this.subscriptionPlanRepository.getPlanById(id);
       if (!subscriptionPlan) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.NOT_FOUND,
+        throw new SubscriptionError(
+          SubscriptionErrorType.NOT_FOUND,
           'Subscription plan not found',
           'GetSubscriptionPlanByIdUseCase.execute',
           { id }
@@ -41,12 +40,12 @@ export class GetSubscriptionPlanByIdUseCase implements IUseCase<string, Subscrip
       }
       return SubscriptionMapper.subscriptionPlanToDTO(subscriptionPlan);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get subscription plan by ID',
         'GetSubscriptionPlanByIdUseCase.execute',
         { id },

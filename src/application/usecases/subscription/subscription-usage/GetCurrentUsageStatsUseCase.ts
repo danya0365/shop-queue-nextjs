@@ -1,8 +1,7 @@
 import { CurrentUsageStatsDTO } from '@/src/application/dtos/backend/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
-import type { BackendSubscriptionUsageRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { SubscriptionError, SubscriptionErrorType, SubscriptionUsageRepository } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting current usage statistics
@@ -10,7 +9,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetCurrentUsageStatsUseCase implements IUseCase<string, CurrentUsageStatsDTO> {
   constructor(
-    private readonly subscriptionUsageRepository: BackendSubscriptionUsageRepository
+    private readonly subscriptionUsageRepository: SubscriptionUsageRepository
   ) { }
 
   /**
@@ -22,8 +21,8 @@ export class GetCurrentUsageStatsUseCase implements IUseCase<string, CurrentUsag
     try {
       // Validate input
       if (!profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'GetCurrentUsageStatsUseCase.execute',
           { profileId }
@@ -33,12 +32,12 @@ export class GetCurrentUsageStatsUseCase implements IUseCase<string, CurrentUsag
       const currentUsageStats = await this.subscriptionUsageRepository.getCurrentUsageStats(profileId);
       return SubscriptionMapper.currentUsageStatsToDTO(currentUsageStats);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get current usage statistics',
         'GetCurrentUsageStatsUseCase.execute',
         { profileId },

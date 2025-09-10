@@ -2,8 +2,7 @@ import { GetSubscriptionPlansPaginatedInputDTO, PaginatedSubscriptionPlansDTO } 
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import type { BackendSubscriptionPlanRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { SubscriptionError, SubscriptionErrorType, SubscriptionPlanRepository } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting paginated subscription plans data
@@ -11,7 +10,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetSubscriptionPlansPaginatedUseCase implements IUseCase<GetSubscriptionPlansPaginatedInputDTO, PaginatedSubscriptionPlansDTO> {
   constructor(
-    private readonly subscriptionPlanRepository: BackendSubscriptionPlanRepository
+    private readonly subscriptionPlanRepository: SubscriptionPlanRepository
   ) { }
 
   /**
@@ -29,12 +28,12 @@ export class GetSubscriptionPlansPaginatedUseCase implements IUseCase<GetSubscri
       const paginatedSubscriptionPlans = await this.subscriptionPlanRepository.getPaginatedPlans(paginationParams);
       return SubscriptionMapper.toPaginatedSubscriptionPlansDTO(paginatedSubscriptionPlans);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get paginated subscription plans',
         'GetSubscriptionPlansPaginatedUseCase.execute',
         {},

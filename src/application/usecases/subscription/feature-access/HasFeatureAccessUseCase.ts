@@ -1,8 +1,8 @@
 import { HasFeatureAccessInputDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';
-import type { BackendFeatureAccessRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import type { FeatureAccessRepository } from '@/src/domain/repositories/subscription-repository';
+import { SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for checking if profile has feature access
@@ -10,7 +10,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDTO, boolean> {
   constructor(
-    private readonly featureAccessRepository: BackendFeatureAccessRepository
+    private readonly featureAccessRepository: FeatureAccessRepository
   ) { }
 
   /**
@@ -22,8 +22,8 @@ export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDT
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'HasFeatureAccessUseCase.execute',
           { params }
@@ -31,8 +31,8 @@ export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDT
       }
 
       if (!params.featureType) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature type is required',
           'HasFeatureAccessUseCase.execute',
           { params }
@@ -40,8 +40,8 @@ export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDT
       }
 
       if (!params.featureId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature ID is required',
           'HasFeatureAccessUseCase.execute',
           { params }
@@ -50,8 +50,8 @@ export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDT
 
       // Validate feature type enum
       if (!Object.values(FeatureType).includes(params.featureType as FeatureType)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid feature type',
           'HasFeatureAccessUseCase.execute',
           { params }
@@ -66,12 +66,12 @@ export class HasFeatureAccessUseCase implements IUseCase<HasFeatureAccessInputDT
 
       return hasAccess;
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to check feature access',
         'HasFeatureAccessUseCase.execute',
         { params },

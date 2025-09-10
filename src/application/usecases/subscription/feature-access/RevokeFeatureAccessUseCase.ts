@@ -1,8 +1,7 @@
 import { RevokeFeatureAccessInputDTO } from '@/src/application/dtos/subscription/subscription-dto';
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';
-import type { BackendFeatureAccessRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { FeatureAccessRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for revoking feature access
@@ -10,7 +9,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessInputDTO, boolean> {
   constructor(
-    private readonly featureAccessRepository: BackendFeatureAccessRepository
+    private readonly featureAccessRepository: FeatureAccessRepository
   ) { }
 
   /**
@@ -22,8 +21,8 @@ export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessI
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'RevokeFeatureAccessUseCase.execute',
           { params }
@@ -31,8 +30,8 @@ export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessI
       }
 
       if (!params.featureType) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature type is required',
           'RevokeFeatureAccessUseCase.execute',
           { params }
@@ -40,8 +39,8 @@ export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessI
       }
 
       if (!params.featureId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature ID is required',
           'RevokeFeatureAccessUseCase.execute',
           { params }
@@ -50,8 +49,8 @@ export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessI
 
       // Validate feature type enum
       if (!Object.values(FeatureType).includes(params.featureType as FeatureType)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid feature type',
           'RevokeFeatureAccessUseCase.execute',
           { params }
@@ -66,12 +65,12 @@ export class RevokeFeatureAccessUseCase implements IUseCase<RevokeFeatureAccessI
 
       return result;
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to revoke feature access',
         'RevokeFeatureAccessUseCase.execute',
         { params },

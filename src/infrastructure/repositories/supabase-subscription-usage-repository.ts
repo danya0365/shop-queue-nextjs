@@ -7,26 +7,26 @@ import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from 
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import {
-  BackendSubscriptionError,
-  BackendSubscriptionErrorType,
-  BackendSubscriptionUsageRepository
-} from "@/src/domain/repositories/backend/backend-subscription-repository";
+  SubscriptionError,
+  SubscriptionErrorType,
+  SubscriptionUsageRepository
+} from "@/src/domain/repositories/subscription-repository";
 import { SupabaseBackendSubscriptionMapper } from "@/src/infrastructure/mappers/backend/supabase-backend-subscription.mapper";
 import {
   SubscriptionUsageSchema
 } from "@/src/infrastructure/schemas/subscription/backend/subscription.schema";
-import { BackendRepository } from "../base/backend-repository";
+import { StandardRepository } from "./base/standard-repository";
 
 /**
  * Supabase implementation of Subscription Usage Repository
  * Following Clean Architecture and SOLID principles
  */
-export class SupabaseBackendSubscriptionUsageRepository extends BackendRepository implements BackendSubscriptionUsageRepository {
+export class SupabaseSubscriptionUsageRepository extends StandardRepository implements SubscriptionUsageRepository {
   constructor(
     dataSource: DatabaseDataSource,
     logger: Logger
   ) {
-    super(dataSource, logger, "BackendSubscriptionUsage");
+    super(dataSource, logger, "SubscriptionUsage");
   }
 
   /**
@@ -70,8 +70,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
         error: error instanceof Error ? error.message : 'Unknown error',
         params
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to get paginated subscription usage',
         'getPaginatedUsage'
       );
@@ -124,8 +124,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
         profileId,
         params
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to get usage by profile ID',
         'getUsageByProfileId'
       );
@@ -189,8 +189,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
         profileId,
         shopId
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to get current usage stats',
         'getCurrentUsageStats'
       );
@@ -221,8 +221,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
       );
 
       if (!insertedData || insertedData.length === 0) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.OPERATION_FAILED,
+        throw new SubscriptionError(
+          SubscriptionErrorType.OPERATION_FAILED,
           'Failed to insert usage record',
           'recordUsage'
         );
@@ -237,8 +237,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
         usageType,
         count
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to record usage',
         'recordUsage'
       );
@@ -263,8 +263,8 @@ export class SupabaseBackendSubscriptionUsageRepository extends BackendRepositor
         action,
         shopId
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to check if action can be performed',
         'canPerformAction'
       );

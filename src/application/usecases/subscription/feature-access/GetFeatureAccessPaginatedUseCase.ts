@@ -3,8 +3,7 @@ import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import type { BackendFeatureAccessRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { FeatureAccessRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting paginated feature access data
@@ -12,7 +11,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetFeatureAccessPaginatedUseCase implements IUseCase<GetFeatureAccessPaginatedInputDTO, PaginatedFeatureAccessDTO> {
   constructor(
-    private featureAccessRepository: BackendFeatureAccessRepository
+    private featureAccessRepository: FeatureAccessRepository
   ) { }
 
   /**
@@ -29,8 +28,8 @@ export class GetFeatureAccessPaginatedUseCase implements IUseCase<GetFeatureAcce
 
       // Validate feature type if provided
       if (input.featureType && !Object.values(FeatureType).includes(input.featureType as FeatureType)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid feature type',
           'GetFeatureAccessPaginatedUseCase.execute',
           { input }
@@ -42,12 +41,12 @@ export class GetFeatureAccessPaginatedUseCase implements IUseCase<GetFeatureAcce
       );
       return SubscriptionMapper.toPaginatedFeatureAccessDTO(paginatedFeatureAccess);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get paginated feature access',
         'GetFeatureAccessPaginatedUseCase.execute',
         {},

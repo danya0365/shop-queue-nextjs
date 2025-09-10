@@ -16,7 +16,7 @@ import {
 } from "@/src/domain/repositories/backend/backend-subscription-repository";
 import { SupabaseBackendSubscriptionMapper } from "@/src/infrastructure/mappers/backend/supabase-backend-subscription.mapper";
 import { SubscriptionPlanSchema, SubscriptionStatsSchema } from "@/src/infrastructure/schemas/subscription/backend/subscription.schema";
-import { BackendRepository } from "../base/backend-repository";
+import { StandardRepository } from "./base/standard-repository";
 
 // Extended types for joined data
 type SubscriptionPlanSchemaRecord = Record<string, unknown> & SubscriptionPlanSchema;
@@ -26,12 +26,12 @@ type SubscriptionStatsSchemaRecord = Record<string, unknown> & SubscriptionStats
  * Supabase implementation of the subscription plan repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseBackendSubscriptionPlanRepository extends BackendRepository implements BackendSubscriptionPlanRepository {
+export class SupabaseSubscriptionPlanRepository extends StandardRepository implements BackendSubscriptionPlanRepository {
   constructor(
     dataSource: DatabaseDataSource,
     logger: Logger
   ) {
-    super(dataSource, logger, "BackendSubscriptionPlan");
+    super(dataSource, logger, "SubscriptionPlan");
   }
 
   /**

@@ -2,8 +2,7 @@ import { FeatureAccessDTO, GrantFeatureAccessInputDTO } from '@/src/application/
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { FeatureType } from '@/src/domain/entities/backend/backend-subscription.entity';
-import type { BackendFeatureAccessRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { FeatureAccessRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for granting feature access
@@ -11,7 +10,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInputDTO, FeatureAccessDTO> {
   constructor(
-    private readonly featureAccessRepository: BackendFeatureAccessRepository
+    private readonly featureAccessRepository: FeatureAccessRepository
   ) { }
 
   /**
@@ -23,8 +22,8 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'GrantFeatureAccessUseCase.execute',
           { params }
@@ -32,8 +31,8 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
       }
 
       if (!params.featureType) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature type is required',
           'GrantFeatureAccessUseCase.execute',
           { params }
@@ -41,8 +40,8 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
       }
 
       if (!params.featureId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Feature ID is required',
           'GrantFeatureAccessUseCase.execute',
           { params }
@@ -51,8 +50,8 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
 
       // Validate feature type enum
       if (!Object.values(FeatureType).includes(params.featureType as FeatureType)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid feature type',
           'GrantFeatureAccessUseCase.execute',
           { params }
@@ -61,8 +60,8 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
 
       // Validate price if provided
       if (params.price !== undefined && params.price < 0) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Price must be non-negative',
           'GrantFeatureAccessUseCase.execute',
           { params }
@@ -91,12 +90,12 @@ export class GrantFeatureAccessUseCase implements IUseCase<GrantFeatureAccessInp
       );
       return SubscriptionMapper.featureAccessToDTO(createdFeatureAccess);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to grant feature access',
         'GrantFeatureAccessUseCase.execute',
         { params },

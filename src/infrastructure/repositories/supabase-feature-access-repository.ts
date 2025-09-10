@@ -6,27 +6,23 @@ import {
 import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import {
-  BackendFeatureAccessRepository,
-  BackendSubscriptionError,
-  BackendSubscriptionErrorType
-} from "@/src/domain/repositories/backend/backend-subscription-repository";
+import { FeatureAccessRepository, SubscriptionError, SubscriptionErrorType } from "@/src/domain/repositories/subscription-repository";
 import { SupabaseBackendSubscriptionMapper } from "@/src/infrastructure/mappers/backend/supabase-backend-subscription.mapper";
 import {
   FeatureAccessSchema
 } from "@/src/infrastructure/schemas/subscription/backend/subscription.schema";
-import { BackendRepository } from "../base/backend-repository";
+import { StandardRepository } from "./base/standard-repository";
 
 /**
  * Supabase implementation of Feature Access Repository
  * Following Clean Architecture and SOLID principles
  */
-export class SupabaseBackendFeatureAccessRepository extends BackendRepository implements BackendFeatureAccessRepository {
+export class SupabaseFeatureAccessRepository extends StandardRepository implements FeatureAccessRepository {
   constructor(
     dataSource: DatabaseDataSource,
     logger: Logger
   ) {
-    super(dataSource, logger, "BackendFeatureAccess");
+    super(dataSource, logger, "FeatureAccess");
   }
 
   /**
@@ -70,8 +66,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
         error: error instanceof Error ? error.message : 'Unknown error',
         params
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to get paginated feature access',
         'getPaginatedFeatureAccess'
       );
@@ -127,8 +123,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
         profileId,
         params
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to get feature access by profile ID',
         'getFeatureAccessByProfileId'
       );
@@ -182,8 +178,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
         featureType,
         shopId
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to check feature access',
         'hasFeatureAccess'
       );
@@ -217,8 +213,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
       );
 
       if (!insertedData || insertedData.length === 0) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.OPERATION_FAILED,
+        throw new SubscriptionError(
+          SubscriptionErrorType.OPERATION_FAILED,
           'Failed to insert feature access record',
           'grantFeatureAccess'
         );
@@ -234,8 +230,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
         price,
         expiresAt
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to grant feature access',
         'grantFeatureAccess'
       );
@@ -320,8 +316,8 @@ export class SupabaseBackendFeatureAccessRepository extends BackendRepository im
         featureType,
         shopId
       });
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.OPERATION_FAILED,
+      throw new SubscriptionError(
+        SubscriptionErrorType.OPERATION_FAILED,
         'Failed to revoke feature access',
         'revokeFeatureAccess'
       );

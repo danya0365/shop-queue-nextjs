@@ -2,8 +2,7 @@ import { GetProfileSubscriptionsPaginatedInputDTO, PaginatedProfileSubscriptions
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import type { BackendProfileSubscriptionRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { ProfileSubscriptionRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting paginated profile subscriptions data
@@ -11,7 +10,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetProfileSubscriptionsPaginatedUseCase implements IUseCase<GetProfileSubscriptionsPaginatedInputDTO, PaginatedProfileSubscriptionsDTO> {
   constructor(
-    private profileSubscriptionRepository: BackendProfileSubscriptionRepository
+    private profileSubscriptionRepository: ProfileSubscriptionRepository
   ) { }
 
   /**
@@ -31,12 +30,12 @@ export class GetProfileSubscriptionsPaginatedUseCase implements IUseCase<GetProf
       );
       return SubscriptionMapper.toPaginatedProfileSubscriptionsDTO(paginatedProfileSubscriptions);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get paginated profile subscriptions',
         'GetProfileSubscriptionsPaginatedUseCase.execute',
         {},

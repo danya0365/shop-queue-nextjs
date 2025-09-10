@@ -2,8 +2,7 @@ import { CreateProfileSubscriptionInputDTO, ProfileSubscriptionDTO } from '@/src
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { BillingPeriod, CreateProfileSubscriptionEntity, SubscriptionStatus } from '@/src/domain/entities/backend/backend-subscription.entity';
-import type { BackendProfileSubscriptionRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { ProfileSubscriptionRepository, SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for creating profile subscription
@@ -11,7 +10,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileSubscriptionInputDTO, ProfileSubscriptionDTO> {
   constructor(
-    private readonly profileSubscriptionRepository: BackendProfileSubscriptionRepository
+    private readonly profileSubscriptionRepository: ProfileSubscriptionRepository
   ) { }
 
   /**
@@ -23,8 +22,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
     try {
       // Validate required fields
       if (!params.profileId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Profile ID is required',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -32,8 +31,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
       }
 
       if (!params.planId?.trim()) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Plan ID is required',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -41,8 +40,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
       }
 
       if (!params.billingPeriod) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Billing period is required',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -50,8 +49,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
       }
 
       if (params.pricePerPeriod === undefined || params.pricePerPeriod < 0) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Price per period is required and must be non-negative',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -60,8 +59,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
 
       // Validate enums
       if (!Object.values(BillingPeriod).includes(params.billingPeriod as BillingPeriod)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid billing period',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -69,8 +68,8 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
       }
 
       if (params.status && !Object.values(SubscriptionStatus).includes(params.status as SubscriptionStatus)) {
-        throw new BackendSubscriptionError(
-          BackendSubscriptionErrorType.VALIDATION_ERROR,
+        throw new SubscriptionError(
+          SubscriptionErrorType.VALIDATION_ERROR,
           'Invalid subscription status',
           'CreateProfileSubscriptionUseCase.execute',
           { params }
@@ -105,12 +104,12 @@ export class CreateProfileSubscriptionUseCase implements IUseCase<CreateProfileS
       const createdProfileSubscription = await this.profileSubscriptionRepository.createSubscription(createProfileSubscriptionEntity);
       return SubscriptionMapper.profileSubscriptionToDTO(createdProfileSubscription);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to create profile subscription',
         'CreateProfileSubscriptionUseCase.execute',
         { params },

@@ -2,8 +2,8 @@ import { GetSubscriptionUsagePaginatedInputDTO, PaginatedSubscriptionUsageDTO } 
 import { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { SubscriptionMapper } from '@/src/application/mappers/backend/subscription-mapper';
 import { PaginationParams } from '@/src/domain/interfaces/pagination-types';
-import type { BackendSubscriptionUsageRepository } from '@/src/domain/repositories/backend/backend-subscription-repository';
-import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/domain/repositories/backend/backend-subscription-repository';
+import { SubscriptionUsageRepository } from '@/src/domain/repositories/subscription-repository';
+import { SubscriptionError, SubscriptionErrorType } from '@/src/domain/repositories/subscription-repository';
 
 /**
  * Use case for getting paginated subscription usage data
@@ -11,7 +11,7 @@ import { BackendSubscriptionError, BackendSubscriptionErrorType } from '@/src/do
  */
 export class GetSubscriptionUsagePaginatedUseCase implements IUseCase<GetSubscriptionUsagePaginatedInputDTO, PaginatedSubscriptionUsageDTO> {
   constructor(
-    private subscriptionUsageRepository: BackendSubscriptionUsageRepository
+    private subscriptionUsageRepository: SubscriptionUsageRepository
   ) { }
 
   /**
@@ -32,12 +32,12 @@ export class GetSubscriptionUsagePaginatedUseCase implements IUseCase<GetSubscri
         : await this.subscriptionUsageRepository.getPaginatedUsage(paginationParams);
       return SubscriptionMapper.toPaginatedSubscriptionUsageDTO(paginatedSubscriptionUsage);
     } catch (error) {
-      if (error instanceof BackendSubscriptionError) {
+      if (error instanceof SubscriptionError) {
         throw error;
       }
 
-      throw new BackendSubscriptionError(
-        BackendSubscriptionErrorType.UNKNOWN,
+      throw new SubscriptionError(
+        SubscriptionErrorType.UNKNOWN,
         'Failed to get paginated subscription usage',
         'GetSubscriptionUsagePaginatedUseCase.execute',
         {},
