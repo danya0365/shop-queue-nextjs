@@ -18,44 +18,58 @@ const mapOperatingHoursToOpeningHours = (operatingHours: ShopCreateData['operati
     {
       dayOfWeek: 'monday',
       isOpen: !operatingHours.monday.closed,
-      openTime: operatingHours.monday.closed ? undefined : operatingHours.monday.open,
-      closeTime: operatingHours.monday.closed ? undefined : operatingHours.monday.close
+      openTime: operatingHours.monday.closed ? undefined : operatingHours.monday.openTime,
+      closeTime: operatingHours.monday.closed ? undefined : operatingHours.monday.closeTime,
+      breakStart: operatingHours.monday.closed ? undefined : operatingHours.monday.breakStart,
+      breakEnd: operatingHours.monday.closed ? undefined : operatingHours.monday.breakEnd
     },
     {
       dayOfWeek: 'tuesday',
       isOpen: !operatingHours.tuesday.closed,
-      openTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.open,
-      closeTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.close
+      openTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.openTime,
+      closeTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.closeTime,
+      breakStart: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.breakStart,
+      breakEnd: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.breakEnd
     },
     {
       dayOfWeek: 'wednesday',
       isOpen: !operatingHours.wednesday.closed,
-      openTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.open,
-      closeTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.close
+      openTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.openTime,
+      closeTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.closeTime,
+      breakStart: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.breakStart,
+      breakEnd: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.breakEnd
     },
     {
       dayOfWeek: 'thursday',
       isOpen: !operatingHours.thursday.closed,
-      openTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.open,
-      closeTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.close
+      openTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.openTime,
+      closeTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.closeTime,
+      breakStart: operatingHours.thursday.closed ? undefined : operatingHours.thursday.breakStart,
+      breakEnd: operatingHours.thursday.closed ? undefined : operatingHours.thursday.breakEnd
     },
     {
       dayOfWeek: 'friday',
       isOpen: !operatingHours.friday.closed,
-      openTime: operatingHours.friday.closed ? undefined : operatingHours.friday.open,
-      closeTime: operatingHours.friday.closed ? undefined : operatingHours.friday.close
+      openTime: operatingHours.friday.closed ? undefined : operatingHours.friday.openTime,
+      closeTime: operatingHours.friday.closed ? undefined : operatingHours.friday.closeTime,
+      breakStart: operatingHours.friday.closed ? undefined : operatingHours.friday.breakStart,
+      breakEnd: operatingHours.friday.closed ? undefined : operatingHours.friday.breakEnd
     },
     {
       dayOfWeek: 'saturday',
       isOpen: !operatingHours.saturday.closed,
-      openTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.open,
-      closeTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.close
+      openTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.openTime,
+      closeTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.closeTime,
+      breakStart: operatingHours.saturday.closed ? undefined : operatingHours.saturday.breakStart,
+      breakEnd: operatingHours.saturday.closed ? undefined : operatingHours.saturday.breakEnd
     },
     {
       dayOfWeek: 'sunday',
       isOpen: !operatingHours.sunday.closed,
-      openTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.open,
-      closeTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.close
+      openTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.openTime,
+      closeTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.closeTime,
+      breakStart: operatingHours.sunday.closed ? undefined : operatingHours.sunday.breakStart,
+      breakEnd: operatingHours.sunday.closed ? undefined : operatingHours.sunday.breakEnd
     }
   ];
 };
@@ -70,13 +84,13 @@ export interface ShopCreateData {
   email: string;
   website?: string;
   operatingHours: {
-    monday: { open: string; close: string; closed: boolean };
-    tuesday: { open: string; close: string; closed: boolean };
-    wednesday: { open: string; close: string; closed: boolean };
-    thursday: { open: string; close: string; closed: boolean };
-    friday: { open: string; close: string; closed: boolean };
-    saturday: { open: string; close: string; closed: boolean };
-    sunday: { open: string; close: string; closed: boolean };
+    monday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    tuesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    wednesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    thursday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    friday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    saturday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
+    sunday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean };
   };
 }
 

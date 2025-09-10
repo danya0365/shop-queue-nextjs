@@ -11,13 +11,13 @@ interface ShopCreateViewProps {
 
 export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
   const [state, actions] = useShopCreatePresenter();
-  
+
   // Use mock data as default values in local development
   const getDefaultFormData = (): ShopCreateData => {
     if (actions.isMockDataEnabled()) {
       return actions.getMockData();
     }
-    
+
     return {
       name: '',
       description: '',
@@ -27,13 +27,13 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
       email: '',
       website: '',
       operatingHours: {
-        monday: { open: '09:00', close: '18:00', closed: false },
-        tuesday: { open: '09:00', close: '18:00', closed: false },
-        wednesday: { open: '09:00', close: '18:00', closed: false },
-        thursday: { open: '09:00', close: '18:00', closed: false },
-        friday: { open: '09:00', close: '18:00', closed: false },
-        saturday: { open: '09:00', close: '18:00', closed: false },
-        sunday: { open: '09:00', close: '18:00', closed: true },
+        monday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        friday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        saturday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
+        sunday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: true },
       }
     };
   };
@@ -52,7 +52,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
     }
   };
 
-  const handleOperatingHoursChange = (day: string, field: 'open' | 'close' | 'closed', value: string | boolean) => {
+  const handleOperatingHoursChange = (day: string, field: 'openTime' | 'closeTime' | 'breakStart' | 'breakEnd' | 'closed', value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       operatingHours: {
@@ -360,27 +360,50 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                       <span className="text-sm text-muted">เปิด</span>
                     </div>
 
-                    {!hours.closed && (
-                      <>
-                        <input
-                          type="time"
-                          value={hours.open}
-                          onChange={(e) => handleOperatingHoursChange(day, 'open', e.target.value)}
-                          className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                        />
-                        <span className="text-muted">ถึง</span>
-                        <input
-                          type="time"
-                          value={hours.close}
-                          onChange={(e) => handleOperatingHoursChange(day, 'close', e.target.value)}
-                          className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                        />
-                      </>
-                    )}
+                    {
+                      !hours.closed && (
+                        <div className="flex items-center space-x-2 flex-wrap">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-muted">เปิด</span>
+                            <input
+                              type="time"
+                              value={hours.openTime}
+                              onChange={(e) => handleOperatingHoursChange(day, 'openTime', e.target.value)}
+                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                            />
+                            <span className="text-muted">ถึง</span>
+                            <input
+                              type="time"
+                              value={hours.closeTime}
+                              onChange={(e) => handleOperatingHoursChange(day, 'closeTime', e.target.value)}
+                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                            />
+                          </div>
+                          <div className="flex items-center space-x-2 mt-2 sm:mt-0 sm:ml-4">
+                            <span className="text-sm text-muted">พักเที่ยง</span>
+                            <input
+                              type="time"
+                              value={hours.breakStart}
+                              onChange={(e) => handleOperatingHoursChange(day, 'breakStart', e.target.value)}
+                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                            />
+                            <span className="text-muted">ถึง</span>
+                            <input
+                              type="time"
+                              value={hours.breakEnd}
+                              onChange={(e) => handleOperatingHoursChange(day, 'breakEnd', e.target.value)}
+                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                            />
+                          </div>
+                        </div>
+                      )
+                    }
 
-                    {hours.closed && (
-                      <span className="text-muted italic">ปิด</span>
-                    )}
+                    {
+                      hours.closed && (
+                        <span className="text-muted italic">ปิด</span>
+                      )
+                    }
                   </div>
                 );
               })}
@@ -411,7 +434,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
