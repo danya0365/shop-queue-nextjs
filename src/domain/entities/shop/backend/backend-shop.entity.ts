@@ -56,6 +56,8 @@ export interface UpdateShopEntity {
 export interface ShopCategoryEntity {
   id: string;
   name: string;
+  slug: string;
+  description: string;
 }
 
 export interface OpeningHourEntity {

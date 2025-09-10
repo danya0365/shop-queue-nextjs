@@ -41,6 +41,8 @@ export interface ShopSchema {
 export interface ShopCategorySchema {
   id: string;
   name: string;
+  slug: string;
+  description: string;
 }
 
 export interface OpeningHourSchema {

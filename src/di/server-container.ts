@@ -2,6 +2,7 @@
 
 import { AuthServiceFactory } from "../application/services/auth-service";
 import { AuthorizationServiceFactory } from "../application/services/authorization.service";
+import { CategoryServiceFactory } from "../application/services/category-service";
 import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
@@ -30,6 +31,7 @@ import { SupabaseBackendFeatureAccessRepository } from "../infrastructure/reposi
 import { SupabaseBackendProfileSubscriptionRepository } from "../infrastructure/repositories/backend/supabase-backend-profile-subscription-repository";
 import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository";
 import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository";
+import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
@@ -60,6 +62,8 @@ export async function createServerContainer(): Promise<Container> {
     const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
 
     const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
+    const shopBackendCategoryRepository = new SupabaseShopBackendCategoryRepository(databaseDatasource, logger);
+
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseBackendSubscriptionPlanRepository(databaseDatasource, logger);
@@ -72,6 +76,7 @@ export async function createServerContainer(): Promise<Container> {
     const profileService = ProfileServiceFactory.create(profileAdapter, logger);
     const authorizationService = AuthorizationServiceFactory.create(logger);
     const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
+    const categoryService = CategoryServiceFactory.create(shopBackendCategoryRepository, logger);
 
     // Create backend subscription service
     const subscriptionService = SubscriptionServiceFactory.create(
@@ -105,6 +110,8 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
     container.registerInstance("SubscriptionService", subscriptionService);
+    container.registerInstance("CategoryService", categoryService);
+
     // Shop Backend services
     container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
     container.registerInstance("PosterTemplateBackendService", posterTemplateBackendService);

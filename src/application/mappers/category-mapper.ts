@@ -1,32 +1,46 @@
-import { Category } from '../../domain/entities/category';
-import { CategoryDto } from '../dtos/category-dto';
+import { CategoryDTO, CategoryStatsDTO } from "@/src/application/dtos/categories-dto";
+import { CategoryEntity, CategoryStatsEntity } from "@/src/domain/entities/backend/backend-category.entity";
 
 /**
- * Mapper class for converting between Category domain entities and DTOs
- * Following Single Responsibility Principle by isolating mapping logic
+ * Mapper for converting between category domain entities and DTOs
+ * Following Clean Architecture principles for separation of concerns
  */
 export class CategoryMapper {
   /**
-   * Convert a Category domain entity to a CategoryDto
-   * @param category Category domain entity
-   * @returns CategoryDto for presentation layer
+   * Convert category entity to DTO
+   * @param entity Category entity
+   * @returns Category DTO
    */
-  static toDto(category: Category): CategoryDto {
+  public static toDTO(entity: CategoryEntity): CategoryDTO {
     return {
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description,
-      createdAt: category.createdAt.toISOString(),
+      id: entity.id,
+      slug: entity.slug,
+      name: entity.name,
+      description: entity.description,
+      icon: entity.icon,
+      color: entity.color,
+      shopsCount: entity.shopsCount,
+      servicesCount: entity.servicesCount,
+      isActive: entity.isActive,
+      sortOrder: entity.sortOrder,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt
     };
   }
 
   /**
-   * Convert multiple Category domain entities to CategoryDtos
-   * @param categories Array of Category domain entities
-   * @returns Array of CategoryDtos
+   * Convert category stats entity to DTO
+   * @param entity Category stats entity
+   * @returns Category stats DTO
    */
-  static toDtoList(categories: Category[]): CategoryDto[] {
-    return categories.map(category => this.toDto(category));
+  public static statsToDTO(entity: CategoryStatsEntity): CategoryStatsDTO {
+    return {
+      totalCategories: entity.totalCategories,
+      activeCategories: entity.activeCategories,
+      totalShops: entity.totalShops,
+      totalServices: entity.totalServices,
+      mostPopularCategory: entity.mostPopularCategory,
+      leastPopularCategory: entity.leastPopularCategory
+    };
   }
 }

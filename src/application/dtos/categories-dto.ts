@@ -13,27 +13,6 @@ export interface CategoryDTO {
   updatedAt: string;
 }
 
-export interface CreateCategoryInputDTO {
-  name: string;
-  slug: string;
-  description: string;
-  icon: string;
-  color: string;
-  isActive: boolean;
-  sortOrder: number;
-}
-
-export interface UpdateCategoryInputDTO {
-  id: string;
-  name?: string;
-  slug?: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  isActive?: boolean;
-  sortOrder?: number;
-}
-
 export interface CategoryStatsDTO {
   totalCategories: number;
   activeCategories: number;
@@ -56,6 +35,11 @@ export interface PaginationMetadata {
   itemsPerPage: number;
   currentPage: number;
   totalPages: number;
+}
+
+export interface GetCategoriesPaginatedInputDTO {
+  page: number;
+  perPage: number;
 }
 
 export interface PaginatedCategoriesDTO {

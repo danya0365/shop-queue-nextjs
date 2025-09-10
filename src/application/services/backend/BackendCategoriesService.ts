@@ -1,17 +1,15 @@
-import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO, PaginatedCategoriesDTO } from '@/src/application/dtos/backend/categories-dto';
-import type { CreateCategoryUseCaseInput } from '@/src/application/usecases/backend/categories/CreateCategoryUseCase';
+import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO, CreateCategoryInputDTO, PaginatedCategoriesDTO, UpdateCategoryInputDTO } from '@/src/application/dtos/backend/categories-dto';
 import { GetCategoriesPaginatedUseCase, type GetCategoriesPaginatedUseCaseInput } from '@/src/application/usecases/backend/categories/GetCategoriesPaginatedUseCase';
-import type { UpdateCategoryUseCaseInput } from '@/src/application/usecases/backend/categories/UpdateCategoryUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { IUseCase } from '../../interfaces/use-case.interface';
 import { BackendCategoryRepository } from '@/src/domain/repositories/backend/backend-category-repository';
+import { IUseCase } from '../../interfaces/use-case.interface';
 import { CreateCategoryUseCase, DeleteCategoryUseCase, GetCategoryByIdUseCase, GetCategoryStatsUseCase, UpdateCategoryUseCase } from '../../usecases/backend/categories';
 
 export interface IBackendCategoriesService {
   getCategoriesData(page?: number, perPage?: number): Promise<CategoriesDataDTO>;
   getCategoryById(id: string): Promise<CategoryDTO>;
-  createCategory(categoryData: CreateCategoryUseCaseInput): Promise<CategoryDTO>;
-  updateCategory(id: string, categoryData: Omit<UpdateCategoryUseCaseInput, 'id'>): Promise<CategoryDTO>;
+  createCategory(categoryData: CreateCategoryInputDTO): Promise<CategoryDTO>;
+  updateCategory(id: string, categoryData: Omit<UpdateCategoryInputDTO, 'id'>): Promise<CategoryDTO>;
   deleteCategory(id: string): Promise<boolean>;
 }
 
@@ -20,8 +18,8 @@ export class BackendCategoriesService implements IBackendCategoriesService {
     private readonly getCategoriesPaginatedUseCase: IUseCase<GetCategoriesPaginatedUseCaseInput, PaginatedCategoriesDTO>,
     private readonly getCategoryStatsUseCase: IUseCase<void, CategoryStatsDTO>,
     private readonly getCategoryByIdUseCase: IUseCase<string, CategoryDTO>,
-    private readonly createCategoryUseCase: IUseCase<CreateCategoryUseCaseInput, CategoryDTO>,
-    private readonly updateCategoryUseCase: IUseCase<UpdateCategoryUseCaseInput, CategoryDTO>,
+    private readonly createCategoryUseCase: IUseCase<CreateCategoryInputDTO, CategoryDTO>,
+    private readonly updateCategoryUseCase: IUseCase<UpdateCategoryInputDTO, CategoryDTO>,
     private readonly deleteCategoryUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
   ) { }
@@ -77,7 +75,7 @@ export class BackendCategoriesService implements IBackendCategoriesService {
    * @param categoryData Category data
    * @returns Created category DTO
    */
-  async createCategory(categoryData: CreateCategoryUseCaseInput): Promise<CategoryDTO> {
+  async createCategory(categoryData: CreateCategoryInputDTO): Promise<CategoryDTO> {
     try {
       this.logger.info('Creating category', { categoryData });
 
@@ -95,7 +93,7 @@ export class BackendCategoriesService implements IBackendCategoriesService {
    * @param categoryData Category data to update
    * @returns Updated category DTO
    */
-  async updateCategory(id: string, categoryData: Omit<UpdateCategoryUseCaseInput, 'id'>): Promise<CategoryDTO> {
+  async updateCategory(id: string, categoryData: Omit<UpdateCategoryInputDTO, 'id'>): Promise<CategoryDTO> {
     try {
       this.logger.info('Updating category', { id, categoryData });
 

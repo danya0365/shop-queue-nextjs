@@ -1,7 +1,64 @@
-import { getClientService } from '@/src/di/client-container';
+import { IShopService } from '@/src/application/services/shop/ShopService';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { getClientContainer } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { isLocalDevelopment } from '@/src/utils/environment';
+import { getMockShopData } from '@/src/utils/mock-data';
+
+const clientContainer = getClientContainer();
+const shopService = clientContainer.resolve<IShopService>('ShopService');
+const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+const logger = clientContainer.resolve<Logger>('Logger');
+
+// Helper function to map form operating hours to DTO opening hours format
+const mapOperatingHoursToOpeningHours = (operatingHours: ShopCreateData['operatingHours']) => {
+  return [
+    {
+      dayOfWeek: 'monday',
+      isOpen: !operatingHours.monday.closed,
+      openTime: operatingHours.monday.closed ? undefined : operatingHours.monday.open,
+      closeTime: operatingHours.monday.closed ? undefined : operatingHours.monday.close
+    },
+    {
+      dayOfWeek: 'tuesday',
+      isOpen: !operatingHours.tuesday.closed,
+      openTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.open,
+      closeTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.close
+    },
+    {
+      dayOfWeek: 'wednesday',
+      isOpen: !operatingHours.wednesday.closed,
+      openTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.open,
+      closeTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.close
+    },
+    {
+      dayOfWeek: 'thursday',
+      isOpen: !operatingHours.thursday.closed,
+      openTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.open,
+      closeTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.close
+    },
+    {
+      dayOfWeek: 'friday',
+      isOpen: !operatingHours.friday.closed,
+      openTime: operatingHours.friday.closed ? undefined : operatingHours.friday.open,
+      closeTime: operatingHours.friday.closed ? undefined : operatingHours.friday.close
+    },
+    {
+      dayOfWeek: 'saturday',
+      isOpen: !operatingHours.saturday.closed,
+      openTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.open,
+      closeTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.close
+    },
+    {
+      dayOfWeek: 'sunday',
+      isOpen: !operatingHours.sunday.closed,
+      openTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.open,
+      closeTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.close
+    }
+  ];
+};
 
 // Define form data interface
 export interface ShopCreateData {
@@ -37,6 +94,8 @@ export interface ShopCreatePresenterActions {
   reset: () => void;
   setError: (error: string | null) => void;
   clearValidationErrors: () => void;
+  getMockData: () => ShopCreateData;
+  isMockDataEnabled: () => boolean;
 }
 
 // Hook type
@@ -51,7 +110,6 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const logger = getClientService<Logger>('Logger');
   const router = useRouter();
 
   const validateShopData = (data: ShopCreateData): Record<string, string> => {
@@ -111,21 +169,39 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
         return false;
       }
 
-      // Simulate API call (replace with actual API call)
-      logger.info('ShopCreatePresenter: Creating shop', { shopName: data.name });
-      
-      // Mock API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Get current user profile to obtain ownerId
+      const currentProfile = await profileService.getCurrentUserProfile();
+      if (!currentProfile) {
+        setError('ไม่พบข้อมูลผู้ใช้ กรุณาล็อกอินก่อนสร้างร้านค้า');
+        return false;
+      }
+
+      // Map form data to CreateShopInputDTO format
+      const createShopData = {
+        name: data.name,
+        description: data.description || undefined,
+        address: data.address,
+        phone: data.phone,
+        email: data.email || undefined,
+        ownerId: currentProfile.id,
+        categoryIds: [data.category], // Convert single category to array
+        openingHours: mapOperatingHoursToOpeningHours(data.operatingHours)
+      };
+
+      logger.info('ShopCreatePresenter: Creating shop', { shopData: createShopData });
+
+      // Call the service with properly mapped data
+      await shopService.createShop(createShopData);
+
       // Mock success response
       setSuccess(true);
       logger.info('ShopCreatePresenter: Shop created successfully');
-      
+
       // Redirect to dashboard after success
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
-      
+
       return true;
     } catch (error) {
       logger.error('ShopCreatePresenter: Error creating shop', error);
@@ -144,12 +220,21 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
     logger.info('ShopCreatePresenter: Reset');
   };
 
+  const getMockData = (): ShopCreateData => {
+    logger.info('ShopCreatePresenter: Getting mock data for local development');
+    return getMockShopData('barbershop');
+  };
+
+  const isMockDataEnabled = (): boolean => {
+    return isLocalDevelopment();
+  };
+
   const clearValidationErrors = () => {
     setValidationErrors({});
   };
 
   return [
     { isLoading, error, success, validationErrors },
-    { createShop, reset, setError, clearValidationErrors },
+    { createShop, reset, setError, clearValidationErrors, getMockData, isMockDataEnabled },
   ];
 };

@@ -1,26 +1,15 @@
-import type { CategoryDTO } from '@/src/application/dtos/backend/categories-dto';
+import type { CategoryDTO, UpdateCategoryInputDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { CategoryMapper } from '@/src/application/mappers/backend/category-mapper';
-import { BackendCategoryError, BackendCategoryErrorType } from '@/src/domain/repositories/backend/backend-category-repository';
 import type { BackendCategoryRepository } from '@/src/domain/repositories/backend/backend-category-repository';
+import { BackendCategoryError, BackendCategoryErrorType } from '@/src/domain/repositories/backend/backend-category-repository';
 
-export interface UpdateCategoryUseCaseInput {
-  id: string;
-  name?: string;
-  slug?: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  isActive?: boolean;
-  sortOrder?: number;
-}
-
-export class UpdateCategoryUseCase implements IUseCase<UpdateCategoryUseCaseInput, CategoryDTO> {
+export class UpdateCategoryUseCase implements IUseCase<UpdateCategoryInputDTO, CategoryDTO> {
   constructor(
     private readonly categoryRepository: BackendCategoryRepository
   ) { }
 
-  async execute(input: UpdateCategoryUseCaseInput): Promise<CategoryDTO> {
+  async execute(input: UpdateCategoryInputDTO): Promise<CategoryDTO> {
     // Validate input
     if (!input.id) {
       throw new BackendCategoryError(
@@ -32,8 +21,8 @@ export class UpdateCategoryUseCase implements IUseCase<UpdateCategoryUseCaseInpu
     }
 
     // Check if at least one field is provided for update
-    const hasUpdateFields = Object.keys(input).some(key => key !== 'id' && input[key as keyof UpdateCategoryUseCaseInput] !== undefined);
-    
+    const hasUpdateFields = Object.keys(input).some(key => key !== 'id' && input[key as keyof UpdateCategoryInputDTO] !== undefined);
+
     if (!hasUpdateFields) {
       throw new BackendCategoryError(
         BackendCategoryErrorType.VALIDATION_ERROR,
@@ -45,7 +34,7 @@ export class UpdateCategoryUseCase implements IUseCase<UpdateCategoryUseCaseInpu
 
     // Check if category exists
     const existingCategory = await this.categoryRepository.getCategoryById(input.id);
-    
+
     if (!existingCategory) {
       throw new BackendCategoryError(
         BackendCategoryErrorType.NOT_FOUND,

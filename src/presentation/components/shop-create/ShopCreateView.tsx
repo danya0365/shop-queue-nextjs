@@ -11,24 +11,34 @@ interface ShopCreateViewProps {
 
 export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
   const [state, actions] = useShopCreatePresenter();
-  const [formData, setFormData] = useState<ShopCreateData>({
-    name: '',
-    description: '',
-    category: '',
-    address: '',
-    phone: '',
-    email: '',
-    website: '',
-    operatingHours: {
-      monday: { open: '09:00', close: '18:00', closed: false },
-      tuesday: { open: '09:00', close: '18:00', closed: false },
-      wednesday: { open: '09:00', close: '18:00', closed: false },
-      thursday: { open: '09:00', close: '18:00', closed: false },
-      friday: { open: '09:00', close: '18:00', closed: false },
-      saturday: { open: '09:00', close: '18:00', closed: false },
-      sunday: { open: '09:00', close: '18:00', closed: true },
+  
+  // Use mock data as default values in local development
+  const getDefaultFormData = (): ShopCreateData => {
+    if (actions.isMockDataEnabled()) {
+      return actions.getMockData();
     }
-  });
+    
+    return {
+      name: '',
+      description: '',
+      category: '',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      operatingHours: {
+        monday: { open: '09:00', close: '18:00', closed: false },
+        tuesday: { open: '09:00', close: '18:00', closed: false },
+        wednesday: { open: '09:00', close: '18:00', closed: false },
+        thursday: { open: '09:00', close: '18:00', closed: false },
+        friday: { open: '09:00', close: '18:00', closed: false },
+        saturday: { open: '09:00', close: '18:00', closed: false },
+        sunday: { open: '09:00', close: '18:00', closed: true },
+      }
+    };
+  };
+
+  const [formData, setFormData] = useState<ShopCreateData>(getDefaultFormData());
 
   const handleInputChange = (field: keyof ShopCreateData, value: string) => {
     setFormData(prev => ({

@@ -37,7 +37,9 @@ export class SupabaseShopBackendShopMapper {
       updatedAt: schema.updated_at,
       categories: schema.categories ? schema.categories.map(cat => ({
         id: cat.id,
-        name: cat.name
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description
       })) : [],
       openingHours: schema.opening_hours ? schema.opening_hours.map(hour => ({
         dayOfWeek: hour.day_of_week,

@@ -6,7 +6,9 @@ import { ServiceDTO } from "./services-dto";
 
 export type ShopCategoryDTO = Partial<CategoryDTO> & {
   id: string;
+  slug: string;
   name: string;
+  description: string;
 }
 
 export interface ShopDTO {

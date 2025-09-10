@@ -105,7 +105,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         // Only select from category_shops table, we'll get categories data via join
         select: ['shop_id', 'category_id'],
         joins: [
-          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name'] }
+          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name', 'slug', 'description'] }
         ],
         filters: [{
           field: 'shop_id',
@@ -134,7 +134,9 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         if (!acc[shopId].some(c => c.id === categoryId)) {
           acc[shopId].push({
             id: categoryId,
-            name: categoryData.name as string
+            name: categoryData.name as string,
+            slug: categoryData.slug as string,
+            description: categoryData.description as string
           });
         }
         return acc;
@@ -278,7 +280,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         // Only select from shop_categories table, we'll get categories data via join
         select: ['shop_id', 'category_id'],
         joins: [
-          { table: 'categories', on: { fromField: 'category_id', toField: 'id' } }
+          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name', 'slug', 'description'] }
         ],
         filters: [{
           field: 'shop_id',
@@ -303,7 +305,9 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         if (!categoriesMap.has(categoryId)) {
           categoriesMap.set(categoryId, {
             id: categoryId,
-            name: categoryData.name as string
+            name: categoryData.name as string,
+            slug: categoryData.slug as string,
+            description: categoryData.description as string
           });
         }
       });
@@ -357,10 +361,6 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         email: shop.email,
         owner_id: shop.ownerId,
         status: shop.status,
-        queue_count: 0,
-        total_services: 0,
-        rating: 0,
-        total_reviews: 0
       };
 
       // Create shop in database

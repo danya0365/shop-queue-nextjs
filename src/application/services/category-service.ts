@@ -1,130 +1,88 @@
-import { ErrorHandlingDecorator } from "../decorators/error-handling.decorator";
-import { CategoryDto, CreateCategoryInputDto } from "../dtos/category-dto";
-import { CategoryUseCaseFactory } from "../factories/category-use-case.factory";
-import type { ICategoryRepositoryAdapter } from "../interfaces/category-repository-adapter.interface";
-import type { ICategoryService } from "../interfaces/category-service.interface";
-import type { ILogger } from "../interfaces/logger.interface";
-import type { IUseCase } from "../interfaces/use-case.interface";
+import type { CategoriesDataDTO, CategoryDTO, CategoryStatsDTO, PaginatedCategoriesDTO } from '@/src/application/dtos/categories-dto';
+import { GetCategoriesPaginatedInputDTO } from '@/src/application/dtos/categories-dto';
+import { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { GetCategoryByIdUseCase, GetCategoryStatsUseCase } from '@/src/application/usecases/categories';
+import { GetCategoriesPaginatedUseCase } from '@/src/application/usecases/categories/GetCategoriesPaginatedUseCase';
+import type { Logger } from '@/src/domain/interfaces/logger';
+import { BackendCategoryRepository } from '@/src/domain/repositories/backend/backend-category-repository';
 
-/**
- * Service class for category operations
- * Following SOLID principles and Clean Architecture
- * Using Factory Pattern, Command Pattern, and Decorator Pattern
- */
+export interface ICategoryService {
+  getActiveCategories(): Promise<CategoryDTO[]>;
+  getCategoriesData(page?: number, perPage?: number): Promise<CategoriesDataDTO>;
+  getCategoryById(id: string): Promise<CategoryDTO>;
+}
+
 export class CategoryService implements ICategoryService {
-  private getCategoriesUseCase: IUseCase<void, CategoryDto[]>;
-  private getCategoryBySlugUseCase: IUseCase<string, CategoryDto | null>;
-  private getCategoryByIdUseCase: IUseCase<string, CategoryDto | null>;
-  private createCategoryUseCase: IUseCase<CreateCategoryInputDto, CategoryDto>;
-  private updateCategoryUseCase: IUseCase<
-    { id: string; data: Partial<CreateCategoryInputDto> },
-    CategoryDto
-  >;
-  private deleteCategoryUseCase: IUseCase<string, void>;
-
-  /**
-   * Constructor with dependency injection
-   * @param categoryAdapter Adapter for category operations
-   * @param logger Optional logger for error logging
-   */
   constructor(
-    private readonly categoryAdapter: ICategoryRepositoryAdapter,
-    private readonly logger?: ILogger
-  ) {
-    // Create use cases using factory and decorate them with error handling
-    this.getCategoriesUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createGetCategoriesUseCase(categoryAdapter),
-      logger
-    );
+    private readonly getCategoriesPaginatedUseCase: IUseCase<GetCategoriesPaginatedInputDTO, PaginatedCategoriesDTO>,
+    private readonly getCategoryStatsUseCase: IUseCase<void, CategoryStatsDTO>,
+    private readonly getCategoryByIdUseCase: IUseCase<string, CategoryDTO>,
+    private readonly logger: Logger
+  ) { }
 
-    this.getCategoryBySlugUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createGetCategoryBySlugUseCase(categoryAdapter),
-      logger
-    );
-
-    this.getCategoryByIdUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createGetCategoryByIdUseCase(categoryAdapter),
-      logger
-    );
-
-    this.createCategoryUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createCreateCategoryUseCase(categoryAdapter),
-      logger
-    );
-
-    this.updateCategoryUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createUpdateCategoryUseCase(categoryAdapter),
-      logger
-    );
-
-    this.deleteCategoryUseCase = new ErrorHandlingDecorator(
-      CategoryUseCaseFactory.createDeleteCategoryUseCase(categoryAdapter),
-      logger
-    );
+  async getActiveCategories(): Promise<CategoryDTO[]> {
+    try {
+      this.logger.info('Getting active categories');
+      const categories = await this.getCategoriesPaginatedUseCase.execute({ page: 1, perPage: 10 });
+      return categories.data;
+    } catch (error) {
+      this.logger.error('Error getting active categories', { error });
+      throw error;
+    }
   }
 
   /**
-   * Get all categories
-   * @returns Array of category DTOs
+   * Get categories data including paginated categories and statistics
+   * @param page Page number (default: 1)
+   * @param perPage Items per page (default: 10)
+   * @returns Categories data DTO
    */
-  async getAllCategories(): Promise<CategoryDto[]> {
-    // Error handling is now managed by the decorator
-    return this.getCategoriesUseCase.execute();
-  }
+  async getCategoriesData(page: number = 1, perPage: number = 10): Promise<CategoriesDataDTO> {
+    try {
+      this.logger.info('Getting categories data', { page, perPage });
 
-  /**
-   * Get a category by slug
-   * @param slug Category slug
-   * @returns Category DTO or null if not found
-   */
-  async getCategoryBySlug(slug: string): Promise<CategoryDto | null> {
-    // Error handling is now managed by the decorator
-    return this.getCategoryBySlugUseCase.execute(slug);
+      // Get categories and stats in parallel
+      const [categoriesResult, stats] = await Promise.all([
+        this.getCategoriesPaginatedUseCase.execute({ page, perPage }),
+        this.getCategoryStatsUseCase.execute()
+      ]);
+
+      return {
+        categories: categoriesResult.data,
+        stats,
+        totalCount: categoriesResult.pagination.totalItems,
+        currentPage: categoriesResult.pagination.currentPage,
+        perPage: categoriesResult.pagination.itemsPerPage
+      };
+    } catch (error) {
+      this.logger.error('Error getting categories data', { error, page, perPage });
+      throw error;
+    }
   }
 
   /**
    * Get a category by ID
    * @param id Category ID
-   * @returns Category DTO or null if not found
+   * @returns Category DTO
    */
-  async getCategoryById(id: string): Promise<CategoryDto | null> {
-    // Error handling is now managed by the decorator
-    return this.getCategoryByIdUseCase.execute(id);
-  }
+  async getCategoryById(id: string): Promise<CategoryDTO> {
+    try {
+      this.logger.info('Getting category by ID', { id });
 
-  /**
-   * Create a new category
-   * @param categoryData Data for the new category
-   * @returns Created category as DTO
-   */
-  async createCategory(
-    categoryData: CreateCategoryInputDto
-  ): Promise<CategoryDto> {
-    // Error handling is now managed by the decorator
-    return this.createCategoryUseCase.execute(categoryData);
+      const result = await this.getCategoryByIdUseCase.execute(id);
+      return result;
+    } catch (error) {
+      this.logger.error('Error getting category by ID', { error, id });
+      throw error;
+    }
   }
+}
 
-  /**
-   * Update a category
-   * @param id Category ID
-   * @param categoryData Updated category data
-   * @returns Updated category as DTO
-   */
-  async updateCategory(
-    id: string,
-    categoryData: Partial<CreateCategoryInputDto>
-  ): Promise<CategoryDto> {
-    // Error handling is now managed by the decorator
-    return this.updateCategoryUseCase.execute({ id, data: categoryData });
-  }
-
-  /**
-   * Delete a category
-   * @param id Category ID
-   * @returns Promise<void>
-   */
-  async deleteCategory(id: string): Promise<void> {
-    // Error handling is now managed by the decorator
-    return this.deleteCategoryUseCase.execute(id);
+export class CategoryServiceFactory {
+  static create(repository: BackendCategoryRepository, logger: Logger): CategoryService {
+    const getCategoriesPaginatedUseCase = new GetCategoriesPaginatedUseCase(repository);
+    const getCategoryStatsUseCase = new GetCategoryStatsUseCase(repository);
+    const getCategoryByIdUseCase = new GetCategoryByIdUseCase(repository);
+    return new CategoryService(getCategoriesPaginatedUseCase, getCategoryStatsUseCase, getCategoryByIdUseCase, logger);
   }
 }

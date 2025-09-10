@@ -1,25 +1,15 @@
-import type { CategoryDTO } from '@/src/application/dtos/backend/categories-dto';
+import type { CategoryDTO, CreateCategoryInputDTO } from '@/src/application/dtos/backend/categories-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { CategoryMapper } from '@/src/application/mappers/backend/category-mapper';
 import type { BackendCategoryRepository } from '@/src/domain/repositories/backend/backend-category-repository';
 import { BackendCategoryError, BackendCategoryErrorType } from '@/src/domain/repositories/backend/backend-category-repository';
 
-export interface CreateCategoryUseCaseInput {
-  name: string;
-  slug: string;
-  description: string;
-  icon: string;
-  color: string;
-  isActive: boolean;
-  sortOrder: number;
-}
-
-export class CreateCategoryUseCase implements IUseCase<CreateCategoryUseCaseInput, CategoryDTO> {
+export class CreateCategoryUseCase implements IUseCase<CreateCategoryInputDTO, CategoryDTO> {
   constructor(
     private readonly categoryRepository: BackendCategoryRepository
   ) { }
 
-  async execute(input: CreateCategoryUseCaseInput): Promise<CategoryDTO> {
+  async execute(input: CreateCategoryInputDTO): Promise<CategoryDTO> {
     // Validate input
     if (!input.name) {
       throw new BackendCategoryError(

@@ -112,7 +112,9 @@ export class ShopMapper {
   private static mapShopCategories(entity: ShopEntity): ShopCategoryDTO[] {
     return entity.categories.map(category => ({
       id: category.id,
-      name: category.name
+      slug: category.slug,
+      name: category.name,
+      description: category.description
     }));
   }
 }

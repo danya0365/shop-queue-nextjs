@@ -2,6 +2,7 @@
 
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
+import { CategoryServiceFactory } from "../application/services/category-service";
 import { ProfileService } from "../application/services/profile-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { Logger } from "../domain/interfaces/logger";
@@ -10,6 +11,7 @@ import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-a
 import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { Container, createContainer } from "./container";
 
@@ -37,18 +39,21 @@ export function createClientContainer(): Container {
 
     // Create repository instances
     const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
+    const shopBackendCategoryRepository = new SupabaseShopBackendCategoryRepository(databaseDatasource, logger);
 
     // Create service instances
     const authService = new AuthService(authDatasource, logger);
     const profileService = new ProfileService(profileAdapter, logger);
     const authorizationService = new AuthorizationService(logger);
     const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
+    const categoryService = CategoryServiceFactory.create(shopBackendCategoryRepository, logger);
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
+    container.registerInstance("CategoryService", categoryService);
 
     logger.info("Client container initialized successfully");
   } catch (error) {
@@ -66,4 +71,9 @@ export function createClientContainer(): Container {
 export function getClientService<T>(token: string | symbol): T {
   const container = createClientContainer();
   return container.resolve<T>(token);
+}
+
+// get client container
+export function getClientContainer(): Container {
+  return createClientContainer();
 }
