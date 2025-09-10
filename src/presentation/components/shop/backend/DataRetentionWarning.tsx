@@ -42,20 +42,20 @@ export function DataRetentionWarning({
 
   const getWarningStyle = () => {
     if (isExpired) {
-      return 'bg-red-50 border-red-200 text-red-800';
+      return 'bg-red-50 dark:bg-red-900/40 border-red-200 dark:border-red-700 text-red-800 dark:text-red-200';
     } else if (isNearExpiry) {
-      return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      return 'bg-yellow-50 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200';
     } else if (isFreeTier) {
-      return 'bg-blue-50 border-blue-200 text-blue-800';
+      return 'bg-blue-50 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-200';
     }
-    return 'bg-gray-50 border-gray-200 text-gray-800';
+    return 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200';
   };
 
   const getIconColor = () => {
-    if (isExpired) return 'text-red-500';
-    if (isNearExpiry) return 'text-yellow-500';
-    if (isFreeTier) return 'text-blue-500';
-    return 'text-gray-500';
+    if (isExpired) return 'text-red-500 dark:text-red-400';
+    if (isNearExpiry) return 'text-yellow-500 dark:text-yellow-400';
+    if (isFreeTier) return 'text-blue-500 dark:text-blue-400';
+    return 'text-gray-500 dark:text-gray-400';
   };
 
   const getWarningMessage = () => {
@@ -100,16 +100,16 @@ export function DataRetentionWarning({
 
               {isFreeTier && (
                 <div className="mt-2">
-                  <div className="text-xs text-gray-600 mb-2">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                     การเก็บข้อมูล: {dataRetentionDays} วัน (แพ็กเกจฟรี)
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-blue-500 dark:bg-blue-400 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, (30 / dataRetentionDays) * 100)}%` }}
                     ></div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     ข้อมูลปัจจุบัน: ~30 วัน
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export function DataRetentionWarning({
               <div className="flex-shrink-0 ml-4">
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors"
                 >
                   อัปเกรด
                 </Link>
@@ -130,10 +130,10 @@ export function DataRetentionWarning({
 
           {isFreeTier && (
             <div className="mt-3 text-xs">
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 💡 <strong>อัปเกรดเพื่อรับสิทธิ์:</strong>
               </p>
-              <ul className="list-disc list-inside text-gray-600 mt-1 space-y-0.5">
+              <ul className="list-disc list-inside text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
                 <li>Pro: เก็บข้อมูล 1 ปี</li>
                 <li>Enterprise: เก็บข้อมูลไม่จำกัด</li>
               </ul>

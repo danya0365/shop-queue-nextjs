@@ -35,24 +35,24 @@ export function EmployeeLimitsWarning({ limits, usage, canAddEmployee, staffLimi
 
   return (
     <div className={`rounded-lg border p-4 mb-6 ${staffLimitReached
-        ? 'bg-red-50 border-red-200'
+        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
         : isWarning
-          ? 'bg-yellow-50 border-yellow-200'
-          : 'bg-blue-50 border-blue-200'
+          ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
       }`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center">
           <div className={`rounded-full p-2 mr-3 ${staffLimitReached
-              ? 'bg-red-100'
+              ? 'bg-red-100 dark:bg-red-900/40'
               : isWarning
-                ? 'bg-yellow-100'
-                : 'bg-blue-100'
+                ? 'bg-yellow-100 dark:bg-yellow-900/40'
+                : 'bg-blue-100 dark:bg-blue-900/40'
             }`}>
             <svg className={`w-5 h-5 ${staffLimitReached
-                ? 'text-red-600'
+                ? 'text-red-600 dark:text-red-400'
                 : isWarning
-                  ? 'text-yellow-600'
-                  : 'text-blue-600'
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-blue-600 dark:text-blue-400'
               }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {staffLimitReached ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -63,10 +63,10 @@ export function EmployeeLimitsWarning({ limits, usage, canAddEmployee, staffLimi
           </div>
           <div>
             <h3 className={`font-semibold ${staffLimitReached
-                ? 'text-red-900'
+                ? 'text-red-900 dark:text-red-100'
                 : isWarning
-                  ? 'text-yellow-900'
-                  : 'text-blue-900'
+                  ? 'text-yellow-900 dark:text-yellow-100'
+                  : 'text-blue-900 dark:text-blue-100'
               }`}>
               {staffLimitReached
                 ? 'ถึงขีดจำกัดจำนวนพนักงานแล้ว'
@@ -76,10 +76,10 @@ export function EmployeeLimitsWarning({ limits, usage, canAddEmployee, staffLimi
               }
             </h3>
             <p className={`text-sm ${staffLimitReached
-                ? 'text-red-700'
+                ? 'text-red-700 dark:text-red-200'
                 : isWarning
-                  ? 'text-yellow-700'
-                  : 'text-blue-700'
+                  ? 'text-yellow-700 dark:text-yellow-200'
+                  : 'text-blue-700 dark:text-blue-200'
               }`}>
               มีพนักงาน {usage.currentStaff} จาก {formatLimit(limits.maxStaff)} คน
               {staffLimitReached && ' - ไม่สามารถเพิ่มพนักงานใหม่ได้'}
