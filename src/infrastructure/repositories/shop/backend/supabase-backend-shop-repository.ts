@@ -378,6 +378,29 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         );
       }
 
+      const shopCategories: Record<string, unknown>[] = shop.categoryIds.map(categoryId => ({
+        shop_id: createdShop.id,
+        category_id: categoryId
+      }));
+
+      // insert opening hours
+      const openingHours: Record<string, unknown>[] = shop.openingHours?.map(hour => ({
+        shop_id: createdShop.id,
+        day_of_week: hour.dayOfWeek,
+        open_time: hour.openTime || null,
+        close_time: hour.closeTime || null,
+        is_open: hour.isOpen,
+        break_start: hour.breakStart || null,
+        break_end: hour.breakEnd || null
+      })) || [];
+
+      await Promise.all(
+        [
+          ...shopCategories.map(category => this.dataSource.insert('category_shops', category)),
+          ...openingHours.map(hour => this.dataSource.insert('shop_opening_hours', hour))
+        ]
+      );
+
       // Get the created shop with joined data
       return this.getShopById(createdShop.id) as Promise<ShopEntity>;
     } catch (error) {

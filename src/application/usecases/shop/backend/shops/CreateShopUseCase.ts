@@ -58,6 +58,8 @@ export class CreateShopUseCase implements IUseCase<CreateShopInputDTO, ShopDTO> 
         email: params.email?.trim() || '',
         ownerId: params.ownerId,
         status: ShopStatus.DRAFT,
+        categoryIds: params.categoryIds,
+
         openingHours: params.openingHours?.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
           isOpen: hour.isOpen,

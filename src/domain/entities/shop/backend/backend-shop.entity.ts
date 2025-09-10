@@ -40,6 +40,7 @@ export interface CreateShopEntity {
   email: string;
   ownerId: string;
   status: ShopStatus;
+  categoryIds: string[];
   openingHours?: OpeningHourEntity[];
 }
 
@@ -50,6 +51,13 @@ export interface UpdateShopEntity {
   phone?: string;
   email?: string;
   status?: ShopStatus;
+  timezone?: string;
+  currency?: string;
+  language?: string;
+  website?: string | null;
+  logo?: string | null;
+  qrCodeUrl?: string | null;
+  categoryIds?: string[];
   openingHours?: OpeningHourEntity[];
 }
 

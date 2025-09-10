@@ -636,11 +636,50 @@ REVOKE UPDATE ON TABLE public.shops FROM authenticated;
 GRANT INSERT (owner_id, slug, name, description, address, phone, email, status, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
 GRANT UPDATE (name, slug, description, address, phone, email, status, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
 
--- Column-level privileges for shop_activity_log
+-- Row-level privileges for shop_activity_log
 CREATE POLICY "Shop managers can view their shop activities"
     ON public.shop_activity_log FOR SELECT
     USING (public.is_shop_manager(shop_id));
 
+-- Row-level policy for shop_opening_hours for select
+CREATE POLICY "Everyone can view shop opening hours"
+    ON public.shop_opening_hours FOR SELECT
+    USING (true);
+
+-- Row-level policy for shop_opening_hours for update
+CREATE POLICY "Shop managers can update their shop opening hours"
+    ON public.shop_opening_hours FOR UPDATE
+    USING (public.is_shop_manager(shop_id));
+
+-- Row-level policy for shop_opening_hours for delete
+CREATE POLICY "Shop managers can delete their shop opening hours"
+    ON public.shop_opening_hours FOR DELETE
+    USING (public.is_shop_manager(shop_id));
+
+-- Row-level policy for shop_opening_hours for insert
+CREATE POLICY "Shop managers can insert their shop opening hours"
+    ON public.shop_opening_hours FOR INSERT
+    WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Row-level policy for category_shops for select
+CREATE POLICY "Everyone can view category shops"
+    ON public.category_shops FOR SELECT
+    USING (true);
+
+-- Row-level policy for category_shops for update
+CREATE POLICY "Shop managers can update their category shops"
+    ON public.category_shops FOR UPDATE
+    USING (public.is_shop_manager(shop_id));
+
+-- Row-level policy for category_shops for delete
+CREATE POLICY "Shop managers can delete their category shops"
+    ON public.category_shops FOR DELETE
+    USING (public.is_shop_manager(shop_id));
+
+-- Row-level policy for category_shops for insert
+CREATE POLICY "Shop managers can insert their category shops"
+    ON public.category_shops FOR INSERT
+    WITH CHECK (public.is_shop_manager(shop_id));
 
 -- Only Owner can update shop status
 CREATE OR REPLACE FUNCTION public.owner_update_shop_status(
