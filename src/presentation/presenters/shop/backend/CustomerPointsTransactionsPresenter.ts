@@ -1,8 +1,11 @@
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { CustomerPointsTransaction, CustomerPointsTransactionBackendService, CustomerPointsTransactionStats } from '@/src/application/services/shop/backend/customer-points-transactions-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define ViewModel interface
 export interface CustomerPointsTransactionsViewModel {
@@ -13,14 +16,15 @@ export interface CustomerPointsTransactionsViewModel {
 }
 
 // Main Presenter class
-export class CustomerPointsTransactionsPresenter extends BaseShopPresenter {
+export class CustomerPointsTransactionsPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly customerPointsTransactionBackendService: CustomerPointsTransactionBackendService,
-  ) {
-    super(logger, shopService);
-  }
+  ) { super(logger, shopService, authService, profileService, subscriptionService); }
 
   async getViewModel(shopId: string): Promise<CustomerPointsTransactionsViewModel> {
     try {
@@ -92,6 +96,9 @@ export class CustomerPointsTransactionsPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const customerPointsTransactionBackendService = serverContainer.resolve<CustomerPointsTransactionBackendService>('CustomerPointsTransactionBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new CustomerPointsTransactionsPresenter(logger, shopService, customerPointsTransactionBackendService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new CustomerPointsTransactionsPresenter(logger, shopService, authService, profileService, subscriptionService, customerPointsTransactionBackendService);
   }
 }

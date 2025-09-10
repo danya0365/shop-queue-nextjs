@@ -1,9 +1,12 @@
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { RewardTransaction, RewardTransactionBackendService, RewardTransactionFilters, RewardTransactionStats } from '@/src/application/services/shop/backend/reward-transactions-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { Metadata } from 'next';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 export interface RewardTransactionsViewModel {
   transactions: RewardTransaction[];
@@ -27,13 +30,16 @@ export interface TypeOption {
   description: string;
 }
 
-export class RewardTransactionsPresenter extends BaseShopPresenter {
+export class RewardTransactionsPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly rewardTransactionService: RewardTransactionBackendService,
   ) {
-    super(logger, shopService);
+    super(logger, shopService, authService, profileService, subscriptionService);
   }
 
   async getViewModel(shopId: string, filters?: RewardTransactionFilters): Promise<RewardTransactionsViewModel> {
@@ -158,7 +164,10 @@ export class RewardTransactionsPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const rewardTransactionService = serverContainer.resolve<RewardTransactionBackendService>('RewardTransactionBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new RewardTransactionsPresenter(logger, shopService, rewardTransactionService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new RewardTransactionsPresenter(logger, shopService, authService, profileService, subscriptionService, rewardTransactionService);
   }
 }
 

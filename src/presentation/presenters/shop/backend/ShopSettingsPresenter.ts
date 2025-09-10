@@ -1,8 +1,11 @@
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { ShopSettings, ShopSettingsBackendService, ShopSettingsStats } from '@/src/application/services/shop/backend/shop-settings-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 // Define ViewModel interface
 export interface ShopSettingsViewModel {
   settings: ShopSettings | null;
@@ -18,13 +21,16 @@ export interface ShopSettingsViewModel {
 }
 
 // Main Presenter class
-export class ShopSettingsPresenter extends BaseShopPresenter {
+export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly shopSettingsBackendService: ShopSettingsBackendService,
   ) {
-    super(logger, shopService);
+    super(logger, shopService, authService, profileService, subscriptionService);
   }
 
   async getViewModel(shopId: string): Promise<ShopSettingsViewModel> {
@@ -126,6 +132,9 @@ export class ShopSettingsPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const shopSettingsBackendService = serverContainer.resolve<ShopSettingsBackendService>('ShopSettingsBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new ShopSettingsPresenter(logger, shopService, shopSettingsBackendService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new ShopSettingsPresenter(logger, shopService, authService, profileService, subscriptionService, shopSettingsBackendService);
   }
 }

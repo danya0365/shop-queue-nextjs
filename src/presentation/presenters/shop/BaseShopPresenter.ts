@@ -1,6 +1,6 @@
 import { ServiceDTO } from '@/src/application/dtos/backend/services-dto';
 import { OpeningHour } from '@/src/application/dtos/shop/backend/shop-opening-hour-dto';
-import { IShopService, ShopService } from '@/src/application/services/shop/ShopService';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import type { Metadata } from 'next';
 

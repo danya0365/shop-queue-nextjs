@@ -1,9 +1,12 @@
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { QueueService, QueueServiceBackendService, QueueServiceStats } from '@/src/application/services/shop/backend/queue-services-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define ViewModel interface
 export interface QueueServicesViewModel {
@@ -15,13 +18,16 @@ export interface QueueServicesViewModel {
 }
 
 // Main Presenter class
-export class QueueServicesPresenter extends BaseShopPresenter {
+export class QueueServicesPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly queueServiceBackendService: QueueServiceBackendService,
   ) {
-    super(logger, shopService);
+    super(logger, shopService, authService, profileService, subscriptionService);
   }
 
   async getViewModel(shopId: string): Promise<QueueServicesViewModel> {
@@ -107,6 +113,9 @@ export class QueueServicesPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const queueServiceBackendService = serverContainer.resolve<QueueServiceBackendService>('QueueServiceBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new QueueServicesPresenter(logger, shopService, queueServiceBackendService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new QueueServicesPresenter(logger, shopService, authService, profileService, subscriptionService, queueServiceBackendService);
   }
 }

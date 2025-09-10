@@ -1,13 +1,12 @@
-import { AuthUserDto } from '@/src/application/dtos/auth-dto';
-import { ProfileDto } from '@/src/application/dtos/profile-dto';
 import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
 import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import type { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
-import { ShopService } from '@/src/application/services/shop/ShopService';
+import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter, ShopInfo } from '../BaseShopPresenter';
+import { ShopInfo } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define interfaces for data structures
 export interface PosterTemplate {
@@ -77,14 +76,14 @@ export interface PostersViewModel {
 }
 
 // Main Presenter class
-export class PostersPresenter extends BaseShopPresenter {
+export class PostersPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
-    shopService: ShopService,
-    private readonly subscriptionService: ISubscriptionService,
-    private readonly authService: IAuthService,
-    private readonly profileService: IProfileService,
-  ) { super(logger, shopService); }
+    shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
+  ) { super(logger, shopService, authService, profileService, subscriptionService); }
 
   async getViewModel(shopId: string): Promise<PostersViewModel> {
     try {
@@ -100,14 +99,14 @@ export class PostersPresenter extends BaseShopPresenter {
         throw new Error("Profile not found");
       }
 
-      const tier = this.subscriptionService.getTierByRole(profile.role);
-      const limits = await this.subscriptionService.getLimitsByTier(tier);
-      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
+      const usage = await this.getUsageStats(profile.id);
 
       // Check data retention limits
       const hasDataRetentionLimit = false;// limits.dataRetentionDays !== null;
       const dataRetentionDays = 365; // limits.maxDataRetentionDays || 365;
-      const isFreeTier = tier === 'free';
+      const isFreeTier = subscriptionPlan.tier === 'free';
 
       const templates = this.getPosterTemplates();
       const shopInfo = await this.getShopInfo(shopId);
@@ -313,12 +312,13 @@ export class PostersPresenter extends BaseShopPresenter {
       throw new Error("Profile not found");
     }
 
-    const tier = this.subscriptionService.getTierByRole(profile.role);
-    const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+    const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+    const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
+    const usage = await this.getUsageStats(profile.id);
 
     // Calculate poster usage
-    const maxFreePosters = tier === 'free' ? 3 : (tier === 'pro' ? 10 : 999999);
-    const hasUnlimitedPosters = tier === 'enterprise';
+    const maxFreePosters = subscriptionPlan.tier === 'free' ? 3 : (subscriptionPlan.tier === 'pro' ? 10 : 999999);
+    const hasUnlimitedPosters = subscriptionPlan.tier === 'enterprise';
     const freePostersUsed = Math.min(usage.totalPosters || 0, maxFreePosters);
     const paidPostersUsed = Math.max(0, (usage.totalPosters || 0) - maxFreePosters);
     const remainingFreePosters = Math.max(0, maxFreePosters - freePostersUsed);
@@ -333,9 +333,9 @@ export class PostersPresenter extends BaseShopPresenter {
     };
 
     return {
-      isPremium: tier !== 'free',
-      planName: tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Enterprise',
-      tier,
+      isPremium: subscriptionPlan.tier !== 'free',
+      planName: subscriptionPlan.tier === 'free' ? 'Free' : subscriptionPlan.tier === 'pro' ? 'Pro' : 'Enterprise',
+      tier: subscriptionPlan.tier,
       expiresAt: undefined,
       limits: {
         maxFreePosters,
@@ -345,26 +345,6 @@ export class PostersPresenter extends BaseShopPresenter {
     };
   }
 
-  private async getUser(): Promise<AuthUserDto | null> {
-    try {
-      return await this.authService.getCurrentUser();
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
-
-  /**
-   * Get the current authenticated user
-   */
-  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
-    try {
-      return await this.profileService.getActiveProfileByAuthId(user.id);
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
 
   /**
    * Generate metadata for the posters page
@@ -385,7 +365,7 @@ export class PostersPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
-    const shopService = serverContainer.resolve<ShopService>("ShopService");
-    return new PostersPresenter(logger, shopService, subscriptionService, authService, profileService);
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    return new PostersPresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }

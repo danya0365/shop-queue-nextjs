@@ -1,13 +1,11 @@
-import { AuthUserDto } from '@/src/application/dtos/auth-dto';
-import { ProfileDto } from '@/src/application/dtos/profile-dto';
 import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import { ISubscriptionService } from '@/src/application/interfaces/subscription-service.interface';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define interfaces for data structures
 export interface Employee {
@@ -72,14 +70,14 @@ export interface EmployeesViewModel {
 }
 
 // Main Presenter class
-export class EmployeesPresenter extends BaseShopPresenter {
+export class EmployeesPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
-    private readonly subscriptionService: ISubscriptionService,
-    private readonly authService: IAuthService,
-    private readonly profileService: IProfileService
-  ) { super(logger, shopService); }
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
+  ) { super(logger, shopService, authService, profileService, subscriptionService); }
 
   async getViewModel(shopId: string): Promise<EmployeesViewModel> {
     try {
@@ -95,9 +93,9 @@ export class EmployeesPresenter extends BaseShopPresenter {
         throw new Error("Profile not found");
       }
 
-      const tier = this.subscriptionService.getTierByRole(profile.role);
-      const limits = await this.subscriptionService.getLimitsByTier(tier);
-      const usage = await this.subscriptionService.getUsageStats(profile.id, shopId);
+      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
+      const usage = await this.getUsageStats(profile.id);
 
       // Mock data - replace with actual service calls
       const employees = this.getEmployees();
@@ -133,8 +131,6 @@ export class EmployeesPresenter extends BaseShopPresenter {
       throw error;
     }
   }
-
-
 
   // Private methods for data preparation
   private getEmployees(): Employee[] {
@@ -286,27 +282,6 @@ export class EmployeesPresenter extends BaseShopPresenter {
     ];
   }
 
-  private async getUser(): Promise<AuthUserDto | null> {
-    try {
-      return await this.authService.getCurrentUser();
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
-
-  /**
-   * Get the current authenticated user
-   */
-  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
-    try {
-      return await this.profileService.getActiveProfileByAuthId(user.id);
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
-
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
@@ -326,6 +301,6 @@ export class EmployeesPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new EmployeesPresenter(logger, shopService, subscriptionService, authService, profileService);
+    return new EmployeesPresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }

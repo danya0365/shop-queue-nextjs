@@ -1,8 +1,11 @@
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { Service, ServicesBackendService } from '@/src/application/services/shop/backend/services-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define ViewModel interface
 export interface ServicesViewModel {
@@ -14,13 +17,16 @@ export interface ServicesViewModel {
 }
 
 // Main Presenter class
-export class ServicesPresenter extends BaseShopPresenter {
+export class ServicesPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly servicesBackendService: ServicesBackendService,
   ) {
-    super(logger, shopService);
+    super(logger, shopService, authService, profileService, subscriptionService);
   }
 
   async getViewModel(shopId: string): Promise<ServicesViewModel> {
@@ -68,6 +74,9 @@ export class ServicesPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const servicesBackendService = serverContainer.resolve<ServicesBackendService>('ServicesBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new ServicesPresenter(logger, shopService, servicesBackendService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new ServicesPresenter(logger, shopService, authService, profileService, subscriptionService, servicesBackendService);
   }
 }

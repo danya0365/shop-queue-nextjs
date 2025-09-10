@@ -1,10 +1,13 @@
 import { OpeningHour } from '@/src/application/dtos/shop/backend/shop-opening-hour-dto';
+import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { OpeningHoursBackendService } from '@/src/application/services/shop/backend/opening-hours-backend-service';
 import { IShopService } from '@/src/application/services/shop/ShopService';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { Metadata } from 'next';
-import { BaseShopPresenter } from '../BaseShopPresenter';
+import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
 // Define ViewModel interface
 export interface OpeningHoursViewModel {
@@ -18,13 +21,16 @@ export interface OpeningHoursViewModel {
 }
 
 // Main Presenter class
-export class OpeningHoursPresenter extends BaseShopPresenter {
+export class OpeningHoursPresenter extends BaseShopBackendPresenter {
   constructor(
     logger: Logger,
     shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
     private readonly openingHoursBackendService: OpeningHoursBackendService,
   ) {
-    super(logger, shopService);
+    super(logger, shopService, authService, profileService, subscriptionService);
   }
 
   async getViewModel(shopId: string): Promise<OpeningHoursViewModel> {
@@ -106,6 +112,9 @@ export class OpeningHoursPresenterFactory {
     const logger = serverContainer.resolve<Logger>('Logger');
     const openingHoursBackendService = serverContainer.resolve<OpeningHoursBackendService>('OpeningHoursBackendService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new OpeningHoursPresenter(logger, shopService, openingHoursBackendService);
+    const authService = serverContainer.resolve<IAuthService>('AuthService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new OpeningHoursPresenter(logger, shopService, authService, profileService, subscriptionService, openingHoursBackendService);
   }
 }
