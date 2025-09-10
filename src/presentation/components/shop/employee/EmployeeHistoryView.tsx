@@ -82,91 +82,63 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">ประวัติการให้บริการ</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">ดูประวัติและสถิติการทำงานของคุณ</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-600 dark:text-gray-400">พนักงาน</p>
-                <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                  {viewModel.employeeName}
-                </p>
-              </div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">ประวัติการให้บริการ</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูประวัติและสถิติการทำงานของคุณ • พนักงาน: {viewModel.employeeName}</p>
+        </div>
+      </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คิวทั้งหมดวันนี้</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{viewModel.currentStats.totalQueues}</p>
             </div>
+            <span className="text-3xl">👥</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">เสร็จสิ้น</p>
+              <p className="text-2xl font-bold text-green-600">{viewModel.currentStats.completedQueues}</p>
+            </div>
+            <span className="text-3xl">✅</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">ยอดขายวันนี้</p>
+              <p className="text-2xl font-bold text-yellow-600">฿{viewModel.currentStats.totalRevenue.toLocaleString()}</p>
+            </div>
+            <span className="text-3xl">💰</span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คะแนนเฉลี่ย</p>
+              <p className="text-2xl font-bold text-purple-600">{viewModel.currentStats.averageRating.toFixed(1)}</p>
+            </div>
+            <span className="text-3xl">⭐</span>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
-                <span className="text-2xl">👥</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">คิวทั้งหมดวันนี้</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {viewModel.currentStats.totalQueues}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-lg">
-                <span className="text-2xl">✅</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">เสร็จสิ้น</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {viewModel.currentStats.completedQueues}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
-                <span className="text-2xl">💰</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ยอดขายวันนี้</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  ฿{viewModel.currentStats.totalRevenue.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">คะแนนเฉลี่ย</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {viewModel.currentStats.averageRating.toFixed(1)}
-                </p>
-              </div>
-            </div>
-          </div>
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">ตัวกรอง</h3>
         </div>
-
-        {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">ตัวกรอง</h3>
+        <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -201,109 +173,109 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
             </div>
 
             <div className="flex items-end">
-              <button className="w-full bg-blue-600 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors">
+              <button className="w-full bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
                 ค้นหา
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* History List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-              ประวัติการให้บริการ ({viewModel.historyQueues.length})
-            </h3>
-          </div>
+      {/* History List */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            ประวัติการให้บริการ ({viewModel.historyQueues.length})
+          </h2>
+        </div>
 
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {viewModel.historyQueues.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-6xl mb-4">📋</div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  ไม่มีประวัติการให้บริการ
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">ประวัติการให้บริการจะแสดงที่นี่</p>
-              </div>
-            ) : (
-              viewModel.historyQueues.map((queue) => (
-                <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 text-sm font-medium px-2.5 py-0.5 rounded">
-                          คิว {queue.queueNumber}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(queue.status)}`}>
-                          {getStatusText(queue.status)}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {queue.servedAt} - {queue.completedAt}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          ({queue.duration} นาที)
-                        </span>
-                      </div>
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {viewModel.historyQueues.length === 0 ? (
+            <div className="text-center py-12">
+              <span className="text-8xl mb-6 block">📋</span>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                ไม่มีประวัติการให้บริการ
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">ประวัติการให้บริการจะแสดงที่นี่</p>
+            </div>
+          ) : (
+            viewModel.historyQueues.map((queue) => (
+              <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 text-sm font-medium px-2.5 py-0.5 rounded">
+                        คิว {queue.queueNumber}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(queue.status)}`}>
+                        {getStatusText(queue.status)}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {queue.servedAt} - {queue.completedAt}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        ({queue.duration} นาที)
+                      </span>
+                    </div>
 
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
-                        {queue.customerName}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {queue.customerPhone}
-                      </p>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      {queue.customerName}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      {queue.customerPhone}
+                    </p>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        <span>฿{queue.total.toLocaleString()}</span>
-                        <span className="flex items-center gap-1">
-                          {getPaymentMethodIcon(queue.paymentMethod)}
-                          {getPaymentMethodText(queue.paymentMethod)}
-                        </span>
-                        {queue.rating && (
-                          <div className="flex items-center gap-1">
-                            {renderStars(queue.rating)}
-                            <span className="ml-1">({queue.rating})</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {queue.services.map((service, index) => (
-                          <span key={service.id}>
-                            {service.name} x{service.quantity}
-                            {index < queue.services.length - 1 && ', '}
-                          </span>
-                        ))}
-                      </div>
-
-                      {queue.feedback && (
-                        <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm text-gray-600 dark:text-gray-400">
-                          💬 {queue.feedback}
+                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <span>฿{queue.total.toLocaleString()}</span>
+                      <span className="flex items-center gap-1">
+                        {getPaymentMethodIcon(queue.paymentMethod)}
+                        {getPaymentMethodText(queue.paymentMethod)}
+                      </span>
+                      {queue.rating && (
+                        <div className="flex items-center gap-1">
+                          {renderStars(queue.rating)}
+                          <span className="ml-1">({queue.rating})</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="ml-4">
-                      <button
-                        onClick={() => handleViewDetails(queue)}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
-                      >
-                        ดูรายละเอียด
-                      </button>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {queue.services.map((service, index) => (
+                        <span key={service.id}>
+                          {service.name} x{service.quantity}
+                          {index < queue.services.length - 1 && ', '}
+                        </span>
+                      ))}
                     </div>
+
+                    {queue.feedback && (
+                      <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm text-gray-600 dark:text-gray-400">
+                        💬 {queue.feedback}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="ml-4">
+                    <button
+                      onClick={() => handleViewDetails(queue)}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+                    >
+                      ดูรายละเอียด
+                    </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
       {/* Details Modal */}
       {showDetailsModal && selectedQueue && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 รายละเอียดคิว {selectedQueue.queueNumber}
               </h3>
               <button
@@ -383,7 +355,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="px-4 py-2 bg-gray-600 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors"
               >
                 ปิด
               </button>
