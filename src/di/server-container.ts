@@ -20,6 +20,7 @@ import { ServicesBackendService } from "../application/services/shop/backend/ser
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { SubscriptionServiceFactory } from "../application/services/subscription-service";
+import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -75,6 +76,15 @@ export async function createServerContainer(): Promise<Container> {
     const subscriptionService = SubscriptionServiceFactory.create(
       logger
     );
+    
+    // Create backend subscription service
+    const backendSubscriptionService = SubscriptionBackendSubscriptionServiceFactory.create(
+      subscriptionPlanRepository,
+      profileSubscriptionRepository,
+      subscriptionUsageRepository,
+      featureAccessRepository,
+      logger
+    );
 
     // Shop Backend services
     const posterTemplateBackendService = new PosterTemplateBackendService(logger);
@@ -99,6 +109,7 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
     container.registerInstance("SubscriptionService", subscriptionService);
+    container.registerInstance("SubscriptionBackendSubscriptionService", backendSubscriptionService);
 
     // Shop Backend services
     container.registerInstance("ShopBackendShopsService", shopBackendShopsService);

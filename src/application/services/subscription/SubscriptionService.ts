@@ -9,6 +9,7 @@ import type {
 
 // Subscription Plan Use Cases
 import { GetSubscriptionPlanByIdUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionPlanByIdUseCase';
+import { GetSubscriptionByProfileIdUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionByProfileIdUseCase';
 import { GetSubscriptionPlansPaginatedUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionPlansPaginatedUseCase';
 
 // Profile Subscription Use Cases
@@ -66,6 +67,7 @@ export interface ISubscriptionBackendSubscriptionService {
   // Subscription Plans
   getSubscriptionPlansPaginated(page?: number, perPage?: number): Promise<PaginatedSubscriptionPlansDTO>;
   getSubscriptionPlanById(id: string): Promise<SubscriptionPlanDTO>;
+  getSubscriptionByProfileId(profileId: string): Promise<SubscriptionPlanDTO>;
 
   // Profile Subscriptions - Internal use only, should not be exposed to business logic
   getProfileSubscriptionsPaginated(page?: number, perPage?: number, profileId?: string): Promise<PaginatedProfileSubscriptionsDTO>;
@@ -96,6 +98,7 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
     // Subscription Plan Use Cases
     private readonly getSubscriptionPlansPaginatedUseCase: IUseCase<GetSubscriptionPlansPaginatedInputDTO, PaginatedSubscriptionPlansDTO>,
     private readonly getSubscriptionPlanByIdUseCase: IUseCase<string, SubscriptionPlanDTO>,
+    private readonly getSubscriptionByProfileIdUseCase: IUseCase<string, SubscriptionPlanDTO>,
 
     // Profile Subscription Use Cases
     private readonly getProfileSubscriptionsPaginatedUseCase: IUseCase<GetProfileSubscriptionsPaginatedInputDTO, PaginatedProfileSubscriptionsDTO>,
@@ -148,6 +151,21 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
       return result;
     } catch (error) {
       this.logger.error('Error getting subscription plan by ID', { error, id });
+      throw error;
+    }
+  }
+
+  /**
+   * Get subscription by profile ID
+   */
+  async getSubscriptionByProfileId(profileId: string): Promise<SubscriptionPlanDTO> {
+    try {
+      this.logger.info('Getting subscription by profile ID', { profileId });
+
+      const result = await this.getSubscriptionByProfileIdUseCase.execute(profileId);
+      return result;
+    } catch (error) {
+      this.logger.error('Error getting subscription by profile ID', { error, profileId });
       throw error;
     }
   }
@@ -472,6 +490,7 @@ export class SubscriptionBackendSubscriptionServiceFactory {
     // Create Subscription Plan Use Cases
     const getSubscriptionPlansPaginatedUseCase = new GetSubscriptionPlansPaginatedUseCase(subscriptionPlanRepository);
     const getSubscriptionPlanByIdUseCase = new GetSubscriptionPlanByIdUseCase(subscriptionPlanRepository);
+    const getSubscriptionByProfileIdUseCase = new GetSubscriptionByProfileIdUseCase(profileSubscriptionRepository, subscriptionPlanRepository);
 
     // Create Profile Subscription Use Cases
     const getProfileSubscriptionsPaginatedUseCase = new GetProfileSubscriptionsPaginatedUseCase(profileSubscriptionRepository);
@@ -497,6 +516,7 @@ export class SubscriptionBackendSubscriptionServiceFactory {
       // Subscription Plan Use Cases
       getSubscriptionPlansPaginatedUseCase,
       getSubscriptionPlanByIdUseCase,
+      getSubscriptionByProfileIdUseCase,
 
       // Profile Subscription Use Cases
       getProfileSubscriptionsPaginatedUseCase,
