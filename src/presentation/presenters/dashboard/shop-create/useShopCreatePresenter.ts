@@ -1,11 +1,11 @@
-import { IShopService } from '@/src/application/services/shop/ShopService';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { IShopService } from '@/src/application/services/shop/ShopService';
 import { getClientContainer } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { isLocalDevelopment } from '@/src/utils/environment';
 import { getMockShopData } from '@/src/utils/mock-data';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const clientContainer = getClientContainer();
 const shopService = clientContainer.resolve<IShopService>('ShopService');
@@ -176,6 +176,8 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
         return false;
       }
 
+      logger.info('ShopCreatePresenter: Current profile', { profile: currentProfile });
+
       // Map form data to CreateShopInputDTO format
       const createShopData = {
         name: data.name,
@@ -189,6 +191,14 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
       };
 
       logger.info('ShopCreatePresenter: Creating shop', { shopData: createShopData });
+
+      const allShops = await shopService.getShopsByOwnerId(currentProfile.id);
+      logger.info('ShopCreatePresenter: All shops', { shops: allShops });
+
+      if (allShops.length >= 5) {
+        setError('คุณไม่สามารถสร้างร้านค้าเพิ่มเติมได้เนื่องจากคุณมีร้านค้าครบแล้ว');
+        return false;
+      }
 
       // Call the service with properly mapped data
       await shopService.createShop(createShopData);

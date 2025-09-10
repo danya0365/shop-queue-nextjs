@@ -63,7 +63,7 @@ CREATE TABLE shops (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     owner_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
+    slug TEXT UNIQUE,
     description TEXT,
     address TEXT,
     phone TEXT,
@@ -613,10 +613,10 @@ CREATE POLICY "Shops are viewable by everyone"
 -- Only authenticated users can create shops
 CREATE POLICY "Authenticated users can create shops"
   ON public.shops FOR INSERT
-  WITH CHECK (
-    auth.role() = 'authenticated'
-    AND owner_id = public.get_active_profile_id()
-  );
+  WITH CHECK (auth.uid() IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE auth_id = auth.uid() AND id = owner_id AND is_active = true
+  ));
 
 -- Only shop managers can update their shops
 CREATE POLICY "Shop managers can update their shops"
@@ -633,8 +633,8 @@ CREATE POLICY "Shop managers can delete their shops"
 -- Remove broad INSERT/UPDATE privileges then grant only allowed columns to authenticated users
 REVOKE INSERT ON TABLE public.shops FROM authenticated;
 REVOKE UPDATE ON TABLE public.shops FROM authenticated;
-GRANT INSERT (owner_id, name, description, address, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
-GRANT UPDATE (name, description, address, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
+GRANT INSERT (owner_id, slug, name, description, address, phone, email, status, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
+GRANT UPDATE (name, slug, description, address, phone, email, status, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
 
 -- Column-level privileges for shop_activity_log
 CREATE POLICY "Shop managers can view their shop activities"
