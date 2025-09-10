@@ -399,22 +399,24 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                               />
                             </div>
                           )}
-                          
-                          <div className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={hours.hasBreak}
-                              onChange={(e) => handleOperatingHoursChange(day, 'hasBreak', e.target.checked)}
-                              className="rounded border-border text-primary focus:ring-primary"
-                              id={`${day}-break`}
-                              disabled={hours.is24Hours}
-                            />
-                            <label htmlFor={`${day}-break`} className="text-sm text-muted ml-2">
-                              มีเวลาพัก
-                            </label>
-                          </div>
-                          
-                          {hours.hasBreak && (
+
+                          {!hours.is24Hours && (
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={hours.hasBreak}
+                                onChange={(e) => handleOperatingHoursChange(day, 'hasBreak', e.target.checked)}
+                                className="rounded border-border text-primary focus:ring-primary"
+                                id={`${day}-break`}
+                                disabled={hours.is24Hours}
+                              />
+                              <label htmlFor={`${day}-break`} className="text-sm text-muted ml-2">
+                                มีเวลาพัก
+                              </label>
+                            </div>
+                          )}
+
+                          {!hours.is24Hours && hours.hasBreak && (
                             <div className="flex items-center">
                               <div className="w-12"></div>
                               <input
