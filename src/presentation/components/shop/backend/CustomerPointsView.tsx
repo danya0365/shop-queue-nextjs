@@ -95,16 +95,12 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            จัดการแต้มลูกค้า
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            จัดการแต้มสะสมลูกค้า ระบบสมาชิก และสิทธิพิเศษ
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการแต้มลูกค้า</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูและจัดการแต้มสะสมของลูกค้าทั้งหมด</p>
         </div>
         <button
           onClick={() => setShowAddPointsModal(true)}
@@ -116,8 +112,8 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">สมาชิกทั้งหมด</p>
@@ -129,7 +125,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่แจกแล้ว</p>
@@ -141,7 +137,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่ใช้แล้ว</p>
@@ -153,7 +149,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">เฉลี่ยต่อคน</p>
@@ -165,7 +161,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">สมาชิกทอง+</p>

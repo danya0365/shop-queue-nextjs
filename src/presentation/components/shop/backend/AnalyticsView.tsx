@@ -38,40 +38,31 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">รายงานและวิเคราะห์</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">ดูสถิติและประสิทธิภาพของร้านค้า</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <select
-                  value={filters.dateRange}
-                  onChange={(e) => setFilters({ ...filters, dateRange: e.target.value as AnalyticsFilters['dateRange'] })}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="today">วันนี้</option>
-                  <option value="week">สัปดาห์นี้</option>
-                  <option value="month">เดือนนี้</option>
-                  <option value="quarter">ไตรมาสนี้</option>
-                  <option value="year">ปีนี้</option>
-                  <option value="custom">กำหนดเอง</option>
-                </select>
-                <button className="bg-blue-600 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors">
-                  ส่งออกรายงาน
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">รายงานและวิเคราะห์</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูสถิติและประสิทธิภาพของร้านค้า</p>
+        </div>
+        <div className="flex space-x-4">
+          <select
+            value={filters.dateRange}
+            onChange={(e) => setFilters({ ...filters, dateRange: e.target.value as AnalyticsFilters['dateRange'] })}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          >
+            <option value="today">วันนี้</option>
+            <option value="week">สัปดาห์นี้</option>
+            <option value="month">เดือนนี้</option>
+            <option value="quarter">ไตรมาสนี้</option>
+            <option value="year">ปีนี้</option>
+            <option value="custom">กำหนดเอง</option>
+          </select>
+          <button className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+            ส่งออกรายงาน
+          </button>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Data Retention Warning */}
         <DataRetentionWarning 
           limits={viewModel.subscription.limits}
@@ -81,9 +72,9 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
           isFreeTier={viewModel.subscription.isFreeTier}
         />
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ยอดขายรวม</p>
@@ -163,10 +154,10 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 relative">
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 relative">
           {/* Free Tier Blur Overlay */}
           {viewModel.subscription.isFreeTier && (
             <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
@@ -233,7 +224,7 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
             <div className="p-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Revenue Chart Placeholder */}
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">ยอดขายรายวัน</h3>
                   <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
                     <div className="text-center">
@@ -247,7 +238,7 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
                 </div>
 
                 {/* Peak Hours */}
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">ช่วงเวลาที่มีลูกค้ามาก</h3>
                   <div className="space-y-3">
                     {viewModel.customerInsights.peakHours
@@ -350,7 +341,7 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">ประสิทธิภาพพนักงาน</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {viewModel.employeePerformance.map((employee) => (
-                  <div key={employee.employeeId} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                  <div key={employee.employeeId} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                         {employee.employeeName}
@@ -466,7 +457,6 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
               </div>
             </div>
           )}
-        </div>
       </div>
     </div>
   );

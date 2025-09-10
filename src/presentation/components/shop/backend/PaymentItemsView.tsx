@@ -67,22 +67,18 @@ export function PaymentItemsView({ viewModel }: PaymentItemsViewProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            จัดการรายการชำระเงิน
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            จัดการรายการบริการที่ชำระเงิน ดูสถิติการขาย และรายได้
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">รายการชำระเงิน</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูรายการสินค้าและบริการที่ลูกค้าชำระเงิน</p>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">รายการทั้งหมด</p>

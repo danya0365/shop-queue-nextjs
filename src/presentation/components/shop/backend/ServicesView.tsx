@@ -37,29 +37,26 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            จัดการบริการ
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            จัดการบริการของร้าน เพิ่ม แก้ไข และตั้งค่าบริการต่างๆ
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการบริการ</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการบริการที่ให้ลูกค้า ราคา และเวลาในการให้บริการ</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-        >
-          <span>➕</span>
-          เพิ่มบริการใหม่
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+          >
+            🛎️ เพิ่มบริการใหม่
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">บริการทั้งหมด</p>
@@ -109,7 +106,8 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
@@ -138,10 +136,14 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
             </select>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Services Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">รายการบริการ ({filteredServices.length})</h2>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">

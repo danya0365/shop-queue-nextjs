@@ -36,12 +36,12 @@ export default function NotificationSettingsView({ viewModel }: NotificationSett
   const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">การตั้งค่าการแจ้งเตือน</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการการแจ้งเตือนทาง SMS, Email, LINE Notify และ Push Notification</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">การตั้งค่าการแจ้งเตือน</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการการแจ้งเตือนต่างๆ ของระบบ</p>
         </div>
         <div className="flex space-x-3">
           <button
@@ -63,69 +63,29 @@ export default function NotificationSettingsView({ viewModel }: NotificationSett
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
-              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ส่งทั้งหมด</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalSent.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-lg">
-              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ส่งสำเร็จ</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalDelivered.toLocaleString()}</p>
+      {/* Notification Categories */}
+      <div className="space-y-6">
+        {viewModel.categories.map((category) => (
+          <div key={category.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ส่งทั้งหมด</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalSent.toLocaleString()}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg">
-              <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ส่งไม่สำเร็จ</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalFailed.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
-              <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">อัตราสำเร็จ</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.deliveryRate.toFixed(1)}%</p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Category Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">ประเภทการแจ้งเตือน</h3>
             </div>
@@ -160,7 +120,7 @@ export default function NotificationSettingsView({ viewModel }: NotificationSett
 
         {/* Settings Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">

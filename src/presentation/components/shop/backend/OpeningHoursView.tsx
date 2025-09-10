@@ -54,28 +54,25 @@ export function OpeningHoursView({ viewModel }: OpeningHoursViewProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            จัดการเวลาเปิด-ปิด
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            จัดการเวลาทำการของร้าน กำหนดวันเวลาเปิด-ปิด และเวลาพักเบรก
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">เวลาทำการ</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการเวลาทำการของร้านและวันหยุด</p>
         </div>
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-            editMode 
-              ? 'bg-gray-600 hover:bg-gray-700 text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-          }`}
-        >
-          <span>{editMode ? '📝' : '⚙️'}</span>
-          {editMode ? 'ยกเลิกแก้ไข' : 'แก้ไขเวลาทำการ'}
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              editMode
+                ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                : 'bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700'
+            }`}
+          >
+            {editMode ? '💾 บันทึก' : '✏️ แก้ไข'}
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
@@ -129,8 +126,8 @@ export function OpeningHoursView({ viewModel }: OpeningHoursViewProps) {
         </div>
       </div>
 
-      {/* Weekly Schedule */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      {/* Opening Hours */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             ตารางเวลาทำการประจำสัปดาห์

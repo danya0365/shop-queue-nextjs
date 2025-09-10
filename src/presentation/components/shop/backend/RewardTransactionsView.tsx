@@ -51,12 +51,12 @@ export default function RewardTransactionsView({ viewModel }: RewardTransactions
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">ประวัติการแลกรางวัล</h1>
-          <p className="text-gray-600 mt-1">จัดการและติดตามประวัติการแลกรางวัลของลูกค้า</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">ประวัติการแลกรางวัล</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูประวัติการแลกเปลี่ยนรางวัลของลูกค้า</p>
         </div>
         <div className="flex space-x-3">
           <button
@@ -72,8 +72,8 @@ export default function RewardTransactionsView({ viewModel }: RewardTransactions
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
