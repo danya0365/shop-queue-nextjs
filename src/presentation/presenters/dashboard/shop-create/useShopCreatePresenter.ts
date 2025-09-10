@@ -18,58 +18,65 @@ const mapOperatingHoursToOpeningHours = (operatingHours: ShopCreateData['operati
     {
       dayOfWeek: 'monday',
       isOpen: !operatingHours.monday.closed,
-      openTime: operatingHours.monday.closed ? undefined : operatingHours.monday.openTime,
-      closeTime: operatingHours.monday.closed ? undefined : operatingHours.monday.closeTime,
-      breakStart: operatingHours.monday.closed || !operatingHours.monday.hasBreak ? undefined : operatingHours.monday.breakStart,
-      breakEnd: operatingHours.monday.closed || !operatingHours.monday.hasBreak ? undefined : operatingHours.monday.breakEnd
+      openTime: operatingHours.monday.closed || operatingHours.monday.is24Hours ? undefined : operatingHours.monday.openTime,
+      closeTime: operatingHours.monday.closed || operatingHours.monday.is24Hours ? undefined : operatingHours.monday.closeTime,
+      breakStart: operatingHours.monday.closed || operatingHours.monday.is24Hours || !operatingHours.monday.hasBreak ? undefined : operatingHours.monday.breakStart,
+      breakEnd: operatingHours.monday.closed || operatingHours.monday.is24Hours || !operatingHours.monday.hasBreak ? undefined : operatingHours.monday.breakEnd,
+      is24Hours: !operatingHours.monday.closed && operatingHours.monday.is24Hours
     },
     {
       dayOfWeek: 'tuesday',
       isOpen: !operatingHours.tuesday.closed,
-      openTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.openTime,
-      closeTime: operatingHours.tuesday.closed ? undefined : operatingHours.tuesday.closeTime,
-      breakStart: operatingHours.tuesday.closed || !operatingHours.tuesday.hasBreak ? undefined : operatingHours.tuesday.breakStart,
-      breakEnd: operatingHours.tuesday.closed || !operatingHours.tuesday.hasBreak ? undefined : operatingHours.tuesday.breakEnd
+      openTime: operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours ? undefined : operatingHours.tuesday.openTime,
+      closeTime: operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours ? undefined : operatingHours.tuesday.closeTime,
+      breakStart: operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours || !operatingHours.tuesday.hasBreak ? undefined : operatingHours.tuesday.breakStart,
+      breakEnd: operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours || !operatingHours.tuesday.hasBreak ? undefined : operatingHours.tuesday.breakEnd,
+      is24Hours: !operatingHours.tuesday.closed && operatingHours.tuesday.is24Hours
     },
     {
       dayOfWeek: 'wednesday',
       isOpen: !operatingHours.wednesday.closed,
-      openTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.openTime,
-      closeTime: operatingHours.wednesday.closed ? undefined : operatingHours.wednesday.closeTime,
-      breakStart: operatingHours.wednesday.closed || !operatingHours.wednesday.hasBreak ? undefined : operatingHours.wednesday.breakStart,
-      breakEnd: operatingHours.wednesday.closed || !operatingHours.wednesday.hasBreak ? undefined : operatingHours.wednesday.breakEnd
+      openTime: operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours ? undefined : operatingHours.wednesday.openTime,
+      closeTime: operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours ? undefined : operatingHours.wednesday.closeTime,
+      breakStart: operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours || !operatingHours.wednesday.hasBreak ? undefined : operatingHours.wednesday.breakStart,
+      breakEnd: operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours || !operatingHours.wednesday.hasBreak ? undefined : operatingHours.wednesday.breakEnd,
+      is24Hours: !operatingHours.wednesday.closed && operatingHours.wednesday.is24Hours
     },
     {
       dayOfWeek: 'thursday',
       isOpen: !operatingHours.thursday.closed,
-      openTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.openTime,
-      closeTime: operatingHours.thursday.closed ? undefined : operatingHours.thursday.closeTime,
-      breakStart: operatingHours.thursday.closed || !operatingHours.thursday.hasBreak ? undefined : operatingHours.thursday.breakStart,
-      breakEnd: operatingHours.thursday.closed || !operatingHours.thursday.hasBreak ? undefined : operatingHours.thursday.breakEnd
+      openTime: operatingHours.thursday.closed || operatingHours.thursday.is24Hours ? undefined : operatingHours.thursday.openTime,
+      closeTime: operatingHours.thursday.closed || operatingHours.thursday.is24Hours ? undefined : operatingHours.thursday.closeTime,
+      breakStart: operatingHours.thursday.closed || operatingHours.thursday.is24Hours || !operatingHours.thursday.hasBreak ? undefined : operatingHours.thursday.breakStart,
+      breakEnd: operatingHours.thursday.closed || operatingHours.thursday.is24Hours || !operatingHours.thursday.hasBreak ? undefined : operatingHours.thursday.breakEnd,
+      is24Hours: !operatingHours.thursday.closed && operatingHours.thursday.is24Hours
     },
     {
       dayOfWeek: 'friday',
       isOpen: !operatingHours.friday.closed,
-      openTime: operatingHours.friday.closed ? undefined : operatingHours.friday.openTime,
-      closeTime: operatingHours.friday.closed ? undefined : operatingHours.friday.closeTime,
-      breakStart: operatingHours.friday.closed || !operatingHours.friday.hasBreak ? undefined : operatingHours.friday.breakStart,
-      breakEnd: operatingHours.friday.closed || !operatingHours.friday.hasBreak ? undefined : operatingHours.friday.breakEnd
+      openTime: operatingHours.friday.closed || operatingHours.friday.is24Hours ? undefined : operatingHours.friday.openTime,
+      closeTime: operatingHours.friday.closed || operatingHours.friday.is24Hours ? undefined : operatingHours.friday.closeTime,
+      breakStart: operatingHours.friday.closed || operatingHours.friday.is24Hours || !operatingHours.friday.hasBreak ? undefined : operatingHours.friday.breakStart,
+      breakEnd: operatingHours.friday.closed || operatingHours.friday.is24Hours || !operatingHours.friday.hasBreak ? undefined : operatingHours.friday.breakEnd,
+      is24Hours: !operatingHours.friday.closed && operatingHours.friday.is24Hours
     },
     {
       dayOfWeek: 'saturday',
       isOpen: !operatingHours.saturday.closed,
-      openTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.openTime,
-      closeTime: operatingHours.saturday.closed ? undefined : operatingHours.saturday.closeTime,
-      breakStart: operatingHours.saturday.closed || !operatingHours.saturday.hasBreak ? undefined : operatingHours.saturday.breakStart,
-      breakEnd: operatingHours.saturday.closed || !operatingHours.saturday.hasBreak ? undefined : operatingHours.saturday.breakEnd
+      openTime: operatingHours.saturday.closed || operatingHours.saturday.is24Hours ? undefined : operatingHours.saturday.openTime,
+      closeTime: operatingHours.saturday.closed || operatingHours.saturday.is24Hours ? undefined : operatingHours.saturday.closeTime,
+      breakStart: operatingHours.saturday.closed || operatingHours.saturday.is24Hours || !operatingHours.saturday.hasBreak ? undefined : operatingHours.saturday.breakStart,
+      breakEnd: operatingHours.saturday.closed || operatingHours.saturday.is24Hours || !operatingHours.saturday.hasBreak ? undefined : operatingHours.saturday.breakEnd,
+      is24Hours: !operatingHours.saturday.closed && operatingHours.saturday.is24Hours
     },
     {
       dayOfWeek: 'sunday',
       isOpen: !operatingHours.sunday.closed,
-      openTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.openTime,
-      closeTime: operatingHours.sunday.closed ? undefined : operatingHours.sunday.closeTime,
-      breakStart: operatingHours.sunday.closed || !operatingHours.sunday.hasBreak ? undefined : operatingHours.sunday.breakStart,
-      breakEnd: operatingHours.sunday.closed || !operatingHours.sunday.hasBreak ? undefined : operatingHours.sunday.breakEnd
+      openTime: operatingHours.sunday.closed || operatingHours.sunday.is24Hours ? undefined : operatingHours.sunday.openTime,
+      closeTime: operatingHours.sunday.closed || operatingHours.sunday.is24Hours ? undefined : operatingHours.sunday.closeTime,
+      breakStart: operatingHours.sunday.closed || operatingHours.sunday.is24Hours || !operatingHours.sunday.hasBreak ? undefined : operatingHours.sunday.breakStart,
+      breakEnd: operatingHours.sunday.closed || operatingHours.sunday.is24Hours || !operatingHours.sunday.hasBreak ? undefined : operatingHours.sunday.breakEnd,
+      is24Hours: !operatingHours.sunday.closed && operatingHours.sunday.is24Hours
     }
   ];
 };
@@ -84,13 +91,13 @@ export interface ShopCreateData {
   email: string;
   website?: string;
   operatingHours: {
-    monday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    tuesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    wednesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    thursday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    friday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    saturday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
-    sunday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean };
+    monday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    tuesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    wednesday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    thursday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    friday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    saturday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
+    sunday: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; closed: boolean; hasBreak: boolean; is24Hours: boolean };
   };
 }
 

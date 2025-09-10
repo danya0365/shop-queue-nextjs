@@ -27,13 +27,13 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
       email: '',
       website: '',
       operatingHours: {
-        monday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        friday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        saturday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
-        sunday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: true, hasBreak: false },
+        monday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        friday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        saturday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false, is24Hours: false },
+        sunday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: true, hasBreak: false, is24Hours: false },
       }
     };
   };
@@ -52,7 +52,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
     }
   };
 
-  const handleOperatingHoursChange = (day: string, field: 'openTime' | 'closeTime' | 'breakStart' | 'breakEnd' | 'closed' | 'hasBreak', value: string | boolean) => {
+  const handleOperatingHoursChange = (day: string, field: 'openTime' | 'closeTime' | 'breakStart' | 'breakEnd' | 'closed' | 'hasBreak' | 'is24Hours', value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       operatingHours: {
@@ -369,21 +369,36 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                       !hours.closed && (
                         <div className="ml-20 space-y-3">
                           <div className="flex items-center">
-                            <div className="w-12 text-sm text-muted">เปิด</div>
                             <input
-                              type="time"
-                              value={hours.openTime}
-                              onChange={(e) => handleOperatingHoursChange(day, 'openTime', e.target.value)}
-                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              type="checkbox"
+                              checked={hours.is24Hours}
+                              onChange={(e) => handleOperatingHoursChange(day, 'is24Hours', e.target.checked)}
+                              className="rounded border-border text-primary focus:ring-primary"
+                              id={`${day}-24hours`}
                             />
-                            <div className="w-12 text-sm text-muted text-center">ถึง</div>
-                            <input
-                              type="time"
-                              value={hours.closeTime}
-                              onChange={(e) => handleOperatingHoursChange(day, 'closeTime', e.target.value)}
-                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                            />
+                            <label htmlFor={`${day}-24hours`} className="text-sm text-muted ml-2">
+                              เปิด 24 ชั่วโมง
+                            </label>
                           </div>
+
+                          {!hours.is24Hours && (
+                            <div className="flex items-center">
+                              <div className="w-12 text-sm text-muted">เปิด</div>
+                              <input
+                                type="time"
+                                value={hours.openTime}
+                                onChange={(e) => handleOperatingHoursChange(day, 'openTime', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              />
+                              <div className="w-12 text-sm text-muted text-center">ถึง</div>
+                              <input
+                                type="time"
+                                value={hours.closeTime}
+                                onChange={(e) => handleOperatingHoursChange(day, 'closeTime', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              />
+                            </div>
+                          )}
                           
                           <div className="flex items-center">
                             <input
@@ -392,6 +407,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                               onChange={(e) => handleOperatingHoursChange(day, 'hasBreak', e.target.checked)}
                               className="rounded border-border text-primary focus:ring-primary"
                               id={`${day}-break`}
+                              disabled={hours.is24Hours}
                             />
                             <label htmlFor={`${day}-break`} className="text-sm text-muted ml-2">
                               มีเวลาพัก
