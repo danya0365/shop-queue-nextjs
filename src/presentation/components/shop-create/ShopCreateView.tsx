@@ -27,13 +27,13 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
       email: '',
       website: '',
       operatingHours: {
-        monday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        friday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        saturday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false },
-        sunday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: true },
+        monday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        friday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        saturday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: false, hasBreak: false },
+        sunday: { openTime: '09:00', closeTime: '18:00', breakStart: '00:00', breakEnd: '00:00', closed: true, hasBreak: false },
       }
     };
   };
@@ -52,7 +52,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
     }
   };
 
-  const handleOperatingHoursChange = (day: string, field: 'openTime' | 'closeTime' | 'breakStart' | 'breakEnd' | 'closed', value: string | boolean) => {
+  const handleOperatingHoursChange = (day: string, field: 'openTime' | 'closeTime' | 'breakStart' | 'breakEnd' | 'closed' | 'hasBreak', value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       operatingHours: {
@@ -330,7 +330,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           <div className="bg-surface rounded-lg shadow-sm border border-border p-6">
             <h2 className="text-xl font-semibold text-foreground mb-6">เวลาทำการ</h2>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {Object.entries(formData.operatingHours).map(([day, hours]) => {
                 const dayNames = {
                   monday: 'จันทร์',
@@ -343,35 +343,40 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                 };
 
                 return (
-                  <div key={day} className="flex items-center space-x-4">
-                    <div className="w-20">
-                      <span className="text-sm font-medium text-foreground">
-                        {dayNames[day as keyof typeof dayNames]}
-                      </span>
-                    </div>
+                  <div key={day} className="flex flex-col space-y-3">
+                    <div className="flex items-center">
+                      <div className="w-20">
+                        <span className="text-sm font-medium text-foreground">
+                          {dayNames[day as keyof typeof dayNames]}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={!hours.closed}
-                        onChange={(e) => handleOperatingHoursChange(day, 'closed', !e.target.checked)}
-                        className="rounded border-border text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm text-muted">เปิด</span>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={!hours.closed}
+                          onChange={(e) => handleOperatingHoursChange(day, 'closed', !e.target.checked)}
+                          className="rounded border-border text-primary focus:ring-primary"
+                          id={`${day}-open`}
+                        />
+                        <label htmlFor={`${day}-open`} className="text-sm text-muted ml-2">
+                          เปิด
+                        </label>
+                      </div>
                     </div>
 
                     {
                       !hours.closed && (
-                        <div className="flex items-center space-x-2 flex-wrap">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-muted">เปิด</span>
+                        <div className="ml-20 space-y-3">
+                          <div className="flex items-center">
+                            <div className="w-12 text-sm text-muted">เปิด</div>
                             <input
                               type="time"
                               value={hours.openTime}
                               onChange={(e) => handleOperatingHoursChange(day, 'openTime', e.target.value)}
                               className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                             />
-                            <span className="text-muted">ถึง</span>
+                            <div className="w-12 text-sm text-muted text-center">ถึง</div>
                             <input
                               type="time"
                               value={hours.closeTime}
@@ -379,29 +384,47 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                               className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                             />
                           </div>
-                          <div className="flex items-center space-x-2 mt-2 sm:mt-0 sm:ml-4">
-                            <span className="text-sm text-muted">พักเที่ยง</span>
+                          
+                          <div className="flex items-center">
                             <input
-                              type="time"
-                              value={hours.breakStart}
-                              onChange={(e) => handleOperatingHoursChange(day, 'breakStart', e.target.value)}
-                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              type="checkbox"
+                              checked={hours.hasBreak}
+                              onChange={(e) => handleOperatingHoursChange(day, 'hasBreak', e.target.checked)}
+                              className="rounded border-border text-primary focus:ring-primary"
+                              id={`${day}-break`}
                             />
-                            <span className="text-muted">ถึง</span>
-                            <input
-                              type="time"
-                              value={hours.breakEnd}
-                              onChange={(e) => handleOperatingHoursChange(day, 'breakEnd', e.target.value)}
-                              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                            />
+                            <label htmlFor={`${day}-break`} className="text-sm text-muted ml-2">
+                              มีเวลาพัก
+                            </label>
                           </div>
+                          
+                          {hours.hasBreak && (
+                            <div className="flex items-center">
+                              <div className="w-12"></div>
+                              <input
+                                type="time"
+                                value={hours.breakStart}
+                                onChange={(e) => handleOperatingHoursChange(day, 'breakStart', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              />
+                              <div className="w-12 text-sm text-muted text-center">ถึง</div>
+                              <input
+                                type="time"
+                                value={hours.breakEnd}
+                                onChange={(e) => handleOperatingHoursChange(day, 'breakEnd', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              />
+                            </div>
+                          )}
                         </div>
                       )
                     }
 
                     {
                       hours.closed && (
-                        <span className="text-muted italic">ปิด</span>
+                        <div className="ml-20">
+                          <span className="text-muted italic">ปิด</span>
+                        </div>
                       )
                     }
                   </div>

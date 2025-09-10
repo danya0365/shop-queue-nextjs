@@ -18,13 +18,13 @@ export const MOCK_SHOP_DATA: ShopCreateData = {
   email: 'contact@modernbarbershop.com',
   website: 'https://modernbarbershop.com',
   operatingHours: {
-    monday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    friday: { openTime: '09:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    saturday: { openTime: '08:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    sunday: { openTime: '10:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', closed: false }
+    monday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    tuesday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    wednesday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    thursday: { openTime: '09:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    friday: { openTime: '09:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    saturday: { openTime: '08:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    sunday: { openTime: '10:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true }
   }
 };
 
@@ -40,13 +40,13 @@ export const MOCK_RESTAURANT_DATA: ShopCreateData = {
   email: 'info@thaifoodhome.com',
   website: 'https://thaifoodhome.com',
   operatingHours: {
-    monday: { openTime: '10:00', closeTime: '22:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    tuesday: { openTime: '10:00', closeTime: '22:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    wednesday: { openTime: '10:00', closeTime: '22:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    thursday: { openTime: '10:00', closeTime: '22:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    friday: { openTime: '10:00', closeTime: '23:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    saturday: { openTime: '10:00', closeTime: '23:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    sunday: { openTime: '10:00', closeTime: '22:00', breakStart: '12:00', breakEnd: '13:00', closed: false }
+    monday: { openTime: '10:00', closeTime: '22:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    tuesday: { openTime: '10:00', closeTime: '22:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    wednesday: { openTime: '10:00', closeTime: '22:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    thursday: { openTime: '10:00', closeTime: '22:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    friday: { openTime: '10:00', closeTime: '23:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    saturday: { openTime: '10:00', closeTime: '23:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true },
+    sunday: { openTime: '10:00', closeTime: '22:00', breakStart: '14:00', breakEnd: '15:00', closed: false, hasBreak: true }
   }
 };
 
@@ -62,13 +62,13 @@ export const MOCK_COFFEE_SHOP_DATA: ShopCreateData = {
   email: 'hello@sakhacoffee.com',
   website: 'https://sakhacoffee.com',
   operatingHours: {
-    monday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    tuesday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    wednesday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    thursday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    friday: { openTime: '07:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    saturday: { openTime: '08:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false },
-    sunday: { openTime: '08:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', closed: false }
+    monday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    tuesday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    wednesday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    thursday: { openTime: '07:00', closeTime: '18:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    friday: { openTime: '07:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: true },
+    saturday: { openTime: '08:00', closeTime: '20:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: false },
+    sunday: { openTime: '08:00', closeTime: '17:00', breakStart: '12:00', breakEnd: '13:00', closed: false, hasBreak: false }
   }
 };
 
