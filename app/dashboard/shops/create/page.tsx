@@ -1,6 +1,6 @@
 import FrontendLayout from "@/src/presentation/components/layouts/front-end/FrontendLayout";
 import { ShopCreateView } from "@/src/presentation/components/shop-create/ShopCreateView";
-import { ShopCreatePresenterFactory } from "@/src/presentation/presenters/shop-create/ShopCreatePresenter";
+import { ShopCreatePresenterFactory } from "@/src/presentation/presenters/dashboard/shop-create/ShopCreatePresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 

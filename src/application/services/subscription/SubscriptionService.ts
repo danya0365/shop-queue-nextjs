@@ -8,8 +8,8 @@ import type {
 } from '@/src/domain/repositories/backend/backend-subscription-repository';
 
 // Subscription Plan Use Cases
-import { GetSubscriptionPlanByIdUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionPlanByIdUseCase';
 import { GetSubscriptionByProfileIdUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionByProfileIdUseCase';
+import { GetSubscriptionPlanByIdUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionPlanByIdUseCase';
 import { GetSubscriptionPlansPaginatedUseCase } from '@/src/application/usecases/subscription/subscription-plans/GetSubscriptionPlansPaginatedUseCase';
 
 // Profile Subscription Use Cases
@@ -63,7 +63,7 @@ import type {
  * Interface for Backend Subscription Service
  * Following Clean Architecture and SOLID principles
  */
-export interface ISubscriptionBackendSubscriptionService {
+export interface ISubscriptionService {
   // Subscription Plans
   getSubscriptionPlansPaginated(page?: number, perPage?: number): Promise<PaginatedSubscriptionPlansDTO>;
   getSubscriptionPlanById(id: string): Promise<SubscriptionPlanDTO>;
@@ -93,7 +93,7 @@ export interface ISubscriptionBackendSubscriptionService {
  * Backend Subscription Service Implementation
  * Orchestrates subscription-related use cases following Clean Architecture
  */
-export class SubscriptionBackendSubscriptionService implements ISubscriptionBackendSubscriptionService {
+export class SubscriptionService implements ISubscriptionService {
   constructor(
     // Subscription Plan Use Cases
     private readonly getSubscriptionPlansPaginatedUseCase: IUseCase<GetSubscriptionPlansPaginatedInputDTO, PaginatedSubscriptionPlansDTO>,
@@ -466,18 +466,18 @@ export class SubscriptionBackendSubscriptionService implements ISubscriptionBack
 
 
 /**
- * Factory for creating Backend Subscription Service with all dependencies
+ * Factory for creating Subscription Service with all dependencies
  * Following Clean Architecture and SOLID principles
  */
-export class SubscriptionBackendSubscriptionServiceFactory {
+export class SubscriptionServiceFactory {
   /**
-   * Create a fully configured Backend Subscription Service
+   * Create a fully configured Subscription Service
    * @param subscriptionPlanRepository Repository for subscription plans
    * @param profileSubscriptionRepository Repository for profile subscriptions
    * @param subscriptionUsageRepository Repository for subscription usage
    * @param featureAccessRepository Repository for feature access
    * @param logger Logger instance
-   * @returns Configured Backend Subscription Service
+   * @returns Configured Subscription Service
    */
   static create(
     subscriptionPlanRepository: BackendSubscriptionPlanRepository,
@@ -485,7 +485,7 @@ export class SubscriptionBackendSubscriptionServiceFactory {
     subscriptionUsageRepository: BackendSubscriptionUsageRepository,
     featureAccessRepository: BackendFeatureAccessRepository,
     logger: Logger
-  ): SubscriptionBackendSubscriptionService {
+  ): SubscriptionService {
 
     // Create Subscription Plan Use Cases
     const getSubscriptionPlansPaginatedUseCase = new GetSubscriptionPlansPaginatedUseCase(subscriptionPlanRepository);
@@ -512,7 +512,7 @@ export class SubscriptionBackendSubscriptionServiceFactory {
     const getFeatureAccessPaginatedUseCase = new GetFeatureAccessPaginatedUseCase(featureAccessRepository);
 
     // Create and return the service with all dependencies
-    return new SubscriptionBackendSubscriptionService(
+    return new SubscriptionService(
       // Subscription Plan Use Cases
       getSubscriptionPlansPaginatedUseCase,
       getSubscriptionPlanByIdUseCase,

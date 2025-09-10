@@ -19,8 +19,7 @@ import { RewardsBackendService } from "../application/services/shop/backend/rewa
 import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
-import { SubscriptionServiceFactory } from "../application/services/subscription-service";
-import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
+import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -73,12 +72,9 @@ export async function createServerContainer(): Promise<Container> {
     const profileService = ProfileServiceFactory.create(profileAdapter, logger);
     const authorizationService = AuthorizationServiceFactory.create(logger);
     const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
-    const subscriptionService = SubscriptionServiceFactory.create(
-      logger
-    );
-    
+
     // Create backend subscription service
-    const backendSubscriptionService = SubscriptionBackendSubscriptionServiceFactory.create(
+    const subscriptionService = SubscriptionServiceFactory.create(
       subscriptionPlanRepository,
       profileSubscriptionRepository,
       subscriptionUsageRepository,
@@ -109,8 +105,6 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
     container.registerInstance("SubscriptionService", subscriptionService);
-    container.registerInstance("SubscriptionBackendSubscriptionService", backendSubscriptionService);
-
     // Shop Backend services
     container.registerInstance("ShopBackendShopsService", shopBackendShopsService);
     container.registerInstance("PosterTemplateBackendService", posterTemplateBackendService);

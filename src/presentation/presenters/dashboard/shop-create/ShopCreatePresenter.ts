@@ -1,12 +1,11 @@
-import { AuthUserDto } from '@/src/application/dtos/auth-dto';
-import { ProfileDto } from '@/src/application/dtos/profile-dto';
 import { ShopCategoryDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { ProfileService } from '@/src/application/services/profile-service';
+import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import { IShopService } from '@/src/application/services/shop/ShopService';
-import { SubscriptionService } from '@/src/application/services/subscription-service';
+import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
+import { BaseSubscriptionPresenter } from '../../base/BaseSubscriptionPresenter';
 
 
 // Define ViewModel interface
@@ -18,14 +17,16 @@ export interface ShopCreateViewModel {
 }
 
 // Main Presenter class
-export class ShopCreatePresenter {
+export class ShopCreatePresenter extends BaseSubscriptionPresenter {
   constructor(
-    private readonly logger: Logger,
+    logger: Logger,
     private readonly shopService: IShopService,
-    private readonly authService: IAuthService,
-    private readonly profileService: ProfileService,
-    private readonly subscriptionService: SubscriptionService
-  ) { }
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService
+  ) {
+    super(logger, authService, profileService, subscriptionService);
+  }
 
   async getViewModel(): Promise<ShopCreateViewModel> {
     try {
@@ -41,17 +42,17 @@ export class ShopCreatePresenter {
         throw new Error("Profile not found");
       }
 
-      // Get subscription information based on user role
-      const tier = this.subscriptionService.getTierByRole(profile.role);
-      const limits = await this.subscriptionService.getLimitsByTier(tier);
-
+      // Get subscription information based on profile
+      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
+      
       // Get shop categories
       const categories = this.getShopCategories();
 
       const shops = await this.shopService.getShopsByOwnerId(profile.id);
       const currentShopsCount = shops.length;
 
-      // Get user's current shop limits (mock data for now)
+      // Check if user can create more shops
       const maxShopsAllowed = limits.maxShops;
       const canCreateShop = limits.maxShops === null || shops.length < limits.maxShops;
 
@@ -103,26 +104,6 @@ export class ShopCreatePresenter {
     ];
   }
 
-  private async getUser(): Promise<AuthUserDto | null> {
-    try {
-      return await this.authService.getCurrentUser();
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
-
-  /**
-   * Get the current authenticated user
-   */
-  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
-    try {
-      return await this.profileService.getActiveProfileByAuthId(user.id);
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
-  }
 
   // Metadata generation
   generateMetadata() {
@@ -139,9 +120,9 @@ export class ShopCreatePresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    const profileService = serverContainer.resolve<ProfileService>('ProfileService');
+    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
     const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const subscriptionService = serverContainer.resolve<SubscriptionService>('SubscriptionService');
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
     return new ShopCreatePresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }

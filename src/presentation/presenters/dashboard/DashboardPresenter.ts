@@ -1,13 +1,14 @@
 import { AuthUserDto } from "@/src/application/dtos/auth-dto";
-import { ProfileDto } from "@/src/application/dtos/profile-dto";
 import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { SubscriptionLimits, SubscriptionTier, UsageStatsDto } from "@/src/application/dtos/subscription-dto";
+import { CurrentUsageStatsDTO } from "@/src/application/dtos/subscription/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { ISubscriptionService } from "@/src/application/interfaces/subscription-service.interface";
 import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseSubscriptionPresenter } from "../base/BaseSubscriptionPresenter";
 
 /**
  * Dashboard statistics interface
@@ -53,14 +54,16 @@ export interface DashboardViewModel {
  * DashboardPresenter handles business logic for the dashboard page
  * Following SOLID principles and Clean Architecture
  */
-export class DashboardPresenter {
+export class DashboardPresenter extends BaseSubscriptionPresenter {
   constructor(
-    private readonly logger: Logger,
-    private readonly authService: IAuthService,
-    private readonly profileService: IProfileService,
+    logger: Logger,
+    authService: IAuthService,
+    profileService: IProfileService,
     private readonly shopService: IShopService,
-    private readonly subscriptionService: ISubscriptionService
-  ) { }
+    subscriptionService: ISubscriptionService
+  ) { 
+    super(logger, authService, profileService, subscriptionService);
+  }
 
   /**
    * Get view model for dashboard page
@@ -88,9 +91,9 @@ export class DashboardPresenter {
       const recentActivity = await this.getRecentActivity(profile.id, shops);
 
       // Get subscription information based on profile
-      const tier = await this.subscriptionService.getTierByRole(profile.role);
-      const limits = await this.subscriptionService.getLimitsByTier(tier);
-      const usage = await this.subscriptionService.getUsageStats(profile.id);
+      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
+      const usage = await this.getUsageStats(profile.id);
       const canCreateShop = limits.maxShops === null || shops.length < limits.maxShops;
 
       return {
@@ -100,7 +103,7 @@ export class DashboardPresenter {
         hasShops,
         shops,
         subscription: {
-          tier,
+          tier: subscriptionPlan.tier,
           limits,
           usage,
           canCreateShop
@@ -185,24 +188,49 @@ export class DashboardPresenter {
     }
   }
 
-  private async getUser(): Promise<AuthUserDto | null> {
-    try {
-      return await this.authService.getCurrentUser();
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
-    }
+
+  /**
+   * Map CurrentUsageStatsDTO to UsageStatsDto
+   */
+  private mapCurrentUsageToUsageStats(currentUsage: CurrentUsageStatsDTO): UsageStatsDto {
+    return {
+      profileId: currentUsage.profileId,
+      shopId: currentUsage.shopId,
+      currentShops: currentUsage.currentShops,
+      todayQueues: currentUsage.todayQueues,
+      currentStaff: currentUsage.currentStaff,
+      monthlySmsSent: currentUsage.monthlySmsSent,
+      activePromotions: currentUsage.activePromotions,
+      // Default values for fields not in CurrentUsageStatsDTO
+      usedPosterDesigns: 0,
+      paidPosterDesigns: 0,
+      totalPosters: 0,
+      dataRetentionMonths: 12
+    };
   }
 
   /**
-   * Get the current authenticated user
+   * Get usage stats for a profile
    */
-  private async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+  private async getUsageStats(profileId: string): Promise<UsageStatsDto> {
     try {
-      return await this.profileService.getActiveProfileByAuthId(user.id);
-    } catch (err) {
-      this.logger.error("Error accessing authentication:", err as Error);
-      return null;
+      const currentUsage = await this.subscriptionService.getCurrentUsageStats(profileId);
+      return this.mapCurrentUsageToUsageStats(currentUsage);
+    } catch (error) {
+      this.logger.error("Error getting usage stats", error);
+      return {
+        profileId: profileId,
+        shopId: undefined,
+        currentShops: 0,
+        todayQueues: 0,
+        currentStaff: 0,
+        monthlySmsSent: 0,
+        activePromotions: 0,
+        usedPosterDesigns: 0,
+        paidPosterDesigns: 0,
+        totalPosters: 0,
+        dataRetentionMonths: 12
+      };
     }
   }
 
@@ -225,6 +253,12 @@ export class DashboardPresenterFactory {
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
-    return new DashboardPresenter(logger, authService, profileService, shopService, subscriptionService);
+    return new DashboardPresenter(
+      logger,
+      authService,
+      profileService,
+      shopService,
+      subscriptionService
+    );
   }
 }

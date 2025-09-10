@@ -1,7 +1,7 @@
 'use client';
 
-import { ShopCreateViewModel } from '@/src/presentation/presenters/shop-create/ShopCreatePresenter';
-import { ShopCreateData, useShopCreatePresenter } from '@/src/presentation/presenters/shop-create/useShopCreatePresenter';
+import { ShopCreateViewModel } from '@/src/presentation/presenters/dashboard/shop-create/ShopCreatePresenter';
+import { ShopCreateData, useShopCreatePresenter } from '@/src/presentation/presenters/dashboard/shop-create/useShopCreatePresenter';
 import Link from 'next/link';
 import { useState } from 'react';
 
