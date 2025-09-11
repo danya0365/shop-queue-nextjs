@@ -435,26 +435,26 @@ ALTER TABLE subscription_payments ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 
--- subscription_plans: Public read access
-CREATE POLICY "subscription_plans_select_policy" ON subscription_plans FOR SELECT USING (is_active = true);
+-- subscription_plans: Public read access for active plans
+CREATE POLICY "Users can view active subscription plans" ON subscription_plans FOR SELECT USING (is_active = true);
 
 -- profile_subscriptions: Users can only see their own subscriptions
-CREATE POLICY "profile_subscriptions_select_policy" ON profile_subscriptions FOR SELECT USING (
+CREATE POLICY "Users can view their own profile subscriptions" ON profile_subscriptions FOR SELECT USING (
     profile_id = (SELECT id FROM profiles WHERE auth_id = auth.uid())
 );
 
--- subscription_usage: Users can only see their own usage
-CREATE POLICY "subscription_usage_select_policy" ON subscription_usage FOR SELECT USING (
+-- subscription_usage: Users can only see their own usage statistics
+CREATE POLICY "Users can view their own subscription usage stats" ON subscription_usage FOR SELECT USING (
     profile_id = (SELECT id FROM profiles WHERE auth_id = auth.uid())
 );
 
--- feature_access: Users can only see their own feature access
-CREATE POLICY "feature_access_select_policy" ON feature_access FOR SELECT USING (
+-- feature_access: Users can only see their own purchased features
+CREATE POLICY "Users can view their own purchased feature access" ON feature_access FOR SELECT USING (
     profile_id = (SELECT id FROM profiles WHERE auth_id = auth.uid())
 );
 
--- subscription_payments: Users can only see their own payments
-CREATE POLICY "subscription_payments_select_policy" ON subscription_payments FOR SELECT USING (
+-- subscription_payments: Users can only see their own payment history
+CREATE POLICY "Users can view their own subscription payment history" ON subscription_payments FOR SELECT USING (
     subscription_id IN (
         SELECT id FROM profile_subscriptions 
         WHERE profile_id = (SELECT id FROM profiles WHERE auth_id = auth.uid())
@@ -462,7 +462,7 @@ CREATE POLICY "subscription_payments_select_policy" ON subscription_payments FOR
 );
 
 -- Admin policies (for backend management)
-CREATE POLICY "admin_full_access_subscription_plans" ON subscription_plans FOR ALL USING (
+CREATE POLICY "Admins have full access to manage subscription plans" ON subscription_plans FOR ALL USING (
     EXISTS (
         SELECT 1 FROM profile_roles pr
         JOIN profiles p ON pr.profile_id = p.id
@@ -470,7 +470,7 @@ CREATE POLICY "admin_full_access_subscription_plans" ON subscription_plans FOR A
     )
 );
 
-CREATE POLICY "admin_full_access_profile_subscriptions" ON profile_subscriptions FOR ALL USING (
+CREATE POLICY "Admins have full access to manage profile subscriptions" ON profile_subscriptions FOR ALL USING (
     EXISTS (
         SELECT 1 FROM profile_roles pr
         JOIN profiles p ON pr.profile_id = p.id
@@ -478,7 +478,7 @@ CREATE POLICY "admin_full_access_profile_subscriptions" ON profile_subscriptions
     )
 );
 
-CREATE POLICY "admin_full_access_subscription_usage" ON subscription_usage FOR ALL USING (
+CREATE POLICY "Admins have full access to view subscription usage analytics" ON subscription_usage FOR ALL USING (
     EXISTS (
         SELECT 1 FROM profile_roles pr
         JOIN profiles p ON pr.profile_id = p.id
@@ -486,7 +486,7 @@ CREATE POLICY "admin_full_access_subscription_usage" ON subscription_usage FOR A
     )
 );
 
-CREATE POLICY "admin_full_access_feature_access" ON feature_access FOR ALL USING (
+CREATE POLICY "Admins have full access to manage feature access purchases" ON feature_access FOR ALL USING (
     EXISTS (
         SELECT 1 FROM profile_roles pr
         JOIN profiles p ON pr.profile_id = p.id
@@ -494,7 +494,7 @@ CREATE POLICY "admin_full_access_feature_access" ON feature_access FOR ALL USING
     )
 );
 
-CREATE POLICY "admin_full_access_subscription_payments" ON subscription_payments FOR ALL USING (
+CREATE POLICY "Admins have full access to manage subscription payments" ON subscription_payments FOR ALL USING (
     EXISTS (
         SELECT 1 FROM profile_roles pr
         JOIN profiles p ON pr.profile_id = p.id
