@@ -19,7 +19,7 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children, shopId }) => {
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen shop-backend-bg">
         <ShopBackendHeader
           shopId={shopId}
           sidebarOpen={sidebarOpen}
@@ -27,14 +27,10 @@ const BackendLayout: React.FC<BackendLayoutProps> = ({ children, shopId }) => {
         />
 
         <div className="flex flex-1 overflow-hidden">
-          <ShopBackendSidebar
-            shopId={shopId}
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-          />
+          <ShopBackendSidebar shopId={shopId} sidebarOpen={sidebarOpen} />
 
           {/* Main Content */}
-          <main className="flex-1 w-full lg:w-auto overflow-y-auto p-4 sm:p-6 transition-all duration-300">
+          <main className="flex-1 overflow-y-auto p-6 transition-all duration-300 shop-backend-text">
             {children}
           </main>
         </div>

@@ -1,147 +1,92 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React from "react";
+import { cn } from '@/src/presentation/utils/tailwind';
+import {
+  Clock,
+  CreditCard,
+  Gift,
+  LayoutDashboard,
+  Scissors,
+  Settings,
+  Store,
+  UserCheck,
+  Users,
+  BarChart3,
+  Image
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React from 'react';
 
 interface ShopBackendSidebarProps {
   shopId: string;
   sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
 }
 
-const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
-  shopId,
-  sidebarOpen,
-  setSidebarOpen,
+const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({ 
+  shopId, 
+  sidebarOpen 
 }) => {
   const pathname = usePathname();
 
-  const navigationItems = [
-    { href: `/shop/${shopId}/backend`, label: "แดชบอร์ด", icon: "📊" },
-    { href: `/shop/${shopId}/backend/queue`, label: "จัดการคิว", icon: "📋" },
-    {
-      href: `/shop/${shopId}/backend/services`,
-      label: "จัดการบริการ",
-      icon: "✂️",
-    },
-    {
-      href: `/shop/${shopId}/backend/customers`,
-      label: "จัดการลูกค้า",
-      icon: "👤",
-    },
-    {
-      href: `/shop/${shopId}/backend/employees`,
-      label: "จัดการพนักงาน",
-      icon: "👥",
-    },
-    {
-      href: `/shop/${shopId}/backend/departments`,
-      label: "จัดการแผนก",
-      icon: "🏢",
-    },
-    {
-      href: `/shop/${shopId}/backend/payments`,
-      label: "การชำระเงิน",
-      icon: "💳",
-    },
-    { href: `/shop/${shopId}/backend/rewards`, label: "รางวัล", icon: "🕐" },
-    {
-      href: `/shop/${shopId}/backend/opening-hours`,
-      label: "เวลาทำการ",
-      icon: "🕐",
-    },
-    {
-      href: `/shop/${shopId}/backend/promotions`,
-      label: "โปรโมชัน",
-      icon: "🎁",
-    },
-    { href: `/shop/${shopId}/backend/posters`, label: "โปสเตอร์", icon: "🖼️" },
-    { href: `/shop/${shopId}/backend/analytics`, label: "รายงาน", icon: "📈" },
-    {
-      href: `/shop/${shopId}/backend/shop-settings`,
-      label: "คั้งค่าร้านค้า",
-      icon: "⚙️",
-    },
+  const navItems = [
+    { href: `/shop/${shopId}/backend`, label: 'แดชบอร์ด', icon: LayoutDashboard },
+    { href: `/shop/${shopId}/backend/queue`, label: 'จัดการคิว', icon: Clock },
+    { href: `/shop/${shopId}/backend/services`, label: 'จัดการบริการ', icon: Scissors },
+    { href: `/shop/${shopId}/backend/customers`, label: 'จัดการลูกค้า', icon: Users },
+    { href: `/shop/${shopId}/backend/employees`, label: 'จัดการพนักงาน', icon: UserCheck },
+    { href: `/shop/${shopId}/backend/departments`, label: 'จัดการแผนก', icon: Store },
+    { href: `/shop/${shopId}/backend/payments`, label: 'การชำระเงิน', icon: CreditCard },
+    { href: `/shop/${shopId}/backend/rewards`, label: 'จัดการรางวัล', icon: Gift },
+    { href: `/shop/${shopId}/backend/promotions`, label: 'จัดการโปรโมชั่น', icon: Gift },
+    { href: `/shop/${shopId}/backend/opening-hours`, label: 'เวลาทำการ', icon: Clock },
+    { href: `/shop/${shopId}/backend/posters`, label: 'โปสเตอร์', icon: Image },
+    { href: `/shop/${shopId}/backend/analytics`, label: 'รายงาน', icon: BarChart3 },
+    { href: `/shop/${shopId}/backend/shop-settings`, label: 'ตั้งค่าร้านค้า', icon: Settings },
   ];
 
-  const isActive = (href: string) => {
-    if (href === `/shop/${shopId}/backend`) {
-      return pathname === href;
-    }
-    return pathname.startsWith(href);
-  };
-
   return (
-    <>
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
-          onClick={() => setSidebarOpen(false)}
-        />
+    <aside
+      className={cn(
+        "transition-all duration-300 ease-in-out z-20 shop-backend-sidebar-bg border-r shop-backend-sidebar-border",
+        sidebarOpen ? "w-64" : "w-0 lg:w-16",
+        "fixed lg:static h-full overflow-hidden"
       )}
+    >
+      <div className="h-full overflow-y-auto">
+        <nav className="p-4 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-      {/* Sidebar */}
-      <aside
-        className={`
-        fixed lg:static inset-y-0 left-0 z-40
-        w-64 bg-blue-50 dark:bg-blue-900 shadow-sm min-h-screen
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}
-      >
-        {/* Mobile Close Button */}
-        <div className="lg:hidden flex justify-end p-4">
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="mt-4 lg:mt-8">
-          <div className="px-4 space-y-2">
-            {navigationItems.map((item) => (
+            return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.href)
-                    ? "bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 border-r-2 border-blue-700"
-                    : "text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800"
-                }`}
+                className={cn(
+                  "flex items-center px-3 py-2 rounded-md transition-colors",
+                  isActive
+                    ? "shop-backend-sidebar-active shop-backend-primary"
+                    : "shop-backend-text shop-backend-sidebar-hover shop-backend-primary-hover",
+                  !sidebarOpen && "lg:justify-center"
+                )}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+                <Icon size={20} className={cn("flex-shrink-0", !sidebarOpen && "lg:mx-0")} />
+                <span className={cn(
+                  "ml-3 font-medium",
+                  !sidebarOpen && "lg:hidden"
+                )}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <div className="absolute left-0 w-1 h-8 shop-backend-primary rounded-r-full" />
+                )}
               </Link>
-            ))}
-          </div>
+            );
+          })}
         </nav>
-
-        {/* Shop ID in Sidebar */}
-        <div className="mt-8 px-4 py-4 border-t border-blue-200 dark:border-blue-700">
-          <div className="text-sm text-blue-600 dark:text-blue-300">
-            ร้าน ID: <span className="font-mono">{shopId}</span>
-          </div>
-        </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
 

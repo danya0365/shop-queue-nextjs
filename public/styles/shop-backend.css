@@ -1,0 +1,72 @@
+@layer base {
+  /* Shop Backend Layout utilities */
+  .shop-backend-bg {
+    @apply bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900;
+  }
+  .shop-backend-header-bg {
+    @apply bg-white/80 backdrop-blur-md dark:bg-slate-800/80;
+  }
+  .shop-backend-header-border {
+    @apply border-indigo-200/50 dark:border-slate-600/50;
+  }
+  .shop-backend-sidebar-bg {
+    @apply bg-white/90 backdrop-blur-sm dark:bg-slate-800/90;
+  }
+  .shop-backend-sidebar-border {
+    @apply border-indigo-200/30 dark:border-slate-600/30;
+  }
+  .shop-backend-sidebar-active {
+    @apply bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50;
+  }
+  .shop-backend-sidebar-hover {
+    @apply hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-slate-700/50 dark:hover:to-indigo-800/50;
+  }
+  .shop-backend-text {
+    @apply text-slate-800 dark:text-slate-100;
+  }
+  .shop-backend-text-muted {
+    @apply text-slate-600 dark:text-slate-300;
+  }
+  .shop-backend-primary {
+    @apply text-indigo-600 dark:text-indigo-400;
+  }
+  .shop-backend-primary-hover {
+    @apply hover:text-indigo-700 dark:hover:text-indigo-300;
+  }
+  .shop-backend-secondary {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+  .shop-backend-secondary-hover {
+    @apply hover:text-purple-700 dark:hover:text-purple-300;
+  }
+  .shop-backend-success {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+  .shop-backend-success-hover {
+    @apply hover:text-emerald-700 dark:hover:text-emerald-300;
+  }
+  .shop-backend-warning {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+  .shop-backend-warning-hover {
+    @apply hover:text-amber-700 dark:hover:text-amber-300;
+  }
+  .shop-backend-danger {
+    @apply text-rose-600 dark:text-rose-400;
+  }
+  .shop-backend-danger-hover {
+    @apply hover:text-rose-700 dark:hover:text-rose-300;
+  }
+  .shop-backend-card {
+    @apply bg-white/70 backdrop-blur-sm border border-indigo-200/30 dark:bg-slate-800/70 dark:border-slate-600/30;
+  }
+  .shop-backend-card-hover {
+    @apply hover:bg-white/80 hover:border-indigo-300/50 dark:hover:bg-slate-800/80 dark:hover:border-slate-500/50;
+  }
+  .shop-backend-button-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white;
+  }
+  .shop-backend-button-secondary {
+    @apply bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 dark:from-slate-700 dark:to-slate-600 dark:hover:from-slate-600 dark:hover:to-slate-500 dark:text-slate-200;
+  }
+}
