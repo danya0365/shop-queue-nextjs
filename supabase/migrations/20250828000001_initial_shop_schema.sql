@@ -717,11 +717,6 @@ AS $$
 DECLARE
     deleted_count INTEGER;
 BEGIN
-    -- Check if user has permission to view this shop's activities
-    IF NOT is_service_role() AND NOT public.is_shop_manager(p_shop_id) THEN
-        RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
-    END IF;
-
     DELETE FROM shop_activity_log 
     WHERE created_at < NOW() - INTERVAL '1 day' * p_days_to_keep;
     
@@ -729,3 +724,596 @@ BEGIN
     RETURN deleted_count;
 END;
 $$;
+
+-- =============================================================================
+-- CUSTOMERS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Customers can be viewed by everyone (for queue system)
+CREATE POLICY "Everyone can view customers"
+  ON public.customers FOR SELECT
+  USING (true);
+
+-- Anyone can insert customers (for registration without login)
+CREATE POLICY "Anyone can insert customers"
+  ON public.customers FOR INSERT
+  WITH CHECK (true);
+
+-- Only shop managers can update customers
+CREATE POLICY "Shop managers can update customers"
+  ON public.customers FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete customers
+CREATE POLICY "Shop managers can delete customers"
+  ON public.customers FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- Column-level security for customers - prevent setting profile_id without authentication
+REVOKE INSERT ON TABLE public.customers FROM anon;
+REVOKE UPDATE ON TABLE public.customers FROM anon;
+GRANT INSERT (shop_id, name, phone, email, date_of_birth, gender, address, notes, is_active) ON TABLE public.customers TO anon;
+GRANT INSERT (shop_id, name, phone, email, date_of_birth, gender, address, notes, is_active, profile_id) ON TABLE public.customers TO authenticated;
+
+-- =============================================================================
+-- QUEUES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view queues (for public queue display)
+CREATE POLICY "Everyone can view queues"
+  ON public.queues FOR SELECT
+  USING (true);
+
+-- Anyone can insert queues (for joining queue without login)
+CREATE POLICY "Anyone can insert queues"
+  ON public.queues FOR INSERT
+  WITH CHECK (true);
+
+-- Only shop managers can update queues
+CREATE POLICY "Shop managers can update queues"
+  ON public.queues FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete queues
+CREATE POLICY "Shop managers can delete queues"
+  ON public.queues FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- Column-level security for queues - prevent setting profile_id without authentication
+REVOKE INSERT ON TABLE public.queues FROM anon;
+REVOKE UPDATE ON TABLE public.queues FROM anon;
+GRANT INSERT () ON TABLE public.queues TO anon;
+GRANT INSERT () ON TABLE public.queues TO authenticated;
+
+
+-- =============================================================================
+-- QUEUE SERVICES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view queue services
+CREATE POLICY "Everyone can view queue services"
+  ON public.queue_services FOR SELECT
+  USING (true);
+
+-- Anyone can insert queue services (when creating queue)
+CREATE POLICY "Anyone can insert queue services"
+  ON public.queue_services FOR INSERT
+  WITH CHECK (true);
+
+-- Only shop managers can update queue services
+CREATE POLICY "Shop managers can update queue services"
+  ON public.queue_services FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Only shop managers can delete queue services
+CREATE POLICY "Shop managers can delete queue services"
+  ON public.queue_services FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- =============================================================================
+-- SERVICES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view services (for public service listing)
+CREATE POLICY "Everyone can view services"
+  ON public.services FOR SELECT
+  USING (true);
+
+-- Only shop managers can insert services
+CREATE POLICY "Shop managers can insert services"
+  ON public.services FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can update services
+CREATE POLICY "Shop managers can update services"
+  ON public.services FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete services
+CREATE POLICY "Shop managers can delete services"
+  ON public.services FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- DEPARTMENTS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view departments
+CREATE POLICY "Everyone can view departments"
+  ON public.departments FOR SELECT
+  USING (true);
+
+-- Only shop managers can insert departments
+CREATE POLICY "Shop managers can insert departments"
+  ON public.departments FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can update departments
+CREATE POLICY "Shop managers can update departments"
+  ON public.departments FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete departments
+CREATE POLICY "Shop managers can delete departments"
+  ON public.departments FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- EMPLOYEES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view their employees
+CREATE POLICY "Shop managers can view employees"
+  ON public.employees FOR SELECT
+  USING (public.is_shop_manager(shop_id));
+
+-- Only shop managers can insert employees
+CREATE POLICY "Shop managers can insert employees"
+  ON public.employees FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can update employees
+CREATE POLICY "Shop managers can update employees"
+  ON public.employees FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete employees
+CREATE POLICY "Shop managers can delete employees"
+  ON public.employees FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- PAYMENTS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view payments
+CREATE POLICY "Shop managers can view payments"
+  ON public.payments FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can insert payments
+CREATE POLICY "Shop managers can insert payments"
+  ON public.payments FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can update payments
+CREATE POLICY "Shop managers can update payments"
+  ON public.payments FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can delete payments
+CREATE POLICY "Shop managers can delete payments"
+  ON public.payments FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- =============================================================================
+-- PAYMENT ITEMS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view payment items
+CREATE POLICY "Shop managers can view payment items"
+  ON public.payment_items FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can insert payment items
+CREATE POLICY "Shop managers can insert payment items"
+  ON public.payment_items FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can update payment items
+CREATE POLICY "Shop managers can update payment items"
+  ON public.payment_items FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can delete payment items
+CREATE POLICY "Shop managers can delete payment items"
+  ON public.payment_items FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- =============================================================================
+-- PROMOTIONS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view active promotions
+CREATE POLICY "Everyone can view promotions"
+  ON public.promotions FOR SELECT
+  USING (true);
+
+-- Only shop managers can insert promotions
+CREATE POLICY "Shop managers can insert promotions"
+  ON public.promotions FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can update promotions
+CREATE POLICY "Shop managers can update promotions"
+  ON public.promotions FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can delete promotions
+CREATE POLICY "Shop managers can delete promotions"
+  ON public.promotions FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- PROMOTION SERVICES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view promotion services
+CREATE POLICY "Everyone can view promotion services"
+  ON public.promotion_services FOR SELECT
+  USING (true);
+
+-- Shop managers can insert promotion services
+CREATE POLICY "Shop managers can insert promotion services"
+  ON public.promotion_services FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- Shop managers can update promotion services
+CREATE POLICY "Shop managers can update promotion services"
+  ON public.promotion_services FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- Shop managers can delete promotion services
+CREATE POLICY "Shop managers can delete promotion services"
+  ON public.promotion_services FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- =============================================================================
+-- PROMOTION USAGE LOGS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view promotion usage logs
+CREATE POLICY "Shop managers can view promotion usage logs"
+  ON public.promotion_usage_logs FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- Anyone can insert promotion usage logs (when using promotion)
+CREATE POLICY "Anyone can insert promotion usage logs"
+  ON public.promotion_usage_logs FOR INSERT
+  WITH CHECK (true);
+
+-- Shop managers can update promotion usage logs
+CREATE POLICY "Shop managers can update promotion usage logs"
+  ON public.promotion_usage_logs FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- Shop managers can delete promotion usage logs
+CREATE POLICY "Shop managers can delete promotion usage logs"
+  ON public.promotion_usage_logs FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- =============================================================================
+-- POSTER TEMPLATES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view poster templates
+CREATE POLICY "Everyone can view poster templates"
+  ON public.poster_templates FOR SELECT
+  USING (true);
+
+-- Only admins can manage poster templates
+CREATE POLICY "Only admins can insert poster templates"
+  ON public.poster_templates FOR INSERT
+  WITH CHECK (is_admin());
+
+CREATE POLICY "Only admins can update poster templates"
+  ON public.poster_templates FOR UPDATE
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+CREATE POLICY "Only admins can delete poster templates"
+  ON public.poster_templates FOR DELETE
+  USING (is_admin());
+
+-- =============================================================================
+-- CUSTOMER POINTS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Customers can view their own points, shop managers can view all
+CREATE POLICY "Customers and shop managers can view customer points"
+  ON public.customer_points FOR SELECT
+  USING (
+    public.is_shop_manager(shop_id) OR
+    EXISTS (
+      SELECT 1 FROM public.customers c 
+      WHERE c.id = customer_id AND c.profile_id = public.get_active_profile_id()
+    )
+  );
+
+-- Shop managers can insert customer points
+CREATE POLICY "Shop managers can insert customer points"
+  ON public.customer_points FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update customer points
+CREATE POLICY "Shop managers can update customer points"
+  ON public.customer_points FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can delete customer points
+CREATE POLICY "Shop managers can delete customer points"
+  ON public.customer_points FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- CUSTOMER POINT TRANSACTIONS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Customers can view their own transactions, shop managers can view all
+CREATE POLICY "Customers and shop managers can view point transactions"
+  ON public.customer_point_transactions FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_points cp
+    JOIN public.customers c ON c.id = cp.customer_id
+    WHERE cp.id = customer_point_id AND (
+      public.is_shop_manager(cp.shop_id) OR
+      c.profile_id = public.get_active_profile_id()
+    )
+  ));
+
+-- Shop managers can insert point transactions
+CREATE POLICY "Shop managers can insert point transactions"
+  ON public.customer_point_transactions FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.customer_points cp
+    WHERE cp.id = customer_point_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- Shop managers can update point transactions
+CREATE POLICY "Shop managers can update point transactions"
+  ON public.customer_point_transactions FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_points cp
+    WHERE cp.id = customer_point_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- Shop managers can delete point transactions
+CREATE POLICY "Shop managers can delete point transactions"
+  ON public.customer_point_transactions FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_points cp
+    WHERE cp.id = customer_point_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- =============================================================================
+-- CUSTOMER POINT EXPIRY TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view point expiry
+CREATE POLICY "Shop managers can view point expiry"
+  ON public.customer_point_expiry FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_point_transactions cpt
+    JOIN public.customer_points cp ON cp.id = cpt.customer_point_id
+    WHERE cpt.id = customer_point_transaction_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- Shop managers can insert point expiry
+CREATE POLICY "Shop managers can insert point expiry"
+  ON public.customer_point_expiry FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.customer_point_transactions cpt
+    JOIN public.customer_points cp ON cp.id = cpt.customer_point_id
+    WHERE cpt.id = customer_point_transaction_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- Shop managers can update point expiry
+CREATE POLICY "Shop managers can update point expiry"
+  ON public.customer_point_expiry FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_point_transactions cpt
+    JOIN public.customer_points cp ON cp.id = cpt.customer_point_id
+    WHERE cpt.id = customer_point_transaction_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- Shop managers can delete point expiry
+CREATE POLICY "Shop managers can delete point expiry"
+  ON public.customer_point_expiry FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.customer_point_transactions cpt
+    JOIN public.customer_points cp ON cp.id = cpt.customer_point_id
+    WHERE cpt.id = customer_point_transaction_id AND public.is_shop_manager(cp.shop_id)
+  ));
+
+-- =============================================================================
+-- REWARDS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Everyone can view available rewards
+CREATE POLICY "Everyone can view rewards"
+  ON public.rewards FOR SELECT
+  USING (true);
+
+-- Shop managers can insert rewards
+CREATE POLICY "Shop managers can insert rewards"
+  ON public.rewards FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update rewards
+CREATE POLICY "Shop managers can update rewards"
+  ON public.rewards FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can delete rewards
+CREATE POLICY "Shop managers can delete rewards"
+  ON public.rewards FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- REWARD USAGES TABLE RLS POLICIES
+-- =============================================================================
+
+-- Customers can view their own reward usages, shop managers can view all
+CREATE POLICY "Customers and shop managers can view reward usages"
+  ON public.reward_usages FOR SELECT
+  USING (
+    public.is_shop_manager(shop_id) OR
+    EXISTS (
+      SELECT 1 FROM public.customers c 
+      WHERE c.id = customer_id AND c.profile_id = public.get_active_profile_id()
+    )
+  );
+
+-- Shop managers can insert reward usages
+CREATE POLICY "Shop managers can insert reward usages"
+  ON public.reward_usages FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update reward usages
+CREATE POLICY "Shop managers can update reward usages"
+  ON public.reward_usages FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can delete reward usages
+CREATE POLICY "Shop managers can delete reward usages"
+  ON public.reward_usages FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SHOP SETTINGS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view their shop settings
+CREATE POLICY "Shop managers can view shop settings"
+  ON public.shop_settings FOR SELECT
+  USING (public.is_shop_manager(shop_id));
+
+-- Shop managers can insert shop settings
+CREATE POLICY "Shop managers can insert shop settings"
+  ON public.shop_settings FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update shop settings
+CREATE POLICY "Shop managers can update shop settings"
+  ON public.shop_settings FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can delete shop settings
+CREATE POLICY "Shop managers can delete shop settings"
+  ON public.shop_settings FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- NOTIFICATION SETTINGS TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can view their notification settings
+CREATE POLICY "Shop managers can view notification settings"
+  ON public.notification_settings FOR SELECT
+  USING (public.is_shop_manager(shop_id));
+
+-- Shop managers can insert notification settings
+CREATE POLICY "Shop managers can insert notification settings"
+  ON public.notification_settings FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update notification settings
+CREATE POLICY "Shop managers can update notification settings"
+  ON public.notification_settings FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can delete notification settings
+CREATE POLICY "Shop managers can delete notification settings"
+  ON public.notification_settings FOR DELETE
+  USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SHOP ACTIVITY LOG TABLE RLS POLICIES
+-- =============================================================================
+
+-- Shop managers can insert activity logs
+CREATE POLICY "Shop managers can insert activity logs"
+  ON public.shop_activity_log FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
