@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { PromotionsView } from "@/src/presentation/components/shop/backend/promotion/PromotionsView";
+import { PromotionsView } from "@/src/presentation/components/shop/backend/PromotionsView";
 import { PromotionsPresenterFactory } from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PromotionsPageProps): Promise
     // Fallback metadata
     return {
       title: "จัดการโปรโมชั่น - เจ้าของร้าน | Shop Queue",
-      description: "สร้างและจัดการโปรโมชั่น ส่วนลด และข้อเสนอพิเศษสำหรับลูกค้า",
+      description: "จัดการโปรโมชั่นและส่วนลด สร้างแคมเปญส่งเสริมการขายที่น่าสนใจ",
     };
   }
 }
