@@ -1,8 +1,11 @@
-"use client";
+'use client';
 
-import { ThemeToggle } from '@/src/presentation/components/ui/ThemeToggle';
+import { useAuthStore } from '@/src/presentation/stores/auth-store';
+import { LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
+import { EmployeeThemeToggle } from './EmployeeThemeToggle';
 
 interface EmployeeHeaderProps {
   shopId: string;
@@ -13,48 +16,55 @@ interface EmployeeHeaderProps {
 const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   shopId,
   sidebarOpen,
-  toggleSidebar,
+  toggleSidebar
 }) => {
-  console.log('EmployeeHeader', { shopId, sidebarOpen });
+  const router = useRouter();
+  const { signOut } = useAuthStore();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/');
+    router.refresh(); // เพื่อให้แน่ใจว่า state ทั้งหมดถูก reset
+  };
+
   return (
-    <header className="bg-green-600 text-white shadow-lg">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Left side - Logo and Menu Button */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-lg text-green-100 hover:bg-green-700 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            <Link href="/" className="text-xl sm:text-2xl font-bold text-white">
-              Shop Queue
-            </Link>
-            <span className="hidden sm:inline text-green-200">|</span>
-            <span className="hidden sm:inline text-sm sm:text-lg font-medium text-green-100">
-              ระบบพนักงาน
-            </span>
+    <header className="employee-header-bg border-b employee-header-border shadow-sm z-10">
+      <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 mr-2 rounded-md employee-sidebar-hover lg:hidden"
+            aria-label="Toggle sidebar"
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <Link href="/" className="flex items-center">
+            <span className="text-xl font-bold employee-primary">ShopQueue</span>
+            <span className="ml-2 text-sm font-medium px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 rounded">ระบบพนักงาน</span>
+          </Link>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="hidden sm:flex items-center space-x-2">
+            <div className="w-3 h-3 employee-status-online rounded-full"></div>
+            <span className="text-sm employee-text-muted">ออนไลน์</span>
           </div>
-
-          {/* Right side - Status and User Info */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <div className="hidden sm:flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-300 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-100">ออนไลน์</span>
-            </div>
-            <div className="hidden md:block text-sm text-green-100">
-              พนักงาน: <span className="font-medium">สมชาย ใจดี</span>
-            </div>
-            <ThemeToggle />
-            <button className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-              <span className="sm:hidden">ออก</span>
-            </button>
+          <div className="hidden md:block text-sm employee-text-muted">
+            พนักงาน: <span className="font-medium employee-primary">สมชาย ใจดี</span>
           </div>
+          <EmployeeThemeToggle />
+          <Link
+            href="/"
+            className="flex items-center text-sm employee-text-muted employee-primary-hover"
+          >
+            <span>กลับไปยังเว็บไซต์</span>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center text-sm employee-text-muted employee-danger-hover cursor-pointer"
+          >
+            <LogOut size={18} className="mr-1" />
+            <span>ออกจากระบบ</span>
+          </button>
         </div>
       </div>
     </header>
