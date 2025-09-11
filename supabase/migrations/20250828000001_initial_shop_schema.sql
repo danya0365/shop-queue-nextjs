@@ -536,6 +536,8 @@ ALTER TABLE public.queue_services ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payment_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.promotion_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.promotion_usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.poster_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_transactions ENABLE ROW LEVEL SECURITY;
@@ -734,27 +736,132 @@ CREATE POLICY "Everyone can view customers"
   ON public.customers FOR SELECT
   USING (true);
 
--- Anyone can insert customers (for registration without login)
-CREATE POLICY "Anyone can insert customers"
-  ON public.customers FOR INSERT
-  WITH CHECK (true);
-
--- Only shop managers can update customers
+-- Only shop managers can update/delete customers directly
 CREATE POLICY "Shop managers can update customers"
   ON public.customers FOR UPDATE
   USING (public.is_shop_manager(shop_id))
   WITH CHECK (public.is_shop_manager(shop_id));
 
--- Only shop managers can delete customers
 CREATE POLICY "Shop managers can delete customers"
   ON public.customers FOR DELETE
   USING (public.is_shop_manager(shop_id));
 
--- Column-level security for customers - prevent setting profile_id without authentication
+-- Remove direct INSERT access - customers are created through queue API functions
 REVOKE INSERT ON TABLE public.customers FROM anon;
-REVOKE UPDATE ON TABLE public.customers FROM anon;
-GRANT INSERT (shop_id, name, phone, email, date_of_birth, gender, address, notes, is_active) ON TABLE public.customers TO anon;
-GRANT INSERT (shop_id, name, phone, email, date_of_birth, gender, address, notes, is_active, profile_id) ON TABLE public.customers TO authenticated;
+REVOKE INSERT ON TABLE public.customers FROM authenticated;
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR CUSTOMER OPERATIONS
+-- =============================================================================
+
+-- Function to register customer with phone verification
+CREATE OR REPLACE FUNCTION public.register_customer_with_phone(
+  p_shop_id UUID,
+  p_name TEXT,
+  p_phone TEXT,
+  p_email TEXT DEFAULT NULL,
+  p_verification_code TEXT DEFAULT NULL
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_id UUID;
+BEGIN
+  -- Validate shop exists and is active
+  IF NOT EXISTS (
+    SELECT 1 FROM public.shops 
+    WHERE id = p_shop_id AND status = 'active'
+  ) THEN
+    RAISE EXCEPTION 'shop_not_found_or_inactive: %', p_shop_id;
+  END IF;
+
+  -- Validate required fields
+  IF p_name IS NULL OR LENGTH(TRIM(p_name)) = 0 THEN
+    RAISE EXCEPTION 'customer_name_required';
+  END IF;
+
+  IF p_phone IS NULL OR LENGTH(TRIM(p_phone)) = 0 THEN
+    RAISE EXCEPTION 'customer_phone_required';
+  END IF;
+
+  -- TODO: Add phone verification logic here
+  -- For now, we'll create the customer directly
+  -- In production, you would verify p_verification_code against sent OTP
+
+  -- Check if customer already exists
+  SELECT id INTO v_customer_id
+  FROM public.customers
+  WHERE shop_id = p_shop_id 
+    AND phone = TRIM(p_phone)
+  LIMIT 1;
+
+  IF v_customer_id IS NOT NULL THEN
+    -- Update existing customer
+    UPDATE public.customers
+    SET name = TRIM(p_name),
+        email = p_email,
+        last_visit = NOW(),
+        updated_at = NOW()
+    WHERE id = v_customer_id;
+  ELSE
+    -- Create new customer
+    INSERT INTO public.customers (shop_id, name, phone, email, is_active, created_at, updated_at)
+    VALUES (p_shop_id, TRIM(p_name), TRIM(p_phone), p_email, true, NOW(), NOW())
+    RETURNING id INTO v_customer_id;
+  END IF;
+
+  RETURN v_customer_id;
+END;
+$$;
+
+-- Function to link customer to authenticated profile
+CREATE OR REPLACE FUNCTION public.link_customer_to_profile(
+  p_customer_id UUID,
+  p_phone TEXT
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_profile_id UUID;
+  v_customer_phone TEXT;
+BEGIN
+  -- Must be authenticated
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'authentication_required';
+  END IF;
+
+  -- Get current user's profile
+  SELECT id INTO v_profile_id
+  FROM public.profiles
+  WHERE auth_id = auth.uid() AND is_active = true;
+
+  IF v_profile_id IS NULL THEN
+    RAISE EXCEPTION 'profile_not_found';
+  END IF;
+
+  -- Verify customer exists and phone matches
+  SELECT phone INTO v_customer_phone
+  FROM public.customers
+  WHERE id = p_customer_id;
+
+  IF v_customer_phone IS NULL THEN
+    RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+  END IF;
+
+  IF v_customer_phone != p_phone THEN
+    RAISE EXCEPTION 'phone_mismatch';
+  END IF;
+
+  -- Link customer to profile
+  UPDATE public.customers
+  SET profile_id = v_profile_id, updated_at = NOW()
+  WHERE id = p_customer_id;
+END;
+$$;
 
 -- =============================================================================
 -- QUEUES TABLE RLS POLICIES
@@ -765,27 +872,286 @@ CREATE POLICY "Everyone can view queues"
   ON public.queues FOR SELECT
   USING (true);
 
--- Anyone can insert queues (for joining queue without login)
-CREATE POLICY "Anyone can insert queues"
-  ON public.queues FOR INSERT
-  WITH CHECK (true);
-
--- Only shop managers can update queues
-CREATE POLICY "Shop managers can update queues"
-  ON public.queues FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Only shop managers can delete queues
+-- No direct INSERT/UPDATE/DELETE - must use API functions
+-- Only shop managers can delete queues (emergency cleanup)
 CREATE POLICY "Shop managers can delete queues"
   ON public.queues FOR DELETE
   USING (public.is_shop_manager(shop_id));
 
--- Column-level security for queues - prevent setting profile_id without authentication
-REVOKE INSERT ON TABLE public.queues FROM anon;
-REVOKE UPDATE ON TABLE public.queues FROM anon;
-GRANT INSERT () ON TABLE public.queues TO anon;
-GRANT INSERT () ON TABLE public.queues TO authenticated;
+-- Remove direct table access for queues - all operations must go through API functions
+REVOKE ALL ON TABLE public.queues FROM anon;
+REVOKE ALL ON TABLE public.queues FROM authenticated;
+
+-- Grant SELECT access for viewing queues
+GRANT SELECT ON TABLE public.queues TO anon;
+GRANT SELECT ON TABLE public.queues TO authenticated;
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR QUEUE OPERATIONS
+-- =============================================================================
+
+-- Function to create a new queue (for customers)
+CREATE OR REPLACE FUNCTION public.create_queue(
+  p_shop_id UUID,
+  p_customer_name TEXT,
+  p_customer_phone TEXT DEFAULT NULL,
+  p_customer_email TEXT DEFAULT NULL,
+  p_service_ids UUID[] DEFAULT '{}',
+  p_note TEXT DEFAULT NULL,
+  p_priority queue_priority DEFAULT 'normal'
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_id UUID;
+  v_queue_id UUID;
+  v_queue_number TEXT;
+  v_service_id UUID;
+  v_service_price DECIMAL(10,2);
+  v_total_duration INTEGER := 0;
+BEGIN
+  -- Validate shop exists and is active
+  IF NOT EXISTS (
+    SELECT 1 FROM public.shops 
+    WHERE id = p_shop_id AND status = 'active'
+  ) THEN
+    RAISE EXCEPTION 'shop_not_found_or_inactive: %', p_shop_id;
+  END IF;
+
+  -- Validate required fields
+  IF p_customer_name IS NULL OR LENGTH(TRIM(p_customer_name)) = 0 THEN
+    RAISE EXCEPTION 'customer_name_required';
+  END IF;
+
+  -- Create or find customer
+  SELECT id INTO v_customer_id
+  FROM public.customers
+  WHERE shop_id = p_shop_id 
+    AND name = TRIM(p_customer_name)
+    AND (p_customer_phone IS NULL OR phone = p_customer_phone)
+  LIMIT 1;
+
+  IF v_customer_id IS NULL THEN
+    INSERT INTO public.customers (shop_id, name, phone, email, is_active)
+    VALUES (p_shop_id, TRIM(p_customer_name), p_customer_phone, p_customer_email, true)
+    RETURNING id INTO v_customer_id;
+  END IF;
+
+  -- Generate queue number
+  SELECT COALESCE(MAX(CAST(SUBSTRING(queue_number FROM '[0-9]+') AS INTEGER)), 0) + 1
+  INTO v_queue_number
+  FROM public.queues
+  WHERE shop_id = p_shop_id 
+    AND DATE(created_at) = CURRENT_DATE;
+  
+  v_queue_number := LPAD(v_queue_number::TEXT, 3, '0');
+
+  -- Calculate total estimated duration
+  IF array_length(p_service_ids, 1) > 0 THEN
+    SELECT COALESCE(SUM(estimated_duration), 15)
+    INTO v_total_duration
+    FROM public.services
+    WHERE id = ANY(p_service_ids) AND shop_id = p_shop_id AND is_available = true;
+  ELSE
+    v_total_duration := 15; -- Default duration
+  END IF;
+
+  -- Create queue
+  INSERT INTO public.queues (
+    shop_id, customer_id, queue_number, status, priority,
+    estimated_duration, note, created_at, updated_at
+  ) VALUES (
+    p_shop_id, v_customer_id, v_queue_number, 'waiting', p_priority,
+    v_total_duration, p_note, NOW(), NOW()
+  ) RETURNING id INTO v_queue_id;
+
+  -- Add services to queue
+  IF array_length(p_service_ids, 1) > 0 THEN
+    FOREACH v_service_id IN ARRAY p_service_ids
+    LOOP
+      SELECT price INTO v_service_price
+      FROM public.services
+      WHERE id = v_service_id AND shop_id = p_shop_id AND is_available = true;
+      
+      IF v_service_price IS NOT NULL THEN
+        INSERT INTO public.queue_services (queue_id, service_id, quantity, price)
+        VALUES (v_queue_id, v_service_id, 1, v_service_price);
+      END IF;
+    END LOOP;
+  END IF;
+
+  RETURN v_queue_id;
+END;
+$$;
+
+-- Function to update queue status (for shop managers)
+CREATE OR REPLACE FUNCTION public.update_queue_status(
+  p_queue_id UUID,
+  p_status queue_status,
+  p_served_by_employee_id UUID DEFAULT NULL,
+  p_note TEXT DEFAULT NULL,
+  p_cancelled_reason TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_current_status queue_status;
+BEGIN
+  -- Get queue info and validate access
+  SELECT shop_id, status INTO v_shop_id, v_current_status
+  FROM public.queues
+  WHERE id = p_queue_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Update queue based on status
+  CASE p_status
+    WHEN 'confirmed' THEN
+      UPDATE public.queues
+      SET status = p_status, updated_at = NOW()
+      WHERE id = p_queue_id AND status = 'waiting';
+      
+    WHEN 'serving' THEN
+      UPDATE public.queues
+      SET status = p_status, served_by_employee_id = p_served_by_employee_id,
+          served_at = NOW(), updated_at = NOW()
+      WHERE id = p_queue_id AND status IN ('waiting', 'confirmed');
+      
+    WHEN 'completed' THEN
+      UPDATE public.queues
+      SET status = p_status, completed_at = NOW(), updated_at = NOW()
+      WHERE id = p_queue_id AND status = 'serving';
+      
+    WHEN 'cancelled' THEN
+      UPDATE public.queues
+      SET status = p_status, cancelled_at = NOW(), cancelled_reason = p_cancelled_reason,
+          cancelled_note = p_note, updated_at = NOW()
+      WHERE id = p_queue_id AND status IN ('waiting', 'confirmed', 'serving');
+      
+    ELSE
+      RAISE EXCEPTION 'invalid_status_transition: % to %', v_current_status, p_status;
+  END CASE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'invalid_status_transition: % to %', v_current_status, p_status;
+  END IF;
+END;
+$$;
+
+-- Function to add feedback and rating (for customers)
+CREATE OR REPLACE FUNCTION public.add_queue_feedback(
+  p_queue_id UUID,
+  p_feedback TEXT,
+  p_rating INTEGER DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_id UUID;
+  v_status queue_status;
+BEGIN
+  -- Validate rating
+  IF p_rating IS NOT NULL AND (p_rating < 1 OR p_rating > 5) THEN
+    RAISE EXCEPTION 'invalid_rating: must be between 1 and 5';
+  END IF;
+
+  -- Get queue info
+  SELECT customer_id, status INTO v_customer_id, v_status
+  FROM public.queues
+  WHERE id = p_queue_id;
+
+  IF v_customer_id IS NULL THEN
+    RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
+  END IF;
+
+  -- Only allow feedback for completed queues
+  IF v_status != 'completed' THEN
+    RAISE EXCEPTION 'feedback_not_allowed: queue must be completed';
+  END IF;
+
+  -- Update feedback
+  UPDATE public.queues
+  SET feedback = p_feedback, rating = p_rating, updated_at = NOW()
+  WHERE id = p_queue_id;
+END;
+$$;
+
+-- Function to get queue position and estimated wait time
+CREATE OR REPLACE FUNCTION public.get_queue_position(
+  p_queue_id UUID
+) RETURNS TABLE(
+  queue_position INTEGER,
+  estimated_wait_minutes INTEGER,
+  ahead_count INTEGER
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_created_at TIMESTAMP WITH TIME ZONE;
+  v_status queue_status;
+BEGIN
+  -- Get queue info
+  SELECT shop_id, created_at, status 
+  INTO v_shop_id, v_created_at, v_status
+  FROM public.queues
+  WHERE id = p_queue_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
+  END IF;
+
+  -- If queue is not waiting, return special values
+  IF v_status != 'waiting' THEN
+    RETURN QUERY SELECT 0, 0, 0;
+    RETURN;
+  END IF;
+
+  -- Calculate position and wait time
+  RETURN QUERY
+  WITH queue_stats AS (
+    SELECT 
+      ROW_NUMBER() OVER (ORDER BY created_at) as pos,
+      id,
+      estimated_duration
+    FROM public.queues
+    WHERE shop_id = v_shop_id 
+      AND status = 'waiting'
+      AND created_at <= v_created_at
+  ),
+  current_queue AS (
+    SELECT pos, estimated_duration
+    FROM queue_stats
+    WHERE id = p_queue_id
+  ),
+  ahead_queues AS (
+    SELECT COALESCE(SUM(estimated_duration), 0) as total_wait
+    FROM queue_stats qs, current_queue cq
+    WHERE qs.pos < cq.pos
+  )
+  SELECT 
+    cq.pos::INTEGER,
+    aq.total_wait::INTEGER,
+    (cq.pos - 1)::INTEGER
+  FROM current_queue cq, ahead_queues aq;
+END;
+$$;
 
 
 -- =============================================================================
@@ -827,21 +1193,148 @@ CREATE POLICY "Everyone can view services"
   ON public.services FOR SELECT
   USING (true);
 
--- Only shop managers can insert services
-CREATE POLICY "Shop managers can insert services"
-  ON public.services FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+-- Remove direct INSERT/UPDATE access - use API functions
+REVOKE INSERT, UPDATE ON TABLE public.services FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.services FROM anon;
 
--- Only shop managers can update services
-CREATE POLICY "Shop managers can update services"
-  ON public.services FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Only shop managers can delete services
+-- Only shop managers can delete services (emergency cleanup)
 CREATE POLICY "Shop managers can delete services"
   ON public.services FOR DELETE
   USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR SERVICES
+-- =============================================================================
+
+-- Function to create service
+CREATE OR REPLACE FUNCTION public.create_service(
+  p_shop_id UUID,
+  p_name TEXT,
+  p_slug TEXT,
+  p_price DECIMAL(10,2),
+  p_description TEXT DEFAULT NULL,
+  p_estimated_duration INTEGER DEFAULT 15,
+  p_category TEXT DEFAULT NULL,
+  p_icon TEXT DEFAULT NULL
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_service_id UUID;
+BEGIN
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(p_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate required fields
+  IF p_name IS NULL OR LENGTH(TRIM(p_name)) = 0 THEN
+    RAISE EXCEPTION 'service_name_required';
+  END IF;
+
+  IF p_slug IS NULL OR LENGTH(TRIM(p_slug)) = 0 THEN
+    RAISE EXCEPTION 'service_slug_required';
+  END IF;
+
+  IF p_price IS NULL OR p_price < 0 THEN
+    RAISE EXCEPTION 'invalid_price: must be >= 0';
+  END IF;
+
+  IF p_estimated_duration IS NULL OR p_estimated_duration <= 0 THEN
+    RAISE EXCEPTION 'invalid_duration: must be > 0';
+  END IF;
+
+  -- Check slug uniqueness within shop
+  IF EXISTS (
+    SELECT 1 FROM public.services 
+    WHERE shop_id = p_shop_id AND slug = TRIM(p_slug)
+  ) THEN
+    RAISE EXCEPTION 'slug_already_exists: %', TRIM(p_slug);
+  END IF;
+
+  -- Create service
+  INSERT INTO public.services (
+    shop_id, name, slug, description, price, estimated_duration,
+    category, icon, is_available, popularity_rank, created_at, updated_at
+  ) VALUES (
+    p_shop_id, TRIM(p_name), TRIM(p_slug), p_description, p_price, p_estimated_duration,
+    p_category, p_icon, true, 0, NOW(), NOW()
+  ) RETURNING id INTO v_service_id;
+
+  RETURN v_service_id;
+END;
+$$;
+
+-- Function to update service
+CREATE OR REPLACE FUNCTION public.update_service(
+  p_service_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_slug TEXT DEFAULT NULL,
+  p_description TEXT DEFAULT NULL,
+  p_price DECIMAL(10,2) DEFAULT NULL,
+  p_estimated_duration INTEGER DEFAULT NULL,
+  p_category TEXT DEFAULT NULL,
+  p_icon TEXT DEFAULT NULL,
+  p_is_available BOOLEAN DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_current_slug TEXT;
+BEGIN
+  -- Get service info and validate access
+  SELECT shop_id, slug INTO v_shop_id, v_current_slug
+  FROM public.services
+  WHERE id = p_service_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'service_not_found: %', p_service_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate inputs if provided
+  IF p_price IS NOT NULL AND p_price < 0 THEN
+    RAISE EXCEPTION 'invalid_price: must be >= 0';
+  END IF;
+
+  IF p_estimated_duration IS NOT NULL AND p_estimated_duration <= 0 THEN
+    RAISE EXCEPTION 'invalid_duration: must be > 0';
+  END IF;
+
+  -- Check slug uniqueness if changing
+  IF p_slug IS NOT NULL AND TRIM(p_slug) != v_current_slug THEN
+    IF EXISTS (
+      SELECT 1 FROM public.services 
+      WHERE shop_id = v_shop_id AND slug = TRIM(p_slug) AND id != p_service_id
+    ) THEN
+      RAISE EXCEPTION 'slug_already_exists: %', TRIM(p_slug);
+    END IF;
+  END IF;
+
+  -- Update service
+  UPDATE public.services
+  SET 
+    name = COALESCE(TRIM(p_name), name),
+    slug = COALESCE(TRIM(p_slug), slug),
+    description = COALESCE(p_description, description),
+    price = COALESCE(p_price, price),
+    estimated_duration = COALESCE(p_estimated_duration, estimated_duration),
+    category = COALESCE(p_category, category),
+    icon = COALESCE(p_icon, icon),
+    is_available = COALESCE(p_is_available, is_available),
+    updated_at = NOW()
+  WHERE id = p_service_id;
+END;
+$$;
 
 -- =============================================================================
 -- DEPARTMENTS TABLE RLS POLICIES
@@ -852,21 +1345,115 @@ CREATE POLICY "Everyone can view departments"
   ON public.departments FOR SELECT
   USING (true);
 
--- Only shop managers can insert departments
-CREATE POLICY "Shop managers can insert departments"
-  ON public.departments FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+-- Remove direct INSERT/UPDATE access - use API functions
+REVOKE INSERT, UPDATE ON TABLE public.departments FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.departments FROM anon;
 
--- Only shop managers can update departments
-CREATE POLICY "Shop managers can update departments"
-  ON public.departments FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Only shop managers can delete departments
+-- Only shop managers can delete departments (emergency cleanup)
 CREATE POLICY "Shop managers can delete departments"
   ON public.departments FOR DELETE
   USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR DEPARTMENTS
+-- =============================================================================
+
+-- Function to create department
+CREATE OR REPLACE FUNCTION public.create_department(
+  p_shop_id UUID,
+  p_name TEXT,
+  p_slug TEXT,
+  p_description TEXT DEFAULT NULL
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_department_id UUID;
+BEGIN
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(p_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate required fields
+  IF p_name IS NULL OR LENGTH(TRIM(p_name)) = 0 THEN
+    RAISE EXCEPTION 'department_name_required';
+  END IF;
+
+  IF p_slug IS NULL OR LENGTH(TRIM(p_slug)) = 0 THEN
+    RAISE EXCEPTION 'department_slug_required';
+  END IF;
+
+  -- Check slug uniqueness within shop
+  IF EXISTS (
+    SELECT 1 FROM public.departments 
+    WHERE shop_id = p_shop_id AND slug = TRIM(p_slug)
+  ) THEN
+    RAISE EXCEPTION 'slug_already_exists: %', TRIM(p_slug);
+  END IF;
+
+  -- Create department
+  INSERT INTO public.departments (
+    shop_id, name, slug, description, created_at, updated_at
+  ) VALUES (
+    p_shop_id, TRIM(p_name), TRIM(p_slug), p_description, NOW(), NOW()
+  ) RETURNING id INTO v_department_id;
+
+  RETURN v_department_id;
+END;
+$$;
+
+-- Function to update department
+CREATE OR REPLACE FUNCTION public.update_department(
+  p_department_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_slug TEXT DEFAULT NULL,
+  p_description TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_current_slug TEXT;
+BEGIN
+  -- Get department info and validate access
+  SELECT shop_id, slug INTO v_shop_id, v_current_slug
+  FROM public.departments
+  WHERE id = p_department_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'department_not_found: %', p_department_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Check slug uniqueness if changing
+  IF p_slug IS NOT NULL AND TRIM(p_slug) != v_current_slug THEN
+    IF EXISTS (
+      SELECT 1 FROM public.departments 
+      WHERE shop_id = v_shop_id AND slug = TRIM(p_slug) AND id != p_department_id
+    ) THEN
+      RAISE EXCEPTION 'slug_already_exists: %', TRIM(p_slug);
+    END IF;
+  END IF;
+
+  -- Update department
+  UPDATE public.departments
+  SET 
+    name = COALESCE(TRIM(p_name), name),
+    slug = COALESCE(TRIM(p_slug), slug),
+    description = COALESCE(p_description, description),
+    updated_at = NOW()
+  WHERE id = p_department_id;
+END;
+$$;
 
 -- =============================================================================
 -- EMPLOYEES TABLE RLS POLICIES
@@ -877,21 +1464,212 @@ CREATE POLICY "Shop managers can view employees"
   ON public.employees FOR SELECT
   USING (public.is_shop_manager(shop_id));
 
--- Only shop managers can insert employees
-CREATE POLICY "Shop managers can insert employees"
-  ON public.employees FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+-- Remove direct INSERT/UPDATE access - use API functions for sensitive data
+REVOKE INSERT, UPDATE ON TABLE public.employees FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.employees FROM anon;
 
--- Only shop managers can update employees
-CREATE POLICY "Shop managers can update employees"
-  ON public.employees FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Only shop managers can delete employees
+-- Only shop managers can delete employees (emergency cleanup)
 CREATE POLICY "Shop managers can delete employees"
   ON public.employees FOR DELETE
   USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR EMPLOYEES
+-- =============================================================================
+
+-- Function to create employee (sensitive operation)
+CREATE OR REPLACE FUNCTION public.create_employee(
+  p_shop_id UUID,
+  p_profile_id UUID,
+  p_employee_code TEXT,
+  p_name TEXT,
+  p_email TEXT DEFAULT NULL,
+  p_phone TEXT DEFAULT NULL,
+  p_position_text TEXT DEFAULT NULL,
+  p_department_id UUID DEFAULT NULL,
+  p_salary DECIMAL(10,2) DEFAULT NULL,
+  p_hire_date DATE DEFAULT NULL,
+  p_station_number INTEGER DEFAULT NULL,
+  p_permissions TEXT[] DEFAULT '{}',
+  p_notes TEXT DEFAULT NULL
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_employee_id UUID;
+BEGIN
+  -- Check if user is shop owner (more restrictive for employee management)
+  IF NOT public.is_shop_owner(p_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop owner role required';
+  END IF;
+
+  -- Validate required fields
+  IF p_name IS NULL OR LENGTH(TRIM(p_name)) = 0 THEN
+    RAISE EXCEPTION 'employee_name_required';
+  END IF;
+
+  IF p_employee_code IS NULL OR LENGTH(TRIM(p_employee_code)) = 0 THEN
+    RAISE EXCEPTION 'employee_code_required';
+  END IF;
+
+  -- Validate profile exists and is not already an employee
+  IF NOT EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = p_profile_id AND is_active = true
+  ) THEN
+    RAISE EXCEPTION 'profile_not_found: %', p_profile_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.employees 
+    WHERE profile_id = p_profile_id AND status = 'active'
+  ) THEN
+    RAISE EXCEPTION 'profile_already_employee: %', p_profile_id;
+  END IF;
+
+  -- Check employee code uniqueness within shop
+  IF EXISTS (
+    SELECT 1 FROM public.employees 
+    WHERE shop_id = p_shop_id AND employee_code = TRIM(p_employee_code)
+  ) THEN
+    RAISE EXCEPTION 'employee_code_already_exists: %', TRIM(p_employee_code);
+  END IF;
+
+  -- Validate department if provided
+  IF p_department_id IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.departments 
+      WHERE id = p_department_id AND shop_id = p_shop_id
+    ) THEN
+      RAISE EXCEPTION 'department_not_found: %', p_department_id;
+    END IF;
+  END IF;
+
+  -- Validate salary
+  IF p_salary IS NOT NULL AND p_salary < 0 THEN
+    RAISE EXCEPTION 'invalid_salary: must be >= 0';
+  END IF;
+
+  -- Create employee
+  INSERT INTO public.employees (
+    shop_id, profile_id, employee_code, name, email, phone,
+    position_text, department_id, salary, hire_date, status,
+    station_number, is_on_duty, permissions, notes, created_at, updated_at
+  ) VALUES (
+    p_shop_id, p_profile_id, TRIM(p_employee_code), TRIM(p_name), p_email, p_phone,
+    p_position_text, p_department_id, p_salary, COALESCE(p_hire_date, CURRENT_DATE), 'active',
+    p_station_number, false, COALESCE(p_permissions, '{}'), p_notes, NOW(), NOW()
+  ) RETURNING id INTO v_employee_id;
+
+  RETURN v_employee_id;
+END;
+$$;
+
+-- Function to update employee (sensitive operation)
+CREATE OR REPLACE FUNCTION public.update_employee(
+  p_employee_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_email TEXT DEFAULT NULL,
+  p_phone TEXT DEFAULT NULL,
+  p_position_text TEXT DEFAULT NULL,
+  p_department_id UUID DEFAULT NULL,
+  p_salary DECIMAL(10,2) DEFAULT NULL,
+  p_station_number INTEGER DEFAULT NULL,
+  p_status employee_status DEFAULT NULL,
+  p_permissions TEXT[] DEFAULT NULL,
+  p_notes TEXT DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+BEGIN
+  -- Get employee info and validate access
+  SELECT shop_id INTO v_shop_id
+  FROM public.employees
+  WHERE id = p_employee_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'employee_not_found: %', p_employee_id;
+  END IF;
+
+  -- Check if user is shop owner
+  IF NOT public.is_shop_owner(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop owner role required';
+  END IF;
+
+  -- Validate department if provided
+  IF p_department_id IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.departments 
+      WHERE id = p_department_id AND shop_id = v_shop_id
+    ) THEN
+      RAISE EXCEPTION 'department_not_found: %', p_department_id;
+    END IF;
+  END IF;
+
+  -- Validate salary
+  IF p_salary IS NOT NULL AND p_salary < 0 THEN
+    RAISE EXCEPTION 'invalid_salary: must be >= 0';
+  END IF;
+
+  -- Update employee
+  UPDATE public.employees
+  SET 
+    name = COALESCE(TRIM(p_name), name),
+    email = COALESCE(p_email, email),
+    phone = COALESCE(p_phone, phone),
+    position_text = COALESCE(p_position_text, position_text),
+    department_id = COALESCE(p_department_id, department_id),
+    salary = COALESCE(p_salary, salary),
+    station_number = COALESCE(p_station_number, station_number),
+    status = COALESCE(p_status, status),
+    permissions = COALESCE(p_permissions, permissions),
+    notes = COALESCE(p_notes, notes),
+    updated_at = NOW()
+  WHERE id = p_employee_id;
+END;
+$$;
+
+-- Function to update employee duty status (less sensitive)
+CREATE OR REPLACE FUNCTION public.update_employee_duty(
+  p_employee_id UUID,
+  p_is_on_duty BOOLEAN
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+BEGIN
+  -- Get employee info and validate access
+  SELECT shop_id INTO v_shop_id
+  FROM public.employees
+  WHERE id = p_employee_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'employee_not_found: %', p_employee_id;
+  END IF;
+
+  -- Check if user is shop manager (less restrictive for duty status)
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Update duty status and login time
+  UPDATE public.employees
+  SET 
+    is_on_duty = p_is_on_duty,
+    last_login = CASE WHEN p_is_on_duty THEN NOW() ELSE last_login END,
+    updated_at = NOW()
+  WHERE id = p_employee_id;
+END;
+$$;
 
 -- =============================================================================
 -- PAYMENTS TABLE RLS POLICIES
@@ -905,33 +1683,171 @@ CREATE POLICY "Shop managers can view payments"
     WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
   ));
 
--- Shop managers can insert payments
-CREATE POLICY "Shop managers can insert payments"
-  ON public.payments FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
-  ));
+-- Remove direct INSERT/UPDATE access - use API functions for financial data
+REVOKE INSERT, UPDATE ON TABLE public.payments FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.payments FROM anon;
 
--- Shop managers can update payments
-CREATE POLICY "Shop managers can update payments"
-  ON public.payments FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
-  ))
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
-  ));
-
--- Shop managers can delete payments
+-- Only shop managers can delete payments (emergency cleanup)
 CREATE POLICY "Shop managers can delete payments"
   ON public.payments FOR DELETE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
     WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
   ));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR PAYMENTS
+-- =============================================================================
+
+-- Function to create payment from queue
+CREATE OR REPLACE FUNCTION public.create_payment_from_queue(
+  p_queue_id UUID,
+  p_processed_by_employee_id UUID DEFAULT NULL
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_payment_id UUID;
+  v_shop_id UUID;
+  v_total_amount DECIMAL(10,2) := 0;
+  v_service_record RECORD;
+BEGIN
+  -- Get queue info and validate access
+  SELECT shop_id INTO v_shop_id
+  FROM public.queues
+  WHERE id = p_queue_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate employee if provided
+  IF p_processed_by_employee_id IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.employees 
+      WHERE id = p_processed_by_employee_id AND shop_id = v_shop_id AND status = 'active'
+    ) THEN
+      RAISE EXCEPTION 'employee_not_found: %', p_processed_by_employee_id;
+    END IF;
+  END IF;
+
+  -- Check if payment already exists
+  IF EXISTS (SELECT 1 FROM public.payments WHERE queue_id = p_queue_id) THEN
+    RAISE EXCEPTION 'payment_already_exists: %', p_queue_id;
+  END IF;
+
+  -- Calculate total amount from queue services
+  SELECT COALESCE(SUM(qs.price * qs.quantity), 0) INTO v_total_amount
+  FROM public.queue_services qs
+  WHERE qs.queue_id = p_queue_id;
+
+  IF v_total_amount = 0 THEN
+    RAISE EXCEPTION 'no_services_found: %', p_queue_id;
+  END IF;
+
+  -- Create payment
+  INSERT INTO public.payments (
+    queue_id, total_amount, paid_amount, payment_status,
+    processed_by_employee_id, created_at, updated_at
+  ) VALUES (
+    p_queue_id, v_total_amount, 0, 'unpaid',
+    p_processed_by_employee_id, NOW(), NOW()
+  ) RETURNING id INTO v_payment_id;
+
+  -- Create payment items from queue services
+  FOR v_service_record IN 
+    SELECT qs.service_id, qs.quantity, qs.price, s.name
+    FROM public.queue_services qs
+    JOIN public.services s ON s.id = qs.service_id
+    WHERE qs.queue_id = p_queue_id
+  LOOP
+    INSERT INTO public.payment_items (
+      payment_id, service_id, name, price, quantity, total, created_at
+    ) VALUES (
+      v_payment_id, v_service_record.service_id, v_service_record.name,
+      v_service_record.price, v_service_record.quantity,
+      v_service_record.price * v_service_record.quantity, NOW()
+    );
+  END LOOP;
+
+  RETURN v_payment_id;
+END;
+$$;
+
+-- Function to process payment
+CREATE OR REPLACE FUNCTION public.process_payment(
+  p_payment_id UUID,
+  p_paid_amount DECIMAL(10,2),
+  p_payment_method payment_method,
+  p_processed_by_employee_id UUID
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_total_amount DECIMAL(10,2);
+  v_current_paid DECIMAL(10,2);
+  v_new_status payment_status;
+BEGIN
+  -- Get payment info and validate access
+  SELECT q.shop_id, p.total_amount, p.paid_amount
+  INTO v_shop_id, v_total_amount, v_current_paid
+  FROM public.payments p
+  JOIN public.queues q ON q.id = p.queue_id
+  WHERE p.id = p_payment_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'payment_not_found: %', p_payment_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate employee
+  IF NOT EXISTS (
+    SELECT 1 FROM public.employees 
+    WHERE id = p_processed_by_employee_id AND shop_id = v_shop_id AND status = 'active'
+  ) THEN
+    RAISE EXCEPTION 'employee_not_found: %', p_processed_by_employee_id;
+  END IF;
+
+  -- Validate payment amount
+  IF p_paid_amount <= 0 THEN
+    RAISE EXCEPTION 'invalid_payment_amount: must be > 0';
+  END IF;
+
+  -- Calculate new paid amount and status
+  v_current_paid := v_current_paid + p_paid_amount;
+  
+  IF v_current_paid >= v_total_amount THEN
+    v_new_status := 'paid';
+  ELSE
+    v_new_status := 'partial';
+  END IF;
+
+  -- Update payment
+  UPDATE public.payments
+  SET 
+    paid_amount = v_current_paid,
+    payment_status = v_new_status,
+    payment_method = p_payment_method,
+    processed_by_employee_id = p_processed_by_employee_id,
+    payment_date = NOW(),
+    updated_at = NOW()
+  WHERE id = p_payment_id;
+END;
+$$;
 
 -- =============================================================================
 -- PAYMENT ITEMS TABLE RLS POLICIES
@@ -946,30 +1862,11 @@ CREATE POLICY "Shop managers can view payment items"
     WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
   ));
 
--- Shop managers can insert payment items
-CREATE POLICY "Shop managers can insert payment items"
-  ON public.payment_items FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
+-- Remove direct INSERT/UPDATE access - payment items created through payment API functions
+REVOKE INSERT, UPDATE ON TABLE public.payment_items FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.payment_items FROM anon;
 
--- Shop managers can update payment items
-CREATE POLICY "Shop managers can update payment items"
-  ON public.payment_items FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ))
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
-
--- Shop managers can delete payment items
+-- Only shop managers can delete payment items (emergency cleanup)
 CREATE POLICY "Shop managers can delete payment items"
   ON public.payment_items FOR DELETE
   USING (EXISTS (
@@ -987,21 +1884,195 @@ CREATE POLICY "Everyone can view promotions"
   ON public.promotions FOR SELECT
   USING (true);
 
--- Only shop managers can insert promotions
-CREATE POLICY "Shop managers can insert promotions"
-  ON public.promotions FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+-- Remove direct INSERT/UPDATE access - use API functions
+REVOKE INSERT, UPDATE ON TABLE public.promotions FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.promotions FROM anon;
 
--- Only shop managers can update promotions
-CREATE POLICY "Shop managers can update promotions"
-  ON public.promotions FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Only shop managers can delete promotions
+-- Only shop managers can delete promotions (emergency cleanup)
 CREATE POLICY "Shop managers can delete promotions"
   ON public.promotions FOR DELETE
   USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR PROMOTIONS
+-- =============================================================================
+
+-- Function to create promotion (Fixed parameter ordering)
+CREATE OR REPLACE FUNCTION public.create_promotion(
+  p_shop_id UUID,
+  p_name TEXT,
+  p_type promotion_type,
+  p_value DECIMAL(10,2),
+  p_start_at TIMESTAMP WITH TIME ZONE,
+  p_end_at TIMESTAMP WITH TIME ZONE,
+  p_description TEXT DEFAULT NULL,
+  p_min_purchase_amount DECIMAL(10,2) DEFAULT 0,
+  p_max_discount_amount DECIMAL(10,2) DEFAULT NULL,
+  p_usage_limit INTEGER DEFAULT NULL,
+  p_conditions JSONB DEFAULT '[]',
+  p_service_ids UUID[] DEFAULT '{}'
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_promotion_id UUID;
+  v_service_id UUID;
+BEGIN
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(p_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate required fields
+  IF p_name IS NULL OR LENGTH(TRIM(p_name)) = 0 THEN
+    RAISE EXCEPTION 'promotion_name_required';
+  END IF;
+
+  IF p_value IS NULL OR p_value <= 0 THEN
+    RAISE EXCEPTION 'invalid_promotion_value: must be > 0';
+  END IF;
+
+  IF p_start_at IS NULL OR p_end_at IS NULL THEN
+    RAISE EXCEPTION 'promotion_dates_required';
+  END IF;
+
+  IF p_start_at >= p_end_at THEN
+    RAISE EXCEPTION 'invalid_promotion_dates: start must be before end';
+  END IF;
+
+  -- Validate amounts
+  IF p_min_purchase_amount < 0 THEN
+    RAISE EXCEPTION 'invalid_min_purchase: must be >= 0';
+  END IF;
+
+  IF p_max_discount_amount IS NOT NULL AND p_max_discount_amount <= 0 THEN
+    RAISE EXCEPTION 'invalid_max_discount: must be > 0';
+  END IF;
+
+  IF p_usage_limit IS NOT NULL AND p_usage_limit <= 0 THEN
+    RAISE EXCEPTION 'invalid_usage_limit: must be > 0';
+  END IF;
+
+  -- Check name uniqueness within shop
+  IF EXISTS (
+    SELECT 1 FROM public.promotions 
+    WHERE shop_id = p_shop_id AND name = TRIM(p_name)
+  ) THEN
+    RAISE EXCEPTION 'promotion_name_already_exists: %', TRIM(p_name);
+  END IF;
+
+  -- Create promotion
+  INSERT INTO public.promotions (
+    shop_id, name, description, type, value, min_purchase_amount,
+    max_discount_amount, start_at, end_at, usage_limit, status,
+    conditions, created_by, created_at, updated_at
+  ) VALUES (
+    p_shop_id, TRIM(p_name), p_description, p_type, p_value, p_min_purchase_amount,
+    p_max_discount_amount, p_start_at, p_end_at, p_usage_limit, 'active',
+    p_conditions, public.get_active_profile_id(), NOW(), NOW()
+  ) RETURNING id INTO v_promotion_id;
+
+  -- Link services to promotion
+  IF array_length(p_service_ids, 1) > 0 THEN
+    FOREACH v_service_id IN ARRAY p_service_ids
+    LOOP
+      -- Validate service belongs to shop
+      IF EXISTS (
+        SELECT 1 FROM public.services 
+        WHERE id = v_service_id AND shop_id = p_shop_id
+      ) THEN
+        INSERT INTO public.promotion_services (promotion_id, service_id)
+        VALUES (v_promotion_id, v_service_id);
+      END IF;
+    END LOOP;
+  END IF;
+
+  RETURN v_promotion_id;
+END;
+$$;
+
+-- Function to update promotion
+CREATE OR REPLACE FUNCTION public.update_promotion(
+  p_promotion_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_description TEXT DEFAULT NULL,
+  p_value DECIMAL(10,2) DEFAULT NULL,
+  p_min_purchase_amount DECIMAL(10,2) DEFAULT NULL,
+  p_max_discount_amount DECIMAL(10,2) DEFAULT NULL,
+  p_start_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  p_end_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  p_usage_limit INTEGER DEFAULT NULL,
+  p_status promotion_status DEFAULT NULL,
+  p_conditions JSONB DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_current_name TEXT;
+BEGIN
+  -- Get promotion info and validate access
+  SELECT shop_id, name INTO v_shop_id, v_current_name
+  FROM public.promotions
+  WHERE id = p_promotion_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'promotion_not_found: %', p_promotion_id;
+  END IF;
+
+  -- Check if user is shop manager
+  IF NOT public.is_shop_manager(v_shop_id) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop manager role required';
+  END IF;
+
+  -- Validate inputs if provided
+  IF p_value IS NOT NULL AND p_value <= 0 THEN
+    RAISE EXCEPTION 'invalid_promotion_value: must be > 0';
+  END IF;
+
+  IF p_min_purchase_amount IS NOT NULL AND p_min_purchase_amount < 0 THEN
+    RAISE EXCEPTION 'invalid_min_purchase: must be >= 0';
+  END IF;
+
+  IF p_max_discount_amount IS NOT NULL AND p_max_discount_amount <= 0 THEN
+    RAISE EXCEPTION 'invalid_max_discount: must be > 0';
+  END IF;
+
+  IF p_usage_limit IS NOT NULL AND p_usage_limit <= 0 THEN
+    RAISE EXCEPTION 'invalid_usage_limit: must be > 0';
+  END IF;
+
+  -- Check name uniqueness if changing
+  IF p_name IS NOT NULL AND TRIM(p_name) != v_current_name THEN
+    IF EXISTS (
+      SELECT 1 FROM public.promotions 
+      WHERE shop_id = v_shop_id AND name = TRIM(p_name) AND id != p_promotion_id
+    ) THEN
+      RAISE EXCEPTION 'promotion_name_already_exists: %', TRIM(p_name);
+    END IF;
+  END IF;
+
+  -- Update promotion
+  UPDATE public.promotions
+  SET 
+    name = COALESCE(TRIM(p_name), name),
+    description = COALESCE(p_description, description),
+    value = COALESCE(p_value, value),
+    min_purchase_amount = COALESCE(p_min_purchase_amount, min_purchase_amount),
+    max_discount_amount = COALESCE(p_max_discount_amount, max_discount_amount),
+    start_at = COALESCE(p_start_at, start_at),
+    end_at = COALESCE(p_end_at, end_at),
+    usage_limit = COALESCE(p_usage_limit, usage_limit),
+    status = COALESCE(p_status, status),
+    conditions = COALESCE(p_conditions, conditions),
+    updated_at = NOW()
+  WHERE id = p_promotion_id;
+END;
+$$;
 
 -- =============================================================================
 -- PROMOTION SERVICES TABLE RLS POLICIES
@@ -1012,21 +2083,9 @@ CREATE POLICY "Everyone can view promotion services"
   ON public.promotion_services FOR SELECT
   USING (true);
 
--- Shop managers can insert promotion services
-CREATE POLICY "Shop managers can insert promotion services"
-  ON public.promotion_services FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
-
--- Shop managers can update promotion services
-CREATE POLICY "Shop managers can update promotion services"
-  ON public.promotion_services FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+-- Remove direct INSERT/UPDATE access - managed through promotion API functions
+REVOKE INSERT, UPDATE ON TABLE public.promotion_services FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.promotion_services FROM anon;
 
 -- Shop managers can delete promotion services
 CREATE POLICY "Shop managers can delete promotion services"
@@ -1107,21 +2166,191 @@ CREATE POLICY "Customers and shop managers can view customer points"
     )
   );
 
--- Shop managers can insert customer points
-CREATE POLICY "Shop managers can insert customer points"
-  ON public.customer_points FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+-- Remove direct INSERT/UPDATE access - use API functions for points management
+REVOKE INSERT, UPDATE ON TABLE public.customer_points FROM authenticated;
+REVOKE INSERT, UPDATE ON TABLE public.customer_points FROM anon;
 
--- Shop managers can update customer points
-CREATE POLICY "Shop managers can update customer points"
-  ON public.customer_points FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
-
--- Shop managers can delete customer points
+-- Shop managers can delete customer points (emergency cleanup)
 CREATE POLICY "Shop managers can delete customer points"
   ON public.customer_points FOR DELETE
   USING (public.is_shop_manager(shop_id));
+
+-- =============================================================================
+-- SECURE API FUNCTIONS FOR CUSTOMER POINTS
+-- =============================================================================
+
+-- Function to initialize customer points
+CREATE OR REPLACE FUNCTION public.initialize_customer_points(
+  p_customer_id UUID
+) RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_points_id UUID;
+BEGIN
+  -- Get customer info
+  SELECT shop_id INTO v_shop_id
+  FROM public.customers
+  WHERE id = p_customer_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+  END IF;
+
+  -- Check if points already exist
+  SELECT id INTO v_points_id
+  FROM public.customer_points
+  WHERE customer_id = p_customer_id;
+
+  IF v_points_id IS NOT NULL THEN
+    RETURN v_points_id;
+  END IF;
+
+  -- Create customer points record
+  INSERT INTO public.customer_points (
+    shop_id, customer_id, current_points, total_earned, total_redeemed,
+    membership_tier, tier_benefits, created_at, updated_at
+  ) VALUES (
+    v_shop_id, p_customer_id, 0, 0, 0,
+    'bronze', '{}', NOW(), NOW()
+  ) RETURNING id INTO v_points_id;
+
+  RETURN v_points_id;
+END;
+$$;
+
+-- Function to add points (from queue completion)
+CREATE OR REPLACE FUNCTION public.add_customer_points(
+  p_customer_id UUID,
+  p_points INTEGER,
+  p_description TEXT,
+  p_queue_id UUID DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_points_id UUID;
+  v_new_total INTEGER;
+  v_new_tier membership_tier;
+BEGIN
+  -- Get customer info
+  SELECT shop_id INTO v_shop_id
+  FROM public.customers
+  WHERE id = p_customer_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+  END IF;
+
+  -- Validate points
+  IF p_points <= 0 THEN
+    RAISE EXCEPTION 'invalid_points: must be > 0';
+  END IF;
+
+  -- Initialize points if not exists
+  SELECT public.initialize_customer_points(p_customer_id) INTO v_points_id;
+
+  -- Update points
+  UPDATE public.customer_points
+  SET 
+    current_points = current_points + p_points,
+    total_earned = total_earned + p_points,
+    updated_at = NOW()
+  WHERE customer_id = p_customer_id
+  RETURNING current_points INTO v_new_total;
+
+  -- Determine new tier based on total points
+  v_new_tier := CASE 
+    WHEN v_new_total >= 10000 THEN 'platinum'
+    WHEN v_new_total >= 5000 THEN 'gold'
+    WHEN v_new_total >= 1000 THEN 'silver'
+    ELSE 'bronze'
+  END;
+
+  -- Update tier if changed
+  UPDATE public.customer_points
+  SET membership_tier = v_new_tier
+  WHERE customer_id = p_customer_id AND membership_tier != v_new_tier;
+
+  -- Create transaction record
+  INSERT INTO public.customer_point_transactions (
+    customer_point_id, type, points, description, related_queue_id,
+    transaction_date, created_at
+  ) VALUES (
+    v_points_id, 'earned', p_points, p_description, p_queue_id,
+    NOW(), NOW()
+  );
+END;
+$$;
+
+-- Function to redeem points
+CREATE OR REPLACE FUNCTION public.redeem_customer_points(
+  p_customer_id UUID,
+  p_points INTEGER,
+  p_description TEXT,
+  p_reward_id UUID DEFAULT NULL
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_shop_id UUID;
+  v_points_id UUID;
+  v_current_points INTEGER;
+BEGIN
+  -- Get customer info
+  SELECT shop_id INTO v_shop_id
+  FROM public.customers
+  WHERE id = p_customer_id;
+
+  IF v_shop_id IS NULL THEN
+    RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+  END IF;
+
+  -- Validate points
+  IF p_points <= 0 THEN
+    RAISE EXCEPTION 'invalid_points: must be > 0';
+  END IF;
+
+  -- Get current points
+  SELECT id, current_points INTO v_points_id, v_current_points
+  FROM public.customer_points
+  WHERE customer_id = p_customer_id;
+
+  IF v_points_id IS NULL THEN
+    RAISE EXCEPTION 'customer_points_not_found: %', p_customer_id;
+  END IF;
+
+  -- Check sufficient points
+  IF v_current_points < p_points THEN
+    RAISE EXCEPTION 'insufficient_points: have %, need %', v_current_points, p_points;
+  END IF;
+
+  -- Update points
+  UPDATE public.customer_points
+  SET 
+    current_points = current_points - p_points,
+    total_redeemed = total_redeemed + p_points,
+    updated_at = NOW()
+  WHERE customer_id = p_customer_id;
+
+  -- Create transaction record
+  INSERT INTO public.customer_point_transactions (
+    customer_point_id, type, points, description,
+    transaction_date, created_at
+  ) VALUES (
+    v_points_id, 'redeemed', p_points, p_description,
+    NOW(), NOW()
+  );
+END;
+$$;
 
 -- =============================================================================
 -- CUSTOMER POINT TRANSACTIONS TABLE RLS POLICIES
