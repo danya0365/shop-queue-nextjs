@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import { ShopSettingsViewModel } from '@/src/presentation/presenters/shop/backend/ShopSettingsPresenter';
-import { useState } from 'react';
+import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
+import { useState } from "react";
 
 interface ShopSettingsViewProps {
   viewModel: ShopSettingsViewModel;
 }
 
 export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
-  const [activeCategory, setActiveCategory] = useState('basic');
+  const [activeCategory, setActiveCategory] = useState("basic");
   const [isEditing, setIsEditing] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+
+  console.log(viewModel);
 
   if (!viewModel.settings) {
     return (
@@ -30,12 +32,12 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
   const stats = viewModel.stats;
 
   const formatDateTime = (date: Date) => {
-    return new Intl.DateTimeFormat('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -59,7 +61,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           </label>
           <input
             type="tel"
-            value={settings.shopPhone || ''}
+            value={settings.shopPhone || ""}
             disabled={!isEditing}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
           />
@@ -71,7 +73,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           คำอธิบายร้าน
         </label>
         <textarea
-          value={settings.shopDescription || ''}
+          value={settings.shopDescription || ""}
           disabled={!isEditing}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
@@ -85,7 +87,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           </label>
           <input
             type="email"
-            value={settings.shopEmail || ''}
+            value={settings.shopEmail || ""}
             disabled={!isEditing}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
           />
@@ -96,7 +98,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           </label>
           <input
             type="url"
-            value={settings.shopWebsite || ''}
+            value={settings.shopWebsite || ""}
             disabled={!isEditing}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
           />
@@ -108,7 +110,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           ที่อยู่
         </label>
         <textarea
-          value={settings.shopAddress || ''}
+          value={settings.shopAddress || ""}
           disabled={!isEditing}
           rows={2}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
@@ -157,7 +159,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
             disabled={!isEditing}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
           />
-          <label htmlFor="allowWalkIn" className="ml-2 block text-sm text-gray-900 dark:text-white">
+          <label
+            htmlFor="allowWalkIn"
+            className="ml-2 block text-sm text-gray-900 dark:text-white"
+          >
             อนุญาตให้เดินเข้ามาจองคิวได้
           </label>
         </div>
@@ -170,7 +175,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
             disabled={!isEditing}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
           />
-          <label htmlFor="allowAdvanceBooking" className="ml-2 block text-sm text-gray-900 dark:text-white">
+          <label
+            htmlFor="allowAdvanceBooking"
+            className="ml-2 block text-sm text-gray-900 dark:text-white"
+          >
             อนุญาตให้จองล่วงหน้าได้
           </label>
         </div>
@@ -204,7 +212,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           disabled={!isEditing}
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
         />
-        <label htmlFor="pointsEnabled" className="ml-2 block text-sm text-gray-900 dark:text-white">
+        <label
+          htmlFor="pointsEnabled"
+          className="ml-2 block text-sm text-gray-900 dark:text-white"
+        >
           เปิดใช้งานระบบแต้มสะสม
         </label>
       </div>
@@ -258,7 +269,9 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">วิธีการชำระเงิน</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            วิธีการชำระเงิน
+          </h3>
 
           <div className="flex items-center">
             <input
@@ -268,7 +281,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
               disabled={!isEditing}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
             />
-            <label htmlFor="acceptCash" className="ml-2 block text-sm text-gray-900 dark:text-white">
+            <label
+              htmlFor="acceptCash"
+              className="ml-2 block text-sm text-gray-900 dark:text-white"
+            >
               💵 เงินสด
             </label>
           </div>
@@ -281,7 +297,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
               disabled={!isEditing}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
             />
-            <label htmlFor="acceptCreditCard" className="ml-2 block text-sm text-gray-900 dark:text-white">
+            <label
+              htmlFor="acceptCreditCard"
+              className="ml-2 block text-sm text-gray-900 dark:text-white"
+            >
               💳 บัตรเครดิต/เดบิต
             </label>
           </div>
@@ -294,7 +313,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
               disabled={!isEditing}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
             />
-            <label htmlFor="acceptBankTransfer" className="ml-2 block text-sm text-gray-900 dark:text-white">
+            <label
+              htmlFor="acceptBankTransfer"
+              className="ml-2 block text-sm text-gray-900 dark:text-white"
+            >
               🏦 โอนเงินผ่านธนาคาร
             </label>
           </div>
@@ -307,7 +329,10 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
               disabled={!isEditing}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
             />
-            <label htmlFor="acceptPromptPay" className="ml-2 block text-sm text-gray-900 dark:text-white">
+            <label
+              htmlFor="acceptPromptPay"
+              className="ml-2 block text-sm text-gray-900 dark:text-white"
+            >
               📱 PromptPay
             </label>
           </div>
@@ -320,7 +345,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
             </label>
             <input
               type="text"
-              value={settings.promptPayId || ''}
+              value={settings.promptPayId || ""}
               disabled={!isEditing}
               placeholder="เบอร์โทรหรือเลขบัตรประชาชน"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
@@ -333,13 +358,13 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
 
   const renderCurrentCategory = () => {
     switch (activeCategory) {
-      case 'basic':
+      case "basic":
         return renderBasicSettings();
-      case 'queue':
+      case "queue":
         return renderQueueSettings();
-      case 'points':
+      case "points":
         return renderPointsSettings();
-      case 'payments':
+      case "payments":
         return renderPaymentSettings();
       default:
         return (
@@ -358,8 +383,12 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">ตั้งค่าร้าน</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการข้อมูลและการตั้งค่าของร้าน</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            ตั้งค่าร้าน
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            จัดการข้อมูลและการตั้งค่าของร้าน
+          </p>
         </div>
       </div>
 
@@ -369,7 +398,9 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">ฟีเจอร์เปิดใช้</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  ฟีเจอร์เปิดใช้
+                </p>
                 <p className="text-2xl font-bold text-green-600">
                   {stats.enabledFeatures.length}
                 </p>
@@ -381,7 +412,9 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">ฟีเจอร์ปิดใช้</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  ฟีเจอร์ปิดใช้
+                </p>
                 <p className="text-2xl font-bold text-gray-600">
                   {stats.disabledFeatures.length}
                 </p>
@@ -393,9 +426,14 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">การเชื่อมต่อ</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  การเชื่อมต่อ
+                </p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {Object.values(stats.integrationStatus).filter(Boolean).length}
+                  {
+                    Object.values(stats.integrationStatus).filter(Boolean)
+                      .length
+                  }
                 </p>
               </div>
               <div className="text-2xl">🔗</div>
@@ -405,7 +443,9 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">อัปเดตล่าสุด</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  อัปเดตล่าสุด
+                </p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatDateTime(stats.lastUpdated)}
                 </p>
@@ -428,10 +468,11 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${activeCategory === category.id
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    activeCategory === category.id
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  }`}
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{category.icon}</span>
@@ -453,10 +494,18 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {viewModel.settingsCategories.find(c => c.id === activeCategory)?.name}
+                {
+                  viewModel.settingsCategories.find(
+                    (c) => c.id === activeCategory
+                  )?.name
+                }
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {viewModel.settingsCategories.find(c => c.id === activeCategory)?.description}
+                {
+                  viewModel.settingsCategories.find(
+                    (c) => c.id === activeCategory
+                  )?.description
+                }
               </p>
             </div>
 

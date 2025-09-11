@@ -1,8 +1,8 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React from 'react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 
 interface ShopBackendSidebarProps {
   shopId: string;
@@ -18,19 +18,51 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
   const pathname = usePathname();
 
   const navigationItems = [
-    { href: `/shop/${shopId}/backend`, label: 'แดชบอร์ด', icon: '📊' },
-    { href: `/shop/${shopId}/backend/queue`, label: 'จัดการคิว', icon: '📋' },
-    { href: `/shop/${shopId}/backend/services`, label: 'จัดการบริการ', icon: '✂️' },
-    { href: `/shop/${shopId}/backend/customers`, label: 'จัดการลูกค้า', icon: '👤' },
-    { href: `/shop/${shopId}/backend/employees`, label: 'จัดการพนักงาน', icon: '👥' },
-    { href: `/shop/${shopId}/backend/departments`, label: 'จัดการแผนก', icon: '🏢' },
-    { href: `/shop/${shopId}/backend/payments`, label: 'การชำระเงิน', icon: '💳' },
-    { href: `/shop/${shopId}/backend/rewards`, label: 'รางวัล', icon: '🕐' },
-    { href: `/shop/${shopId}/backend/opening-hours`, label: 'เวลาทำการ', icon: '🕐' },
-    { href: `/shop/${shopId}/backend/promotions`, label: 'โปรโมชัน', icon: '🎁' },
-    { href: `/shop/${shopId}/backend/posters`, label: 'โปสเตอร์', icon: '🖼️' },
-    { href: `/shop/${shopId}/backend/analytics`, label: 'รายงาน', icon: '📈' },
-    { href: `/shop/${shopId}/backend/settings`, label: 'ตั้งค่าร้าน', icon: '⚙️' },
+    { href: `/shop/${shopId}/backend`, label: "แดชบอร์ด", icon: "📊" },
+    { href: `/shop/${shopId}/backend/queue`, label: "จัดการคิว", icon: "📋" },
+    {
+      href: `/shop/${shopId}/backend/services`,
+      label: "จัดการบริการ",
+      icon: "✂️",
+    },
+    {
+      href: `/shop/${shopId}/backend/customers`,
+      label: "จัดการลูกค้า",
+      icon: "👤",
+    },
+    {
+      href: `/shop/${shopId}/backend/employees`,
+      label: "จัดการพนักงาน",
+      icon: "👥",
+    },
+    {
+      href: `/shop/${shopId}/backend/departments`,
+      label: "จัดการแผนก",
+      icon: "🏢",
+    },
+    {
+      href: `/shop/${shopId}/backend/payments`,
+      label: "การชำระเงิน",
+      icon: "💳",
+    },
+    { href: `/shop/${shopId}/backend/rewards`, label: "รางวัล", icon: "🕐" },
+    {
+      href: `/shop/${shopId}/backend/opening-hours`,
+      label: "เวลาทำการ",
+      icon: "🕐",
+    },
+    {
+      href: `/shop/${shopId}/backend/promotions`,
+      label: "โปรโมชัน",
+      icon: "🎁",
+    },
+    { href: `/shop/${shopId}/backend/posters`, label: "โปสเตอร์", icon: "🖼️" },
+    { href: `/shop/${shopId}/backend/analytics`, label: "รายงาน", icon: "📈" },
+    {
+      href: `/shop/${shopId}/backend/shop-settings`,
+      label: "คั้งค่าร้านค้า",
+      icon: "⚙️",
+    },
   ];
 
   const isActive = (href: string) => {
@@ -51,20 +83,32 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         fixed lg:static inset-y-0 left-0 z-40
         w-64 bg-blue-50 dark:bg-blue-900 shadow-sm min-h-screen
         transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}
+      >
         {/* Mobile Close Button */}
         <div className="lg:hidden flex justify-end p-4">
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-2 rounded-lg text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -77,10 +121,11 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.href)
-                    ? 'bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 border-r-2 border-blue-700'
-                    : 'text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800'
-                  }`}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive(item.href)
+                    ? "bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 border-r-2 border-blue-700"
+                    : "text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800"
+                }`}
               >
                 <span className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.label}</span>

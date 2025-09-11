@@ -1,4 +1,4 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
+import type { Logger } from "@/src/domain/interfaces/logger";
 
 // Shop Settings interface and types
 export interface ShopSettings {
@@ -45,11 +45,11 @@ export interface ShopSettings {
   promptPayId?: string;
 
   // Display Settings
-  theme: 'light' | 'dark' | 'auto';
-  language: 'th' | 'en';
+  theme: "light" | "dark" | "auto";
+  language: "th" | "en";
   currency: string;
   dateFormat: string;
-  timeFormat: '12h' | '24h';
+  timeFormat: "12h" | "24h";
 
   // Advanced Settings
   autoConfirmBooking: boolean;
@@ -72,31 +72,36 @@ export interface ShopSettingsStats {
 
 export interface IShopSettingsBackendService {
   getShopSettings(shopId: string): Promise<ShopSettings | null>;
-  updateShopSettings(shopId: string, data: Partial<ShopSettings>): Promise<ShopSettings>;
+  updateShopSettings(
+    shopId: string,
+    data: Partial<ShopSettings>
+  ): Promise<ShopSettings>;
   resetToDefaults(shopId: string): Promise<ShopSettings>;
   getSettingsStats(shopId: string): Promise<ShopSettingsStats>;
-  validateSettings(settings: Partial<ShopSettings>): Promise<{ isValid: boolean; errors: string[] }>;
+  validateSettings(
+    settings: Partial<ShopSettings>
+  ): Promise<{ isValid: boolean; errors: string[] }>;
   exportSettings(shopId: string): Promise<string>;
   importSettings(shopId: string, settingsData: string): Promise<ShopSettings>;
 }
 
 export class ShopSettingsBackendService implements IShopSettingsBackendService {
   private mockSettings: ShopSettings = {
-    id: 'settings_1',
-    shopId: 'shop1',
+    id: "settings_1",
+    shopId: "shop1",
     // Basic Shop Information
-    shopName: 'ร้านตัดผมสไตล์โมเดิร์น',
-    shopDescription: 'ร้านตัดผมและจัดแต่งทรงผม บริการครบครัน ด้วยช่างมืออาชีพ',
-    shopPhone: '02-123-4567',
-    shopEmail: 'info@modernhair.com',
-    shopAddress: '123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-    shopWebsite: 'https://modernhair.com',
-    shopLogo: '/images/shop-logo.png',
+    shopName: "ร้านตัดผมสไตล์โมเดิร์น",
+    shopDescription: "ร้านตัดผมและจัดแต่งทรงผม บริการครบครัน ด้วยช่างมืออาชีพ",
+    shopPhone: "02-123-4567",
+    shopEmail: "info@modernhair.com",
+    shopAddress: "123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
+    shopWebsite: "https://modernhair.com",
+    shopLogo: "/images/shop-logo.png",
 
     // Business Hours
-    timezone: 'Asia/Bangkok',
-    defaultOpenTime: '09:00',
-    defaultCloseTime: '20:00',
+    timezone: "Asia/Bangkok",
+    defaultOpenTime: "09:00",
+    defaultCloseTime: "20:00",
 
     // Queue Settings
     maxQueuePerService: 10,
@@ -122,14 +127,14 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     acceptCreditCard: true,
     acceptBankTransfer: true,
     acceptPromptPay: true,
-    promptPayId: '0212345678',
+    promptPayId: "0212345678",
 
     // Display Settings
-    theme: 'light',
-    language: 'th',
-    currency: 'THB',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: '24h',
+    theme: "light",
+    language: "th",
+    currency: "THB",
+    dateFormat: "DD/MM/YYYY",
+    timeFormat: "24h",
 
     // Advanced Settings
     autoConfirmBooking: false,
@@ -138,30 +143,38 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     showPricesPublic: true,
     enableReviews: true,
 
-    createdAt: new Date('2024-01-01T00:00:00Z'),
-    updatedAt: new Date('2024-01-15T10:30:00Z'),
+    createdAt: new Date("2024-01-01T00:00:00Z"),
+    updatedAt: new Date("2024-01-15T10:30:00Z"),
   };
 
-  constructor(private readonly logger: Logger) { }
+  constructor(private readonly logger: Logger) {}
 
   async getShopSettings(shopId: string): Promise<ShopSettings | null> {
-    this.logger.info('ShopSettingsBackendService: Getting shop settings', { shopId });
+    this.logger.info("ShopSettingsBackendService: Getting shop settings", {
+      shopId,
+    });
 
-    if (this.mockSettings.shopId !== shopId) {
-      this.logger.warn('ShopSettingsBackendService: Shop settings not found', { shopId });
-      return null;
-    }
-
-    this.logger.info('ShopSettingsBackendService: Retrieved shop settings', { shopId });
+    this.logger.info("ShopSettingsBackendService: Retrieved shop settings", {
+      shopId,
+    });
     return this.mockSettings;
   }
 
-  async updateShopSettings(shopId: string, data: Partial<ShopSettings>): Promise<ShopSettings> {
-    this.logger.info('ShopSettingsBackendService: Updating shop settings', { shopId, data });
+  async updateShopSettings(
+    shopId: string,
+    data: Partial<ShopSettings>
+  ): Promise<ShopSettings> {
+    this.logger.info("ShopSettingsBackendService: Updating shop settings", {
+      shopId,
+      data,
+    });
 
     if (this.mockSettings.shopId !== shopId) {
-      this.logger.error('ShopSettingsBackendService: Shop not found for settings update', { shopId });
-      throw new Error('Shop not found');
+      this.logger.error(
+        "ShopSettingsBackendService: Shop not found for settings update",
+        { shopId }
+      );
+      throw new Error("Shop not found");
     }
 
     // Update settings
@@ -171,22 +184,25 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
       updatedAt: new Date(),
     };
 
-    this.logger.info('ShopSettingsBackendService: Shop settings updated', {
+    this.logger.info("ShopSettingsBackendService: Shop settings updated", {
       shopId,
-      updatedFields: Object.keys(data)
+      updatedFields: Object.keys(data),
     });
 
     return this.mockSettings;
   }
 
   async resetToDefaults(shopId: string): Promise<ShopSettings> {
-    this.logger.info('ShopSettingsBackendService: Resetting settings to defaults', { shopId });
+    this.logger.info(
+      "ShopSettingsBackendService: Resetting settings to defaults",
+      { shopId }
+    );
 
     const defaultSettings: ShopSettings = {
       id: this.mockSettings.id,
       shopId,
       // Basic Shop Information
-      shopName: 'ร้านของฉัน',
+      shopName: "ร้านของฉัน",
       shopDescription: undefined,
       shopPhone: undefined,
       shopEmail: undefined,
@@ -195,9 +211,9 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
       shopLogo: undefined,
 
       // Business Hours
-      timezone: 'Asia/Bangkok',
-      defaultOpenTime: '09:00',
-      defaultCloseTime: '18:00',
+      timezone: "Asia/Bangkok",
+      defaultOpenTime: "09:00",
+      defaultCloseTime: "18:00",
 
       // Queue Settings
       maxQueuePerService: 5,
@@ -226,11 +242,11 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
       promptPayId: undefined,
 
       // Display Settings
-      theme: 'light',
-      language: 'th',
-      currency: 'THB',
-      dateFormat: 'DD/MM/YYYY',
-      timeFormat: '24h',
+      theme: "light",
+      language: "th",
+      currency: "THB",
+      dateFormat: "DD/MM/YYYY",
+      timeFormat: "24h",
 
       // Advanced Settings
       autoConfirmBooking: false,
@@ -245,16 +261,20 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
 
     this.mockSettings = defaultSettings;
 
-    this.logger.info('ShopSettingsBackendService: Settings reset to defaults', { shopId });
+    this.logger.info("ShopSettingsBackendService: Settings reset to defaults", {
+      shopId,
+    });
     return this.mockSettings;
   }
 
   async getSettingsStats(shopId: string): Promise<ShopSettingsStats> {
-    this.logger.info('ShopSettingsBackendService: Getting settings stats', { shopId });
+    this.logger.info("ShopSettingsBackendService: Getting settings stats", {
+      shopId,
+    });
 
     const settings = await this.getShopSettings(shopId);
     if (!settings) {
-      throw new Error('Shop settings not found');
+      throw new Error("Shop settings not found");
     }
 
     const enabledFeatures: string[] = [];
@@ -262,18 +282,18 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
 
     // Check feature status
     const features = [
-      { key: 'pointsEnabled', name: 'ระบบแต้มสะสม' },
-      { key: 'allowAdvanceBooking', name: 'จองล่วงหน้า' },
-      { key: 'smsEnabled', name: 'แจ้งเตือน SMS' },
-      { key: 'emailEnabled', name: 'แจ้งเตือน Email' },
-      { key: 'lineNotifyEnabled', name: 'แจ้งเตือน LINE' },
-      { key: 'acceptCreditCard', name: 'รับบัตรเครดิต' },
-      { key: 'acceptPromptPay', name: 'รับ PromptPay' },
-      { key: 'autoConfirmBooking', name: 'ยืนยันการจองอัตโนมัติ' },
-      { key: 'enableReviews', name: 'ระบบรีวิว' },
+      { key: "pointsEnabled", name: "ระบบแต้มสะสม" },
+      { key: "allowAdvanceBooking", name: "จองล่วงหน้า" },
+      { key: "smsEnabled", name: "แจ้งเตือน SMS" },
+      { key: "emailEnabled", name: "แจ้งเตือน Email" },
+      { key: "lineNotifyEnabled", name: "แจ้งเตือน LINE" },
+      { key: "acceptCreditCard", name: "รับบัตรเครดิต" },
+      { key: "acceptPromptPay", name: "รับ PromptPay" },
+      { key: "autoConfirmBooking", name: "ยืนยันการจองอัตโนมัติ" },
+      { key: "enableReviews", name: "ระบบรีวิว" },
     ];
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       if (settings[feature.key as keyof ShopSettings]) {
         enabledFeatures.push(feature.name);
       } else {
@@ -282,11 +302,11 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     });
 
     const integrationStatus = {
-      'SMS Gateway': settings.smsEnabled,
-      'Email Service': settings.emailEnabled,
-      'LINE Notify': settings.lineNotifyEnabled,
-      'Payment Gateway': settings.acceptCreditCard || settings.acceptPromptPay,
-      'Points System': settings.pointsEnabled,
+      "SMS Gateway": settings.smsEnabled,
+      "Email Service": settings.emailEnabled,
+      "LINE Notify": settings.lineNotifyEnabled,
+      "Payment Gateway": settings.acceptCreditCard || settings.acceptPromptPay,
+      "Points System": settings.pointsEnabled,
     };
 
     const stats = {
@@ -297,78 +317,109 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
       integrationStatus,
     };
 
-    this.logger.info('ShopSettingsBackendService: Settings stats calculated', {
+    this.logger.info("ShopSettingsBackendService: Settings stats calculated", {
       shopId,
       enabledCount: enabledFeatures.length,
-      disabledCount: disabledFeatures.length
+      disabledCount: disabledFeatures.length,
     });
 
     return stats;
   }
 
-  async validateSettings(settings: Partial<ShopSettings>): Promise<{ isValid: boolean; errors: string[] }> {
-    this.logger.info('ShopSettingsBackendService: Validating settings', { settings });
+  async validateSettings(
+    settings: Partial<ShopSettings>
+  ): Promise<{ isValid: boolean; errors: string[] }> {
+    this.logger.info("ShopSettingsBackendService: Validating settings", {
+      settings,
+    });
 
     const errors: string[] = [];
 
     // Validate shop name
-    if (settings.shopName !== undefined && settings.shopName.trim().length === 0) {
-      errors.push('ชื่อร้านไม่สามารถเป็นค่าว่างได้');
+    if (
+      settings.shopName !== undefined &&
+      settings.shopName.trim().length === 0
+    ) {
+      errors.push("ชื่อร้านไม่สามารถเป็นค่าว่างได้");
     }
 
     // Validate email format
-    if (settings.shopEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.shopEmail)) {
-      errors.push('รูปแบบอีเมลไม่ถูกต้อง');
+    if (
+      settings.shopEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.shopEmail)
+    ) {
+      errors.push("รูปแบบอีเมลไม่ถูกต้อง");
     }
 
     // Validate phone format
     if (settings.shopPhone && !/^[0-9\-\s\+\(\)]+$/.test(settings.shopPhone)) {
-      errors.push('รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง');
+      errors.push("รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง");
     }
 
     // Validate time format
-    if (settings.defaultOpenTime && !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultOpenTime)) {
-      errors.push('รูปแบบเวลาเปิดไม่ถูกต้อง');
+    if (
+      settings.defaultOpenTime &&
+      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultOpenTime)
+    ) {
+      errors.push("รูปแบบเวลาเปิดไม่ถูกต้อง");
     }
 
-    if (settings.defaultCloseTime && !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultCloseTime)) {
-      errors.push('รูปแบบเวลาปิดไม่ถูกต้อง');
+    if (
+      settings.defaultCloseTime &&
+      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultCloseTime)
+    ) {
+      errors.push("รูปแบบเวลาปิดไม่ถูกต้อง");
     }
 
     // Validate numeric values
-    if (settings.maxQueuePerService !== undefined && settings.maxQueuePerService < 1) {
-      errors.push('จำนวนคิวสูงสุดต้องมากกว่า 0');
+    if (
+      settings.maxQueuePerService !== undefined &&
+      settings.maxQueuePerService < 1
+    ) {
+      errors.push("จำนวนคิวสูงสุดต้องมากกว่า 0");
     }
 
     if (settings.pointsPerBaht !== undefined && settings.pointsPerBaht < 0) {
-      errors.push('อัตราแต้มต่อบาทต้องไม่น้อยกว่า 0');
+      errors.push("อัตราแต้มต่อบาทต้องไม่น้อยกว่า 0");
     }
 
-    if (settings.minimumPointsToRedeem !== undefined && settings.minimumPointsToRedeem < 0) {
-      errors.push('แต้มขั้นต่ำในการใช้ต้องไม่น้อยกว่า 0');
+    if (
+      settings.minimumPointsToRedeem !== undefined &&
+      settings.minimumPointsToRedeem < 0
+    ) {
+      errors.push("แต้มขั้นต่ำในการใช้ต้องไม่น้อยกว่า 0");
     }
 
     // Validate PromptPay ID
-    if (settings.acceptPromptPay && settings.promptPayId && !/^[0-9]{10,13}$/.test(settings.promptPayId.replace(/\-/g, ''))) {
-      errors.push('รูปแบบ PromptPay ID ไม่ถูกต้อง');
+    if (
+      settings.acceptPromptPay &&
+      settings.promptPayId &&
+      !/^[0-9]{10,13}$/.test(settings.promptPayId.replace(/\-/g, ""))
+    ) {
+      errors.push("รูปแบบ PromptPay ID ไม่ถูกต้อง");
     }
 
     const isValid = errors.length === 0;
 
-    this.logger.info('ShopSettingsBackendService: Settings validation completed', {
-      isValid,
-      errorCount: errors.length
-    });
+    this.logger.info(
+      "ShopSettingsBackendService: Settings validation completed",
+      {
+        isValid,
+        errorCount: errors.length,
+      }
+    );
 
     return { isValid, errors };
   }
 
   async exportSettings(shopId: string): Promise<string> {
-    this.logger.info('ShopSettingsBackendService: Exporting settings', { shopId });
+    this.logger.info("ShopSettingsBackendService: Exporting settings", {
+      shopId,
+    });
 
     const settings = await this.getShopSettings(shopId);
     if (!settings) {
-      throw new Error('Shop settings not found');
+      throw new Error("Shop settings not found");
     }
 
     // Remove sensitive or non-exportable fields
@@ -382,16 +433,21 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
 
     const exportString = JSON.stringify(exportData, null, 2);
 
-    this.logger.info('ShopSettingsBackendService: Settings exported', {
+    this.logger.info("ShopSettingsBackendService: Settings exported", {
       shopId,
-      dataSize: exportString.length
+      dataSize: exportString.length,
     });
 
     return exportString;
   }
 
-  async importSettings(shopId: string, settingsData: string): Promise<ShopSettings> {
-    this.logger.info('ShopSettingsBackendService: Importing settings', { shopId });
+  async importSettings(
+    shopId: string,
+    settingsData: string
+  ): Promise<ShopSettings> {
+    this.logger.info("ShopSettingsBackendService: Importing settings", {
+      shopId,
+    });
 
     try {
       const importedData = JSON.parse(settingsData);
@@ -399,18 +455,28 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
       // Validate imported data
       const validation = await this.validateSettings(importedData);
       if (!validation.isValid) {
-        throw new Error(`การตรวจสอบข้อมูลไม่ผ่าน: ${validation.errors.join(', ')}`);
+        throw new Error(
+          `การตรวจสอบข้อมูลไม่ผ่าน: ${validation.errors.join(", ")}`
+        );
       }
 
       // Update settings with imported data
-      const updatedSettings = await this.updateShopSettings(shopId, importedData);
+      const updatedSettings = await this.updateShopSettings(
+        shopId,
+        importedData
+      );
 
-      this.logger.info('ShopSettingsBackendService: Settings imported successfully', { shopId });
+      this.logger.info(
+        "ShopSettingsBackendService: Settings imported successfully",
+        { shopId }
+      );
       return updatedSettings;
-
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Failed to import settings', error);
-      throw new Error('ไม่สามารถนำเข้าการตั้งค่าได้: รูปแบบข้อมูลไม่ถูกต้อง');
+      this.logger.error(
+        "ShopSettingsBackendService: Failed to import settings",
+        error
+      );
+      throw new Error("ไม่สามารถนำเข้าการตั้งค่าได้: รูปแบบข้อมูลไม่ถูกต้อง");
     }
   }
 }
