@@ -1,8 +1,7 @@
 import type { PromotionStatsDTO } from "@/src/application/dtos/backend/promotions-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import type { IBackendPromotionsService } from "@/src/application/services/backend/BackendPromotionsService";
-import { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
+import type { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
@@ -59,7 +58,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly promotionsService: IBackendPromotionsService
+    private readonly promotionsService: IShopBackendPromotionsService
   ) {
     super(
       logger,
@@ -83,26 +82,29 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
       });
 
       // Get promotions data from service
-      const promotionsData = await this.promotionsService.getPromotionsData(
-        page,
-        perPage
-      );
+      const paginatedPromotions =
+        await this.promotionsService.getPaginatedPromotionsByShopId(
+          shopId,
+          page,
+          perPage
+        );
+
+      const promotionStats =
+        await this.promotionsService.getPromotionsStatsByShopId(shopId);
 
       // Map service DTOs to view model
-      const promotions: PromotionData[] = promotionsData.promotions.map(
+      const promotions: PromotionData[] = paginatedPromotions.data.map(
         this.mapPromotionData
       );
-      const stats: PromotionStats = this.mapStatsData(promotionsData.stats);
-
-      const totalPages = Math.ceil(promotionsData.totalCount / perPage);
+      const stats: PromotionStats = this.mapStatsData(promotionStats);
 
       return {
         promotions,
         stats,
-        totalCount: promotionsData.totalCount,
-        currentPage: promotionsData.currentPage,
-        perPage: promotionsData.perPage,
-        totalPages,
+        totalCount: paginatedPromotions.pagination.totalItems,
+        currentPage: paginatedPromotions.pagination.currentPage,
+        perPage: paginatedPromotions.pagination.itemsPerPage,
+        totalPages: paginatedPromotions.pagination.totalPages,
       };
     } catch (error) {
       this.logger.error("PromotionsPresenter: Error getting view model", error);

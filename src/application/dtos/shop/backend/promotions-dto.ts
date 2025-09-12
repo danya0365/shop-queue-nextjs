@@ -10,14 +10,14 @@ export interface PromotionDTO {
   shopName: string; // joined from shop
   name: string;
   description: string | null;
-  type: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'free_item';
+  type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
   value: number;
   minPurchaseAmount: number | null;
   maxDiscountAmount: number | null;
   startAt: string;
   endAt: string;
   usageLimit: number | null;
-  status: 'active' | 'inactive' | 'expired' | 'scheduled';
+  status: "active" | "inactive" | "expired" | "scheduled";
   conditions: PromotionCondition[] | null;
   createdBy: string; // joined from profile
   createdByName: string | null; // joined from profile
@@ -61,20 +61,20 @@ export interface UpdatePromotionParams {
  * Promotion type enum
  */
 export enum PromotionType {
-  PERCENTAGE = 'percentage',
-  FIXED_AMOUNT = 'fixed_amount',
-  BUY_X_GET_Y = 'buy_x_get_y',
-  FREE_ITEM = 'free_item'
+  PERCENTAGE = "percentage",
+  FIXED_AMOUNT = "fixed_amount",
+  BUY_X_GET_Y = "buy_x_get_y",
+  FREE_ITEM = "free_item",
 }
 
 /**
  * Promotion status enum
  */
 export enum PromotionStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  EXPIRED = 'expired',
-  SCHEDULED = 'scheduled'
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  EXPIRED = "expired",
+  SCHEDULED = "scheduled",
 }
 
 export interface PromotionStatsDTO {
@@ -125,6 +125,7 @@ export interface PromotionsDataDTO {
  * Input DTO for GetPromotionsPaginatedUseCase
  */
 export interface GetPromotionsPaginatedInput {
+  shopId: string;
   page: number;
   limit: number;
 }

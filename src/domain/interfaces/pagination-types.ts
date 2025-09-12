@@ -7,6 +7,12 @@ export interface PaginationParams {
   limit: number;
 }
 
+export interface PaginationParamsWithShopId {
+  page?: number;
+  limit?: number;
+  shopId?: string;
+}
+
 /**
  * Pagination metadata for domain layer
  */

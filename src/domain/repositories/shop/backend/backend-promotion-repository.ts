@@ -1,15 +1,21 @@
-import type { CreatePromotionEntity, PaginatedPromotionsEntity, PromotionEntity, PromotionStatsEntity, UpdatePromotionEntity } from '@/src/domain/entities/shop/backend/backend-promotion.entity';
-import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type {
+  CreatePromotionEntity,
+  PaginatedPromotionsEntity,
+  PromotionEntity,
+  PromotionStatsEntity,
+  UpdatePromotionEntity,
+} from "@/src/domain/entities/shop/backend/backend-promotion.entity";
+import { PaginationParamsWithShopId } from "@/src/domain/interfaces/pagination-types";
 
 /**
  * Promotion repository error types
  */
 export enum ShopBackendPromotionErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -22,10 +28,10 @@ export class ShopBackendPromotionError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendPromotionError';
+    this.name = "ShopBackendPromotionError";
   }
 }
 
@@ -40,14 +46,16 @@ export interface ShopBackendPromotionRepository {
    * @returns Paginated promotions data
    * @throws ShopBackendPromotionError if the operation fails
    */
-  getPaginatedPromotions(params: PaginationParams): Promise<PaginatedPromotionsEntity>;
+  getPaginatedPromotions(
+    params: PaginationParamsWithShopId
+  ): Promise<PaginatedPromotionsEntity>;
 
   /**
    * Get promotion statistics
    * @returns Promotion statistics data
    * @throws ShopBackendPromotionError if the operation fails
    */
-  getPromotionStats(): Promise<PromotionStatsEntity>;
+  getPromotionStats(shopId: string): Promise<PromotionStatsEntity>;
 
   /**
    * Get promotion by ID
@@ -63,7 +71,9 @@ export interface ShopBackendPromotionRepository {
    * @returns Created promotion entity
    * @throws ShopBackendPromotionError if the operation fails
    */
-  createPromotion(promotion: Omit<CreatePromotionEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<PromotionEntity>;
+  createPromotion(
+    promotion: Omit<CreatePromotionEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<PromotionEntity>;
 
   /**
    * Update an existing promotion
@@ -72,7 +82,12 @@ export interface ShopBackendPromotionRepository {
    * @returns Updated promotion entity
    * @throws ShopBackendPromotionError if the operation fails
    */
-  updatePromotion(id: string, promotion: Partial<Omit<UpdatePromotionEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PromotionEntity>;
+  updatePromotion(
+    id: string,
+    promotion: Partial<
+      Omit<UpdatePromotionEntity, "id" | "createdAt" | "updatedAt">
+    >
+  ): Promise<PromotionEntity>;
 
   /**
    * Delete a promotion

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { PromotionsViewModel } from '@/src/presentation/presenters/shop/backend/PromotionsPresenter';
-import { usePromotionsPresenter } from '@/src/presentation/presenters/shop/backend/usePromotionsPresenter';
-import { useState } from 'react';
+import { PromotionsViewModel } from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
+import { usePromotionsPresenter } from "@/src/presentation/presenters/shop/backend/usePromotionsPresenter";
+import { useState } from "react";
 
 interface PromotionsViewProps {
   viewModel: PromotionsViewModel;
@@ -10,28 +10,48 @@ interface PromotionsViewProps {
 
 export function PromotionsView({ viewModel }: PromotionsViewProps) {
   const [state, actions] = usePromotionsPresenter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Filter promotions based on search and status
-  const filteredPromotions = viewModel.promotions.filter(promotion => {
-    const matchesSearch = promotion.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (promotion.description && promotion.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === 'all' || promotion.status === statusFilter;
+  const filteredPromotions = viewModel.promotions.filter((promotion) => {
+    const matchesSearch =
+      promotion.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (promotion.description &&
+        promotion.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus =
+      statusFilter === "all" || promotion.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string | null) => {
     const statusConfig = {
-      active: { label: 'ใช้งาน', class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-      inactive: { label: 'ไม่ใช้งาน', class: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' },
-      expired: { label: 'หมดอายุ', class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-      scheduled: { label: 'กำหนดการ', class: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+      active: {
+        label: "ใช้งาน",
+        class:
+          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      },
+      inactive: {
+        label: "ไม่ใช้งาน",
+        class: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      },
+      expired: {
+        label: "หมดอายุ",
+        class: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      },
+      scheduled: {
+        label: "กำหนดการ",
+        class: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.inactive;
+    const config =
+      statusConfig[status as keyof typeof statusConfig] ||
+      statusConfig.inactive;
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.class}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.class}`}
+      >
         {config.label}
       </span>
     );
@@ -39,38 +59,45 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
 
   const getPromotionTypeLabel = (type: string) => {
     const typeLabels = {
-      percentage: 'ส่วนลด %',
-      fixed_amount: 'ส่วนลดคงที่',
-      buy_x_get_y: 'ซื้อ X แถม Y',
-      free_shipping: 'ส่งฟรี'
+      percentage: "ส่วนลด %",
+      fixed_amount: "ส่วนลดคงที่",
+      buy_x_get_y: "ซื้อ X แถม Y",
+      free_shipping: "ส่งฟรี",
     };
     return typeLabels[type as keyof typeof typeLabels] || type;
   };
 
   const getPromotionTypeColor = (type: string) => {
     const colors = {
-      percentage: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      fixed_amount: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      buy_x_get_y: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      free_shipping: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+      percentage:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      fixed_amount:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      buy_x_get_y:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      free_shipping:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
     };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return (
+      colors[type as keyof typeof colors] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    );
   };
 
   const formatValue = (type: string, value: number) => {
-    if (type === 'percentage') {
+    if (type === "percentage") {
       return `${value}%`;
-    } else if (type === 'fixed_amount') {
+    } else if (type === "fixed_amount") {
       return `฿${value.toLocaleString()}`;
     }
     return value.toString();
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -79,8 +106,12 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการโปรโมชั่น</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">สร้างและจัดการโปรโมชั่นส่วนลดสำหรับร้านของคุณ</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการโปรโมชั่น
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            สร้างและจัดการโปรโมชั่นส่วนลดสำหรับร้านของคุณ
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
@@ -97,7 +128,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">โปรโมชั่นทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                โปรโมชั่นทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.stats.totalPromotions}
               </p>
@@ -109,7 +142,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">เปิดใช้งาน</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เปิดใช้งาน
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {viewModel.stats.activePromotions}
               </p>
@@ -121,7 +156,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">กำหนดการ</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                กำหนดการ
+              </p>
               <p className="text-2xl font-bold text-blue-600">
                 {viewModel.stats.scheduledPromotions}
               </p>
@@ -133,7 +170,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ส่วนลดรวม</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ส่วนลดรวม
+              </p>
               <p className="text-2xl font-bold text-purple-600">
                 ฿{(viewModel.stats.totalDiscountGiven || 0).toLocaleString()}
               </p>
@@ -145,7 +184,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">หมดอายุ</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                หมดอายุ
+              </p>
               <p className="text-2xl font-bold text-red-600">
                 {viewModel.stats.expiredPromotions}
               </p>
@@ -157,7 +198,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ถูกใช้แล้ว</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ถูกใช้แล้ว
+              </p>
               <p className="text-2xl font-bold text-orange-600">
                 {viewModel.stats.totalUsage}
               </p>
@@ -167,7 +210,7 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         </div>
       </div>
 
-        {/* Filters */}
+      {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
@@ -221,32 +264,56 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {promotion.name}
                     </h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPromotionTypeColor(promotion.type)}`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPromotionTypeColor(
+                        promotion.type
+                      )}`}
+                    >
                       {getPromotionTypeLabel(promotion.type)}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <button 
+                  <button
                     onClick={() => {
                       actions.setSelectedPromotion(promotion);
                       actions.setShowEditModal(true);
                     }}
                     className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
                     </svg>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       actions.setSelectedPromotion(promotion);
                       actions.setShowDeleteModal(true);
                     }}
                     className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -262,7 +329,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
               {/* Promotion Details */}
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">ค่าส่วนลด:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ค่าส่วนลด:
+                  </span>
                   <span className="font-semibold text-blue-600">
                     {formatValue(promotion.type, promotion.value)}
                   </span>
@@ -270,7 +339,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
 
                 {promotion.minPurchaseAmount && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">ยอดซื้อขั้นต่ำ:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      ยอดซื้อขั้นต่ำ:
+                    </span>
                     <span className="font-semibold text-green-600">
                       ฿{promotion.minPurchaseAmount.toLocaleString()}
                     </span>
@@ -279,7 +350,9 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
 
                 {promotion.maxDiscountAmount && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">ส่วนลดสูงสุด:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      ส่วนลดสูงสุด:
+                    </span>
                     <span className="font-semibold text-orange-600">
                       ฿{promotion.maxDiscountAmount.toLocaleString()}
                     </span>
@@ -287,15 +360,20 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
                 )}
 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">ระยะเวลา:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ระยะเวลา:
+                  </span>
                   <span className="text-sm text-gray-900 dark:text-white">
-                    {formatDate(promotion.startAt)} - {formatDate(promotion.endAt)}
+                    {formatDate(promotion.startAt)} -{" "}
+                    {formatDate(promotion.endAt)}
                   </span>
                 </div>
 
                 {promotion.usageLimit && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">จำกัดการใช้:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      จำกัดการใช้:
+                    </span>
                     <span className="font-semibold text-purple-600">
                       {promotion.usageLimit} ครั้ง
                     </span>
@@ -307,12 +385,14 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center">
                   {getStatusBadge(promotion.status)}
-                  <button className={`text-sm font-medium ${
-                    promotion.status === 'active'
-                      ? 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300'
-                      : 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300'
-                  }`}>
-                    {promotion.status === 'active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                  <button
+                    className={`text-sm font-medium ${
+                      promotion.status === "active"
+                        ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                    }`}
+                  >
+                    {promotion.status === "active" ? "ปิดใช้งาน" : "เปิดใช้งาน"}
                   </button>
                 </div>
               </div>
@@ -348,20 +428,42 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
         <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-5 w-5 text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800 dark:text-red-200">{state.error}</p>
+              <p className="text-sm text-red-800 dark:text-red-200">
+                {state.error}
+              </p>
             </div>
             <div className="ml-auto pl-3">
               <button
                 onClick={() => actions.setError(null)}
                 className="text-red-400 hover:text-red-600 dark:hover:text-red-300"
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>

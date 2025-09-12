@@ -1,24 +1,30 @@
 import { PromotionStatsDTO } from "@/src/application/dtos/shop/backend/promotions-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { PromotionMapper } from "@/src/application/mappers/shop/backend/promotion-mapper";
-import { ShopBackendPromotionError, ShopBackendPromotionErrorType, ShopBackendPromotionRepository } from "@/src/domain/repositories/shop/backend/backend-promotion-repository";
+import {
+  ShopBackendPromotionError,
+  ShopBackendPromotionErrorType,
+  ShopBackendPromotionRepository,
+} from "@/src/domain/repositories/shop/backend/backend-promotion-repository";
 
 /**
  * Use case for getting promotion statistics
  * Following SOLID principles and Clean Architecture
  */
-export class GetPromotionStatsUseCase implements IUseCase<void, PromotionStatsDTO> {
-  constructor(
-    private promotionRepository: ShopBackendPromotionRepository
-  ) { }
+export class GetPromotionStatsUseCase
+  implements IUseCase<string, PromotionStatsDTO>
+{
+  constructor(private promotionRepository: ShopBackendPromotionRepository) {}
 
   /**
    * Execute the use case to get promotion statistics
    * @returns Promotion statistics data
    */
-  async execute(): Promise<PromotionStatsDTO> {
+  async execute(shopId: string): Promise<PromotionStatsDTO> {
     try {
-      const promotionStats = await this.promotionRepository.getPromotionStats();
+      const promotionStats = await this.promotionRepository.getPromotionStats(
+        shopId
+      );
       return PromotionMapper.statsToDTO(promotionStats);
     } catch (error) {
       if (error instanceof ShopBackendPromotionError) {
@@ -27,9 +33,9 @@ export class GetPromotionStatsUseCase implements IUseCase<void, PromotionStatsDT
 
       throw new ShopBackendPromotionError(
         ShopBackendPromotionErrorType.UNKNOWN,
-        'Failed to get promotion statistics',
-        'GetPromotionStatsUseCase.execute',
-        {},
+        "Failed to get promotion statistics",
+        "GetPromotionStatsUseCase.execute",
+        { shopId },
         error
       );
     }

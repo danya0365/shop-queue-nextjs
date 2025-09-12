@@ -1,15 +1,21 @@
-import { CreatePromotionEntity, PromotionEntity, PromotionStatsEntity, PaginatedPromotionsEntity, UpdatePromotionEntity } from "../../entities/backend/backend-promotion.entity";
-import { PaginationParams } from "../../interfaces/pagination-types";
+import {
+  CreatePromotionEntity,
+  PaginatedPromotionsEntity,
+  PromotionEntity,
+  PromotionStatsEntity,
+  UpdatePromotionEntity,
+} from "../../entities/backend/backend-promotion.entity";
+import { PaginationParamsWithShopId } from "../../interfaces/pagination-types";
 
 /**
  * Promotion repository error types
  */
 export enum BackendPromotionErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -22,10 +28,10 @@ export class BackendPromotionError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'BackendPromotionError';
+    this.name = "BackendPromotionError";
   }
 }
 
@@ -40,7 +46,9 @@ export interface BackendPromotionRepository {
    * @returns Paginated promotions data
    * @throws BackendPromotionError if the operation fails
    */
-  getPaginatedPromotions(params: PaginationParams): Promise<PaginatedPromotionsEntity>;
+  getPaginatedPromotions(
+    params: PaginationParamsWithShopId
+  ): Promise<PaginatedPromotionsEntity>;
 
   /**
    * Get promotion statistics
@@ -63,7 +71,9 @@ export interface BackendPromotionRepository {
    * @returns Created promotion entity
    * @throws BackendPromotionError if the operation fails
    */
-  createPromotion(promotion: Omit<CreatePromotionEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<PromotionEntity>;
+  createPromotion(
+    promotion: Omit<CreatePromotionEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<PromotionEntity>;
 
   /**
    * Update an existing promotion
@@ -72,7 +82,12 @@ export interface BackendPromotionRepository {
    * @returns Updated promotion entity
    * @throws BackendPromotionError if the operation fails
    */
-  updatePromotion(id: string, promotion: Partial<Omit<UpdatePromotionEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PromotionEntity>;
+  updatePromotion(
+    id: string,
+    promotion: Partial<
+      Omit<UpdatePromotionEntity, "id" | "createdAt" | "updatedAt">
+    >
+  ): Promise<PromotionEntity>;
 
   /**
    * Delete a promotion
