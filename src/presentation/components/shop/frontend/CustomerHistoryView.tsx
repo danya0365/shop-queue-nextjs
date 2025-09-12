@@ -88,245 +88,118 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
   });
 
   return (
-    <div className="min-h-screen frontend-overlay">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="frontend-card shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold frontend-text-primary">ประวัติการใช้บริการ</h1>
-                <p className="text-sm frontend-text-secondary">ดูประวัติการจองคิวและการใช้บริการของคุณ</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm frontend-text-secondary">สวัสดี</p>
-                <p className="text-lg font-medium frontend-text-primary">
-                  {viewModel.customerName}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="frontend-card">
+        <div className="p-6">
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">ประวัติการใช้บริการ</h1>
+          <p className="frontend-text-secondary">ดูประวัติคิวและการใช้บริการของคุณ</p>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="frontend-card p-6">
-            <div className="flex items-center">
-              <div className="p-2 frontend-queue-current rounded-lg">
-                <span className="text-2xl">📋</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium frontend-text-secondary">คิวทั้งหมด</p>
-                <p className="text-2xl font-bold frontend-text-primary">
-                  {viewModel.customerStats.totalQueues}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="frontend-card p-6">
-            <div className="flex items-center">
-              <div className="p-2 frontend-queue-time rounded-lg">
-                <span className="text-2xl">✅</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium frontend-text-secondary">เสร็จสิ้น</p>
-                <p className="text-2xl font-bold frontend-service-price">
-                  {viewModel.customerStats.completedQueues}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="frontend-card p-6">
-            <div className="flex items-center">
-              <div className="p-2 frontend-queue-average rounded-lg">
-                <span className="text-2xl">💰</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium frontend-text-secondary">ยอดใช้จ่ายรวม</p>
-                <p className="text-2xl font-bold frontend-service-price">
-                  ฿{viewModel.customerStats.totalSpent.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="frontend-card p-6">
-            <div className="flex items-center">
-              <div className="p-2 frontend-queue-waiting rounded-lg">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium frontend-text-secondary">คะแนนเฉลี่ย</p>
-                <p className="text-2xl font-bold frontend-queue-waiting">
-                  {viewModel.customerStats.averageRating > 0 ? viewModel.customerStats.averageRating.toFixed(1) : '-'}
-                </p>
-              </div>
-            </div>
-          </div>
+      {/* Filters */}
+      <div className="frontend-card">
+        <div className="p-6 border-b frontend-card-border">
+          <h3 className="text-lg font-medium frontend-text-primary">ตัวกรอง</h3>
         </div>
-
-        {/* Customer Info */}
-        <div className="frontend-card p-6 mb-6">
-          <h3 className="text-lg font-medium frontend-text-primary mb-4">ข้อมูลสมาชิก</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm frontend-text-secondary">สมาชิกตั้งแต่</p>
-              <p className="text-lg font-medium frontend-text-primary">
-                {new Date(viewModel.customerStats.memberSince).toLocaleDateString('th-TH')}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm frontend-text-secondary">บริการที่ชื่นชอบ</p>
-              <p className="text-lg font-medium frontend-text-primary">
-                {viewModel.customerStats.favoriteService}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm frontend-text-secondary">สถานะ</p>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium frontend-queue-time">
-                สมาชิกปกติ
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="frontend-card p-6 mb-6">
-          <h3 className="text-lg font-medium frontend-text-primary mb-4">ตัวกรอง</h3>
+        <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium frontend-text-primary mb-2">
+              <label className="block text-sm font-medium frontend-text-primary mb-1">
                 สถานะ
               </label>
               <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value as HistoryFilters['status'] })}
-                className="w-full frontend-input"
+                value={filters.status || ''}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value || undefined })}
+                className="frontend-input w-full"
               >
-                <option value="all">ทั้งหมด</option>
+                <option value="">ทั้งหมด</option>
                 <option value="completed">เสร็จสิ้น</option>
                 <option value="cancelled">ยกเลิก</option>
                 <option value="no_show">ไม่มาตามนัด</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-sm font-medium frontend-text-primary mb-2">
-                ช่วงเวลา
+              <label className="block text-sm font-medium frontend-text-primary mb-1">
+                วันที่เริ่มต้น
               </label>
-              <select
-                value={filters.dateRange}
-                onChange={(e) => setFilters({ ...filters, dateRange: e.target.value as HistoryFilters['dateRange'] })}
-                className="w-full frontend-input"
-              >
-                <option value="all">ทั้งหมด</option>
-                <option value="month">เดือนนี้</option>
-                <option value="quarter">ไตรมาสนี้</option>
-                <option value="year">ปีนี้</option>
-              </select>
+              <input
+                type="date"
+                value={filters.startDate || ''}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value || undefined })}
+                className="frontend-input w-full"
+              />
             </div>
-
-            <div className="flex items-end">
-              <button className="w-full frontend-button-primary px-4 py-2 rounded-lg transition-colors">
-                ค้นหา
-              </button>
+            <div>
+              <label className="block text-sm font-medium frontend-text-primary mb-1">
+                วันที่สิ้นสุด
+              </label>
+              <input
+                type="date"
+                value={filters.endDate || ''}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value || undefined })}
+                className="frontend-input w-full"
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* History List */}
-        <div className="frontend-card">
-          <div className="px-6 py-4 border-b frontend-card-border">
-            <h3 className="text-lg font-medium frontend-text-primary">
-              ประวัติการใช้บริการ ({filteredHistory.length})
-            </h3>
-          </div>
-
-          <div className="divide-y frontend-card-border">
-            {filteredHistory.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="frontend-text-muted text-6xl mb-4">📋</div>
-                <h3 className="text-lg font-medium frontend-text-primary mb-2">
-                  ไม่มีประวัติการใช้บริการ
-                </h3>
-                <p className="frontend-text-secondary">เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่</p>
-              </div>
-            ) : (
-              filteredHistory.map((queue) => (
-                <div key={queue.id} className="p-6 frontend-card-hover">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="frontend-badge-info text-sm font-medium px-2.5 py-0.5 rounded">
-                          คิว {queue.queueNumber}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(queue.status)}`}>
+      {/* History List */}
+      <div className="frontend-card">
+        <div className="p-6 border-b frontend-card-border">
+          <h3 className="text-lg font-medium frontend-text-primary">ประวัติการใช้บริการ</h3>
+        </div>
+        <div className="p-6">
+          {filteredHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <span className="text-6xl mb-4 block">📜</span>
+              <h4 className="text-xl font-semibold frontend-text-primary mb-2">ไม่มีประวัติการใช้บริการ</h4>
+              <p className="frontend-text-secondary">เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredHistory.map((queue, index) => (
+                <div key={queue.id}>
+                  <div className="frontend-card frontend-card-hover p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="frontend-badge-info px-3 py-1 rounded-full text-sm font-medium">
+                          #{queue.queueNumber}
+                        </div>
+                        <div>
+                          <h4 className="font-medium frontend-text-primary">{queue.shopName}</h4>
+                          <p className="text-sm frontend-text-secondary">{queue.date} เวลา {queue.time}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <p className="font-bold frontend-service-price">฿{queue.totalAmount}</p>
+                          <p className="text-sm frontend-text-secondary">{queue.services.length} รายการ</p>
+                        </div>
+                        
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          queue.status === 'completed' ? 'frontend-badge-success' :
+                          queue.status === 'cancelled' ? 'frontend-status-cancelled' :
+                          'frontend-badge-warning'
+                        }`}>
                           {getStatusText(queue.status)}
                         </span>
-                        <span className="text-xs frontend-text-muted">
-                          {new Date(queue.queueDate).toLocaleDateString('th-TH')} {queue.queueTime}
-                        </span>
+                        
+                        <button
+                          onClick={() => handleViewDetails(queue)}
+                          className="frontend-button-secondary px-4 py-2 rounded-lg text-sm font-medium"
+                        >
+                          ดูรายละเอียด
+                        </button>
                       </div>
-
-                      <h3 className="font-medium frontend-text-primary mb-1">
-                        {queue.shopName}
-                      </h3>
-
-                      <div className="text-sm frontend-text-secondary mb-2">
-                        {queue.services.map((service, index) => (
-                          <span key={service.id}>
-                            {service.name} x{service.quantity}
-                            {index < queue.services.length - 1 && ', '}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm frontend-text-secondary">
-                        <span className="font-medium frontend-service-price">
-                          ฿{queue.totalAmount.toLocaleString()}
-                        </span>
-                        {queue.paymentMethod && (
-                          <span className="flex items-center gap-1">
-                            {getPaymentMethodIcon(queue.paymentMethod)}
-                            {getPaymentMethodText(queue.paymentMethod)}
-                          </span>
-                        )}
-                        {queue.rating && (
-                          <div className="flex items-center gap-1">
-                            {renderStars(queue.rating)}
-                            <span className="ml-1">({queue.rating})</span>
-                          </div>
-                        )}
-                        {queue.waitTime && (
-                          <span>รอ {queue.waitTime} นาที</span>
-                        )}
-                      </div>
-
-                      {queue.feedback && (
-                        <div className="mt-2 p-2 bg-gray-50 rounded text-sm text-gray-600">
-                          💬 {queue.feedback}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="ml-4">
-                      <button
-                        onClick={() => handleViewDetails(queue)}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        ดูรายละเอียด
-                      </button>
                     </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

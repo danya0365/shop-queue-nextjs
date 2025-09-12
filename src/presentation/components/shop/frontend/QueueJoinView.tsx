@@ -71,42 +71,19 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
             <div className="frontend-qr-section rounded-lg p-6 mb-6">
               <h3 className="font-semibold frontend-text-primary mb-4">รายละเอียดคิว</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="frontend-text-secondary">ชื่อ:</span>
-                  <span className="font-medium frontend-text-primary">{customerName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="frontend-text-secondary">เบอร์โทร:</span>
-                  <span className="font-medium frontend-text-primary">{customerPhone}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="frontend-text-secondary">จำนวนบริการ:</span>
-                  <span className="font-medium frontend-text-primary">{state.selectedServices.length} รายการ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="frontend-text-secondary">ราคารวม:</span>
-                  <span className="font-bold frontend-service-price">฿{state.totalPrice}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="frontend-text-secondary">เวลารอโดยประมาณ:</span>
-                  <span className="font-medium frontend-queue-time">{estimatedWaitTime} นาที</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col space-y-4">
               <button
-                onClick={() => window.location.href = `/shop/${shopId}/status`}
-                className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
+                onClick={() => window.location.href = `/shop/${shopId}/status?queue=${state.queueNumber}`}
+                className="frontend-button-primary px-6 py-3 rounded-lg font-semibold mr-4"
               >
-                📱 ติดตามสถานะคิว
+                ติดตามสถานะคิว
               </button>
               <button
-                onClick={actions.reset}
-                className="frontend-button-disabled px-6 py-3 rounded-lg font-semibold"
+                onClick={() => {
+                  actions.resetState();
+                }}
+                className="frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
               >
-                🔄 เข้าคิวใหม่
+                เข้าคิวใหม่
               </button>
             </div>
           </div>
@@ -117,7 +94,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
   if (!isAcceptingQueues) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="space-y-8">
         <div className="frontend-card p-8 text-center">
           <span className="text-6xl mb-4 block">😔</span>
           <h1 className="text-2xl font-bold frontend-text-primary mb-2">ขณะนี้ไม่รับคิวเพิ่ม</h1>
@@ -134,13 +111,20 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold frontend-text-primary mb-2">เข้าคิว - {shopName}</h1>
-        <div className="flex items-center space-x-4 text-sm frontend-text-secondary">
-          <span>คิวปัจจุบัน: {currentQueueLength} คิว</span>
-          <span>•</span>
-          <span>เวลารอโดยประมาณ: {estimatedWaitTime} นาที</span>
+    <div className="space-y-8">
+      {/* Shop Header */}
+      <div className="frontend-card">
+        <div className="p-6 border-b frontend-card-border">
+          <h1 className="text-2xl font-bold frontend-text-primary">{shopName}</h1>
+        </div>
+        <div className="p-6">
+          <div className="flex items-center space-x-4 text-sm frontend-text-secondary">
+            <span>⏰ เวลารอโดยประมาณ: {estimatedWaitTime} นาที</span>
+            <span>👥 คิวข้างหน้า: {currentQueueLength} คิว</span>
+            <span className={isAcceptingQueues ? 'frontend-text-success' : 'frontend-text-danger'}>
+              {isAcceptingQueues ? '✅ รับคิวอยู่' : '❌ ไม่รับคิว'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -151,27 +135,18 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
             <div className="p-6 border-b frontend-card-border">
               <h2 className="text-xl font-semibold frontend-text-primary">เลือกบริการ</h2>
             </div>
-
-            {/* Category Filter */}
-            <div className="p-6 border-b">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setSelectedCategory('ทั้งหมด')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === 'ทั้งหมด'
-                      ? 'frontend-button-primary'
-                      : 'frontend-button-secondary'
-                    }`}
-                >
-                  ทั้งหมด
-                </button>
-                {categories.map((category) => (
+            <div className="p-6">
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {['ทั้งหมด', ...categories].map((category) => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedCategory === category
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      selectedCategory === category
                         ? 'frontend-button-primary'
                         : 'frontend-button-secondary'
-                      }`}
+                    }`}
                   >
                     {category}
                   </button>
@@ -181,38 +156,36 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
             {/* Services Grid */}
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredServices.map((service) => (
-                  <div
-                    key={service.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${!service.available
-                        ? 'frontend-card-secondary cursor-not-allowed opacity-50'
-                        : state.selectedServices.includes(service.id)
-                          ? 'frontend-service-card border-2'
-                          : 'frontend-card frontend-card-hover'
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredServices.map((service) => {
+                  const isSelected = state.selectedServices.includes(service.id);
+                  return (
+                    <div
+                      key={service.id}
+                      onClick={() => handleServiceToggle(service.id)}
+                      className={`cursor-pointer rounded-lg p-4 border-2 transition-all ${
+                        isSelected
+                          ? 'frontend-service-card border-purple-500'
+                          : 'frontend-card frontend-card-hover border-transparent'
                       }`}
-                    onClick={() => service.available && handleServiceToggle(service.id)}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <span className="text-2xl">{service.icon}</span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold frontend-text-primary">{service.name}</h3>
-                          {state.selectedServices.includes(service.id) && (
-                            <span className="frontend-text-success">✓</span>
-                          )}
-                        </div>
+                    >
+                      <div className="text-center">
+                        <span className="text-3xl mb-2 block">{service.icon}</span>
+                        <h3 className="font-semibold frontend-text-primary mb-1">{service.name}</h3>
+                        <p className="text-sm frontend-text-secondary mb-2">{service.description}</p>
                         <div className="flex justify-between items-center text-sm">
                           <span className="font-bold frontend-service-price">฿{service.price}</span>
                           <span className="frontend-text-muted">~{service.estimatedTime} นาที</span>
                         </div>
-                        {!service.available && (
-                          <span className="text-xs frontend-text-danger mt-1 block">ไม่พร้อมให้บริการ</span>
+                        {isSelected && (
+                          <div className="mt-2">
+                            <span className="frontend-text-success text-sm font-medium">✓ เลือกแล้ว</span>
+                          </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -221,40 +194,47 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
         {/* Order Summary & Form */}
         <div className="space-y-6">
           {/* Order Summary */}
-          <div className="frontend-card">
-            <div className="p-6 border-b frontend-card-border">
-              <h2 className="text-xl font-semibold frontend-text-primary">สรุปคำสั่ง</h2>
-            </div>
-            <div className="p-6">
-              {state.selectedServices.length === 0 ? (
-                <p className="frontend-text-muted text-center py-4">ยังไม่ได้เลือกบริการ</p>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    {state.selectedServices.map((serviceId) => {
-                      const service = services.find(s => s.id === serviceId);
-                      return service ? (
-                        <div key={serviceId} className="flex justify-between text-sm">
-                          <span className="frontend-text-primary">{service.name}</span>
-                          <span className="frontend-service-price">฿{service.price}</span>
+          {state.selectedServices.length > 0 && (
+            <div className="frontend-card">
+              <div className="p-6 border-b frontend-card-border">
+                <h3 className="text-lg font-semibold frontend-text-primary">สรุปการสั่ง</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {state.selectedServices.map((serviceId) => {
+                    const service = services.find(s => s.id === serviceId);
+                    if (!service) return null;
+                    return (
+                      <div key={serviceId} className="flex justify-between items-center">
+                        <div>
+                          <span className="frontend-text-primary font-medium">{service.name}</span>
+                          <span className="frontend-text-muted text-sm ml-2">~{service.estimatedTime} นาที</span>
                         </div>
-                      ) : null;
-                    })}
+                        <span className="frontend-service-price font-bold">฿{service.price}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="border-t frontend-card-border mt-4 pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold frontend-text-primary">รวมทั้งหมด</span>
+                    <span className="font-bold text-lg frontend-service-price">
+                      ฿{state.selectedServices.reduce((total, serviceId) => {
+                        const service = services.find(s => s.id === serviceId);
+                        return total + (service?.price || 0);
+                      }, 0)}
+                    </span>
                   </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between font-semibold">
-                      <span className="frontend-text-primary">รวม:</span>
-                      <span className="frontend-service-price">฿{state.totalPrice}</span>
-                    </div>
-                    <div className="flex justify-between text-sm frontend-text-secondary mt-1">
-                      <span>เวลาโดยประมาณ:</span>
-                      <span>{state.estimatedTime} นาที</span>
-                    </div>
+                  <div className="text-sm frontend-text-secondary mt-1">
+                    เวลาโดยประมาณ: {state.selectedServices.reduce((total, serviceId) => {
+                      const service = services.find(s => s.id === serviceId);
+                      return total + (service?.estimatedTime || 0);
+                    }, 0)} นาที
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Customer Form */}
           <div className="frontend-card">

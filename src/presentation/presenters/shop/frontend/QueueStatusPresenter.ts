@@ -9,10 +9,12 @@ export interface CustomerQueue {
   queueNumber: string;
   status: 'waiting' | 'confirmed' | 'serving' | 'completed' | 'cancelled';
   customerName: string;
+  customerPhone: string;
   services: string[];
   totalPrice: number;
   estimatedWaitTime: number;
   position: number;
+  specialRequests?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,10 +71,12 @@ export class QueueStatusPresenter extends BaseShopPresenter {
         queueNumber: 'A016',
         status: 'confirmed',
         customerName: 'สมชาย ใจดี',
+        customerPhone: '081-234-5678',
         services: ['กาแฟลาเต้', 'เค้กช็อกโกแลต'],
         totalPrice: 205,
         estimatedWaitTime: 15,
         position: 3,
+        specialRequests: 'ไม่ใส่น้ำตาล',
         createdAt: '10:35',
         updatedAt: '10:37',
       };
