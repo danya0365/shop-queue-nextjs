@@ -195,7 +195,7 @@ export function useServicesPresenter(
         ? parseInt(formData.get("estimatedDuration") as string)
         : null;
       const icon = formData.get("icon") as string;
-      const isAvailable = formData.get("isAvailable") === "true";
+      const isAvailable = formData.get("isAvailable") === "on";
 
       // Validate form data
       const errors: Record<string, string> = {};

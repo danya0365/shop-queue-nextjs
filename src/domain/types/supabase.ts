@@ -1820,7 +1820,7 @@ export type Database = {
           owner_id: string
           phone: string | null
           qr_code_url: string | null
-          slug: string
+          slug: string | null
           status: Database["public"]["Enums"]["shop_status"] | null
           timezone: string | null
           updated_at: string | null
@@ -1839,7 +1839,7 @@ export type Database = {
           owner_id: string
           phone?: string | null
           qr_code_url?: string | null
-          slug: string
+          slug?: string | null
           status?: Database["public"]["Enums"]["shop_status"] | null
           timezone?: string | null
           updated_at?: string | null
@@ -1858,7 +1858,7 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           qr_code_url?: string | null
-          slug?: string
+          slug?: string | null
           status?: Database["public"]["Enums"]["shop_status"] | null
           timezone?: string | null
           updated_at?: string | null
@@ -2733,7 +2733,7 @@ export type Database = {
         }
         Relationships: []
       }
-      service_by_shop_stats_view: {
+      service_stats_by_shop_view: {
         Row: {
           available_services: number | null
           average_price: number | null
@@ -2905,6 +2905,19 @@ export type Database = {
       }
     }
     Functions: {
+      add_customer_points: {
+        Args: {
+          p_customer_id: string
+          p_points: number
+          p_description: string
+          p_queue_id?: string
+        }
+        Returns: undefined
+      }
+      add_queue_feedback: {
+        Args: { p_queue_id: string; p_feedback: string; p_rating?: number }
+        Returns: undefined
+      }
       can_perform_action: {
         Args: { p_profile_id: string; p_action: string; p_shop_id?: string }
         Returns: boolean
@@ -2926,25 +2939,96 @@ export type Database = {
         }
         Returns: Json
       }
-      create_employee: {
+      create_department: {
         Args: {
-          p_employee_code: string
-          p_name: string
-          p_email: string
-          p_phone: string
-          p_department_id: string
-          p_position: string
           p_shop_id: string
-          p_status: Database["public"]["Enums"]["employee_status"]
-          p_hire_date: string
-          p_permissions: string[]
-          p_salary: number
-          p_notes: string
+          p_name: string
+          p_slug: string
+          p_description?: string
         }
+        Returns: string
+      }
+      create_employee: {
+        Args:
+          | {
+              p_shop_id: string
+              p_profile_id: string
+              p_employee_code: string
+              p_name: string
+              p_email?: string
+              p_phone?: string
+              p_position_text?: string
+              p_department_id?: string
+              p_salary?: number
+              p_hire_date?: string
+              p_station_number?: number
+              p_permissions?: string[]
+              p_notes?: string
+            }
+          | {
+              p_employee_code: string
+              p_name: string
+              p_email: string
+              p_phone: string
+              p_department_id: string
+              p_position: string
+              p_shop_id: string
+              p_status: Database["public"]["Enums"]["employee_status"]
+              p_hire_date: string
+              p_permissions: string[]
+              p_salary: number
+              p_notes: string
+            }
+        Returns: string
+      }
+      create_payment_from_queue: {
+        Args: { p_queue_id: string; p_processed_by_employee_id?: string }
         Returns: string
       }
       create_profile: {
         Args: { username: string; full_name?: string; avatar_url?: string }
+        Returns: string
+      }
+      create_promotion: {
+        Args: {
+          p_shop_id: string
+          p_name: string
+          p_type: Database["public"]["Enums"]["promotion_type"]
+          p_value: number
+          p_start_at: string
+          p_end_at: string
+          p_description?: string
+          p_min_purchase_amount?: number
+          p_max_discount_amount?: number
+          p_usage_limit?: number
+          p_conditions?: Json
+          p_service_ids?: string[]
+        }
+        Returns: string
+      }
+      create_queue: {
+        Args: {
+          p_shop_id: string
+          p_customer_name: string
+          p_customer_phone?: string
+          p_customer_email?: string
+          p_service_ids?: string[]
+          p_note?: string
+          p_priority?: Database["public"]["Enums"]["queue_priority"]
+        }
+        Returns: string
+      }
+      create_service: {
+        Args: {
+          p_shop_id: string
+          p_name: string
+          p_slug: string
+          p_price: number
+          p_description?: string
+          p_estimated_duration?: number
+          p_category?: string
+          p_icon?: string
+        }
         Returns: string
       }
       create_shop_activity: {
@@ -3113,6 +3197,14 @@ export type Database = {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
       }
+      get_queue_position: {
+        Args: { p_queue_id: string }
+        Returns: {
+          queue_position: number
+          estimated_wait_minutes: number
+          ahead_count: number
+        }[]
+      }
       get_queue_status_distribution: {
         Args: { p_shop_id: string; p_start_date?: string; p_end_date?: string }
         Returns: {
@@ -3157,6 +3249,10 @@ export type Database = {
           verification_status: string
         }[]
       }
+      initialize_customer_points: {
+        Args: { p_customer_id: string }
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -3181,6 +3277,10 @@ export type Database = {
         Args: { shop_id_param: string }
         Returns: boolean
       }
+      link_customer_to_profile: {
+        Args: { p_customer_id: string; p_phone: string }
+        Returns: undefined
+      }
       migrate_profile_roles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -3189,6 +3289,24 @@ export type Database = {
         Args: {
           p_shop_id: string
           p_new_status: Database["public"]["Enums"]["shop_status"]
+        }
+        Returns: undefined
+      }
+      process_payment: {
+        Args: {
+          p_payment_id: string
+          p_paid_amount: number
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+          p_processed_by_employee_id: string
+        }
+        Returns: undefined
+      }
+      redeem_customer_points: {
+        Args: {
+          p_customer_id: string
+          p_points: number
+          p_description: string
+          p_reward_id?: string
         }
         Returns: undefined
       }
@@ -3202,6 +3320,16 @@ export type Database = {
           p_employee_id?: string
         }
         Returns: Json
+      }
+      register_customer_with_phone: {
+        Args: {
+          p_shop_id: string
+          p_name: string
+          p_phone: string
+          p_email?: string
+          p_verification_code?: string
+        }
+        Returns: string
       }
       set_profile_active: {
         Args: { profile_id: string }
@@ -3229,23 +3357,90 @@ export type Database = {
         }
         Returns: Json
       }
-      update_employee: {
+      update_department: {
         Args: {
-          p_employee_id: string
-          p_employee_code?: string
+          p_department_id: string
           p_name?: string
-          p_email?: string
-          p_phone?: string
-          p_department_id?: string
-          p_position_text?: string
-          p_shop_id?: string
-          p_status?: Database["public"]["Enums"]["employee_status"]
-          p_hire_date?: string
-          p_permissions?: string[]
-          p_salary?: number
-          p_notes?: string
+          p_slug?: string
+          p_description?: string
         }
-        Returns: boolean
+        Returns: undefined
+      }
+      update_employee: {
+        Args:
+          | {
+              p_employee_id: string
+              p_name?: string
+              p_email?: string
+              p_phone?: string
+              p_position_text?: string
+              p_department_id?: string
+              p_salary?: number
+              p_station_number?: number
+              p_status?: Database["public"]["Enums"]["employee_status"]
+              p_permissions?: string[]
+              p_notes?: string
+            }
+          | {
+              p_employee_id: string
+              p_employee_code?: string
+              p_name?: string
+              p_email?: string
+              p_phone?: string
+              p_department_id?: string
+              p_position_text?: string
+              p_shop_id?: string
+              p_status?: Database["public"]["Enums"]["employee_status"]
+              p_hire_date?: string
+              p_permissions?: string[]
+              p_salary?: number
+              p_notes?: string
+            }
+        Returns: undefined
+      }
+      update_employee_duty: {
+        Args: { p_employee_id: string; p_is_on_duty: boolean }
+        Returns: undefined
+      }
+      update_promotion: {
+        Args: {
+          p_promotion_id: string
+          p_name?: string
+          p_description?: string
+          p_value?: number
+          p_min_purchase_amount?: number
+          p_max_discount_amount?: number
+          p_start_at?: string
+          p_end_at?: string
+          p_usage_limit?: number
+          p_status?: Database["public"]["Enums"]["promotion_status"]
+          p_conditions?: Json
+        }
+        Returns: undefined
+      }
+      update_queue_status: {
+        Args: {
+          p_queue_id: string
+          p_status: Database["public"]["Enums"]["queue_status"]
+          p_served_by_employee_id?: string
+          p_note?: string
+          p_cancelled_reason?: string
+        }
+        Returns: undefined
+      }
+      update_service: {
+        Args: {
+          p_service_id: string
+          p_name?: string
+          p_slug?: string
+          p_description?: string
+          p_price?: number
+          p_estimated_duration?: number
+          p_category?: string
+          p_icon?: string
+          p_is_available?: boolean
+        }
+        Returns: undefined
       }
     }
     Enums: {
