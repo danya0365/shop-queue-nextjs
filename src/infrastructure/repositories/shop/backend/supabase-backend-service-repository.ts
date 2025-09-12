@@ -1,29 +1,46 @@
-import { PaginatedServicesEntity, ServiceEntity, ServiceStatsEntity } from "@/src/domain/entities/shop/backend/backend-service.entity";
-import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  PaginatedServicesEntity,
+  ServiceEntity,
+  ServiceStatsEntity,
+} from "@/src/domain/entities/shop/backend/backend-service.entity";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendServiceError, ShopBackendServiceErrorType, ShopBackendServiceRepository } from "@/src/domain/repositories/shop/backend/backend-service-repository";
+import {
+  ShopBackendServiceError,
+  ShopBackendServiceErrorType,
+  ShopBackendServiceRepository,
+} from "@/src/domain/repositories/shop/backend/backend-service-repository";
 import { SupabaseShopBackendServiceMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-service.mapper";
-import { ServiceSchemaType, ServiceStatsSchemaType } from "@/src/infrastructure/schemas/shop/backend/service.schema";
+import {
+  ServiceSchemaType,
+  ServiceStatsSchemaType,
+} from "@/src/infrastructure/schemas/shop/backend/service.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type ServiceWithJoinedData = ServiceSchemaType & {
-  shops?: { name?: string },
-  categories?: { name?: string }
+  shops?: { name?: string };
+  categories?: { name?: string };
 };
 type ServiceSchemaRecord = Record<string, unknown> & ServiceSchemaType;
-type ServiceStatsSchemaRecord = Record<string, unknown> & ServiceStatsSchemaType;
+type ServiceStatsSchemaRecord = Record<string, unknown> &
+  ServiceStatsSchemaType;
 
 /**
  * Supabase implementation of the service repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendServiceRepository extends StandardRepository implements ShopBackendServiceRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendServiceRepository
+  extends StandardRepository
+  implements ShopBackendServiceRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendService");
   }
 
@@ -32,105 +49,117 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
    * @param params Pagination parameters with filters
    * @returns Paginated services data
    */
-  async getPaginatedServices(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      categoryFilter?: string;
-      availabilityFilter?: string;
-      shopId?: string;
+  async getPaginatedServices(
+    params: PaginationParams & {
+      filters?: {
+        searchQuery?: string;
+        categoryFilter?: string;
+        availabilityFilter?: string;
+        shopId?: string;
+      };
     }
-  }): Promise<PaginatedServicesEntity> {
+  ): Promise<PaginatedServicesEntity> {
     try {
       const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
 
       // Build query options
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' }, select: ['name'] }
+          {
+            table: "shops",
+            on: { fromField: "shop_id", toField: "id" },
+            select: ["name"],
+          },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
+          offset,
         },
-        filters: []
+        filters: [],
       };
 
       // Apply filters
       if (filters?.searchQuery) {
         queryOptions.filters?.push({
-          field: 'name',
+          field: "name",
           operator: FilterOperator.ILIKE,
-          value: `%${filters.searchQuery}%`
+          value: `%${filters.searchQuery}%`,
         });
       }
 
       if (filters?.categoryFilter) {
         queryOptions.filters?.push({
-          field: 'category',
+          field: "category",
           operator: FilterOperator.EQ,
-          value: filters.categoryFilter
+          value: filters.categoryFilter,
         });
       }
 
       if (filters?.availabilityFilter) {
-        const isAvailable = filters.availabilityFilter === 'available';
+        const isAvailable = filters.availabilityFilter === "available";
         queryOptions.filters?.push({
-          field: 'is_available',
+          field: "is_available",
           operator: FilterOperator.EQ,
-          value: isAvailable
+          value: isAvailable,
         });
       }
 
       if (filters?.shopId) {
         queryOptions.filters?.push({
-          field: 'shop_id',
+          field: "shop_id",
           operator: FilterOperator.EQ,
-          value: filters.shopId
+          value: filters.shopId,
         });
       }
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const services = await this.dataSource.getAdvanced<ServiceSchemaRecord>(
-        'services',
+        "services",
         queryOptions
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count('services', { filters: queryOptions.filters });
+      const totalItems = await this.dataSource.count("services", {
+        filters: queryOptions.filters,
+      });
 
       // Map database results to domain entities
-      const mappedServices = services.map(service => {
+      const mappedServices = services.map((service) => {
         // Handle joined data from shops table
         const serviceWithJoinedData = service as ServiceWithJoinedData;
 
         const serviceWithShopName = {
           ...service,
-          shop_name: serviceWithJoinedData.shops?.name
+          shop_name: serviceWithJoinedData.shops?.name,
         };
 
         return SupabaseShopBackendServiceMapper.toDomain(serviceWithShopName);
       });
 
       // Create pagination metadata
-      const pagination = SupabaseShopBackendServiceMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseShopBackendServiceMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
         data: mappedServices,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof ShopBackendServiceError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedServices', { error });
+      this.logger.error("Error in getPaginatedServices", { error });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching services',
-        'getPaginatedServices',
+        "An unexpected error occurred while fetching services",
+        "getPaginatedServices",
         {},
         error
       );
@@ -146,11 +175,17 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
     try {
       // Use getById which is designed for fetching by ID
       const service = await this.dataSource.getById<ServiceSchemaRecord>(
-        'services',
+        "services",
         id,
         {
-          select: ['*'],
-          joins: [{ table: 'shops', on: { fromField: 'shop_id', toField: 'id' }, select: ['name'] }]
+          select: ["*"],
+          joins: [
+            {
+              table: "shops",
+              on: { fromField: "shop_id", toField: "id" },
+              select: ["name"],
+            },
+          ],
         }
       );
 
@@ -163,7 +198,7 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
 
       const serviceWithShopName = {
         ...service,
-        shop_name: serviceWithJoinedData.shops?.name
+        shop_name: serviceWithJoinedData.shops?.name,
       };
 
       // Map database result to domain entity
@@ -173,11 +208,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in getServiceById', { error, id });
+      this.logger.error("Error in getServiceById", { error, id });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching service',
-        'getServiceById',
+        "An unexpected error occurred while fetching service",
+        "getServiceById",
         { id },
         error
       );
@@ -189,17 +224,19 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
    * @param service Service data without id, createdAt, updatedAt
    * @returns Created service entity
    */
-  async createService(service: Omit<ServiceEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceEntity> {
+  async createService(
+    service: Omit<ServiceEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<ServiceEntity> {
     try {
       const serviceData = SupabaseShopBackendServiceMapper.toDatabase({
         ...service,
-        id: '', // Will be generated by database
+        id: "", // Will be generated by database
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
 
       const createdService = await this.dataSource.insert<ServiceSchemaRecord>(
-        'services',
+        "services",
         serviceData
       );
       return SupabaseShopBackendServiceMapper.toDomain(createdService);
@@ -208,11 +245,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in createService', { error, service });
+      this.logger.error("Error in createService", { error, service });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while creating service',
-        'createService',
+        "An unexpected error occurred while creating service",
+        "createService",
         { service },
         error
       );
@@ -225,15 +262,20 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
    * @param updates Partial service data to update
    * @returns Updated service entity
    */
-  async updateService(id: string, updates: Partial<ServiceEntity>): Promise<ServiceEntity> {
+  async updateService(
+    id: string,
+    updates: Partial<ServiceEntity>
+  ): Promise<ServiceEntity> {
     try {
       const updateData = {
-        ...SupabaseShopBackendServiceMapper.toDatabase(updates as ServiceEntity),
+        ...SupabaseShopBackendServiceMapper.toDatabase(
+          updates as ServiceEntity
+        ),
         updated_at: new Date().toISOString(),
       };
 
       const updatedService = await this.dataSource.update<ServiceSchemaRecord>(
-        'services',
+        "services",
         id,
         updateData
       );
@@ -241,8 +283,8 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
       if (!updatedService) {
         throw new ShopBackendServiceError(
           ShopBackendServiceErrorType.NOT_FOUND,
-          'Service not found',
-          'updateService',
+          "Service not found",
+          "updateService",
           { id }
         );
       }
@@ -253,11 +295,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in updateService', { error, id, updates });
+      this.logger.error("Error in updateService", { error, id, updates });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while updating service',
-        'updateService',
+        "An unexpected error occurred while updating service",
+        "updateService",
         { id, updates },
         error
       );
@@ -278,10 +320,7 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
       }
 
       // Delete service
-      const result = await this.dataSource.delete(
-        'services',
-        id
-      );
+      const result = await this.dataSource.delete("services", id);
 
       return result !== null;
     } catch (error) {
@@ -289,11 +328,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in deleteService', { error, id });
+      this.logger.error("Error in deleteService", { error, id });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting service',
-        'deleteService',
+        "An unexpected error occurred while deleting service",
+        "deleteService",
         { id },
         error
       );
@@ -310,11 +349,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
     try {
       const updateData = {
         is_available: isAvailable,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       const updatedService = await this.dataSource.update<ServiceSchemaRecord>(
-        'services',
+        "services",
         id,
         updateData
       );
@@ -325,11 +364,15 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in toggleAvailability', { error, id, isAvailable });
+      this.logger.error("Error in toggleAvailability", {
+        error,
+        id,
+        isAvailable,
+      });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while toggling service availability',
-        'toggleAvailability',
+        "An unexpected error occurred while toggling service availability",
+        "toggleAvailability",
         { id, isAvailable },
         error
       );
@@ -344,17 +387,18 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for service statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<ServiceStatsSchemaRecord>(
-        'service_stats_summary_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<ServiceStatsSchemaRecord>(
+          "service_stats_summary_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -365,7 +409,7 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
           averagePrice: 0,
           totalRevenue: 0,
           servicesByCategory: {},
-          popularServices: []
+          popularServices: [],
         };
       }
 
@@ -377,11 +421,11 @@ export class SupabaseShopBackendServiceRepository extends StandardRepository imp
         throw error;
       }
 
-      this.logger.error('Error in getServiceStats', { error });
+      this.logger.error("Error in getServiceStats", { error });
       throw new ShopBackendServiceError(
         ShopBackendServiceErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching service statistics',
-        'getServiceStats',
+        "An unexpected error occurred while fetching service statistics",
+        "getServiceStats",
         {},
         error
       );

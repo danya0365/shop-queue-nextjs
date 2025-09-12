@@ -1,9 +1,7 @@
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import type {
-  Service,
-  ServicesBackendService,
-} from "@/src/application/services/shop/backend/services-backend-service";
+import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
+import { IShopBackendServicesService } from "@/src/application/services/shop/backend/BackendServicesService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
@@ -12,11 +10,18 @@ import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define ViewModel interface
 export interface ServicesViewModel {
-  services: Service[];
+  services: ServiceDTO[];
   totalServices: number;
   activeServices: number;
   inactiveServices: number;
   categories: string[];
+  averagePrice: number;
+  totalRevenue: number;
+  popularServices: {
+    id: string;
+    name: string;
+    bookingCount: number;
+  }[];
 }
 
 // Main Presenter class
@@ -27,7 +32,7 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly servicesBackendService: ServicesBackendService
+    private readonly backendServicesService: IShopBackendServicesService
   ) {
     super(
       logger,
@@ -42,27 +47,24 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
     try {
       this.logger.info("ServicesPresenter: Getting view model", { shopId });
 
-      // Get services data
-      const services = await this.servicesBackendService.getServices(shopId);
+      // Get services data with stats
+      const servicesData = await this.backendServicesService.getServicesData(1, 100, { shopId });
+      const { services, stats } = servicesData;
 
-      // Calculate statistics
-      const totalServices = services.length;
-      const activeServices = services.filter(
-        (service) => service.isAvailable
-      ).length;
-      const inactiveServices = totalServices - activeServices;
-
-      // Get unique categories
+      // Get unique categories from services
       const categories = [
         ...new Set(services.map((service) => service.category).filter(Boolean)),
       ] as string[];
 
       return {
         services,
-        totalServices,
-        activeServices,
-        inactiveServices,
+        totalServices: stats.totalServices,
+        activeServices: stats.availableServices,
+        inactiveServices: stats.unavailableServices,
         categories,
+        averagePrice: stats.averagePrice,
+        totalRevenue: stats.totalRevenue,
+        popularServices: stats.popularServices,
       };
     } catch (error) {
       this.logger.error("ServicesPresenter: Error getting view model", error);
@@ -92,15 +94,15 @@ export class ServicesPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
-    const servicesBackendService =
-      serverContainer.resolve<ServicesBackendService>("ServicesBackendService");
+    const backendServicesService =
+      serverContainer.resolve<IShopBackendServicesService>("ShopBackendServicesService");
     return new ServicesPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      servicesBackendService
+      backendServicesService
     );
   }
 }

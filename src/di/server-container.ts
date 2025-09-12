@@ -6,6 +6,7 @@ import { CategoryServiceFactory } from "../application/services/category-service
 import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/backend/BackendPaymentsService";
 import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
+import { ShopBackendServicesServiceFactory } from "../application/services/shop/backend/BackendServicesService";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
@@ -19,7 +20,6 @@ import { PosterTemplateBackendService } from "../application/services/shop/backe
 import { QueueServiceBackendService } from "../application/services/shop/backend/queue-services-backend-service";
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
-import { ServicesBackendService } from "../application/services/shop/backend/services-backend-service";
 import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
@@ -35,6 +35,7 @@ import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
+import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
@@ -81,6 +82,8 @@ export async function createServerContainer(): Promise<Container> {
       new SupabaseShopBackendPaymentRepository(databaseDatasource, logger);
     const shopBackendPromotionRepository =
       new SupabaseShopBackendPromotionRepository(databaseDatasource, logger);
+    const shopBackendServiceRepository =
+      new SupabaseShopBackendServiceRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -124,7 +127,6 @@ export async function createServerContainer(): Promise<Container> {
     const posterTemplateBackendService = new PosterTemplateBackendService(
       logger
     );
-    const servicesBackendService = new ServicesBackendService(logger);
     const customersBackendService = new CustomersBackendService(logger);
     const departmentsBackendService = new DepartmentsBackendService(logger);
     const paymentsBackendService = new PaymentsBackendService(logger);
@@ -156,7 +158,10 @@ export async function createServerContainer(): Promise<Container> {
         shopBackendPromotionRepository,
         logger
       );
-
+    const shopBackendServicesService = ShopBackendServicesServiceFactory.create(
+      shopBackendServiceRepository,
+      logger
+    );
     // Register all services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
@@ -179,12 +184,12 @@ export async function createServerContainer(): Promise<Container> {
       shopBackendPromotionsService
     );
     container.registerInstance(
-      "PosterTemplateBackendService",
-      posterTemplateBackendService
+      "ShopBackendServicesService",
+      shopBackendServicesService
     );
     container.registerInstance(
-      "ServicesBackendService",
-      servicesBackendService
+      "PosterTemplateBackendService",
+      posterTemplateBackendService
     );
     container.registerInstance(
       "CustomersBackendService",
