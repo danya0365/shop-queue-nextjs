@@ -23,7 +23,7 @@ export interface ShopEntity {
   ownerId: string;
   ownerName?: string; // Join from profiles table
   status: ShopStatus;
-  openingHours: OpeningHourEntity[]; // Join from shop_opening_hours table
+  openingHours: ShopOpeningHourEntity[]; // Join from shop_opening_hours table
   queueCount: number;
   totalServices: number;
   rating: number;
@@ -41,7 +41,7 @@ export interface CreateShopEntity {
   ownerId: string;
   status: ShopStatus;
   categoryIds: string[];
-  openingHours?: OpeningHourEntity[];
+  openingHours?: ShopOpeningHourEntity[];
 }
 
 export interface UpdateShopEntity {
@@ -58,7 +58,7 @@ export interface UpdateShopEntity {
   logo?: string | null;
   qrCodeUrl?: string | null;
   categoryIds?: string[];
-  openingHours?: OpeningHourEntity[];
+  openingHours?: ShopOpeningHourEntity[];
 }
 
 export interface ShopCategoryEntity {
@@ -68,7 +68,7 @@ export interface ShopCategoryEntity {
   description: string;
 }
 
-export interface OpeningHourEntity {
+export interface ShopOpeningHourEntity {
   dayOfWeek: string;
   openTime: string;
   closeTime: string;
@@ -81,10 +81,10 @@ export interface OpeningHourEntity {
  * Shop status enum
  */
 export enum ShopStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  DRAFT = "draft",
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
 }
 
 /**

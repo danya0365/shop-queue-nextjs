@@ -15,7 +15,9 @@ interface QueueManagementPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: QueueManagementPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: QueueManagementPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await QueueManagementPresenterFactory.create();
 
@@ -36,16 +38,18 @@ export async function generateMetadata({ params }: QueueManagementPageProps): Pr
  * Queue Management page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function QueueManagementPage({ params }: QueueManagementPageProps) {
+export default async function QueueManagementPage({
+  params,
+}: QueueManagementPageProps) {
   const { shopId } = await params;
   const presenter = await QueueManagementPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <QueueManagementView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,7 +58,7 @@ export default async function QueueManagementPage({ params }: QueueManagementPag
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

@@ -52,9 +52,7 @@ export function CustomerDashboardView({
                 </div>
                 <div className="flex items-center space-x-1">
                   <span>🕒</span>
-                  <span>
-                    {shopInfo.openTime} - {shopInfo.closeTime}
-                  </span>
+                  <span>{shopInfo.openingHours}</span>
                 </div>
                 <div
                   className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
@@ -313,9 +311,7 @@ export function CustomerDashboardView({
             <span className="text-xl">🕒</span>
             <div>
               <p className="font-medium frontend-text-primary">เวลาเปิด-ปิด</p>
-              <p className="frontend-text-secondary">
-                {shopInfo.openTime} - {shopInfo.closeTime}
-              </p>
+              <p className="frontend-text-secondary">{shopInfo.openingHours}</p>
             </div>
           </div>
         </div>

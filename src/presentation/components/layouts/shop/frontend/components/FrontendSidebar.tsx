@@ -1,32 +1,33 @@
 "use client";
 
+import { ShopInfo } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
 interface FrontendSidebarProps {
-  shopId: string;
+  shop: ShopInfo;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }
 
 const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
-  shopId,
+  shop,
   sidebarOpen,
   setSidebarOpen,
 }) => {
   const pathname = usePathname();
 
   const navigationItems = [
-    { href: `/shop/${shopId}`, label: "หน้าหลัก", icon: "🏠" },
-    { href: `/shop/${shopId}/queue`, label: "เข้าคิว", icon: "📝" },
-    { href: `/shop/${shopId}/status`, label: "สถานะคิว", icon: "⏰" },
-    { href: `/shop/${shopId}/history`, label: "ประวัติ", icon: "📚" },
-    { href: `/shop/${shopId}/rewards`, label: "แต้มสะสม", icon: "🎁" },
+    { href: `/shop/${shop.id}`, label: "หน้าหลัก", icon: "🏠" },
+    { href: `/shop/${shop.id}/queue`, label: "เข้าคิว", icon: "📝" },
+    { href: `/shop/${shop.id}/status`, label: "สถานะคิว", icon: "⏰" },
+    { href: `/shop/${shop.id}/history`, label: "ประวัติ", icon: "📚" },
+    { href: `/shop/${shop.id}/rewards`, label: "แต้มสะสม", icon: "🎁" },
   ];
 
   const isActive = (href: string) => {
-    if (href === `/shop/${shopId}`) {
+    if (href === `/shop/${shop.id}`) {
       return pathname === href;
     }
     return pathname.startsWith(href);

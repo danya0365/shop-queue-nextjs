@@ -15,7 +15,9 @@ interface EmployeeQueuePageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: EmployeeQueuePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: EmployeeQueuePageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await EmployeeQueuePresenterFactory.create();
 
@@ -36,16 +38,18 @@ export async function generateMetadata({ params }: EmployeeQueuePageProps): Prom
  * Employee Queue page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function EmployeeQueuePage({ params }: EmployeeQueuePageProps) {
+export default async function EmployeeQueuePage({
+  params,
+}: EmployeeQueuePageProps) {
   const { shopId } = await params;
   const presenter = await EmployeeQueuePresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <EmployeeLayout shopId={shopId}>
+      <EmployeeLayout shop={shopInfo}>
         <EmployeeQueueView viewModel={viewModel} />
       </EmployeeLayout>
     );
@@ -54,7 +58,7 @@ export default async function EmployeeQueuePage({ params }: EmployeeQueuePagePro
 
     // Fallback UI
     return (
-      <EmployeeLayout shopId={shopId}>
+      <EmployeeLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

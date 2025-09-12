@@ -9,17 +9,20 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 interface CustomerDashboardPageProps {
-  params: { shopId: string };
+  params: Promise<{ shopId: string }>;
 }
 
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: CustomerDashboardPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CustomerDashboardPageProps): Promise<Metadata> {
+  const { shopId } = await params;
   const presenter = await CustomerDashboardPresenterFactory.create();
 
   try {
-    return presenter.generateMetadata(params.shopId);
+    return presenter.generateMetadata(shopId);
   } catch (error) {
     console.error("Error generating metadata:", error);
 
@@ -35,16 +38,18 @@ export async function generateMetadata({ params }: CustomerDashboardPageProps): 
  * Customer Dashboard page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function CustomerDashboardPage({ params }: CustomerDashboardPageProps) {
-  const { shopId } = params;
+export default async function CustomerDashboardPage({
+  params,
+}: CustomerDashboardPageProps) {
+  const { shopId } = await params;
   const presenter = await CustomerDashboardPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout shop={shopInfo}>
         <CustomerDashboardView viewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
@@ -53,7 +58,7 @@ export default async function CustomerDashboardPage({ params }: CustomerDashboar
 
     // Fallback UI
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

@@ -1,7 +1,12 @@
 import type { PromotionStatsDTO } from "@/src/application/dtos/backend/promotions-dto";
+import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IBackendPromotionsService } from "@/src/application/services/backend/BackendPromotionsService";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getBackendContainer } from "@/src/di/backend-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define interfaces for data structures
 export interface PromotionData {
@@ -46,11 +51,23 @@ export interface PromotionsViewModel {
 }
 
 // Main Presenter class
-export class PromotionsPresenter {
+export class PromotionsPresenter extends BaseShopBackendPresenter {
   constructor(
-    private readonly promotionsService: IBackendPromotionsService,
-    private readonly logger: Logger
-  ) {}
+    logger: Logger,
+    shopService: IShopService,
+    authService: IAuthService,
+    profileService: IProfileService,
+    subscriptionService: ISubscriptionService,
+    private readonly promotionsService: IBackendPromotionsService
+  ) {
+    super(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
+  }
 
   async getViewModel(
     shopId: string,
@@ -147,6 +164,20 @@ export class PromotionsPresenterFactory {
         "BackendPromotionsService"
       );
     const logger = backendContainer.resolve<Logger>("Logger");
-    return new PromotionsPresenter(promotionsService, logger);
+    const authService = backendContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      backendContainer.resolve<IProfileService>("ProfileService");
+    const shopService = backendContainer.resolve<IShopService>("ShopService");
+    const subscriptionService = backendContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new PromotionsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      promotionsService
+    );
   }
 }

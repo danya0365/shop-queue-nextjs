@@ -16,7 +16,9 @@ interface QueueStatusPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: QueueStatusPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: QueueStatusPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await QueueStatusPresenterFactory.create();
 
@@ -37,7 +39,10 @@ export async function generateMetadata({ params }: QueueStatusPageProps): Promis
  * Queue Status page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function QueueStatusPage({ params, searchParams }: QueueStatusPageProps) {
+export default async function QueueStatusPage({
+  params,
+  searchParams,
+}: QueueStatusPageProps) {
   const { shopId } = await params;
   const { queue } = await searchParams;
   const presenter = await QueueStatusPresenterFactory.create();
@@ -45,9 +50,9 @@ export default async function QueueStatusPage({ params, searchParams }: QueueSta
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId, queue);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout shop={shopInfo}>
         <QueueStatusView viewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
@@ -56,7 +61,7 @@ export default async function QueueStatusPage({ params, searchParams }: QueueSta
 
     // Fallback UI
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

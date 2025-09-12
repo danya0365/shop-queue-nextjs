@@ -31,7 +31,7 @@ export interface ShopSchema {
   // Joined data from shop_categories and categories tables
   categories?: ShopCategorySchema[];
   // Joined data from opening_hours table
-  opening_hours?: OpeningHourSchema[];
+  opening_hours?: ShopOpeningHourSchema[];
 }
 
 export interface ShopCategorySchema {
@@ -39,11 +39,13 @@ export interface ShopCategorySchema {
   name: string;
 }
 
-export interface OpeningHourSchema {
+export interface ShopOpeningHourSchema {
   day_of_week: number;
   open_time: string;
   close_time: string;
   is_open: boolean;
+  break_start: string;
+  break_end: string;
 }
 
 /**

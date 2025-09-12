@@ -1,34 +1,41 @@
-'use client';
+"use client";
 
-import { cn } from '@/src/presentation/utils/tailwind';
-import {
-  Home,
-  Clock,
-  Bell,
-  CreditCard,
-  History
-} from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React from 'react';
+import { ShopInfo } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import { cn } from "@/src/presentation/utils/tailwind";
+import { Bell, Clock, CreditCard, History, Home } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 
 interface EmployeeSidebarProps {
-  shopId: string;
+  shop: ShopInfo;
   sidebarOpen: boolean;
 }
 
-const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({ 
-  shopId, 
-  sidebarOpen 
+const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
+  shop,
+  sidebarOpen,
 }) => {
   const pathname = usePathname();
 
   const navItems = [
-    { href: `/shop/${shopId}/employee`, label: 'หน้าหลัก', icon: Home },
-    { href: `/shop/${shopId}/employee/queue`, label: 'จัดการคิว', icon: Clock },
-    { href: `/shop/${shopId}/employee/serve`, label: 'ให้บริการ', icon: Bell },
-    { href: `/shop/${shopId}/employee/payment`, label: 'ชำระเงิน', icon: CreditCard },
-    { href: `/shop/${shopId}/employee/history`, label: 'ประวัติ', icon: History },
+    { href: `/shop/${shop.id}/employee`, label: "หน้าหลัก", icon: Home },
+    {
+      href: `/shop/${shop.id}/employee/queue`,
+      label: "จัดการคิว",
+      icon: Clock,
+    },
+    { href: `/shop/${shop.id}/employee/serve`, label: "ให้บริการ", icon: Bell },
+    {
+      href: `/shop/${shop.id}/employee/payment`,
+      label: "ชำระเงิน",
+      icon: CreditCard,
+    },
+    {
+      href: `/shop/${shop.id}/employee/history`,
+      label: "ประวัติ",
+      icon: History,
+    },
   ];
 
   return (
@@ -43,7 +50,8 @@ const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
@@ -57,11 +65,16 @@ const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
                   !sidebarOpen && "lg:justify-center"
                 )}
               >
-                <Icon size={20} className={cn("flex-shrink-0", !sidebarOpen && "lg:mx-0")} />
-                <span className={cn(
-                  "ml-3 font-medium",
-                  !sidebarOpen && "lg:hidden"
-                )}>
+                <Icon
+                  size={20}
+                  className={cn("flex-shrink-0", !sidebarOpen && "lg:mx-0")}
+                />
+                <span
+                  className={cn(
+                    "ml-3 font-medium",
+                    !sidebarOpen && "lg:hidden"
+                  )}
+                >
                   {item.label}
                 </span>
                 {isActive && (
@@ -97,7 +110,8 @@ const EmployeeSidebar: React.FC<EmployeeSidebarProps> = ({
               <span className="text-sm employee-text-muted">ออนไลน์</span>
             </div>
             <div className="text-sm employee-text-muted">
-              พนักงาน: <span className="font-medium employee-primary">สมชาย ใจดี</span>
+              พนักงาน:{" "}
+              <span className="font-medium employee-primary">สมชาย ใจดี</span>
             </div>
           </div>
         )}

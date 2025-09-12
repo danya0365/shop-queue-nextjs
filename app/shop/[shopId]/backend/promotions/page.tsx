@@ -15,7 +15,9 @@ interface PromotionsPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: PromotionsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PromotionsPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await PromotionsPresenterFactory.create();
 
@@ -27,7 +29,8 @@ export async function generateMetadata({ params }: PromotionsPageProps): Promise
     // Fallback metadata
     return {
       title: "จัดการโปรโมชั่น - เจ้าของร้าน | Shop Queue",
-      description: "จัดการโปรโมชั่นและส่วนลด สร้างแคมเปญส่งเสริมการขายที่น่าสนใจ",
+      description:
+        "จัดการโปรโมชั่นและส่วนลด สร้างแคมเปญส่งเสริมการขายที่น่าสนใจ",
     };
   }
 }
@@ -43,9 +46,9 @@ export default async function PromotionsPage({ params }: PromotionsPageProps) {
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <PromotionsView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,7 +57,7 @@ export default async function PromotionsPage({ params }: PromotionsPageProps) {
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

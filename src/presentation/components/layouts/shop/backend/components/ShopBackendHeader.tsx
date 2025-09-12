@@ -1,29 +1,30 @@
-'use client';
+"use client";
 
-import { useAuthStore } from '@/src/presentation/stores/auth-store';
-import { LogOut, Menu, X } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { ShopBackendThemeToggle } from './ShopBackendThemeToggle';
+import { ShopInfo } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import { useAuthStore } from "@/src/presentation/stores/auth-store";
+import { LogOut, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { ShopBackendThemeToggle } from "./ShopBackendThemeToggle";
 
 interface ShopBackendHeaderProps {
-  shopId: string;
+  shop: ShopInfo | undefined;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
 const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
-  shopId,
+  shop,
   sidebarOpen,
-  toggleSidebar
+  toggleSidebar,
 }) => {
   const router = useRouter();
   const { signOut } = useAuthStore();
 
   const handleLogout = async () => {
     await signOut();
-    router.push('/');
+    router.push("/");
     router.refresh(); // เพื่อให้แน่ใจว่า state ทั้งหมดถูก reset
   };
 
@@ -39,13 +40,20 @@ const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <Link href="/" className="flex items-center">
-            <span className="text-xl font-bold shop-backend-primary">ShopQueue</span>
-            <span className="ml-2 text-sm font-medium px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 rounded">ระบบจัดการร้าน</span>
+            <span className="text-xl font-bold shop-backend-primary">
+              ShopQueue
+            </span>
+            <span className="ml-2 text-sm font-medium px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 rounded">
+              ระบบจัดการร้าน
+            </span>
           </Link>
         </div>
         <div className="flex items-center space-x-4">
           <div className="hidden md:block text-sm shop-backend-text-muted">
-            ร้าน ID: <span className="font-mono shop-backend-primary">{shopId}</span>
+            ร้าน :
+            <span className="font-mono shop-backend-primary">
+              {shop?.name || ""}
+            </span>
           </div>
           <ShopBackendThemeToggle />
           <Link

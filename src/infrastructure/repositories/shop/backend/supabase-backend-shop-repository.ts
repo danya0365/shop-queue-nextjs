@@ -1,29 +1,53 @@
-import { CreateShopEntity, PaginatedShopsEntity, ShopCategoryEntity, ShopEntity, ShopStatsEntity, UpdateShopEntity } from "@/src/domain/entities/shop/backend/backend-shop.entity";
-import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  CreateShopEntity,
+  PaginatedShopsEntity,
+  ShopCategoryEntity,
+  ShopEntity,
+  ShopOpeningHourEntity,
+  ShopStatsEntity,
+  UpdateShopEntity,
+} from "@/src/domain/entities/shop/backend/backend-shop.entity";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendShopError, ShopBackendShopErrorType, ShopBackendShopRepository } from "@/src/domain/repositories/shop/backend/backend-shop-repository";
+import {
+  ShopBackendShopError,
+  ShopBackendShopErrorType,
+  ShopBackendShopRepository,
+} from "@/src/domain/repositories/shop/backend/backend-shop-repository";
 import { SupabaseShopBackendShopMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-shop.mapper";
-import { ShopSchema, ShopStatsSchema } from "@/src/infrastructure/schemas/shop/backend/shop.schema";
+import {
+  ShopOpeningHourSchema,
+  ShopSchema,
+  ShopStatsSchema,
+} from "@/src/infrastructure/schemas/shop/backend/shop.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type ShopWithJoins = ShopSchema & {
-  profiles?: { full_name?: string },
-  categories?: ShopCategoryEntity[]
+  profiles?: { full_name?: string };
+  categories?: ShopCategoryEntity[];
+  opening_hours?: ShopOpeningHourEntity[];
 };
 type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
 type ShopStatsSchemaRecord = Record<string, unknown> & ShopStatsSchema;
+type ShopOpeningHourSchemaRecord = Record<string, unknown> &
+  ShopOpeningHourSchema;
 
 /**
  * Supabase implementation of the shop repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendShopRepository extends StandardRepository implements ShopBackendShopRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendShopRepository
+  extends StandardRepository
+  implements ShopBackendShopRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendShop");
   }
 
@@ -35,30 +59,69 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
   async getShopsByOwnerId(ownerId: string): Promise<ShopEntity[]> {
     try {
       const queryOptions: QueryOptions = {
-        select: ['*'],
-        filters: [{
-          field: 'owner_id',
-          operator: FilterOperator.EQ,
-          value: ownerId
-        }]
+        select: ["*"],
+        filters: [
+          {
+            field: "owner_id",
+            operator: FilterOperator.EQ,
+            value: ownerId,
+          },
+        ],
       };
 
       const shops = await this.dataSource.getAdvanced<ShopSchemaRecord>(
-        'shops',
+        "shops",
         queryOptions
       );
 
-      return shops.map(shop => SupabaseShopBackendShopMapper.toDomain(shop));
+      // get opening hours for each shop
+      const openingHours =
+        await this.dataSource.getAdvanced<ShopOpeningHourSchemaRecord>(
+          "shops_opening_hours",
+          {
+            select: ["*"],
+            filters: [
+              {
+                field: "shop_id",
+                operator: FilterOperator.IN,
+                value: shops.map((shop) => shop.id),
+              },
+            ],
+          }
+        );
+
+      // map opening hours to shops
+      const openingHoursMap = new Map<string, ShopOpeningHourSchemaRecord[]>();
+      openingHours.forEach((openingHour) => {
+        const shopId = openingHour.shop_id as string;
+        if (!openingHoursMap.has(shopId)) {
+          openingHoursMap.set(shopId, []);
+        }
+        openingHoursMap.get(shopId)?.push(openingHour);
+      });
+
+      // map shops to domain entities
+      const shopsWithOpeningHours = shops.map((shop) => {
+        const openingHours = openingHoursMap.get(shop.id);
+        return {
+          ...shop,
+          openingHours: openingHours || [],
+        };
+      });
+
+      return shopsWithOpeningHours.map((shop) =>
+        SupabaseShopBackendShopMapper.toDomain(shop)
+      );
     } catch (error) {
       if (error instanceof ShopBackendShopError) {
         throw error;
       }
 
-      this.logger.error('Error in getShopsByOwnerId', { error, ownerId });
+      this.logger.error("Error in getShopsByOwnerId", { error, ownerId });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching shops by owner ID',
-        'getShopsByOwnerId',
+        "An unexpected error occurred while fetching shops by owner ID",
+        "getShopsByOwnerId",
         { ownerId },
         error
       );
@@ -70,57 +133,66 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
    * @param params Pagination parameters
    * @returns Paginated shops data
    */
-  async getPaginatedShops(params: PaginationParams): Promise<PaginatedShopsEntity> {
+  async getPaginatedShops(
+    params: PaginationParams
+  ): Promise<PaginatedShopsEntity> {
     try {
       const { page, limit } = params;
       const offset = (page - 1) * limit;
 
       // First, get shops with owner information
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'profiles', on: { fromField: 'owner_id', toField: 'id' } }
+          { table: "profiles", on: { fromField: "owner_id", toField: "id" } },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
-        }
+          offset,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const shops = await this.dataSource.getAdvanced<ShopSchemaRecord>(
-        'shops',
+        "shops",
         queryOptions
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count('shops', queryOptions);
+      const totalItems = await this.dataSource.count("shops", queryOptions);
 
       // Get categories for all shops in a single query
-      const shopIds = shops.map(shop => shop.id);
+      const shopIds = shops.map((shop) => shop.id);
 
       // Query to get categories for all shops
       const categoriesQuery: QueryOptions = {
         // Only select from category_shops table, we'll get categories data via join
-        select: ['shop_id', 'category_id'],
+        select: ["shop_id", "category_id"],
         joins: [
-          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name', 'slug', 'description'] }
+          {
+            table: "categories",
+            on: { fromField: "category_id", toField: "id" },
+            select: ["id", "name", "slug", "description"],
+          },
         ],
-        filters: [{
-          field: 'shop_id',
-          operator: FilterOperator.IN,
-          value: shopIds
-        }]
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.IN,
+            value: shopIds,
+          },
+        ],
       };
 
-      const shopCategories = await this.dataSource.getAdvanced<Record<string, unknown>>(
-        'category_shops',
-        categoriesQuery
-      );
+      const shopCategories = await this.dataSource.getAdvanced<
+        Record<string, unknown>
+      >("category_shops", categoriesQuery);
 
       // Group categories by shop_id
-      const categoriesByShopId = shopCategories.reduce<Record<string, ShopCategoryEntity[]>>((acc, category) => {
+      const categoriesByShopId = shopCategories.reduce<
+        Record<string, ShopCategoryEntity[]>
+      >((acc, category) => {
         const shopId = category.shop_id as string;
         if (!acc[shopId]) {
           acc[shopId] = [];
@@ -131,38 +203,44 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         const categoryId = categoryData.id as string;
 
         // Only add if not already in the array (avoid duplicates)
-        if (!acc[shopId].some(c => c.id === categoryId)) {
+        if (!acc[shopId].some((c) => c.id === categoryId)) {
           acc[shopId].push({
             id: categoryId,
             name: categoryData.name as string,
             slug: categoryData.slug as string,
-            description: categoryData.description as string
+            description: categoryData.description as string,
           });
         }
         return acc;
       }, {});
 
-      // query shop_stats_by_shop_view for each department into hash map 
-      const shopStatsByShopView = await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
-        'shop_stats_by_shop_view',
-        {
-          select: ['shop_id', 'total_queues', 'total_services'],
-          filters: [{
-            field: 'shop_id',
-            operator: FilterOperator.IN,
-            value: shopIds
-          }]
-        }
-      );
+      // query shop_stats_by_shop_view for each department into hash map
+      const shopStatsByShopView =
+        await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
+          "shop_stats_by_shop_view",
+          {
+            select: ["shop_id", "total_queues", "total_services"],
+            filters: [
+              {
+                field: "shop_id",
+                operator: FilterOperator.IN,
+                value: shopIds,
+              },
+            ],
+          }
+        );
 
       // map shop_stats_by_shop_view to hash map
-      const shopStatsByShopViewMap = shopStatsByShopView.reduce((acc, shopStats) => {
-        acc[shopStats.shop_id as string] = shopStats;
-        return acc;
-      }, {} as Record<string, ShopStatsSchemaRecord>);
+      const shopStatsByShopViewMap = shopStatsByShopView.reduce(
+        (acc, shopStats) => {
+          acc[shopStats.shop_id as string] = shopStats;
+          return acc;
+        },
+        {} as Record<string, ShopStatsSchemaRecord>
+      );
 
       // Map database results to domain entities
-      const mappedShops = shops.map(shop => {
+      const mappedShops = shops.map((shop) => {
         // handle joined data from joined tables
         const shopWithJoinedData = shop as ShopWithJoins;
         const categories = categoriesByShopId[shop.id] || [];
@@ -173,29 +251,33 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
           queue_count: Number(shopStats?.total_queues || 0),
           total_services: Number(shopStats?.total_services || 0),
           owner_name: shopWithJoinedData.profiles?.full_name,
-          categories: categories
+          categories: categories,
         };
 
         return SupabaseShopBackendShopMapper.toDomain(shopWithJoins);
       });
 
       // Create pagination metadata
-      const pagination = SupabaseShopBackendShopMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseShopBackendShopMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
         data: mappedShops,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof ShopBackendShopError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedShops', { error });
+      this.logger.error("Error in getPaginatedShops", { error });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching shops',
-        'getPaginatedShops',
+        "An unexpected error occurred while fetching shops",
+        "getPaginatedShops",
         {},
         error
       );
@@ -210,17 +292,18 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for shop statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
-        'shop_stats_summary_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<ShopStatsSchemaRecord>(
+          "shop_stats_summary_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -228,7 +311,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
           totalShops: 0,
           activeShops: 0,
           pendingApproval: 0,
-          newThisMonth: 0
+          newThisMonth: 0,
         };
       }
 
@@ -240,11 +323,11 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw error;
       }
 
-      this.logger.error('Error in getShopStats', { error });
+      this.logger.error("Error in getShopStats", { error });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching shop statistics',
-        'getShopStats',
+        "An unexpected error occurred while fetching shop statistics",
+        "getShopStats",
         {},
         error
       );
@@ -261,13 +344,13 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const shop = await this.dataSource.getById<ShopSchemaRecord>(
-        'shops',
+        "shops",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'profiles', on: { fromField: 'owner_id', toField: 'id' } }
-          ]
+            { table: "profiles", on: { fromField: "owner_id", toField: "id" } },
+          ],
         }
       );
 
@@ -278,26 +361,31 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
       // Get categories for this shop
       const categoriesQuery: QueryOptions = {
         // Only select from shop_categories table, we'll get categories data via join
-        select: ['shop_id', 'category_id'],
+        select: ["shop_id", "category_id"],
         joins: [
-          { table: 'categories', on: { fromField: 'category_id', toField: 'id' }, select: ['id', 'name', 'slug', 'description'] }
+          {
+            table: "categories",
+            on: { fromField: "category_id", toField: "id" },
+            select: ["id", "name", "slug", "description"],
+          },
         ],
-        filters: [{
-          field: 'shop_id',
-          operator: FilterOperator.EQ,
-          value: id
-        }]
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: id,
+          },
+        ],
       };
 
-      const shopCategories = await this.dataSource.getAdvanced<Record<string, unknown>>(
-        'category_shops',
-        categoriesQuery
-      );
+      const shopCategories = await this.dataSource.getAdvanced<
+        Record<string, unknown>
+      >("category_shops", categoriesQuery);
 
       // Format categories - ensure no duplicates
       const categoriesMap = new Map<string, ShopCategoryEntity>();
 
-      shopCategories.forEach(category => {
+      shopCategories.forEach((category) => {
         // Get category data from the joined categories table
         const categoryData = category.categories as Record<string, unknown>;
         const categoryId = categoryData.id as string;
@@ -307,12 +395,40 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
             id: categoryId,
             name: categoryData.name as string,
             slug: categoryData.slug as string,
-            description: categoryData.description as string
+            description: categoryData.description as string,
           });
         }
       });
 
       const categories = Array.from(categoriesMap.values());
+
+      // get opening hours for this shop
+      const openingHoursQuery: QueryOptions = {
+        select: ["*"],
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: id,
+          },
+        ],
+      };
+
+      const openingHours =
+        await this.dataSource.getAdvanced<ShopOpeningHourSchemaRecord>(
+          "shop_opening_hours",
+          openingHoursQuery
+        );
+
+      // Format opening hours - ensure no duplicates
+      const openingHoursMap = new Map<string, ShopOpeningHourSchemaRecord[]>();
+      openingHours.forEach((openingHour) => {
+        const shopId = openingHour.shop_id as string;
+        if (!openingHoursMap.has(shopId)) {
+          openingHoursMap.set(shopId, []);
+        }
+        openingHoursMap.get(shopId)?.push(openingHour);
+      });
 
       // Handle joined data from profiles table
       const shopWithJoinedData = shop as ShopWithJoins;
@@ -324,7 +440,8 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         rating: 4.5,
         total_reviews: 10,
         owner_name: shopWithJoinedData.profiles?.full_name,
-        categories: categories
+        categories: categories,
+        opening_hours: openingHoursMap.get(id) || [],
       };
 
       // Map database result to domain entity
@@ -334,11 +451,11 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw error;
       }
 
-      this.logger.error('Error in getShopById', { error, id });
+      this.logger.error("Error in getShopById", { error, id });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching shop',
-        'getShopById',
+        "An unexpected error occurred while fetching shop",
+        "getShopById",
         { id },
         error
       );
@@ -350,7 +467,9 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
    * @param shop Shop data to create
    * @returns Created shop entity
    */
-  async createShop(shop: Omit<CreateShopEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopEntity> {
+  async createShop(
+    shop: Omit<CreateShopEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<ShopEntity> {
     try {
       // Convert domain entity to database schema
       const shopSchema = {
@@ -365,41 +484,46 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
 
       // Create shop in database
       const createdShop = await this.dataSource.insert<ShopSchemaRecord>(
-        'shops',
+        "shops",
         shopSchema
       );
 
       if (!createdShop) {
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.OPERATION_FAILED,
-          'Failed to create shop',
-          'createShop',
+          "Failed to create shop",
+          "createShop",
           { shop }
         );
       }
 
-      const shopCategories: Record<string, unknown>[] = shop.categoryIds.map(categoryId => ({
-        shop_id: createdShop.id,
-        category_id: categoryId
-      }));
+      const shopCategories: Record<string, unknown>[] = shop.categoryIds.map(
+        (categoryId) => ({
+          shop_id: createdShop.id,
+          category_id: categoryId,
+        })
+      );
 
       // insert opening hours
-      const openingHours: Record<string, unknown>[] = shop.openingHours?.map(hour => ({
-        shop_id: createdShop.id,
-        day_of_week: hour.dayOfWeek,
-        open_time: hour.openTime || null,
-        close_time: hour.closeTime || null,
-        is_open: hour.isOpen,
-        break_start: hour.breakStart || null,
-        break_end: hour.breakEnd || null
-      })) || [];
+      const openingHours: Record<string, unknown>[] =
+        shop.openingHours?.map((hour) => ({
+          shop_id: createdShop.id,
+          day_of_week: hour.dayOfWeek,
+          open_time: hour.openTime || null,
+          close_time: hour.closeTime || null,
+          is_open: hour.isOpen,
+          break_start: hour.breakStart || null,
+          break_end: hour.breakEnd || null,
+        })) || [];
 
-      await Promise.all(
-        [
-          ...shopCategories.map(category => this.dataSource.insert('category_shops', category)),
-          ...openingHours.map(hour => this.dataSource.insert('shop_opening_hours', hour))
-        ]
-      );
+      await Promise.all([
+        ...shopCategories.map((category) =>
+          this.dataSource.insert("category_shops", category)
+        ),
+        ...openingHours.map((hour) =>
+          this.dataSource.insert("shop_opening_hours", hour)
+        ),
+      ]);
 
       // Get the created shop with joined data
       return this.getShopById(createdShop.id) as Promise<ShopEntity>;
@@ -408,11 +532,11 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw error;
       }
 
-      this.logger.error('Error in createShop', { error, shop });
+      this.logger.error("Error in createShop", { error, shop });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while creating shop',
-        'createShop',
+        "An unexpected error occurred while creating shop",
+        "createShop",
         { shop },
         error
       );
@@ -425,7 +549,10 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
    * @param shop Shop data to update
    * @returns Updated shop entity
    */
-  async updateShop(id: string, shop: Partial<Omit<UpdateShopEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ShopEntity> {
+  async updateShop(
+    id: string,
+    shop: Partial<Omit<UpdateShopEntity, "id" | "createdAt" | "updatedAt">>
+  ): Promise<ShopEntity> {
     try {
       // Check if shop exists
       const existingShop = await this.getShopById(id);
@@ -433,7 +560,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.NOT_FOUND,
           `Shop with ID ${id} not found`,
-          'updateShop',
+          "updateShop",
           { id, shop }
         );
       }
@@ -441,7 +568,8 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
       // Convert domain entity to database schema
       const shopSchema: Partial<ShopSchema> = {};
       if (shop.name !== undefined) shopSchema.name = shop.name;
-      if (shop.description !== undefined) shopSchema.description = shop.description;
+      if (shop.description !== undefined)
+        shopSchema.description = shop.description;
       if (shop.address !== undefined) shopSchema.address = shop.address;
       if (shop.phone !== undefined) shopSchema.phone = shop.phone;
       if (shop.email !== undefined) shopSchema.email = shop.email;
@@ -449,7 +577,7 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
 
       // Update shop in database
       const updatedShop = await this.dataSource.update<ShopSchemaRecord>(
-        'shops',
+        "shops",
         id,
         shopSchema
       );
@@ -457,8 +585,8 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
       if (!updatedShop) {
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.OPERATION_FAILED,
-          'Failed to update shop',
-          'updateShop',
+          "Failed to update shop",
+          "updateShop",
           { id, shop }
         );
       }
@@ -470,11 +598,11 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw error;
       }
 
-      this.logger.error('Error in updateShop', { error, id, shop });
+      this.logger.error("Error in updateShop", { error, id, shop });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while updating shop',
-        'updateShop',
+        "An unexpected error occurred while updating shop",
+        "updateShop",
         { id, shop },
         error
       );
@@ -494,16 +622,13 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.NOT_FOUND,
           `Shop with ID ${id} not found`,
-          'deleteShop',
+          "deleteShop",
           { id }
         );
       }
 
       // Delete shop from database
-      await this.dataSource.delete(
-        'shops',
-        id
-      );
+      await this.dataSource.delete("shops", id);
 
       // Since we've already checked if the shop exists, we can return true
       return true;
@@ -512,11 +637,11 @@ export class SupabaseShopBackendShopRepository extends StandardRepository implem
         throw error;
       }
 
-      this.logger.error('Error in deleteShop', { error, id });
+      this.logger.error("Error in deleteShop", { error, id });
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting shop',
-        'deleteShop',
+        "An unexpected error occurred while deleting shop",
+        "deleteShop",
         { id },
         error
       );

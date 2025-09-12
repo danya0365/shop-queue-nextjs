@@ -15,7 +15,9 @@ interface PaymentItemsPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: PaymentItemsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PaymentItemsPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await PaymentItemsPresenterFactory.create();
 
@@ -36,16 +38,18 @@ export async function generateMetadata({ params }: PaymentItemsPageProps): Promi
  * Backend Payment Items page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function PaymentItemsPage({ params }: PaymentItemsPageProps) {
+export default async function PaymentItemsPage({
+  params,
+}: PaymentItemsPageProps) {
   const { shopId } = await params;
   const presenter = await PaymentItemsPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <PaymentItemsView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,13 +58,15 @@ export default async function PaymentItemsPage({ params }: PaymentItemsPageProps
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">
               เกิดข้อผิดพลาด
             </h1>
-            <p className="text-muted mb-4">ไม่สามารถโหลดข้อมูลรายการชำระเงินได้</p>
+            <p className="text-muted mb-4">
+              ไม่สามารถโหลดข้อมูลรายการชำระเงินได้
+            </p>
             <Link
               href={`/shop/${shopId}/backend`}
               className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"

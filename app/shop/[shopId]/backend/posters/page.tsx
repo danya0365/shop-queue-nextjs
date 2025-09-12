@@ -15,7 +15,9 @@ interface PostersPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: PostersPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PostersPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await PostersPresenterFactory.create();
 
@@ -43,9 +45,9 @@ export default async function PostersPage({ params }: PostersPageProps) {
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <PostersView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,7 +56,7 @@ export default async function PostersPage({ params }: PostersPageProps) {
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

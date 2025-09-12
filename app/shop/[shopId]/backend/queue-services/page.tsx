@@ -15,7 +15,9 @@ interface QueueServicesPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: QueueServicesPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: QueueServicesPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await QueueServicesPresenterFactory.create();
 
@@ -27,7 +29,8 @@ export async function generateMetadata({ params }: QueueServicesPageProps): Prom
     // Fallback metadata
     return {
       title: "จัดการคิวบริการ - เจ้าของร้าน | Shop Queue",
-      description: "จัดการคิวบริการของร้าน ตั้งค่าความจุ เวลารอ และสถานะบริการต่างๆ",
+      description:
+        "จัดการคิวบริการของร้าน ตั้งค่าความจุ เวลารอ และสถานะบริการต่างๆ",
     };
   }
 }
@@ -36,16 +39,18 @@ export async function generateMetadata({ params }: QueueServicesPageProps): Prom
  * Backend Queue Services page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function QueueServicesPage({ params }: QueueServicesPageProps) {
+export default async function QueueServicesPage({
+  params,
+}: QueueServicesPageProps) {
   const { shopId } = await params;
   const presenter = await QueueServicesPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <QueueServicesView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,7 +59,7 @@ export default async function QueueServicesPage({ params }: QueueServicesPagePro
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

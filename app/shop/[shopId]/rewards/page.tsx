@@ -15,7 +15,9 @@ interface CustomerRewardsPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: CustomerRewardsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CustomerRewardsPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await CustomerRewardsPresenterFactory.create();
 
@@ -36,16 +38,18 @@ export async function generateMetadata({ params }: CustomerRewardsPageProps): Pr
  * Customer Rewards page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function CustomerRewardsPage({ params }: CustomerRewardsPageProps) {
+export default async function CustomerRewardsPage({
+  params,
+}: CustomerRewardsPageProps) {
   const { shopId } = await params;
   const presenter = await CustomerRewardsPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout shop={shopInfo}>
         <CustomerRewardsView viewModel={viewModel} />
       </FrontendLayout>
     );
@@ -54,7 +58,7 @@ export default async function CustomerRewardsPage({ params }: CustomerRewardsPag
 
     // Fallback UI
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

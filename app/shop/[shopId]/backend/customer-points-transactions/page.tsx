@@ -15,7 +15,9 @@ interface CustomerPointsTransactionsPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: CustomerPointsTransactionsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CustomerPointsTransactionsPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await CustomerPointsTransactionsPresenterFactory.create();
 
@@ -27,7 +29,8 @@ export async function generateMetadata({ params }: CustomerPointsTransactionsPag
     // Fallback metadata
     return {
       title: "ประวัติการใช้แต้ม - เจ้าของร้าน | Shop Queue",
-      description: "ดูประวัติการทำรายการแต้มลูกค้า การได้รับแต้ม การใช้แต้ม และสถิติการใช้งาน",
+      description:
+        "ดูประวัติการทำรายการแต้มลูกค้า การได้รับแต้ม การใช้แต้ม และสถิติการใช้งาน",
     };
   }
 }
@@ -36,16 +39,18 @@ export async function generateMetadata({ params }: CustomerPointsTransactionsPag
  * Backend Customer Points Transactions page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function CustomerPointsTransactionsPage({ params }: CustomerPointsTransactionsPageProps) {
+export default async function CustomerPointsTransactionsPage({
+  params,
+}: CustomerPointsTransactionsPageProps) {
   const { shopId } = await params;
   const presenter = await CustomerPointsTransactionsPresenterFactory.create();
 
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <CustomerPointsTransactionsView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,13 +59,15 @@ export default async function CustomerPointsTransactionsPage({ params }: Custome
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">
               เกิดข้อผิดพลาด
             </h1>
-            <p className="text-muted mb-4">ไม่สามารถโหลดข้อมูลประวัติการใช้แต้มได้</p>
+            <p className="text-muted mb-4">
+              ไม่สามารถโหลดข้อมูลประวัติการใช้แต้มได้
+            </p>
             <Link
               href={`/shop/${shopId}/backend`}
               className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"

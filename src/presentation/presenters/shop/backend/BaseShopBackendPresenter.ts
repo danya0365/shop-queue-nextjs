@@ -1,26 +1,21 @@
-import { AuthUserDto } from '@/src/application/dtos/auth-dto';
-import { CurrentUsageStatsDTO, SubscriptionPlanDTO } from '@/src/application/dtos/backend/subscription-dto';
-import { ProfileDto } from '@/src/application/dtos/profile-dto';
-import { SubscriptionLimits, SubscriptionTier, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
-import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import { IShopService } from '@/src/application/services/shop/ShopService';
-import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { Metadata } from 'next';
-import { BaseShopPresenter } from '../BaseShopPresenter';
-
-export interface ShopInfo {
-  id: string;
-  name: string;
-  description: string;
-  address: string;
-  phone: string;
-  qrCodeUrl: string;
-  logo?: string;
-  openingHours: string;
-  services: string[];
-}
+import { AuthUserDto } from "@/src/application/dtos/auth-dto";
+import {
+  CurrentUsageStatsDTO,
+  SubscriptionPlanDTO,
+} from "@/src/application/dtos/backend/subscription-dto";
+import { ProfileDto } from "@/src/application/dtos/profile-dto";
+import {
+  SubscriptionLimits,
+  SubscriptionTier,
+  UsageStatsDto,
+} from "@/src/application/dtos/subscription-dto";
+import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import type { Metadata } from "next";
+import { BaseShopPresenter } from "../BaseShopPresenter";
 
 /**
  * Base presenter for Shop pages.
@@ -32,9 +27,10 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
     protected readonly shopService: IShopService,
     protected readonly authService: IAuthService,
     protected readonly profileService: IProfileService,
-    protected readonly subscriptionService: ISubscriptionService,
-  ) { super(logger, shopService); }
-
+    protected readonly subscriptionService: ISubscriptionService
+  ) {
+    super(logger, shopService);
+  }
 
   /**
    * Get the current authenticated user
@@ -51,7 +47,9 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
   /**
    * Get the current active profile
    */
-  protected async getActiveProfile(user: AuthUserDto): Promise<ProfileDto | null> {
+  protected async getActiveProfile(
+    user: AuthUserDto
+  ): Promise<ProfileDto | null> {
     try {
       return await this.profileService.getActiveProfileByAuthId(user.id);
     } catch (err) {
@@ -63,11 +61,19 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
   /**
    * Get subscription plan for a profile
    */
-  protected async getSubscriptionPlan(profileId: string, role: string): Promise<SubscriptionPlanDTO> {
+  protected async getSubscriptionPlan(
+    profileId: string,
+    role: string
+  ): Promise<SubscriptionPlanDTO> {
     try {
-      return await this.subscriptionService.getSubscriptionByProfileId(profileId);
+      return await this.subscriptionService.getSubscriptionByProfileId(
+        profileId
+      );
     } catch (error) {
-      this.logger.warn("No active subscription found for profile, creating default plan based on role", { error, profileId });
+      this.logger.warn(
+        "No active subscription found for profile, creating default plan based on role",
+        { error, profileId }
+      );
 
       // Create a default subscription plan based on role
       const tier = this.getRoleBasedTier(role);
@@ -77,14 +83,15 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
       return {
         id: `default_${profileId}`,
         tier: tier,
-        name: tier === 'free' ? 'ฟรี' : tier === 'pro' ? 'Pro' : 'Enterprise',
-        nameEn: tier === 'free' ? 'Free' : tier === 'pro' ? 'Pro' : 'Enterprise',
-        description: 'แผนการใช้งานตามสิทธิ์ของบทบาท',
-        descriptionEn: 'Subscription plan based on role',
-        monthlyPrice: tier === 'free' ? 0 : tier === 'pro' ? 299 : 999,
-        yearlyPrice: tier === 'free' ? 0 : tier === 'pro' ? 2990 : 9990,
+        name: tier === "free" ? "ฟรี" : tier === "pro" ? "Pro" : "Enterprise",
+        nameEn:
+          tier === "free" ? "Free" : tier === "pro" ? "Pro" : "Enterprise",
+        description: "แผนการใช้งานตามสิทธิ์ของบทบาท",
+        descriptionEn: "Subscription plan based on role",
+        monthlyPrice: tier === "free" ? 0 : tier === "pro" ? 299 : 999,
+        yearlyPrice: tier === "free" ? 0 : tier === "pro" ? 2990 : 9990,
         lifetimePrice: null,
-        currency: 'THB',
+        currency: "THB",
         maxShops: limits.maxShops,
         maxQueuesPerDay: limits.maxQueuesPerDay,
         dataRetentionMonths: limits.dataRetentionMonths,
@@ -104,7 +111,7 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
         isActive: true,
         sortOrder: 0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     }
   }
@@ -114,18 +121,20 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
    */
   protected getRoleBasedTier(role: string): SubscriptionTier {
     const roleToTierMap: Record<string, SubscriptionTier> = {
-      'user': 'free',
-      'moderator': 'pro',
-      'admin': 'enterprise'
+      user: "free",
+      moderator: "pro",
+      admin: "enterprise",
     };
 
-    return roleToTierMap[role] || 'free';
+    return roleToTierMap[role] || "free";
   }
 
   /**
    * Get default limits for tier
    */
-  protected async getDefaultLimitsForTier(tier: SubscriptionTier): Promise<SubscriptionLimits> {
+  protected async getDefaultLimitsForTier(
+    tier: SubscriptionTier
+  ): Promise<SubscriptionLimits> {
     const limitsMap: Record<SubscriptionTier, SubscriptionLimits> = {
       free: {
         maxShops: 1,
@@ -141,7 +150,7 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
         hasPrioritySupport: false,
         hasCustomBranding: false,
         hasAnalytics: false,
-        hasPromotionFeatures: false
+        hasPromotionFeatures: false,
       },
       pro: {
         maxShops: 3,
@@ -157,7 +166,7 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
         hasPrioritySupport: false,
         hasCustomBranding: false,
         hasAnalytics: true,
-        hasPromotionFeatures: true
+        hasPromotionFeatures: true,
       },
       enterprise: {
         maxShops: null,
@@ -173,18 +182,19 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
         hasPrioritySupport: true,
         hasCustomBranding: true,
         hasAnalytics: true,
-        hasPromotionFeatures: true
-      }
+        hasPromotionFeatures: true,
+      },
     };
 
     return limitsMap[tier];
   }
 
-
   /**
    * Map CurrentUsageStatsDTO to UsageStatsDto
    */
-  private mapCurrentUsageToUsageStats(currentUsage: CurrentUsageStatsDTO): UsageStatsDto {
+  private mapCurrentUsageToUsageStats(
+    currentUsage: CurrentUsageStatsDTO
+  ): UsageStatsDto {
     return {
       profileId: currentUsage.profileId,
       shopId: currentUsage.shopId,
@@ -197,7 +207,7 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
       usedPosterDesigns: 0,
       paidPosterDesigns: 0,
       totalPosters: 0,
-      dataRetentionMonths: 12
+      dataRetentionMonths: 12,
     };
   }
 
@@ -206,7 +216,9 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
    */
   protected async getUsageStats(profileId: string): Promise<UsageStatsDto> {
     try {
-      const currentUsage = await this.subscriptionService.getCurrentUsageStats(profileId);
+      const currentUsage = await this.subscriptionService.getCurrentUsageStats(
+        profileId
+      );
       return this.mapCurrentUsageToUsageStats(currentUsage);
     } catch (error) {
       this.logger.error("Error getting usage stats", error);
@@ -221,7 +233,7 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
         usedPosterDesigns: 0,
         paidPosterDesigns: 0,
         totalPosters: 0,
-        dataRetentionMonths: 12
+        dataRetentionMonths: 12,
       };
     }
   }
@@ -229,7 +241,9 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
   /**
    * Map SubscriptionPlanDTO to SubscriptionLimits
    */
-  protected mapSubscriptionPlanToLimits(plan: SubscriptionPlanDTO): SubscriptionLimits {
+  protected mapSubscriptionPlanToLimits(
+    plan: SubscriptionPlanDTO
+  ): SubscriptionLimits {
     return {
       maxShops: plan.maxShops,
       maxQueuesPerDay: plan.maxQueuesPerDay,
@@ -244,11 +258,15 @@ export abstract class BaseShopBackendPresenter extends BaseShopPresenter {
       hasPrioritySupport: plan.hasPrioritySupport,
       hasCustomBranding: plan.hasCustomBranding,
       hasAnalytics: plan.hasAnalytics,
-      hasPromotionFeatures: plan.hasPromotionFeatures
+      hasPromotionFeatures: plan.hasPromotionFeatures,
     };
   }
 
-  protected async generateShopMetadata(shopId: string, pageTitlePrefix: string, description: string): Promise<Metadata> {
+  protected async generateShopMetadata(
+    shopId: string,
+    pageTitlePrefix: string,
+    description: string
+  ): Promise<Metadata> {
     const shopInfo = await this.getShopInfo(shopId);
     return {
       title: `${pageTitlePrefix} - ${shopInfo.name} - Backend | Shop Queue`,

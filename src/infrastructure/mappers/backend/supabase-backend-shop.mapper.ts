@@ -1,4 +1,8 @@
-import { ShopEntity, ShopStatsEntity, ShopStatus } from "../../../domain/entities/backend/backend-shop.entity";
+import {
+  ShopEntity,
+  ShopStatsEntity,
+  ShopStatus,
+} from "../../../domain/entities/backend/backend-shop.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
 import { ShopSchema, ShopStatsSchema } from "../../schemas/backend/shop.schema";
 
@@ -35,16 +39,22 @@ export class SupabaseBackendShopMapper {
       totalReviews: schema.total_reviews || 0,
       createdAt: schema.created_at,
       updatedAt: schema.updated_at,
-      categories: schema.categories ? schema.categories.map(cat => ({
-        id: cat.id,
-        name: cat.name
-      })) : [],
-      openingHours: schema.opening_hours ? schema.opening_hours.map(hour => ({
-        dayOfWeek: hour.day_of_week,
-        openTime: hour.open_time,
-        closeTime: hour.close_time,
-        isOpen: hour.is_open
-      })) : []
+      categories: schema.categories
+        ? schema.categories.map((cat) => ({
+            id: cat.id,
+            name: cat.name,
+          }))
+        : [],
+      openingHours: schema.opening_hours
+        ? schema.opening_hours.map((hour) => ({
+            dayOfWeek: hour.day_of_week,
+            openTime: hour.open_time,
+            closeTime: hour.close_time,
+            isOpen: hour.is_open,
+            breakStart: hour.break_start,
+            breakEnd: hour.break_end,
+          }))
+        : [],
     };
   }
 
@@ -77,12 +87,14 @@ export class SupabaseBackendShopMapper {
       created_at: entity.createdAt,
       updated_at: entity.updatedAt,
       categories: entity.categories,
-      opening_hours: entity.openingHours.map(hour => ({
+      opening_hours: entity.openingHours.map((hour) => ({
         day_of_week: hour.dayOfWeek,
         open_time: hour.openTime,
         close_time: hour.closeTime,
-        is_open: hour.isOpen
-      }))
+        is_open: hour.isOpen,
+        break_start: hour.breakStart,
+        break_end: hour.breakEnd,
+      })),
     };
   }
 
@@ -96,7 +108,7 @@ export class SupabaseBackendShopMapper {
       totalShops: schema.total_shops,
       activeShops: schema.active_shops,
       pendingApproval: schema.pending_approval,
-      newThisMonth: schema.new_this_month
+      newThisMonth: schema.new_this_month,
     };
   }
 
@@ -120,7 +132,7 @@ export class SupabaseBackendShopMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }

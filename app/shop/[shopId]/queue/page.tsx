@@ -15,7 +15,9 @@ interface QueueJoinPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: QueueJoinPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: QueueJoinPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await QueueJoinPresenterFactory.create();
 
@@ -43,9 +45,9 @@ export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout shop={shopInfo}>
         <QueueJoinView viewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
@@ -54,7 +56,7 @@ export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
 
     // Fallback UI
     return (
-      <FrontendLayout shopId={shopId}>
+      <FrontendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">

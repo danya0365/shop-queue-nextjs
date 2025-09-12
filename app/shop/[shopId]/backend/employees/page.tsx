@@ -15,7 +15,9 @@ interface EmployeesPageProps {
 /**
  * Generate metadata for the page
  */
-export async function generateMetadata({ params }: EmployeesPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: EmployeesPageProps): Promise<Metadata> {
   const { shopId } = await params;
   const presenter = await EmployeesPresenterFactory.create();
 
@@ -27,7 +29,8 @@ export async function generateMetadata({ params }: EmployeesPageProps): Promise<
     // Fallback metadata
     return {
       title: "จัดการพนักงาน - เจ้าของร้าน | Shop Queue",
-      description: "จัดการข้อมูลพนักงาน สิทธิ์การเข้าถึง และประสิทธิภาพการทำงาน",
+      description:
+        "จัดการข้อมูลพนักงาน สิทธิ์การเข้าถึง และประสิทธิภาพการทำงาน",
     };
   }
 }
@@ -43,9 +46,9 @@ export default async function EmployeesPage({ params }: EmployeesPageProps) {
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
-
+    const shopInfo = await presenter.getShopInfo(shopId);
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout shop={shopInfo}>
         <EmployeesView viewModel={viewModel} />
       </BackendLayout>
     );
@@ -54,7 +57,7 @@ export default async function EmployeesPage({ params }: EmployeesPageProps) {
 
     // Fallback UI
     return (
-      <BackendLayout shopId={shopId}>
+      <BackendLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-2">
