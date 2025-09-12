@@ -4,6 +4,7 @@ import type {
   CustomerHistoryViewModel,
   CustomerQueueHistory,
   HistoryFilters,
+  HistoryFilterType,
 } from "@/src/presentation/presenters/shop/frontend/CustomerHistoryPresenter";
 import { useState } from "react";
 
@@ -90,7 +91,11 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
   };
 
   const filteredHistory = viewModel.queueHistory.filter((queue) => {
-    if (filters.status !== "all" && queue.status !== filters.status)
+    if (
+      filters.status &&
+      filters.status !== "all" &&
+      queue.status !== filters.status
+    )
       return false;
     // Add more filter logic as needed
     return true;
@@ -124,7 +129,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
                 onChange={(e) =>
                   setFilters({
                     ...filters,
-                    status: e.target.value || undefined,
+                    status: (e.target.value || "all") as HistoryFilterType,
                   })
                 }
                 className="frontend-input w-full"
@@ -191,7 +196,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredHistory.map((queue, index) => (
+              {filteredHistory.map((queue) => (
                 <div key={queue.id}>
                   <div className="frontend-card frontend-card-hover p-4 rounded-lg">
                     <div className="flex items-center justify-between">
@@ -204,7 +209,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
                             {queue.shopName}
                           </h4>
                           <p className="text-sm frontend-text-secondary">
-                            {queue.date} เวลา {queue.time}
+                            {queue.queueDate} เวลา {queue.queueTime}
                           </p>
                         </div>
                       </div>

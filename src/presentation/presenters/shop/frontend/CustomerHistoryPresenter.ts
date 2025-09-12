@@ -1,7 +1,7 @@
-import { ShopService } from '@/src/application/services/shop/ShopService';
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
+import { ShopService } from "@/src/application/services/shop/ShopService";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
 // Define interfaces for data structures
 export interface CustomerQueueHistory {
@@ -10,7 +10,7 @@ export interface CustomerQueueHistory {
   shopName: string;
   services: HistoryService[];
   totalAmount: number;
-  status: 'completed' | 'cancelled' | 'no_show';
+  status: "completed" | "cancelled" | "no_show";
   queueDate: string;
   queueTime: string;
   completedAt?: string;
@@ -19,7 +19,7 @@ export interface CustomerQueueHistory {
   rating?: number;
   feedback?: string;
   employeeName?: string;
-  paymentMethod?: 'cash' | 'card' | 'qr' | 'transfer';
+  paymentMethod?: "cash" | "card" | "qr" | "transfer";
 }
 
 export interface HistoryService {
@@ -40,10 +40,15 @@ export interface CustomerStats {
 }
 
 export interface HistoryFilters {
-  status: 'all' | 'completed' | 'cancelled' | 'no_show';
-  dateRange: 'all' | 'month' | 'quarter' | 'year';
+  status: HistoryFilterType;
+  dateRange: "all" | "month" | "quarter" | "year";
   shop: string;
+  startDate?: string;
+  endDate?: string;
 }
+
+// type filter
+export type HistoryFilterType = "all" | "completed" | "cancelled" | "no_show";
 
 // Define ViewModel interface
 export interface CustomerHistoryViewModel {
@@ -61,7 +66,10 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
 
   async getViewModel(shopId: string): Promise<CustomerHistoryViewModel> {
     try {
-      this.logger.info('CustomerHistoryPresenter: Getting view model for shop', { shopId });
+      this.logger.info(
+        "CustomerHistoryPresenter: Getting view model for shop",
+        { shopId }
+      );
 
       // Mock data - replace with actual service calls
       const queueHistory = this.getQueueHistory();
@@ -71,14 +79,17 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
         queueHistory,
         customerStats,
         filters: {
-          status: 'all',
-          dateRange: 'all',
-          shop: 'all',
+          status: "all",
+          dateRange: "all",
+          shop: "all",
         },
-        customerName: 'สมชาย ลูกค้าดี',
+        customerName: "สมชาย ลูกค้าดี",
       };
     } catch (error) {
-      this.logger.error('CustomerHistoryPresenter: Error getting view model', error);
+      this.logger.error(
+        "CustomerHistoryPresenter: Error getting view model",
+        error
+      );
       throw error;
     }
   }
@@ -87,120 +98,123 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
   private getQueueHistory(): CustomerQueueHistory[] {
     return [
       {
-        id: '1',
-        queueNumber: 'A015',
-        shopName: 'ร้านกาแฟสุขใจ',
+        id: "1",
+        queueNumber: "A015",
+        shopName: "ร้านกาแฟสุขใจ",
         services: [
-          { id: '1', name: 'กาแฟลาเต้', price: 85, quantity: 1 },
-          { id: '2', name: 'เค้กช็อกโกแลต', price: 120, quantity: 1 },
+          { id: "1", name: "กาแฟลาเต้", price: 85, quantity: 1 },
+          { id: "2", name: "เค้กช็อกโกแลต", price: 120, quantity: 1 },
         ],
         totalAmount: 219.35,
-        status: 'completed',
-        queueDate: '2024-01-15',
-        queueTime: '10:30',
-        completedAt: '10:45',
+        status: "completed",
+        queueDate: "2024-01-15",
+        queueTime: "10:30",
+        completedAt: "10:45",
         waitTime: 8,
         serviceTime: 7,
         rating: 5,
-        feedback: 'บริการดีมาก กาแฟอร่อย เค้กหวานกำลังดี',
-        employeeName: 'สมชาย ใจดี',
-        paymentMethod: 'qr',
+        feedback: "บริการดีมาก กาแฟอร่อย เค้กหวานกำลังดี",
+        employeeName: "สมชาย ใจดี",
+        paymentMethod: "qr",
       },
       {
-        id: '2',
-        queueNumber: 'A012',
-        shopName: 'ร้านกาแฟสุขใจ',
-        services: [
-          { id: '3', name: 'กาแฟอเมริกาโน่', price: 65, quantity: 2 },
-        ],
-        totalAmount: 139.10,
-        status: 'completed',
-        queueDate: '2024-01-12',
-        queueTime: '14:15',
-        completedAt: '14:28',
+        id: "2",
+        queueNumber: "A012",
+        shopName: "ร้านกาแฟสุขใจ",
+        services: [{ id: "3", name: "กาแฟอเมริกาโน่", price: 65, quantity: 2 }],
+        totalAmount: 139.1,
+        status: "completed",
+        queueDate: "2024-01-12",
+        queueTime: "14:15",
+        completedAt: "14:28",
         waitTime: 5,
         serviceTime: 8,
         rating: 4,
-        feedback: 'กาแฟดี แต่รอนานหน่อย',
-        employeeName: 'สมหญิง รักงาน',
-        paymentMethod: 'cash',
+        feedback: "กาแฟดี แต่รอนานหน่อย",
+        employeeName: "สมหญิง รักงาน",
+        paymentMethod: "cash",
       },
       {
-        id: '3',
-        queueNumber: 'A008',
-        shopName: 'ร้านกาแฟสุขใจ',
+        id: "3",
+        queueNumber: "A008",
+        shopName: "ร้านกาแฟสุขใจ",
         services: [
-          { id: '4', name: 'เซ็ตอาหารเช้า', price: 150, quantity: 1 },
-          { id: '5', name: 'กาแฟคาปูชิโน่', price: 75, quantity: 1 },
+          { id: "4", name: "เซ็ตอาหารเช้า", price: 150, quantity: 1 },
+          { id: "5", name: "กาแฟคาปูชิโน่", price: 75, quantity: 1 },
         ],
         totalAmount: 244.45,
-        status: 'completed',
-        queueDate: '2024-01-08',
-        queueTime: '08:45',
-        completedAt: '09:05',
+        status: "completed",
+        queueDate: "2024-01-08",
+        queueTime: "08:45",
+        completedAt: "09:05",
         waitTime: 12,
         serviceTime: 8,
         rating: 5,
-        feedback: 'อาหารเช้าอร่อย กาแฟหอม บรรยากาศดี',
-        employeeName: 'สมศรี ขยันทำงาน',
-        paymentMethod: 'card',
+        feedback: "อาหารเช้าอร่อย กาแฟหอม บรรยากาศดี",
+        employeeName: "สมศรี ขยันทำงาน",
+        paymentMethod: "card",
       },
       {
-        id: '4',
-        queueNumber: 'A005',
-        shopName: 'ร้านกาแฟสุขใจ',
-        services: [
-          { id: '6', name: 'สมูทตี้ผลไม้', price: 85, quantity: 1 },
-        ],
-        totalAmount: 91.80,
-        status: 'cancelled',
-        queueDate: '2024-01-05',
-        queueTime: '16:20',
+        id: "4",
+        queueNumber: "A005",
+        shopName: "ร้านกาแฟสุขใจ",
+        services: [{ id: "6", name: "สมูทตี้ผลไม้", price: 85, quantity: 1 }],
+        totalAmount: 91.8,
+        status: "cancelled",
+        queueDate: "2024-01-05",
+        queueTime: "16:20",
         waitTime: 0,
         paymentMethod: undefined,
       },
       {
-        id: '5',
-        queueNumber: 'A003',
-        shopName: 'ร้านกาแฟสุขใจ',
+        id: "5",
+        queueNumber: "A003",
+        shopName: "ร้านกาแฟสุขใจ",
         services: [
-          { id: '7', name: 'กาแฟเอสเปรสโซ่', price: 55, quantity: 1 },
-          { id: '8', name: 'คุกกี้', price: 45, quantity: 2 },
+          { id: "7", name: "กาแฟเอสเปรสโซ่", price: 55, quantity: 1 },
+          { id: "8", name: "คุกกี้", price: 45, quantity: 2 },
         ],
         totalAmount: 155.35,
-        status: 'completed',
-        queueDate: '2024-01-03',
-        queueTime: '11:10',
-        completedAt: '11:22',
+        status: "completed",
+        queueDate: "2024-01-03",
+        queueTime: "11:10",
+        completedAt: "11:22",
         waitTime: 7,
         serviceTime: 5,
         rating: 4,
-        employeeName: 'สมชาย ใจดี',
-        paymentMethod: 'qr',
+        employeeName: "สมชาย ใจดี",
+        paymentMethod: "qr",
       },
     ];
   }
 
   private getCustomerStats(history: CustomerQueueHistory[]): CustomerStats {
-    const completedQueues = history.filter(q => q.status === 'completed');
-    const cancelledQueues = history.filter(q => q.status === 'cancelled');
+    const completedQueues = history.filter((q) => q.status === "completed");
+    const cancelledQueues = history.filter((q) => q.status === "cancelled");
 
-    const totalSpent = completedQueues.reduce((sum, q) => sum + q.totalAmount, 0);
-    const ratingsWithValues = completedQueues.filter(q => q.rating);
-    const averageRating = ratingsWithValues.length > 0
-      ? ratingsWithValues.reduce((sum, q) => sum + (q.rating || 0), 0) / ratingsWithValues.length
-      : 0;
+    const totalSpent = completedQueues.reduce(
+      (sum, q) => sum + q.totalAmount,
+      0
+    );
+    const ratingsWithValues = completedQueues.filter((q) => q.rating);
+    const averageRating =
+      ratingsWithValues.length > 0
+        ? ratingsWithValues.reduce((sum, q) => sum + (q.rating || 0), 0) /
+          ratingsWithValues.length
+        : 0;
 
     // Calculate favorite service
     const serviceCount: { [key: string]: number } = {};
-    completedQueues.forEach(queue => {
-      queue.services.forEach(service => {
-        serviceCount[service.name] = (serviceCount[service.name] || 0) + service.quantity;
+    completedQueues.forEach((queue) => {
+      queue.services.forEach((service) => {
+        serviceCount[service.name] =
+          (serviceCount[service.name] || 0) + service.quantity;
       });
     });
 
-    const favoriteService = Object.entries(serviceCount)
-      .sort(([, a], [, b]) => b - a)[0]?.[0] || 'ไม่มีข้อมูล';
+    const favoriteService =
+      Object.entries(serviceCount).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      "ไม่มีข้อมูล";
 
     return {
       totalQueues: history.length,
@@ -209,7 +223,7 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
       totalSpent,
       averageRating,
       favoriteService,
-      memberSince: '2023-12-01',
+      memberSince: "2023-12-01",
     };
   }
 
@@ -217,8 +231,8 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
       shopId,
-      'ประวัติการใช้บริการ - ลูกค้า',
-      'ดูประวัติการจองคิวและการใช้บริการของคุณ'
+      "ประวัติการใช้บริการ - ลูกค้า",
+      "ดูประวัติการจองคิวและการใช้บริการของคุณ"
     );
   }
 }
@@ -227,8 +241,8 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
 export class CustomerHistoryPresenterFactory {
   static async create(): Promise<CustomerHistoryPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const shopService = serverContainer.resolve<ShopService>('ShopService');
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const shopService = serverContainer.resolve<ShopService>("ShopService");
     return new CustomerHistoryPresenter(logger, shopService);
   }
 }
