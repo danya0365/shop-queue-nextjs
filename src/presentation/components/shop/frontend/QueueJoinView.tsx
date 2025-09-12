@@ -31,7 +31,10 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
       ? services
       : services.filter((service) => service.category === selectedCategory);
 
-  const handleServiceToggle = (serviceId: string) => {
+  const handleServiceToggle = (serviceId: string, isDisabled: boolean) => {
+    if (isDisabled) {
+      return;
+    }
     if (state.selectedServices.includes(serviceId)) {
       actions.removeService(serviceId);
     } else {
@@ -188,15 +191,21 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                   const isSelected = state.selectedServices.includes(
                     service.id
                   );
+                  const isDisabled = service.available === false;
                   return (
                     <div
                       key={service.id}
-                      onClick={() => handleServiceToggle(service.id)}
+                      onClick={() =>
+                        handleServiceToggle(service.id, isDisabled)
+                      }
                       className={cn(
-                        "cursor-pointer p-4 transition-all",
+                        "p-4 transition-all",
                         isSelected
                           ? "frontend-item-card-selected"
-                          : "frontend-item-card"
+                          : "frontend-item-card",
+                        isDisabled
+                          ? "frontend-item-card-disabled cursor-not-allowed"
+                          : "cursor-pointer"
                       )}
                     >
                       <div className="text-center">

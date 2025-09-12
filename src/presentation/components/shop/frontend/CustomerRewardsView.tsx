@@ -174,7 +174,7 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
                     `rounded-lg p-4 ${
                       reward.isAvailable
                         ? "frontend-card frontend-card-hover"
-                        : "frontend-card-secondary"
+                        : "frontend-card-disabled"
                     } transition-shadow`,
                     reward.isAvailable
                       ? "cursor-pointer"
