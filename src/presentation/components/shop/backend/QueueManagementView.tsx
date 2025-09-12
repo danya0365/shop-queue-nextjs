@@ -145,47 +145,57 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คิวทั้งหมด</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pagination.totalCount}</p>
-            </div>
-            <span className="text-3xl">📋</span>
+      {pagination.totalCount === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 border border-gray-200 dark:border-gray-700 text-center">
+          <div className="text-gray-500 dark:text-gray-400">
+            <div className="text-4xl mb-4">📊</div>
+            <p className="text-lg font-medium">ยังไม่มีข้อมูลสถิติคิว</p>
+            <p className="text-sm mt-2">ข้อมูลสถิติคิวจะแสดงเมื่อมีลูกค้าจองคิว</p>
           </div>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คิวทั้งหมด</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pagination.totalCount}</p>
+              </div>
+              <span className="text-3xl">📋</span>
+            </div>
+          </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">รอดำเนินการ</p>
-              <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{waitingCount}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">รอดำเนินการ</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{waitingCount}</p>
+              </div>
+              <span className="text-3xl">⏳</span>
             </div>
-            <span className="text-3xl">⏳</span>
           </div>
-        </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">กำลังให้บริการ</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{servingCount}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">กำลังให้บริการ</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{servingCount}</p>
+              </div>
+              <span className="text-3xl">🔔️</span>
             </div>
-            <span className="text-3xl">🔔️</span>
           </div>
-        </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">เสร็จสิ้นวันนี้</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{completedToday}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">เสร็จสิ้นวันนี้</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{completedToday}</p>
+              </div>
+              <span className="text-3xl">✅</span>
             </div>
-            <span className="text-3xl">✅</span>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
