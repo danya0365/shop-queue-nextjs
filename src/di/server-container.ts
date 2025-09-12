@@ -162,6 +162,7 @@ export async function createServerContainer(): Promise<Container> {
       shopBackendServiceRepository,
       logger
     );
+
     // Register all services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);

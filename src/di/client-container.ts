@@ -4,15 +4,43 @@ import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
 import { ProfileService } from "../application/services/profile-service";
+import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/backend/BackendPaymentsService";
+import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
+import { ShopBackendServicesServiceFactory } from "../application/services/shop/backend/BackendServicesService";
+import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
+import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
+import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
+import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
+import { DepartmentsBackendService } from "../application/services/shop/backend/departments-backend-service";
+import { NotificationSettingsBackendService } from "../application/services/shop/backend/notification-settings-backend-service";
+import { OpeningHoursBackendService } from "../application/services/shop/backend/opening-hours-backend-service";
+import { PaymentItemsBackendService } from "../application/services/shop/backend/payment-items-backend-service";
+import { PaymentsBackendService } from "../application/services/shop/backend/payments-backend-service";
+import { PosterTemplateBackendService } from "../application/services/shop/backend/poster-templates-backend-service";
+import { QueueServiceBackendService } from "../application/services/shop/backend/queue-services-backend-service";
+import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
+import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
+import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
+import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
-import { SupabaseClientType, SupabaseDatasource } from "../infrastructure/datasources/supabase-datasource";
+import {
+  SupabaseClientType,
+  SupabaseDatasource,
+} from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
+import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
+import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
+import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
+import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
+import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
+import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
+import { SupabaseSubscriptionUsageRepository } from "../infrastructure/repositories/supabase-subscription-usage-repository";
 import { Container, createContainer } from "./container";
 
 /**
@@ -35,25 +63,177 @@ export function createClientContainer(): Container {
     );
 
     const authDatasource = new SupabaseAuthDataSource(logger, supabase);
-    const profileAdapter = ProfileRepositoryFactory.createAdapter(databaseDatasource, logger);
+    const profileAdapter = ProfileRepositoryFactory.createAdapter(
+      databaseDatasource,
+      logger
+    );
 
     // Create repository instances
-    const shopBackendShopRepository = new SupabaseShopBackendShopRepository(databaseDatasource, logger);
-    const shopBackendCategoryRepository = new SupabaseShopBackendCategoryRepository(databaseDatasource, logger);
+    const shopBackendShopRepository = new SupabaseShopBackendShopRepository(
+      databaseDatasource,
+      logger
+    );
+    const shopBackendCategoryRepository =
+      new SupabaseShopBackendCategoryRepository(databaseDatasource, logger);
+    const shopBackendPaymentRepository =
+      new SupabaseShopBackendPaymentRepository(databaseDatasource, logger);
+    const shopBackendPromotionRepository =
+      new SupabaseShopBackendPromotionRepository(databaseDatasource, logger);
+    const shopBackendServiceRepository =
+      new SupabaseShopBackendServiceRepository(databaseDatasource, logger);
+
+    // Create subscription repositories
+    const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
+      databaseDatasource,
+      logger
+    );
+    const profileSubscriptionRepository =
+      new SupabaseProfileSubscriptionRepository(databaseDatasource, logger);
+    const subscriptionUsageRepository = new SupabaseSubscriptionUsageRepository(
+      databaseDatasource,
+      logger
+    );
+    const featureAccessRepository = new SupabaseFeatureAccessRepository(
+      databaseDatasource,
+      logger
+    );
+
+    // Create backend subscription service
+    const subscriptionService = SubscriptionServiceFactory.create(
+      subscriptionPlanRepository,
+      profileSubscriptionRepository,
+      subscriptionUsageRepository,
+      featureAccessRepository,
+      logger
+    );
 
     // Create service instances
     const authService = new AuthService(authDatasource, logger);
     const profileService = new ProfileService(profileAdapter, logger);
     const authorizationService = new AuthorizationService(logger);
-    const shopService = ShopServiceFactory.create(shopBackendShopRepository, logger);
-    const categoryService = CategoryServiceFactory.create(shopBackendCategoryRepository, logger);
+    const shopService = ShopServiceFactory.create(
+      shopBackendShopRepository,
+      logger
+    );
+    const categoryService = CategoryServiceFactory.create(
+      shopBackendCategoryRepository,
+      logger
+    );
+
+    // Shop Backend services
+    const posterTemplateBackendService = new PosterTemplateBackendService(
+      logger
+    );
+    const customersBackendService = new CustomersBackendService(logger);
+    const departmentsBackendService = new DepartmentsBackendService(logger);
+    const paymentsBackendService = new PaymentsBackendService(logger);
+    const rewardsBackendService = new RewardsBackendService(logger);
+    const openingHoursBackendService = new OpeningHoursBackendService(logger);
+    const paymentItemsBackendService = new PaymentItemsBackendService(logger);
+    const customerPointsBackendService = new CustomerPointsBackendService(
+      logger
+    );
+    const queueServiceBackendService = new QueueServiceBackendService(logger);
+    const customerPointsTransactionBackendService =
+      new CustomerPointsTransactionBackendService(logger);
+    const shopSettingsBackendService = new ShopSettingsBackendService(logger);
+    const notificationSettingsBackendService =
+      new NotificationSettingsBackendService(logger);
+    const rewardTransactionBackendService = new RewardTransactionBackendService(
+      logger
+    );
+    const shopBackendShopsService = ShopBackendShopsServiceFactory.create(
+      shopBackendShopRepository,
+      logger
+    );
+    const shopBackendPaymentsService = ShopBackendPaymentsServiceFactory.create(
+      shopBackendPaymentRepository,
+      logger
+    );
+    const shopBackendPromotionsService =
+      ShopBackendPromotionsServiceFactory.create(
+        shopBackendPromotionRepository,
+        logger
+      );
+    const shopBackendServicesService = ShopBackendServicesServiceFactory.create(
+      shopBackendServiceRepository,
+      logger
+    );
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
     container.registerInstance("AuthorizationService", authorizationService);
     container.registerInstance("ShopService", shopService);
+    container.registerInstance("SubscriptionService", subscriptionService);
     container.registerInstance("CategoryService", categoryService);
+
+    // Shop Backend services
+    container.registerInstance(
+      "ShopBackendShopsService",
+      shopBackendShopsService
+    );
+    container.registerInstance(
+      "ShopBackendPaymentsService",
+      shopBackendPaymentsService
+    );
+    container.registerInstance(
+      "ShopBackendPromotionsService",
+      shopBackendPromotionsService
+    );
+    container.registerInstance(
+      "ShopBackendServicesService",
+      shopBackendServicesService
+    );
+    container.registerInstance(
+      "PosterTemplateBackendService",
+      posterTemplateBackendService
+    );
+    container.registerInstance(
+      "CustomersBackendService",
+      customersBackendService
+    );
+    container.registerInstance(
+      "DepartmentsBackendService",
+      departmentsBackendService
+    );
+    container.registerInstance(
+      "PaymentsBackendService",
+      paymentsBackendService
+    );
+    container.registerInstance("RewardsBackendService", rewardsBackendService);
+    container.registerInstance(
+      "OpeningHoursBackendService",
+      openingHoursBackendService
+    );
+    container.registerInstance(
+      "PaymentItemsBackendService",
+      paymentItemsBackendService
+    );
+    container.registerInstance(
+      "CustomerPointsBackendService",
+      customerPointsBackendService
+    );
+    container.registerInstance(
+      "QueueServiceBackendService",
+      queueServiceBackendService
+    );
+    container.registerInstance(
+      "CustomerPointsTransactionBackendService",
+      customerPointsTransactionBackendService
+    );
+    container.registerInstance(
+      "ShopSettingsBackendService",
+      shopSettingsBackendService
+    );
+    container.registerInstance(
+      "NotificationSettingsBackendService",
+      notificationSettingsBackendService
+    );
+    container.registerInstance(
+      "RewardTransactionBackendService",
+      rewardTransactionBackendService
+    );
 
     logger.info("Client container initialized successfully");
   } catch (error) {

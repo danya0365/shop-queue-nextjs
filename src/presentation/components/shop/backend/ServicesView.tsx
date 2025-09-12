@@ -1,27 +1,55 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
-import { useState } from "react";
+import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 
 interface ServicesViewProps {
-  viewModel: ServicesViewModel;
+  initialViewModel: ServicesViewModel;
+  shopId: string;
 }
 
-export function ServicesView({ viewModel }: ServicesViewProps) {
+export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
+  const [viewModel, setViewModel] = useState(initialViewModel);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  
+  const { getServicesData, isLoading, error } = useServicesPresenter();
 
-  // Filter services based on search and category
-  const filteredServices = viewModel.services.filter((service) => {
-    const matchesSearch =
-      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (service.description &&
-        service.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory =
-      selectedCategory === "all" || service.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Load services data when filters or page changes
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const newViewModel = await getServicesData(shopId, currentPage, 10, {
+          searchQuery: searchTerm || undefined,
+          categoryFilter: selectedCategory !== "all" ? selectedCategory : undefined
+        });
+        setViewModel(newViewModel);
+      } catch (error) {
+        console.error("Error loading services:", error);
+      }
+    };
+
+    loadData();
+  }, [shopId, currentPage, searchTerm, selectedCategory, getServicesData]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Handle search and category filter changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setCurrentPage(1); // Reset to first page when changing category
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("th-TH", {
@@ -135,7 +163,7 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
                 type="text"
                 placeholder="ค้นหาบริการ..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
@@ -144,7 +172,7 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
             <div className="sm:w-48">
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">หมวดหมู่ทั้งหมด</option>
@@ -163,8 +191,18 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            รายการบริการ ({filteredServices.length})
+            รายการบริการ ({viewModel.services.pagination.totalCount})
           </h2>
+          {isLoading && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              กำลังโหลดข้อมูล...
+            </p>
+          )}
+          {error && (
+            <p className="text-sm text-red-500 dark:text-red-400 mt-1">
+              {error}
+            </p>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -191,7 +229,7 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredServices.length === 0 ? (
+              {viewModel.services.data.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -217,7 +255,7 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
                   </td>
                 </tr>
               ) : (
-                filteredServices.map((service) => (
+                viewModel.services.data.map((service) => (
                   <tr
                     key={service.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -286,9 +324,72 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Create Service Modal Placeholder */}
+        {/* Pagination */}
+        {viewModel.services.pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              แสดง {(viewModel.services.pagination.currentPage - 1) * viewModel.services.pagination.perPage + 1} - {Math.min(viewModel.services.pagination.currentPage * viewModel.services.pagination.perPage, viewModel.services.pagination.totalCount)} จาก {viewModel.services.pagination.totalCount} รายการ
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1 || isLoading}
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  currentPage > 1 && !isLoading
+                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                ก่อนหน้า
+              </button>
+
+              <div className="flex space-x-1">
+                {Array.from({ length: Math.min(viewModel.services.pagination.totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (viewModel.services.pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= viewModel.services.pagination.totalPages - 2) {
+                    pageNum = viewModel.services.pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      disabled={isLoading}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${
+                        pageNum === currentPage
+                          ? "bg-blue-500 text-white"
+                          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= viewModel.services.pagination.totalPages || isLoading}
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  currentPage < viewModel.services.pagination.totalPages && !isLoading
+                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                ถัดไป
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">

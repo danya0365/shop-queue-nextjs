@@ -1,16 +1,32 @@
+import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
 import { IShopBackendServicesService } from "@/src/application/services/shop/backend/BackendServicesService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
+import { Container } from "@/src/di/container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define ViewModel interface
 export interface ServicesViewModel {
-  services: ServiceDTO[];
+  // ข้อมูลบริการพร้อม pagination
+  services: {
+    data: ServiceDTO[]; // ข้อมูลบริการ (เฉพาะหน้าปัจจุบัน)
+    pagination: {
+      // ข้อมูล pagination
+      currentPage: number; // หน้าปัจจุบัน
+      totalPages: number; // จำนวนหน้าทั้งหมด
+      perPage: number; // จำนวนรายการต่อหน้า
+      totalCount: number; // จำนวนรายการทั้งหมด
+      hasNext: boolean; // มีหน้าถัดไปหรือไม่
+      hasPrev: boolean; // มีหน้าก่อนหน้าหรือไม่
+    };
+  };
+
+  // ข้อมูลสถิติ (ยังคงเดิม)
   totalServices: number;
   activeServices: number;
   inactiveServices: number;
@@ -43,21 +59,63 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
     );
   }
 
-  async getViewModel(shopId: string): Promise<ServicesViewModel> {
+  async getViewModel(
+    shopId: string,
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      categoryFilter?: string;
+      availabilityFilter?: string;
+    }
+  ): Promise<ServicesViewModel> {
     try {
-      this.logger.info("ServicesPresenter: Getting view model", { shopId });
+      this.logger.info("ServicesPresenter: Getting view model", {
+        shopId,
+        page,
+        perPage,
+        filters,
+      });
 
-      // Get services data with stats
-      const servicesData = await this.backendServicesService.getServicesData(1, 100, { shopId });
-      const { services, stats } = servicesData;
+      // Get services data with pagination and filters
+      const servicesData = await this.backendServicesService.getServicesData(
+        page,
+        perPage,
+        {
+          shopId,
+          searchQuery: filters?.searchQuery,
+          categoryFilter: filters?.categoryFilter,
+          availabilityFilter: filters?.availabilityFilter,
+        }
+      );
+
+      const {
+        services,
+        stats,
+        totalCount,
+        currentPage,
+        perPage: responsePerPage,
+      } = servicesData;
 
       // Get unique categories from services
       const categories = [
         ...new Set(services.map((service) => service.category).filter(Boolean)),
       ] as string[];
 
+      const totalPages = Math.ceil(totalCount / responsePerPage);
+
       return {
-        services,
+        services: {
+          data: services,
+          pagination: {
+            currentPage,
+            totalPages,
+            perPage: responsePerPage,
+            totalCount,
+            hasNext: currentPage < totalPages,
+            hasPrev: currentPage > 1,
+          },
+        },
         totalServices: stats.totalServices,
         activeServices: stats.availableServices,
         inactiveServices: stats.unavailableServices,
@@ -82,27 +140,54 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
   }
 }
 
-// Factory class
-export class ServicesPresenterFactory {
+// Base Factory class for reducing code duplication
+abstract class BaseServicesPresenterFactory {
+  protected static async createPresenter(
+    getContainer: () => Promise<Container> | Container
+  ): Promise<ServicesPresenter> {
+    try {
+      const container = await getContainer();
+      const logger = container.resolve<Logger>("Logger");
+      const shopService = container.resolve<IShopService>("ShopService");
+      const authService = container.resolve<IAuthService>("AuthService");
+      const profileService =
+        container.resolve<IProfileService>("ProfileService");
+      const subscriptionService = container.resolve<ISubscriptionService>(
+        "SubscriptionService"
+      );
+      const backendServicesService =
+        container.resolve<IShopBackendServicesService>(
+          "ShopBackendServicesService"
+        );
+
+      return new ServicesPresenter(
+        logger,
+        shopService,
+        authService,
+        profileService,
+        subscriptionService,
+        backendServicesService
+      );
+    } catch (error) {
+      throw new Error(
+        `Failed to create ServicesPresenter: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+}
+
+// Factory class for server-side
+export class ServicesPresenterFactory extends BaseServicesPresenterFactory {
   static async create(): Promise<ServicesPresenter> {
-    const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>("Logger");
-    const shopService = serverContainer.resolve<IShopService>("ShopService");
-    const authService = serverContainer.resolve<IAuthService>("AuthService");
-    const profileService =
-      serverContainer.resolve<IProfileService>("ProfileService");
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
-      "SubscriptionService"
-    );
-    const backendServicesService =
-      serverContainer.resolve<IShopBackendServicesService>("ShopBackendServicesService");
-    return new ServicesPresenter(
-      logger,
-      shopService,
-      authService,
-      profileService,
-      subscriptionService,
-      backendServicesService
-    );
+    return this.createPresenter(() => getServerContainer());
+  }
+}
+
+// Factory class for client-side
+export class ClientServicesPresenterFactory extends BaseServicesPresenterFactory {
+  static async create(): Promise<ServicesPresenter> {
+    return this.createPresenter(() => getClientContainer());
   }
 }
