@@ -11,4 +11,5 @@
 @import "./feature.css";
 @import "./backend.css";
 @import "./shop-backend.css";
-@import "./employee.css";
+@import "./shop-employee.css";
+@import "./shop-frontend.css";
