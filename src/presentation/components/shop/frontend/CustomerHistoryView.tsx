@@ -88,19 +88,19 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen frontend-overlay">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="frontend-card shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">ประวัติการใช้บริการ</h1>
-                <p className="text-sm text-gray-600">ดูประวัติการจองคิวและการใช้บริการของคุณ</p>
+                <h1 className="text-2xl font-bold frontend-text-primary">ประวัติการใช้บริการ</h1>
+                <p className="text-sm frontend-text-secondary">ดูประวัติการจองคิวและการใช้บริการของคุณ</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">สวัสดี</p>
-                <p className="text-lg font-medium text-gray-900">
+                <p className="text-sm frontend-text-secondary">สวัสดี</p>
+                <p className="text-lg font-medium frontend-text-primary">
                   {viewModel.customerName}
                 </p>
               </div>
@@ -113,56 +113,56 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="frontend-card p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 frontend-queue-current rounded-lg">
                 <span className="text-2xl">📋</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">คิวทั้งหมด</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium frontend-text-secondary">คิวทั้งหมด</p>
+                <p className="text-2xl font-bold frontend-text-primary">
                   {viewModel.customerStats.totalQueues}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="frontend-card p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
+              <div className="p-2 frontend-queue-time rounded-lg">
                 <span className="text-2xl">✅</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">เสร็จสิ้น</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium frontend-text-secondary">เสร็จสิ้น</p>
+                <p className="text-2xl font-bold frontend-service-price">
                   {viewModel.customerStats.completedQueues}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="frontend-card p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
+              <div className="p-2 frontend-queue-average rounded-lg">
                 <span className="text-2xl">💰</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">ยอดใช้จ่ายรวม</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-sm font-medium frontend-text-secondary">ยอดใช้จ่ายรวม</p>
+                <p className="text-2xl font-bold frontend-service-price">
                   ฿{viewModel.customerStats.totalSpent.toLocaleString()}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="frontend-card p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
+              <div className="p-2 frontend-queue-waiting rounded-lg">
                 <span className="text-2xl">⭐</span>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">คะแนนเฉลี่ย</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-sm font-medium frontend-text-secondary">คะแนนเฉลี่ย</p>
+                <p className="text-2xl font-bold frontend-queue-waiting">
                   {viewModel.customerStats.averageRating > 0 ? viewModel.customerStats.averageRating.toFixed(1) : '-'}
                 </p>
               </div>
@@ -171,24 +171,24 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
         </div>
 
         {/* Customer Info */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">ข้อมูลสมาชิก</h3>
+        <div className="frontend-card p-6 mb-6">
+          <h3 className="text-lg font-medium frontend-text-primary mb-4">ข้อมูลสมาชิก</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-gray-600">สมาชิกตั้งแต่</p>
-              <p className="text-lg font-medium text-gray-900">
+              <p className="text-sm frontend-text-secondary">สมาชิกตั้งแต่</p>
+              <p className="text-lg font-medium frontend-text-primary">
                 {new Date(viewModel.customerStats.memberSince).toLocaleDateString('th-TH')}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">บริการที่ชื่นชอบ</p>
-              <p className="text-lg font-medium text-gray-900">
+              <p className="text-sm frontend-text-secondary">บริการที่ชื่นชอบ</p>
+              <p className="text-lg font-medium frontend-text-primary">
                 {viewModel.customerStats.favoriteService}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">สถานะ</p>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <p className="text-sm frontend-text-secondary">สถานะ</p>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium frontend-queue-time">
                 สมาชิกปกติ
               </span>
             </div>
@@ -196,17 +196,17 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">ตัวกรอง</h3>
+        <div className="frontend-card p-6 mb-6">
+          <h3 className="text-lg font-medium frontend-text-primary mb-4">ตัวกรอง</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium frontend-text-primary mb-2">
                 สถานะ
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value as HistoryFilters['status'] })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full frontend-input"
               >
                 <option value="all">ทั้งหมด</option>
                 <option value="completed">เสร็จสิ้น</option>
@@ -216,13 +216,13 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium frontend-text-primary mb-2">
                 ช่วงเวลา
               </label>
               <select
                 value={filters.dateRange}
                 onChange={(e) => setFilters({ ...filters, dateRange: e.target.value as HistoryFilters['dateRange'] })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full frontend-input"
               >
                 <option value="all">ทั้งหมด</option>
                 <option value="month">เดือนนี้</option>
@@ -232,7 +232,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
             </div>
 
             <div className="flex items-end">
-              <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="w-full frontend-button-primary px-4 py-2 rounded-lg transition-colors">
                 ค้นหา
               </button>
             </div>
@@ -240,44 +240,44 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
         </div>
 
         {/* History List */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
+        <div className="frontend-card">
+          <div className="px-6 py-4 border-b frontend-card-border">
+            <h3 className="text-lg font-medium frontend-text-primary">
               ประวัติการใช้บริการ ({filteredHistory.length})
             </h3>
           </div>
 
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y frontend-card-border">
             {filteredHistory.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-400 text-6xl mb-4">📋</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <div className="frontend-text-muted text-6xl mb-4">📋</div>
+                <h3 className="text-lg font-medium frontend-text-primary mb-2">
                   ไม่มีประวัติการใช้บริการ
                 </h3>
-                <p className="text-gray-600">เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่</p>
+                <p className="frontend-text-secondary">เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่</p>
               </div>
             ) : (
               filteredHistory.map((queue) => (
-                <div key={queue.id} className="p-6 hover:bg-gray-50">
+                <div key={queue.id} className="p-6 frontend-card-hover">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                        <span className="frontend-badge-info text-sm font-medium px-2.5 py-0.5 rounded">
                           คิว {queue.queueNumber}
                         </span>
                         <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(queue.status)}`}>
                           {getStatusText(queue.status)}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs frontend-text-muted">
                           {new Date(queue.queueDate).toLocaleDateString('th-TH')} {queue.queueTime}
                         </span>
                       </div>
 
-                      <h3 className="font-medium text-gray-900 mb-1">
+                      <h3 className="font-medium frontend-text-primary mb-1">
                         {queue.shopName}
                       </h3>
 
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-sm frontend-text-secondary mb-2">
                         {queue.services.map((service, index) => (
                           <span key={service.id}>
                             {service.name} x{service.quantity}
@@ -286,8 +286,8 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
                         ))}
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="font-medium text-blue-600">
+                      <div className="flex items-center gap-4 text-sm frontend-text-secondary">
+                        <span className="font-medium frontend-service-price">
                           ฿{queue.totalAmount.toLocaleString()}
                         </span>
                         {queue.paymentMethod && (

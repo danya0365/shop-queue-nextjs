@@ -68,19 +68,19 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen frontend-overlay">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="frontend-card shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">รางวัลและแต้มสะสม</h1>
-                <p className="text-sm text-gray-600">แลกของรางวัลและติดตามแต้มสะสมของคุณ</p>
+                <h1 className="text-2xl font-bold frontend-text-primary">รางวัลและแต้มสะสม</h1>
+                <p className="text-sm frontend-text-secondary">แลกของรางวัลและติดตามแต้มสะสมของคุณ</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">สวัสดี</p>
-                <p className="text-lg font-medium text-gray-900">
+                <p className="text-sm frontend-text-secondary">สวัสดี</p>
+                <p className="text-lg font-medium frontend-text-primary">
                   {viewModel.customerName}
                 </p>
               </div>
@@ -92,15 +92,15 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Points Summary */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white mb-6">
+        <div className="frontend-shop-header rounded-lg p-6 text-white mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold">แต้มสะสมของคุณ</h2>
-              <p className="text-blue-100">สะสมแต้มเพื่อแลกของรางวัลสุดพิเศษ</p>
+              <p className="frontend-shop-header-text-light">สะสมแต้มเพื่อแลกของรางวัลสุดพิเศษ</p>
             </div>
             <div className="text-right">
               <div className="text-4xl font-bold">{viewModel.customerPoints.currentPoints.toLocaleString()}</div>
-              <div className="text-sm text-blue-100">แต้ม</div>
+              <div className="text-sm frontend-shop-header-text-light">แต้ม</div>
             </div>
           </div>
 
@@ -138,23 +138,23 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
         </div>
 
         {/* Tier Benefits */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="frontend-card p-6 mb-6">
+          <h3 className="text-lg font-medium frontend-text-primary mb-4">
             สิทธิประโยชน์สมาชิก {viewModel.customerPoints.tier}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {viewModel.customerPoints.tierBenefits.map((benefit, index) => (
               <div key={index} className="flex items-center">
-                <span className="text-green-500 mr-2">✓</span>
-                <span className="text-gray-700">{benefit}</span>
+                <span className="frontend-text-success mr-2">✓</span>
+                <span className="frontend-text-primary">{benefit}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="border-b border-gray-200">
+        <div className="frontend-card">
+          <div className="border-b frontend-card-border">
             <nav className="flex space-x-8 px-6">
               {[
                 { id: 'rewards', name: 'แลกของรางวัล', icon: '🎁' },
@@ -164,10 +164,10 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-blue-500 frontend-text-primary'
+                      : 'border-transparent frontend-text-secondary hover:frontend-text-primary hover:border-gray-300'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -185,26 +185,26 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
                   <div
                     key={reward.id}
                     className={`border rounded-lg p-4 ${
-                      reward.isAvailable ? 'border-gray-200 hover:shadow-md' : 'border-gray-100 bg-gray-50'
+                      reward.isAvailable ? 'frontend-card frontend-card-hover' : 'frontend-card-secondary'
                     } transition-shadow`}
                   >
                     <div className="text-center mb-4">
                       <div className="text-4xl mb-2">{reward.imageUrl}</div>
-                      <h3 className="font-medium text-gray-900">{reward.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{reward.description}</p>
+                      <h3 className="font-medium frontend-text-primary">{reward.name}</h3>
+                      <p className="text-sm frontend-text-secondary mt-1">{reward.description}</p>
                     </div>
 
                     <div className="flex items-center justify-between mb-4">
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      <span className="frontend-badge-info text-xs px-2 py-1 rounded-full">
                         {reward.category}
                       </span>
-                      <span className="text-lg font-bold text-blue-600">
+                      <span className="text-lg font-bold frontend-service-price">
                         {reward.pointsCost} แต้ม
                       </span>
                     </div>
 
                     {reward.stock !== undefined && (
-                      <div className="text-xs text-gray-500 mb-3">
+                      <div className="text-xs frontend-text-muted mb-3">
                         เหลือ {reward.stock} ชิ้น
                       </div>
                     )}
@@ -214,8 +214,8 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
                       disabled={!reward.isAvailable || viewModel.customerPoints.currentPoints < reward.pointsCost}
                       className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
                         reward.isAvailable && viewModel.customerPoints.currentPoints >= reward.pointsCost
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          ? 'frontend-button-primary'
+                          : 'frontend-button-disabled cursor-not-allowed'
                       }`}
                     >
                       {!reward.isAvailable

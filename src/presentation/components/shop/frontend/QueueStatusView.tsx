@@ -63,16 +63,16 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ติดตามสถานะคิว</h1>
-          <p className="text-gray-600">{shopName}</p>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">ติดตามสถานะคิว</h1>
+          <p className="frontend-text-secondary">{shopName}</p>
         </div>
 
         {/* Search Form */}
-        <div className="bg-white rounded-xl shadow-sm border p-8">
+        <div className="frontend-card p-8">
           <div className="text-center mb-6">
             <span className="text-6xl mb-4 block">🔍</span>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">ค้นหาคิวของคุณ</h2>
-            <p className="text-gray-600">กรอกหมายเลขคิวเพื่อติดตามสถานะ</p>
+            <h2 className="text-2xl font-semibold frontend-text-primary mb-2">ค้นหาคิวของคุณ</h2>
+            <p className="frontend-text-secondary">กรอกหมายเลขคิวเพื่อติดตามสถานะ</p>
           </div>
 
           <div className="max-w-md mx-auto">
@@ -86,7 +86,7 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
               />
               <button
                 onClick={handleSearch}
-                className="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-colors"
+                className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
               >
                 ค้นหา
               </button>
@@ -95,17 +95,17 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
         </div>
 
         {/* Current Queue Info */}
-        <div className="mt-8 bg-white rounded-xl shadow-sm border">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">สถานะคิวปัจจุบัน</h2>
+        <div className="mt-8 frontend-card">
+          <div className="p-6 border-b frontend-card-border">
+            <h2 className="text-xl font-semibold frontend-text-primary">สถานะคิวปัจจุบัน</h2>
           </div>
           <div className="p-6">
             <div className="text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-blue-600">{queueProgress.currentNumber}</span>
+              <div className="w-20 h-20 frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold">{queueProgress.currentNumber}</span>
               </div>
-              <p className="text-lg font-medium text-gray-900 mb-2">คิวที่กำลังให้บริการ</p>
-              <p className="text-gray-600">เวลาเฉลี่ยต่อคิว: {queueProgress.averageServiceTime} นาที</p>
+              <p className="text-lg font-medium frontend-text-primary mb-2">คิวที่กำลังให้บริการ</p>
+              <p className="frontend-text-secondary">เวลาเฉลี่ยต่อคิว: {queueProgress.averageServiceTime} นาที</p>
             </div>
           </div>
         </div>
@@ -116,13 +116,13 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">สถานะคิวของคุณ</h1>
-        <p className="text-gray-600">{shopName}</p>
+        <h1 className="text-3xl font-bold frontend-text-primary mb-2">สถานะคิวของคุณ</h1>
+        <p className="frontend-text-secondary">{shopName}</p>
       </div>
 
       {/* Queue Status Card */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden mb-8">
-        <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-8 text-center">
+      <div className="frontend-card overflow-hidden mb-8">
+        <div className="frontend-shop-header text-white p-8 text-center">
           <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-4xl font-bold">{customerQueue?.queueNumber}</span>
           </div>
@@ -137,120 +137,140 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
           {/* Progress Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold text-orange-600">{customerQueue?.position}</span>
+              <div className="w-16 h-16 frontend-badge-warning rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl font-bold">{customerQueue?.position}</span>
               </div>
-              <p className="text-sm text-gray-600">ลำดับคิว</p>
+              <p className="text-sm frontend-text-secondary">ลำดับคิว</p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold text-blue-600">{queueProgress.totalAhead}</span>
+              <div className="w-16 h-16 frontend-badge-info rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl font-bold">{queueProgress.totalAhead}</span>
               </div>
-              <p className="text-sm text-gray-600">คิวข้างหน้า</p>
+              <p className="text-sm frontend-text-secondary">คิวข้างหน้า</p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold text-green-600">{customerQueue?.estimatedWaitTime}</span>
+              <div className="w-16 h-16 frontend-badge-success rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl font-bold">{customerQueue?.estimatedWaitTime}</span>
               </div>
-              <p className="text-sm text-gray-600">เวลารอ (นาที)</p>
+              <p className="text-sm frontend-text-secondary">เวลารอ (นาที)</p>
             </div>
           </div>
 
           {/* Queue Details */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4">รายละเอียดคิว</h3>
+          <div className="frontend-card-secondary rounded-lg p-6 mb-6">
+            <h3 className="font-semibold frontend-text-primary mb-4">รายละเอียดคิว</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">ชื่อลูกค้า:</span>
-                <span className="font-medium">{customerQueue?.customerName}</span>
+                <span className="frontend-text-secondary">ชื่อลูกค้า:</span>
+                <span className="font-medium frontend-text-primary">{customerQueue?.customerName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">บริการ:</span>
-                <span className="font-medium">{customerQueue?.services.join(', ')}</span>
+                <span className="frontend-text-secondary">บริการ:</span>
+                <span className="font-medium frontend-text-primary">{customerQueue?.services.join(', ')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">ราคารวม:</span>
-                <span className="font-bold text-green-600">฿{customerQueue?.totalPrice}</span>
+                <span className="frontend-text-secondary">ราคารวม:</span>
+                <span className="font-bold frontend-text-success">฿{customerQueue?.totalPrice}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">เวลาเข้าคิว:</span>
-                <span className="font-medium">{customerQueue?.createdAt}</span>
+                <span className="frontend-text-secondary">เวลาเข้าคิว:</span>
+                <span className="font-medium frontend-text-primary">{customerQueue?.createdAt}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">คาดว่าจะถึงคิว:</span>
-                <span className="font-medium text-orange-600">{queueProgress.estimatedCallTime}</span>
+                <span className="frontend-text-secondary">คาดว่าจะถึงคิว:</span>
+                <span className="font-medium frontend-text-warning">{queueProgress.estimatedCallTime}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Queue Information */}
+          <div className="frontend-card-secondary p-6">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="frontend-text-secondary text-sm mb-1">คิวปัจจุบัน</p>
+                <p className="text-2xl font-bold frontend-text-primary">{queueProgress.currentNumber}</p>
+              </div>
+              <div>
+                <p className="frontend-text-secondary text-sm mb-1">เวลารอโดยประมาณ</p>
+                <p className="text-2xl font-bold frontend-queue-current">{customerQueue?.estimatedWaitTime} นาที</p>
               </div>
             </div>
           </div>
 
           {/* Status Messages */}
           {customerQueue?.status === 'waiting' && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <div className="frontend-status-waiting rounded-lg p-4 mb-6">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl">⏳</span>
                 <div>
-                  <p className="font-medium text-orange-800">รอการยืนยันจากร้าน</p>
-                  <p className="text-sm text-orange-600">ร้านจะยืนยันคิวของคุณในไม่ช้า</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {customerQueue?.status === 'confirmed' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">✅</span>
-                <div>
-                  <p className="font-medium text-blue-800">คิวได้รับการยืนยันแล้ว</p>
-                  <p className="text-sm text-blue-600">กรุณารอจนกว่าจะถึงคิวของคุณ</p>
+                  <h3 className="font-semibold frontend-text-primary">กรุณารอสักครู่</h3>
+                  <p className="frontend-text-secondary text-sm">ระบบกำลังจัดคิวให้คุณ โปรดรอการเรียกจากเจ้าหน้าที่</p>
                 </div>
               </div>
             </div>
           )}
 
           {customerQueue?.status === 'serving' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div className="frontend-status-serving rounded-lg p-4 mb-6">
               <div className="flex items-center space-x-3">
-                <span className="text-2xl">🛎️</span>
+                <span className="text-2xl">✅</span>
                 <div>
-                  <p className="font-medium text-green-800">ถึงคิวของคุณแล้ว!</p>
-                  <p className="text-sm text-green-600">กรุณามาที่เคาน์เตอร์เพื่อรับบริการ</p>
+                  <h3 className="font-semibold frontend-text-primary">ถึงคิวของคุณแล้ว!</h3>
+                  <p className="frontend-text-secondary text-sm">กรุณาไปที่เคาน์เตอร์เพื่อรับบริการ</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {customerQueue?.status === 'completed' && (
+            <div className="frontend-status-completed rounded-lg p-4 mb-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">🎉</span>
+                <div>
+                  <h3 className="font-semibold frontend-text-primary">เสร็จสิ้นแล้ว</h3>
+                  <p className="frontend-text-secondary text-sm">ขอบคุณที่ใช้บริการ หวังว่าจะได้พบกันอีก</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {customerQueue?.status === 'cancelled' && (
+            <div className="frontend-status-cancelled rounded-lg p-4 mb-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">❌</span>
+                <div>
+                  <h3 className="font-semibold frontend-text-primary">คิวถูกยกเลิก</h3>
+                  <p className="frontend-text-secondary text-sm">คิวของคุณถูกยกเลิกแล้ว สามารถจองคิวใหม่ได้</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col space-y-3">
-            {customerQueue?.status === 'serving' && (
-              <button className="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
-                🏃‍♂️ ไปรับบริการ
-              </button>
-            )}
-
-            {canCancel && (
+          <div className="space-y-4">
+            {customerQueue?.status === 'waiting' && (
               <button
-                onClick={() => setShowCancelConfirm(true)}
-                className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                onClick={handleCancel}
+                className="w-full frontend-button-danger py-3 px-6 rounded-lg font-semibold transition-colors"
               >
-                ❌ ยกเลิกคิว
+                ยกเลิกคิว
               </button>
             )}
 
             <button
               onClick={() => window.location.reload()}
-              className="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+              className="w-full frontend-button-secondary py-3 px-6 rounded-lg font-semibold transition-colors"
             >
-              🔄 รีเฟรชสถานะ
+              รีเฟรช
             </button>
 
             <button
               onClick={() => window.location.href = `/shop/${shopId}`}
-              className="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-colors"
+              className="w-full frontend-button-primary py-3 px-6 rounded-lg font-semibold transition-colors"
             >
-              🏠 กลับหน้าหลัก
+              กลับหน้าหลัก
             </button>
           </div>
         </div>
@@ -259,22 +279,22 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
       {/* Cancel Confirmation Modal */}
       {showCancelConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+          <div className="frontend-card p-6 max-w-md w-full">
             <div className="text-center mb-6">
               <span className="text-6xl mb-4 block">⚠️</span>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">ยืนยันการยกเลิกคิว</h3>
-              <p className="text-gray-600">คุณแน่ใจหรือไม่ที่จะยกเลิกคิว {customerQueue?.queueNumber}?</p>
+              <h3 className="text-xl font-semibold frontend-text-primary mb-2">ยืนยันการยกเลิกคิว</h3>
+              <p className="frontend-text-secondary">คุณแน่ใจหรือไม่ที่จะยกเลิกคิว {customerQueue?.queueNumber}?</p>
             </div>
             <div className="flex space-x-4">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                className="flex-1 frontend-button-secondary px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 ไม่ยกเลิก
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"
+                className="flex-1 frontend-button-danger px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 ยืนยันยกเลิก
               </button>
