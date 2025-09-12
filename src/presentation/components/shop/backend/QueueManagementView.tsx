@@ -1,19 +1,66 @@
 'use client';
 
-import { QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
-import { useState } from 'react';
+import { useQueueManagementPresenter } from '@/src/presentation/presenters/shop/backend/useQueueManagementPresenter';
 import { QueueLimitsWarning } from './QueueLimitsWarning';
+import { QueueItem, QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
 
 interface QueueManagementViewProps {
-  viewModel: QueueManagementViewModel;
+  shopId: string;
+  initialViewModel?: QueueManagementViewModel;
 }
 
-export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
-  const { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime, subscription } = viewModel;
-  console.log('QueueManagementView props', { queues, totalQueues, waitingCount, servingCount, completedToday, averageWaitTime, subscription });
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedPriority, setSelectedPriority] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+export function QueueManagementView({ shopId, initialViewModel }: QueueManagementViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    currentPage,
+    perPage,
+    filters,
+    handlePageChange,
+    handleNextPage,
+    handlePrevPage,
+    handleStatusFilter,
+    handlePriorityFilter,
+    handleSearch,
+    resetFilters,
+    refreshData,
+  } = useQueueManagementPresenter(shopId, initialViewModel);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">กำลังโหลดข้อมูลคิว...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="text-red-500 text-4xl mb-4">❌</div>
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+          <button
+            onClick={refreshData}
+            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+          >
+            ลองใหม่อีกครั้ง
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!viewModel) {
+    return null;
+  }
+
+  const { queues, waitingCount, servingCount, completedToday, averageWaitTime, subscription } = viewModel;
+  const { data: queueData, pagination } = queues;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,13 +101,13 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
     }
   };
 
-  const filteredQueues = queues.filter(queue => {
-    const matchesStatus = selectedStatus === 'all' || queue.status === selectedStatus;
-    const matchesPriority = selectedPriority === 'all' || queue.priority === selectedPriority;
-    const matchesSearch = searchTerm === '' ||
-      queue.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      queue.queueNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      queue.customerPhone.includes(searchTerm);
+  const filteredQueues = queueData.filter((queue: QueueItem) => {
+    const matchesStatus = filters.status === 'all' || queue.status === filters.status;
+    const matchesPriority = filters.priority === 'all' || queue.priority === filters.priority;
+    const matchesSearch = filters.search === '' ||
+      queue.customerName.toLowerCase().includes(filters.search.toLowerCase()) ||
+      queue.queueNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+      queue.customerPhone.includes(filters.search);
 
     return matchesStatus && matchesPriority && matchesSearch;
   });
@@ -103,7 +150,7 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คิวทั้งหมด</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalQueues}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pagination.totalCount}</p>
             </div>
             <span className="text-3xl">📋</span>
           </div>
@@ -148,8 +195,8 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">สถานะ</label>
                 <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  value={filters.status}
+                  onChange={(e) => handleStatusFilter(e.target.value)}
                   className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">ทั้งหมด</option>
@@ -164,8 +211,8 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ระดับความสำคัญ</label>
                 <select
-                  value={selectedPriority}
-                  onChange={(e) => setSelectedPriority(e.target.value)}
+                  value={filters.priority}
+                  onChange={(e) => handlePriorityFilter(e.target.value)}
                   className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">ทั้งหมด</option>
@@ -181,10 +228,20 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
               <input
                 type="text"
                 placeholder="ค้นหาชื่อ, เบอร์โทร, หรือหมายเลขคิว"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={filters.search}
+                onChange={(e) => handleSearch(e.target.value)}
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={resetFilters}
+                disabled={loading}
+                className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                รีเซ็ต
+              </button>
             </div>
           </div>
         </div>
@@ -203,11 +260,11 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
               <div className="text-gray-500 dark:text-gray-400">
                 <div className="text-4xl mb-4">📋</div>
                 <p className="text-lg">
-                  {searchTerm || selectedStatus !== 'all' || selectedPriority !== 'all'
+                  {filters.search || filters.status !== 'all' || filters.priority !== 'all'
                     ? "ไม่พบรายการคิวที่ตรงกับเงื่อนไขการค้นหา"
                     : "ยังไม่มีรายการคิวในระบบ"}
                 </p>
-                {searchTerm || selectedStatus !== 'all' || selectedPriority !== 'all' ? (
+                {filters.search || filters.status !== 'all' || filters.priority !== 'all' ? (
                   <p className="text-sm text-gray-400 mt-2">
                     ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการคิวใหม่
                   </p>
@@ -219,7 +276,7 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
               </div>
             </div>
           ) : (
-            filteredQueues.map((queue) => (
+            filteredQueues.map((queue: QueueItem) => (
             <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -284,6 +341,71 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           ))
           )}
         </div>
+
+        {/* Pagination */}
+        {viewModel?.queues.pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              แสดง {(viewModel.queues.pagination.currentPage - 1) * viewModel.queues.pagination.perPage + 1} - {Math.min(viewModel.queues.pagination.currentPage * viewModel.queues.pagination.perPage, viewModel.queues.pagination.totalCount)} จาก {viewModel.queues.pagination.totalCount} รายการ
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1 || loading}
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  currentPage > 1 && !loading
+                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                ก่อนหน้า
+              </button>
+
+              <div className="flex space-x-1">
+                {Array.from({ length: Math.min(viewModel.queues.pagination.totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (viewModel.queues.pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= viewModel.queues.pagination.totalPages - 2) {
+                    pageNum = viewModel.queues.pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      disabled={loading}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${
+                        pageNum === currentPage
+                          ? "bg-blue-500 text-white"
+                          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage >= viewModel.queues.pagination.totalPages || loading}
+                className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  currentPage < viewModel.queues.pagination.totalPages && !loading
+                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                ถัดไป
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

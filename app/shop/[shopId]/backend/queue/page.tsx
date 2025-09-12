@@ -45,12 +45,12 @@ export default async function QueueManagementPage({
   const presenter = await QueueManagementPresenterFactory.create();
 
   try {
-    // Get view model from presenter
-    const viewModel = await presenter.getViewModel(shopId);
+    // Get view model from presenter with initial pagination
+    const initialViewModel = await presenter.getViewModel(shopId, 1, 10);
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <QueueManagementView viewModel={viewModel} />
+        <QueueManagementView initialViewModel={initialViewModel} shopId={shopId} />
       </BackendLayout>
     );
   } catch (error) {

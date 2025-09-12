@@ -4,8 +4,10 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
+import { Container } from '@/src/di/container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
+import { getClientContainer } from '@/src/di/client-container';
 
 // Define interfaces for data structures
 export interface QueueItem {
@@ -29,8 +31,20 @@ export interface QueueFilter {
 
 // Define ViewModel interface
 export interface QueueManagementViewModel {
-  queues: QueueItem[];
-  totalQueues: number;
+  // ข้อมูลคิวพร้อม pagination
+  queues: {
+    data: QueueItem[];        // ข้อมูลคิว (เฉพาะหน้าปัจจุบัน)
+    pagination: {              // ข้อมูล pagination
+      currentPage: number;        // หน้าปัจจุบัน
+      totalPages: number;         // จำนวนหน้าทั้งหมด
+      perPage: number;           // จำนวนรายการต่อหน้า
+      totalCount: number;        // จำนวนรายการทั้งหมด
+      hasNext: boolean;          // มีหน้าถัดไปหรือไม่
+      hasPrev: boolean;          // มีหน้าก่อนหน้าหรือไม่
+    };
+  };
+  
+  // ข้อมูลสถิติ (ยังคงเดิม)
   waitingCount: number;
   servingCount: number;
   completedToday: number;
@@ -54,9 +68,23 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     subscriptionService: ISubscriptionService,
   ) { super(logger, shopService, authService, profileService, subscriptionService); }
 
-  async getViewModel(shopId: string): Promise<QueueManagementViewModel> {
+  async getViewModel(
+    shopId: string,
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      status?: string;
+      priority?: string;
+      search?: string;
+    }
+  ): Promise<QueueManagementViewModel> {
     try {
-      this.logger.info('QueueManagementPresenter: Getting view model for shop', { shopId });
+      this.logger.info('QueueManagementPresenter: Getting view model', {
+        shopId,
+        page,
+        perPage,
+        filters,
+      });
 
       const user = await this.getUser();
       if (!user) {
@@ -73,23 +101,57 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       const usage = await this.getUsageStats(profile.id);
 
       // Mock data - replace with actual service calls
-      const queues = this.getQueueData();
-      const stats = this.calculateStats(queues);
+      const allQueues = this.getQueueData();
+      const stats = this.calculateStats(allQueues);
+
+      // Apply filters
+      let filteredQueues = allQueues;
+      if (filters) {
+        if (filters.status && filters.status !== 'all') {
+          filteredQueues = filteredQueues.filter(q => q.status === filters.status);
+        }
+        if (filters.priority && filters.priority !== 'all') {
+          filteredQueues = filteredQueues.filter(q => q.priority === filters.priority);
+        }
+        if (filters.search) {
+          filteredQueues = filteredQueues.filter(q => 
+            q.customerName.toLowerCase().includes(filters.search!.toLowerCase()) ||
+            q.queueNumber.toLowerCase().includes(filters.search!.toLowerCase())
+          );
+        }
+      }
+
+      // Apply pagination
+      const totalCount = filteredQueues.length;
+      const totalPages = Math.ceil(totalCount / perPage);
+      const currentPage = Math.min(page, totalPages || 1);
+      const startIndex = (currentPage - 1) * perPage;
+      const endIndex = startIndex + perPage;
+      const paginatedQueues = filteredQueues.slice(startIndex, endIndex);
 
       const dailyLimitReached = limits.maxQueuesPerDay !== null && usage.todayQueues >= limits.maxQueuesPerDay;
       const canCreateQueue = !dailyLimitReached;
 
       return {
-        queues,
-        totalQueues: queues.length,
+        queues: {
+          data: paginatedQueues,
+          pagination: {
+            currentPage,
+            totalPages,
+            perPage,
+            totalCount,
+            hasNext: currentPage < totalPages,
+            hasPrev: currentPage > 1,
+          },
+        },
         waitingCount: stats.waiting,
         servingCount: stats.serving,
         completedToday: stats.completed,
         averageWaitTime: 15,
         filters: {
-          status: 'all',
-          priority: 'all',
-          search: '',
+          status: filters?.status || 'all',
+          priority: filters?.priority || 'all',
+          search: filters?.search || '',
         },
         subscription: {
           limits,
@@ -175,15 +237,40 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
   }
 }
 
-// Factory class
-export class QueueManagementPresenterFactory {
+// Base Factory class for reducing code duplication
+abstract class BaseQueueManagementPresenterFactory {
+  protected static async createPresenter(
+    getContainer: () => Promise<Container> | Container
+  ): Promise<QueueManagementPresenter> {
+    try {
+      const container = await getContainer();
+      const logger = container.resolve<Logger>('Logger');
+      const shopService = container.resolve<IShopService>('ShopService');
+      const authService = container.resolve<IAuthService>('AuthService');
+      const profileService = container.resolve<IProfileService>('ProfileService');
+      const subscriptionService = container.resolve<ISubscriptionService>('SubscriptionService');
+      
+      return new QueueManagementPresenter(logger, shopService, authService, profileService, subscriptionService);
+    } catch (error) {
+      throw new Error(
+        `Failed to create QueueManagementPresenter: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  }
+}
+
+// Factory class for server-side
+export class QueueManagementPresenterFactory extends BaseQueueManagementPresenterFactory {
   static async create(): Promise<QueueManagementPresenter> {
-    const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
-    const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new QueueManagementPresenter(logger, shopService, authService, profileService, subscriptionService);
+    return this.createPresenter(() => getServerContainer());
+  }
+}
+
+// Factory class for client-side
+export class ClientQueueManagementPresenterFactory extends BaseQueueManagementPresenterFactory {
+  static async create(): Promise<QueueManagementPresenter> {
+    return this.createPresenter(() => getClientContainer());
   }
 }

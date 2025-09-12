@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
 import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 
@@ -10,46 +10,22 @@ interface ServicesViewProps {
 }
 
 export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
-  const [viewModel, setViewModel] = useState(initialViewModel);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const {
+    viewModel,
+    loading,
+    error,
+    currentPage,
+    filters,
+    handlePageChange,
+    handleNextPage,
+    handlePrevPage,
+    handleSearchChange,
+    handleCategoryChange,
+    resetFilters,
+  } = useServicesPresenter(shopId, initialViewModel);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
-  
-  const { getServicesData, isLoading, error } = useServicesPresenter();
-
-  // Load services data when filters or page changes
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const newViewModel = await getServicesData(shopId, currentPage, 10, {
-          searchQuery: searchTerm || undefined,
-          categoryFilter: selectedCategory !== "all" ? selectedCategory : undefined
-        });
-        setViewModel(newViewModel);
-      } catch (error) {
-        console.error("Error loading services:", error);
-      }
-    };
-
-    loadData();
-  }, [shopId, currentPage, searchTerm, selectedCategory, getServicesData]);
-
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Handle search and category filter changes
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    setCurrentPage(1); // Reset to first page when changing category
-  };
+  const { searchQuery, categoryFilter } = filters;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("th-TH", {
@@ -71,6 +47,21 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
       ? `${hours} ชม. ${remainingMinutes} นาที`
       : `${hours} ชม.`;
   };
+
+  if (loading || !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">กำลังโหลดข้อมูลบริการ...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -162,7 +153,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               <input
                 type="text"
                 placeholder="ค้นหาบริการ..."
-                value={searchTerm}
+                value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -171,7 +162,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
             {/* Category Filter */}
             <div className="sm:w-48">
               <select
-                value={selectedCategory}
+                value={categoryFilter}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
@@ -183,6 +174,17 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 ))}
               </select>
             </div>
+
+            {/* Reset Button */}
+            <div className="flex items-end">
+              <button
+                onClick={resetFilters}
+                disabled={loading}
+                className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                รีเซ็ต
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -193,7 +195,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             รายการบริการ ({viewModel.services.pagination.totalCount})
           </h2>
-          {isLoading && (
+          {loading && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               กำลังโหลดข้อมูล...
             </p>
@@ -238,11 +240,11 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">🛎️</div>
                       <p className="text-lg">
-                        {searchTerm || selectedCategory !== "all" 
+                        {searchQuery || categoryFilter !== "all" 
                           ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีบริการในระบบ"}
                       </p>
-                      {searchTerm || selectedCategory !== "all" ? (
+                      {searchQuery || categoryFilter !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
                         </p>
@@ -334,10 +336,10 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
             
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1 || isLoading}
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1 || loading}
                 className={`px-3 py-1 rounded-md text-sm font-medium ${
-                  currentPage > 1 && !isLoading
+                  currentPage > 1 && !loading
                     ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                 }`}
@@ -362,7 +364,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      disabled={isLoading}
+                      disabled={loading}
                       className={`px-3 py-1 rounded-md text-sm font-medium ${
                         pageNum === currentPage
                           ? "bg-blue-500 text-white"
@@ -376,10 +378,10 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               </div>
 
               <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= viewModel.services.pagination.totalPages || isLoading}
+                onClick={handleNextPage}
+                disabled={currentPage >= viewModel.services.pagination.totalPages || loading}
                 className={`px-3 py-1 rounded-md text-sm font-medium ${
-                  currentPage < viewModel.services.pagination.totalPages && !isLoading
+                  currentPage < viewModel.services.pagination.totalPages && !loading
                     ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                 }`}
