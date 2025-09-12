@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeToggle } from "@/src/presentation/components/ui/ThemeToggle";
+import { FrontendThemeToggle } from "./FrontendThemeToggle";
 import { ShopInfo } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -67,7 +67,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
 
             {/* Right side - Auth & Theme Toggle */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <ThemeToggle />
+              <FrontendThemeToggle />
               
               {/* Desktop Auth */}
               <div className="hidden md:flex items-center space-x-4">
