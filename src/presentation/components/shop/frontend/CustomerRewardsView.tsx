@@ -76,15 +76,13 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="frontend-card">
-        <div className="p-6">
-          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
-            แต้มสะสมและสิทธิพิเศษ
-          </h1>
-          <p className="frontend-text-secondary">
-            ดูแต้มสะสมและแลกของรางวัลของคุณ
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+          แต้มสะสมและสิทธิพิเศษ
+        </h1>
+        <p className="frontend-text-secondary">
+          ดูแต้มสะสมและแลกของรางวัลของคุณ
+        </p>
       </div>
 
       {/* Points Summary */}
