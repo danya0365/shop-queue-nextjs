@@ -37,7 +37,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 frontend-overlay z-30"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -46,7 +46,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
       <aside
         className={`
         fixed lg:static inset-y-0 left-0 z-40
-        w-64 bg-purple-50 dark:bg-purple-900 shadow-sm h-full overflow-y-auto
+        w-64 frontend-sidebar-bg shadow-sm h-full overflow-y-auto
         flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -56,7 +56,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
         <div className="lg:hidden flex justify-end p-4 flex-none">
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-lg text-purple-600 hover:bg-purple-100 transition-colors"
+            className="p-2 rounded-lg frontend-sidebar-text-muted frontend-sidebar-hover transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -83,8 +83,8 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
                 href={item.href}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive(item.href)
-                    ? "bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 border-r-2 border-purple-700"
-                    : "text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-800"
+                    ? "frontend-sidebar-active"
+                    : "frontend-sidebar-text frontend-sidebar-hover"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -95,8 +95,8 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
         </nav>
 
         {/* Shop Info in Sidebar */}
-        <div className="p-4 border-t border-purple-200 dark:border-purple-700 flex-none">
-          <div className="text-sm text-purple-600 dark:text-purple-300">
+        <div className="p-4 border-t frontend-sidebar-border flex-none">
+          <div className="text-sm frontend-sidebar-text-muted">
             <div className="font-medium mb-1">ร้านกาแฟดีใจ</div>
             <div className="text-xs opacity-75">เปิดทุกวัน 08:00 - 20:00</div>
           </div>

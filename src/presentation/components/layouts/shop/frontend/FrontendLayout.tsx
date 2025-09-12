@@ -22,7 +22,7 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900">
+      <div className="flex flex-col h-screen frontend-bg">
         <FrontendHeader
           shopId={shopId}
           sidebarOpen={sidebarOpen}
@@ -40,9 +40,9 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({
           <main className="flex-1 w-full lg:w-auto overflow-y-auto transition-all duration-300">
             <div className="max-w-7xl mx-auto p-4 sm:p-6">{children}</div>
             {/* Footer */}
-            <footer className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-purple-200 dark:border-purple-700">
+            <footer className="frontend-footer-bg border-t frontend-footer-border">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                <div className="text-center text-gray-600 dark:text-gray-300">
+                <div className="text-center frontend-footer-text">
                   <p className="mb-1 text-sm">
                     © 2024 Shop Queue - ระบบจัดการคิวอัจฉริยะ
                   </p>

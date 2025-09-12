@@ -1,0 +1,54 @@
+@layer base {
+  /* Frontend Layout utilities */
+  .frontend-bg {
+    @apply bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900;
+  }
+  .frontend-header-bg {
+    @apply bg-purple-600;
+  }
+  .frontend-header-text {
+    @apply text-white;
+  }
+  .frontend-header-text-light {
+    @apply text-purple-100;
+  }
+  .frontend-header-text-muted {
+    @apply text-purple-200;
+  }
+  .frontend-header-hover {
+    @apply hover:bg-purple-700;
+  }
+  .frontend-sidebar-bg {
+    @apply bg-purple-50 dark:bg-purple-900;
+  }
+  .frontend-sidebar-text {
+    @apply text-purple-700 dark:text-purple-300;
+  }
+  .frontend-sidebar-text-muted {
+    @apply text-purple-600 dark:text-purple-300;
+  }
+  .frontend-sidebar-hover {
+    @apply hover:bg-purple-100 dark:hover:bg-purple-800;
+  }
+  .frontend-sidebar-active {
+    @apply bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 border-r-2 border-purple-700;
+  }
+  .frontend-sidebar-border {
+    @apply border-purple-200 dark:border-purple-700;
+  }
+  .frontend-footer-bg {
+    @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-md;
+  }
+  .frontend-footer-border {
+    @apply border-purple-200 dark:border-purple-700;
+  }
+  .frontend-footer-text {
+    @apply text-gray-600 dark:text-gray-300;
+  }
+  .frontend-button-primary {
+    @apply bg-white text-purple-600 hover:bg-purple-50;
+  }
+  .frontend-overlay {
+    @apply bg-black/50;
+  }
+}
