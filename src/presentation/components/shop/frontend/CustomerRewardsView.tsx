@@ -5,6 +5,7 @@ import type {
   CustomerReward,
   CustomerRewardsViewModel,
 } from "@/src/presentation/presenters/shop/frontend/CustomerRewardsPresenter";
+import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
 interface CustomerRewardsViewProps {
@@ -169,11 +170,16 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
               {viewModel.availableRewards.map((reward) => (
                 <div
                   key={reward.id}
-                  className={`border rounded-lg p-4 ${
+                  className={cn(
+                    `rounded-lg p-4 ${
+                      reward.isAvailable
+                        ? "frontend-card frontend-card-hover"
+                        : "frontend-card-secondary"
+                    } transition-shadow`,
                     reward.isAvailable
-                      ? "frontend-card frontend-card-hover"
-                      : "frontend-card-secondary"
-                  } transition-shadow`}
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed opacity-50"
+                  )}
                 >
                   <div className="text-center mb-4">
                     <div className="text-4xl mb-2">{reward.imageUrl}</div>
