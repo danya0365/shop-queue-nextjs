@@ -227,8 +227,8 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none">
-                            <div className="absolute top-2 left-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                          <div className="absolute inset-0 border-2 border-green-500 rounded-lg pointer-events-none">
+                            <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
                               <span className="text-sm">✓</span>
                             </div>
                           </div>
