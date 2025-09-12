@@ -20,11 +20,10 @@ import { GetPromotionStatsUseCase } from "../../usecases/backend/promotions/GetP
 import { UpdatePromotionUseCase } from "../../usecases/backend/promotions/UpdatePromotionUseCase";
 
 export interface IBackendPromotionsService {
-  getPaginatedPromotionsByShopId(
-    shopId: string,
+  getPromotionsData(
     page?: number,
     perPage?: number
-  ): Promise<PaginatedPromotionsDTO>;
+  ): Promise<PromotionsDataDTO>;
   getPromotionStats(): Promise<PromotionStatsDTO>;
   getPromotionById(id: string): Promise<PromotionDTO>;
   createPromotion(params: CreatePromotionParams): Promise<PromotionDTO>;
@@ -59,34 +58,34 @@ export class BackendPromotionsService implements IBackendPromotionsService {
   ) {}
 
   /**
-   * Get paginated promotions by shop ID
-   * @param shopId Shop ID
+   * Get promotions data including paginated promotions and statistics
    * @param page Page number (default: 1)
    * @param perPage Items per page (default: 10)
-   * @returns Paginated promotions DTO
+   * @returns Promotions data DTO
    */
-  async getPaginatedPromotionsByShopId(
-    shopId: string,
+  async getPromotionsData(
     page: number = 1,
     perPage: number = 10
-  ): Promise<PaginatedPromotionsDTO> {
+  ): Promise<PromotionsDataDTO> {
     try {
-      this.logger.info("Getting paginated promotions by shop ID", {
-        shopId,
-        page,
-        perPage,
-      });
+      this.logger.info("Getting promotions data", { page, perPage });
 
-      const result = await this.getPromotionsPaginatedUseCase.execute({
-        shopId,
-        page,
-        limit: perPage,
-      });
-      return result;
+      // Get promotions and stats in parallel
+      const [promotionsResult, stats] = await Promise.all([
+        this.getPromotionsPaginatedUseCase.execute({ page, limit: perPage }),
+        this.getPromotionStatsUseCase.execute(),
+      ]);
+
+      return {
+        promotions: promotionsResult.data,
+        stats,
+        totalCount: promotionsResult.pagination.totalItems,
+        currentPage: promotionsResult.pagination.currentPage,
+        perPage: promotionsResult.pagination.itemsPerPage,
+      };
     } catch (error) {
-      this.logger.error("Error getting paginated promotions by shop ID", {
+      this.logger.error("Error getting promotions data", {
         error,
-        shopId,
         page,
         perPage,
       });

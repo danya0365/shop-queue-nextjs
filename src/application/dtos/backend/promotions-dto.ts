@@ -125,7 +125,6 @@ export interface PromotionsDataDTO {
  * Input DTO for GetPromotionsPaginatedUseCase
  */
 export interface GetPromotionsPaginatedInput {
-  shopId: string;
   page: number;
   limit: number;
 }
