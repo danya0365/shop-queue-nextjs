@@ -46,12 +46,12 @@
     @apply text-gray-600 dark:text-gray-300;
   }
   .frontend-button-primary {
-    @apply bg-white text-purple-600 hover:bg-purple-50;
+    @apply bg-white text-purple-600 hover:bg-purple-50 dark:bg-gray-800 dark:text-purple-400 dark:hover:bg-gray-700;
   }
   .frontend-overlay {
     @apply bg-black/50;
   }
-  
+
   /* Dashboard Components */
   .frontend-announcement {
     @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white;
@@ -63,52 +63,55 @@
     @apply text-purple-100;
   }
   .frontend-card {
-    @apply bg-white rounded-xl shadow-sm border;
+    @apply bg-white rounded-xl shadow-sm border dark:bg-gray-800 border-purple-200 dark:border-purple-700;
+  }
+  .frontend-card-border {
+    @apply border-purple-200 dark:border-purple-700;
   }
   .frontend-card-hover {
     @apply hover:shadow-md transition-shadow;
   }
   .frontend-qr-section {
-    @apply bg-gray-50 border-t;
+    @apply bg-gray-50 border-t dark:bg-gray-700 dark:border-gray-600;
   }
   .frontend-qr-code {
-    @apply bg-white border-2 border-gray-300;
+    @apply bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600;
   }
   .frontend-text-primary {
-    @apply text-gray-900;
+    @apply text-gray-900 dark:text-gray-100;
   }
   .frontend-text-secondary {
-    @apply text-gray-600;
+    @apply text-gray-600 dark:text-gray-300;
   }
   .frontend-text-muted {
-    @apply text-gray-500;
+    @apply text-gray-500 dark:text-gray-400;
   }
   .frontend-queue-current {
-    @apply bg-blue-100 text-blue-600;
+    @apply bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400;
   }
   .frontend-queue-waiting {
-    @apply bg-orange-100 text-orange-600;
+    @apply bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400;
   }
   .frontend-queue-time {
-    @apply bg-green-100 text-green-600;
+    @apply bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400;
   }
   .frontend-queue-average {
-    @apply bg-purple-100 text-purple-600;
+    @apply bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400;
   }
   .frontend-button-join-queue {
     @apply bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105;
   }
   .frontend-button-disabled {
-    @apply bg-gray-300 text-gray-500 cursor-not-allowed;
+    @apply bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400;
   }
   .frontend-service-card {
-    @apply bg-gray-50 hover:bg-gray-100 transition-colors;
+    @apply bg-gray-50 hover:bg-gray-100 transition-colors dark:bg-gray-700 dark:hover:bg-gray-600;
   }
   .frontend-service-price {
-    @apply text-purple-600;
+    @apply text-purple-600 dark:text-purple-400;
   }
   .frontend-promotion-card {
-    @apply bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200;
+    @apply bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 dark:from-pink-900/20 dark:to-purple-900/20 dark:border-pink-700;
   }
   .frontend-promotion-badge {
     @apply bg-pink-500 text-white;
