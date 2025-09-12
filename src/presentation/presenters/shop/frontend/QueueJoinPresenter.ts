@@ -71,6 +71,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "1",
         name: "กาแฟอเมริกาโน่",
+        description: "กาแฟอเมริกาโน่",
         price: 65,
         estimatedTime: 5,
         category: "เครื่องดื่มร้อน",
@@ -80,6 +81,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "2",
         name: "กาแฟลาเต้",
+        description: "กาแฟลาเต้",
         price: 85,
         estimatedTime: 7,
         category: "เครื่องดื่มร้อน",
@@ -89,6 +91,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "3",
         name: "กาแฟเย็น",
+        description: "กาแฟเย็น",
         price: 75,
         estimatedTime: 6,
         category: "เครื่องดื่มเย็น",
@@ -98,6 +101,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "4",
         name: "ชาเขียวเย็น",
+        description: "ชาเขียวเย็น",
         price: 60,
         estimatedTime: 4,
         category: "เครื่องดื่มเย็น",
@@ -107,6 +111,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "5",
         name: "เค้กช็อกโกแลต",
+        description: "เค้กช็อกโกแลต",
         price: 120,
         estimatedTime: 3,
         category: "ขนมหวาน",
@@ -116,6 +121,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "6",
         name: "แซนด์วิชแฮม",
+        description: "แซนด์วิชแฮม",
         price: 95,
         estimatedTime: 10,
         category: "อาหาร",
@@ -125,6 +131,7 @@ export class QueueJoinPresenter extends BaseShopPresenter {
       {
         id: "7",
         name: "สลัดผลไม้",
+        description: "สลัดผลไม้",
         price: 80,
         estimatedTime: 8,
         category: "อาหาร",
