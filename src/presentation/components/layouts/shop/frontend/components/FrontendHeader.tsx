@@ -1,8 +1,9 @@
 "use client";
 
-import { ThemeToggle } from '@/src/presentation/components/ui/ThemeToggle';
-import Link from 'next/link';
-import React from 'react';
+import { ThemeToggle } from "@/src/presentation/components/ui/ThemeToggle";
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 interface FrontendHeaderProps {
   shopId: string;
@@ -15,7 +16,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
   sidebarOpen,
   toggleSidebar,
 }) => {
-  console.log('FrontendHeader', { shopId, sidebarOpen });
+  console.log("FrontendHeader", { shopId, sidebarOpen });
   return (
     <header className="bg-purple-600 text-white shadow-lg">
       <div className="px-4 sm:px-6 lg:px-8">
@@ -24,11 +25,9 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
           <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg text-purple-100 hover:bg-purple-700 transition-colors"
+              className="p-2 rounded-lg text-purple-100 hover:bg-purple-700 transition-colors lg:hidden"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
             <Link href="/" className="text-xl sm:text-2xl font-bold text-white">
