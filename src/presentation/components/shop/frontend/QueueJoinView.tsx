@@ -60,7 +60,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
   if (state.isSuccess && state.queueNumber) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="flex flex-col gap-8">
         <div className="frontend-card overflow-hidden">
           <div className="frontend-shop-header p-8 text-center">
             <span className="text-6xl mb-4 block">🎉</span>
@@ -95,7 +95,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
               </button>
               <button
                 onClick={() => {
-                  actions.resetState();
+                  actions.reset();
                 }}
                 className="frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
               >
@@ -110,7 +110,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
 
   if (!isAcceptingQueues) {
     return (
-      <div className="space-y-8">
+      <div className="flex flex-col gap-8">
         <div className="frontend-card p-8 text-center">
           <span className="text-6xl mb-4 block">😔</span>
           <h1 className="text-2xl font-bold frontend-text-primary mb-2">
@@ -131,9 +131,9 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       {/* Shop Header */}
-      <div className="mb-8 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold frontend-text-primary mb-2">
           {shopName}
         </h1>

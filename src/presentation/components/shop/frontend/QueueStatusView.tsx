@@ -80,8 +80,8 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
 
   if (!isFound) {
     return (
-      <div className="space-y-8">
-        <div className="mb-8">
+      <div className="flex flex-col gap-8">
+        <div>
           <h1 className="text-3xl font-bold frontend-text-primary mb-2">
             ติดตามสถานะคิว
           </h1>
@@ -114,7 +114,7 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
         </div>
 
         {/* Current Queue Info */}
-        <div className="mt-8 frontend-card">
+        <div className="frontend-card">
           <div className="p-6 border-b frontend-card-border">
             <h2 className="text-xl font-semibold frontend-text-primary">
               สถานะคิวปัจจุบัน
@@ -141,8 +141,8 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="mb-8">
+    <div className="flex flex-col gap-8">
+      <div>
         <h1 className="text-3xl font-bold frontend-text-primary mb-2">
           สถานะคิวของคุณ
         </h1>

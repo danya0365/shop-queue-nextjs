@@ -74,9 +74,9 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <h1 className="text-3xl font-bold frontend-text-primary mb-2">
           แต้มสะสมและสิทธิพิเศษ
         </h1>

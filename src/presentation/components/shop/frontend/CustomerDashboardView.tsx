@@ -24,7 +24,7 @@ export function CustomerDashboardView({
   const [showQRCode, setShowQRCode] = useState(false);
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       {/* Announcement Banner */}
       {announcement && (
         <div className="frontend-announcement p-4 rounded-xl">

@@ -1,12 +1,13 @@
-import { ShopService } from '@/src/application/services/shop/ShopService';
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
+import { ShopService } from "@/src/application/services/shop/ShopService";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
 // Define interfaces for data structures
 export interface ServiceOption {
   id: string;
   name: string;
+  description: string;
   price: number;
   estimatedTime: number;
   category: string;
@@ -19,7 +20,7 @@ export interface QueueFormData {
   customerPhone: string;
   services: string[];
   specialRequests?: string;
-  priority: 'normal' | 'urgent';
+  priority: "normal" | "urgent";
 }
 
 // Define ViewModel interface
@@ -41,7 +42,9 @@ export class QueueJoinPresenter extends BaseShopPresenter {
 
   async getViewModel(shopId: string): Promise<QueueJoinViewModel> {
     try {
-      this.logger.info('QueueJoinPresenter: Getting view model for shop', { shopId });
+      this.logger.info("QueueJoinPresenter: Getting view model for shop", {
+        shopId,
+      });
 
       // Mock data - replace with actual service calls
       const services = this.getAvailableServices();
@@ -52,12 +55,12 @@ export class QueueJoinPresenter extends BaseShopPresenter {
         categories,
         estimatedWaitTime: 25,
         currentQueueLength: 12,
-        shopName: 'ร้านกาแฟดีใจ',
+        shopName: "ร้านกาแฟดีใจ",
         isAcceptingQueues: true,
         maxQueueLength: 50,
       };
     } catch (error) {
-      this.logger.error('QueueJoinPresenter: Error getting view model', error);
+      this.logger.error("QueueJoinPresenter: Error getting view model", error);
       throw error;
     }
   }
@@ -66,73 +69,75 @@ export class QueueJoinPresenter extends BaseShopPresenter {
   private getAvailableServices(): ServiceOption[] {
     return [
       {
-        id: '1',
-        name: 'กาแฟอเมริกาโน่',
+        id: "1",
+        name: "กาแฟอเมริกาโน่",
         price: 65,
         estimatedTime: 5,
-        category: 'เครื่องดื่มร้อน',
+        category: "เครื่องดื่มร้อน",
         available: true,
-        icon: '☕',
+        icon: "☕",
       },
       {
-        id: '2',
-        name: 'กาแฟลาเต้',
+        id: "2",
+        name: "กาแฟลาเต้",
         price: 85,
         estimatedTime: 7,
-        category: 'เครื่องดื่มร้อน',
+        category: "เครื่องดื่มร้อน",
         available: true,
-        icon: '🥛',
+        icon: "🥛",
       },
       {
-        id: '3',
-        name: 'กาแฟเย็น',
+        id: "3",
+        name: "กาแฟเย็น",
         price: 75,
         estimatedTime: 6,
-        category: 'เครื่องดื่มเย็น',
+        category: "เครื่องดื่มเย็น",
         available: true,
-        icon: '🧊',
+        icon: "🧊",
       },
       {
-        id: '4',
-        name: 'ชาเขียวเย็น',
+        id: "4",
+        name: "ชาเขียวเย็น",
         price: 60,
         estimatedTime: 4,
-        category: 'เครื่องดื่มเย็น',
+        category: "เครื่องดื่มเย็น",
         available: true,
-        icon: '🍃',
+        icon: "🍃",
       },
       {
-        id: '5',
-        name: 'เค้กช็อกโกแลต',
+        id: "5",
+        name: "เค้กช็อกโกแลต",
         price: 120,
         estimatedTime: 3,
-        category: 'ขนมหวาน',
+        category: "ขนมหวาน",
         available: true,
-        icon: '🍰',
+        icon: "🍰",
       },
       {
-        id: '6',
-        name: 'แซนด์วิชแฮม',
+        id: "6",
+        name: "แซนด์วิชแฮม",
         price: 95,
         estimatedTime: 10,
-        category: 'อาหาร',
+        category: "อาหาร",
         available: true,
-        icon: '🥪',
+        icon: "🥪",
       },
       {
-        id: '7',
-        name: 'สลัดผลไม้',
+        id: "7",
+        name: "สลัดผลไม้",
         price: 80,
         estimatedTime: 8,
-        category: 'อาหาร',
+        category: "อาหาร",
         available: false,
-        icon: '🥗',
+        icon: "🥗",
       },
     ];
   }
 
   private getServiceCategories(services: ServiceOption[]): string[] {
-    const categories = [...new Set(services.map(service => service.category))];
+    const categories = [
+      ...new Set(services.map((service) => service.category)),
+    ];
     return categories;
   }
 
@@ -140,8 +145,8 @@ export class QueueJoinPresenter extends BaseShopPresenter {
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
       shopId,
-      'เข้าคิว',
-      'เลือกบริการและเข้าคิวออนไลน์ เพื่อประหยัดเวลารอคอย'
+      "เข้าคิว",
+      "เลือกบริการและเข้าคิวออนไลน์ เพื่อประหยัดเวลารอคอย"
     );
   }
 }
@@ -150,8 +155,8 @@ export class QueueJoinPresenter extends BaseShopPresenter {
 export class QueueJoinPresenterFactory {
   static async create(): Promise<QueueJoinPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const shopService = serverContainer.resolve<ShopService>('ShopService');
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const shopService = serverContainer.resolve<ShopService>("ShopService");
     return new QueueJoinPresenter(logger, shopService);
   }
 }
