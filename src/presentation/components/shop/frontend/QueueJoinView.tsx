@@ -2,6 +2,7 @@
 
 import { QueueJoinViewModel } from "@/src/presentation/presenters/shop/frontend/QueueJoinPresenter";
 import { useQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useQueueJoinPresenter";
+import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
 interface QueueJoinViewProps {
@@ -191,11 +192,13 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                     <div
                       key={service.id}
                       onClick={() => handleServiceToggle(service.id)}
-                      className={`cursor-pointer rounded-lg p-4 border-2 transition-all ${
-                        isSelected
-                          ? "frontend-service-card border-purple-500"
-                          : "frontend-card frontend-card-hover border-transparent"
-                      }`}
+                      className={cn(
+                        `cursor-pointer rounded-lg p-4 border-2 transition-all ${
+                          isSelected
+                            ? "frontend-service-card border-purple-500"
+                            : "frontend-card frontend-card-hover border-transparent"
+                        }`
+                      )}
                     >
                       <div className="text-center">
                         <span className="text-3xl mb-2 block">
