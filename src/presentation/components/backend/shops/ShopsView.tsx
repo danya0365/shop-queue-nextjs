@@ -83,52 +83,60 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
-              <p className="text-2xl font-bold backend-text mt-2">{shopsData.stats.totalShops}</p>
+      {shopsData.stats.totalShops === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติร้านค้า</h3>
+          <p className="backend-text-muted">ข้อมูลสถิติร้านค้าจะแสดงเมื่อมีการสร้างร้านค้า</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ร้านค้าทั้งหมด</h3>
+                <p className="text-2xl font-bold backend-text mt-2">{shopsData.stats.totalShops}</p>
+              </div>
+              <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+                <Store size={24} />
+              </div>
             </div>
-            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
-              <Store size={24} />
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">เปิดให้บริการ</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{shopsData.stats.activeShops}</p>
+              </div>
+              <div className="p-3 rounded-full text-green-600 bg-green-50">
+                <CheckCircle size={24} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">รออนุมัติ</h3>
+                <p className="text-2xl font-bold text-yellow-600 mt-2">{shopsData.stats.pendingApproval}</p>
+              </div>
+              <div className="p-3 rounded-full text-yellow-600 bg-yellow-50">
+                <Clock size={24} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ร้านค้าใหม่เดือนนี้</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-2">{shopsData.stats.newThisMonth}</p>
+              </div>
+              <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+                <TrendingUp size={24} />
+              </div>
             </div>
           </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">เปิดให้บริการ</h3>
-              <p className="text-2xl font-bold text-green-600 mt-2">{shopsData.stats.activeShops}</p>
-            </div>
-            <div className="p-3 rounded-full text-green-600 bg-green-50">
-              <CheckCircle size={24} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">รออนุมัติ</h3>
-              <p className="text-2xl font-bold text-yellow-600 mt-2">{shopsData.stats.pendingApproval}</p>
-            </div>
-            <div className="p-3 rounded-full text-yellow-600 bg-yellow-50">
-              <Clock size={24} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ร้านค้าใหม่เดือนนี้</h3>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{shopsData.stats.newThisMonth}</p>
-            </div>
-            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
-              <TrendingUp size={24} />
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
@@ -202,7 +210,17 @@ export function ShopsView({ viewModel }: ShopsViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {shopsData.shops.map((shop) => (
+                {shopsData.shops.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">🏪</div>
+                        <h3>ยังไม่มีข้อมูลร้านค้า</h3>
+                        <p>ข้อมูลร้านค้าจะแสดงที่นี่เมื่อมีการสร้างร้านค้า</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : shopsData.shops.map((shop) => (
                   <tr key={shop.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div>

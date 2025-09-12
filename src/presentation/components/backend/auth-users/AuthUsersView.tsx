@@ -242,7 +242,30 @@ export function AuthUsersView({ viewModel }: AuthUsersViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="text-gray-500 dark:text-gray-400">
+                        <div className="text-4xl mb-4">👥</div>
+                        <p className="text-lg">
+                          {searchTerm || filterProvider
+                            ? "ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไขการค้นหา"
+                            : "ยังไม่มีผู้ใช้งานในระบบ"}
+                        </p>
+                        {searchTerm || filterProvider ? (
+                          <p className="text-sm text-gray-400 mt-2">
+                            ลองปรับเงื่อนไขการค้นหาหรือตรวจสอบการตั้งค่า
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-400 mt-2">
+                            ผู้ใช้งานจะแสดงที่นี่เมื่อมีการลงทะเบียนเข้าใช้งานระบบ
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
                   <tr key={user.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div>
@@ -303,7 +326,8 @@ export function AuthUsersView({ viewModel }: AuthUsersViewProps) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>

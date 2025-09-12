@@ -198,7 +198,28 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
           </h2>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {filteredQueues.map((queue) => (
+          {filteredQueues.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="text-gray-500 dark:text-gray-400">
+                <div className="text-4xl mb-4">📋</div>
+                <p className="text-lg">
+                  {searchTerm || selectedStatus !== 'all' || selectedPriority !== 'all'
+                    ? "ไม่พบรายการคิวที่ตรงกับเงื่อนไขการค้นหา"
+                    : "ยังไม่มีรายการคิวในระบบ"}
+                </p>
+                {searchTerm || selectedStatus !== 'all' || selectedPriority !== 'all' ? (
+                  <p className="text-sm text-gray-400 mt-2">
+                    ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการคิวใหม่
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-400 mt-2">
+                    คลิกปุ่ม &lsquo;เพิ่มคิวใหม่&rsquo; เพื่อเริ่มบันทึกรายการแรกของคุณ
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            filteredQueues.map((queue) => (
             <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -260,7 +281,8 @@ export function QueueManagementView({ viewModel }: QueueManagementViewProps) {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
     </div>

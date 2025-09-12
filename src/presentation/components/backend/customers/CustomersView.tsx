@@ -208,7 +208,26 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {customersData.customers.map((customer) => (
+                {customersData.customers.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">👥</div>
+                        <h3 className="text-lg font-medium backend-text mb-2">
+                          {state.searchQuery || state.membershipFilter || state.genderFilter
+                            ? 'ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา'
+                            : 'ยังไม่มีลูกค้าในระบบ'}
+                        </h3>
+                        <p className="text-sm text-gray-400 mt-2">
+                          {state.searchQuery || state.membershipFilter || state.genderFilter
+                            ? 'ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่'
+                            : 'คลิกปุ่ม "เพิ่มลูกค้าใหม่" เพื่อเริ่มเพิ่มลูกค้าแรกของคุณ'}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  customersData.customers.map((customer) => (
                   <tr key={customer.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div>
@@ -263,7 +282,8 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>

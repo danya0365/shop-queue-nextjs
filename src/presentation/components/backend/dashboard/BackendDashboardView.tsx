@@ -114,7 +114,14 @@ export function BackendDashboardView({ viewModel }: BackendDashboardViewProps) {
         <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
           <h2 className="text-xl font-semibold backend-text mb-4">บริการยอดนิยม</h2>
           <div className="space-y-3">
-            {popularServices.map((service, index) => (
+            {popularServices.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">🔧</div>
+                <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีบริการในระบบ</h3>
+                <p className="text-sm text-gray-400 mt-2">เพิ่มบริการแรกของคุณเพื่อเริ่มเก็บสถิติการใช้งาน</p>
+              </div>
+            ) : (
+              popularServices.map((service, index) => (
               <div key={service.id} className="flex items-center justify-between p-3 backend-sidebar-hover rounded-lg">
                 <div>
                   <div className="flex items-center space-x-2">
@@ -131,7 +138,8 @@ export function BackendDashboardView({ viewModel }: BackendDashboardViewProps) {
                   <div className="text-sm font-medium backend-primary">#{index + 1}</div>
                 </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
       </div>
@@ -140,7 +148,14 @@ export function BackendDashboardView({ viewModel }: BackendDashboardViewProps) {
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
         <h2 className="text-xl font-semibold backend-text mb-4">กิจกรรมล่าสุด</h2>
         <div className="space-y-4">
-          {recentActivities.map((activity) => (
+          {recentActivities.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4">📋</div>
+              <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีกิจกรรมล่าสุด</h3>
+              <p className="text-sm text-gray-400 mt-2">กิจกรรมต่างๆ จะแสดงที่นี่เมื่อมีการใช้งานระบบ</p>
+            </div>
+          ) : (
+            recentActivities.map((activity) => (
             <div key={activity.id} className="flex items-start space-x-4 p-4 backend-sidebar-hover rounded-lg">
               <div className={`p-2 rounded-full ${DashboardMapper.getActivityColor(activity.type)}`}>
                 <span className="text-lg">{DashboardMapper.getActivityIcon(activity.type)}</span>
@@ -153,7 +168,8 @@ export function BackendDashboardView({ viewModel }: BackendDashboardViewProps) {
                 </p>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
 

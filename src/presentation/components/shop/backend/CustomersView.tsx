@@ -212,8 +212,24 @@ export function CustomersView({ viewModel }: CustomersViewProps) {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="text-gray-500 dark:text-gray-400">
+                      <div className="text-4xl mb-4">👥</div>
+                      <p className="text-lg">
+                        {searchTerm || filterType !== 'all'
+                          ? "ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา"
+                          : "ยังไม่มีลูกค้าในระบบ"}
+                      </p>
+                      {searchTerm || filterType !== 'all' ? (
+                        <p className="text-sm text-gray-400 mt-2">
+                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400 mt-2">
+                          คลิกปุ่ม &lsquo;เพิ่มลูกค้าใหม่&rsquo; เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
+                        </p>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (

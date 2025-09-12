@@ -197,7 +197,17 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {departments.map((department: DepartmentData) => (
+                {departments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">🏢</div>
+                        <h3>ยังไม่มีแผนกในระบบ</h3>
+                        <p>คลิกปุ่ม &quot;เพิ่มแผนกใหม่&quot; เพื่อเริ่มเพิ่มแผนกแรกของคุณ</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : departments.map((department: DepartmentData) => (
                   <tr key={department.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <span className="backend-text font-medium">{department.name}</span>
@@ -269,8 +279,15 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       {/* Department Distribution Chart */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
         <h2 className="text-xl font-semibold backend-text mb-4">การกระจายตัวของแผนก</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {departments.slice(0, 8).map((department: DepartmentData) => (
+        {departments.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">📊</div>
+            <h3>ยังไม่มีข้อมูลการกระจายตัวของแผนก</h3>
+            <p>เพิ่มแผนกแรกของคุณเพื่อดูการกระจายตัวของพนักงานในแต่ละแผนก</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {departments.slice(0, 8).map((department: DepartmentData) => (
             <div key={department.id} className="text-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-lg">
               <div className="text-2xl mb-2">
                 {department.employeeCount === 0 
@@ -287,7 +304,8 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
               <p className="text-xs backend-text-muted">พนักงาน</p>
             </div>
           ))}
-        </div>
+          </div>
+        )}
         <div className="mt-4 text-center">
           <p className="text-sm backend-text-muted">
             แสดง {Math.min(8, departments.length)} จาก {totalCount} แผนก

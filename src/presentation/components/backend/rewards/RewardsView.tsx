@@ -101,76 +101,92 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">รางวัลทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{rewardsData.stats.totalRewards}</p>
+      {rewardsData.stats.totalRewards === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติรางวัล</h3>
+          <p className="backend-text-muted">ข้อมูลสถิติรางวัลจะแสดงเมื่อมีการสร้างรางวัล</p>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">รางวัลที่ใช้งานได้</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.stats.activeRewards}</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">รางวัลทั้งหมด</h3>
+            <p className="text-2xl font-bold backend-text mt-2">{rewardsData.stats.totalRewards}</p>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">รางวัลที่ใช้งานได้</h3>
+            <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.stats.activeRewards}</p>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">การแลกรางวัลทั้งหมด</h3>
+            <p className="text-2xl font-bold text-blue-600 mt-2">{rewardsData.stats.totalRedemptions}</p>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">แต้มที่ใช้ไปแล้ว</h3>
+            <p className="text-2xl font-bold text-purple-600 mt-2">{formatPoints(rewardsData.stats.totalPointsRedeemed)}</p>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">การแลกรางวัลทั้งหมด</h3>
-          <p className="text-2xl font-bold text-blue-600 mt-2">{rewardsData.stats.totalRedemptions}</p>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">แต้มที่ใช้ไปแล้ว</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{formatPoints(rewardsData.stats.totalPointsRedeemed)}</p>
-        </div>
-      </div>
+      )}
 
       {/* Reward Type Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ส่วนลด</h3>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{rewardsData.typeStats.discount.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.discount.percentage}% ของทั้งหมด</p>
+      {rewardsData.stats.totalRewards === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">🏷️</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลประเภทรางวัล</h3>
+          <p className="backend-text-muted">ข้อมูลประเภทรางวัลจะแสดงเมื่อมีการสร้างรางวัล</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ส่วนลด</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-2">{rewardsData.typeStats.discount.count}</p>
+                <p className="text-xs backend-text-muted">{rewardsData.typeStats.discount.percentage}% ของทั้งหมด</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 text-xl">🎫</span>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-blue-600 text-xl">🎫</span>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ของฟรี</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.typeStats.freeItem.count}</p>
+                <p className="text-xs backend-text-muted">{rewardsData.typeStats.freeItem.percentage}% ของทั้งหมด</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-green-600 text-xl">🎁</span>
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">คืนเงิน</h3>
+                <p className="text-2xl font-bold text-purple-600 mt-2">{rewardsData.typeStats.cashback.count}</p>
+                <p className="text-xs backend-text-muted">{rewardsData.typeStats.cashback.percentage}% ของทั้งหมด</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <span className="text-purple-600 text-xl">💰</span>
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">สิทธิพิเศษ</h3>
+                <p className="text-2xl font-bold text-orange-600 mt-2">{rewardsData.typeStats.specialPrivilege.count}</p>
+                <p className="text-xs backend-text-muted">{rewardsData.typeStats.specialPrivilege.percentage}% ของทั้งหมด</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <span className="text-orange-600 text-xl">👑</span>
+              </div>
             </div>
           </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ของฟรี</h3>
-              <p className="text-2xl font-bold text-green-600 mt-2">{rewardsData.typeStats.freeItem.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.freeItem.percentage}% ของทั้งหมด</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-green-600 text-xl">🎁</span>
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">คืนเงิน</h3>
-              <p className="text-2xl font-bold text-purple-600 mt-2">{rewardsData.typeStats.cashback.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.cashback.percentage}% ของทั้งหมด</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <span className="text-purple-600 text-xl">💰</span>
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">สิทธิพิเศษ</h3>
-              <p className="text-2xl font-bold text-orange-600 mt-2">{rewardsData.typeStats.specialPrivilege.count}</p>
-              <p className="text-xs backend-text-muted">{rewardsData.typeStats.specialPrivilege.percentage}% ของทั้งหมด</p>
-            </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <span className="text-orange-600 text-xl">👑</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
@@ -237,7 +253,17 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {rewardsData.rewards.map((reward) => (
+                {rewardsData.rewards.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">🎁</div>
+                        <h3>ยังไม่มีข้อมูลรางวัล</h3>
+                        <p>ข้อมูลรางวัลจะแสดงที่นี่เมื่อมีการสร้างรางวัล</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : rewardsData.rewards.map((reward) => (
                   <tr key={reward.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
@@ -317,7 +343,17 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
               </tr>
             </thead>
             <tbody>
-              {rewardsData.recentUsage.map((usage) => {
+              {rewardsData.recentUsage.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 px-4 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="text-6xl mb-4">📈</div>
+                      <h3>ยังไม่มีข้อมูลการแลกรางวัล</h3>
+                      <p>ข้อมูลการแลกรางวัลจะแสดงที่นี่เมื่อมีลูกค้าแลกคะแนน</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : rewardsData.recentUsage.map((usage) => {
                 return (
                   <tr key={usage.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4 backend-text">{usage.customerName}</td>

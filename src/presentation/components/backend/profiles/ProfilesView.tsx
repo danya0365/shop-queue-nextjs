@@ -155,24 +155,32 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
           <User size={20} className="backend-text-muted" />
           <h3 className="text-lg font-semibold backend-text">การกระจายตามเพศ</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-blue-600">{profilesData.stats.profilesByGender.male}</p>
-            <p className="backend-text-muted text-sm">ชาย</p>
+        {profilesData.stats.totalProfiles === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">👥</div>
+            <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลการกระจายตามเพศ</h3>
+            <p className="backend-text-muted">ข้อมูลการกระจายตามเพศจะแสดงเมื่อมีผู้ใช้สมัครสมาชิก</p>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-pink-600">{profilesData.stats.profilesByGender.female}</p>
-            <p className="backend-text-muted text-sm">หญิง</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-blue-600">{profilesData.stats.profilesByGender.male}</p>
+              <p className="backend-text-muted text-sm">ชาย</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-pink-600">{profilesData.stats.profilesByGender.female}</p>
+              <p className="backend-text-muted text-sm">หญิง</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-purple-600">{profilesData.stats.profilesByGender.other}</p>
+              <p className="backend-text-muted text-sm">อื่นๆ</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-600">{profilesData.stats.profilesByGender.notSpecified}</p>
+              <p className="backend-text-muted text-sm">ไม่ระบุ</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-purple-600">{profilesData.stats.profilesByGender.other}</p>
-            <p className="backend-text-muted text-sm">อื่นๆ</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-600">{profilesData.stats.profilesByGender.notSpecified}</p>
-            <p className="backend-text-muted text-sm">ไม่ระบุ</p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Filter and Search */}
@@ -247,7 +255,17 @@ export function ProfilesView({ viewModel }: ProfilesViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {profilesData.profiles.map((profile) => (
+                {profilesData.profiles.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">👤</div>
+                        <h3>ยังไม่มีข้อมูลโปรไฟล์</h3>
+                        <p>ข้อมูลโปรไฟล์ผู้ใช้จะแสดงที่นี่เมื่อมีการสมัครสมาชิก</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : profilesData.profiles.map((profile) => (
                   <tr key={profile.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">

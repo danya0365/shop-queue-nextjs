@@ -317,7 +317,20 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                   <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">🛎️</div>
-                      <p className="text-lg">ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา</p>
+                      <p className="text-lg">
+                        {searchTerm || selectedDepartment !== 'all' || selectedStatus !== 'all'
+                          ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
+                          : "ยังไม่มีบริการในระบบ"}
+                      </p>
+                      {searchTerm || selectedDepartment !== 'all' || selectedStatus !== 'all' ? (
+                        <p className="text-sm text-gray-400 mt-2">
+                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400 mt-2">
+                          คลิกปุ่ม &lsquo;เพิ่มบริการ&rsquo; เพื่อเริ่มบันทึกรายการแรกของคุณ
+                        </p>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -149,25 +149,33 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
       )}
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">โปรโมชั่นทั้งหมด</h3>
-          <p className="text-2xl font-bold backend-text mt-2">{stats.totalPromotions}</p>
+      {stats.totalPromotions === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติโปรโมชั่น</h3>
+          <p className="backend-text-muted">ข้อมูลสถิติโปรโมชั่นจะแสดงเมื่อมีการสร้างโปรโมชั่น</p>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">โปรโมชั่นทั้งหมด</h3>
+            <p className="text-2xl font-bold backend-text mt-2">{stats.totalPromotions}</p>
+          </div>
 
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ใช้งานอยู่</h3>
-          <p className="text-2xl font-bold text-green-600 mt-2">{stats.activePromotions}</p>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">ใช้งานอยู่</h3>
+            <p className="text-2xl font-bold text-green-600 mt-2">{stats.activePromotions}</p>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">การใช้งานทั้งหมด</h3>
+            <p className="text-2xl font-bold text-purple-600 mt-2">{stats.totalUsage.toLocaleString()}</p>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <h3 className="backend-text-muted text-sm font-medium">ส่วนลดรวม</h3>
+            <p className="text-2xl font-bold text-orange-600 mt-2">{formatCurrency(stats.totalDiscountGiven)}</p>
+          </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">การใช้งานทั้งหมด</h3>
-          <p className="text-2xl font-bold text-purple-600 mt-2">{stats.totalUsage.toLocaleString()}</p>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <h3 className="backend-text-muted text-sm font-medium">ส่วนลดรวม</h3>
-          <p className="text-2xl font-bold text-orange-600 mt-2">{formatCurrency(stats.totalDiscountGiven)}</p>
-        </div>
-      </div>
+      )}
 
       {/* Promotions Table */}
       <div className="backend-sidebar-bg rounded-lg backend-sidebar-border border">
@@ -193,7 +201,17 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {promotions.map((promotion) => (
+                {promotions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">🏷️</div>
+                        <h3>ยังไม่มีข้อมูลโปรโมชั่น</h3>
+                        <p>ข้อมูลโปรโมชั่นจะแสดงที่นี่เมื่อมีการสร้างโปรโมชั่น</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : promotions.map((promotion) => (
                   <tr key={promotion.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="backend-text font-medium">{promotion.name}</div>

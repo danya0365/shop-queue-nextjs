@@ -119,74 +119,82 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">คิวทั้งหมด</h3>
-              <p className="text-xl font-bold backend-text mt-1">{queuesData.stats.totalQueues}</p>
+      {queuesData.stats.totalQueues === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติคิว</h3>
+          <p className="backend-text-muted">ข้อมูลสถิติคิวจะแสดงเมื่อมีลูกค้าจองคิว</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">คิวทั้งหมด</h3>
+                <p className="text-xl font-bold backend-text mt-1">{queuesData.stats.totalQueues}</p>
+              </div>
+              <div className="p-2 rounded-full text-blue-600 bg-blue-50">
+                <Users size={20} />
+              </div>
             </div>
-            <div className="p-2 rounded-full text-blue-600 bg-blue-50">
-              <Users size={20} />
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">รอคิว</h3>
+                <p className="text-xl font-bold text-yellow-600 mt-1">{queuesData.stats.waitingQueues}</p>
+              </div>
+              <div className="p-2 rounded-full text-yellow-600 bg-yellow-50">
+                <Clock size={20} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">กำลังให้บริการ</h3>
+                <p className="text-xl font-bold text-blue-600 mt-1">{queuesData.stats.inProgressQueues}</p>
+              </div>
+              <div className="p-2 rounded-full text-blue-600 bg-blue-50">
+                <Activity size={20} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">เสร็จสิ้นวันนี้</h3>
+                <p className="text-xl font-bold text-green-600 mt-1">{queuesData.stats.completedToday}</p>
+              </div>
+              <div className="p-2 rounded-full text-green-600 bg-green-50">
+                <CheckCircle size={20} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">ยกเลิกวันนี้</h3>
+                <p className="text-xl font-bold text-red-600 mt-1">{queuesData.stats.cancelledToday}</p>
+              </div>
+              <div className="p-2 rounded-full text-red-600 bg-red-50">
+                <XCircle size={20} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-xs font-medium">เวลารอเฉลี่ย</h3>
+                <p className="text-xl font-bold text-purple-600 mt-1">{queuesData.stats.averageWaitTime} นาที</p>
+              </div>
+              <div className="p-2 rounded-full text-purple-600 bg-purple-50">
+                <Timer size={20} />
+              </div>
             </div>
           </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">รอคิว</h3>
-              <p className="text-xl font-bold text-yellow-600 mt-1">{queuesData.stats.waitingQueues}</p>
-            </div>
-            <div className="p-2 rounded-full text-yellow-600 bg-yellow-50">
-              <Clock size={20} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">กำลังให้บริการ</h3>
-              <p className="text-xl font-bold text-blue-600 mt-1">{queuesData.stats.inProgressQueues}</p>
-            </div>
-            <div className="p-2 rounded-full text-blue-600 bg-blue-50">
-              <Activity size={20} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">เสร็จสิ้นวันนี้</h3>
-              <p className="text-xl font-bold text-green-600 mt-1">{queuesData.stats.completedToday}</p>
-            </div>
-            <div className="p-2 rounded-full text-green-600 bg-green-50">
-              <CheckCircle size={20} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">ยกเลิกวันนี้</h3>
-              <p className="text-xl font-bold text-red-600 mt-1">{queuesData.stats.cancelledToday}</p>
-            </div>
-            <div className="p-2 rounded-full text-red-600 bg-red-50">
-              <XCircle size={20} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-xs font-medium">เวลารอเฉลี่ย</h3>
-              <p className="text-xl font-bold text-purple-600 mt-1">{queuesData.stats.averageWaitTime} นาที</p>
-            </div>
-            <div className="p-2 rounded-full text-purple-600 bg-purple-50">
-              <Timer size={20} />
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
@@ -266,7 +274,17 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {queuesData.queues.map((queue) => (
+                {queuesData.queues.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">📋</div>
+                        <h3>ยังไม่มีข้อมูลคิว</h3>
+                        <p>ข้อมูลคิวจะแสดงที่นี่เมื่อมีลูกค้าจองคิว</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : queuesData.queues.map((queue) => (
                   <tr key={queue.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="text-center">

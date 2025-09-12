@@ -214,7 +214,17 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {employeesData.employees.map((employee) => (
+                {employeesData.employees.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">👤</div>
+                        <h3>{state.searchQuery || state.departmentFilter || state.statusFilter ? 'ไม่พบพนักงานที่ตรงกับเงื่อนไขการค้นหา' : 'ยังไม่มีพนักงานในระบบ'}</h3>
+                        <p>{state.searchQuery || state.departmentFilter || state.statusFilter ? 'ลองปรับเงื่อนไขการค้นหาหรือเพิ่มพนักงานใหม่' : 'คลิกปุ่ม &quot;เพิ่มพนักงานใหม่&quot; เพื่อเริ่มเพิ่มพนักงานแรกของคุณ'}</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : employeesData.employees.map((employee) => (
                   <tr key={employee.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div>

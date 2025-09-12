@@ -230,7 +230,30 @@ export default function RewardTransactionsView({ viewModel }: RewardTransactions
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredTransactions.map((transaction) => (
+              {filteredTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="text-gray-500 dark:text-gray-400">
+                      <div className="text-4xl mb-4">📋</div>
+                      <p className="text-lg">
+                        {searchTerm || selectedStatus || selectedType
+                          ? "ไม่พบรายการแลกรางวัลที่ตรงกับเงื่อนไขการค้นหา"
+                          : "ยังไม่มีรายการแลกรางวัลในระบบ"}
+                      </p>
+                      {searchTerm || selectedStatus || selectedType ? (
+                        <p className="text-sm text-gray-400 mt-2">
+                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการแลกรางวัลใหม่
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400 mt-2">
+                          รายการแลกรางวัลจะแสดงที่นี่เมื่อลูกค้าทำการแลกเปลี่ยนรางวัล
+                        </p>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredTransactions.map((transaction) => (
                 <tr key={transaction.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {new Date(transaction.transactionDate).toLocaleDateString('th-TH')}
@@ -288,7 +311,8 @@ export default function RewardTransactionsView({ viewModel }: RewardTransactions
                     )}
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

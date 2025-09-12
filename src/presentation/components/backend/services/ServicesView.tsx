@@ -87,81 +87,105 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">บริการทั้งหมด</h3>
-              <p className="text-2xl font-bold backend-text mt-2">{servicesData.stats.totalServices}</p>
+      {servicesData.stats.totalServices === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติบริการ</h3>
+          <p className="backend-text-muted">ข้อมูลสถิติบริการจะแสดงเมื่อมีการสร้างบริการ</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">บริการทั้งหมด</h3>
+                <p className="text-2xl font-bold backend-text mt-2">{servicesData.stats.totalServices}</p>
+              </div>
+              <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+                <Wrench size={24} />
+              </div>
             </div>
-            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
-              <Wrench size={24} />
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">พร้อมให้บริการ</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{servicesData.stats.availableServices}</p>
+              </div>
+              <div className="p-3 rounded-full text-green-600 bg-green-50">
+                <CheckCircle size={24} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ไม่พร้อมให้บริการ</h3>
+                <p className="text-2xl font-bold text-red-600 mt-2">{servicesData.stats.unavailableServices}</p>
+              </div>
+              <div className="p-3 rounded-full text-red-600 bg-red-50">
+                <XCircle size={24} />
+              </div>
+            </div>
+          </div>
+          <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="backend-text-muted text-sm font-medium">ราคาเฉลี่ย</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-2">{formatPrice(servicesData.stats.averagePrice)}</p>
+              </div>
+              <div className="p-3 rounded-full text-blue-600 bg-blue-50">
+                <DollarSign size={24} />
+              </div>
             </div>
           </div>
         </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">พร้อมให้บริการ</h3>
-              <p className="text-2xl font-bold text-green-600 mt-2">{servicesData.stats.availableServices}</p>
-            </div>
-            <div className="p-3 rounded-full text-green-600 bg-green-50">
-              <CheckCircle size={24} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ไม่พร้อมให้บริการ</h3>
-              <p className="text-2xl font-bold text-red-600 mt-2">{servicesData.stats.unavailableServices}</p>
-            </div>
-            <div className="p-3 rounded-full text-red-600 bg-red-50">
-              <XCircle size={24} />
-            </div>
-          </div>
-        </div>
-        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="backend-text-muted text-sm font-medium">ราคาเฉลี่ย</h3>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{formatPrice(servicesData.stats.averagePrice)}</p>
-            </div>
-            <div className="p-3 rounded-full text-blue-600 bg-blue-50">
-              <DollarSign size={24} />
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Category Distribution */}
-      <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-        <div className="flex items-center space-x-2 mb-4">
-          <TrendingUp size={20} className="backend-text-muted" />
-          <h3 className="text-lg font-semibold backend-text">การกระจายตามหมวดหมู่</h3>
+      {servicesData.stats.totalServices === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">📈</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลการกระจายตามหมวดหมู่</h3>
+          <p className="backend-text-muted">ข้อมูลการกระจายตามหมวดหมู่จะแสดงเมื่อมีการสร้างบริการ</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(servicesData.stats.servicesByCategory).map(([category, count]) => (
-            <div key={category} className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{count}</p>
-              <p className="backend-text-muted text-sm">{category}</p>
-            </div>
-          ))}
+      ) : (
+        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+          <div className="flex items-center space-x-2 mb-4">
+            <TrendingUp size={20} className="backend-text-muted" />
+            <h3 className="text-lg font-semibold backend-text">การกระจายตามหมวดหมู่</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Object.entries(servicesData.stats.servicesByCategory).map(([category, count]) => (
+              <div key={category} className="text-center">
+                <p className="text-2xl font-bold text-blue-600">{count}</p>
+                <p className="backend-text-muted text-sm">{category}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Popular Services */}
-      <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
-        <h3 className="text-lg font-semibold backend-text mb-4">บริการยอดนิยม</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {servicesData.stats.popularServices.map((service) => (
-            <div key={service.id} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="font-medium backend-text">{service.name}</p>
-              <p className="text-sm backend-text-muted">{service.bookingCount} การจอง</p>
-            </div>
-          ))}
+      {servicesData.stats.totalServices === 0 ? (
+        <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
+          <div className="text-6xl mb-4">⭐</div>
+          <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลบริการยอดนิยม</h3>
+          <p className="backend-text-muted">ข้อมูลบริการยอดนิยมจะแสดงเมื่อมีการสร้างบริการ</p>
         </div>
-      </div>
+      ) : (
+        <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
+          <h3 className="text-lg font-semibold backend-text mb-4">บริการยอดนิยม</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {servicesData.stats.popularServices.map((service) => (
+              <div key={service.id} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium backend-text">{service.name}</p>
+                <p className="text-sm backend-text-muted">{service.bookingCount} การจอง</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter and Search */}
       <div className="backend-sidebar-bg rounded-lg p-6 backend-sidebar-border border">
@@ -234,7 +258,17 @@ export function ServicesView({ viewModel }: ServicesViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {servicesData.services.map((service) => (
+                {servicesData.services.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="text-6xl mb-4">🔧</div>
+                        <h3>ยังไม่มีข้อมูลบริการ</h3>
+                        <p>ข้อมูลบริการจะแสดงที่นี่เมื่อมีการสร้างบริการ</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : servicesData.services.map((service) => (
                   <tr key={service.id} className="border-b backend-sidebar-border hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
