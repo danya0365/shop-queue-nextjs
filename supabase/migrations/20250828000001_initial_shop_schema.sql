@@ -1193,9 +1193,15 @@ CREATE POLICY "Everyone can view services"
   ON public.services FOR SELECT
   USING (true);
 
--- Remove direct INSERT/UPDATE access - use API functions
-REVOKE INSERT, UPDATE ON TABLE public.services FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.services FROM anon;
+-- Only shop managers can create, update, or delete services
+CREATE POLICY "Only shop managers can create services"
+  ON public.services FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Only shop managers can update services
+CREATE POLICY "Only shop managers can update services"
+  ON public.services FOR UPDATE
+  USING (public.is_shop_manager(shop_id));
 
 -- Only shop managers can delete services (emergency cleanup)
 CREATE POLICY "Shop managers can delete services"

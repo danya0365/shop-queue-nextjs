@@ -77,7 +77,7 @@ export class SupabaseShopBackendShopRepository
       // get opening hours for each shop
       const openingHours =
         await this.dataSource.getAdvanced<ShopOpeningHourSchemaRecord>(
-          "shops_opening_hours",
+          "shop_opening_hours",
           {
             select: ["*"],
             filters: [

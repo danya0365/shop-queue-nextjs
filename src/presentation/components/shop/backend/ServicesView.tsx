@@ -22,9 +22,23 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handleSearchChange,
     handleCategoryChange,
     resetFilters,
+    handleCreateService,
   } = useServicesPresenter(shopId, initialViewModel);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  
+  // Handle form submission with error handling
+  const handleCreateServiceLocal = async (event: React.FormEvent) => {
+    try {
+      await handleCreateService(event);
+      // Close modal on success
+      setShowCreateModal(false);
+    } catch (error) {
+      // Error is handled by the hook, but we can add additional UI feedback here if needed
+      console.error('Form submission error:', error);
+    }
+  };
+  
   const { searchQuery, categoryFilter } = filters;
 
   const formatPrice = (price: number) => {
@@ -394,24 +408,146 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
       </div>
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มบริการใหม่
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
-            </div>
+            
+            <form onSubmit={handleCreateServiceLocal} className="space-y-4">
+              {/* ชื่อบริการ */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ชื่อบริการ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น ตัดผมชาย, ตัดผมหญิง"
+                  maxLength={100}
+                  required
+                />
+              </div>
+              
+              {/* คำอธิบาย */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  คำอธิบาย
+                </label>
+                <textarea
+                  name="description"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="กรอกคำอธิบายบริการ (ไม่บังคับ)"
+                  rows={3}
+                />
+              </div>
+              
+              {/* หมวดหมู่ */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  หมวดหมู่ <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="category"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">เลือกหมวดหมู่</option>
+                  {viewModel.categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                  <option value="other">อื่นๆ</option>
+                </select>
+              </div>
+              
+              {/* ราคา */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ราคา (บาท) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              
+              {/* ระยะเวลา */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ระยะเวลา (นาที)
+                </label>
+                <input
+                  type="number"
+                  name="estimatedDuration"
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น 30"
+                />
+                <p className="text-gray-500 text-sm mt-1">ปล่อยว่างไว้ถ้าไม่ระบุระยะเวลา</p>
+              </div>
+              
+              {/* Icon */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Icon
+                </label>
+                <input
+                  type="text"
+                  name="icon"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น 💇‍♀️, ✂️, 💅"
+                  maxLength={10}
+                />
+                <p className="text-gray-500 text-sm mt-1">ใช้ emoji 1-2 ตัว (ไม่บังคับ)</p>
+              </div>
+              
+              {/* สถานะ */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  สถานะ
+                </label>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isAvailable"
+                    defaultChecked={true}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    เปิดใช้งานบริการนี้
+                  </label>
+                </div>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex justify-end space-x-2 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+                >
+                  บันทึก
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
   );
 }
+
+export default ServicesView;

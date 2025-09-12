@@ -235,6 +235,9 @@ export class SupabaseShopBackendServiceRepository
         updatedAt: new Date().toISOString(),
       });
 
+      // remove id from serviceData
+      delete serviceData.id;
+
       const createdService = await this.dataSource.insert<ServiceSchemaRecord>(
         "services",
         serviceData

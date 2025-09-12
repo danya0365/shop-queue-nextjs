@@ -138,6 +138,44 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       "จัดการบริการของร้าน เพิ่ม แก้ไข ลบ และตั้งค่าบริการต่างๆ"
     );
   }
+
+  // Create service method
+  async createService(shopId: string, data: {
+    name: string;
+    description: string | null;
+    category: string;
+    price: number;
+    estimatedDuration: number | null;
+    icon: string | null;
+    isAvailable: boolean;
+  }): Promise<void> {
+    try {
+      this.logger.info("ServicesPresenter: Creating service", {
+        shopId,
+        serviceName: data.name,
+      });
+
+      await this.backendServicesService.createService({
+        shopId,
+        name: data.name,
+        slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+        description: data.description || undefined,
+        category: data.category,
+        price: data.price,
+        estimatedDuration: data.estimatedDuration || undefined,
+        icon: data.icon || undefined,
+        isAvailable: data.isAvailable,
+      });
+
+      this.logger.info("ServicesPresenter: Service created successfully", {
+        shopId,
+        serviceName: data.name,
+      });
+    } catch (error) {
+      this.logger.error("ServicesPresenter: Error creating service", error);
+      throw error;
+    }
+  }
 }
 
 // Base Factory class for reducing code duplication
