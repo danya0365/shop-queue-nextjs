@@ -164,15 +164,15 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
             </div>
             <div className="p-6">
               {/* Category Filter */}
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-3 mb-6">
                 {["ทั้งหมด", ...categories].map((category) => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`frontend-category-filter ${
                       selectedCategory === category
-                        ? "frontend-button-primary"
-                        : "frontend-button-secondary"
+                        ? "frontend-category-filter-active"
+                        : "frontend-category-filter-inactive"
                     }`}
                   >
                     {category}
@@ -193,11 +193,10 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                       key={service.id}
                       onClick={() => handleServiceToggle(service.id)}
                       className={cn(
-                        `cursor-pointer rounded-lg p-4 border-2 transition-all ${
-                          isSelected
-                            ? "frontend-service-card border-purple-500"
-                            : "frontend-card frontend-card-hover border-transparent"
-                        }`
+                        "cursor-pointer p-4 transition-all",
+                        isSelected
+                          ? "frontend-item-card-selected"
+                          : "frontend-item-card"
                       )}
                     >
                       <div className="text-center">
@@ -219,10 +218,10 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="mt-2">
-                            <span className="frontend-text-success text-sm font-medium">
-                              ✓ เลือกแล้ว
-                            </span>
+                          <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none">
+                            <div className="absolute top-2 left-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                              <span className="text-sm">✓</span>
+                            </div>
                           </div>
                         )}
                       </div>

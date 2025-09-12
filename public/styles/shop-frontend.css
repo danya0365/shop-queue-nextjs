@@ -75,7 +75,7 @@
     @apply bg-gray-50 border-t dark:bg-gray-700 dark:border-gray-600;
   }
   .frontend-qr-code {
-    @apply bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600;
+    @apply bg-white border-1 border-gray-300 dark:bg-gray-800 dark:border-gray-600;
   }
   .frontend-text-primary {
     @apply text-gray-900 dark:text-gray-100;
@@ -121,5 +121,49 @@
   }
   .frontend-status-closed {
     @apply bg-red-500;
+  }
+
+  /* New frontend item card utility */
+  .frontend-item-card {
+    @apply bg-white border-1 border-gray-300 rounded-xl shadow-lg 
+           hover:shadow-xl hover:border-purple-400 transition-all duration-300 
+           dark:bg-gray-700 dark:border-gray-600 dark:hover:border-purple-500
+           hover:scale-[1.02] hover:-translate-y-1;
+  }
+
+  .frontend-item-card-selected {
+    @apply bg-gradient-to-br from-purple-50 to-blue-50 border-purple-500 rounded-xl shadow-lg 
+           dark:from-purple-900/80 dark:to-blue-900/80 dark:border-purple-400 dark:bg-gray-600
+           scale-[1.02] -translate-y-1 ring-1 ring-purple-300 dark:ring-purple-500;
+  }
+
+  /* Enhanced category filter buttons */
+  .frontend-category-filter {
+    @apply px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300
+           border-1 border-transparent cursor-pointer
+           hover:scale-105 hover:-translate-y-0.5 active:scale-95;
+  }
+
+  .frontend-category-filter-active {
+    @apply bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg
+           border-purple-400 hover:from-purple-600 hover:to-blue-600;
+  }
+
+  .frontend-category-filter-inactive {
+    @apply bg-white/70 text-gray-700 border-gray-200 shadow-sm
+           hover:bg-white hover:border-purple-300 hover:text-purple-600 hover:shadow-md
+           dark:bg-gray-800/70 dark:text-gray-300 dark:border-gray-600
+           dark:hover:bg-gray-700 dark:hover:border-purple-500 dark:hover:text-purple-400;
+  }
+
+  /* Status utilities */
+  .frontend-text-success {
+    @apply text-green-600 dark:text-green-400;
+  }
+  .frontend-text-danger {
+    @apply text-red-600 dark:text-red-400;
+  }
+  .frontend-status-cancelled {
+    @apply bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-700;
   }
 }
