@@ -2,9 +2,10 @@ import type { PromotionStatsDTO } from "@/src/application/dtos/backend/promotion
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IBackendPromotionsService } from "@/src/application/services/backend/BackendPromotionsService";
+import { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
-import { getBackendContainer } from "@/src/di/backend-container";
+import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
@@ -158,17 +159,17 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
 // Factory class
 export class PromotionsPresenterFactory {
   static async create(): Promise<PromotionsPresenter> {
-    const backendContainer = await getBackendContainer();
+    const serverContainer = await getServerContainer();
     const promotionsService =
-      backendContainer.resolve<IBackendPromotionsService>(
-        "BackendPromotionsService"
+      serverContainer.resolve<IShopBackendPromotionsService>(
+        "ShopBackendPromotionsService"
       );
-    const logger = backendContainer.resolve<Logger>("Logger");
-    const authService = backendContainer.resolve<IAuthService>("AuthService");
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService =
-      backendContainer.resolve<IProfileService>("ProfileService");
-    const shopService = backendContainer.resolve<IShopService>("ShopService");
-    const subscriptionService = backendContainer.resolve<ISubscriptionService>(
+      serverContainer.resolve<IProfileService>("ProfileService");
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
     return new PromotionsPresenter(
