@@ -386,11 +386,18 @@ export class SupabaseShopBackendServiceRepository
    * Get service statistics from database
    * @returns Service statistics
    */
-  async getServiceStats(): Promise<ServiceStatsEntity> {
+  async getServiceStats(shopId: string): Promise<ServiceStatsEntity> {
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
         select: ["*"],
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: shopId,
+          },
+        ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
@@ -399,7 +406,7 @@ export class SupabaseShopBackendServiceRepository
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData =
         await this.dataSource.getAdvanced<ServiceStatsSchemaRecord>(
-          "service_stats_summary_view",
+          "service_stats_by_shop_view",
           queryOptions
         );
 

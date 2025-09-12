@@ -75,7 +75,7 @@ CROSS JOIN services_by_category sbc
 CROSS JOIN popular_services ps;
 
 
-CREATE OR REPLACE VIEW service_by_shop_stats_view AS
+CREATE OR REPLACE VIEW service_stats_by_shop_view AS
 WITH service_basic_stats AS (
   SELECT 
     s.shop_id,

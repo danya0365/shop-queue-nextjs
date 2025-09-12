@@ -1,36 +1,74 @@
-import type { CreateServiceInputDTO, PaginatedServicesDTO, ServiceDTO, ServiceStatsDTO, ServicesDataDTO, UpdateServiceInputDTO } from '@/src/application/dtos/shop/backend/services-dto';
-import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { CreateServiceUseCase, DeleteServiceUseCase, GetServiceByIdUseCase, GetServiceStatsUseCase, UpdateServiceUseCase } from '@/src/application/usecases/shop/backend/services';
-import { GetServicesPaginatedUseCase, type GetServicesPaginatedUseCaseInput } from '@/src/application/usecases/shop/backend/services/GetServicesPaginatedUseCase';
-import { ToggleServiceAvailabilityUseCase, type ToggleServiceAvailabilityUseCaseInput } from '@/src/application/usecases/shop/backend/services/ToggleServiceAvailabilityUseCase';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopBackendServiceRepository } from '@/src/domain/repositories/shop/backend/backend-service-repository';
+import type {
+  CreateServiceInputDTO,
+  PaginatedServicesDTO,
+  ServiceDTO,
+  ServiceStatsDTO,
+  ServicesDataDTO,
+  UpdateServiceInputDTO,
+} from "@/src/application/dtos/shop/backend/services-dto";
+import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import {
+  CreateServiceUseCase,
+  DeleteServiceUseCase,
+  GetServiceByIdUseCase,
+  GetServiceStatsUseCase,
+  UpdateServiceUseCase,
+} from "@/src/application/usecases/shop/backend/services";
+import {
+  GetServicesPaginatedUseCase,
+  type GetServicesPaginatedUseCaseInput,
+} from "@/src/application/usecases/shop/backend/services/GetServicesPaginatedUseCase";
+import {
+  ToggleServiceAvailabilityUseCase,
+  type ToggleServiceAvailabilityUseCaseInput,
+} from "@/src/application/usecases/shop/backend/services/ToggleServiceAvailabilityUseCase";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { ShopBackendServiceRepository } from "@/src/domain/repositories/shop/backend/backend-service-repository";
 
 export interface IShopBackendServicesService {
-  getServicesData(page?: number, perPage?: number, filters?: {
-    searchQuery?: string;
-    categoryFilter?: string;
-    availabilityFilter?: string;
-    shopId?: string;
-  }): Promise<ServicesDataDTO>;
+  getServicesData(
+    page?: number,
+    perPage?: number,
+    filters?: {
+      searchQuery?: string;
+      categoryFilter?: string;
+      availabilityFilter?: string;
+      shopId?: string;
+    }
+  ): Promise<ServicesDataDTO>;
   getServiceById(id: string): Promise<ServiceDTO | null>;
   createService(serviceData: CreateServiceInputDTO): Promise<ServiceDTO>;
-  updateService(id: string, serviceData: Omit<UpdateServiceInputDTO, 'id'>): Promise<ServiceDTO>;
+  updateService(
+    id: string,
+    serviceData: Omit<UpdateServiceInputDTO, "id">
+  ): Promise<ServiceDTO>;
   deleteService(id: string): Promise<boolean>;
   toggleServiceAvailability(id: string, isAvailable: boolean): Promise<boolean>;
 }
 
 export class ShopBackendServicesService implements IShopBackendServicesService {
   constructor(
-    private readonly getServicesPaginatedUseCase: IUseCase<GetServicesPaginatedUseCaseInput, PaginatedServicesDTO>,
-    private readonly getServiceStatsUseCase: IUseCase<void, ServiceStatsDTO>,
+    private readonly getServicesPaginatedUseCase: IUseCase<
+      GetServicesPaginatedUseCaseInput,
+      PaginatedServicesDTO
+    >,
+    private readonly getServiceStatsUseCase: IUseCase<string, ServiceStatsDTO>,
     private readonly getServiceByIdUseCase: IUseCase<string, ServiceDTO | null>,
-    private readonly createServiceUseCase: IUseCase<CreateServiceInputDTO, ServiceDTO>,
-    private readonly updateServiceUseCase: IUseCase<UpdateServiceInputDTO, ServiceDTO>,
+    private readonly createServiceUseCase: IUseCase<
+      CreateServiceInputDTO,
+      ServiceDTO
+    >,
+    private readonly updateServiceUseCase: IUseCase<
+      UpdateServiceInputDTO,
+      ServiceDTO
+    >,
     private readonly deleteServiceUseCase: IUseCase<string, boolean>,
-    private readonly toggleServiceAvailabilityUseCase: IUseCase<ToggleServiceAvailabilityUseCaseInput, boolean>,
+    private readonly toggleServiceAvailabilityUseCase: IUseCase<
+      ToggleServiceAvailabilityUseCaseInput,
+      boolean
+    >,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   /**
    * Get services data including paginated services and statistics
@@ -50,12 +88,12 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
     }
   ): Promise<ServicesDataDTO> {
     try {
-      this.logger.info('Getting services data', { page, perPage, filters });
+      this.logger.info("Getting services data", { page, perPage, filters });
 
       // Get services and stats in parallel
       const [servicesResult, stats] = await Promise.all([
         this.getServicesPaginatedUseCase.execute({ page, perPage, filters }),
-        this.getServiceStatsUseCase.execute()
+        this.getServiceStatsUseCase.execute(filters?.shopId),
       ]);
 
       return {
@@ -63,10 +101,15 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
         stats,
         totalCount: servicesResult.pagination.totalItems,
         currentPage: servicesResult.pagination.currentPage,
-        perPage: servicesResult.pagination.itemsPerPage
+        perPage: servicesResult.pagination.itemsPerPage,
       };
     } catch (error) {
-      this.logger.error('Error getting services data', { error, page, perPage, filters });
+      this.logger.error("Error getting services data", {
+        error,
+        page,
+        perPage,
+        filters,
+      });
       throw error;
     }
   }
@@ -78,12 +121,12 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
    */
   async getServiceById(id: string): Promise<ServiceDTO | null> {
     try {
-      this.logger.info('Getting service by ID', { id });
+      this.logger.info("Getting service by ID", { id });
 
       const result = await this.getServiceByIdUseCase.execute(id);
       return result;
     } catch (error) {
-      this.logger.error('Error getting service by ID', { error, id });
+      this.logger.error("Error getting service by ID", { error, id });
       throw error;
     }
   }
@@ -95,12 +138,12 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
    */
   async createService(serviceData: CreateServiceInputDTO): Promise<ServiceDTO> {
     try {
-      this.logger.info('Creating service', { serviceData });
+      this.logger.info("Creating service", { serviceData });
 
       const result = await this.createServiceUseCase.execute(serviceData);
       return result;
     } catch (error) {
-      this.logger.error('Error creating service', { error, serviceData });
+      this.logger.error("Error creating service", { error, serviceData });
       throw error;
     }
   }
@@ -111,15 +154,18 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
    * @param serviceData Service data to update
    * @returns Updated service DTO
    */
-  async updateService(id: string, serviceData: Omit<UpdateServiceInputDTO, 'id'>): Promise<ServiceDTO> {
+  async updateService(
+    id: string,
+    serviceData: Omit<UpdateServiceInputDTO, "id">
+  ): Promise<ServiceDTO> {
     try {
-      this.logger.info('Updating service', { id, serviceData });
+      this.logger.info("Updating service", { id, serviceData });
 
       const updateData = { id, ...serviceData };
       const result = await this.updateServiceUseCase.execute(updateData);
       return result;
     } catch (error) {
-      this.logger.error('Error updating service', { error, id, serviceData });
+      this.logger.error("Error updating service", { error, id, serviceData });
       throw error;
     }
   }
@@ -131,12 +177,12 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
    */
   async deleteService(id: string): Promise<boolean> {
     try {
-      this.logger.info('Deleting service', { id });
+      this.logger.info("Deleting service", { id });
 
       const result = await this.deleteServiceUseCase.execute(id);
       return result;
     } catch (error) {
-      this.logger.error('Error deleting service', { error, id });
+      this.logger.error("Error deleting service", { error, id });
       throw error;
     }
   }
@@ -147,28 +193,53 @@ export class ShopBackendServicesService implements IShopBackendServicesService {
    * @param isAvailable Availability flag
    * @returns Success flag
    */
-  async toggleServiceAvailability(id: string, isAvailable: boolean): Promise<boolean> {
+  async toggleServiceAvailability(
+    id: string,
+    isAvailable: boolean
+  ): Promise<boolean> {
     try {
-      this.logger.info('Toggling service availability', { id, isAvailable });
+      this.logger.info("Toggling service availability", { id, isAvailable });
 
-      const result = await this.toggleServiceAvailabilityUseCase.execute({ id, isAvailable });
+      const result = await this.toggleServiceAvailabilityUseCase.execute({
+        id,
+        isAvailable,
+      });
       return result;
     } catch (error) {
-      this.logger.error('Error toggling service availability', { error, id, isAvailable });
+      this.logger.error("Error toggling service availability", {
+        error,
+        id,
+        isAvailable,
+      });
       throw error;
     }
   }
 }
 
 export class ShopBackendServicesServiceFactory {
-  static create(repository: ShopBackendServiceRepository, logger: Logger): ShopBackendServicesService {
-    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(repository);
+  static create(
+    repository: ShopBackendServiceRepository,
+    logger: Logger
+  ): ShopBackendServicesService {
+    const getServicesPaginatedUseCase = new GetServicesPaginatedUseCase(
+      repository
+    );
     const getServiceStatsUseCase = new GetServiceStatsUseCase(repository);
     const getServiceByIdUseCase = new GetServiceByIdUseCase(repository);
     const createServiceUseCase = new CreateServiceUseCase(repository);
     const updateServiceUseCase = new UpdateServiceUseCase(repository);
     const deleteServiceUseCase = new DeleteServiceUseCase(repository);
-    const toggleServiceAvailabilityUseCase = new ToggleServiceAvailabilityUseCase(repository);
-    return new ShopBackendServicesService(getServicesPaginatedUseCase, getServiceStatsUseCase, getServiceByIdUseCase, createServiceUseCase, updateServiceUseCase, deleteServiceUseCase, toggleServiceAvailabilityUseCase, logger);
+    const toggleServiceAvailabilityUseCase =
+      new ToggleServiceAvailabilityUseCase(repository);
+    return new ShopBackendServicesService(
+      getServicesPaginatedUseCase,
+      getServiceStatsUseCase,
+      getServiceByIdUseCase,
+      createServiceUseCase,
+      updateServiceUseCase,
+      deleteServiceUseCase,
+      toggleServiceAvailabilityUseCase,
+      logger
+    );
   }
 }

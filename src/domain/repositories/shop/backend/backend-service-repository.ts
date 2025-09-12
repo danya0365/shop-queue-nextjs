@@ -1,11 +1,15 @@
-import type { PaginatedServicesEntity, ServiceEntity, ServiceStatsEntity } from '@/src/domain/entities/backend/backend-service.entity';
-import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type {
+  PaginatedServicesEntity,
+  ServiceEntity,
+  ServiceStatsEntity,
+} from "@/src/domain/entities/backend/backend-service.entity";
+import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 
 export enum ShopBackendServiceErrorType {
-  NOT_FOUND = 'NOT_FOUND',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  DUPLICATE_ERROR = 'DUPLICATE_ERROR',
-  UNKNOWN = 'UNKNOWN'
+  NOT_FOUND = "NOT_FOUND",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  DUPLICATE_ERROR = "DUPLICATE_ERROR",
+  UNKNOWN = "UNKNOWN",
 }
 
 export class ShopBackendServiceError extends Error {
@@ -17,32 +21,39 @@ export class ShopBackendServiceError extends Error {
     public readonly originalError?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendServiceError';
+    this.name = "ShopBackendServiceError";
   }
 }
 
 export interface ShopBackendServiceRepository {
   // Get paginated services
-  getPaginatedServices(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      categoryFilter?: string;
-      availabilityFilter?: string;
-      shopId?: string;
+  getPaginatedServices(
+    params: PaginationParams & {
+      filters?: {
+        searchQuery?: string;
+        categoryFilter?: string;
+        availabilityFilter?: string;
+        shopId?: string;
+      };
     }
-  }): Promise<PaginatedServicesEntity>;
+  ): Promise<PaginatedServicesEntity>;
 
   // Get service statistics
-  getServiceStats(): Promise<ServiceStatsEntity>;
+  getServiceStats(shopId: string): Promise<ServiceStatsEntity>;
 
   // Get single service by ID
   getServiceById(id: string): Promise<ServiceEntity | null>;
 
   // Create new service
-  createService(service: Omit<ServiceEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ServiceEntity>;
+  createService(
+    service: Omit<ServiceEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<ServiceEntity>;
 
   // Update service
-  updateService(id: string, updates: Partial<ServiceEntity>): Promise<ServiceEntity>;
+  updateService(
+    id: string,
+    updates: Partial<ServiceEntity>
+  ): Promise<ServiceEntity>;
 
   // Delete service
   deleteService(id: string): Promise<boolean>;
