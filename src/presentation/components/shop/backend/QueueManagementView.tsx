@@ -343,6 +343,38 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             รายการคิว ({queueData.length})
           </h2>
+
+          {/* Active Filters */}
+          {(filters.search || filters.status !== 'all' || filters.priority !== 'all') && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {filters.search && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                  ค้นหา: &ldquo;{filters.search}&rdquo;
+                </span>
+              )}
+              {filters.status !== 'all' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                  สถานะ: {getStatusText(filters.status)}
+                </span>
+              )}
+              {filters.priority !== 'all' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                  ความสำคัญ: {getPriorityText(filters.priority)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {loading && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              กำลังโหลดข้อมูล...
+            </p>
+          )}
+          {error && (
+            <p className="text-sm text-red-500 dark:text-red-400 mt-1">
+              {error}
+            </p>
+          )}
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {queueData.length === 0 ? (
