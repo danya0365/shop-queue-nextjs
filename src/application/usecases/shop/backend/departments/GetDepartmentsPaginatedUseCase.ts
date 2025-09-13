@@ -8,6 +8,12 @@ import { ShopBackendDepartmentError, ShopBackendDepartmentErrorType } from '@/sr
 export interface GetDepartmentsPaginatedInput {
   page: number;
   limit: number;
+  filters?: {
+    searchQuery?: string;
+    shopFilter?: string;
+    minEmployeeCount?: number;
+    maxEmployeeCount?: number;
+  };
 }
 
 export interface PaginatedDepartmentsDTO {
@@ -48,9 +54,17 @@ export class GetDepartmentsPaginatedUseCase implements IUseCase<GetDepartmentsPa
         );
       }
 
-      const params: PaginationParams = {
+      const params: PaginationParams & {
+        filters?: {
+          searchQuery?: string;
+          shopFilter?: string;
+          minEmployeeCount?: number;
+          maxEmployeeCount?: number;
+        };
+      } = {
         page: input.page,
-        limit: input.limit
+        limit: input.limit,
+        filters: input.filters
       };
 
       // Get paginated departments from repository

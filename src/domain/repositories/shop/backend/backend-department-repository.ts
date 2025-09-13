@@ -36,11 +36,18 @@ export class ShopBackendDepartmentError extends Error {
 export interface ShopBackendDepartmentRepository {
   /**
    * Get paginated departments data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated departments data
    * @throws ShopBackendDepartmentError if the operation fails
    */
-  getPaginatedDepartments(params: PaginationParams): Promise<PaginatedDepartmentsEntity>;
+  getPaginatedDepartments(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      shopFilter?: string;
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    };
+  }): Promise<PaginatedDepartmentsEntity>;
 
   /**
    * Get department statistics

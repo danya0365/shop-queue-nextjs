@@ -5,7 +5,16 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendDepartmentRepository } from '@/src/domain/repositories/shop/backend/backend-department-repository';
 
 export interface IShopBackendDepartmentsService {
-  getDepartmentsData(page?: number, perPage?: number): Promise<DepartmentsDataDTO>;
+  getDepartmentsData(
+    page?: number,
+    perPage?: number,
+    filters?: {
+      searchQuery?: string;
+      shopFilter?: string;
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    }
+  ): Promise<DepartmentsDataDTO>;
   getDepartmentStats(): Promise<DepartmentStatsDTO>;
   getDepartmentById(id: string): Promise<DepartmentDTO>;
   createDepartment(params: CreateDepartmentDTO): Promise<DepartmentDTO>;
@@ -30,13 +39,22 @@ export class ShopBackendDepartmentsService implements IShopBackendDepartmentsSer
    * @param perPage Items per page (default: 10)
    * @returns Departments data DTO
    */
-  async getDepartmentsData(page: number = 1, perPage: number = 10): Promise<DepartmentsDataDTO> {
+  async getDepartmentsData(
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      shopFilter?: string;
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    }
+  ): Promise<DepartmentsDataDTO> {
     try {
-      this.logger.info('Getting departments data', { page, perPage });
+      this.logger.info('Getting departments data', { page, perPage, filters });
 
       // Get departments and stats in parallel
       const [departmentsResult, stats] = await Promise.all([
-        this.getDepartmentsPaginatedUseCase.execute({ page, limit: perPage }),
+        this.getDepartmentsPaginatedUseCase.execute({ page, limit: perPage, filters }),
         this.getDepartmentStatsUseCase.execute()
       ]);
 

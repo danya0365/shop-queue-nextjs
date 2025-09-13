@@ -1,5 +1,5 @@
 import { CreateDepartmentEntity, DepartmentEntity, DepartmentStatsEntity, PaginatedDepartmentsEntity } from "@/src/domain/entities/shop/backend/backend-department.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import { ShopBackendDepartmentError, ShopBackendDepartmentErrorType, ShopBackendDepartmentRepository } from "@/src/domain/repositories/shop/backend/backend-department-repository";
@@ -28,17 +28,52 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
 
   /**
    * Get paginated departments data from database
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated departments data
    */
-  async getPaginatedDepartments(params: PaginationParams): Promise<PaginatedDepartmentsEntity> {
+  async getPaginatedDepartments(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      shopFilter?: string;
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    };
+  }): Promise<PaginatedDepartmentsEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
+
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number;
+      }> = [];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: 'name',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.shopFilter) {
+        queryFilters.push({
+          field: 'shop_id',
+          operator: FilterOperator.EQ,
+          value: filters.shopFilter,
+        });
+      }
+
+      // Note: employeeCount filtering will be handled after fetching data
+      // since it's a calculated field from a joined view
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
         select: ['*'],
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
         joins: [
           { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
         ],
@@ -90,11 +125,29 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         return SupabaseShopBackendDepartmentMapper.toDomain(departmentWithJoins);
       });
 
+      // Apply employee count filters if specified
+      let filteredDepartments = mappedDepartments;
+      if (filters?.minEmployeeCount !== undefined || filters?.maxEmployeeCount !== undefined) {
+        filteredDepartments = mappedDepartments.filter(department => {
+          const employeeCount = department.employeeCount;
+          
+          if (filters?.minEmployeeCount !== undefined && employeeCount < filters.minEmployeeCount) {
+            return false;
+          }
+          
+          if (filters?.maxEmployeeCount !== undefined && employeeCount > filters.maxEmployeeCount) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+
       // Create pagination metadata
       const pagination = SupabaseShopBackendDepartmentMapper.createPaginationMeta(page, limit, totalItems);
 
       return {
-        data: mappedDepartments,
+        data: filteredDepartments,
         pagination
       };
     } catch (error) {
