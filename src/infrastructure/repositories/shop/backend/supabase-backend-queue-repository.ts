@@ -386,6 +386,101 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
   }
 
   /**
+   * Get multiple queues by IDs
+   * @param ids Array of queue IDs
+   * @returns Array of queue entities (only found queues)
+   */
+  async getQueuesByIds(ids: string[]): Promise<QueueEntity[]> {
+    try {
+      if (ids.length === 0) {
+        return [];
+      }
+
+      const queuesOptions: QueryOptions = {
+        select: ['*'],
+        joins: [
+          { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
+          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
+        ],
+        filters: [
+          { field: 'id', operator: FilterOperator.IN, value: ids }
+        ]
+      };
+
+      const queues = await this.dataSource.getAdvanced<QueueSchemaRecord>(
+        'queues',
+        queuesOptions
+      );
+
+      if (queues.length === 0) {
+        return [];
+      }
+
+      // Get queue services for all found queues
+      const queueIds = queues.map(q => q.id);
+      const queueServicesOptions: QueryOptions = {
+        select: ['*'],
+        joins: [
+          { table: 'services', on: { fromField: 'service_id', toField: 'id' } }
+        ],
+        filters: [
+          { field: 'queue_id', operator: FilterOperator.IN, value: queueIds }
+        ]
+      };
+
+      const services = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+        'queue_services',
+        queueServicesOptions
+      );
+
+      // Group services by queue_id
+      const servicesByQueueId = new Map<string, QueueServiceSchemaRecord[]>();
+      services.forEach(service => {
+        const queueId = service.queue_id;
+        if (!servicesByQueueId.has(queueId)) {
+          servicesByQueueId.set(queueId, []);
+        }
+        servicesByQueueId.get(queueId)!.push(service);
+      });
+
+      // Map each queue with its relations
+      const queueEntities: QueueEntity[] = [];
+      for (const queue of queues) {
+        const queueWithJoinedData = queue as QueueWithCustomerAndShop;
+        const queueServices = servicesByQueueId.get(queue.id) || [];
+
+        const queueWithRelations = {
+          ...queue,
+          customer_name: queueWithJoinedData.customers?.name,
+          customer_phone: queueWithJoinedData.customers?.phone,
+          shop_name: queueWithJoinedData.shops?.name,
+          queue_services: queueServices
+        };
+
+        const queueEntity = SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
+        if (queueEntity) {
+          queueEntities.push(queueEntity);
+        }
+      }
+
+      return queueEntities;
+    } catch (error) {
+      if (error instanceof ShopBackendQueueError) {
+        throw error;
+      }
+
+      this.logger.error('Error in getQueuesByIds', { error, ids });
+      throw new ShopBackendQueueError(
+        ShopBackendQueueErrorType.UNKNOWN,
+        'An unexpected error occurred while fetching queues by IDs',
+        'getQueuesByIds',
+        { ids },
+        error
+      );
+    }
+  }
+
+  /**
    * Create a new queue
    * @param queue Queue entity to create
    * @returns Created queue entity

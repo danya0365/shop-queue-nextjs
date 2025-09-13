@@ -75,6 +75,14 @@ export interface ShopBackendQueueRepository {
   getQueueById(id: string): Promise<QueueEntity | null>;
 
   /**
+   * Get multiple queues by IDs
+   * @param ids Array of queue IDs
+   * @returns Array of queue entities (only found queues)
+   * @throws ShopBackendQueueError if the operation fails
+   */
+  getQueuesByIds(ids: string[]): Promise<QueueEntity[]>;
+
+  /**
    * Create a new queue
    * @param queue Queue entity to create
    * @returns Created queue entity
