@@ -36,11 +36,20 @@ export class ShopBackendCategoryError extends Error {
 export interface ShopBackendCategoryRepository {
   /**
    * Get paginated categories data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated categories data
    * @throws ShopBackendCategoryError if the operation fails
    */
-  getPaginatedCategories(params: PaginationParams): Promise<CategoryPaginatedEntity>;
+  getPaginatedCategories(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      isActiveFilter?: boolean;
+      minShopsCount?: number;
+      maxShopsCount?: number;
+      minServicesCount?: number;
+      maxServicesCount?: number;
+    };
+  }): Promise<CategoryPaginatedEntity>;
 
   /**
    * Get category statistics

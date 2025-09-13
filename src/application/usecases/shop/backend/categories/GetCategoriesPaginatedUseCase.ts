@@ -7,6 +7,14 @@ import { ShopBackendCategoryError, ShopBackendCategoryErrorType } from '@/src/do
 export interface GetCategoriesPaginatedUseCaseInput {
   page: number;
   perPage: number;
+  filters?: {
+    searchQuery?: string;
+    isActiveFilter?: boolean;
+    minShopsCount?: number;
+    maxShopsCount?: number;
+    minServicesCount?: number;
+    maxServicesCount?: number;
+  };
 }
 
 export class GetCategoriesPaginatedUseCase implements IUseCase<GetCategoriesPaginatedUseCaseInput, PaginatedCategoriesDTO> {
@@ -15,7 +23,7 @@ export class GetCategoriesPaginatedUseCase implements IUseCase<GetCategoriesPagi
   ) { }
 
   async execute(input: GetCategoriesPaginatedUseCaseInput): Promise<PaginatedCategoriesDTO> {
-    const { page, perPage } = input;
+    const { page, perPage, filters } = input;
 
     // Validate input
     if (page < 1) {
@@ -38,7 +46,8 @@ export class GetCategoriesPaginatedUseCase implements IUseCase<GetCategoriesPagi
 
     const categories = await this.categoryRepository.getPaginatedCategories({
       page,
-      limit: perPage
+      limit: perPage,
+      filters
     });
 
     const categoriesDTO = categories.data.map(category => CategoryMapper.toDTO(category));

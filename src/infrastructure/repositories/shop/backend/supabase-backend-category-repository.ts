@@ -25,17 +25,51 @@ export class SupabaseShopBackendCategoryRepository extends StandardRepository im
 
   /**
    * Get paginated categories data from database
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated categories data
    */
-  async getPaginatedCategories(params: PaginationParams): Promise<CategoryPaginatedEntity> {
+  async getPaginatedCategories(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      isActiveFilter?: boolean;
+      minShopsCount?: number;
+      maxShopsCount?: number;
+      minServicesCount?: number;
+      maxServicesCount?: number;
+    };
+  }): Promise<CategoryPaginatedEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
+
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number | boolean;
+      }> = [];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: 'name',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.isActiveFilter !== undefined) {
+        queryFilters.push({
+          field: 'is_active',
+          operator: FilterOperator.EQ,
+          value: filters.isActiveFilter,
+        });
+      }
 
       // Query to get categories with counts
       const queryOptions: QueryOptions = {
         select: ['*'],
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
         sort: [{ field: 'sort_order', direction: SortDirection.ASC }],
         pagination: {
           limit,
@@ -92,11 +126,39 @@ export class SupabaseShopBackendCategoryRepository extends StandardRepository im
         return SupabaseShopBackendCategoryMapper.toDomain(categoryWithCounts);
       });
 
+      // Apply calculated field filters if specified
+      let filteredCategories = mappedCategories;
+      if (filters?.minShopsCount !== undefined || filters?.maxShopsCount !== undefined || 
+          filters?.minServicesCount !== undefined || filters?.maxServicesCount !== undefined) {
+        filteredCategories = mappedCategories.filter(category => {
+          const shopsCount = category.shopsCount;
+          const servicesCount = category.servicesCount;
+          
+          if (filters?.minShopsCount !== undefined && shopsCount < filters.minShopsCount) {
+            return false;
+          }
+          
+          if (filters?.maxShopsCount !== undefined && shopsCount > filters.maxShopsCount) {
+            return false;
+          }
+          
+          if (filters?.minServicesCount !== undefined && servicesCount < filters.minServicesCount) {
+            return false;
+          }
+          
+          if (filters?.maxServicesCount !== undefined && servicesCount > filters.maxServicesCount) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+
       // Create pagination metadata
       const pagination = SupabaseShopBackendCategoryMapper.createPaginationMeta(page, limit, totalItems);
 
       return {
-        data: mappedCategories,
+        data: filteredCategories,
         pagination
       };
     } catch (error) {

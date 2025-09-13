@@ -8,7 +8,14 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendCategoryRepository } from '@/src/domain/repositories/shop/backend/backend-category-repository';
 
 export interface IShopBackendCategoriesService {
-  getCategoriesData(page?: number, perPage?: number): Promise<CategoriesDataDTO>;
+  getCategoriesData(page?: number, perPage?: number, filters?: {
+    searchQuery?: string;
+    isActiveFilter?: boolean;
+    minShopsCount?: number;
+    maxShopsCount?: number;
+    minServicesCount?: number;
+    maxServicesCount?: number;
+  }): Promise<CategoriesDataDTO>;
   getCategoryById(id: string): Promise<CategoryDTO>;
   createCategory(categoryData: CreateCategoryUseCaseInput): Promise<CategoryDTO>;
   updateCategory(id: string, categoryData: Omit<UpdateCategoryUseCaseInput, 'id'>): Promise<CategoryDTO>;
@@ -30,15 +37,23 @@ export class ShopBackendCategoriesService implements IShopBackendCategoriesServi
    * Get categories data including paginated categories and statistics
    * @param page Page number (default: 1)
    * @param perPage Items per page (default: 10)
+   * @param filters Optional filter parameters
    * @returns Categories data DTO
    */
-  async getCategoriesData(page: number = 1, perPage: number = 10): Promise<CategoriesDataDTO> {
+  async getCategoriesData(page: number = 1, perPage: number = 10, filters?: {
+    searchQuery?: string;
+    isActiveFilter?: boolean;
+    minShopsCount?: number;
+    maxShopsCount?: number;
+    minServicesCount?: number;
+    maxServicesCount?: number;
+  }): Promise<CategoriesDataDTO> {
     try {
-      this.logger.info('Getting categories data', { page, perPage });
+      this.logger.info('Getting categories data', { page, perPage, filters });
 
       // Get categories and stats in parallel
       const [categoriesResult, stats] = await Promise.all([
-        this.getCategoriesPaginatedUseCase.execute({ page, perPage }),
+        this.getCategoriesPaginatedUseCase.execute({ page, perPage, filters }),
         this.getCategoryStatsUseCase.execute()
       ]);
 
