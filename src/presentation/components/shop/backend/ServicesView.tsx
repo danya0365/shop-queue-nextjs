@@ -5,6 +5,7 @@ import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend
 import { useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
 import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 interface ServicesViewProps {
   initialViewModel: ServicesViewModel;
@@ -21,6 +22,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handlePageChange,
     handleNextPage,
     handlePrevPage,
+    handlePerPageChange,
     handleSearchChange,
     handleCategoryChange,
     handleAvailabilityChange,
@@ -488,20 +490,41 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
         </div>
 
         {/* Pagination */}
-        {viewModel.services.pagination.totalPages > 1 && (
+        {viewModel.services.pagination.totalPages > 0 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              แสดง{" "}
-              {(viewModel.services.pagination.currentPage - 1) *
-                viewModel.services.pagination.perPage +
-                1}{" "}
-              -{" "}
-              {Math.min(
-                viewModel.services.pagination.currentPage *
-                  viewModel.services.pagination.perPage,
-                viewModel.services.pagination.totalCount
-              )}{" "}
-              จาก {viewModel.services.pagination.totalCount} รายการ
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                แสดง{" "}
+                {(viewModel.services.pagination.currentPage - 1) *
+                  viewModel.services.pagination.perPage +
+                  1}{" "}
+                -{" "}
+                {Math.min(
+                  viewModel.services.pagination.currentPage *
+                    viewModel.services.pagination.perPage,
+                  viewModel.services.pagination.totalCount
+                )}{" "}
+                จาก {viewModel.services.pagination.totalCount} รายการ
+              </div>
+              
+              {/* Per Page Dropdown */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  แสดงต่อหน้า:
+                </span>
+                <select
+                  value={viewModel.services.pagination.perPage}
+                  onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                  disabled={loading}
+                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {getPaginationConfig().PER_PAGE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">

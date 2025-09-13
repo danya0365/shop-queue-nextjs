@@ -6,6 +6,7 @@ import {
 } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
 import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
 import { useCallback, useEffect, useState } from "react";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 interface CreateServiceDTO {
   name: string;
@@ -42,6 +43,7 @@ interface UseServicesPresenterReturn {
   handlePageChange: (page: number) => void;
   handleNextPage: () => void;
   handlePrevPage: () => void;
+  handlePerPageChange: (perPage: number) => void;
   handleSearchChange: (value: string) => void;
   handleCategoryChange: (value: string) => void;
   handleAvailabilityChange: (value: string) => void;
@@ -68,7 +70,7 @@ export function useServicesPresenter(
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
+  const [perPage, setPerPage] = useState(getPaginationConfig().SERVICES_PER_PAGE);
   const [filters, setFilters] = useState({
     searchQuery: "",
     categoryFilter: "all",
@@ -152,6 +154,12 @@ export function useServicesPresenter(
       setCurrentPage((prev) => prev - 1);
     }
   }, [currentPage]);
+
+  // Per page handler
+  const handlePerPageChange = useCallback((newPerPage: number) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Reset to first page when changing per page
+  }, []);
 
   // Filter handlers
   const handleSearchChange = useCallback((value: string) => {
@@ -421,6 +429,7 @@ export function useServicesPresenter(
     handlePageChange,
     handleNextPage,
     handlePrevPage,
+    handlePerPageChange,
     handleSearchChange,
     handleCategoryChange,
     handleAvailabilityChange,

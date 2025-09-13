@@ -9,6 +9,7 @@ import { Container } from "@/src/di/container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 // Define ViewModel interface
 export interface ServicesViewModel {
@@ -63,7 +64,7 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
   async getViewModel(
     shopId: string,
     page: number = 1,
-    perPage: number = 10,
+    perPage: number = getPaginationConfig().SERVICES_PER_PAGE,
     filters?: {
       searchQuery?: string;
       categoryFilter?: string;

@@ -1,6 +1,7 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
 import { ServicesView } from "@/src/presentation/components/shop/backend/ServicesView";
 import { ServicesPresenterFactory } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -44,7 +45,11 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
 
   try {
     // Get view model from presenter with initial pagination
-    const initialViewModel = await presenter.getViewModel(shopId, 1, 10);
+    const initialViewModel = await presenter.getViewModel(
+    shopId,
+    1,
+    getPaginationConfig().SERVICES_PER_PAGE
+  );
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
