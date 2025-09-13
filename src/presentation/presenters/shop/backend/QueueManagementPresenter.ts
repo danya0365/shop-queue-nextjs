@@ -1,6 +1,7 @@
 import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
+import { IShopBackendQueuesService } from '@/src/application/services/shop/backend/BackendQueuesService';
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
@@ -66,7 +67,10 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    private readonly backendQueuesService: IShopBackendQueuesService
+  ) { 
+    super(logger, shopService, authService, profileService, subscriptionService); 
+  }
 
   async getViewModel(
     shopId: string,
@@ -100,54 +104,57 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
       const usage = await this.getUsageStats(profile.id);
 
-      // Mock data - replace with actual service calls
-      const allQueues = this.getQueueData();
-      const stats = this.calculateStats(allQueues);
+      // Get queues data with pagination and filters from service
+      const queuesData = await this.backendQueuesService.getQueuesData(
+        shopId,
+        page,
+        perPage
+      );
 
-      // Apply filters
-      let filteredQueues = allQueues;
-      if (filters) {
-        if (filters.status && filters.status !== 'all') {
-          filteredQueues = filteredQueues.filter(q => q.status === filters.status);
-        }
-        if (filters.priority && filters.priority !== 'all') {
-          filteredQueues = filteredQueues.filter(q => q.priority === filters.priority);
-        }
-        if (filters.search) {
-          filteredQueues = filteredQueues.filter(q => 
-            q.customerName.toLowerCase().includes(filters.search!.toLowerCase()) ||
-            q.queueNumber.toLowerCase().includes(filters.search!.toLowerCase())
-          );
-        }
-      }
+      const {
+        queues: queueDTOs,
+        stats,
+        totalCount,
+        currentPage,
+        perPage: responsePerPage,
+      } = queuesData;
 
-      // Apply pagination
-      const totalCount = filteredQueues.length;
-      const totalPages = Math.ceil(totalCount / perPage);
-      const currentPage = Math.min(page, totalPages || 1);
-      const startIndex = (currentPage - 1) * perPage;
-      const endIndex = startIndex + perPage;
-      const paginatedQueues = filteredQueues.slice(startIndex, endIndex);
+      // Map QueueDTO to QueueItem
+      const queues: QueueItem[] = queueDTOs.map(queue => ({
+        id: queue.id,
+        queueNumber: queue.queueNumber,
+        customerName: queue.customerName,
+        customerPhone: queue.customerPhone,
+        status: queue.status === 'in_progress' ? 'serving' : 
+                queue.status === 'no_show' ? 'cancelled' : queue.status,
+        priority: queue.priority === 'urgent' ? 'vip' : queue.priority,
+        estimatedTime: queue.estimatedWaitTime,
+        createdAt: queue.createdAt,
+        notes: queue.notes,
+        services: queue.queueServices.map(qs => qs.serviceName),
+      }));
+
+      const totalPages = Math.ceil(totalCount / responsePerPage);
 
       const dailyLimitReached = limits.maxQueuesPerDay !== null && usage.todayQueues >= limits.maxQueuesPerDay;
       const canCreateQueue = !dailyLimitReached;
 
       return {
         queues: {
-          data: paginatedQueues,
+          data: queues,
           pagination: {
             currentPage,
             totalPages,
-            perPage,
+            perPage: responsePerPage,
             totalCount,
             hasNext: currentPage < totalPages,
             hasPrev: currentPage > 1,
           },
         },
-        waitingCount: stats.waiting,
-        servingCount: stats.serving,
-        completedToday: stats.completed,
-        averageWaitTime: 15,
+        waitingCount: stats.waitingQueues,
+        servingCount: stats.inProgressQueues,
+        completedToday: stats.completedToday,
+        averageWaitTime: stats.averageWaitTime,
         filters: {
           status: filters?.status || 'all',
           priority: filters?.priority || 'all',
@@ -249,8 +256,9 @@ abstract class BaseQueueManagementPresenterFactory {
       const authService = container.resolve<IAuthService>('AuthService');
       const profileService = container.resolve<IProfileService>('ProfileService');
       const subscriptionService = container.resolve<ISubscriptionService>('SubscriptionService');
+      const backendQueuesService = container.resolve<IShopBackendQueuesService>('ShopBackendQueuesService');
       
-      return new QueueManagementPresenter(logger, shopService, authService, profileService, subscriptionService);
+      return new QueueManagementPresenter(logger, shopService, authService, profileService, subscriptionService, backendQueuesService);
     } catch (error) {
       throw new Error(
         `Failed to create QueueManagementPresenter: ${
