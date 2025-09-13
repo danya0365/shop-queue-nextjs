@@ -10,6 +10,15 @@ export interface GetCustomersPaginatedUseCaseInput {
   searchTerm?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  filters?: {
+    searchQuery?: string;
+    membershipTierFilter?: string;
+    isActiveFilter?: boolean;
+    minTotalPoints?: number;
+    maxTotalPoints?: number;
+    minTotalQueues?: number;
+    maxTotalQueues?: number;
+  };
 }
 
 export class GetCustomersPaginatedUseCase implements IUseCase<GetCustomersPaginatedUseCaseInput, PaginatedCustomersDTO> {
@@ -40,6 +49,7 @@ export class GetCustomersPaginatedUseCase implements IUseCase<GetCustomersPagina
     const customers = await this.customerRepository.getPaginatedCustomers({
       page,
       limit: perPage,
+      filters: input.filters,
     });
 
     const customersDTO = customers.data.map(customer => CustomerMapper.toDTO(customer));

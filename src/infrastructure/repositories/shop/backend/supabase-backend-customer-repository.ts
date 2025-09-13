@@ -1,5 +1,5 @@
 import { CustomerEntity, CustomerStatsEntity, MembershipTier, PaginatedCustomersEntity } from "@/src/domain/entities/shop/backend/backend-customer.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import { ShopBackendCustomerError, ShopBackendCustomerErrorType, ShopBackendCustomerRepository } from "@/src/domain/repositories/shop/backend/backend-customer-repository";
@@ -29,17 +29,63 @@ export class SupabaseShopBackendCustomerRepository extends StandardRepository im
 
   /**
    * Get paginated customers data from database
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated customers data
    */
-  async getPaginatedCustomers(params: PaginationParams): Promise<PaginatedCustomersEntity> {
+  async getPaginatedCustomers(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      membershipTierFilter?: string;
+      isActiveFilter?: boolean;
+      minTotalPoints?: number;
+      maxTotalPoints?: number;
+      minTotalQueues?: number;
+      maxTotalQueues?: number;
+    };
+  }): Promise<PaginatedCustomersEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
+
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number | boolean;
+      }> = [];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: 'name',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.membershipTierFilter) {
+        queryFilters.push({
+          field: 'membership_tier',
+          operator: FilterOperator.EQ,
+          value: filters.membershipTierFilter,
+        });
+      }
+
+      if (filters?.isActiveFilter !== undefined) {
+        queryFilters.push({
+          field: 'is_active',
+          operator: FilterOperator.EQ,
+          value: filters.isActiveFilter,
+        });
+      }
+
+      // Note: totalPoints and totalQueues filtering will be handled after fetching data
+      // since they are calculated fields from joined tables
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
         select: ['*'],
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
         joins: [
           { table: 'queues', on: { fromField: 'id', toField: 'customer_id' } },
           { table: 'customer_points', on: { fromField: 'id', toField: 'customer_id' } }
@@ -76,11 +122,39 @@ export class SupabaseShopBackendCustomerRepository extends StandardRepository im
         return SupabaseShopBackendCustomerMapper.toDomain(customerWithJoinedFields);
       });
 
+      // Apply calculated field filters if specified
+      let filteredCustomers = mappedCustomers;
+      if (filters?.minTotalPoints !== undefined || filters?.maxTotalPoints !== undefined || 
+          filters?.minTotalQueues !== undefined || filters?.maxTotalQueues !== undefined) {
+        filteredCustomers = mappedCustomers.filter(customer => {
+          const totalPoints = customer.totalPoints;
+          const totalQueues = customer.totalQueues;
+          
+          if (filters?.minTotalPoints !== undefined && totalPoints < filters.minTotalPoints) {
+            return false;
+          }
+          
+          if (filters?.maxTotalPoints !== undefined && totalPoints > filters.maxTotalPoints) {
+            return false;
+          }
+          
+          if (filters?.minTotalQueues !== undefined && totalQueues < filters.minTotalQueues) {
+            return false;
+          }
+          
+          if (filters?.maxTotalQueues !== undefined && totalQueues > filters.maxTotalQueues) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+
       // Create pagination metadata
       const pagination = SupabaseShopBackendCustomerMapper.createPaginationMeta(page, limit, totalItems);
 
       return {
-        data: mappedCustomers,
+        data: filteredCustomers,
         pagination
       };
     } catch (error) {

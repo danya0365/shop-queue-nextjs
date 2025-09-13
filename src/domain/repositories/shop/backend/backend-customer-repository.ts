@@ -36,11 +36,21 @@ export class ShopBackendCustomerError extends Error {
 export interface ShopBackendCustomerRepository {
   /**
    * Get paginated customers data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated customers data
    * @throws ShopBackendCustomerError if the operation fails
    */
-  getPaginatedCustomers(params: PaginationParams): Promise<PaginatedCustomersEntity>;
+  getPaginatedCustomers(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      membershipTierFilter?: string;
+      isActiveFilter?: boolean;
+      minTotalPoints?: number;
+      maxTotalPoints?: number;
+      minTotalQueues?: number;
+      maxTotalQueues?: number;
+    };
+  }): Promise<PaginatedCustomersEntity>;
 
   /**
    * Get customer statistics

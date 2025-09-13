@@ -10,7 +10,15 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendCustomerRepository } from '@/src/domain/repositories/shop/backend/backend-customer-repository';
 
 export interface IShopBackendCustomersService {
-  getCustomersData(page?: number, perPage?: number, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<CustomersDataDTO>;
+  getCustomersData(page?: number, perPage?: number, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc', filters?: {
+    searchQuery?: string;
+    membershipTierFilter?: string;
+    isActiveFilter?: boolean;
+    minTotalPoints?: number;
+    maxTotalPoints?: number;
+    minTotalQueues?: number;
+    maxTotalQueues?: number;
+  }): Promise<CustomersDataDTO>;
   getCustomerById(id: string): Promise<CustomerDTO>;
   createCustomer(data: CreateCustomerUseCaseInput): Promise<CustomerDTO>;
   updateCustomer(id: string, data: Omit<UpdateCustomerUseCaseInput, 'id'>): Promise<CustomerDTO>;
@@ -28,7 +36,15 @@ export class ShopBackendCustomersService implements IShopBackendCustomersService
     private readonly logger: Logger
   ) { }
 
-  async getCustomersData(page: number = 1, perPage: number = 10, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc'): Promise<CustomersDataDTO> {
+  async getCustomersData(page: number = 1, perPage: number = 10, searchTerm?: string, sortBy?: string, sortOrder?: 'asc' | 'desc', filters?: {
+    searchQuery?: string;
+    membershipTierFilter?: string;
+    isActiveFilter?: boolean;
+    minTotalPoints?: number;
+    maxTotalPoints?: number;
+    minTotalQueues?: number;
+    maxTotalQueues?: number;
+  }): Promise<CustomersDataDTO> {
     try {
       // Get customers and stats in parallel
       const [customersResult, stats] = await Promise.all([
@@ -37,7 +53,8 @@ export class ShopBackendCustomersService implements IShopBackendCustomersService
           perPage,
           searchTerm,
           sortBy,
-          sortOrder
+          sortOrder,
+          filters
         }),
         this.getCustomerStatsUseCase.execute()
       ]);
