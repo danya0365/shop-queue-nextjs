@@ -1,11 +1,11 @@
 "use client";
 
+import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
 import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 import { useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
-import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
-import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 interface ServicesViewProps {
   initialViewModel: ServicesViewModel;
@@ -39,7 +39,9 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("");
   const [editingService, setEditingService] = useState<ServiceDTO | null>(null);
-  const [deletingService, setDeletingService] = useState<ServiceDTO | null>(null);
+  const [deletingService, setDeletingService] = useState<ServiceDTO | null>(
+    null
+  );
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -65,11 +67,13 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     try {
       // Add selected icon to form data
       const form = event.target as HTMLFormElement;
-      const iconInput = form.querySelector('input[name="icon"]') as HTMLInputElement;
+      const iconInput = form.querySelector(
+        'input[name="icon"]'
+      ) as HTMLInputElement;
       if (iconInput) {
         iconInput.value = selectedIcon;
       }
-      
+
       await handleUpdateService(event);
       // Close modal and reset icon on success
       setShowEditModal(false);
@@ -119,11 +123,13 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     try {
       // Add selected icon to form data
       const form = event.target as HTMLFormElement;
-      const iconInput = form.querySelector('input[name="icon"]') as HTMLInputElement;
+      const iconInput = form.querySelector(
+        'input[name="icon"]'
+      ) as HTMLInputElement;
       if (iconInput) {
         iconInput.value = selectedIcon;
       }
-      
+
       await handleCreateService(event);
       // Close modal and reset icon on success
       setShowCreateModal(false);
@@ -192,9 +198,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               <p className="text-red-600 dark:text-red-400 font-medium mb-2">
                 เกิดข้อผิดพลาด
               </p>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {error}
-              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
               <button
                 onClick={refreshData}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
@@ -383,9 +387,11 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             รายการบริการ ({viewModel.services.pagination.totalCount})
           </h2>
-          
+
           {/* Active Filters */}
-          {(searchQuery || categoryFilter !== "all" || availabilityFilter !== "all") && (
+          {(searchQuery ||
+            categoryFilter !== "all" ||
+            availabilityFilter !== "all") && (
             <div className="mt-3 flex flex-wrap gap-2">
               {searchQuery && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
@@ -399,12 +405,15 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               )}
               {availabilityFilter !== "all" && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
-                  สถานะ: {availabilityFilter === "available" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                  สถานะ:{" "}
+                  {availabilityFilter === "available"
+                    ? "เปิดใช้งาน"
+                    : "ปิดใช้งาน"}
                 </span>
               )}
             </div>
           )}
-          
+
           {loading && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               กำลังโหลดข้อมูล...
@@ -450,11 +459,15 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">🛎️</div>
                       <p className="text-lg">
-                        {searchQuery || categoryFilter !== "all" || availabilityFilter !== "all"
+                        {searchQuery ||
+                        categoryFilter !== "all" ||
+                        availabilityFilter !== "all"
                           ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีบริการในระบบ"}
                       </p>
-                      {searchQuery || categoryFilter !== "all" || availabilityFilter !== "all" ? (
+                      {searchQuery ||
+                      categoryFilter !== "all" ||
+                      availabilityFilter !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
                         </p>
@@ -514,7 +527,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleEditService(service.id)}
                           disabled={editLoading}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -530,7 +543,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                         >
                           {service.isAvailable ? "ปิดใช้งาน" : "เปิดใช้งาน"}
                         </button>
-                        <button 
+                        <button
                           onClick={() => openDeleteModal(service)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
@@ -553,16 +566,28 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               {/* Info and Per Page Dropdown */}
               <div className="flex flex-col space-y-3">
                 <div className="text-sm text-gray-700 dark:text-gray-300 text-center">
-                  แสดง {(viewModel.services.pagination.currentPage - 1) * viewModel.services.pagination.perPage + 1} - {Math.min(viewModel.services.pagination.currentPage * viewModel.services.pagination.perPage, viewModel.services.pagination.totalCount)} จาก {viewModel.services.pagination.totalCount} รายการ
+                  แสดง{" "}
+                  {(viewModel.services.pagination.currentPage - 1) *
+                    viewModel.services.pagination.perPage +
+                    1}{" "}
+                  -{" "}
+                  {Math.min(
+                    viewModel.services.pagination.currentPage *
+                      viewModel.services.pagination.perPage,
+                    viewModel.services.pagination.totalCount
+                  )}{" "}
+                  จาก {viewModel.services.pagination.totalCount} รายการ
                 </div>
-                
+
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     แสดงต่อหน้า:
                   </span>
                   <select
                     value={viewModel.services.pagination.perPage}
-                    onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -574,7 +599,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   </select>
                 </div>
               </div>
-              
+
               {/* Pagination Controls - Mobile */}
               <div className="flex items-center justify-between">
                 <button
@@ -588,16 +613,21 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 >
                   ก่อนหน้า
                 </button>
-                
+
                 <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  หน้า {currentPage} / {viewModel.services.pagination.totalPages}
+                  หน้า {currentPage} /{" "}
+                  {viewModel.services.pagination.totalPages}
                 </div>
-                
+
                 <button
                   onClick={handleNextPage}
-                  disabled={currentPage >= viewModel.services.pagination.totalPages || loading}
+                  disabled={
+                    currentPage >= viewModel.services.pagination.totalPages ||
+                    loading
+                  }
                   className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
-                    currentPage < viewModel.services.pagination.totalPages && !loading
+                    currentPage < viewModel.services.pagination.totalPages &&
+                    !loading
                       ? "bg-blue-500 text-white hover:bg-blue-600"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                   }`}
@@ -606,7 +636,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 </button>
               </div>
             </div>
-            
+
             {/* Desktop Layout - Horizontal */}
             <div className="hidden sm:flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -623,7 +653,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   )}{" "}
                   จาก {viewModel.services.pagination.totalCount} รายการ
                 </div>
-                
+
                 {/* Per Page Dropdown */}
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -631,7 +661,9 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   </span>
                   <select
                     value={viewModel.services.pagination.perPage}
-                    onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -720,7 +752,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
         )}
       </div>
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มบริการใหม่
@@ -776,7 +808,9 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   ))}
                   <option value="other">อื่นๆ</option>
                 </datalist>
-                <p className="text-gray-500 text-sm mt-1">เลือกจากรายการหรือพิมพ์หมวดหมู่ใหม่</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  เลือกจากรายการหรือพิมพ์หมวดหมู่ใหม่
+                </p>
               </div>
 
               {/* ราคา */}
@@ -835,7 +869,8 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   </div>
                 </div>
                 <p className="text-gray-500 text-sm mt-1">
-                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji หรือพิมพ์เอง
+                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji
+                  หรือพิมพ์เอง
                 </p>
               </div>
 
@@ -880,7 +915,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
 
       {/* Edit Service Modal */}
       {showEditModal && editingService && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -962,7 +997,9 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   ))}
                   <option value="other">อื่นๆ</option>
                 </datalist>
-                <p className="text-gray-500 text-sm mt-1">เลือกจากรายการหรือพิมพ์หมวดหมู่ใหม่</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  เลือกจากรายการหรือพิมพ์หมวดหมู่ใหม่
+                </p>
               </div>
 
               {/* Price */}
@@ -1026,7 +1063,8 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   </div>
                 </div>
                 <p className="text-gray-500 text-sm mt-1">
-                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji หรือพิมพ์เอง
+                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji
+                  หรือพิมพ์เอง
                 </p>
               </div>
 
@@ -1043,7 +1081,10 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     defaultChecked={editingService.isAvailable}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="editIsAvailable" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="editIsAvailable"
+                    className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                  >
                     เปิดใช้งานบริการนี้
                   </label>
                 </div>
@@ -1073,12 +1114,12 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && deletingService && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               ยืนยันการลบบริการ
             </h3>
-            
+
             <div className="mb-6">
               <p className="text-gray-700 dark:text-gray-300 mb-2">
                 คุณต้องการลบบริการนี้ใช่หรือไม่?
@@ -1088,14 +1129,15 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   {deletingService.icon} {deletingService.name}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {deletingService.category} • {deletingService.price.toLocaleString()} บาท
+                  {deletingService.category} •{" "}
+                  {deletingService.price.toLocaleString()} บาท
                 </p>
               </div>
               <p className="text-sm text-red-600 dark:text-red-400 mt-3">
                 ⚠️ การลบบริการจะไม่สามารถกู้คืนได้
               </p>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <button
                 type="button"
