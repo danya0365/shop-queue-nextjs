@@ -113,6 +113,15 @@ export interface PaymentsDataDTO {
 export interface GetPaymentsPaginatedInput {
   page: number;
   limit: number;
+  filters?: {
+    searchQuery?: string;
+    paymentMethodFilter?: string;
+    paymentStatusFilter?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    minAmount?: number;
+    maxAmount?: number;
+  };
 }
 
 export type PaginatedPaymentsDTO = PaginatedResult<PaymentDTO>;

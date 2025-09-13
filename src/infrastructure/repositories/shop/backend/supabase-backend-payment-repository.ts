@@ -52,17 +52,92 @@ export class SupabaseShopBackendPaymentRepository extends StandardRepository imp
 
   /**
    * Get paginated payments with related data using separate queries for better performance
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated payments data
    */
-  async getPaginatedPayments(params: PaginationParams): Promise<PaginatedPaymentsEntity> {
+  async getPaginatedPayments(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      paymentMethodFilter?: string;
+      paymentStatusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minAmount?: number;
+      maxAmount?: number;
+    };
+  }): Promise<PaginatedPaymentsEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
+
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number;
+      }> = [];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: 'queue_number',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.paymentMethodFilter) {
+        queryFilters.push({
+          field: 'payment_method',
+          operator: FilterOperator.EQ,
+          value: filters.paymentMethodFilter,
+        });
+      }
+
+      if (filters?.paymentStatusFilter) {
+        queryFilters.push({
+          field: 'payment_status',
+          operator: FilterOperator.EQ,
+          value: filters.paymentStatusFilter,
+        });
+      }
+
+      if (filters?.dateFrom) {
+        queryFilters.push({
+          field: 'payment_date',
+          operator: FilterOperator.GTE,
+          value: filters.dateFrom,
+        });
+      }
+
+      if (filters?.dateTo) {
+        queryFilters.push({
+          field: 'payment_date',
+          operator: FilterOperator.LTE,
+          value: filters.dateTo,
+        });
+      }
+
+      if (filters?.minAmount !== undefined) {
+        queryFilters.push({
+          field: 'total_amount',
+          operator: FilterOperator.GTE,
+          value: filters.minAmount,
+        });
+      }
+
+      if (filters?.maxAmount !== undefined) {
+        queryFilters.push({
+          field: 'total_amount',
+          operator: FilterOperator.LTE,
+          value: filters.maxAmount,
+        });
+      }
 
       // Step 1: Get payments with pagination
       const paymentsQuery: QueryOptions = {
         select: ['*'],
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
         sort: [{ field: 'created_at', direction: SortDirection.DESC }],
         pagination: {
           limit,

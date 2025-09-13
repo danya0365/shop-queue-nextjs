@@ -33,7 +33,8 @@ export class GetPaymentsPaginatedUseCase implements IUseCase<GetPaymentsPaginate
       // Get paginated payments from repository
       const paginatedPayments = await this.paymentRepository.getPaginatedPayments({
         page: input.page,
-        limit: input.limit
+        limit: input.limit,
+        filters: input.filters
       });
 
       // Use mapper to convert entity to DTO

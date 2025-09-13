@@ -36,11 +36,21 @@ export class ShopBackendPaymentError extends Error {
 export interface ShopBackendPaymentRepository {
   /**
    * Get paginated payments data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated payments data
    * @throws ShopBackendPaymentError if the operation fails
    */
-  getPaginatedPayments(params: PaginationParams): Promise<PaginatedPaymentsEntity>;
+  getPaginatedPayments(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      paymentMethodFilter?: string;
+      paymentStatusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minAmount?: number;
+      maxAmount?: number;
+    };
+  }): Promise<PaginatedPaymentsEntity>;
 
   /**
    * Get payment statistics

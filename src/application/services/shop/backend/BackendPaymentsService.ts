@@ -12,7 +12,19 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendPaymentRepository } from '@/src/domain/repositories/shop/backend/backend-payment-repository';
 
 export interface IShopBackendPaymentsService {
-  getPaymentsData(page?: number, perPage?: number): Promise<PaymentsDataDTO>;
+  getPaymentsData(
+    page?: number,
+    perPage?: number,
+    filters?: {
+      searchQuery?: string;
+      paymentMethodFilter?: string;
+      paymentStatusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minAmount?: number;
+      maxAmount?: number;
+    }
+  ): Promise<PaymentsDataDTO>;
   getPaymentStats(): Promise<PaymentStatsDTO>;
   getPaymentMethodStats(): Promise<PaymentMethodStatsDTO>;
   getPaymentById(id: string): Promise<PaymentDTO>;
@@ -39,13 +51,25 @@ export class ShopBackendPaymentsService implements IShopBackendPaymentsService {
    * @param perPage Items per page (default: 10)
    * @returns Payments data DTO
    */
-  async getPaymentsData(page: number = 1, perPage: number = 10): Promise<PaymentsDataDTO> {
+  async getPaymentsData(
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      paymentMethodFilter?: string;
+      paymentStatusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minAmount?: number;
+      maxAmount?: number;
+    }
+  ): Promise<PaymentsDataDTO> {
     try {
-      this.logger.info('Getting payments data', { page, perPage });
+      this.logger.info('Getting payments data', { page, perPage, filters });
 
       // Get payments and stats in parallel
       const [paymentsResult, stats] = await Promise.all([
-        this.getPaymentsPaginatedUseCase.execute({ page, limit: perPage }),
+        this.getPaymentsPaginatedUseCase.execute({ page, limit: perPage, filters }),
         this.getPaymentStatsUseCase.execute()
       ]);
 
