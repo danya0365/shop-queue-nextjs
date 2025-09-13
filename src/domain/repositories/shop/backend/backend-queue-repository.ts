@@ -36,11 +36,21 @@ export class ShopBackendQueueError extends Error {
 export interface ShopBackendQueueRepository {
   /**
    * Get paginated queues data
-   * @param params Pagination parameters
+   * @param params Pagination parameters with filters
    * @returns Paginated queues data
    * @throws ShopBackendQueueError if the operation fails
    */
-  getPaginatedQueues(params: PaginationParams): Promise<PaginatedQueuesEntity>;
+  getPaginatedQueues(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      statusFilter?: string;
+      priorityFilter?: string;
+      shopId?: string;
+      customerId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    };
+  }): Promise<PaginatedQueuesEntity>;
 
   /**
    * Get queue statistics

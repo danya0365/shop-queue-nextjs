@@ -31,15 +31,25 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
   /**
    * Get paginated queues data from database
-   * @param params Pagination parameters
+   * @param params Pagination parameters with filters
    * @returns Paginated queues data
    */
-  async getPaginatedQueues(params: PaginationParams): Promise<PaginatedQueuesEntity> {
+  async getPaginatedQueues(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      statusFilter?: string;
+      priorityFilter?: string;
+      shopId?: string;
+      customerId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    };
+  }): Promise<PaginatedQueuesEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
 
-      // Use getAdvanced with proper QueryOptions format
+      // Build query options
       const queryOptions: QueryOptions = {
         select: ['*'],
         joins: [
@@ -50,8 +60,66 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         pagination: {
           limit,
           offset
-        }
+        },
+        filters: []
       };
+
+      // Apply filters
+      if (filters?.searchQuery) {
+        queryOptions.filters?.push({
+          field: 'queue_number',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`
+        });
+      }
+
+      if (filters?.statusFilter) {
+        queryOptions.filters?.push({
+          field: 'status',
+          operator: FilterOperator.EQ,
+          value: filters.statusFilter
+        });
+      }
+
+      if (filters?.priorityFilter) {
+        queryOptions.filters?.push({
+          field: 'priority',
+          operator: FilterOperator.EQ,
+          value: filters.priorityFilter
+        });
+      }
+
+      if (filters?.shopId) {
+        queryOptions.filters?.push({
+          field: 'shop_id',
+          operator: FilterOperator.EQ,
+          value: filters.shopId
+        });
+      }
+
+      if (filters?.customerId) {
+        queryOptions.filters?.push({
+          field: 'customer_id',
+          operator: FilterOperator.EQ,
+          value: filters.customerId
+        });
+      }
+
+      if (filters?.dateFrom) {
+        queryOptions.filters?.push({
+          field: 'created_at',
+          operator: FilterOperator.GTE,
+          value: filters.dateFrom
+        });
+      }
+
+      if (filters?.dateTo) {
+        queryOptions.filters?.push({
+          field: 'created_at',
+          operator: FilterOperator.LTE,
+          value: filters.dateTo
+        });
+      }
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const queues = await this.dataSource.getAdvanced<QueueSchemaRecord>(
@@ -87,8 +155,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         return acc;
       }, {} as Record<string, QueueServiceSchemaRecord[]>);
 
-      // Count total items
-      const totalItems = await this.dataSource.count('queues');
+      // Count total items with the same filters
+      const countQueryOptions: QueryOptions = {
+        filters: queryOptions.filters || []
+      };
+      const totalItems = await this.dataSource.count('queues', countQueryOptions);
 
       // Map database results to domain entities
       const mappedQueues = queues.map(queue => {
