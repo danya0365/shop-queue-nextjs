@@ -1,10 +1,14 @@
 import type { CreateQueueInput, PaginatedQueuesDTO, QueueDTO, QueuesDataDTO, QueueStatsDTO, UpdateQueueInput } from '@/src/application/dtos/shop/backend/queues-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
+import { AssignQueueToEmployeeInput, AssignQueueToEmployeeUseCase } from '@/src/application/usecases/shop/backend/queues/AssignQueueToEmployeeUseCase';
 import { CreateQueueUseCase } from '@/src/application/usecases/shop/backend/queues/CreateQueueUseCase';
 import { DeleteQueueUseCase } from '@/src/application/usecases/shop/backend/queues/DeleteQueueUseCase';
 import { GetQueueByIdUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueueByIdUseCase';
+import { GetNextQueueToServeInput, GetNextQueueToServeUseCase } from '@/src/application/usecases/shop/backend/queues/GetNextQueueToServeUseCase';
+import { GetQueuePositionInput, GetQueuePositionUseCase, QueuePositionInfo } from '@/src/application/usecases/shop/backend/queues/GetQueuePositionUseCase';
 import { GetQueuesPaginatedInput, GetQueuesPaginatedUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueuesPaginatedUseCase';
 import { GetQueueStatsUseCase } from '@/src/application/usecases/shop/backend/queues/GetQueueStatsUseCase';
+import { UpdateQueueStatusInput, UpdateQueueStatusUseCase } from '@/src/application/usecases/shop/backend/queues/UpdateQueueStatusUseCase';
 import { UpdateQueueUseCase } from '@/src/application/usecases/shop/backend/queues/UpdateQueueUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
@@ -16,6 +20,12 @@ export interface IShopBackendQueuesService {
   createQueue(queueData: CreateQueueInput): Promise<QueueDTO>;
   updateQueue(id: string, queueData: Omit<UpdateQueueInput, 'id'>): Promise<QueueDTO>;
   deleteQueue(id: string): Promise<boolean>;
+  
+  // Queue Management Methods
+  assignQueueToEmployee(input: AssignQueueToEmployeeInput): Promise<QueueDTO>;
+  updateQueueStatus(input: UpdateQueueStatusInput): Promise<QueueDTO>;
+  getNextQueueToServe(input: GetNextQueueToServeInput): Promise<QueueDTO | null>;
+  getQueuePosition(input: GetQueuePositionInput): Promise<QueuePositionInfo>;
 }
 
 export class ShopBackendQueuesService implements IShopBackendQueuesService {
@@ -26,6 +36,10 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
     private readonly createQueueUseCase: IUseCase<CreateQueueInput, QueueDTO>,
     private readonly updateQueueUseCase: IUseCase<UpdateQueueInput, QueueDTO>,
     private readonly deleteQueueUseCase: IUseCase<string, boolean>,
+    private readonly assignQueueToEmployeeUseCase: IUseCase<AssignQueueToEmployeeInput, QueueDTO>,
+    private readonly updateQueueStatusUseCase: IUseCase<UpdateQueueStatusInput, QueueDTO>,
+    private readonly getNextQueueToServeUseCase: IUseCase<GetNextQueueToServeInput, QueueDTO | null>,
+    private readonly getQueuePositionUseCase: IUseCase<GetQueuePositionInput, QueuePositionInfo>,
     private readonly logger: Logger
   ) { }
 
@@ -136,16 +150,69 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
   /**
    * Delete a queue
    * @param id Queue ID
-   * @returns Success flag
+   * @returns True if deletion was successful
    */
   async deleteQueue(id: string): Promise<boolean> {
     try {
-      this.logger.info('Deleting queue', { id });
-
-      const result = await this.deleteQueueUseCase.execute(id);
-      return result;
+      return await this.deleteQueueUseCase.execute(id);
     } catch (error) {
       this.logger.error('Error deleting queue', { error, id });
+      throw error;
+    }
+  }
+
+  /**
+   * Assign a queue to an employee
+   * @param input Assignment parameters
+   * @returns Updated queue DTO
+   */
+  async assignQueueToEmployee(input: AssignQueueToEmployeeInput): Promise<QueueDTO> {
+    try {
+      return await this.assignQueueToEmployeeUseCase.execute(input);
+    } catch (error) {
+      this.logger.error('Error assigning queue to employee', { error, input });
+      throw error;
+    }
+  }
+
+  /**
+   * Update queue status with business logic validation
+   * @param input Status update parameters
+   * @returns Updated queue DTO
+   */
+  async updateQueueStatus(input: UpdateQueueStatusInput): Promise<QueueDTO> {
+    try {
+      return await this.updateQueueStatusUseCase.execute(input);
+    } catch (error) {
+      this.logger.error('Error updating queue status', { error, input });
+      throw error;
+    }
+  }
+
+  /**
+   * Get the next queue to serve
+   * @param input Parameters for finding next queue
+   * @returns Next queue DTO or null if no queue available
+   */
+  async getNextQueueToServe(input: GetNextQueueToServeInput): Promise<QueueDTO | null> {
+    try {
+      return await this.getNextQueueToServeUseCase.execute(input);
+    } catch (error) {
+      this.logger.error('Error getting next queue to serve', { error, input });
+      throw error;
+    }
+  }
+
+  /**
+   * Get queue position and estimated wait time
+   * @param input Queue position parameters
+   * @returns Queue position information
+   */
+  async getQueuePosition(input: GetQueuePositionInput): Promise<QueuePositionInfo> {
+    try {
+      return await this.getQueuePositionUseCase.execute(input);
+    } catch (error) {
+      this.logger.error('Error getting queue position', { error, input });
       throw error;
     }
   }
@@ -159,7 +226,23 @@ export class ShopBackendQueuesServiceFactory {
     const createQueueUseCase = new CreateQueueUseCase(repository, logger);
     const updateQueueUseCase = new UpdateQueueUseCase(repository, logger);
     const deleteQueueUseCase = new DeleteQueueUseCase(repository, logger);
-    return new ShopBackendQueuesService(getQueuesPaginatedUseCase, getQueueStatsUseCase, getQueueByIdUseCase, createQueueUseCase, updateQueueUseCase, deleteQueueUseCase, logger);
+    const assignQueueToEmployeeUseCase = new AssignQueueToEmployeeUseCase(repository, logger);
+    const updateQueueStatusUseCase = new UpdateQueueStatusUseCase(repository, logger);
+    const getNextQueueToServeUseCase = new GetNextQueueToServeUseCase(repository, logger);
+    const getQueuePositionUseCase = new GetQueuePositionUseCase(repository, logger);
+
+    return new ShopBackendQueuesService(
+      getQueuesPaginatedUseCase,
+      getQueueStatsUseCase,
+      getQueueByIdUseCase,
+      createQueueUseCase,
+      updateQueueUseCase,
+      deleteQueueUseCase,
+      assignQueueToEmployeeUseCase,
+      updateQueueStatusUseCase,
+      getNextQueueToServeUseCase,
+      getQueuePositionUseCase,
+      logger
+    );
   }
 }
-

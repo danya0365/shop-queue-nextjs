@@ -17,6 +17,7 @@ export interface QueueEntity {
   priority: QueuePriority;
   estimatedWaitTime: number; // in minutes
   actualWaitTime?: number; // in minutes
+  servedByEmployeeId?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -51,6 +52,9 @@ export interface UpdateQueueEntity {
   priority?: 'normal' | 'high' | 'urgent';
   estimatedWaitTime?: number;
   actualWaitTime?: number;
+  servedByEmployeeId?: string;
+  calledAt?: string;
+  completedAt?: string;
   notes?: string;
   queueServices?: {
     serviceId: string;

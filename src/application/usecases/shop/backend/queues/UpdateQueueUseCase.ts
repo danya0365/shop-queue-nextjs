@@ -33,6 +33,8 @@ export class UpdateQueueUseCase implements IUseCase<UpdateQueueInput, QueueDTO> 
       // Map input to domain entity format expected by repository
       const queueToUpdate: UpdateQueueEntity = {
         ...queueData,
+        calledAt: queueData.calledAt || undefined,
+        completedAt: queueData.completedAt || undefined,
         queueServices: queueData.queueServices?.map(service => ({
           serviceId: service.serviceId,
           quantity: service.quantity,
