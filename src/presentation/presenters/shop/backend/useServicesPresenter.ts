@@ -56,6 +56,11 @@ interface UseServicesPresenterReturn {
   getServiceById: (id: string) => Promise<ServiceDTO | null>;
   deleteService: (id: string) => Promise<void>;
   handleDeleteService: (id: string) => Promise<void>;
+  actionLoading: {
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
 }
 
 export function useServicesPresenter(
@@ -67,6 +72,11 @@ export function useServicesPresenter(
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState({
+    create: false,
+    update: false,
+    delete: false
+  });
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -129,14 +139,14 @@ export function useServicesPresenter(
     if (!initialViewModel) {
       loadData();
     }
-  }, [loadData, initialViewModel]);
+  }, [shopId, currentPage, perPage, filters, initialViewModel, loadData]); // Add loadData back
 
   // Load data when filters change
   useEffect(() => {
     if (initialViewModel) {
       loadData();
     }
-  }, [filters, loadData, initialViewModel]);
+  }, [shopId, currentPage, perPage, filters, initialViewModel, loadData]); // Add loadData back
 
   // Pagination handlers
   const handlePageChange = useCallback((page: number) => {
@@ -165,16 +175,19 @@ export function useServicesPresenter(
   const handleSearchChange = useCallback((value: string) => {
     setFilters((prev) => ({ ...prev, searchQuery: value }));
     setCurrentPage(1); // Reset to first page when filtering
+    setError(null); // Clear error when searching
   }, []);
 
   const handleCategoryChange = useCallback((value: string) => {
     setFilters((prev) => ({ ...prev, categoryFilter: value }));
     setCurrentPage(1); // Reset to first page when filtering
+    setError(null); // Clear error when filtering
   }, []);
 
   const handleAvailabilityChange = useCallback((value: string) => {
     setFilters((prev) => ({ ...prev, availabilityFilter: value }));
     setCurrentPage(1); // Reset to first page when filtering
+    setError(null); // Clear error when filtering
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -184,9 +197,11 @@ export function useServicesPresenter(
       availabilityFilter: "all",
     });
     setCurrentPage(1);
+    setError(null); // Clear error when resetting filters
   }, []);
 
   const refreshData = useCallback(() => {
+    setError(null); // Clear error when refreshing
     loadData();
   }, [loadData]);
 
@@ -194,6 +209,9 @@ export function useServicesPresenter(
   const createService = useCallback(
     async (data: CreateServiceDTO) => {
       try {
+        setActionLoading(prev => ({ ...prev, create: true }));
+        setError(null); // Clear previous errors
+
         const presenter = await ClientServicesPresenterFactory.create();
 
         await presenter.createService(shopId, data);
@@ -205,6 +223,8 @@ export function useServicesPresenter(
           err instanceof Error ? err.message : "Failed to create service";
         setError(errorMessage);
         throw new Error(errorMessage);
+      } finally {
+        setActionLoading(prev => ({ ...prev, create: false }));
       }
     },
     [shopId, loadData]
@@ -231,6 +251,9 @@ export function useServicesPresenter(
   const updateService = useCallback(
     async (data: UpdateServiceDTO) => {
       try {
+        setActionLoading(prev => ({ ...prev, update: true }));
+        setError(null); // Clear previous errors
+
         const presenter = await ClientServicesPresenterFactory.create();
 
         await presenter.updateService(data.id, {
@@ -250,6 +273,8 @@ export function useServicesPresenter(
           err instanceof Error ? err.message : "Failed to update service";
         setError(errorMessage);
         throw new Error(errorMessage);
+      } finally {
+        setActionLoading(prev => ({ ...prev, update: false }));
       }
     },
     [loadData]
@@ -382,8 +407,8 @@ export function useServicesPresenter(
   const deleteService = useCallback(
     async (id: string) => {
       try {
-        setLoading(true);
-        setError(null);
+        setActionLoading(prev => ({ ...prev, delete: true }));
+        setError(null); // Clear previous errors
 
         const { ClientServicesPresenterFactory } = await import(
           "@/src/presentation/presenters/shop/backend/ServicesPresenter"
@@ -400,7 +425,7 @@ export function useServicesPresenter(
         setError(errorMessage);
         throw err;
       } finally {
-        setLoading(false);
+        setActionLoading(prev => ({ ...prev, delete: false }));
       }
     },
     [loadData]
@@ -442,5 +467,6 @@ export function useServicesPresenter(
     getServiceById,
     deleteService,
     handleDeleteService,
+    actionLoading,
   };
 }

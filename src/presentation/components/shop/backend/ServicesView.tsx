@@ -27,6 +27,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handleCategoryChange,
     handleAvailabilityChange,
     resetFilters,
+    refreshData,
     handleCreateService,
     handleUpdateService,
     getServiceById,
@@ -162,7 +163,8 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
       : `${hours} ชม.`;
   };
 
-  if (loading || !viewModel) {
+  // Show loading only on initial load or when explicitly loading
+  if (loading && !viewModel) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
@@ -172,6 +174,60 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               <p className="text-gray-600 dark:text-gray-400">
                 กำลังโหลดข้อมูลบริการ...
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                เกิดข้อผิดพลาด
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {error}
+              </p>
+              <button
+                onClick={refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have no view model and not loading, show empty state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-6xl mb-4">🔧</div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
+                ยังไม่มีข้อมูลบริการ
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 mb-4">
+                ข้อมูลบริการจะแสดงที่นี่เมื่อมีการสร้างบริการ
+              </p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                สร้างบริการแรก
+              </button>
             </div>
           </div>
         </div>
