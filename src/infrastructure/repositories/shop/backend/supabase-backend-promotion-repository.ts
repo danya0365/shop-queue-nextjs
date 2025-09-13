@@ -47,14 +47,22 @@ export class SupabaseShopBackendPromotionRepository
 
   /**
    * Get paginated promotions data from database
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated promotions data
    */
   async getPaginatedPromotions(
-    params: PaginationParamsWithShopId
+    params: PaginationParamsWithShopId & {
+      filters?: {
+        searchQuery?: string;
+        typeFilter?: string;
+        statusFilter?: string;
+        dateFrom?: string;
+        dateTo?: string;
+      };
+    }
   ): Promise<PaginatedPromotionsEntity> {
     try {
-      const { page = 1, limit = 10, shopId } = params;
+      const { page = 1, limit = 10, shopId, filters } = params;
       const offset = (page - 1) * limit;
 
       if (!shopId) {
@@ -67,16 +75,64 @@ export class SupabaseShopBackendPromotionRepository
         );
       }
 
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number;
+      }> = [
+        {
+          field: "shop_id",
+          operator: FilterOperator.EQ,
+          value: shopId,
+        },
+      ];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: "name",
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.typeFilter) {
+        queryFilters.push({
+          field: "type",
+          operator: FilterOperator.EQ,
+          value: filters.typeFilter,
+        });
+      }
+
+      if (filters?.statusFilter) {
+        queryFilters.push({
+          field: "status",
+          operator: FilterOperator.EQ,
+          value: filters.statusFilter,
+        });
+      }
+
+      if (filters?.dateFrom) {
+        queryFilters.push({
+          field: "start_at",
+          operator: FilterOperator.GTE,
+          value: filters.dateFrom,
+        });
+      }
+
+      if (filters?.dateTo) {
+        queryFilters.push({
+          field: "end_at",
+          operator: FilterOperator.LTE,
+          value: filters.dateTo,
+        });
+      }
+
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
         select: ["*"],
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
+        filters: queryFilters,
         joins: [
           { table: "shops", on: { fromField: "shop_id", toField: "id" } },
           { table: "profiles", on: { fromField: "created_by", toField: "id" } },

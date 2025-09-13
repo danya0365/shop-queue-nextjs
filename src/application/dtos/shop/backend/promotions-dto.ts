@@ -128,6 +128,13 @@ export interface GetPromotionsPaginatedInput {
   shopId: string;
   page: number;
   limit: number;
+  filters?: {
+    searchQuery?: string;
+    typeFilter?: string;
+    statusFilter?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }
 
 export type PaginatedPromotionsDTO = PaginatedResult<PromotionDTO>;

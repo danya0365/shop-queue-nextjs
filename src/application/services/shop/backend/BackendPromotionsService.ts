@@ -22,7 +22,14 @@ export interface IShopBackendPromotionsService {
   getPaginatedPromotionsByShopId(
     shopId: string,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    filters?: {
+      searchQuery?: string;
+      typeFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }
   ): Promise<PaginatedPromotionsDTO>;
   getPromotionsStatsByShopId(shopId: string): Promise<PromotionStatsDTO>;
   getPromotionById(id: string): Promise<PromotionDTO>;
@@ -69,19 +76,28 @@ export class ShopBackendPromotionsService
   async getPaginatedPromotionsByShopId(
     shopId: string,
     page: number = 1,
-    perPage: number = 10
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      typeFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }
   ): Promise<PaginatedPromotionsDTO> {
     try {
       this.logger.info("Getting paginated promotions by shop ID", {
         shopId,
         page,
         perPage,
+        filters,
       });
 
       const result = await this.getPromotionsPaginatedUseCase.execute({
         shopId,
         page,
         limit: perPage,
+        filters,
       });
       return result;
     } catch (error) {

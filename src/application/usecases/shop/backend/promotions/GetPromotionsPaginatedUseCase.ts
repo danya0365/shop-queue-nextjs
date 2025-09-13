@@ -29,10 +29,19 @@ export class GetPromotionsPaginatedUseCase
     input: GetPromotionsPaginatedInput
   ): Promise<PaginatedPromotionsDTO> {
     try {
-      const paginationParams: PaginationParamsWithShopId = {
+      const paginationParams: PaginationParamsWithShopId & {
+        filters?: {
+          searchQuery?: string;
+          typeFilter?: string;
+          statusFilter?: string;
+          dateFrom?: string;
+          dateTo?: string;
+        };
+      } = {
         shopId: input.shopId,
         page: input.page || 1,
         limit: input.limit || 10,
+        filters: input.filters,
       };
 
       const paginatedPromotions =

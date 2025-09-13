@@ -42,12 +42,20 @@ export class ShopBackendPromotionError extends Error {
 export interface ShopBackendPromotionRepository {
   /**
    * Get paginated promotions data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated promotions data
    * @throws ShopBackendPromotionError if the operation fails
    */
   getPaginatedPromotions(
-    params: PaginationParamsWithShopId
+    params: PaginationParamsWithShopId & {
+      filters?: {
+        searchQuery?: string;
+        typeFilter?: string;
+        statusFilter?: string;
+        dateFrom?: string;
+        dateTo?: string;
+      };
+    }
   ): Promise<PaginatedPromotionsEntity>;
 
   /**
