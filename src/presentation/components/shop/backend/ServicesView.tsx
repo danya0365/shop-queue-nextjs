@@ -32,6 +32,8 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handleUpdateService,
     getServiceById,
     handleDeleteService,
+    handleToggleServiceAvailability,
+    actionLoading,
   } = useServicesPresenter(shopId, initialViewModel);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -535,11 +537,20 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                           แก้ไข
                         </button>
                         <button
+                          onClick={() => {
+                            if (service.id) {
+                              handleToggleServiceAvailability(
+                                service.id,
+                                service.isAvailable ?? false
+                              );
+                            }
+                          }}
+                          disabled={actionLoading?.toggle}
                           className={`${
                             service.isAvailable
                               ? "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                               : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                          }`}
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           {service.isAvailable ? "ปิดใช้งาน" : "เปิดใช้งาน"}
                         </button>

@@ -60,7 +60,10 @@ interface UseServicesPresenterReturn {
     create: boolean;
     update: boolean;
     delete: boolean;
+    toggle: boolean;
   };
+  toggleServiceAvailability: (id: string, isAvailable: boolean) => Promise<void>;
+  handleToggleServiceAvailability: (id: string, isAvailable: boolean) => Promise<void>;
 }
 
 export function useServicesPresenter(
@@ -75,7 +78,8 @@ export function useServicesPresenter(
   const [actionLoading, setActionLoading] = useState({
     create: false,
     update: false,
-    delete: false
+    delete: false,
+    toggle: false
   });
 
   // State for pagination and filters
@@ -444,6 +448,64 @@ export function useServicesPresenter(
     [deleteService]
   );
 
+  // Toggle service availability function
+  const toggleServiceAvailability = useCallback(
+    async (id: string, isAvailable: boolean) => {
+      try {
+        setActionLoading(prev => ({ ...prev, toggle: true }));
+        setError(null); // Clear previous errors
+
+        const { ClientServicesPresenterFactory } = await import(
+          "@/src/presentation/presenters/shop/backend/ServicesPresenter"
+        );
+        const presenter = await ClientServicesPresenterFactory.create();
+
+        // Get current service data
+        const service = await presenter.getServiceById(id);
+        if (!service) {
+          throw new Error("ไม่พบบริการที่ต้องการอัปเดต");
+        }
+
+        // Update service with toggled availability
+        const updateData = {
+          name: service.name,
+          description: service.description || null,
+          category: service.category || "",
+          price: service.price,
+          estimatedDuration: service.estimatedDuration || null,
+          icon: service.icon || null,
+          isAvailable: !isAvailable // Toggle the availability
+        };
+
+        await presenter.updateService(id, updateData);
+        
+        // Refresh data after successful toggle
+        await loadData();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "ไม่สามารถอัปเดตสถานะบริการได้";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setActionLoading(prev => ({ ...prev, toggle: false }));
+      }
+    },
+    [loadData]
+  );
+
+  // Handle toggle service availability function
+  const handleToggleServiceAvailability = useCallback(
+    async (id: string, isAvailable: boolean) => {
+      try {
+        await toggleServiceAvailability(id, isAvailable);
+      } catch (err) {
+        // Error is already handled in toggleServiceAvailability
+        throw err;
+      }
+    },
+    [toggleServiceAvailability]
+  );
+
   return {
     viewModel,
     loading,
@@ -467,6 +529,8 @@ export function useServicesPresenter(
     getServiceById,
     deleteService,
     handleDeleteService,
+    toggleServiceAvailability,
+    handleToggleServiceAvailability,
     actionLoading,
   };
 }
