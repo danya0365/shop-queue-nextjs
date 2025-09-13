@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getPaginationConfig } from '@/src/infrastructure/config/PaginationConfig';
 import { useQueueManagementPresenter } from '@/src/presentation/presenters/shop/backend/useQueueManagementPresenter';
 import { QueueLimitsWarning } from './QueueLimitsWarning';
 import { QueueItem, QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
@@ -475,7 +476,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {[5, 10, 20, 50].map((option) => (
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option: number) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
@@ -551,7 +552,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {[5, 10, 20, 50].map((option) => (
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option: number) => (
                       <option key={option} value={option}>
                         {option}
                       </option>

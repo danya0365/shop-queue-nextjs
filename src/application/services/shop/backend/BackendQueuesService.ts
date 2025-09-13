@@ -14,7 +14,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
 
 export interface IShopBackendQueuesService {
-  getQueuesData(shopId: string, page?: number, perPage?: number): Promise<QueuesDataDTO>;
+  getQueuesData(shopId: string, page?: number, perPage?: number, filters?: GetQueuesPaginatedInput['filters']): Promise<QueuesDataDTO>;
   getQueuesPaginated(page: number, limit: number, filters?: GetQueuesPaginatedInput['filters']): Promise<PaginatedQueuesDTO>;
   getQueueById(id: string): Promise<QueueDTO>;
   createQueue(queueData: CreateQueueInput): Promise<QueueDTO>;
@@ -50,13 +50,19 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
    * @param perPage Items per page (default: 10)
    * @returns Queues data DTO
    */
-  async getQueuesData(shopId: string, page: number = 1, perPage: number = 10): Promise<QueuesDataDTO> {
+  async getQueuesData(shopId: string, page: number = 1, perPage: number = 10, filters?: GetQueuesPaginatedInput['filters']): Promise<QueuesDataDTO> {
     try {
-      this.logger.info('Getting queues data', { shopId, page, perPage });
+      this.logger.info('Getting queues data', { shopId, page, perPage, filters });
+
+      // Merge shopId with provided filters
+      const mergedFilters = {
+        ...filters,
+        shopId: shopId
+      };
 
       // Get queues and stats in parallel
       const [queuesResult, stats] = await Promise.all([
-        this.getQueuesPaginatedUseCase.execute({ page, limit: perPage, filters: { shopId } }),
+        this.getQueuesPaginatedUseCase.execute({ page, limit: perPage, filters: mergedFilters }),
         this.getQueueStatsUseCase.execute(shopId)
       ]);
 
@@ -68,7 +74,7 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
         perPage: queuesResult.pagination.itemsPerPage
       };
     } catch (error) {
-      this.logger.error('Error in getQueuesData', { error, shopId, page, perPage });
+      this.logger.error('Error in getQueuesData', { error, shopId, page, perPage, filters });
       throw error;
     }
   }

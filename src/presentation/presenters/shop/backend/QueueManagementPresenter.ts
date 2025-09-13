@@ -118,10 +118,19 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       const usage = await this.getUsageStats(profile.id);
 
       // Get queues data with pagination and filters from service
+      // Transform filters to match the expected format
+      const transformedFilters = filters ? {
+        searchQuery: filters.search,
+        statusFilter: filters.status !== 'all' ? filters.status : undefined,
+        priorityFilter: filters.priority !== 'all' ? filters.priority : undefined,
+        shopId: shopId
+      } : undefined;
+      
       const queuesData = await this.backendQueuesService.getQueuesData(
         shopId,
         page,
-        perPage
+        perPage,
+        transformedFilters
       );
 
       const {
