@@ -1,3 +1,6 @@
+-- Set app password for testing
+set session my.app_password = '12345678';
+
 -- Insert username: mobile_repair_owner for mobile repair shop owner
 INSERT INTO
     auth.users (

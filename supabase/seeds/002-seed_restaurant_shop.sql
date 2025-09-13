@@ -1,3 +1,7 @@
+
+-- Set app password for testing
+set session my.app_password = '12345678';
+
 -- Insert username: restaurant_owner for restaurant owner
 INSERT INTO
     auth.users (

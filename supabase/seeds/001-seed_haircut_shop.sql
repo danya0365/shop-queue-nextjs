@@ -1,3 +1,5 @@
+-- Set app password for testing
+set session my.app_password = '12345678';
 
 -- Insert username: haircut_owner for shop owner
 INSERT INTO

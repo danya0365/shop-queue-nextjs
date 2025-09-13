@@ -1,3 +1,6 @@
+-- Set app password for testing
+set session my.app_password = '12345678';
+
 -- Insert username: spa_owner for spa owner
 INSERT INTO
     auth.users (
