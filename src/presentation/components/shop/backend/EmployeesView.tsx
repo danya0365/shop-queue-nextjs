@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { EmployeesViewModel } from '@/src/presentation/presenters/shop/backend/EmployeesPresenter';
-import { useState } from 'react';
-import { EmployeeLimitsWarning } from './EmployeeLimitsWarning';
+import { EmployeesViewModel } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
+import { useState } from "react";
+import { EmployeeLimitsWarning } from "./EmployeeLimitsWarning";
 
 interface EmployeesViewProps {
   viewModel: EmployeesViewModel;
@@ -13,10 +13,10 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [filters, setFilters] = useState({
-    search: '',
-    status: 'all',
-    department: 'all',
-    position: 'all'
+    search: "",
+    status: "all",
+    department: "all",
+    position: "all",
   });
 
   const handleEmployeeClick = (employee: any) => {
@@ -24,30 +24,82 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
     setShowDetailsModal(true);
   };
 
-  const filteredEmployees = viewModel.employees.filter(employee => {
-    if (filters.status !== 'all' && employee.status !== filters.status) return false;
-    if (filters.department !== 'all' && employee.department !== filters.department) return false;
-    if (filters.position !== 'all' && employee.position !== filters.position) return false;
-    if (filters.search && !employee.name.toLowerCase().includes(filters.search.toLowerCase()) &&
-        !employee.email.toLowerCase().includes(filters.search.toLowerCase())) return false;
+  const filteredEmployees = viewModel.employees.filter((employee) => {
+    if (filters.status !== "all" && employee.status !== filters.status)
+      return false;
+    if (
+      filters.department !== "all" &&
+      employee.department !== filters.department
+    )
+      return false;
+    if (filters.position !== "all" && employee.position !== filters.position)
+      return false;
+    if (
+      filters.search &&
+      !employee.name.toLowerCase().includes(filters.search.toLowerCase()) &&
+      !employee.email.toLowerCase().includes(filters.search.toLowerCase())
+    )
+      return false;
     return true;
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      {/* Development Status Overlay */}
+      <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl">🚧</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              กำลังพัฒนาระบบ
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              เปิดใช้งานเร็วๆ นี้
+            </p>
+          </div>
+          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>กำลังปรับปรุงฟีเจอร์การจัดการพนักงาน</span>
+            </div>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
+              <span>เพิ่มประสิทธิภาพการทำงาน</span>
+            </div>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
+              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
+            </div>
+          </div>
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              ขออภัยในความไม่สะดวก
+              <br />
+              ทีมงานกำลังพัฒนาเพื่อคุณ
+            </p>
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการพนักงาน</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการข้อมูลพนักงานและสิทธิ์การเข้าถึง</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการพนักงาน
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            จัดการข้อมูลพนักงานและสิทธิ์การเข้าถึง
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
             onClick={() => setShowAddModal(true)}
             className={`px-4 py-2 rounded-lg transition-colors ${
-              viewModel.subscription.canAddEmployee 
-                ? 'bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700' 
-                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              viewModel.subscription.canAddEmployee
+                ? "bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700"
+                : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             }`}
             disabled={!viewModel.subscription.canAddEmployee}
           >
@@ -57,7 +109,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       </div>
 
       {/* Employee Limits Warning */}
-      <EmployeeLimitsWarning 
+      <EmployeeLimitsWarning
         limits={viewModel.subscription.limits}
         usage={viewModel.subscription.usage}
         staffLimitReached={viewModel.subscription.staffLimitReached}
@@ -72,7 +124,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <span className="text-2xl">👥</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">พนักงานทั้งหมด</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                พนักงานทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {viewModel.totalEmployees}
               </p>
@@ -86,7 +140,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <span className="text-2xl">✅</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">พนักงานที่ทำงาน</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                พนักงานที่ทำงาน
+              </p>
               <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {viewModel.activeEmployees}
               </p>
@@ -100,7 +156,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <span className="text-2xl">🏖️</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">พนักงานลา</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                พนักงานลา
+              </p>
               <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                 {viewModel.onLeaveEmployees}
               </p>
@@ -114,7 +172,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <span className="text-2xl">💰</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ค่าใช้จ่ายเงินเดือน</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                ค่าใช้จ่ายเงินเดือน
+              </p>
               <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 ฿{viewModel.totalSalaryExpense.toLocaleString()}
               </p>
@@ -126,7 +186,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">ตัวกรอง</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+            ตัวกรอง
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -135,7 +197,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <input
                 type="text"
                 value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, search: e.target.value })
+                }
                 placeholder="ชื่อหรืออีเมล"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -147,7 +211,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               </label>
               <select
                 value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, status: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">สถานะทั้งหมด</option>
@@ -163,12 +229,16 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               </label>
               <select
                 value={filters.department}
-                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, department: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">แผนกทั้งหมด</option>
                 {viewModel.departments.map((dept) => (
-                  <option key={dept.id} value={dept.name}>{dept.name}</option>
+                  <option key={dept.id} value={dept.name}>
+                    {dept.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -215,12 +285,15 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredEmployees.map((employee) => (
-                <tr key={employee.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr
+                  key={employee.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-lg">
-                          {employee.avatar || '👤'}
+                          {employee.avatar || "👤"}
                         </div>
                       </div>
                       <div className="ml-4">
@@ -234,18 +307,28 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-gray-100">{employee.department}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{employee.position}</div>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                      {employee.department}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {employee.position}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      employee.status === 'active' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : employee.status === 'on_leave'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      {employee.status === 'active' ? 'ทำงาน' : employee.status === 'on_leave' ? 'ลา' : 'ไม่ทำงาน'}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        employee.status === "active"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : employee.status === "on_leave"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                      }`}
+                    >
+                      {employee.status === "active"
+                        ? "ทำงาน"
+                        : employee.status === "on_leave"
+                        ? "ลา"
+                        : "ไม่ทำงาน"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
@@ -272,14 +355,22 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
 
         {filteredEmployees.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">👥</div>
+            <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
+              👥
+            </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              {filters.search || filters.status !== 'all' || filters.department !== 'all' || filters.position !== 'all'
+              {filters.search ||
+              filters.status !== "all" ||
+              filters.department !== "all" ||
+              filters.position !== "all"
                 ? "ไม่พบพนักงานที่ตรงกับเงื่อนไขการค้นหา"
                 : "ยังไม่มีพนักงานในระบบ"}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              {filters.search || filters.status !== 'all' || filters.department !== 'all' || filters.position !== 'all'
+              {filters.search ||
+              filters.status !== "all" ||
+              filters.department !== "all" ||
+              filters.position !== "all"
                 ? "ลองปรับเงื่อนไขการค้นหาหรือเพิ่มพนักงานใหม่"
                 : "คลิกปุ่ม 'เพิ่มพนักงาน' เพื่อเริ่มเพิ่มพนักงานคนแรกของคุณ"}
             </p>
@@ -307,49 +398,89 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               {/* Personal Info */}
               <div className="flex items-center space-x-4">
                 <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl">
-                  {selectedEmployee?.avatar || '👤'}
+                  {selectedEmployee?.avatar || "👤"}
                 </div>
                 <div>
-                  <h4 className="text-xl font-medium text-gray-900 dark:text-gray-100">{selectedEmployee?.name}</h4>
-                  <p className="text-gray-600 dark:text-gray-400">{selectedEmployee?.position}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">{selectedEmployee?.department}</p>
+                  <h4 className="text-xl font-medium text-gray-900 dark:text-gray-100">
+                    {selectedEmployee?.name}
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {selectedEmployee?.position}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    {selectedEmployee?.department}
+                  </p>
                 </div>
               </div>
 
               {/* Contact Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">ข้อมูลติดต่อ</h5>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">อีเมล: {selectedEmployee?.email}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">เบอร์โทร: {selectedEmployee?.phone}</p>
+                  <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    ข้อมูลติดต่อ
+                  </h5>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    อีเมล: {selectedEmployee?.email}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    เบอร์โทร: {selectedEmployee?.phone}
+                  </p>
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">ข้อมูลการทำงาน</h5>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">วันที่เริ่มงาน: {selectedEmployee?.hireDate}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">เงินเดือน: ฿{selectedEmployee?.salary?.toLocaleString()}</p>
+                  <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    ข้อมูลการทำงาน
+                  </h5>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    วันที่เริ่มงาน: {selectedEmployee?.hireDate}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    เงินเดือน: ฿{selectedEmployee?.salary?.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
               {/* Today's Performance */}
               <div>
-                <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">ประสิทธิภาพวันนี้</h5>
+                <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  ประสิทธิภาพวันนี้
+                </h5>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">คิวที่ให้บริการ</p>
-                    <p className="text-lg font-bold text-blue-600">{selectedEmployee?.todayStats?.queuesServed || 0}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      คิวที่ให้บริการ
+                    </p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {selectedEmployee?.todayStats?.queuesServed || 0}
+                    </p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">ยอดขาย</p>
-                    <p className="text-lg font-bold text-green-600">฿{selectedEmployee?.todayStats?.revenue?.toLocaleString() || '0'}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      ยอดขาย
+                    </p>
+                    <p className="text-lg font-bold text-green-600">
+                      ฿
+                      {selectedEmployee?.todayStats?.revenue?.toLocaleString() ||
+                        "0"}
+                    </p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">เวลาเฉลี่ย/คิว</p>
-                    <p className="text-lg font-bold text-yellow-600">{selectedEmployee?.todayStats?.averageServiceTime || 0} นาที</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      เวลาเฉลี่ย/คิว
+                    </p>
+                    <p className="text-lg font-bold text-yellow-600">
+                      {selectedEmployee?.todayStats?.averageServiceTime || 0}{" "}
+                      นาที
+                    </p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">คะแนนเฉลี่ย</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      คะแนนเฉลี่ย
+                    </p>
                     <p className="text-lg font-bold text-purple-600">
-                      {selectedEmployee?.todayStats?.rating && selectedEmployee?.todayStats?.rating > 0 ? selectedEmployee.todayStats.rating.toFixed(1) : '-'}
+                      {selectedEmployee?.todayStats?.rating &&
+                      selectedEmployee?.todayStats?.rating > 0
+                        ? selectedEmployee.todayStats.rating.toFixed(1)
+                        : "-"}
                     </p>
                   </div>
                 </div>
@@ -357,19 +488,25 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
 
               {/* Permissions */}
               <div>
-                <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">สิทธิ์การเข้าถึง</h5>
+                <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  สิทธิ์การเข้าถึง
+                </h5>
                 <div className="flex flex-wrap gap-2">
-                  {selectedEmployee?.permissions?.map((permissionId: string) => {
-                    const permission = viewModel.permissions.find(p => p.id === permissionId);
-                    return permission ? (
-                      <span
-                        key={permission.id}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        {permission.name}
-                      </span>
-                    ) : null;
-                  })}
+                  {selectedEmployee?.permissions?.map(
+                    (permissionId: string) => {
+                      const permission = viewModel.permissions.find(
+                        (p) => p.id === permissionId
+                      );
+                      return permission ? (
+                        <span
+                          key={permission.id}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                        >
+                          {permission.name}
+                        </span>
+                      ) : null;
+                    }
+                  )}
                 </div>
               </div>
             </div>
@@ -393,9 +530,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               เพิ่มพนักงานใหม่
             </h3>
-            <p className="text-gray-600 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
+            <p className="text-gray-600 mb-4">ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้</p>
 
             <form className="space-y-4">
               <div>
@@ -435,7 +570,9 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                   <option value="">เลือกแผนก</option>
                   {viewModel.departments.map((dept, index) => (
-                    <option key={index} value={String(dept)}>{String(dept)}</option>
+                    <option key={index} value={String(dept)}>
+                      {String(dept)}
+                    </option>
                   ))}
                 </select>
               </div>
