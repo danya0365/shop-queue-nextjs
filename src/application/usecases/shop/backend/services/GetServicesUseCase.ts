@@ -20,10 +20,14 @@ export class GetServicesUseCase implements IUseCase<GetServicesInputDTO, Service
       throw new Error('Limit must be between 1 and 100');
     }
 
+    if (!filters?.shopId) {
+      throw new Error('Shop ID is required');
+    }
+
     // Get services and stats in parallel
     const [servicesResult, stats] = await Promise.all([
       this.serviceRepository.getPaginatedServices({ page, limit, filters }),
-      this.serviceRepository.getServiceStats()
+      this.serviceRepository.getServiceStats(filters.shopId)
     ]);
 
     return {

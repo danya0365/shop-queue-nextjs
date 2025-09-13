@@ -4,9 +4,21 @@ import {
   ClientServicesPresenterFactory,
   ServicesViewModel,
 } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
+import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
 import { useCallback, useEffect, useState } from "react";
 
 interface CreateServiceDTO {
+  name: string;
+  description: string | null;
+  category: string;
+  price: number;
+  estimatedDuration: number | null;
+  icon: string | null;
+  isAvailable: boolean;
+}
+
+interface UpdateServiceDTO {
+  id: string;
   name: string;
   description: string | null;
   category: string;
@@ -37,6 +49,9 @@ interface UseServicesPresenterReturn {
   refreshData: () => void;
   createService: (data: CreateServiceDTO) => Promise<void>;
   handleCreateService: (event: React.FormEvent) => Promise<void>;
+  updateService: (data: UpdateServiceDTO) => Promise<void>;
+  handleUpdateService: (event: React.FormEvent) => Promise<void>;
+  getServiceById: (id: string) => Promise<ServiceDTO | null>;
 }
 
 export function useServicesPresenter(
@@ -178,6 +193,51 @@ export function useServicesPresenter(
     [shopId, loadData]
   );
 
+  // Get service by ID function
+  const getServiceById = useCallback(
+    async (id: string): Promise<ServiceDTO | null> => {
+      try {
+        const presenter = await ClientServicesPresenterFactory.create();
+        const service = await presenter.getServiceById(id);
+        return service;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to get service";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
+    },
+    []
+  );
+
+  // Update service function
+  const updateService = useCallback(
+    async (data: UpdateServiceDTO) => {
+      try {
+        const presenter = await ClientServicesPresenterFactory.create();
+
+        await presenter.updateService(data.id, {
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          price: data.price,
+          estimatedDuration: data.estimatedDuration,
+          icon: data.icon,
+          isAvailable: data.isAvailable,
+        });
+
+        // Refresh data after updating service
+        await loadData();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to update service";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
+    },
+    [loadData]
+  );
+
   const handleCreateService = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
@@ -236,6 +296,71 @@ export function useServicesPresenter(
     [createService]
   );
 
+  // Handle update service form submission
+  const handleUpdateService = useCallback(
+    async (event: React.FormEvent) => {
+      event.preventDefault();
+
+      // Get form data from the form element
+      const form = event.target as HTMLFormElement;
+      const formData = new FormData(form);
+
+      // Extract form values
+      const id = formData.get("id") as string;
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
+      const category = formData.get("category") as string;
+      const price = parseFloat(formData.get("price") as string);
+      const estimatedDuration = formData.get("estimatedDuration")
+        ? parseInt(formData.get("estimatedDuration") as string)
+        : null;
+      const icon = formData.get("icon") as string;
+      const isAvailable = formData.get("isAvailable") === "on";
+
+      // Validate form data
+      const errors: Record<string, string> = {};
+
+      if (!id) {
+        errors.id = "ไม่พบ ID ของบริการ";
+      }
+
+      if (!name || name.trim().length < 2) {
+        errors.name = "ชื่อบริการต้องมีอย่างน้อย 2 ตัวอักษร";
+      }
+
+      if (!category) {
+        errors.category = "กรุณาเลือกหมวดหมู่";
+      }
+
+      if (price <= 0) {
+        errors.price = "ราคาต้องมากกว่า 0";
+      } else if (price > 999999) {
+        errors.price = "ราคาต้องไม่เกิน 999,999 บาท";
+      }
+
+      // If there are validation errors, throw an error with the validation messages
+      if (Object.keys(errors).length > 0) {
+        throw new Error(Object.values(errors).join(", "));
+      }
+
+      // Create update service data
+      const updateServiceData = {
+        id,
+        name: name.trim(),
+        description: description.trim() || null,
+        category,
+        price,
+        estimatedDuration,
+        icon: icon.trim() || null,
+        isAvailable,
+      };
+
+      // Call updateService
+      await updateService(updateServiceData);
+    },
+    [updateService]
+  );
+
   return {
     viewModel,
     loading,
@@ -253,5 +378,8 @@ export function useServicesPresenter(
     refreshData,
     createService,
     handleCreateService,
+    updateService,
+    handleUpdateService,
+    getServiceById,
   };
 }

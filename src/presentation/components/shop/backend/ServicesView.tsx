@@ -4,6 +4,7 @@ import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/Se
 import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 import { useState } from "react";
 import { EmojiPicker } from "./EmojiPicker";
+import type { ServiceDTO } from "@/src/application/dtos/shop/backend/services-dto";
 
 interface ServicesViewProps {
   initialViewModel: ServicesViewModel;
@@ -24,10 +25,59 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handleCategoryChange,
     resetFilters,
     handleCreateService,
+    handleUpdateService,
+    getServiceById,
   } = useServicesPresenter(shopId, initialViewModel);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("");
+  const [editingService, setEditingService] = useState<ServiceDTO | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+
+  // Handle edit service
+  const handleEditService = async (serviceId: string) => {
+    try {
+      setEditLoading(true);
+      const service = await getServiceById(serviceId);
+      if (service) {
+        setEditingService(service);
+        setSelectedIcon(service.icon || "");
+        setShowEditModal(true);
+      }
+    } catch (error) {
+      console.error("Error fetching service for edit:", error);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  // Handle edit form submission
+  const handleEditServiceLocal = async (event: React.FormEvent) => {
+    try {
+      // Add selected icon to form data
+      const form = event.target as HTMLFormElement;
+      const iconInput = form.querySelector('input[name="icon"]') as HTMLInputElement;
+      if (iconInput) {
+        iconInput.value = selectedIcon;
+      }
+      
+      await handleUpdateService(event);
+      // Close modal and reset icon on success
+      setShowEditModal(false);
+      setEditingService(null);
+      setSelectedIcon("");
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
+  };
+
+  // Close edit modal
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditingService(null);
+    setSelectedIcon("");
+  };
 
   // Handle form submission with error handling
   const handleCreateServiceLocal = async (event: React.FormEvent) => {
@@ -336,7 +386,11 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <button 
+                          onClick={() => handleEditService(service.id)}
+                          disabled={editLoading}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                           แก้ไข
                         </button>
                         <button
@@ -603,6 +657,199 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
                 >
                   บันทึก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Service Modal */}
+      {showEditModal && editingService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                แก้ไขบริการ
+              </h3>
+              <button
+                onClick={closeEditModal}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditServiceLocal} className="space-y-4">
+              {/* Hidden ID field */}
+              <input type="hidden" name="id" value={editingService.id} />
+
+              {/* Service Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ชื่อบริการ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  defaultValue={editingService.name}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น ตัดผมชาย"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  คำอธิบาย
+                </label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  defaultValue={editingService.description || ""}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น ตัดผมชายสไตล์ทันสมัย"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  หมวดหมู่ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="category"
+                  list="category-list"
+                  required
+                  defaultValue={editingService.category || ""}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เลือกหรือพิมพ์หมวดหมู่..."
+                />
+                <datalist id="category-list">
+                  {viewModel.categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                  <option value="other">อื่นๆ</option>
+                </datalist>
+                <p className="text-gray-500 text-sm mt-1">เลือกจากรายการหรือพิมพ์หมวดหมู่ใหม่</p>
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ราคา (บาท) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  required
+                  min="1"
+                  max="999999"
+                  step="1"
+                  defaultValue={editingService.price}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น 150"
+                />
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ระยะเวลา (นาที)
+                </label>
+                <input
+                  type="number"
+                  name="estimatedDuration"
+                  min="1"
+                  max="1440"
+                  step="1"
+                  defaultValue={editingService.estimatedDuration || ""}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="เช่น 30"
+                />
+                <p className="text-gray-500 text-sm mt-1">
+                  ปล่อยว่างไว้ถ้าไม่ระบุระยะเวลา
+                </p>
+              </div>
+
+              {/* Icon */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Icon
+                </label>
+                <div className="flex items-center space-x-3">
+                  <EmojiPicker
+                    selectedEmoji={selectedIcon}
+                    onEmojiSelect={setSelectedIcon}
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="icon"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="เช่น 💇‍♀️, ✂️, 💅"
+                      maxLength={10}
+                      value={selectedIcon}
+                      onChange={(e) => setSelectedIcon(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">
+                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji หรือพิมพ์เอง
+                </p>
+              </div>
+
+              {/* สถานะ */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  สถานะ
+                </label>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isAvailable"
+                    id="editIsAvailable"
+                    defaultChecked={editingService.isAvailable}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="editIsAvailable" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    เปิดใช้งานบริการนี้
+                  </label>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-end space-x-2 pt-4">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {editLoading ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
                 </button>
               </div>
             </form>

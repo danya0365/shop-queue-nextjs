@@ -176,6 +176,58 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       throw error;
     }
   }
+
+  // Get service by ID method
+  async getServiceById(id: string): Promise<ServiceDTO | null> {
+    try {
+      this.logger.info("ServicesPresenter: Getting service by ID", { id });
+
+      const service = await this.backendServicesService.getServiceById(id);
+      return service;
+    } catch (error) {
+      this.logger.error("ServicesPresenter: Error getting service by ID", error);
+      throw error;
+    }
+  }
+
+  // Update service method
+  async updateService(id: string, data: {
+    name: string;
+    description: string | null;
+    category: string;
+    price: number;
+    estimatedDuration: number | null;
+    icon: string | null;
+    isAvailable: boolean;
+  }): Promise<void> {
+    try {
+      this.logger.info("ServicesPresenter: Updating service", {
+        id,
+        serviceName: data.name,
+      });
+
+      await this.backendServicesService.updateService(id, {
+        updates: {
+          name: data.name,
+          slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+          description: data.description || undefined,
+          category: data.category,
+          price: data.price,
+          estimatedDuration: data.estimatedDuration || undefined,
+          icon: data.icon || undefined,
+          isAvailable: data.isAvailable,
+        }
+      });
+
+      this.logger.info("ServicesPresenter: Service updated successfully", {
+        id,
+        serviceName: data.name,
+      });
+    } catch (error) {
+      this.logger.error("ServicesPresenter: Error updating service", error);
+      throw error;
+    }
+  }
 }
 
 // Base Factory class for reducing code duplication
