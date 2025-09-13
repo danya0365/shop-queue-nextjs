@@ -19,7 +19,6 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     loading,
     error,
     currentPage,
-    perPage,
     filters,
     handlePageChange,
     handleNextPage,
@@ -74,7 +73,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     return null;
   }
 
-  const { queues, waitingCount, servingCount, completedToday, averageWaitTime, subscription } = viewModel;
+  const { queues, waitingCount, servingCount, completedToday, subscription } = viewModel;
   const { data: queueData, pagination } = queues;
 
   const getStatusColor = (status: string) => {
@@ -115,17 +114,6 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
       default: return priority;
     }
   };
-
-  const filteredQueues = queueData.filter((queue: QueueItem) => {
-    const matchesStatus = filters.status === 'all' || queue.status === filters.status;
-    const matchesPriority = filters.priority === 'all' || queue.priority === filters.priority;
-    const matchesSearch = filters.search === '' ||
-      queue.customerName.toLowerCase().includes(filters.search.toLowerCase()) ||
-      queue.queueNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-      queue.customerPhone.includes(filters.search);
-
-    return matchesStatus && matchesPriority && matchesSearch;
-  });
 
   // Action handlers
   const handleEditQueue = (queue: QueueItem) => {
@@ -337,11 +325,11 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            รายการคิว ({filteredQueues.length})
+            รายการคิว ({queueData.length})
           </h2>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {filteredQueues.length === 0 ? (
+          {queueData.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-gray-500 dark:text-gray-400">
                 <div className="text-4xl mb-4">📋</div>
@@ -362,7 +350,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
               </div>
             </div>
           ) : (
-            filteredQueues.map((queue: QueueItem) => (
+            queueData.map((queue: QueueItem) => (
             <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">

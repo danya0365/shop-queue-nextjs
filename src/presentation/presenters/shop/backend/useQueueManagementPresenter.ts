@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { QueueManagementPresenter, type QueueManagementViewModel } from './QueueManagementPresenter';
+import type { QueueManagementViewModel } from './QueueManagementPresenter';
 
 export function useQueueManagementPresenter(shopId: string, initialViewModel?: QueueManagementViewModel) {
   const [viewModel, setViewModel] = useState<QueueManagementViewModel | null>(initialViewModel || null);
@@ -65,6 +65,13 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
     }
   }, [loadData, initialViewModel]);
 
+  // Load data when filters change
+  useEffect(() => {
+    if (initialViewModel) {
+      loadData();
+    }
+  }, [shopId, currentPage, perPage, filters, initialViewModel, loadData]);
+
   // Pagination handlers
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -86,16 +93,19 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
   const handleStatusFilter = useCallback((status: string) => {
     setFilters(prev => ({ ...prev, status }));
     setCurrentPage(1); // Reset to first page when filtering
+    setError(null); // Clear error when filtering
   }, []);
 
   const handlePriorityFilter = useCallback((priority: string) => {
     setFilters(prev => ({ ...prev, priority }));
     setCurrentPage(1); // Reset to first page when filtering
+    setError(null); // Clear error when filtering
   }, []);
 
   const handleSearch = useCallback((search: string) => {
     setFilters(prev => ({ ...prev, search }));
     setCurrentPage(1); // Reset to first page when searching
+    setError(null); // Clear error when searching
   }, []);
 
   // Reset filters
