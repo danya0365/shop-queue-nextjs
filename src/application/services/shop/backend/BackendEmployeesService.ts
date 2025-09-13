@@ -11,7 +11,20 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendEmployeeRepository } from '@/src/domain/repositories/shop/backend/backend-employee-repository';
 
 export interface IShopBackendEmployeesService {
-  getEmployeesData(page?: number, perPage?: number): Promise<EmployeesDataDTO>;
+  getEmployeesData(
+    page?: number,
+    perPage?: number,
+    filters?: {
+      searchQuery?: string;
+      departmentFilter?: string;
+      positionFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minSalary?: number;
+      maxSalary?: number;
+    }
+  ): Promise<EmployeesDataDTO>;
   getEmployeeStats(): Promise<EmployeeStatsDTO>;
   getEmployeeById(id: string): Promise<EmployeeDTO>;
   createEmployee(params: CreateEmployeeParams): Promise<EmployeeDTO>;
@@ -36,13 +49,26 @@ export class ShopBackendEmployeesService implements IShopBackendEmployeesService
    * @param perPage Items per page (default: 10)
    * @returns Employees data DTO
    */
-  async getEmployeesData(page: number = 1, perPage: number = 10): Promise<EmployeesDataDTO> {
+  async getEmployeesData(
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      departmentFilter?: string;
+      positionFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minSalary?: number;
+      maxSalary?: number;
+    }
+  ): Promise<EmployeesDataDTO> {
     try {
-      this.logger.info('Getting employees data', { page, perPage });
+      this.logger.info('Getting employees data', { page, perPage, filters });
 
       // Get employees and stats in parallel
       const [employeesResult, stats] = await Promise.all([
-        this.getEmployeesPaginatedUseCase.execute({ page, limit: perPage }),
+        this.getEmployeesPaginatedUseCase.execute({ page, limit: perPage, filters }),
         this.getEmployeeStatsUseCase.execute()
       ]);
 

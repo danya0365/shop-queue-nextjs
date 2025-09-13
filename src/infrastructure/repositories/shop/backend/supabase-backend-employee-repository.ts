@@ -1,5 +1,5 @@
 import { CreateEmployeeEntity, EmployeeEntity, EmployeeStatsEntity, PaginatedEmployeesEntity } from "@/src/domain/entities/shop/backend/backend-employee.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import { ShopBackendEmployeeError, ShopBackendEmployeeErrorType, ShopBackendEmployeeRepository } from "@/src/domain/repositories/shop/backend/backend-employee-repository";
@@ -29,17 +29,101 @@ export class SupabaseShopBackendEmployeeRepository extends StandardRepository im
 
   /**
    * Get paginated employees data from database
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated employees data
    */
-  async getPaginatedEmployees(params: PaginationParams): Promise<PaginatedEmployeesEntity> {
+  async getPaginatedEmployees(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      departmentFilter?: string;
+      positionFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minSalary?: number;
+      maxSalary?: number;
+    };
+  }): Promise<PaginatedEmployeesEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
+
+      // Build filters array
+      const queryFilters: Array<{
+        field: string;
+        operator: FilterOperator;
+        value: string | number;
+      }> = [];
+
+      // Add optional filters
+      if (filters?.searchQuery) {
+        queryFilters.push({
+          field: 'name',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.searchQuery}%`,
+        });
+      }
+
+      if (filters?.departmentFilter) {
+        queryFilters.push({
+          field: 'department_id',
+          operator: FilterOperator.EQ,
+          value: filters.departmentFilter,
+        });
+      }
+
+      if (filters?.positionFilter) {
+        queryFilters.push({
+          field: 'position',
+          operator: FilterOperator.ILIKE,
+          value: `%${filters.positionFilter}%`,
+        });
+      }
+
+      if (filters?.statusFilter) {
+        queryFilters.push({
+          field: 'status',
+          operator: FilterOperator.EQ,
+          value: filters.statusFilter,
+        });
+      }
+
+      if (filters?.dateFrom) {
+        queryFilters.push({
+          field: 'hire_date',
+          operator: FilterOperator.GTE,
+          value: filters.dateFrom,
+        });
+      }
+
+      if (filters?.dateTo) {
+        queryFilters.push({
+          field: 'hire_date',
+          operator: FilterOperator.LTE,
+          value: filters.dateTo,
+        });
+      }
+
+      if (filters?.minSalary !== undefined) {
+        queryFilters.push({
+          field: 'salary',
+          operator: FilterOperator.GTE,
+          value: filters.minSalary,
+        });
+      }
+
+      if (filters?.maxSalary !== undefined) {
+        queryFilters.push({
+          field: 'salary',
+          operator: FilterOperator.LTE,
+          value: filters.maxSalary,
+        });
+      }
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
         select: ['*'],
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
         joins: [
           { table: 'departments', on: { fromField: 'department_id', toField: 'id' } },
           { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }

@@ -89,6 +89,16 @@ export interface EmployeesDataDTO {
 export interface GetEmployeesPaginatedInput {
   page: number;
   limit: number;
+  filters?: {
+    searchQuery?: string;
+    departmentFilter?: string;
+    positionFilter?: string;
+    statusFilter?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    minSalary?: number;
+    maxSalary?: number;
+  };
 }
 
 export type PaginatedEmployeesDTO = PaginatedResult<EmployeeDTO>;

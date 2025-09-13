@@ -17,14 +17,26 @@ export class GetEmployeesPaginatedUseCase implements IUseCase<GetEmployeesPagina
 
   /**
    * Execute the use case to get paginated shops data
-   * @param input Pagination parameters
+   * @param input Pagination and filter parameters
    * @returns Paginated shops data
    */
   async execute(input: GetEmployeesPaginatedInput): Promise<PaginatedEmployeesDTO> {
     try {
-      const paginationParams: PaginationParams = {
+      const paginationParams: PaginationParams & {
+        filters?: {
+          searchQuery?: string;
+          departmentFilter?: string;
+          positionFilter?: string;
+          statusFilter?: string;
+          dateFrom?: string;
+          dateTo?: string;
+          minSalary?: number;
+          maxSalary?: number;
+        };
+      } = {
         page: input.page || 1,
-        limit: input.limit || 10
+        limit: input.limit || 10,
+        filters: input.filters
       };
 
       const paginatedEmployees = await this.employeeRepository.getPaginatedEmployees(paginationParams);

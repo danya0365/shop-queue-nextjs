@@ -36,11 +36,22 @@ export class ShopBackendEmployeeError extends Error {
 export interface ShopBackendEmployeeRepository {
   /**
    * Get paginated employees data
-   * @param params Pagination parameters
+   * @param params Pagination and filter parameters
    * @returns Paginated employees data
    * @throws ShopBackendEmployeeError if the operation fails
    */
-  getPaginatedEmployees(params: PaginationParams): Promise<PaginatedEmployeesEntity>;
+  getPaginatedEmployees(params: PaginationParams & {
+    filters?: {
+      searchQuery?: string;
+      departmentFilter?: string;
+      positionFilter?: string;
+      statusFilter?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      minSalary?: number;
+      maxSalary?: number;
+    };
+  }): Promise<PaginatedEmployeesEntity>;
 
   /**
    * Get employee statistics
