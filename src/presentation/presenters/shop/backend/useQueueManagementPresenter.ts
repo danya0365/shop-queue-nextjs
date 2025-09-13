@@ -17,6 +17,14 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
     search: '' as string,
   });
 
+  // Action loading states
+  const [actionLoading, setActionLoading] = useState({
+    updateStatus: false,
+    updateQueue: false,
+    deleteQueue: false,
+    createQueue: false,
+  });
+
   // Initialize with initial view model if provided
   useEffect(() => {
     if (initialViewModel) {
@@ -105,6 +113,112 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
     loadData();
   }, [loadData]);
 
+  // Update queue status (quick actions)
+  const updateQueueStatus = useCallback(async (queueId: string, newStatus: string) => {
+    try {
+      setActionLoading(prev => ({ ...prev, updateStatus: true }));
+      setError(null);
+      
+      const { ClientQueueManagementPresenterFactory } = await import('./QueueManagementPresenter');
+      const presenter = await ClientQueueManagementPresenterFactory.create();
+      
+      await presenter.updateQueueStatus(shopId, queueId, newStatus as 'waiting' | 'confirmed' | 'serving' | 'completed' | 'cancelled');
+      
+      // Refresh data after update
+      await loadData();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update queue status';
+      setError(errorMessage);
+      console.error('Error updating queue status:', err);
+      throw err; // Re-throw to let UI handle it
+    } finally {
+      setActionLoading(prev => ({ ...prev, updateStatus: false }));
+    }
+  }, [shopId, loadData]);
+
+  // Update queue (edit services, priority, notes)
+  const updateQueue = useCallback(async (queueId: string, data: {
+    services?: string[];
+    priority?: string;
+    notes?: string;
+  }) => {
+    try {
+      setActionLoading(prev => ({ ...prev, updateQueue: true }));
+      setError(null);
+      
+      const { ClientQueueManagementPresenterFactory } = await import('./QueueManagementPresenter');
+      const presenter = await ClientQueueManagementPresenterFactory.create();
+      
+      await presenter.updateQueue(shopId, queueId, data as {
+        services: string[];
+        priority: 'normal' | 'high' | 'vip';
+        notes?: string;
+      });
+      
+      // Refresh data after update
+      await loadData();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update queue';
+      setError(errorMessage);
+      console.error('Error updating queue:', err);
+      throw err; // Re-throw to let UI handle it
+    } finally {
+      setActionLoading(prev => ({ ...prev, updateQueue: false }));
+    }
+  }, [shopId, loadData]);
+
+  // Delete queue (only waiting status)
+  const deleteQueue = useCallback(async (queueId: string) => {
+    try {
+      setActionLoading(prev => ({ ...prev, deleteQueue: true }));
+      setError(null);
+      
+      const { ClientQueueManagementPresenterFactory } = await import('./QueueManagementPresenter');
+      const presenter = await ClientQueueManagementPresenterFactory.create();
+      
+      await presenter.deleteQueue(shopId, queueId);
+      
+      // Refresh data after delete
+      await loadData();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete queue';
+      setError(errorMessage);
+      console.error('Error deleting queue:', err);
+      throw err; // Re-throw to let UI handle it
+    } finally {
+      setActionLoading(prev => ({ ...prev, deleteQueue: false }));
+    }
+  }, [shopId, loadData]);
+
+  // Create new queue (with inline customer creation)
+  const createQueue = useCallback(async (data: {
+    customerName: string;
+    customerPhone: string;
+    services: string[];
+    priority: 'normal' | 'high' | 'vip';
+    notes?: string;
+  }) => {
+    try {
+      setActionLoading(prev => ({ ...prev, createQueue: true }));
+      setError(null);
+      
+      const { ClientQueueManagementPresenterFactory } = await import('./QueueManagementPresenter');
+      const presenter = await ClientQueueManagementPresenterFactory.create();
+      
+      await presenter.createQueue(shopId, data);
+      
+      // Refresh data after creation
+      await loadData();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create queue';
+      setError(errorMessage);
+      console.error('Error creating queue:', err);
+      throw err; // Re-throw to let UI handle it
+    } finally {
+      setActionLoading(prev => ({ ...prev, createQueue: false }));
+    }
+  }, [shopId, loadData]);
+
   return {
     // Data
     viewModel,
@@ -128,6 +242,13 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
     handlePriorityFilter,
     handleSearch,
     resetFilters,
+    
+    // CRUD actions
+    updateQueueStatus,
+    updateQueue,
+    deleteQueue,
+    createQueue,
+    actionLoading,
     
     // Utility
     refreshData,

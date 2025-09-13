@@ -2511,7 +2511,41 @@ export type Database = {
         }
         Relationships: []
       }
-      queue_stats_view: {
+      queue_stats_by_shop_view: {
+        Row: {
+          average_wait_time: number | null
+          cancelled_today: number | null
+          completed_today: number | null
+          in_progress_queues: number | null
+          shop_id: string | null
+          total_queues: number | null
+          waiting_queues: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_stats_summary_view: {
         Row: {
           average_wait_time: number | null
           cancelled_today: number | null

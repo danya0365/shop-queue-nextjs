@@ -1,8 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useQueueManagementPresenter } from '@/src/presentation/presenters/shop/backend/useQueueManagementPresenter';
 import { QueueLimitsWarning } from './QueueLimitsWarning';
 import { QueueItem, QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
+import { EditQueueModal } from './modals/EditQueueModal';
+import { DeleteConfirmationModal } from './modals/DeleteConfirmationModal';
+import { CreateQueueModal } from './modals/CreateQueueModal';
 
 interface QueueManagementViewProps {
   shopId: string;
@@ -25,7 +29,18 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     handleSearch,
     resetFilters,
     refreshData,
+    updateQueueStatus,
+    updateQueue,
+    deleteQueue,
+    createQueue,
+    actionLoading,
   } = useQueueManagementPresenter(shopId, initialViewModel);
+
+  // Modal states
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedQueue, setSelectedQueue] = useState<QueueItem | null>(null);
 
   if (loading) {
     return (
@@ -112,6 +127,66 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     return matchesStatus && matchesPriority && matchesSearch;
   });
 
+  // Action handlers
+  const handleEditQueue = (queue: QueueItem) => {
+    setSelectedQueue(queue);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateQueue = async (queueId: string, data: {
+    services: string[];
+    priority: 'normal' | 'high' | 'vip';
+    notes?: string;
+  }) => {
+    await updateQueue(queueId, {
+      services: data.services,
+      priority: data.priority,
+      notes: data.notes,
+    });
+  };
+
+  const handleStatusUpdate = async (queueId: string, newStatus: string) => {
+    try {
+      await updateQueueStatus(queueId, newStatus);
+    } catch (error) {
+      console.error('Error updating queue status:', error);
+    }
+  };
+
+  const handleDeleteQueue = async (queueId: string) => {
+    setSelectedQueue(queueData.find(q => q.id === queueId) || null);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedQueue) {
+      try {
+        await deleteQueue(selectedQueue.id);
+        setDeleteModalOpen(false);
+        setSelectedQueue(null);
+      } catch (error) {
+        console.error('Error deleting queue:', error);
+      }
+    }
+  };
+
+  const handleCreateQueue = async (data: {
+    customerName: string;
+    customerPhone: string;
+    services: string[];
+    priority: 'normal' | 'high' | 'vip';
+    notes?: string;
+  }) => {
+    try {
+      await createQueue(data);
+      setCreateModalOpen(false);
+      // Success notification could be added here
+    } catch (error) {
+      console.error('Error creating queue:', error);
+      // Error is already handled by the presenter and shown in the UI
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -122,6 +197,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
         </div>
         <div className="flex space-x-4">
           <button
+            onClick={() => setCreateModalOpen(true)}
             className={`px-4 py-2 rounded-lg transition-colors ${subscription.canCreateQueue
                 ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
                 : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
@@ -328,22 +404,47 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                   <div className="flex flex-col space-y-2">
                     {queue.status === 'waiting' && (
                       <>
-                        <button className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
+                        <button 
+                          onClick={() => handleStatusUpdate(queue.id, 'confirmed')}
+                          disabled={actionLoading.updateStatus}
+                          className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
+                        >
                           ยืนยัน
                         </button>
-                        <button className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        <button 
+                          onClick={() => handleStatusUpdate(queue.id, 'serving')}
+                          disabled={actionLoading.updateStatus}
+                          className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
                           เรียก
                         </button>
                       </>
                     )}
                     {queue.status === 'serving' && (
-                      <button className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors">
+                      <button 
+                        onClick={() => handleStatusUpdate(queue.id, 'completed')}
+                        disabled={actionLoading.updateStatus}
+                        className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
+                      >
                         เสร็จสิ้น
                       </button>
                     )}
-                    <button className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors">
+                    <button 
+                      onClick={() => handleEditQueue(queue)}
+                      disabled={actionLoading.updateQueue}
+                      className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                    >
                       แก้ไข
                     </button>
+                    {queue.status === 'waiting' && (
+                      <button 
+                        onClick={() => handleDeleteQueue(queue.id)}
+                        disabled={actionLoading.deleteQueue}
+                        className="bg-red-500 dark:bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50"
+                      >
+                        ลบ
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -417,6 +518,40 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           </div>
         )}
       </div>
+
+      {/* Edit Queue Modal */}
+      <EditQueueModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedQueue(null);
+        }}
+        queue={selectedQueue}
+        onSave={handleUpdateQueue}
+        isLoading={actionLoading.updateQueue}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedQueue(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        queueNumber={selectedQueue?.queueNumber}
+        customerName={selectedQueue?.customerName}
+        isLoading={actionLoading.deleteQueue}
+      />
+
+      {/* Create Queue Modal */}
+      <CreateQueueModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSave={handleCreateQueue}
+        isLoading={actionLoading.createQueue}
+        shopId={shopId}
+      />
     </div>
   );
 }

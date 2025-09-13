@@ -29,17 +29,20 @@ export interface QueueEntity {
  * Input DTO for CreateQueueUseCase
  */
 export interface CreateQueueEntity {
-  customerId: string;
+  customerId?: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
   shopId: string;
   queueNumber: number;
-  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority: 'normal' | 'high' | 'urgent';
+  status: "waiting" | "in_progress" | "completed" | "cancelled" | "no_show";
+  priority: "normal" | "high" | "urgent";
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
     serviceId: string;
     quantity: number;
-    price: number;
+    price?: number;
   }[];
 }
 
@@ -48,8 +51,8 @@ export interface CreateQueueEntity {
  */
 export interface UpdateQueueEntity {
   queueNumber?: number;
-  status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority?: 'normal' | 'high' | 'urgent';
+  status?: "waiting" | "in_progress" | "completed" | "cancelled" | "no_show";
+  priority?: "normal" | "high" | "urgent";
   estimatedWaitTime?: number;
   actualWaitTime?: number;
   servedByEmployeeId?: string;
@@ -59,7 +62,7 @@ export interface UpdateQueueEntity {
   queueServices?: {
     serviceId: string;
     quantity: number;
-    price: number;
+    price?: number;
   }[];
 }
 
@@ -78,20 +81,20 @@ export interface QueueServiceEntity {
  * Queue status enum
  */
 export enum QueueStatus {
-  WAITING = 'waiting',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  NO_SHOW = 'no_show'
+  WAITING = "waiting",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  NO_SHOW = "no_show",
 }
 
 /**
  * Queue priority enum
  */
 export enum QueuePriority {
-  NORMAL = 'normal',
-  HIGH = 'high',
-  URGENT = 'urgent'
+  NORMAL = "normal",
+  HIGH = "high",
+  URGENT = "urgent",
 }
 
 /**

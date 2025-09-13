@@ -889,14 +889,14 @@ GRANT SELECT ON TABLE public.queues TO authenticated;
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR QUEUE OPERATIONS
 -- =============================================================================
-
 -- Function to create a new queue (for customers)
 CREATE OR REPLACE FUNCTION public.create_queue(
   p_shop_id UUID,
   p_customer_name TEXT,
   p_customer_phone TEXT DEFAULT NULL,
   p_customer_email TEXT DEFAULT NULL,
-  p_service_ids UUID[] DEFAULT '{}',
+  p_customer_id UUID DEFAULT NULL,
+  p_services JSONB DEFAULT '[]',
   p_note TEXT DEFAULT NULL,
   p_priority queue_priority DEFAULT 'normal'
 ) RETURNS UUID
@@ -908,8 +908,11 @@ DECLARE
   v_customer_id UUID;
   v_queue_id UUID;
   v_queue_number TEXT;
+  v_service_item JSONB;
   v_service_id UUID;
+  v_service_quantity INTEGER;
   v_service_price DECIMAL(10,2);
+  v_service_duration INTEGER;
   v_total_duration INTEGER := 0;
 BEGIN
   -- Validate shop exists and is active
@@ -925,18 +928,35 @@ BEGIN
     RAISE EXCEPTION 'customer_name_required';
   END IF;
 
-  -- Create or find customer
-  SELECT id INTO v_customer_id
-  FROM public.customers
-  WHERE shop_id = p_shop_id 
-    AND name = TRIM(p_customer_name)
-    AND (p_customer_phone IS NULL OR phone = p_customer_phone)
-  LIMIT 1;
+  -- Validate services parameter structure
+  IF p_services IS NOT NULL AND jsonb_typeof(p_services) != 'array' THEN
+    RAISE EXCEPTION 'services_must_be_array';
+  END IF;
 
-  IF v_customer_id IS NULL THEN
-    INSERT INTO public.customers (shop_id, name, phone, email, is_active)
-    VALUES (p_shop_id, TRIM(p_customer_name), p_customer_phone, p_customer_email, true)
-    RETURNING id INTO v_customer_id;
+  -- Create or find customer
+  IF p_customer_id IS NOT NULL THEN
+    -- Use provided customer_id and validate it exists
+    SELECT id INTO v_customer_id
+    FROM public.customers
+    WHERE id = p_customer_id AND shop_id = p_shop_id AND is_active = true;
+    
+    IF v_customer_id IS NULL THEN
+      RAISE EXCEPTION 'customer_not_found_or_inactive: %', p_customer_id;
+    END IF;
+  ELSE
+    -- Find existing customer by name/phone or create new one
+    SELECT id INTO v_customer_id
+    FROM public.customers
+    WHERE shop_id = p_shop_id 
+      AND name = TRIM(p_customer_name)
+      AND (p_customer_phone IS NULL OR phone = p_customer_phone)
+    LIMIT 1;
+
+    IF v_customer_id IS NULL THEN
+      INSERT INTO public.customers (shop_id, name, phone, email, is_active)
+      VALUES (p_shop_id, TRIM(p_customer_name), p_customer_phone, p_customer_email, true)
+      RETURNING id INTO v_customer_id;
+    END IF;
   END IF;
 
   -- Generate queue number
@@ -948,14 +968,32 @@ BEGIN
   
   v_queue_number := LPAD(v_queue_number::TEXT, 3, '0');
 
-  -- Calculate total estimated duration
-  IF array_length(p_service_ids, 1) > 0 THEN
-    SELECT COALESCE(SUM(estimated_duration), 15)
-    INTO v_total_duration
-    FROM public.services
-    WHERE id = ANY(p_service_ids) AND shop_id = p_shop_id AND is_available = true;
-  ELSE
-    v_total_duration := 15; -- Default duration
+  -- Calculate total estimated duration from services
+  IF p_services IS NOT NULL AND jsonb_array_length(p_services) > 0 THEN
+    FOR v_service_item IN SELECT * FROM jsonb_array_elements(p_services)
+    LOOP
+      -- Validate required fields in service object
+      IF NOT (v_service_item ? 'service_id') THEN
+        RAISE EXCEPTION 'service_id_required_in_services_array';
+      END IF;
+
+      v_service_id := (v_service_item->>'service_id')::UUID;
+      v_service_quantity := COALESCE((v_service_item->>'quantity')::INTEGER, 1);
+      
+      -- Get service duration
+      SELECT estimated_duration INTO v_service_duration
+      FROM public.services
+      WHERE id = v_service_id AND shop_id = p_shop_id AND is_available = true;
+      
+      IF v_service_duration IS NOT NULL THEN
+        v_total_duration := v_total_duration + (v_service_duration * v_service_quantity);
+      END IF;
+    END LOOP;
+  END IF;
+
+  -- Set default duration if no services or total is 0
+  IF v_total_duration = 0 THEN
+    v_total_duration := 15;
   END IF;
 
   -- Create queue
@@ -968,16 +1006,33 @@ BEGIN
   ) RETURNING id INTO v_queue_id;
 
   -- Add services to queue
-  IF array_length(p_service_ids, 1) > 0 THEN
-    FOREACH v_service_id IN ARRAY p_service_ids
+  IF p_services IS NOT NULL AND jsonb_array_length(p_services) > 0 THEN
+    FOR v_service_item IN SELECT * FROM jsonb_array_elements(p_services)
     LOOP
-      SELECT price INTO v_service_price
-      FROM public.services
-      WHERE id = v_service_id AND shop_id = p_shop_id AND is_available = true;
+      v_service_id := (v_service_item->>'service_id')::UUID;
+      v_service_quantity := COALESCE((v_service_item->>'quantity')::INTEGER, 1);
       
+      -- Use provided price or get from database
+      IF v_service_item ? 'price' AND (v_service_item->>'price') IS NOT NULL THEN
+        v_service_price := (v_service_item->>'price')::DECIMAL(10,2);
+      ELSE
+        SELECT price INTO v_service_price
+        FROM public.services
+        WHERE id = v_service_id AND shop_id = p_shop_id AND is_available = true;
+      END IF;
+      
+      -- Validate service exists and is available
+      IF NOT EXISTS (
+        SELECT 1 FROM public.services
+        WHERE id = v_service_id AND shop_id = p_shop_id AND is_available = true
+      ) THEN
+        RAISE EXCEPTION 'service_not_found_or_unavailable: %', v_service_id;
+      END IF;
+      
+      -- Insert queue service
       IF v_service_price IS NOT NULL THEN
         INSERT INTO public.queue_services (queue_id, service_id, quantity, price)
-        VALUES (v_queue_id, v_service_id, 1, v_service_price);
+        VALUES (v_queue_id, v_service_id, v_service_quantity, v_service_price);
       END IF;
     END LOOP;
   END IF;

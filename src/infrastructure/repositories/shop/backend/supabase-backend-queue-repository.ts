@@ -1,11 +1,32 @@
-import { CreateQueueEntity, PaginatedQueuesEntity, QueueEntity, QueueStatsEntity, UpdateQueueEntity } from "@/src/domain/entities/shop/backend/backend-queue.entity";
-import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  CreateQueueEntity,
+  PaginatedQueuesEntity,
+  QueueEntity,
+  QueueStatsEntity,
+  UpdateQueueEntity,
+} from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendQueueError, ShopBackendQueueErrorType, ShopBackendQueueRepository } from "@/src/domain/repositories/shop/backend/backend-queue-repository";
+import {
+  ShopBackendQueueError,
+  ShopBackendQueueErrorType,
+  ShopBackendQueueRepository,
+} from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 import { SupabaseShopBackendQueueMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-queue.mapper";
-import { QueueSchema, QueueServiceSchema, QueueStatsSchema, ServiceSchema } from "@/src/infrastructure/schemas/shop/backend/queue.schema";
+import {
+  QueueSchema,
+  QueueServiceSchema,
+  QueueStatsSchema,
+  ServiceSchema,
+} from "@/src/infrastructure/schemas/shop/backend/queue.schema";
 import { StandardRepository } from "../../base/standard-repository";
+import { CustomerSchema } from "@/src/infrastructure/schemas/backend/customer.schema";
 
 // Extended types for joined data
 type QueueWithCustomerAndShop = QueueSchema & {
@@ -21,11 +42,11 @@ type QueueStatsSchemaRecord = Record<string, unknown> & QueueStatsSchema;
  * Supabase implementation of the queue repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendQueueRepository extends StandardRepository implements ShopBackendQueueRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendQueueRepository
+  extends StandardRepository
+  implements ShopBackendQueueRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendQueue");
   }
 
@@ -34,104 +55,109 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
    * @param params Pagination parameters with filters
    * @returns Paginated queues data
    */
-  async getPaginatedQueues(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      statusFilter?: string;
-      priorityFilter?: string;
-      shopId?: string;
-      customerId?: string;
-      employeeId?: string;
-      serviceId?: string;
-      dateFrom?: string;
-      dateTo?: string;
-      completionDateFrom?: string;
-      completionDateTo?: string;
-      minEstimatedWaitTime?: number;
-      maxEstimatedWaitTime?: number;
-    };
-  }): Promise<PaginatedQueuesEntity> {
+  async getPaginatedQueues(
+    params: PaginationParams & {
+      filters?: {
+        searchQuery?: string;
+        statusFilter?: string;
+        priorityFilter?: string;
+        shopId?: string;
+        customerId?: string;
+        employeeId?: string;
+        serviceId?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        completionDateFrom?: string;
+        completionDateTo?: string;
+        minEstimatedWaitTime?: number;
+        maxEstimatedWaitTime?: number;
+      };
+    }
+  ): Promise<PaginatedQueuesEntity> {
     try {
       const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
 
       // Build query options
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
+          {
+            table: "customers",
+            on: { fromField: "customer_id", toField: "id" },
+          },
+          { table: "shops", on: { fromField: "shop_id", toField: "id" } },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
+          offset,
         },
-        filters: []
+        filters: [],
       };
 
       // Apply filters
       if (filters?.searchQuery) {
         queryOptions.filters?.push({
-          field: 'queue_number',
+          field: "queue_number",
           operator: FilterOperator.ILIKE,
-          value: `%${filters.searchQuery}%`
+          value: `%${filters.searchQuery}%`,
         });
       }
 
       if (filters?.statusFilter) {
         queryOptions.filters?.push({
-          field: 'status',
+          field: "status",
           operator: FilterOperator.EQ,
-          value: filters.statusFilter
+          value: filters.statusFilter,
         });
       }
 
       if (filters?.priorityFilter) {
         queryOptions.filters?.push({
-          field: 'priority',
+          field: "priority",
           operator: FilterOperator.EQ,
-          value: filters.priorityFilter
+          value: filters.priorityFilter,
         });
       }
 
       if (filters?.shopId) {
         queryOptions.filters?.push({
-          field: 'shop_id',
+          field: "shop_id",
           operator: FilterOperator.EQ,
-          value: filters.shopId
+          value: filters.shopId,
         });
       }
 
       if (filters?.customerId) {
         queryOptions.filters?.push({
-          field: 'customer_id',
+          field: "customer_id",
           operator: FilterOperator.EQ,
-          value: filters.customerId
+          value: filters.customerId,
         });
       }
 
       if (filters?.dateFrom) {
         queryOptions.filters?.push({
-          field: 'created_at',
+          field: "created_at",
           operator: FilterOperator.GTE,
-          value: filters.dateFrom
+          value: filters.dateFrom,
         });
       }
 
       if (filters?.dateTo) {
         queryOptions.filters?.push({
-          field: 'created_at',
+          field: "created_at",
           operator: FilterOperator.LTE,
-          value: filters.dateTo
+          value: filters.dateTo,
         });
       }
 
       if (filters?.employeeId) {
         queryOptions.filters?.push({
-          field: 'served_by_employee_id',
+          field: "served_by_employee_id",
           operator: FilterOperator.EQ,
-          value: filters.employeeId
+          value: filters.employeeId,
         });
       }
 
@@ -142,43 +168,42 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       if (filters?.completionDateFrom) {
         queryOptions.filters?.push({
-          field: 'completed_at',
+          field: "completed_at",
           operator: FilterOperator.GTE,
-          value: filters.completionDateFrom
+          value: filters.completionDateFrom,
         });
       }
 
       if (filters?.completionDateTo) {
         queryOptions.filters?.push({
-          field: 'completed_at',
+          field: "completed_at",
           operator: FilterOperator.LTE,
-          value: filters.completionDateTo
+          value: filters.completionDateTo,
         });
       }
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const queues = await this.dataSource.getAdvanced<QueueSchemaRecord>(
-        'queues',
+        "queues",
         queryOptions
       );
 
       // Get queue services for each queue
-      const queueIds = queues.map(queue => queue.id);
+      const queueIds = queues.map((queue) => queue.id);
       const queueServicesOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'services', on: { fromField: 'service_id', toField: 'id' } }
+          { table: "services", on: { fromField: "service_id", toField: "id" } },
         ],
         filters: [
-          { field: 'queue_id', operator: FilterOperator.IN, value: queueIds }
-        ]
+          { field: "queue_id", operator: FilterOperator.IN, value: queueIds },
+        ],
       };
 
       // Get all queue services in a single query
-      const queueServices = await this.dataSource.getAdvanced<QueueServiceSchemaRecord & { services: ServiceSchema }>(
-        'queue_services',
-        queueServicesOptions
-      );
+      const queueServices = await this.dataSource.getAdvanced<
+        QueueServiceSchemaRecord & { services: ServiceSchema }
+      >("queue_services", queueServicesOptions);
 
       // Group queue services by queue_id
       const servicesByQueueId = queueServices.reduce((acc, queueService) => {
@@ -192,12 +217,15 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       // Count total items with the same filters
       const countQueryOptions: QueryOptions = {
-        filters: queryOptions.filters || []
+        filters: queryOptions.filters || [],
       };
-      const totalItems = await this.dataSource.count('queues', countQueryOptions);
+      const totalItems = await this.dataSource.count(
+        "queues",
+        countQueryOptions
+      );
 
       // Map database results to domain entities
-      let mappedQueues = queues.map(queue => {
+      let mappedQueues = queues.map((queue) => {
         // Handle joined data from customers and shops tables using our QueueWithCustomerAndShop type
         const queueWithJoinedData = queue as QueueWithCustomerAndShop;
 
@@ -209,47 +237,53 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
           customer_name: queueWithJoinedData.customers?.name,
           customer_phone: queueWithJoinedData.customers?.phone,
           shop_name: queueWithJoinedData.shops?.name,
-          queue_services: services
+          queue_services: services,
         };
         return SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
       });
 
       // Apply post-query filters for calculated fields and complex filtering
       if (filters?.serviceId) {
-        mappedQueues = mappedQueues.filter(queue => 
-          queue.queueServices.some(service => service.serviceId === filters.serviceId)
+        mappedQueues = mappedQueues.filter((queue) =>
+          queue.queueServices.some(
+            (service) => service.serviceId === filters.serviceId
+          )
         );
       }
 
       if (filters?.minEstimatedWaitTime !== undefined) {
-        mappedQueues = mappedQueues.filter(queue => 
-          queue.estimatedWaitTime >= filters.minEstimatedWaitTime!
+        mappedQueues = mappedQueues.filter(
+          (queue) => queue.estimatedWaitTime >= filters.minEstimatedWaitTime!
         );
       }
 
       if (filters?.maxEstimatedWaitTime !== undefined) {
-        mappedQueues = mappedQueues.filter(queue => 
-          queue.estimatedWaitTime <= filters.maxEstimatedWaitTime!
+        mappedQueues = mappedQueues.filter(
+          (queue) => queue.estimatedWaitTime <= filters.maxEstimatedWaitTime!
         );
       }
 
       // Create pagination metadata
-      const pagination = SupabaseShopBackendQueueMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseShopBackendQueueMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
         data: mappedQueues,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof ShopBackendQueueError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedQueues', { error });
+      this.logger.error("Error in getPaginatedQueues", { error });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queues',
-        'getPaginatedQueues',
+        "An unexpected error occurred while fetching queues",
+        "getPaginatedQueues",
         {},
         error
       );
@@ -265,13 +299,13 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
           {
-            field: 'shop_id',
+            field: "shop_id",
             operator: FilterOperator.EQ,
-            value: shopId
-          }
+            value: shopId,
+          },
         ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
@@ -279,10 +313,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       // Assuming a view exists for queue statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<QueueStatsSchemaRecord>(
-        'queue_stats_by_shop_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<QueueStatsSchemaRecord>(
+          "queue_stats_by_shop_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -292,7 +327,7 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
           inProgressQueues: 0,
           completedToday: 0,
           cancelledToday: 0,
-          averageWaitTime: 0
+          averageWaitTime: 0,
         };
       }
 
@@ -304,11 +339,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in getQueueStats', { error });
+      this.logger.error("Error in getQueueStats", { error });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queue statistics',
-        'getQueueStats',
+        "An unexpected error occurred while fetching queue statistics",
+        "getQueueStats",
         {},
         error
       );
@@ -325,14 +360,17 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const queue = await this.dataSource.getById<QueueSchemaRecord>(
-        'queues',
+        "queues",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
-            { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
-          ]
+            {
+              table: "customers",
+              on: { fromField: "customer_id", toField: "id" },
+            },
+            { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+          ],
         }
       );
 
@@ -342,19 +380,20 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       // Get queue services
       const queueServicesOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'services', on: { fromField: 'service_id', toField: 'id' } }
+          { table: "services", on: { fromField: "service_id", toField: "id" } },
         ],
         filters: [
-          { field: 'queue_id', operator: FilterOperator.EQ, value: id }
-        ]
+          { field: "queue_id", operator: FilterOperator.EQ, value: id },
+        ],
       };
 
-      const services = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
-        'queue_services',
-        queueServicesOptions
-      );
+      const services =
+        await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+          "queue_services",
+          queueServicesOptions
+        );
 
       // Handle joined data from customers and shops tables using our QueueWithCustomerAndShop type
       const queueWithJoinedData = queue as QueueWithCustomerAndShop;
@@ -364,7 +403,7 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         customer_name: queueWithJoinedData.customers?.name,
         customer_phone: queueWithJoinedData.customers?.phone,
         shop_name: queueWithJoinedData.shops?.name,
-        queue_services: services
+        queue_services: services,
       };
 
       // Map database result to domain entity
@@ -374,11 +413,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in getQueueById', { error, id });
+      this.logger.error("Error in getQueueById", { error, id });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queue',
-        'getQueueById',
+        "An unexpected error occurred while fetching queue",
+        "getQueueById",
         { id },
         error
       );
@@ -397,18 +436,19 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       }
 
       const queuesOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
+          {
+            table: "customers",
+            on: { fromField: "customer_id", toField: "id" },
+          },
+          { table: "shops", on: { fromField: "shop_id", toField: "id" } },
         ],
-        filters: [
-          { field: 'id', operator: FilterOperator.IN, value: ids }
-        ]
+        filters: [{ field: "id", operator: FilterOperator.IN, value: ids }],
       };
 
       const queues = await this.dataSource.getAdvanced<QueueSchemaRecord>(
-        'queues',
+        "queues",
         queuesOptions
       );
 
@@ -417,25 +457,26 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       }
 
       // Get queue services for all found queues
-      const queueIds = queues.map(q => q.id);
+      const queueIds = queues.map((q) => q.id);
       const queueServicesOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'services', on: { fromField: 'service_id', toField: 'id' } }
+          { table: "services", on: { fromField: "service_id", toField: "id" } },
         ],
         filters: [
-          { field: 'queue_id', operator: FilterOperator.IN, value: queueIds }
-        ]
+          { field: "queue_id", operator: FilterOperator.IN, value: queueIds },
+        ],
       };
 
-      const services = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
-        'queue_services',
-        queueServicesOptions
-      );
+      const services =
+        await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+          "queue_services",
+          queueServicesOptions
+        );
 
       // Group services by queue_id
       const servicesByQueueId = new Map<string, QueueServiceSchemaRecord[]>();
-      services.forEach(service => {
+      services.forEach((service) => {
         const queueId = service.queue_id;
         if (!servicesByQueueId.has(queueId)) {
           servicesByQueueId.set(queueId, []);
@@ -454,10 +495,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
           customer_name: queueWithJoinedData.customers?.name,
           customer_phone: queueWithJoinedData.customers?.phone,
           shop_name: queueWithJoinedData.shops?.name,
-          queue_services: queueServices
+          queue_services: queueServices,
         };
 
-        const queueEntity = SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
+        const queueEntity =
+          SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
         if (queueEntity) {
           queueEntities.push(queueEntity);
         }
@@ -469,11 +511,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in getQueuesByIds', { error, ids });
+      this.logger.error("Error in getQueuesByIds", { error, ids });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queues by IDs',
-        'getQueuesByIds',
+        "An unexpected error occurred while fetching queues by IDs",
+        "getQueuesByIds",
         { ids },
         error
       );
@@ -485,47 +527,72 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
    * @param queue Queue entity to create
    * @returns Created queue entity
    */
-  async createQueue(queue: Omit<CreateQueueEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<QueueEntity> {
+  async createQueue(
+    queue: Omit<CreateQueueEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<QueueEntity> {
     try {
       // Convert domain entity to database schema
       const queueSchema = {
         customer_id: queue.customerId,
+        customer_name: queue.customerName,
+        customer_phone: queue.customerPhone,
+        customer_email: queue.customerEmail,
         shop_id: queue.shopId,
         queue_number: queue.queueNumber.toString(),
         status: queue.status,
         priority: queue.priority,
         estimated_duration: queue.estimatedWaitTime,
-        note: queue.notes || null
+        note: queue.notes || null,
       };
 
       // Insert queue in database
-      const createdQueue = await this.dataSource.insert<QueueSchemaRecord>(
-        'queues',
-        queueSchema
+      // call rpc function to create queue
+      const createdQueue = await this.dataSource.callRpc<QueueSchemaRecord>(
+        "create_queue",
+        {
+          p_shop_id: queueSchema.shop_id,
+          p_customer_name: queueSchema.customer_name,
+          p_customer_phone: queueSchema.customer_phone,
+          p_customer_email: queueSchema.customer_email,
+          p_priority: queueSchema.priority,
+          p_note: queueSchema.note,
+          p_services: queue.queueServices.map((service) => {
+            return {
+              service_id: service.serviceId,
+              quantity: service.quantity,
+              price: service.price,
+            };
+          }),
+        }
       );
+
+      // const createdQueue = await this.dataSource.insert<QueueSchemaRecord>(
+      //   'queues',
+      //   queueSchema
+      // );
 
       if (!createdQueue) {
         throw new ShopBackendQueueError(
           ShopBackendQueueErrorType.OPERATION_FAILED,
-          'Failed to create queue',
-          'createQueue',
+          "Failed to create queue",
+          "createQueue",
           { queue }
         );
       }
 
       // Create queue services
-      const queueServices = queue.queueServices.map(service => ({
+      const queueServices = queue.queueServices.map((service) => ({
         queue_id: createdQueue.id,
         service_id: service.serviceId,
         quantity: service.quantity,
-        price: service.price
+        price: service.price,
       }));
 
       // Create queue services in database - one by one since createMany doesn't exist
       if (queueServices.length > 0) {
         for (const service of queueServices) {
           await this.dataSource.insert<QueueServiceSchemaRecord>(
-            'queue_services',
+            "queue_services",
             service
           );
         }
@@ -538,11 +605,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in createQueue', { error, queue });
+      this.logger.error("Error in createQueue", { error, queue });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while creating queue',
-        'createQueue',
+        "An unexpected error occurred while creating queue",
+        "createQueue",
         { queue },
         error
       );
@@ -555,7 +622,10 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
    * @param queue Queue data to update
    * @returns Updated queue entity
    */
-  async updateQueue(id: string, queue: Partial<UpdateQueueEntity>): Promise<QueueEntity> {
+  async updateQueue(
+    id: string,
+    queue: Partial<UpdateQueueEntity>
+  ): Promise<QueueEntity> {
     try {
       // Check if queue exists
       const existingQueue = await this.getQueueById(id);
@@ -563,7 +633,7 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw new ShopBackendQueueError(
           ShopBackendQueueErrorType.NOT_FOUND,
           `Queue with ID ${id} not found`,
-          'updateQueue',
+          "updateQueue",
           { id, queue }
         );
       }
@@ -573,12 +643,13 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       if (queue.status !== undefined) queueSchema.status = queue.status;
       if (queue.priority !== undefined) queueSchema.priority = queue.priority;
-      if (queue.estimatedWaitTime !== undefined) queueSchema.estimated_duration = queue.estimatedWaitTime;
+      if (queue.estimatedWaitTime !== undefined)
+        queueSchema.estimated_duration = queue.estimatedWaitTime;
       if (queue.notes !== undefined) queueSchema.note = queue.notes || null;
 
       // Update queue in database
       await this.dataSource.update<QueueSchemaRecord>(
-        'queues',
+        "queues",
         id,
         queueSchema
       );
@@ -586,29 +657,32 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       // Update queue services if provided
       if (queue.queueServices && queue.queueServices.length > 0) {
         // Delete existing queue services
-        const existingServices = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
-          'queue_services',
-          {
-            filters: [{ field: 'queue_id', operator: FilterOperator.EQ, value: id }],
-            select: ['id']
-          }
-        );
+        const existingServices =
+          await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+            "queue_services",
+            {
+              filters: [
+                { field: "queue_id", operator: FilterOperator.EQ, value: id },
+              ],
+              select: ["id"],
+            }
+          );
 
         for (const service of existingServices) {
-          await this.dataSource.delete('queue_services', service.id as string);
+          await this.dataSource.delete("queue_services", service.id as string);
         }
 
         // Create new queue services one by one
-        const queueServices = queue.queueServices.map(service => ({
+        const queueServices = queue.queueServices.map((service) => ({
           queue_id: id,
           service_id: service.serviceId,
           quantity: service.quantity,
-          price: service.price
+          price: service.price,
         }));
 
         for (const service of queueServices) {
           await this.dataSource.insert<QueueServiceSchemaRecord>(
-            'queue_services',
+            "queue_services",
             service
           );
         }
@@ -621,11 +695,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in updateQueue', { error, id, queue });
+      this.logger.error("Error in updateQueue", { error, id, queue });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while updating queue',
-        'updateQueue',
+        "An unexpected error occurred while updating queue",
+        "updateQueue",
         { id, queue },
         error
       );
@@ -647,21 +721,24 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
       // Delete queue services first (cascade delete should handle this, but just to be safe)
       // First get all queue services for this queue
-      const existingServices = await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
-        'queue_services',
-        {
-          filters: [{ field: 'queue_id', operator: FilterOperator.EQ, value: id }],
-          select: ['id']
-        }
-      );
+      const existingServices =
+        await this.dataSource.getAdvanced<QueueServiceSchemaRecord>(
+          "queue_services",
+          {
+            filters: [
+              { field: "queue_id", operator: FilterOperator.EQ, value: id },
+            ],
+            select: ["id"],
+          }
+        );
 
       // Delete each service individually
       for (const service of existingServices) {
-        await this.dataSource.delete('queue_services', service.id as string);
+        await this.dataSource.delete("queue_services", service.id as string);
       }
 
       // Delete queue
-      await this.dataSource.delete('queues', id);
+      await this.dataSource.delete("queues", id);
 
       return true;
     } catch (error) {
@@ -669,11 +746,11 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         throw error;
       }
 
-      this.logger.error('Error in deleteQueue', { error, id });
+      this.logger.error("Error in deleteQueue", { error, id });
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting queue',
-        'deleteQueue',
+        "An unexpected error occurred while deleting queue",
+        "deleteQueue",
         { id },
         error
       );
