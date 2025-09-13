@@ -3,6 +3,7 @@
 import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
 import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 import { useState } from "react";
+import { EmojiPicker } from "./EmojiPicker";
 
 interface ServicesViewProps {
   initialViewModel: ServicesViewModel;
@@ -26,17 +27,32 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
   } = useServicesPresenter(shopId, initialViewModel);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState("");
 
   // Handle form submission with error handling
   const handleCreateServiceLocal = async (event: React.FormEvent) => {
     try {
+      // Add selected icon to form data
+      const form = event.target as HTMLFormElement;
+      const iconInput = form.querySelector('input[name="icon"]') as HTMLInputElement;
+      if (iconInput) {
+        iconInput.value = selectedIcon;
+      }
+      
       await handleCreateService(event);
-      // Close modal on success
+      // Close modal and reset icon on success
       setShowCreateModal(false);
+      setSelectedIcon("");
     } catch (error) {
       // Error is handled by the hook, but we can add additional UI feedback here if needed
       console.error("Form submission error:", error);
     }
+  };
+
+  // Reset icon when modal is closed
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setSelectedIcon("");
   };
 
   const { searchQuery, categoryFilter } = filters;
@@ -533,15 +549,25 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Icon
                 </label>
-                <input
-                  type="text"
-                  name="icon"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="เช่น 💇‍♀️, ✂️, 💅"
-                  maxLength={10}
-                />
+                <div className="flex items-center space-x-3">
+                  <EmojiPicker
+                    selectedEmoji={selectedIcon}
+                    onEmojiSelect={setSelectedIcon}
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="icon"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="เช่น 💇‍♀️, ✂️, 💅"
+                      maxLength={10}
+                      value={selectedIcon}
+                      onChange={(e) => setSelectedIcon(e.target.value)}
+                    />
+                  </div>
+                </div>
                 <p className="text-gray-500 text-sm mt-1">
-                  ใช้ emoji 1-2 ตัว (ไม่บังคับ)
+                  ใช้ emoji 1-2 ตัว (ไม่บังคับ) - คลิกที่ปุ่มเพื่อเลือก emoji หรือพิมพ์เอง
                 </p>
               </div>
 
@@ -567,7 +593,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               <div className="flex justify-end space-x-2 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={handleCloseModal}
                   className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
                 >
                   ยกเลิก
