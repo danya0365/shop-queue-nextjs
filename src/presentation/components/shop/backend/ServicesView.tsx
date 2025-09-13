@@ -416,16 +416,18 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
             </div>
           )}
 
-          {loading && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              กำลังโหลดข้อมูล...
-            </p>
-          )}
-          {error && (
-            <p className="text-sm text-red-500 dark:text-red-400 mt-1">
-              {error}
-            </p>
-          )}
+          <div className="min-h-[24px]">
+            {loading && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                กำลังโหลดข้อมูล...
+              </p>
+            )}
+            {error && (
+              <p className="text-sm text-red-500 dark:text-red-400 mt-1">
+                {error}
+              </p>
+            )}
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">

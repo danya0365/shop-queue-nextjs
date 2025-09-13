@@ -12,6 +12,7 @@ import { Container } from "@/src/di/container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 import { getClientContainer } from "@/src/di/client-container";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 // Define interfaces for data structures
 export interface QueueItem {
@@ -85,7 +86,7 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
   async getViewModel(
     shopId: string,
     page: number = 1,
-    perPage: number = 10,
+    perPage: number = getPaginationConfig().QUEUES_PER_PAGE,
     filters?: {
       status?: string;
       priority?: string;

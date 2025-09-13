@@ -1,20 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { getPaginationConfig } from '@/src/infrastructure/config/PaginationConfig';
-import { useQueueManagementPresenter } from '@/src/presentation/presenters/shop/backend/useQueueManagementPresenter';
-import { QueueLimitsWarning } from './QueueLimitsWarning';
-import { QueueItem, QueueManagementViewModel } from '@/src/presentation/presenters/shop/backend/QueueManagementPresenter';
-import { EditQueueModal } from './modals/EditQueueModal';
-import { DeleteConfirmationModal } from './modals/DeleteConfirmationModal';
-import { CreateQueueModal } from './modals/CreateQueueModal';
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import {
+  QueueItem,
+  QueueManagementViewModel,
+} from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
+import { useQueueManagementPresenter } from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
+import { useState } from "react";
+import { CreateQueueModal } from "./modals/CreateQueueModal";
+import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
+import { EditQueueModal } from "./modals/EditQueueModal";
+import { QueueLimitsWarning } from "./QueueLimitsWarning";
 
 interface QueueManagementViewProps {
   shopId: string;
   initialViewModel?: QueueManagementViewModel;
 }
 
-export function QueueManagementView({ shopId, initialViewModel }: QueueManagementViewProps) {
+export function QueueManagementView({
+  shopId,
+  initialViewModel,
+}: QueueManagementViewProps) {
   const {
     viewModel,
     loading,
@@ -89,45 +95,65 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     return null;
   }
 
-  const { queues, waitingCount, servingCount, completedToday, subscription } = viewModel;
+  const { queues, waitingCount, servingCount, completedToday, subscription } =
+    viewModel;
   const { data: queueData, pagination } = queues;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'waiting': return 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200';
-      case 'confirmed': return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
-      case 'serving': return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
-      case 'completed': return 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
-      case 'cancelled': return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
-      default: return 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
+      case "waiting":
+        return "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200";
+      case "confirmed":
+        return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+      case "serving":
+        return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+      case "completed":
+        return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
+      case "cancelled":
+        return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
+      default:
+        return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
-      case 'vip': return 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
-      default: return 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
+      case "high":
+        return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
+      case "vip":
+        return "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200";
+      default:
+        return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'waiting': return 'รอดำเนินการ';
-      case 'confirmed': return 'ยืนยันแล้ว';
-      case 'serving': return 'กำลังให้บริการ';
-      case 'completed': return 'เสร็จสิ้น';
-      case 'cancelled': return 'ยกเลิก';
-      default: return status;
+      case "waiting":
+        return "รอดำเนินการ";
+      case "confirmed":
+        return "ยืนยันแล้ว";
+      case "serving":
+        return "กำลังให้บริการ";
+      case "completed":
+        return "เสร็จสิ้น";
+      case "cancelled":
+        return "ยกเลิก";
+      default:
+        return status;
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'high': return 'สำคัญ';
-      case 'vip': return 'VIP';
-      case 'normal': return 'ปกติ';
-      default: return priority;
+      case "high":
+        return "สำคัญ";
+      case "vip":
+        return "VIP";
+      case "normal":
+        return "ปกติ";
+      default:
+        return priority;
     }
   };
 
@@ -137,11 +163,14 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     setEditModalOpen(true);
   };
 
-  const handleUpdateQueue = async (queueId: string, data: {
-    services: string[];
-    priority: 'normal' | 'high' | 'vip';
-    notes?: string;
-  }) => {
+  const handleUpdateQueue = async (
+    queueId: string,
+    data: {
+      services: string[];
+      priority: "normal" | "high" | "vip";
+      notes?: string;
+    }
+  ) => {
     await updateQueue(queueId, {
       services: data.services,
       priority: data.priority,
@@ -153,12 +182,12 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     try {
       await updateQueueStatus(queueId, newStatus);
     } catch (error) {
-      console.error('Error updating queue status:', error);
+      console.error("Error updating queue status:", error);
     }
   };
 
   const handleDeleteQueue = async (queueId: string) => {
-    setSelectedQueue(queueData.find(q => q.id === queueId) || null);
+    setSelectedQueue(queueData.find((q) => q.id === queueId) || null);
     setDeleteModalOpen(true);
   };
 
@@ -169,7 +198,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
         setDeleteModalOpen(false);
         setSelectedQueue(null);
       } catch (error) {
-        console.error('Error deleting queue:', error);
+        console.error("Error deleting queue:", error);
       }
     }
   };
@@ -178,7 +207,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     customerName: string;
     customerPhone: string;
     services: string[];
-    priority: 'normal' | 'high' | 'vip';
+    priority: "normal" | "high" | "vip";
     notes?: string;
   }) => {
     try {
@@ -186,7 +215,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
       setCreateModalOpen(false);
       // Success notification could be added here
     } catch (error) {
-      console.error('Error creating queue:', error);
+      console.error("Error creating queue:", error);
       // Error is already handled by the presenter and shown in the UI
     }
   };
@@ -196,16 +225,21 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการคิว</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">ติดตามและจัดการคิวลูกค้าทั้งหมด</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการคิว
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            ติดตามและจัดการคิวลูกค้าทั้งหมด
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
             onClick={() => setCreateModalOpen(true)}
-            className={`px-4 py-2 rounded-lg transition-colors ${subscription.canCreateQueue
-                ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
-                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-              }`}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              subscription.canCreateQueue
+                ? "bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700"
+                : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            }`}
             disabled={!subscription.canCreateQueue}
           >
             📝 เพิ่มคิวใหม่
@@ -230,7 +264,9 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="text-gray-500 dark:text-gray-400">
             <div className="text-4xl mb-4">📊</div>
             <p className="text-lg font-medium">ยังไม่มีข้อมูลสถิติคิว</p>
-            <p className="text-sm mt-2">ข้อมูลสถิติคิวจะแสดงเมื่อมีลูกค้าจองคิว</p>
+            <p className="text-sm mt-2">
+              ข้อมูลสถิติคิวจะแสดงเมื่อมีลูกค้าจองคิว
+            </p>
           </div>
         </div>
       ) : (
@@ -238,8 +274,12 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">คิวทั้งหมด</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pagination.totalCount}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  คิวทั้งหมด
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {pagination.totalCount}
+                </p>
               </div>
               <span className="text-3xl">📋</span>
             </div>
@@ -248,8 +288,12 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">รอดำเนินการ</p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{waitingCount}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  รอดำเนินการ
+                </p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {waitingCount}
+                </p>
               </div>
               <span className="text-3xl">⏳</span>
             </div>
@@ -258,8 +302,12 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">กำลังให้บริการ</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{servingCount}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  กำลังให้บริการ
+                </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {servingCount}
+                </p>
               </div>
               <span className="text-3xl">🔔️</span>
             </div>
@@ -268,8 +316,12 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">เสร็จสิ้นวันนี้</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{completedToday}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  เสร็จสิ้นวันนี้
+                </p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {completedToday}
+                </p>
               </div>
               <span className="text-3xl">✅</span>
             </div>
@@ -283,7 +335,9 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4">
             <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">สถานะ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  สถานะ
+                </label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleStatusFilter(e.target.value)}
@@ -299,7 +353,9 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ระดับความสำคัญ</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  ระดับความสำคัญ
+                </label>
                 <select
                   value={filters.priority}
                   onChange={(e) => handlePriorityFilter(e.target.value)}
@@ -314,7 +370,9 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
             </div>
 
             <div className="flex-1 max-w-md">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ค้นหา</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                ค้นหา
+              </label>
               <input
                 type="text"
                 placeholder="ค้นหาชื่อ, เบอร์โทร, หรือหมายเลขคิว"
@@ -345,19 +403,21 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
           </h2>
 
           {/* Active Filters */}
-          {(filters.search || filters.status !== 'all' || filters.priority !== 'all') && (
+          {(filters.search ||
+            filters.status !== "all" ||
+            filters.priority !== "all") && (
             <div className="mt-3 flex flex-wrap gap-2">
               {filters.search && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                   ค้นหา: &ldquo;{filters.search}&rdquo;
                 </span>
               )}
-              {filters.status !== 'all' && (
+              {filters.status !== "all" && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                   สถานะ: {getStatusText(filters.status)}
                 </span>
               )}
-              {filters.priority !== 'all' && (
+              {filters.priority !== "all" && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                   ความสำคัญ: {getPriorityText(filters.priority)}
                 </span>
@@ -365,16 +425,18 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
             </div>
           )}
 
-          {loading && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              กำลังโหลดข้อมูล...
-            </p>
-          )}
-          {error && (
-            <p className="text-sm text-red-500 dark:text-red-400 mt-1">
-              {error}
-            </p>
-          )}
+          <div className="min-h-[24px]">
+            {loading && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                กำลังโหลดข้อมูล...
+              </p>
+            )}
+            {error && (
+              <p className="text-sm text-red-500 dark:text-red-400 mt-1">
+                {error}
+              </p>
+            )}
+          </div>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {queueData.length === 0 ? (
@@ -382,110 +444,148 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
               <div className="text-gray-500 dark:text-gray-400">
                 <div className="text-4xl mb-4">📋</div>
                 <p className="text-lg">
-                  {filters.search || filters.status !== 'all' || filters.priority !== 'all'
+                  {filters.search ||
+                  filters.status !== "all" ||
+                  filters.priority !== "all"
                     ? "ไม่พบรายการคิวที่ตรงกับเงื่อนไขการค้นหา"
                     : "ยังไม่มีรายการคิวในระบบ"}
                 </p>
-                {filters.search || filters.status !== 'all' || filters.priority !== 'all' ? (
+                {filters.search ||
+                filters.status !== "all" ||
+                filters.priority !== "all" ? (
                   <p className="text-sm text-gray-400 mt-2">
                     ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการคิวใหม่
                   </p>
                 ) : (
                   <p className="text-sm text-gray-400 mt-2">
-                    คลิกปุ่ม &lsquo;เพิ่มคิวใหม่&rsquo; เพื่อเริ่มบันทึกรายการแรกของคุณ
+                    คลิกปุ่ม &lsquo;เพิ่มคิวใหม่&rsquo;
+                    เพื่อเริ่มบันทึกรายการแรกของคุณ
                   </p>
                 )}
               </div>
             </div>
           ) : (
             queueData.map((queue: QueueItem) => (
-            <div key={queue.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 dark:text-blue-300 font-bold">{queue.queueNumber}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{queue.customerName}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(queue.status)}`}>
-                        {getStatusText(queue.status)}
-                      </span>
-                      {queue.priority !== 'normal' && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(queue.priority)}`}>
-                          {getPriorityText(queue.priority)}
+              <div
+                key={queue.id}
+                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 dark:text-blue-300 font-bold">
+                          {queue.queueNumber}
                         </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                          {queue.customerName}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            queue.status
+                          )}`}
+                        >
+                          {getStatusText(queue.status)}
+                        </span>
+                        {queue.priority !== "normal" && (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                              queue.priority
+                            )}`}
+                          >
+                            {getPriorityText(queue.priority)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {queue.customerPhone}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        บริการ: {queue.services.join(", ")}
+                      </p>
+                      {queue.notes && (
+                        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                          หมายเหตุ: {queue.notes}
+                        </p>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{queue.customerPhone}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">บริการ: {queue.services.join(', ')}</p>
-                    {queue.notes && (
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">หมายเหตุ: {queue.notes}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">เวลา</p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{queue.createdAt}</p>
-                    {queue.estimatedTime > 0 && (
-                      <p className="text-xs text-orange-600 dark:text-orange-400">รอ ~{queue.estimatedTime} นาที</p>
-                    )}
                   </div>
 
-                  <div className="flex flex-col space-y-2">
-                    {queue.status === 'waiting' && (
-                      <>
-                        <button 
-                          onClick={() => handleStatusUpdate(queue.id, 'confirmed')}
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        เวลา
+                      </p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {queue.createdAt}
+                      </p>
+                      {queue.estimatedTime > 0 && (
+                        <p className="text-xs text-orange-600 dark:text-orange-400">
+                          รอ ~{queue.estimatedTime} นาที
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col space-y-2">
+                      {queue.status === "waiting" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(queue.id, "confirmed")
+                            }
+                            disabled={actionLoading.updateStatus}
+                            className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
+                          >
+                            ยืนยัน
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(queue.id, "serving")
+                            }
+                            disabled={actionLoading.updateStatus}
+                            className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          >
+                            เรียก
+                          </button>
+                        </>
+                      )}
+                      {queue.status === "serving" && (
+                        <button
+                          onClick={() =>
+                            handleStatusUpdate(queue.id, "completed")
+                          }
                           disabled={actionLoading.updateStatus}
-                          className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
+                          className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
                         >
-                          ยืนยัน
+                          เสร็จสิ้น
                         </button>
-                        <button 
-                          onClick={() => handleStatusUpdate(queue.id, 'serving')}
-                          disabled={actionLoading.updateStatus}
-                          className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      )}
+                      <button
+                        onClick={() => handleEditQueue(queue)}
+                        disabled={actionLoading.updateQueue}
+                        className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                      >
+                        แก้ไข
+                      </button>
+                      {queue.status === "waiting" && (
+                        <button
+                          onClick={() => handleDeleteQueue(queue.id)}
+                          disabled={actionLoading.deleteQueue}
+                          className="bg-red-500 dark:bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50"
                         >
-                          เรียก
+                          ลบ
                         </button>
-                      </>
-                    )}
-                    {queue.status === 'serving' && (
-                      <button 
-                        onClick={() => handleStatusUpdate(queue.id, 'completed')}
-                        disabled={actionLoading.updateStatus}
-                        className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
-                      >
-                        เสร็จสิ้น
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => handleEditQueue(queue)}
-                      disabled={actionLoading.updateQueue}
-                      className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                    >
-                      แก้ไข
-                    </button>
-                    {queue.status === 'waiting' && (
-                      <button 
-                        onClick={() => handleDeleteQueue(queue.id)}
-                        disabled={actionLoading.deleteQueue}
-                        className="bg-red-500 dark:bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50"
-                      >
-                        ลบ
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))
           )}
         </div>
 
@@ -522,11 +622,13 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option: number) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map(
+                      (option: number) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
               </div>
@@ -546,8 +648,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                 </button>
 
                 <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  หน้า {currentPage} /{" "}
-                  {viewModel.queues.pagination.totalPages}
+                  หน้า {currentPage} / {viewModel.queues.pagination.totalPages}
                 </div>
 
                 <button
@@ -598,11 +699,13 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
                     disabled={loading}
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option: number) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map(
+                      (option: number) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
               </div>
