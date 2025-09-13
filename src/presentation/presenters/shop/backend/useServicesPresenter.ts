@@ -52,6 +52,8 @@ interface UseServicesPresenterReturn {
   updateService: (data: UpdateServiceDTO) => Promise<void>;
   handleUpdateService: (event: React.FormEvent) => Promise<void>;
   getServiceById: (id: string) => Promise<ServiceDTO | null>;
+  deleteService: (id: string) => Promise<void>;
+  handleDeleteService: (id: string) => Promise<void>;
 }
 
 export function useServicesPresenter(
@@ -361,6 +363,47 @@ export function useServicesPresenter(
     [updateService]
   );
 
+  // Delete service function
+  const deleteService = useCallback(
+    async (id: string) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { ClientServicesPresenterFactory } = await import(
+          "@/src/presentation/presenters/shop/backend/ServicesPresenter"
+        );
+        const presenter = await ClientServicesPresenterFactory.create();
+
+        await presenter.deleteService(id);
+        
+        // Refresh data after successful deletion
+        await loadData();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "ไม่สามารถลบบริการได้";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadData]
+  );
+
+  // Handle delete service function
+  const handleDeleteService = useCallback(
+    async (id: string) => {
+      try {
+        await deleteService(id);
+      } catch (err) {
+        // Error is already handled in deleteService
+        throw err;
+      }
+    },
+    [deleteService]
+  );
+
   return {
     viewModel,
     loading,
@@ -381,5 +424,7 @@ export function useServicesPresenter(
     updateService,
     handleUpdateService,
     getServiceById,
+    deleteService,
+    handleDeleteService,
   };
 }

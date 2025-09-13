@@ -27,13 +27,17 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handleCreateService,
     handleUpdateService,
     getServiceById,
+    handleDeleteService,
   } = useServicesPresenter(shopId, initialViewModel);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("");
   const [editingService, setEditingService] = useState<ServiceDTO | null>(null);
+  const [deletingService, setDeletingService] = useState<ServiceDTO | null>(null);
   const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Handle edit service
   const handleEditService = async (serviceId: string) => {
@@ -77,6 +81,33 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     setShowEditModal(false);
     setEditingService(null);
     setSelectedIcon("");
+  };
+
+  // Handle delete service
+  const handleDeleteServiceLocal = async (serviceId: string) => {
+    try {
+      setDeleteLoading(true);
+      await handleDeleteService(serviceId);
+      // Close modal on success
+      setShowDeleteModal(false);
+      setDeletingService(null);
+    } catch (error) {
+      console.error("Error deleting service:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Open delete confirmation modal
+  const openDeleteModal = (service: ServiceDTO) => {
+    setDeletingService(service);
+    setShowDeleteModal(true);
+  };
+
+  // Close delete modal
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeletingService(null);
   };
 
   // Handle form submission with error handling
@@ -402,7 +433,10 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                         >
                           {service.isAvailable ? "ปิดใช้งาน" : "เปิดใช้งาน"}
                         </button>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <button 
+                          onClick={() => openDeleteModal(service)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
                           ลบ
                         </button>
                       </div>
@@ -853,6 +887,53 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && deletingService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              ยืนยันการลบบริการ
+            </h3>
+            
+            <div className="mb-6">
+              <p className="text-gray-700 dark:text-gray-300 mb-2">
+                คุณต้องการลบบริการนี้ใช่หรือไม่?
+              </p>
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {deletingService.icon} {deletingService.name}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {deletingService.category} • {deletingService.price.toLocaleString()} บาท
+                </p>
+              </div>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-3">
+                ⚠️ การลบบริการจะไม่สามารถกู้คืนได้
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteServiceLocal(deletingService.id)}
+                disabled={deleteLoading}
+                className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleteLoading ? "กำลังลบ..." : "ลบบริการ"}
+              </button>
+            </div>
           </div>
         </div>
       )}

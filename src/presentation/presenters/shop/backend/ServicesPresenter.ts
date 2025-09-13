@@ -228,6 +228,22 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       throw error;
     }
   }
+
+  // Delete service method
+  async deleteService(id: string): Promise<void> {
+    try {
+      this.logger.info("ServicesPresenter: Deleting service", { id });
+
+      await this.backendServicesService.deleteService(id);
+
+      this.logger.info("ServicesPresenter: Service deleted successfully", {
+        id,
+      });
+    } catch (error) {
+      this.logger.error("ServicesPresenter: Error deleting service", error);
+      throw error;
+    }
+  }
 }
 
 // Base Factory class for reducing code duplication
