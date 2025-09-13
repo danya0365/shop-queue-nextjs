@@ -23,6 +23,7 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
     handlePageChange,
     handleNextPage,
     handlePrevPage,
+    handlePerPageChange,
     handleStatusFilter,
     handlePriorityFilter,
     handleSearch,
@@ -442,66 +443,194 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
         </div>
 
         {/* Pagination */}
-        {viewModel?.queues.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              แสดง {(viewModel.queues.pagination.currentPage - 1) * viewModel.queues.pagination.perPage + 1} - {Math.min(viewModel.queues.pagination.currentPage * viewModel.queues.pagination.perPage, viewModel.queues.pagination.totalCount)} จาก {viewModel.queues.pagination.totalCount} รายการ
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1 || loading}
-                className={`px-3 py-1 rounded-md text-sm font-medium ${
-                  currentPage > 1 && !loading
-                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                ก่อนหน้า
-              </button>
+        {viewModel?.queues.pagination.totalPages > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            {/* Mobile Layout - Stacked */}
+            <div className="flex flex-col space-y-4 sm:hidden">
+              {/* Info and Per Page Dropdown */}
+              <div className="flex flex-col space-y-3">
+                <div className="text-sm text-gray-700 dark:text-gray-300 text-center">
+                  แสดง{" "}
+                  {(viewModel.queues.pagination.currentPage - 1) *
+                    viewModel.queues.pagination.perPage +
+                    1}{" "}
+                  -{" "}
+                  {Math.min(
+                    viewModel.queues.pagination.currentPage *
+                      viewModel.queues.pagination.perPage,
+                    viewModel.queues.pagination.totalCount
+                  )}{" "}
+                  จาก {viewModel.queues.pagination.totalCount} รายการ
+                </div>
 
-              <div className="flex space-x-1">
-                {Array.from({ length: Math.min(viewModel.queues.pagination.totalPages, 5) }, (_, i) => {
-                  let pageNum;
-                  if (viewModel.queues.pagination.totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= viewModel.queues.pagination.totalPages - 2) {
-                    pageNum = viewModel.queues.pagination.totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      disabled={loading}
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${
-                        pageNum === currentPage
-                          ? "bg-blue-500 text-white"
-                          : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    แสดงต่อหน้า:
+                  </span>
+                  <select
+                    value={viewModel.queues.pagination.perPage}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
+                    disabled={loading}
+                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {[5, 10, 20, 50].map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage >= viewModel.queues.pagination.totalPages || loading}
-                className={`px-3 py-1 rounded-md text-sm font-medium ${
-                  currentPage < viewModel.queues.pagination.totalPages && !loading
-                    ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                ถัดไป
-              </button>
+              {/* Pagination Controls - Mobile */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage <= 1 || loading}
+                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                    currentPage > 1 && !loading
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ก่อนหน้า
+                </button>
+
+                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  หน้า {currentPage} /{" "}
+                  {viewModel.queues.pagination.totalPages}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={
+                    currentPage >= viewModel.queues.pagination.totalPages ||
+                    loading
+                  }
+                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                    currentPage < viewModel.queues.pagination.totalPages &&
+                    !loading
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ถัดไป
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Layout - Horizontal */}
+            <div className="hidden sm:flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  แสดง{" "}
+                  {(viewModel.queues.pagination.currentPage - 1) *
+                    viewModel.queues.pagination.perPage +
+                    1}{" "}
+                  -{" "}
+                  {Math.min(
+                    viewModel.queues.pagination.currentPage *
+                      viewModel.queues.pagination.perPage,
+                    viewModel.queues.pagination.totalCount
+                  )}{" "}
+                  จาก {viewModel.queues.pagination.totalCount} รายการ
+                </div>
+
+                {/* Per Page Dropdown */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    แสดงต่อหน้า:
+                  </span>
+                  <select
+                    value={viewModel.queues.pagination.perPage}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
+                    disabled={loading}
+                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {[5, 10, 20, 50].map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage <= 1 || loading}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    currentPage > 1 && !loading
+                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ก่อนหน้า
+                </button>
+
+                <div className="flex space-x-1">
+                  {Array.from(
+                    {
+                      length: Math.min(
+                        viewModel.queues.pagination.totalPages,
+                        5
+                      ),
+                    },
+                    (_, i) => {
+                      let pageNum;
+                      if (viewModel.queues.pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (
+                        currentPage >=
+                        viewModel.queues.pagination.totalPages - 2
+                      ) {
+                        pageNum =
+                          viewModel.queues.pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={loading}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${
+                            pageNum === currentPage
+                              ? "bg-blue-500 text-white"
+                              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={
+                    currentPage >= viewModel.queues.pagination.totalPages ||
+                    loading
+                  }
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    currentPage < viewModel.queues.pagination.totalPages &&
+                    !loading
+                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ถัดไป
+                </button>
+              </div>
             </div>
           </div>
         )}

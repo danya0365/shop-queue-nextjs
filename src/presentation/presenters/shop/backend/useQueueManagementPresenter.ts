@@ -10,7 +10,7 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
+  const [perPage, setPerPage] = useState(10);
   const [filters, setFilters] = useState({
     status: 'all' as string,
     priority: 'all' as string,
@@ -88,6 +88,11 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
       setCurrentPage(prev => prev - 1);
     }
   }, [viewModel?.queues.pagination.hasPrev]);
+
+  const handlePerPageChange = useCallback((newPerPage: number) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Reset to first page when changing per page
+  }, []);
 
   // Filter handlers
   const handleStatusFilter = useCallback((status: string) => {
@@ -246,6 +251,7 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
     handlePageChange,
     handleNextPage,
     handlePrevPage,
+    handlePerPageChange,
     
     // Filter handlers
     handleStatusFilter,
