@@ -129,6 +129,13 @@ export function useServicesPresenter(
     }
   }, [loadData, initialViewModel]);
 
+  // Load data when filters change
+  useEffect(() => {
+    if (initialViewModel) {
+      loadData();
+    }
+  }, [filters, loadData, initialViewModel]);
+
   // Pagination handlers
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);

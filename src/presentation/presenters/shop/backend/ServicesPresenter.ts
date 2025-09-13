@@ -30,7 +30,8 @@ export interface ServicesViewModel {
   totalServices: number;
   activeServices: number;
   inactiveServices: number;
-  categories: string[];
+  categories: string[]; // categories from filtered services (for display)
+  allCategories: string[]; // all categories for dropdown (without filters)
   averagePrice: number;
   totalRevenue: number;
   popularServices: {
@@ -119,7 +120,8 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
         totalServices: stats.totalServices,
         activeServices: stats.availableServices,
         inactiveServices: stats.unavailableServices,
-        categories,
+        categories, // categories from filtered services
+        allCategories: Object.keys(stats.servicesByCategory || {}), // all categories from stats
         averagePrice: stats.averagePrice,
         totalRevenue: stats.totalRevenue,
         popularServices: stats.popularServices,

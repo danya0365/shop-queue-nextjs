@@ -23,6 +23,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     handlePrevPage,
     handleSearchChange,
     handleCategoryChange,
+    handleAvailabilityChange,
     resetFilters,
     handleCreateService,
     handleUpdateService,
@@ -136,7 +137,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
     setSelectedIcon("");
   };
 
-  const { searchQuery, categoryFilter } = filters;
+  const { searchQuery, categoryFilter, availabilityFilter } = filters;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("th-TH", {
@@ -268,7 +269,8 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                 placeholder="ค้นหาบริการ..."
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                disabled={loading}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -277,14 +279,29 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               <select
                 value={categoryFilter}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                disabled={loading}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="all">หมวดหมู่ทั้งหมด</option>
-                {viewModel.categories.map((category) => (
+                {viewModel.allCategories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Availability Filter */}
+            <div className="sm:w-48">
+              <select
+                value={availabilityFilter}
+                onChange={(e) => handleAvailabilityChange(e.target.value)}
+                disabled={loading}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="all">สถานะทั้งหมด</option>
+                <option value="available">เปิดใช้งาน</option>
+                <option value="unavailable">ปิดใช้งาน</option>
               </select>
             </div>
 
@@ -308,6 +325,28 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             รายการบริการ ({viewModel.services.pagination.totalCount})
           </h2>
+          
+          {/* Active Filters */}
+          {(searchQuery || categoryFilter !== "all" || availabilityFilter !== "all") && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {searchQuery && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                  ค้นหา: &ldquo;{searchQuery}&rdquo;
+                </span>
+              )}
+              {categoryFilter !== "all" && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                  หมวดหมู่: {categoryFilter}
+                </span>
+              )}
+              {availabilityFilter !== "all" && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                  สถานะ: {availabilityFilter === "available" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                </span>
+              )}
+            </div>
+          )}
+          
           {loading && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               กำลังโหลดข้อมูล...
@@ -353,11 +392,11 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">🛎️</div>
                       <p className="text-lg">
-                        {searchQuery || categoryFilter !== "all"
+                        {searchQuery || categoryFilter !== "all" || availabilityFilter !== "all"
                           ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีบริการในระบบ"}
                       </p>
-                      {searchQuery || categoryFilter !== "all" ? (
+                      {searchQuery || categoryFilter !== "all" || availabilityFilter !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
                         </p>
@@ -589,7 +628,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   required
                 />
                 <datalist id="category-list">
-                  {viewModel.categories.map((category) => (
+                  {viewModel.allCategories.map((category) => (
                     <option key={category} value={category}>
                       {category}
                     </option>
@@ -775,7 +814,7 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
                   placeholder="เลือกหรือพิมพ์หมวดหมู่..."
                 />
                 <datalist id="category-list">
-                  {viewModel.categories.map((category) => (
+                  {viewModel.allCategories.map((category) => (
                     <option key={category} value={category}>
                       {category}
                     </option>
