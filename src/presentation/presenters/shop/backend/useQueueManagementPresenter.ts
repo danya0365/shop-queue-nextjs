@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { getPaginationConfig } from '@/src/infrastructure/config/PaginationConfig';
 import type { QueueManagementViewModel } from './QueueManagementPresenter';
 
 export function useQueueManagementPresenter(shopId: string, initialViewModel?: QueueManagementViewModel) {
@@ -10,7 +11,7 @@ export function useQueueManagementPresenter(shopId: string, initialViewModel?: Q
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(getPaginationConfig().QUEUES_PER_PAGE);
   const [filters, setFilters] = useState({
     status: 'all' as string,
     priority: 'all' as string,
