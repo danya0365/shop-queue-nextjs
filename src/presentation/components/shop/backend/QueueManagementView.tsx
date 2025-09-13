@@ -43,29 +43,43 @@ export function QueueManagementView({ shopId, initialViewModel }: QueueManagemen
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<QueueItem | null>(null);
 
-  if (loading) {
+  // Show loading only on initial load or when explicitly loading
+  if (loading && !viewModel) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">กำลังโหลดข้อมูลคิว...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลคิว...
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  // Show error state if there's an error but we have no data
+  if (error && !viewModel) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="text-red-500 text-4xl mb-4">❌</div>
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <button
-            onClick={refreshData}
-            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
-          >
-            ลองใหม่อีกครั้ง
-          </button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                {error}
+              </p>
+              <button
+                onClick={refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
