@@ -41,8 +41,14 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       priorityFilter?: string;
       shopId?: string;
       customerId?: string;
+      employeeId?: string;
+      serviceId?: string;
       dateFrom?: string;
       dateTo?: string;
+      completionDateFrom?: string;
+      completionDateTo?: string;
+      minEstimatedWaitTime?: number;
+      maxEstimatedWaitTime?: number;
     };
   }): Promise<PaginatedQueuesEntity> {
     try {
@@ -121,6 +127,35 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         });
       }
 
+      if (filters?.employeeId) {
+        queryOptions.filters?.push({
+          field: 'served_by_employee_id',
+          operator: FilterOperator.EQ,
+          value: filters.employeeId
+        });
+      }
+
+      if (filters?.serviceId) {
+        // For service filtering, we need to filter by queue_services
+        // This will be handled in post-query filtering
+      }
+
+      if (filters?.completionDateFrom) {
+        queryOptions.filters?.push({
+          field: 'completed_at',
+          operator: FilterOperator.GTE,
+          value: filters.completionDateFrom
+        });
+      }
+
+      if (filters?.completionDateTo) {
+        queryOptions.filters?.push({
+          field: 'completed_at',
+          operator: FilterOperator.LTE,
+          value: filters.completionDateTo
+        });
+      }
+
       // Use extended type that satisfies Record<string, unknown> constraint
       const queues = await this.dataSource.getAdvanced<QueueSchemaRecord>(
         'queues',
@@ -162,7 +197,7 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       const totalItems = await this.dataSource.count('queues', countQueryOptions);
 
       // Map database results to domain entities
-      const mappedQueues = queues.map(queue => {
+      let mappedQueues = queues.map(queue => {
         // Handle joined data from customers and shops tables using our QueueWithCustomerAndShop type
         const queueWithJoinedData = queue as QueueWithCustomerAndShop;
 
@@ -178,6 +213,25 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
         };
         return SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
       });
+
+      // Apply post-query filters for calculated fields and complex filtering
+      if (filters?.serviceId) {
+        mappedQueues = mappedQueues.filter(queue => 
+          queue.queueServices.some(service => service.serviceId === filters.serviceId)
+        );
+      }
+
+      if (filters?.minEstimatedWaitTime !== undefined) {
+        mappedQueues = mappedQueues.filter(queue => 
+          queue.estimatedWaitTime >= filters.minEstimatedWaitTime!
+        );
+      }
+
+      if (filters?.maxEstimatedWaitTime !== undefined) {
+        mappedQueues = mappedQueues.filter(queue => 
+          queue.estimatedWaitTime <= filters.maxEstimatedWaitTime!
+        );
+      }
 
       // Create pagination metadata
       const pagination = SupabaseShopBackendQueueMapper.createPaginationMeta(page, limit, totalItems);

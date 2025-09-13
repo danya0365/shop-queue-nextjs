@@ -17,8 +17,14 @@ export interface GetQueuesPaginatedInput {
     priorityFilter?: string;
     shopId?: string;
     customerId?: string;
+    employeeId?: string;
+    serviceId?: string;
     dateFrom?: string;
     dateTo?: string;
+    completionDateFrom?: string;
+    completionDateTo?: string;
+    minEstimatedWaitTime?: number;
+    maxEstimatedWaitTime?: number;
   };
 }
 

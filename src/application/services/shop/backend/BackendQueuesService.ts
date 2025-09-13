@@ -11,6 +11,7 @@ import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backe
 
 export interface IShopBackendQueuesService {
   getQueuesData(shopId: string, page?: number, perPage?: number): Promise<QueuesDataDTO>;
+  getQueuesPaginated(page: number, limit: number, filters?: GetQueuesPaginatedInput['filters']): Promise<PaginatedQueuesDTO>;
   getQueueById(id: string): Promise<QueueDTO>;
   createQueue(queueData: CreateQueueInput): Promise<QueueDTO>;
   updateQueue(id: string, queueData: Omit<UpdateQueueInput, 'id'>): Promise<QueueDTO>;
@@ -53,10 +54,31 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
         perPage: queuesResult.pagination.itemsPerPage
       };
     } catch (error) {
-      this.logger.error('Error getting queues data', { error, page, perPage });
+      this.logger.error('Error in getQueuesData', { error, shopId, page, perPage });
       throw error;
     }
   }
+
+  /**
+   * Get paginated queues with advanced filtering
+   * @param page Page number
+   * @param limit Items per page
+   * @param filters Advanced filtering options
+   * @returns Paginated queues DTO
+   */
+  async getQueuesPaginated(page: number, limit: number, filters?: GetQueuesPaginatedInput['filters']): Promise<PaginatedQueuesDTO> {
+    try {
+      this.logger.info('Getting paginated queues with filters', { page, limit, filters });
+      
+      const result = await this.getQueuesPaginatedUseCase.execute({ page, limit, filters });
+      
+      return result;
+    } catch (error) {
+      this.logger.error('Error in getQueuesPaginated', { error, page, limit, filters });
+      throw error;
+    }
+  }
+
 
   /**
    * Get a queue by ID
