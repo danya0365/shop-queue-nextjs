@@ -425,20 +425,34 @@ export function QueueManagementView({
             </div>
           )}
 
-          <div className="min-h-[24px]">
-            {loading && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                กำลังโหลดข้อมูล...
-              </p>
-            )}
-            {error && (
-              <p className="text-sm text-red-500 dark:text-red-400 mt-1">
-                {error}
-              </p>
-            )}
-          </div>
         </div>
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="relative min-h-[200px]">
+          {/* Loading and Error Overlay */}
+          {(loading || error) && (
+            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center z-10">
+              <div className="text-center">
+                {loading && (
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                      กำลังโหลดข้อมูล...
+                    </p>
+                  </div>
+                )}
+                {error && (
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="text-red-500 text-2xl">⚠️</div>
+                    <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                      {error}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* List Data */}
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {queueData.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-gray-500 dark:text-gray-400">
@@ -784,7 +798,8 @@ export function QueueManagementView({
             </div>
           </div>
         )}
-      </div>
+          </div>
+        </div>
 
       {/* Edit Queue Modal */}
       <EditQueueModal
