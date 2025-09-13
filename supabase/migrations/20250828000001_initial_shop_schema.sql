@@ -1105,9 +1105,10 @@ BEGIN
 END;
 $$;
 
--- Function to add feedback and rating (for customers)
+-- Function to add feedback and rating (for customers) with enhanced security
 CREATE OR REPLACE FUNCTION public.add_queue_feedback(
   p_queue_id UUID,
+  p_customer_id UUID,  -- Added for customer validation
   p_feedback TEXT,
   p_rating INTEGER DEFAULT NULL
 ) RETURNS VOID
@@ -1118,6 +1119,9 @@ AS $$
 DECLARE
   v_customer_id UUID;
   v_status queue_status;
+  v_completed_at TIMESTAMP WITH TIME ZONE;
+  v_feedback_deadline TIMESTAMP WITH TIME ZONE;
+  feedback_window_days INTEGER := 30; -- Configurable feedback window
 BEGIN
   -- Validate rating
   IF p_rating IS NOT NULL AND (p_rating < 1 OR p_rating > 5) THEN
@@ -1125,7 +1129,7 @@ BEGIN
   END IF;
 
   -- Get queue info
-  SELECT customer_id, status INTO v_customer_id, v_status
+  SELECT customer_id, status, updated_at INTO v_customer_id, v_status, v_completed_at
   FROM public.queues
   WHERE id = p_queue_id;
 
@@ -1133,15 +1137,61 @@ BEGIN
     RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
   END IF;
 
+  -- Validate customer ownership
+  IF v_customer_id != p_customer_id THEN
+    RAISE EXCEPTION 'unauthorized: customer does not own this queue';
+  END IF;
+
   -- Only allow feedback for completed queues
   IF v_status != 'completed' THEN
     RAISE EXCEPTION 'feedback_not_allowed: queue must be completed';
   END IF;
 
+  -- Calculate feedback deadline
+  v_feedback_deadline := v_completed_at + INTERVAL '1 day' * feedback_window_days;
+
+  -- Check if feedback period has expired
+  IF NOW() > v_feedback_deadline THEN
+    RAISE EXCEPTION 'feedback_expired: feedback period has expired. Deadline was %', 
+      v_feedback_deadline::DATE;
+  END IF;
+
+  -- Validate feedback content (optional sanitization)
+  IF p_feedback IS NOT NULL AND LENGTH(TRIM(p_feedback)) = 0 THEN
+    RAISE EXCEPTION 'invalid_feedback: feedback cannot be empty';
+  END IF;
+
+  IF p_feedback IS NOT NULL AND LENGTH(p_feedback) > 1000 THEN
+    RAISE EXCEPTION 'invalid_feedback: feedback too long (max 1000 characters)';
+  END IF;
+
   -- Update feedback
   UPDATE public.queues
-  SET feedback = p_feedback, rating = p_rating, updated_at = NOW()
+  SET 
+    feedback = p_feedback, 
+    rating = p_rating, 
+    updated_at = NOW()
   WHERE id = p_queue_id;
+
+  -- Log successful feedback (optional for audit trail)
+  INSERT INTO public.audit_logs (
+    table_name, 
+    record_id, 
+    action, 
+    customer_id, 
+    created_at
+  ) VALUES (
+    'queues', 
+    p_queue_id, 
+    'feedback_added', 
+    p_customer_id, 
+    NOW()
+  ) ON CONFLICT DO NOTHING; -- Ignore if audit_logs table doesn't exist
+
+EXCEPTION
+  WHEN others THEN
+    -- Re-raise the exception to maintain error handling
+    RAISE;
 END;
 $$;
 
