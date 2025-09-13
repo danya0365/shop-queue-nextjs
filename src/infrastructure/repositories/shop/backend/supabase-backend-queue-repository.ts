@@ -204,13 +204,21 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
 
   /**
    * Get queue statistics from database
+   * @param shopId Shop ID for filtering statistics
    * @returns Queue statistics
    */
-  async getQueueStats(): Promise<QueueStatsEntity> {
+  async getQueueStats(shopId: string): Promise<QueueStatsEntity> {
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
         select: ['*'],
+        filters: [
+          {
+            field: 'shop_id',
+            operator: FilterOperator.EQ,
+            value: shopId
+          }
+        ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
@@ -218,7 +226,7 @@ export class SupabaseShopBackendQueueRepository extends StandardRepository imple
       // Assuming a view exists for queue statistics
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData = await this.dataSource.getAdvanced<QueueStatsSchemaRecord>(
-        'queue_stats_view',
+        'queue_stats_by_shop_view',
         queryOptions
       );
 

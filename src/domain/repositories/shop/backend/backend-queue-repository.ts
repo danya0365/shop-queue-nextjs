@@ -54,10 +54,11 @@ export interface ShopBackendQueueRepository {
 
   /**
    * Get queue statistics
+   * @param shopId Shop ID for filtering statistics
    * @returns Queue statistics data
    * @throws ShopBackendQueueError if the operation fails
    */
-  getQueueStats(): Promise<QueueStatsEntity>;
+  getQueueStats(shopId: string): Promise<QueueStatsEntity>;
 
   /**
    * Get queue by ID

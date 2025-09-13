@@ -11,6 +11,15 @@ import type { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/
 export interface GetQueuesPaginatedInput {
   page: number;
   limit: number;
+  filters?: {
+    searchQuery?: string;
+    statusFilter?: string;
+    priorityFilter?: string;
+    shopId?: string;
+    customerId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }
 
 /**
@@ -45,7 +54,10 @@ export class GetQueuesPaginatedUseCase implements IUseCase<GetQueuesPaginatedInp
         limit: input.limit || 10
       };
 
-      const paginatedQueues = await this.queueRepository.getPaginatedQueues(paginationParams);
+      const paginatedQueues = await this.queueRepository.getPaginatedQueues({
+        ...paginationParams,
+        filters: input.filters
+      });
 
       // Map domain entities to DTOs
       return {

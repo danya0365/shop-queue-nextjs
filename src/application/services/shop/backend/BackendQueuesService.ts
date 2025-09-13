@@ -10,7 +10,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
 
 export interface IShopBackendQueuesService {
-  getQueuesData(page?: number, perPage?: number): Promise<QueuesDataDTO>;
+  getQueuesData(shopId: string, page?: number, perPage?: number): Promise<QueuesDataDTO>;
   getQueueById(id: string): Promise<QueueDTO>;
   createQueue(queueData: CreateQueueInput): Promise<QueueDTO>;
   updateQueue(id: string, queueData: Omit<UpdateQueueInput, 'id'>): Promise<QueueDTO>;
@@ -20,7 +20,7 @@ export interface IShopBackendQueuesService {
 export class ShopBackendQueuesService implements IShopBackendQueuesService {
   constructor(
     private readonly getQueuesPaginatedUseCase: IUseCase<GetQueuesPaginatedInput, PaginatedQueuesDTO>,
-    private readonly getQueueStatsUseCase: IUseCase<void, QueueStatsDTO>,
+    private readonly getQueueStatsUseCase: IUseCase<string, QueueStatsDTO>,
     private readonly getQueueByIdUseCase: IUseCase<string, QueueDTO>,
     private readonly createQueueUseCase: IUseCase<CreateQueueInput, QueueDTO>,
     private readonly updateQueueUseCase: IUseCase<UpdateQueueInput, QueueDTO>,
@@ -30,18 +30,19 @@ export class ShopBackendQueuesService implements IShopBackendQueuesService {
 
   /**
    * Get queues data including paginated queues and statistics
+   * @param shopId Shop ID for filtering data
    * @param page Page number (default: 1)
    * @param perPage Items per page (default: 10)
    * @returns Queues data DTO
    */
-  async getQueuesData(page: number = 1, perPage: number = 10): Promise<QueuesDataDTO> {
+  async getQueuesData(shopId: string, page: number = 1, perPage: number = 10): Promise<QueuesDataDTO> {
     try {
-      this.logger.info('Getting queues data', { page, perPage });
+      this.logger.info('Getting queues data', { shopId, page, perPage });
 
       // Get queues and stats in parallel
       const [queuesResult, stats] = await Promise.all([
-        this.getQueuesPaginatedUseCase.execute({ page, limit: perPage }),
-        this.getQueueStatsUseCase.execute()
+        this.getQueuesPaginatedUseCase.execute({ page, limit: perPage, filters: { shopId } }),
+        this.getQueueStatsUseCase.execute(shopId)
       ]);
 
       return {

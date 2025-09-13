@@ -8,7 +8,7 @@ import type { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/
  * Use case for getting queue statistics
  * Following SOLID principles and Clean Architecture
  */
-export class GetQueueStatsUseCase implements IUseCase<void, QueueStatsDTO> {
+export class GetQueueStatsUseCase implements IUseCase<string, QueueStatsDTO> {
   constructor(
     private readonly queueRepository: ShopBackendQueueRepository,
     private readonly logger: Logger
@@ -16,16 +16,17 @@ export class GetQueueStatsUseCase implements IUseCase<void, QueueStatsDTO> {
 
   /**
    * Execute the use case to get queue statistics
+   * @param shopId Shop ID for filtering statistics
    * @returns Queue statistics DTO
    */
-  async execute(): Promise<QueueStatsDTO> {
+  async execute(shopId: string): Promise<QueueStatsDTO> {
     try {
-      this.logger.info('Getting queue statistics');
+      this.logger.info('Getting queue statistics', { shopId });
 
-      const queueStats = await this.queueRepository.getQueueStats();
+      const queueStats = await this.queueRepository.getQueueStats(shopId);
       return QueueMapper.statsToDTO(queueStats);
     } catch (error) {
-      this.logger.error('Error getting queue statistics', { error });
+      this.logger.error('Error getting queue statistics', { error, shopId });
       throw error;
     }
   }
