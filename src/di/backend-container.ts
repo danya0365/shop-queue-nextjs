@@ -30,6 +30,7 @@ import { SupabaseBackendProfileRepository } from "../infrastructure/repositories
 import { SupabaseBackendProfileSubscriptionRepository } from '../infrastructure/repositories/backend/supabase-backend-profile-subscription-repository';
 import { SupabaseBackendPromotionRepository } from "../infrastructure/repositories/backend/supabase-backend-promotion-repository";
 import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/backend/supabase-backend-queue-repository";
+import { SupabaseShopBackendQueueAnalyticsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-analytics-repository";
 import { SupabaseBackendRewardRepository } from '../infrastructure/repositories/backend/supabase-backend-reward-repository';
 import { SupabaseBackendServiceRepository } from '../infrastructure/repositories/backend/supabase-backend-service-repository';
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
@@ -62,6 +63,7 @@ export async function createBackendContainer(): Promise<Container> {
     const authUsersRepository = new SupabaseBackendAuthUsersRepository(databaseDatasource, logger);
     const shopRepository = new SupabaseBackendShopRepository(databaseDatasource, logger);
     const queueRepository = new SupabaseBackendQueueRepository(databaseDatasource, logger);
+    const queueAnalyticsRepository = new SupabaseShopBackendQueueAnalyticsRepository(databaseDatasource, logger);
     const customerRepository = new SupabaseBackendCustomerRepository(databaseDatasource, logger);
     const departmentRepository = new SupabaseBackendDepartmentRepository(databaseDatasource, logger);
     const employeeRepository = new SupabaseBackendEmployeeRepository(databaseDatasource, logger);
