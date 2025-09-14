@@ -18,6 +18,12 @@ export interface ShopDTO {
   address: string | null;
   phone: string | null;
   email: string | null;
+  website: string | null;
+  logo: string | null;
+  qrCodeUrl: string | null;
+  timezone: string;
+  currency: string;
+  language: string;
   categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;
@@ -38,7 +44,13 @@ export interface CreateShopInputDTO {
   address: string;
   phone: string;
   email?: string;
+  website?: string;
   ownerId: string;
+  logo?: string;
+  qrCodeUrl?: string;
+  timezone?: string;
+  currency?: string;
+  language?: string;
   categoryIds: string[];
   openingHours: Array<{
     dayOfWeek: string;
@@ -57,7 +69,13 @@ export interface UpdateShopInputDTO {
   address?: string;
   phone?: string;
   email?: string;
+  website?: string;
   status?: ShopStatus;
+  logo?: string;
+  qrCodeUrl?: string;
+  timezone?: string;
+  currency?: string;
+  language?: string;
   openingHours?: Array<{
     dayOfWeek: string;
     isOpen: boolean;

@@ -163,6 +163,7 @@ export function useShopSettingsActions(
 
       try {
         const presenter = await ClientShopSettingsPresenterFactory.create();
+
         await presenter.updateShop(data);
 
         // Refresh the view model after update

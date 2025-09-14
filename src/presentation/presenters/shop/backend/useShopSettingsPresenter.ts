@@ -274,6 +274,7 @@ export function useShopSettingsPresenter(
         address: formData.shopAddress,
         phone: formData.shopPhone,
         email: formData.shopEmail,
+        website: formData.shopWebsite,
       };
 
       // Convert formData to match UpdateShopSettingsInputDTO type

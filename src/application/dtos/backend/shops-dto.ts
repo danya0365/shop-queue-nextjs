@@ -14,6 +14,12 @@ export interface ShopDTO {
   address: string | null;
   phone: string | null;
   email: string | null;
+  website: string | null;
+  logo: string | null;
+  qrCodeUrl: string | null;
+  timezone: string;
+  currency: string;
+  language: string;
   categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;

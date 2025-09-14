@@ -11,6 +11,7 @@ export interface ShopInfo {
   description: string;
   address: string;
   phone: string;
+  website: string;
   qrCodeUrl: string;
   logo?: string;
   openingHours: string;
@@ -40,6 +41,7 @@ export abstract class BaseShopPresenter {
       description: shop.description || "",
       address: shop.address || "",
       phone: shop.phone || "",
+      website: shop.website || "",
       qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
       logo: "/images/shop-logo.png",
       openingHours: this.createOpeningHoursString(shop.openingHours),

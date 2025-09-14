@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ShopSettings } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
 import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
+import { useEffect, useState } from "react";
 
 interface ShopSettingsViewProps {
   shopId: string;
@@ -68,7 +69,7 @@ export function ShopSettingsView({
 
   // Shop status state (separate from form data since it's part of Shop entity, not ShopSettings)
   const [shopStatus, setShopStatus] = useState<"open" | "closed">("open");
-  
+
   // Initialize shop status from shop data
   useEffect(() => {
     if (viewModel.shop) {
@@ -115,103 +116,112 @@ export function ShopSettingsView({
   // Use form data for editing, original settings for display
   const currentSettings = isEditing ? formData : settings;
 
-  const renderBasicSettings = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            ชื่อร้าน *
-          </label>
-          <input
-            type="text"
-            value={currentSettings.shopName || ""}
-            onChange={(e) => handleInputChange("shopName", e.target.value)}
-            disabled={!isEditing}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
-              fieldErrors.shopName
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 dark:border-gray-600"
-            }`}
-          />
-          {fieldErrors.shopName && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.shopName}</p>
-          )}
+  const renderBasicSettings = () => {
+    const shopSetting = currentSettings as unknown as ShopSettings;
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              ชื่อร้าน *
+            </label>
+            <input
+              type="text"
+              value={shopSetting.shopName || ""}
+              onChange={(e) => handleInputChange("shopName", e.target.value)}
+              disabled={!isEditing}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
+                fieldErrors.shopName
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            />
+            {fieldErrors.shopName && (
+              <p className="mt-1 text-sm text-red-600">
+                {fieldErrors.shopName}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              เบอร์โทรศัพท์
+            </label>
+            <input
+              type="tel"
+              value={shopSetting.shopPhone || ""}
+              onChange={(e) => handleInputChange("shopPhone", e.target.value)}
+              disabled={!isEditing}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            />
+          </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            เบอร์โทรศัพท์
+            คำอธิบายร้าน
           </label>
-          <input
-            type="tel"
-            value={currentSettings.shopPhone || ""}
-            onChange={(e) => handleInputChange("shopPhone", e.target.value)}
+          <textarea
+            value={shopSetting.shopDescription || ""}
+            onChange={(e) =>
+              handleInputChange("shopDescription", e.target.value)
+            }
             disabled={!isEditing}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              อีเมล
+            </label>
+            <input
+              type="email"
+              value={shopSetting.shopEmail || ""}
+              onChange={(e) => handleInputChange("shopEmail", e.target.value)}
+              disabled={!isEditing}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
+                fieldErrors.shopEmail
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            />
+            {fieldErrors.shopEmail && (
+              <p className="mt-1 text-sm text-red-600">
+                {fieldErrors.shopEmail}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              เว็บไซต์
+            </label>
+            <input
+              type="url"
+              value={shopSetting.shopWebsite || ""}
+              onChange={(e) => handleInputChange("shopWebsite", e.target.value)}
+              disabled={!isEditing}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            ที่อยู่
+          </label>
+          <textarea
+            value={shopSetting.shopAddress || ""}
+            onChange={(e) => handleInputChange("shopAddress", e.target.value)}
+            disabled={!isEditing}
+            rows={2}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
           />
         </div>
       </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          คำอธิบายร้าน
-        </label>
-        <textarea
-          value={currentSettings.shopDescription || ""}
-          onChange={(e) => handleInputChange("shopDescription", e.target.value)}
-          disabled={!isEditing}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            อีเมล
-          </label>
-          <input
-            type="email"
-            value={currentSettings.shopEmail || ""}
-            onChange={(e) => handleInputChange("shopEmail", e.target.value)}
-            disabled={!isEditing}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
-              fieldErrors.shopEmail
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 dark:border-gray-600"
-            }`}
-          />
-          {fieldErrors.shopEmail && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.shopEmail}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            เว็บไซต์
-          </label>
-          <input
-            type="url"
-            value={currentSettings.shopWebsite || ""}
-            onChange={(e) => handleInputChange("shopWebsite", e.target.value)}
-            disabled={!isEditing}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          ที่อยู่
-        </label>
-        <textarea
-          value={currentSettings.shopAddress || ""}
-          onChange={(e) => handleInputChange("shopAddress", e.target.value)}
-          disabled={!isEditing}
-          rows={2}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
-        />
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderQueueSettings = () => (
     <div className="space-y-6">
@@ -881,7 +891,7 @@ export function ShopSettingsView({
             ควบคุมสถานะการเปิด-ปิดร้านของคุณ
           </p>
         </div>
-        
+
         <div className="flex justify-center">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-2 shadow-inner flex">
             <button
@@ -895,7 +905,7 @@ export function ShopSettingsView({
               <span className="text-2xl">🟢</span>
               เปิดร้าน
             </button>
-            
+
             <button
               onClick={() => handleShopStatusChange("closed")}
               className={`px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center gap-3 min-w-[140px] justify-center ml-2 ${
@@ -909,16 +919,20 @@ export function ShopSettingsView({
             </button>
           </div>
         </div>
-        
+
         <div className="text-center mt-6">
-          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-            shopStatus === "open"
-              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-              : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-          }`}>
-            <span className={`w-2 h-2 rounded-full animate-pulse ${
-              shopStatus === "open" ? "bg-green-500" : "bg-red-500"
-            }`}></span>
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+              shopStatus === "open"
+                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
+                : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full animate-pulse ${
+                shopStatus === "open" ? "bg-green-500" : "bg-red-500"
+              }`}
+            ></span>
             สถานะปัจจุบัน: {shopStatus === "open" ? "เปิดร้าน" : "ปิดร้าน"}
           </div>
         </div>

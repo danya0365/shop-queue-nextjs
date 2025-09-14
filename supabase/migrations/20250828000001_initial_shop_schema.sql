@@ -812,8 +812,8 @@ CREATE POLICY "Shop managers can delete their shops"
 -- Remove broad INSERT/UPDATE privileges then grant only allowed columns to authenticated users
 REVOKE INSERT ON TABLE public.shops FROM authenticated;
 REVOKE UPDATE ON TABLE public.shops FROM authenticated;
-GRANT INSERT (owner_id, slug, name, description, address, phone, email, status, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
-GRANT UPDATE (name, slug, description, address, phone, email, status, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
+GRANT INSERT (owner_id, slug, name, description, address, phone, email, status, website, logo, qr_code_url, timezone, currency, language, created_at, updated_at) ON TABLE public.shops TO authenticated;
+GRANT UPDATE (name, slug, description, address, phone, email, status, website, logo, qr_code_url, timezone, currency, language, updated_at) ON TABLE public.shops TO authenticated;
 
 -- Row-level privileges for shop_activity_log
 CREATE POLICY "Shop managers can view their shop activities"

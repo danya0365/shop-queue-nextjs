@@ -601,6 +601,12 @@ export class SupabaseShopBackendShopRepository
       if (shop.phone !== undefined) shopSchema.phone = shop.phone;
       if (shop.email !== undefined) shopSchema.email = shop.email;
       if (shop.status !== undefined) shopSchema.status = shop.status;
+      if (shop.website !== undefined) shopSchema.website = shop.website;
+      if (shop.logo !== undefined) shopSchema.logo = shop.logo;
+      if (shop.qrCodeUrl !== undefined) shopSchema.qr_code_url = shop.qrCodeUrl;
+      if (shop.timezone !== undefined) shopSchema.timezone = shop.timezone;
+      if (shop.currency !== undefined) shopSchema.currency = shop.currency;
+      if (shop.language !== undefined) shopSchema.language = shop.language;
 
       // Update shop in database
       const updatedShop = await this.dataSource.update<ShopSchemaRecord>(

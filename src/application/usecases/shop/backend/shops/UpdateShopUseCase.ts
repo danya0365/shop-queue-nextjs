@@ -1,14 +1,20 @@
-import { ShopDTO, UpdateShopInputDTO } from '@/src/application/dtos/shop/backend/shops-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { ShopMapper } from '@/src/application/mappers/shop/backend/shop-mapper';
-import { UpdateShopEntity } from '@/src/domain/entities/shop/backend/backend-shop.entity';
-import type { ShopBackendShopRepository } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
-import { ShopBackendShopError, ShopBackendShopErrorType } from '@/src/domain/repositories/shop/backend/backend-shop-repository';
+import {
+  ShopDTO,
+  UpdateShopInputDTO,
+} from "@/src/application/dtos/shop/backend/shops-dto";
+import { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import { ShopMapper } from "@/src/application/mappers/shop/backend/shop-mapper";
+import { UpdateShopEntity } from "@/src/domain/entities/shop/backend/backend-shop.entity";
+import type { ShopBackendShopRepository } from "@/src/domain/repositories/shop/backend/backend-shop-repository";
+import {
+  ShopBackendShopError,
+  ShopBackendShopErrorType,
+} from "@/src/domain/repositories/shop/backend/backend-shop-repository";
 
-export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> {
-  constructor(
-    private readonly shopRepository: ShopBackendShopRepository
-  ) { }
+export class UpdateShopUseCase
+  implements IUseCase<UpdateShopInputDTO, ShopDTO>
+{
+  constructor(private readonly shopRepository: ShopBackendShopRepository) {}
 
   async execute(params: UpdateShopInputDTO): Promise<ShopDTO> {
     try {
@@ -16,8 +22,8 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
       if (!params.id?.trim()) {
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.VALIDATION_ERROR,
-          'Shop ID is required',
-          'UpdateShopUseCase.execute',
+          "Shop ID is required",
+          "UpdateShopUseCase.execute",
           { params }
         );
       }
@@ -28,20 +34,22 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
         throw new ShopBackendShopError(
           ShopBackendShopErrorType.NOT_FOUND,
           `Shop with ID ${params.id} not found`,
-          'UpdateShopUseCase.execute',
+          "UpdateShopUseCase.execute",
           { params }
         );
       }
 
       // Build update entity with only provided fields
-      const updateShopEntity: Partial<Omit<UpdateShopEntity, 'id' | 'createdAt' | 'updatedAt'>> = {};
+      const updateShopEntity: Partial<
+        Omit<UpdateShopEntity, "id" | "createdAt" | "updatedAt">
+      > = {};
 
       if (params.name !== undefined) {
         if (!params.name.trim()) {
           throw new ShopBackendShopError(
             ShopBackendShopErrorType.VALIDATION_ERROR,
-            'Shop name cannot be empty',
-            'UpdateShopUseCase.execute',
+            "Shop name cannot be empty",
+            "UpdateShopUseCase.execute",
             { params }
           );
         }
@@ -56,8 +64,8 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
         if (!params.address.trim()) {
           throw new ShopBackendShopError(
             ShopBackendShopErrorType.VALIDATION_ERROR,
-            'Shop address cannot be empty',
-            'UpdateShopUseCase.execute',
+            "Shop address cannot be empty",
+            "UpdateShopUseCase.execute",
             { params }
           );
         }
@@ -68,8 +76,8 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
         if (!params.phone.trim()) {
           throw new ShopBackendShopError(
             ShopBackendShopErrorType.VALIDATION_ERROR,
-            'Shop phone cannot be empty',
-            'UpdateShopUseCase.execute',
+            "Shop phone cannot be empty",
+            "UpdateShopUseCase.execute",
             { params }
           );
         }
@@ -84,18 +92,45 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
         updateShopEntity.status = params.status;
       }
 
+      if (params.website !== undefined) {
+        updateShopEntity.website = params.website?.trim();
+      }
+
+      if (params.logo !== undefined) {
+        updateShopEntity.logo = params.logo?.trim();
+      }
+
+      if (params.qrCodeUrl !== undefined) {
+        updateShopEntity.qrCodeUrl = params.qrCodeUrl?.trim();
+      }
+
+      if (params.timezone !== undefined) {
+        updateShopEntity.timezone = params.timezone?.trim();
+      }
+
+      if (params.currency !== undefined) {
+        updateShopEntity.currency = params.currency?.trim();
+      }
+
+      if (params.language !== undefined) {
+        updateShopEntity.language = params.language?.trim();
+      }
+
       if (params.openingHours !== undefined) {
-        updateShopEntity.openingHours = params.openingHours.map(hour => ({
+        updateShopEntity.openingHours = params.openingHours.map((hour) => ({
           dayOfWeek: hour.dayOfWeek,
           isOpen: hour.isOpen,
-          openTime: hour.openTime || '',
-          closeTime: hour.closeTime || '',
-          breakStart: hour.breakStart || '',
-          breakEnd: hour.breakEnd || ''
+          openTime: hour.openTime || "",
+          closeTime: hour.closeTime || "",
+          breakStart: hour.breakStart || "",
+          breakEnd: hour.breakEnd || "",
         }));
       }
 
-      const updatedShop = await this.shopRepository.updateShop(params.id, updateShopEntity);
+      const updatedShop = await this.shopRepository.updateShop(
+        params.id,
+        updateShopEntity
+      );
       return ShopMapper.toDTO(updatedShop);
     } catch (error) {
       if (error instanceof ShopBackendShopError) {
@@ -104,8 +139,8 @@ export class UpdateShopUseCase implements IUseCase<UpdateShopInputDTO, ShopDTO> 
 
       throw new ShopBackendShopError(
         ShopBackendShopErrorType.UNKNOWN,
-        'Failed to update shop',
-        'UpdateShopUseCase.execute',
+        "Failed to update shop",
+        "UpdateShopUseCase.execute",
         { params },
         error
       );
