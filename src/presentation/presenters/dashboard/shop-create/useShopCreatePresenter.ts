@@ -1,206 +1,42 @@
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { IShopService } from "@/src/application/services/shop/ShopService";
 import { getClientContainer } from "@/src/di/client-container";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { isLocalDevelopment } from "@/src/utils/environment";
 import { getMockShopData } from "@/src/utils/mock-data";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ClientShopCreatePresenterFactory } from "./ShopCreatePresenter";
 
 const clientContainer = getClientContainer();
-const shopService = clientContainer.resolve<IShopService>("ShopService");
 const profileService =
   clientContainer.resolve<IProfileService>("ProfileService");
 const logger = clientContainer.resolve<Logger>("Logger");
+
+// Helper function to map a single day's operating hours to DTO format
+const mapDayToOpeningHours = (
+  dayOfWeek: string,
+  dayData: ShopCreateData["operatingHours"][keyof ShopCreateData["operatingHours"]]
+) => {
+  return {
+    dayOfWeek,
+    isOpen: !dayData.closed,
+    openTime: dayData.closed || dayData.is24Hours ? undefined : dayData.openTime,
+    closeTime: dayData.closed || dayData.is24Hours ? undefined : dayData.closeTime,
+    breakStart: dayData.closed || dayData.is24Hours || !dayData.hasBreak ? undefined : dayData.breakStart,
+    breakEnd: dayData.closed || dayData.is24Hours || !dayData.hasBreak ? undefined : dayData.breakEnd,
+    is24Hours: !dayData.closed && dayData.is24Hours,
+  };
+};
 
 // Helper function to map form operating hours to DTO opening hours format
 const mapOperatingHoursToOpeningHours = (
   operatingHours: ShopCreateData["operatingHours"]
 ) => {
-  return [
-    {
-      dayOfWeek: "monday",
-      isOpen: !operatingHours.monday.closed,
-      openTime:
-        operatingHours.monday.closed || operatingHours.monday.is24Hours
-          ? undefined
-          : operatingHours.monday.openTime,
-      closeTime:
-        operatingHours.monday.closed || operatingHours.monday.is24Hours
-          ? undefined
-          : operatingHours.monday.closeTime,
-      breakStart:
-        operatingHours.monday.closed ||
-        operatingHours.monday.is24Hours ||
-        !operatingHours.monday.hasBreak
-          ? undefined
-          : operatingHours.monday.breakStart,
-      breakEnd:
-        operatingHours.monday.closed ||
-        operatingHours.monday.is24Hours ||
-        !operatingHours.monday.hasBreak
-          ? undefined
-          : operatingHours.monday.breakEnd,
-      is24Hours:
-        !operatingHours.monday.closed && operatingHours.monday.is24Hours,
-    },
-    {
-      dayOfWeek: "tuesday",
-      isOpen: !operatingHours.tuesday.closed,
-      openTime:
-        operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours
-          ? undefined
-          : operatingHours.tuesday.openTime,
-      closeTime:
-        operatingHours.tuesday.closed || operatingHours.tuesday.is24Hours
-          ? undefined
-          : operatingHours.tuesday.closeTime,
-      breakStart:
-        operatingHours.tuesday.closed ||
-        operatingHours.tuesday.is24Hours ||
-        !operatingHours.tuesday.hasBreak
-          ? undefined
-          : operatingHours.tuesday.breakStart,
-      breakEnd:
-        operatingHours.tuesday.closed ||
-        operatingHours.tuesday.is24Hours ||
-        !operatingHours.tuesday.hasBreak
-          ? undefined
-          : operatingHours.tuesday.breakEnd,
-      is24Hours:
-        !operatingHours.tuesday.closed && operatingHours.tuesday.is24Hours,
-    },
-    {
-      dayOfWeek: "wednesday",
-      isOpen: !operatingHours.wednesday.closed,
-      openTime:
-        operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours
-          ? undefined
-          : operatingHours.wednesday.openTime,
-      closeTime:
-        operatingHours.wednesday.closed || operatingHours.wednesday.is24Hours
-          ? undefined
-          : operatingHours.wednesday.closeTime,
-      breakStart:
-        operatingHours.wednesday.closed ||
-        operatingHours.wednesday.is24Hours ||
-        !operatingHours.wednesday.hasBreak
-          ? undefined
-          : operatingHours.wednesday.breakStart,
-      breakEnd:
-        operatingHours.wednesday.closed ||
-        operatingHours.wednesday.is24Hours ||
-        !operatingHours.wednesday.hasBreak
-          ? undefined
-          : operatingHours.wednesday.breakEnd,
-      is24Hours:
-        !operatingHours.wednesday.closed && operatingHours.wednesday.is24Hours,
-    },
-    {
-      dayOfWeek: "thursday",
-      isOpen: !operatingHours.thursday.closed,
-      openTime:
-        operatingHours.thursday.closed || operatingHours.thursday.is24Hours
-          ? undefined
-          : operatingHours.thursday.openTime,
-      closeTime:
-        operatingHours.thursday.closed || operatingHours.thursday.is24Hours
-          ? undefined
-          : operatingHours.thursday.closeTime,
-      breakStart:
-        operatingHours.thursday.closed ||
-        operatingHours.thursday.is24Hours ||
-        !operatingHours.thursday.hasBreak
-          ? undefined
-          : operatingHours.thursday.breakStart,
-      breakEnd:
-        operatingHours.thursday.closed ||
-        operatingHours.thursday.is24Hours ||
-        !operatingHours.thursday.hasBreak
-          ? undefined
-          : operatingHours.thursday.breakEnd,
-      is24Hours:
-        !operatingHours.thursday.closed && operatingHours.thursday.is24Hours,
-    },
-    {
-      dayOfWeek: "friday",
-      isOpen: !operatingHours.friday.closed,
-      openTime:
-        operatingHours.friday.closed || operatingHours.friday.is24Hours
-          ? undefined
-          : operatingHours.friday.openTime,
-      closeTime:
-        operatingHours.friday.closed || operatingHours.friday.is24Hours
-          ? undefined
-          : operatingHours.friday.closeTime,
-      breakStart:
-        operatingHours.friday.closed ||
-        operatingHours.friday.is24Hours ||
-        !operatingHours.friday.hasBreak
-          ? undefined
-          : operatingHours.friday.breakStart,
-      breakEnd:
-        operatingHours.friday.closed ||
-        operatingHours.friday.is24Hours ||
-        !operatingHours.friday.hasBreak
-          ? undefined
-          : operatingHours.friday.breakEnd,
-      is24Hours:
-        !operatingHours.friday.closed && operatingHours.friday.is24Hours,
-    },
-    {
-      dayOfWeek: "saturday",
-      isOpen: !operatingHours.saturday.closed,
-      openTime:
-        operatingHours.saturday.closed || operatingHours.saturday.is24Hours
-          ? undefined
-          : operatingHours.saturday.openTime,
-      closeTime:
-        operatingHours.saturday.closed || operatingHours.saturday.is24Hours
-          ? undefined
-          : operatingHours.saturday.closeTime,
-      breakStart:
-        operatingHours.saturday.closed ||
-        operatingHours.saturday.is24Hours ||
-        !operatingHours.saturday.hasBreak
-          ? undefined
-          : operatingHours.saturday.breakStart,
-      breakEnd:
-        operatingHours.saturday.closed ||
-        operatingHours.saturday.is24Hours ||
-        !operatingHours.saturday.hasBreak
-          ? undefined
-          : operatingHours.saturday.breakEnd,
-      is24Hours:
-        !operatingHours.saturday.closed && operatingHours.saturday.is24Hours,
-    },
-    {
-      dayOfWeek: "sunday",
-      isOpen: !operatingHours.sunday.closed,
-      openTime:
-        operatingHours.sunday.closed || operatingHours.sunday.is24Hours
-          ? undefined
-          : operatingHours.sunday.openTime,
-      closeTime:
-        operatingHours.sunday.closed || operatingHours.sunday.is24Hours
-          ? undefined
-          : operatingHours.sunday.closeTime,
-      breakStart:
-        operatingHours.sunday.closed ||
-        operatingHours.sunday.is24Hours ||
-        !operatingHours.sunday.hasBreak
-          ? undefined
-          : operatingHours.sunday.breakStart,
-      breakEnd:
-        operatingHours.sunday.closed ||
-        operatingHours.sunday.is24Hours ||
-        !operatingHours.sunday.hasBreak
-          ? undefined
-          : operatingHours.sunday.breakEnd,
-      is24Hours:
-        !operatingHours.sunday.closed && operatingHours.sunday.is24Hours,
-    },
-  ];
+  const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+  
+  return daysOfWeek.map(day => 
+    mapDayToOpeningHours(day, operatingHours[day as keyof typeof operatingHours])
+  );
 };
 
 // Define form data interface
@@ -382,10 +218,6 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
         return false;
       }
 
-      logger.info("ShopCreatePresenter: Current profile", {
-        profile: currentProfile,
-      });
-
       // Map form data to CreateShopInputDTO format
       const createShopData = {
         name: data.name,
@@ -398,36 +230,25 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
         openingHours: mapOperatingHoursToOpeningHours(data.operatingHours),
       };
 
-      logger.info("ShopCreatePresenter: Creating shop", {
-        shopData: createShopData,
-      });
+      // Use ShopCreatePresenter for business logic
+      const presenter = await ClientShopCreatePresenterFactory.create();
+      const result = await presenter.createShop(createShopData);
 
-      const allShops = await shopService.getShopsByOwnerId(currentProfile.id);
-      logger.info("ShopCreatePresenter: All shops", { shops: allShops });
+      if (result) {
+        // Mock success response
+        setSuccess(true);
+        logger.info("ShopCreatePresenter: Shop created successfully");
 
-      if (allShops.length >= 5) {
-        setError(
-          "คุณไม่สามารถสร้างร้านค้าเพิ่มเติมได้เนื่องจากคุณมีร้านค้าครบแล้ว"
-        );
-        return false;
+        // Redirect to dashboard after success
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 2000);
       }
 
-      // Call the service with properly mapped data
-      await shopService.createShop(createShopData);
-
-      // Mock success response
-      setSuccess(true);
-      logger.info("ShopCreatePresenter: Shop created successfully");
-
-      // Redirect to dashboard after success
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
-
-      return true;
+      return result;
     } catch (error) {
       logger.error("ShopCreatePresenter: Error creating shop", error);
-      setError("เกิดข้อผิดพลาดในการสร้างร้านค้า กรุณาลองใหม่อีกครั้ง");
+      setError(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการสร้างร้านค้า กรุณาลองใหม่อีกครั้ง");
       return false;
     } finally {
       setIsLoading(false);
