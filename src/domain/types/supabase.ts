@@ -1726,60 +1726,156 @@ export type Database = {
       }
       shop_settings: {
         Row: {
-          allow_advance_booking: boolean | null
+          accept_bank_transfer: boolean
+          accept_cash: boolean
+          accept_credit_card: boolean
+          accept_promptpay: boolean
+          allow_advance_booking: boolean
+          allow_data_export: boolean
+          allow_guest_booking: boolean
           allow_registration: boolean | null
+          allow_walk_in: boolean
+          api_key: string
+          auto_confirm_booking: boolean
           auto_confirm_queues: boolean | null
           backup_frequency: string | null
           booking_window_hours: number | null
           cancellation_deadline: number | null
           created_at: string | null
           data_retention_days: number | null
+          date_format: string
+          email_enabled: boolean
+          enable_analytics: boolean
+          enable_data_backup: boolean
+          enable_reviews: boolean
+          enable_session_timeout: boolean
+          enable_two_factor: boolean
+          enable_webhooks: boolean
           estimated_service_time: number | null
           id: string
+          line_notify_enabled: boolean
           log_level: string | null
           maintenance_mode: boolean | null
+          max_advance_booking_days: number
+          max_queue_per_service: number
           max_queue_size: number | null
-          require_email_verification: boolean | null
+          minimum_points_to_redeem: number
+          notify_before_minutes: number
+          points_enabled: boolean
+          points_expiry_months: number
+          points_per_baht: number
+          promptpay_id: string | null
+          queue_timeout_minutes: number
+          require_customer_phone: boolean
+          require_email_verification: boolean
           session_timeout: number | null
           shop_id: string
+          show_prices_public: boolean
+          sms_enabled: boolean
+          theme: string
+          time_format: string
           updated_at: string | null
         }
         Insert: {
-          allow_advance_booking?: boolean | null
+          accept_bank_transfer?: boolean
+          accept_cash?: boolean
+          accept_credit_card?: boolean
+          accept_promptpay?: boolean
+          allow_advance_booking?: boolean
+          allow_data_export?: boolean
+          allow_guest_booking?: boolean
           allow_registration?: boolean | null
+          allow_walk_in?: boolean
+          api_key?: string
+          auto_confirm_booking?: boolean
           auto_confirm_queues?: boolean | null
           backup_frequency?: string | null
           booking_window_hours?: number | null
           cancellation_deadline?: number | null
           created_at?: string | null
           data_retention_days?: number | null
+          date_format?: string
+          email_enabled?: boolean
+          enable_analytics?: boolean
+          enable_data_backup?: boolean
+          enable_reviews?: boolean
+          enable_session_timeout?: boolean
+          enable_two_factor?: boolean
+          enable_webhooks?: boolean
           estimated_service_time?: number | null
           id?: string
+          line_notify_enabled?: boolean
           log_level?: string | null
           maintenance_mode?: boolean | null
+          max_advance_booking_days?: number
+          max_queue_per_service?: number
           max_queue_size?: number | null
-          require_email_verification?: boolean | null
+          minimum_points_to_redeem?: number
+          notify_before_minutes?: number
+          points_enabled?: boolean
+          points_expiry_months?: number
+          points_per_baht?: number
+          promptpay_id?: string | null
+          queue_timeout_minutes?: number
+          require_customer_phone?: boolean
+          require_email_verification?: boolean
           session_timeout?: number | null
           shop_id: string
+          show_prices_public?: boolean
+          sms_enabled?: boolean
+          theme?: string
+          time_format?: string
           updated_at?: string | null
         }
         Update: {
-          allow_advance_booking?: boolean | null
+          accept_bank_transfer?: boolean
+          accept_cash?: boolean
+          accept_credit_card?: boolean
+          accept_promptpay?: boolean
+          allow_advance_booking?: boolean
+          allow_data_export?: boolean
+          allow_guest_booking?: boolean
           allow_registration?: boolean | null
+          allow_walk_in?: boolean
+          api_key?: string
+          auto_confirm_booking?: boolean
           auto_confirm_queues?: boolean | null
           backup_frequency?: string | null
           booking_window_hours?: number | null
           cancellation_deadline?: number | null
           created_at?: string | null
           data_retention_days?: number | null
+          date_format?: string
+          email_enabled?: boolean
+          enable_analytics?: boolean
+          enable_data_backup?: boolean
+          enable_reviews?: boolean
+          enable_session_timeout?: boolean
+          enable_two_factor?: boolean
+          enable_webhooks?: boolean
           estimated_service_time?: number | null
           id?: string
+          line_notify_enabled?: boolean
           log_level?: string | null
           maintenance_mode?: boolean | null
+          max_advance_booking_days?: number
+          max_queue_per_service?: number
           max_queue_size?: number | null
-          require_email_verification?: boolean | null
+          minimum_points_to_redeem?: number
+          notify_before_minutes?: number
+          points_enabled?: boolean
+          points_expiry_months?: number
+          points_per_baht?: number
+          promptpay_id?: string | null
+          queue_timeout_minutes?: number
+          require_customer_phone?: boolean
+          require_email_verification?: boolean
           session_timeout?: number | null
           shop_id?: string
+          show_prices_public?: boolean
+          sms_enabled?: boolean
+          theme?: string
+          time_format?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -2949,7 +3045,12 @@ export type Database = {
         Returns: undefined
       }
       add_queue_feedback: {
-        Args: { p_queue_id: string; p_feedback: string; p_rating?: number }
+        Args: {
+          p_queue_id: string
+          p_customer_id: string
+          p_feedback: string
+          p_rating?: number
+        }
         Returns: undefined
       }
       can_perform_action: {
@@ -3046,7 +3147,8 @@ export type Database = {
           p_customer_name: string
           p_customer_phone?: string
           p_customer_email?: string
-          p_service_ids?: string[]
+          p_customer_id?: string
+          p_services?: Json
           p_note?: string
           p_priority?: Database["public"]["Enums"]["queue_priority"]
         }

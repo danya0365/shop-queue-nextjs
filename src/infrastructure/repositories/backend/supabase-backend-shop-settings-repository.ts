@@ -186,16 +186,6 @@ export class SupabaseBackendShopSettingsRepository implements ShopBackendShopSet
       const defaultSettings: Partial<
         Omit<UpdateShopSettingsEntity, "id" | "createdAt" | "updatedAt">
       > = {
-        shopName: 'My Shop',
-        shopDescription: '',
-        shopPhone: '',
-        shopEmail: '',
-        shopAddress: '',
-        shopWebsite: '',
-        shopLogo: '',
-        timezone: 'Asia/Bangkok',
-        defaultOpenTime: '09:00',
-        defaultCloseTime: '18:00',
         maxQueuePerService: 10,
         queueTimeoutMinutes: 30,
         allowWalkIn: true,
@@ -215,8 +205,6 @@ export class SupabaseBackendShopSettingsRepository implements ShopBackendShopSet
         acceptPromptPay: false,
         promptPayId: '',
         theme: 'light',
-        language: 'th',
-        currency: 'THB',
         dateFormat: 'DD/MM/YYYY',
         timeFormat: '24h',
         autoConfirmBooking: true,
@@ -296,13 +284,7 @@ export class SupabaseBackendShopSettingsRepository implements ShopBackendShopSet
       // Basic validation - in a real implementation, this would have comprehensive validation logic
       const errors: string[] = [];
       
-      if (!data.shopName || data.shopName.trim().length === 0) {
-        errors.push('Shop name is required');
-      }
       
-      if (!data.timezone || data.timezone.trim().length === 0) {
-        errors.push('Timezone is required');
-      }
       
       const result: ShopSettingsValidationResult = {
         isValid: errors.length === 0,

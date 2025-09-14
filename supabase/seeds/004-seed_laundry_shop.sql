@@ -434,51 +434,6 @@ CROSS JOIN (
     ('L003'::text, 'serving'::public.queue_status, 'high'::public.queue_priority, 2880::integer, NOW() + INTERVAL '1 day', 'ชุดสูท 1 ชุด'::text, NULL::text, NULL::integer, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', NOW() - INTERVAL '30 minutes', NULL::timestamp)
 ) AS q(queue_number, status, priority, estimated_duration, estimated_call_time, note, feedback, rating, created_at, updated_at, served_at, completed_at);
 
--- Insert shop settings
-WITH shop_data AS (
-  SELECT s.id AS shop_id
-  FROM shops s
-  JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'laundry_owner'
-  LIMIT 1
-)
-INSERT INTO shop_settings (
-  shop_id,
-  max_queue_size,
-  estimated_service_time,
-  allow_advance_booking,
-  booking_window_hours,
-  auto_confirm_queues,
-  cancellation_deadline,
-  maintenance_mode,
-  allow_registration,
-  require_email_verification,
-  session_timeout,
-  backup_frequency,
-  log_level,
-  data_retention_days,
-  created_at,
-  updated_at
-)
-SELECT
-  sd.shop_id,
-  40,
-  1440,
-  true,
-  168,
-  true,
-  120,
-  false,
-  true,
-  false,
-  60,
-  'daily',
-  'info',
-  180,
-  NOW() - INTERVAL '12 months',
-  NOW() - INTERVAL '1 day'
-FROM shop_data sd;
-
 -- Insert customer points
 WITH shop_data AS (
   SELECT s.id AS shop_id

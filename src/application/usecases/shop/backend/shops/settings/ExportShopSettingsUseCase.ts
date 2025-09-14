@@ -67,9 +67,9 @@ export class ExportShopSettingsUseCase
       // Include business hours if requested
       if (params.includeBusinessHours) {
         exportData.businessHours = {
-          timezone: shopSettings.timezone,
-          defaultOpenTime: shopSettings.defaultOpenTime,
-          defaultCloseTime: shopSettings.defaultCloseTime,
+          timezone: 'Asia/Bangkok',
+          defaultOpenTime: '09:00',
+          defaultCloseTime: '17:00',
         };
       }
 
@@ -119,8 +119,8 @@ export class ExportShopSettingsUseCase
       if (params.includeDisplaySettings) {
         exportData.displaySettings = {
           theme: shopSettings.theme,
-          language: shopSettings.language,
-          currency: shopSettings.currency,
+          language: 'th',
+          currency: 'THB',
           dateFormat: shopSettings.dateFormat,
           timeFormat: shopSettings.timeFormat,
         };

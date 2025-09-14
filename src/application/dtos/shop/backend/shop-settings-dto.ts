@@ -1,7 +1,5 @@
+import { ShopSettingsEntity } from "@/src/domain/entities/shop/backend/backend-shop-settings.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
-import { 
-  ShopSettingsEntity
-} from "@/src/domain/entities/shop/backend/backend-shop-settings.entity";
 
 /**
  * Shop Settings DTO for data transfer between layers
@@ -63,6 +61,20 @@ export interface ShopSettingsDTO {
   showPricesPublic: boolean;
   enableReviews: boolean;
 
+  // Security Settings
+  enableTwoFactor: boolean;
+  requireEmailVerification: boolean;
+  enableSessionTimeout: boolean;
+
+  // Data & Privacy Settings
+  enableAnalytics: boolean;
+  enableDataBackup: boolean;
+  allowDataExport: boolean;
+
+  // API & Integration Settings
+  apiKey: string;
+  enableWebhooks: boolean;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +122,19 @@ export interface CreateShopSettingsInputDTO {
   allowGuestBooking?: boolean;
   showPricesPublic?: boolean;
   enableReviews?: boolean;
+  // Security Settings
+  enableTwoFactor?: boolean;
+  requireEmailVerification?: boolean;
+  enableSessionTimeout?: boolean;
+
+  // Data & Privacy Settings
+  enableAnalytics?: boolean;
+  enableDataBackup?: boolean;
+  allowDataExport?: boolean;
+
+  // API & Integration Settings
+  apiKey?: string;
+  enableWebhooks?: boolean;
 }
 
 /**
@@ -155,6 +180,19 @@ export interface UpdateShopSettingsInputDTO {
   allowGuestBooking?: boolean;
   showPricesPublic?: boolean;
   enableReviews?: boolean;
+  // Security Settings
+  enableTwoFactor?: boolean;
+  requireEmailVerification?: boolean;
+  enableSessionTimeout?: boolean;
+
+  // Data & Privacy Settings
+  enableAnalytics?: boolean;
+  enableDataBackup?: boolean;
+  allowDataExport?: boolean;
+
+  // API & Integration Settings
+  apiKey?: string;
+  enableWebhooks?: boolean;
 }
 
 /**
@@ -198,7 +236,7 @@ export interface ValidateShopSettingsInput {
  */
 export interface ExportShopSettingsInput {
   shopId: string;
-  format: 'json' | 'csv' | 'xml';
+  format: "json" | "csv" | "xml";
   includeBasicInfo?: boolean;
   includeBusinessHours?: boolean;
   includeQueueSettings?: boolean;

@@ -14,7 +14,6 @@ import { BackendServicesServiceFactory } from "../application/services/backend/B
 import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
 import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/backend/BackendSubscriptionService";
 import { ShopBackendDashboardServiceFactory } from "../application/services/shop/backend/BackendDashboardService";
-import { ShopSettingsBackendServiceFactory } from "../application/services/shop/backend/shop-settings-backend-service";
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import {
@@ -190,10 +189,6 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const backendCustomersService = BackendCustomersServiceFactory.create(
       customerRepository,
-      logger
-    );
-    const backendShopSettingsService = ShopSettingsBackendServiceFactory.create(
-      shopSettingsRepository,
       logger
     );
 

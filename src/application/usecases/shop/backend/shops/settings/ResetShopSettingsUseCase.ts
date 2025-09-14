@@ -70,9 +70,9 @@ export class ResetShopSettingsUseCase
       // Reset business hours if requested
       if (params.resetBusinessHours) {
         originalValues.businessHours = {
-          timezone: existingSettings.timezone,
-          defaultOpenTime: existingSettings.defaultOpenTime,
-          defaultCloseTime: existingSettings.defaultCloseTime,
+          timezone: 'Asia/Bangkok',
+          defaultOpenTime: '09:00',
+          defaultCloseTime: '17:00',
         };
         Object.assign(resetData, this.getDefaultBusinessHours());
       }
@@ -127,8 +127,8 @@ export class ResetShopSettingsUseCase
       if (params.resetDisplaySettings) {
         originalValues.displaySettings = {
           theme: existingSettings.theme,
-          language: existingSettings.language,
-          currency: existingSettings.currency,
+          language: 'th',
+          currency: 'THB',
           dateFormat: existingSettings.dateFormat,
           timeFormat: existingSettings.timeFormat,
         };

@@ -684,51 +684,6 @@ FROM payment_data pd
 JOIN queue_data qd ON pd.queue_id = qd.queue_id
 WHERE qd.queue_number IN ('M001', 'M002');
 
--- Insert shop settings
-WITH shop_data AS (
-  SELECT s.id AS shop_id
-  FROM shops s
-  JOIN profiles p ON s.owner_id = p.id
-  WHERE p.username = 'mobile_repair_owner'
-  LIMIT 1
-)
-INSERT INTO shop_settings (
-  shop_id,
-  max_queue_size,
-  estimated_service_time,
-  allow_advance_booking,
-  booking_window_hours,
-  auto_confirm_queues,
-  cancellation_deadline,
-  maintenance_mode,
-  allow_registration,
-  require_email_verification,
-  session_timeout,
-  backup_frequency,
-  log_level,
-  data_retention_days,
-  created_at,
-  updated_at
-)
-SELECT
-  sd.shop_id,
-  30,
-  45,
-  true,
-  72,
-  true,
-  60,
-  false,
-  true,
-  false,
-  45,
-  'daily',
-  'info',
-  180,
-  NOW() - INTERVAL '12 months',
-  NOW() - INTERVAL '1 day'
-FROM shop_data sd;
-
 -- Insert notification settings
 WITH shop_data AS (
   SELECT s.id AS shop_id

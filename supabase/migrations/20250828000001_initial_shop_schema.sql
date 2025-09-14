@@ -382,22 +382,87 @@ CREATE TABLE reward_usages (
 CREATE TABLE shop_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
-    max_queue_size INTEGER DEFAULT 50,
+
     estimated_service_time INTEGER DEFAULT 15, -- minutes
-    allow_advance_booking BOOLEAN DEFAULT false,
-    booking_window_hours INTEGER DEFAULT 24,
-    auto_confirm_queues BOOLEAN DEFAULT true,
-    cancellation_deadline INTEGER DEFAULT 30, -- minutes
+    
     maintenance_mode BOOLEAN DEFAULT false,
     allow_registration BOOLEAN DEFAULT true,
-    require_email_verification BOOLEAN DEFAULT false,
     session_timeout INTEGER DEFAULT 30, -- minutes
     backup_frequency TEXT DEFAULT 'daily',
     log_level TEXT DEFAULT 'info',
     data_retention_days INTEGER DEFAULT 365,
+    
+    -- Queue Settings
+    auto_confirm_queues BOOLEAN DEFAULT true,
+    max_queue_size INTEGER DEFAULT 50,
+    max_queue_per_service INTEGER NOT NULL DEFAULT 10,
+    queue_timeout_minutes INTEGER NOT NULL DEFAULT 30,
+    allow_walk_in BOOLEAN NOT NULL DEFAULT true,
+    allow_advance_booking BOOLEAN NOT NULL DEFAULT true,
+    max_advance_booking_days INTEGER NOT NULL DEFAULT 7,
+    booking_window_hours INTEGER DEFAULT 24,
+    cancellation_deadline INTEGER DEFAULT 30, -- minutes
+    
+    -- Points System
+    points_enabled BOOLEAN NOT NULL DEFAULT false,
+    points_per_baht INTEGER NOT NULL DEFAULT 1,
+    points_expiry_months INTEGER NOT NULL DEFAULT 12,
+    minimum_points_to_redeem INTEGER NOT NULL DEFAULT 100,
+    
+    -- Notification Settings
+    sms_enabled BOOLEAN NOT NULL DEFAULT false,
+    email_enabled BOOLEAN NOT NULL DEFAULT true,
+    line_notify_enabled BOOLEAN NOT NULL DEFAULT false,
+    notify_before_minutes INTEGER NOT NULL DEFAULT 15,
+    
+    -- Payment Settings
+    accept_cash BOOLEAN NOT NULL DEFAULT true,
+    accept_credit_card BOOLEAN NOT NULL DEFAULT false,
+    accept_bank_transfer BOOLEAN NOT NULL DEFAULT false,
+    accept_promptpay BOOLEAN NOT NULL DEFAULT false,
+    promptpay_id TEXT,
+    
+    -- Display Settings
+    theme TEXT NOT NULL DEFAULT 'light' CHECK (theme IN ('light', 'dark', 'auto')),
+    date_format TEXT NOT NULL DEFAULT 'DD/MM/YYYY',
+    time_format TEXT NOT NULL DEFAULT '24h' CHECK (time_format IN ('12h', '24h')),
+    
+    -- Advanced Settings
+    auto_confirm_booking BOOLEAN NOT NULL DEFAULT false,
+    require_customer_phone BOOLEAN NOT NULL DEFAULT true,
+    allow_guest_booking BOOLEAN NOT NULL DEFAULT false,
+    show_prices_public BOOLEAN NOT NULL DEFAULT true,
+    enable_reviews BOOLEAN NOT NULL DEFAULT true,
+    
+    -- Security Settings
+    enable_two_factor BOOLEAN NOT NULL DEFAULT false,
+    require_email_verification BOOLEAN NOT NULL DEFAULT false,
+    enable_session_timeout BOOLEAN NOT NULL DEFAULT false,
+    
+    -- Data & Privacy Settings
+    enable_analytics BOOLEAN NOT NULL DEFAULT false,
+    enable_data_backup BOOLEAN NOT NULL DEFAULT false,
+    allow_data_export BOOLEAN NOT NULL DEFAULT false,
+    
+    -- API & Integration Settings
+    api_key TEXT NOT NULL DEFAULT '',
+    enable_webhooks BOOLEAN NOT NULL DEFAULT false,
+    
+    -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(shop_id)
+    
+    -- Constraints
+    UNIQUE(shop_id),
+    
+    -- Check constraints
+    CONSTRAINT shop_settings_max_queue_per_service_check CHECK (max_queue_per_service > 0),
+    CONSTRAINT shop_settings_queue_timeout_minutes_check CHECK (queue_timeout_minutes > 0),
+    CONSTRAINT shop_settings_max_advance_booking_days_check CHECK (max_advance_booking_days > 0),
+    CONSTRAINT shop_settings_points_per_baht_check CHECK (points_per_baht >= 0),
+    CONSTRAINT shop_settings_points_expiry_months_check CHECK (points_expiry_months > 0),
+    CONSTRAINT shop_settings_minimum_points_to_redeem_check CHECK (minimum_points_to_redeem >= 0),
+    CONSTRAINT shop_settings_notify_before_minutes_check CHECK (notify_before_minutes >= 0)
 );
 
 -- 21. Notification Settings
@@ -521,6 +586,118 @@ CREATE TRIGGER update_customer_points_updated_at BEFORE UPDATE ON customer_point
 CREATE TRIGGER update_rewards_updated_at BEFORE UPDATE ON rewards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_shop_settings_updated_at BEFORE UPDATE ON shop_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_notification_settings_updated_at BEFORE UPDATE ON notification_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger function to automatically create shop_settings when a shop is created
+CREATE OR REPLACE FUNCTION create_shop_settings_on_shop_create()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Insert default shop settings for the new shop
+  INSERT INTO public.shop_settings (
+    shop_id,
+    estimated_service_time,
+    maintenance_mode,
+    allow_registration,
+    session_timeout,
+    backup_frequency,
+    log_level,
+    data_retention_days,
+    auto_confirm_queues,
+    max_queue_size,
+    max_queue_per_service,
+    queue_timeout_minutes,
+    allow_walk_in,
+    allow_advance_booking,
+    max_advance_booking_days,
+    booking_window_hours,
+    cancellation_deadline,
+    points_enabled,
+    points_per_baht,
+    points_expiry_months,
+    minimum_points_to_redeem,
+    sms_enabled,
+    email_enabled,
+    line_notify_enabled,
+    notify_before_minutes,
+    accept_cash,
+    accept_credit_card,
+    accept_bank_transfer,
+    accept_promptpay,
+    promptpay_id,
+    theme,
+    date_format,
+    time_format,
+    auto_confirm_booking,
+    require_customer_phone,
+    allow_guest_booking,
+    show_prices_public,
+    enable_reviews,
+    enable_two_factor,
+    require_email_verification,
+    enable_session_timeout,
+    enable_analytics,
+    enable_data_backup,
+    allow_data_export,
+    api_key,
+    enable_webhooks
+  ) VALUES (
+    NEW.id,
+    15, -- estimated_service_time
+    false, -- maintenance_mode
+    true, -- allow_registration
+    30, -- session_timeout
+    'daily', -- backup_frequency
+    'info', -- log_level
+    365, -- data_retention_days
+    true, -- auto_confirm_queues
+    50, -- max_queue_size
+    10, -- max_queue_per_service
+    30, -- queue_timeout_minutes
+    true, -- allow_walk_in
+    true, -- allow_advance_booking
+    7, -- max_advance_booking_days
+    24, -- booking_window_hours
+    30, -- cancellation_deadline
+    false, -- points_enabled
+    1, -- points_per_baht
+    12, -- points_expiry_months
+    100, -- minimum_points_to_redeem
+    false, -- sms_enabled
+    true, -- email_enabled
+    false, -- line_notify_enabled
+    15, -- notify_before_minutes
+    true, -- accept_cash
+    false, -- accept_credit_card
+    false, -- accept_bank_transfer
+    false, -- accept_promptpay
+    '', -- promptpay_id
+    'light', -- theme
+    'DD/MM/YYYY', -- date_format
+    '24h', -- time_format
+    false, -- auto_confirm_booking
+    true, -- require_customer_phone
+    false, -- allow_guest_booking
+    true, -- show_prices_public
+    true, -- enable_reviews
+    false, -- enable_two_factor
+    false, -- require_email_verification
+    false, -- enable_session_timeout
+    false, -- enable_analytics
+    false, -- enable_data_backup
+    false, -- allow_data_export
+    '', -- api_key
+    false -- enable_webhooks
+  )
+  ON CONFLICT (shop_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to automatically insert shop_settings when a shop is created
+CREATE TRIGGER trigger_create_shop_settings_on_shop_create
+AFTER INSERT ON public.shops
+FOR EACH ROW
+EXECUTE FUNCTION create_shop_settings_on_shop_create();
 
 -- Enable Row Level Security on all shop tables
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;

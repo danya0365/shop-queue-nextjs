@@ -8,6 +8,7 @@ import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/
 import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
 import { ShopBackendQueuesServiceFactory } from "../application/services/shop/backend/BackendQueuesService";
 import { ShopBackendServicesServiceFactory } from "../application/services/shop/backend/BackendServicesService";
+import { ShopBackendShopSettingsServiceFactory } from "../application/services/shop/backend/BackendShopSettingsService";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
@@ -39,6 +40,7 @@ import { SupabaseShopBackendPromotionRepository } from "../infrastructure/reposi
 import { SupabaseShopBackendQueueRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-repository";
 import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
+import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
 import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
@@ -92,6 +94,8 @@ export async function createServerContainer(): Promise<Container> {
       new SupabaseShopBackendPromotionRepository(databaseDatasource, logger);
     const shopBackendServiceRepository =
       new SupabaseShopBackendServiceRepository(databaseDatasource, logger);
+    const shopBackendShopSettingsRepository =
+      new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -177,6 +181,11 @@ export async function createServerContainer(): Promise<Container> {
         shopBackendOpeningHoursRepository,
         logger
       );
+    const shopBackendShopSettingsService =
+      ShopBackendShopSettingsServiceFactory.create(
+        shopBackendShopSettingsRepository,
+        logger
+      );
 
     // Register all services in the container
     container.registerInstance("AuthService", authService);
@@ -210,6 +219,10 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance(
       "ShopBackendOpeningHoursService",
       shopBackendOpeningHoursService
+    );
+    container.registerInstance(
+      "ShopBackendShopSettingsService",
+      shopBackendShopSettingsService
     );
     container.registerInstance(
       "PosterTemplateBackendService",

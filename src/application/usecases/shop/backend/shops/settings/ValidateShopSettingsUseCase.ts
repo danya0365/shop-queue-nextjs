@@ -142,11 +142,6 @@ export class ValidateShopSettingsUseCase
     }
 
     // Validate payment settings
-    if (settings.currency !== undefined) {
-      if (!settings.currency?.trim()) {
-        result.errors.push("Currency cannot be empty");
-      }
-    }
 
     // Validate display settings
     if (settings.theme !== undefined) {
@@ -155,11 +150,6 @@ export class ValidateShopSettingsUseCase
       }
     }
 
-    if (settings.language !== undefined) {
-      if (!["th", "en"].includes(settings.language)) {
-        result.errors.push("Language must be one of: th, en");
-      }
-    }
   }
 
   private isValidEmail(email: string): boolean {

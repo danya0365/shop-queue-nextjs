@@ -1,6 +1,7 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { UpdateShopSettingsInputDTO, CreateShopSettingsInputDTO } from '@/src/application/dtos/shop/backend/shop-settings-dto';
-import type { ShopBackendShopSettingsRepository } from '@/src/domain/repositories/shop/backend/backend-shop-settings-repository';
+import type {
+  CreateShopSettingsInputDTO,
+  UpdateShopSettingsInputDTO,
+} from "@/src/application/dtos/shop/backend/shop-settings-dto";
 import {
   CreateShopSettingsUseCase,
   DeleteShopSettingsUseCase,
@@ -12,7 +13,9 @@ import {
   ResetShopSettingsUseCase,
   UpdateShopSettingsUseCase,
   ValidateShopSettingsUseCase,
-} from '@/src/application/usecases/shop/backend/shops/settings';
+} from "@/src/application/usecases/shop/backend/shops/settings";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import type { ShopBackendShopSettingsRepository } from "@/src/domain/repositories/shop/backend/backend-shop-settings-repository";
 
 // Shop Settings interface and types
 export interface ShopSettings {
@@ -72,6 +75,20 @@ export interface ShopSettings {
   showPricesPublic: boolean;
   enableReviews: boolean;
 
+  // Security Settings
+  enableTwoFactor: boolean;
+  requireEmailVerification: boolean;
+  enableSessionTimeout: boolean;
+
+  // Data & Privacy Settings
+  enableAnalytics: boolean;
+  enableDataBackup: boolean;
+  allowDataExport: boolean;
+
+  // API & Integration Settings
+  apiKey: string;
+  enableWebhooks: boolean;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,11 +101,16 @@ export interface ShopSettingsStats {
   integrationStatus: Record<string, boolean>;
 }
 
-export interface IShopSettingsBackendService {
+export interface IShopBackendShopSettingsService {
   getShopSettings(shopId: string): Promise<ShopSettings | null>;
   getShopSettingsById(id: string): Promise<ShopSettings | null>;
-  createShopSettings(settings: Omit<ShopSettings, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopSettings>;
-  updateShopSettings(shopId: string, data: Partial<ShopSettings>): Promise<ShopSettings>;
+  createShopSettings(
+    settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">
+  ): Promise<ShopSettings>;
+  updateShopSettings(
+    shopId: string,
+    data: Partial<ShopSettings>
+  ): Promise<ShopSettings>;
   deleteShopSettings(shopId: string): Promise<boolean>;
   resetShopSettings(shopId: string): Promise<ShopSettings>;
   getShopSettingsStats(shopId: string): Promise<ShopSettingsStats>;
@@ -99,7 +121,9 @@ export interface IShopSettingsBackendService {
   importSettings(shopId: string, settingsData: string): Promise<ShopSettings>;
 }
 
-export class ShopSettingsBackendService implements IShopSettingsBackendService {
+export class ShopBackendShopSettingsService
+  implements IShopBackendShopSettingsService
+{
   constructor(
     private readonly getShopSettingsUseCase: GetShopSettingsUseCase,
     private readonly getShopSettingsByIdUseCase: GetShopSettingsByIdUseCase,
@@ -116,13 +140,15 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
 
   async getShopSettings(shopId: string): Promise<ShopSettings | null> {
     try {
-      this.logger.info('ShopSettingsBackendService: Getting shop settings', { shopId });
-      
+      this.logger.info("ShopSettingsBackendService: Getting shop settings", {
+        shopId,
+      });
+
       const result = await this.getShopSettingsUseCase.execute({ shopId });
-      
+
       // Convert DTO to domain model
       if (!result) return null;
-      
+
       const settings: ShopSettings = {
         id: result.id,
         shopId: result.shopId,
@@ -164,27 +190,43 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
+        enableTwoFactor: result.enableTwoFactor,
+        requireEmailVerification: result.requireEmailVerification,
+        enableSessionTimeout: result.enableSessionTimeout,
+        enableAnalytics: result.enableAnalytics,
+        enableDataBackup: result.enableDataBackup,
+        allowDataExport: result.allowDataExport,
+        apiKey: result.apiKey,
+        enableWebhooks: result.enableWebhooks,
         createdAt: new Date(result.createdAt),
         updatedAt: new Date(result.updatedAt),
       };
-      
-      this.logger.info('ShopSettingsBackendService: Retrieved shop settings', { shopId });
+
+      this.logger.info("ShopSettingsBackendService: Retrieved shop settings", {
+        shopId,
+      });
       return settings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error getting shop settings', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error getting shop settings",
+        { error, shopId }
+      );
       throw error;
     }
   }
 
   async getShopSettingsById(id: string): Promise<ShopSettings | null> {
     try {
-      this.logger.info('ShopSettingsBackendService: Getting shop settings by id', { id });
-      
+      this.logger.info(
+        "ShopSettingsBackendService: Getting shop settings by id",
+        { id }
+      );
+
       const result = await this.getShopSettingsByIdUseCase.execute(id);
-      
+
       // Convert DTO to domain model
       if (!result) return null;
-      
+
       const settings: ShopSettings = {
         id: result.id,
         shopId: result.shopId,
@@ -226,22 +268,45 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
+        // Security Settings
+        enableTwoFactor: result.enableTwoFactor,
+        requireEmailVerification: result.requireEmailVerification,
+        enableSessionTimeout: result.enableSessionTimeout,
+
+        // Data & Privacy Settings
+        enableAnalytics: result.enableAnalytics,
+        enableDataBackup: result.enableDataBackup,
+        allowDataExport: result.allowDataExport,
+
+        // API & Integration Settings
+        apiKey: result.apiKey,
+        enableWebhooks: result.enableWebhooks,
         createdAt: new Date(result.createdAt),
         updatedAt: new Date(result.updatedAt),
       };
-      
-      this.logger.info('ShopSettingsBackendService: Retrieved shop settings by id', { id });
+
+      this.logger.info(
+        "ShopSettingsBackendService: Retrieved shop settings by id",
+        { id }
+      );
       return settings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error getting shop settings by id', { error, id });
+      this.logger.error(
+        "ShopSettingsBackendService: Error getting shop settings by id",
+        { error, id }
+      );
       throw error;
     }
   }
 
-  async createShopSettings(settings: Omit<ShopSettings, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopSettings> {
+  async createShopSettings(
+    settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">
+  ): Promise<ShopSettings> {
     try {
-      this.logger.info('ShopSettingsBackendService: Creating shop settings', { settings });
-      
+      this.logger.info("ShopSettingsBackendService: Creating shop settings", {
+        settings,
+      });
+
       const createData: CreateShopSettingsInputDTO = {
         shopId: settings.shopId,
         shopName: settings.shopName,
@@ -282,10 +347,23 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: settings.allowGuestBooking,
         showPricesPublic: settings.showPricesPublic,
         enableReviews: settings.enableReviews,
+        // Security Settings
+        enableTwoFactor: settings.enableTwoFactor,
+        requireEmailVerification: settings.requireEmailVerification,
+        enableSessionTimeout: settings.enableSessionTimeout,
+
+        // Data & Privacy Settings
+        enableAnalytics: settings.enableAnalytics,
+        enableDataBackup: settings.enableDataBackup,
+        allowDataExport: settings.allowDataExport,
+
+        // API & Integration Settings
+        apiKey: settings.apiKey,
+        enableWebhooks: settings.enableWebhooks,
       };
-      
+
       const result = await this.createShopSettingsUseCase.execute(createData);
-      
+
       // Convert DTO to domain model
       const newSettings: ShopSettings = {
         id: result.id,
@@ -328,18 +406,35 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
+        // Security Settings
+        enableTwoFactor: result.enableTwoFactor,
+        requireEmailVerification: result.requireEmailVerification,
+        enableSessionTimeout: result.enableSessionTimeout,
+
+        // Data & Privacy Settings
+        enableAnalytics: result.enableAnalytics,
+        enableDataBackup: result.enableDataBackup,
+        allowDataExport: result.allowDataExport,
+
+        // API & Integration Settings
+        apiKey: result.apiKey,
+        enableWebhooks: result.enableWebhooks,
+
         createdAt: new Date(result.createdAt),
         updatedAt: new Date(result.updatedAt),
       };
-      
-      this.logger.info('ShopSettingsBackendService: Shop settings created', {
+
+      this.logger.info("ShopSettingsBackendService: Shop settings created", {
         shopId: settings.shopId,
         settingsId: newSettings.id,
       });
-      
+
       return newSettings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error creating shop settings', { error, settings });
+      this.logger.error(
+        "ShopSettingsBackendService: Error creating shop settings",
+        { error, settings }
+      );
       throw error;
     }
   }
@@ -349,8 +444,11 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     data: Partial<ShopSettings>
   ): Promise<ShopSettings> {
     try {
-      this.logger.info('ShopSettingsBackendService: Updating shop settings', { shopId, data });
-      
+      this.logger.info("ShopSettingsBackendService: Updating shop settings", {
+        shopId,
+        data,
+      });
+
       // Create update data with only the fields that should be updated
       const updateData: UpdateShopSettingsInputDTO = {
         shopId: shopId,
@@ -393,9 +491,9 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         showPricesPublic: data.showPricesPublic,
         enableReviews: data.enableReviews,
       };
-      
+
       const result = await this.updateShopSettingsUseCase.execute(updateData);
-      
+
       // Convert DTO to domain model
       const settings: ShopSettings = {
         id: result.id,
@@ -438,52 +536,83 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
+        // Security Settings
+        enableTwoFactor: result.enableTwoFactor,
+        requireEmailVerification: result.requireEmailVerification,
+        enableSessionTimeout: result.enableSessionTimeout,
+
+        // Data & Privacy Settings
+        enableAnalytics: result.enableAnalytics,
+        enableDataBackup: result.enableDataBackup,
+        allowDataExport: result.allowDataExport,
+
+        // API & Integration Settings
+        apiKey: result.apiKey,
+        enableWebhooks: result.enableWebhooks,
         createdAt: new Date(result.createdAt),
         updatedAt: new Date(result.updatedAt),
       };
-      
-      this.logger.info('ShopSettingsBackendService: Shop settings updated', {
+
+      this.logger.info("ShopSettingsBackendService: Shop settings updated", {
         shopId,
         updatedFields: Object.keys(data),
       });
-      
+
       return settings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error updating shop settings', { error, shopId, data });
+      this.logger.error(
+        "ShopSettingsBackendService: Error updating shop settings",
+        { error, shopId, data }
+      );
       throw error;
     }
   }
 
   async deleteShopSettings(shopId: string): Promise<boolean> {
     try {
-      this.logger.info('ShopSettingsBackendService: Deleting shop settings', { shopId });
-      
+      this.logger.info("ShopSettingsBackendService: Deleting shop settings", {
+        shopId,
+      });
+
       const result = await this.deleteShopSettingsUseCase.execute({ shopId });
-      
-      this.logger.info('ShopSettingsBackendService: Shop settings deleted', { shopId, success: result });
+
+      this.logger.info("ShopSettingsBackendService: Shop settings deleted", {
+        shopId,
+        success: result,
+      });
       return result;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error deleting shop settings', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error deleting shop settings",
+        { error, shopId }
+      );
       throw error;
     }
   }
 
   async resetShopSettings(shopId: string): Promise<ShopSettings> {
     try {
-      this.logger.info('ShopSettingsBackendService: Resetting shop settings', { shopId });
-      
-      const resetResult = await this.resetShopSettingsUseCase.execute({ shopId });
-      
-      this.logger.info('ShopSettingsBackendService: Shop settings reset', { shopId, success: resetResult.success });
-      
+      this.logger.info("ShopSettingsBackendService: Resetting shop settings", {
+        shopId,
+      });
+
+      const resetResult = await this.resetShopSettingsUseCase.execute({
+        shopId,
+      });
+
+      this.logger.info("ShopSettingsBackendService: Shop settings reset", {
+        shopId,
+        success: resetResult.success,
+      });
+
       // Fetch the updated settings after reset
       const result = await this.getShopSettingsUseCase.execute({ shopId });
-      
+
       // Convert DTO to domain model
       if (!result) {
-        throw new Error('Failed to fetch shop settings after reset');
+        throw new Error("Failed to fetch shop settings after reset");
       }
-      
+
       const settings: ShopSettings = {
         id: result.id,
         shopId: result.shopId,
@@ -525,23 +654,41 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
+        // Security Settings
+        enableTwoFactor: result.enableTwoFactor,
+        requireEmailVerification: result.requireEmailVerification,
+        enableSessionTimeout: result.enableSessionTimeout,
+
+        // Data & Privacy Settings
+        enableAnalytics: result.enableAnalytics,
+        enableDataBackup: result.enableDataBackup,
+        allowDataExport: result.allowDataExport,
+
+        // API & Integration Settings
+        apiKey: result.apiKey,
+        enableWebhooks: result.enableWebhooks,
         createdAt: new Date(result.createdAt),
-        updatedAt: new Date(result.updatedAt)
+        updatedAt: new Date(result.updatedAt),
       };
-      
+
       return settings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error resetting shop settings', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error resetting shop settings",
+        { error, shopId }
+      );
       throw error;
     }
   }
 
   async getShopSettingsStats(shopId: string): Promise<ShopSettingsStats> {
     try {
-      this.logger.info('ShopSettingsBackendService: Getting settings stats', { shopId });
-      
+      this.logger.info("ShopSettingsBackendService: Getting settings stats", {
+        shopId,
+      });
+
       const result = await this.getShopSettingsStatsUseCase.execute({ shopId });
-      
+
       // Convert DTO to domain model
       const stats: ShopSettingsStats = {
         totalSettings: result.totalSettings,
@@ -550,11 +697,16 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
         disabledFeatures: result.disabledFeatures,
         integrationStatus: result.integrationStatus,
       };
-      
-      this.logger.info('ShopSettingsBackendService: Settings stats retrieved', { shopId });
+
+      this.logger.info("ShopSettingsBackendService: Settings stats retrieved", {
+        shopId,
+      });
       return stats;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error getting settings stats', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error getting settings stats",
+        { error, shopId }
+      );
       throw error;
     }
   }
@@ -563,42 +715,55 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     settings: Partial<ShopSettings>
   ): Promise<{ isValid: boolean; errors: string[] }> {
     try {
-      this.logger.info('ShopSettingsBackendService: Validating settings', { settings });
-      
-      const result = await this.validateShopSettingsUseCase.execute({ 
+      this.logger.info("ShopSettingsBackendService: Validating settings", {
+        settings,
+      });
+
+      const result = await this.validateShopSettingsUseCase.execute({
         settings: {
           ...settings,
           createdAt: settings.createdAt?.toISOString(),
-          updatedAt: settings.updatedAt?.toISOString()
+          updatedAt: settings.updatedAt?.toISOString(),
+        },
+      });
+
+      this.logger.info(
+        "ShopSettingsBackendService: Settings validation completed",
+        {
+          isValid: result.isValid,
+          errorCount: result.errors.length,
         }
-      });
-      
-      this.logger.info('ShopSettingsBackendService: Settings validation completed', {
-        isValid: result.isValid,
-        errorCount: result.errors.length,
-      });
-      
+      );
+
       return result;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error validating settings', { error, settings });
+      this.logger.error(
+        "ShopSettingsBackendService: Error validating settings",
+        { error, settings }
+      );
       throw error;
     }
   }
 
   async exportSettings(shopId: string): Promise<string> {
     try {
-      this.logger.info('ShopSettingsBackendService: Exporting settings', { shopId });
-      
-      const result = await this.exportShopSettingsUseCase.execute({ 
-        shopId, 
-        format: 'json' 
+      this.logger.info("ShopSettingsBackendService: Exporting settings", {
+        shopId,
       });
-      
+
+      const result = await this.exportShopSettingsUseCase.execute({
+        shopId,
+        format: "json",
+      });
+
       // The interface expects a string, but the use case returns ExportShopSettingsOutput
       // We need to convert the output to a string representation
       return JSON.stringify(result, null, 2);
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error exporting settings', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error exporting settings",
+        { error, shopId }
+      );
       throw error;
     }
   }
@@ -608,25 +773,38 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
     settingsData: string
   ): Promise<ShopSettings> {
     try {
-      this.logger.info('ShopSettingsBackendService: Importing settings', { shopId });
-      
-      const validationResult = await this.importShopSettingsUseCase.execute({ shopId, settingsData });
-      
+      this.logger.info("ShopSettingsBackendService: Importing settings", {
+        shopId,
+      });
+
+      const validationResult = await this.importShopSettingsUseCase.execute({
+        shopId,
+        settingsData,
+      });
+
       if (!validationResult.isValid) {
-        throw new Error(`Import validation failed: ${validationResult.errors.join(', ')}`);
+        throw new Error(
+          `Import validation failed: ${validationResult.errors.join(", ")}`
+        );
       }
-      
+
       // After successful import, fetch the updated settings
       const updatedSettings = await this.getShopSettings(shopId);
-      
+
       if (!updatedSettings) {
-        throw new Error('Failed to retrieve updated settings after import');
+        throw new Error("Failed to retrieve updated settings after import");
       }
-      
-      this.logger.info('ShopSettingsBackendService: Settings imported successfully', { shopId });
+
+      this.logger.info(
+        "ShopSettingsBackendService: Settings imported successfully",
+        { shopId }
+      );
       return updatedSettings;
     } catch (error) {
-      this.logger.error('ShopSettingsBackendService: Error importing settings', { error, shopId });
+      this.logger.error(
+        "ShopSettingsBackendService: Error importing settings",
+        { error, shopId }
+      );
       throw error;
     }
   }
@@ -636,25 +814,34 @@ export class ShopSettingsBackendService implements IShopSettingsBackendService {
  * Factory for creating ShopSettingsBackendService instances
  * Following Clean Architecture and Factory pattern principles
  */
-export class ShopSettingsBackendServiceFactory {
+export class ShopBackendShopSettingsServiceFactory {
   static create(
     repository: ShopBackendShopSettingsRepository,
     logger: Logger
-  ): ShopSettingsBackendService {
+  ): IShopBackendShopSettingsService {
     // Create all use cases with their dependencies
     const getShopSettingsUseCase = new GetShopSettingsUseCase(repository);
-    const getShopSettingsByIdUseCase = new GetShopSettingsByIdUseCase(repository);
+    const getShopSettingsByIdUseCase = new GetShopSettingsByIdUseCase(
+      repository
+    );
     const createShopSettingsUseCase = new CreateShopSettingsUseCase(repository);
     const updateShopSettingsUseCase = new UpdateShopSettingsUseCase(repository);
     const deleteShopSettingsUseCase = new DeleteShopSettingsUseCase(repository);
     const resetShopSettingsUseCase = new ResetShopSettingsUseCase(repository);
-    const getShopSettingsStatsUseCase = new GetShopSettingsStatsUseCase(repository);
-    const validateShopSettingsUseCase = new ValidateShopSettingsUseCase(repository);
+    const getShopSettingsStatsUseCase = new GetShopSettingsStatsUseCase(
+      repository
+    );
+    const validateShopSettingsUseCase = new ValidateShopSettingsUseCase(
+      repository
+    );
     const exportShopSettingsUseCase = new ExportShopSettingsUseCase(repository);
-    const importShopSettingsUseCase = new ImportShopSettingsUseCase(repository, validateShopSettingsUseCase);
+    const importShopSettingsUseCase = new ImportShopSettingsUseCase(
+      repository,
+      validateShopSettingsUseCase
+    );
 
     // Create and return the service instance
-    return new ShopSettingsBackendService(
+    return new ShopBackendShopSettingsService(
       getShopSettingsUseCase,
       getShopSettingsByIdUseCase,
       createShopSettingsUseCase,

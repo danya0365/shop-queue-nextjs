@@ -668,46 +668,6 @@ JOIN service_data sd ON sd.name = pi.name
 WHERE qd.queue_number = pi.queue_number
 AND qd.queue_number IN ('R001', 'R002');
 
--- Insert shop settings for the restaurant
-INSERT INTO shop_settings (
-  shop_id,
-  max_queue_size,
-  estimated_service_time,
-  allow_advance_booking,
-  booking_window_hours,
-  auto_confirm_queues,
-  cancellation_deadline,
-  maintenance_mode,
-  allow_registration,
-  require_email_verification,
-  session_timeout,
-  backup_frequency,
-  log_level,
-  data_retention_days,
-  created_at,
-  updated_at
-)
-SELECT
-  s.id AS shop_id,
-  50 AS max_queue_size,
-  15 AS estimated_service_time,
-  true AS allow_advance_booking,
-  24 AS booking_window_hours,
-  true AS auto_confirm_queues,
-  30 AS cancellation_deadline,
-  false AS maintenance_mode,
-  true AS allow_registration,
-  false AS require_email_verification,
-  30 AS session_timeout,
-  'daily'::text AS backup_frequency,
-  'info'::text AS log_level,
-  365 AS data_retention_days,
-  NOW(),
-  NOW()
-FROM shops s
-JOIN profiles p ON s.owner_id = p.id
-WHERE p.username = 'restaurant_owner';
-
 -- Insert notification settings for the restaurant
 INSERT INTO notification_settings (
   shop_id,
