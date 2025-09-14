@@ -30,11 +30,6 @@ export interface ShopSettings {
   shopWebsite?: string;
   shopLogo?: string;
 
-  // Business Hours
-  timezone: string;
-  defaultOpenTime: string;
-  defaultCloseTime: string;
-
   // Queue Settings
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
@@ -159,9 +154,6 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
-        timezone: result.timezone,
-        defaultOpenTime: result.defaultOpenTime,
-        defaultCloseTime: result.defaultCloseTime,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -237,9 +229,6 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
-        timezone: result.timezone,
-        defaultOpenTime: result.defaultOpenTime,
-        defaultCloseTime: result.defaultCloseTime,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -365,9 +354,6 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
-        timezone: result.timezone,
-        defaultOpenTime: result.defaultOpenTime,
-        defaultCloseTime: result.defaultCloseTime,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -485,9 +471,6 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
-        timezone: result.timezone,
-        defaultOpenTime: result.defaultOpenTime,
-        defaultCloseTime: result.defaultCloseTime,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -603,9 +586,6 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
-        timezone: result.timezone,
-        defaultOpenTime: result.defaultOpenTime,
-        defaultCloseTime: result.defaultCloseTime,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,

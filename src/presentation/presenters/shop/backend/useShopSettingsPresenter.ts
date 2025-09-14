@@ -317,8 +317,7 @@ export function useShopSettingsPresenter(
     setExportData(null);
 
     try {
-      const data = await exportShopSettings();
-      setExportData(JSON.stringify(data, null, 2));
+      await exportShopSettings(); // This function handles setting exportData internally
       setShowExportModal(true);
     } catch (error) {
       setSaveError("ไม่สามารถส่งออกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");

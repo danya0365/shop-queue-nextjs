@@ -30,11 +30,6 @@ export class CreateShopSettingsUseCase
         );
       }
 
-      // Validate business hours if provided
-      if (params.defaultOpenTime || params.defaultCloseTime) {
-        this.validateBusinessHours(params);
-      }
-
       // Validate queue settings if provided
       if (params.maxQueuePerService || params.queueTimeoutMinutes) {
         this.validateQueueSettings(params);
@@ -77,32 +72,6 @@ export class CreateShopSettingsUseCase
         "CreateShopSettingsUseCase.execute",
         { params },
         error
-      );
-    }
-  }
-
-  private validateBusinessHours(params: CreateShopSettingsInputDTO): void {
-    if (
-      params.defaultOpenTime &&
-      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(params.defaultOpenTime)
-    ) {
-      throw new ShopBackendShopSettingsError(
-        ShopBackendShopSettingsErrorType.VALIDATION_ERROR,
-        "Default open time must be in HH:MM format",
-        "CreateShopSettingsUseCase.validateBusinessHours",
-        { defaultOpenTime: params.defaultOpenTime }
-      );
-    }
-
-    if (
-      params.defaultCloseTime &&
-      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(params.defaultCloseTime)
-    ) {
-      throw new ShopBackendShopSettingsError(
-        ShopBackendShopSettingsErrorType.VALIDATION_ERROR,
-        "Default close time must be in HH:MM format",
-        "CreateShopSettingsUseCase.validateBusinessHours",
-        { defaultCloseTime: params.defaultCloseTime }
       );
     }
   }
