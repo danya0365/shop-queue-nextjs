@@ -40,7 +40,7 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
       // Get settings and stats
       const [settings, stats] = await Promise.all([
         this.shopSettingsBackendService.getShopSettings(shopId),
-        this.shopSettingsBackendService.getSettingsStats(shopId).catch(() => null)
+        this.shopSettingsBackendService.getShopSettingsStats(shopId).catch(() => null)
       ]);
 
       // Define settings categories

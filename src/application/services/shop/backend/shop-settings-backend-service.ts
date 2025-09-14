@@ -1,4 +1,18 @@
-import type { Logger } from "@/src/domain/interfaces/logger";
+import type { Logger } from '@/src/domain/interfaces/logger';
+import type { UpdateShopSettingsInputDTO, CreateShopSettingsInputDTO } from '@/src/application/dtos/shop/backend/shop-settings-dto';
+import type { ShopBackendShopSettingsRepository } from '@/src/domain/repositories/shop/backend/backend-shop-settings-repository';
+import {
+  CreateShopSettingsUseCase,
+  DeleteShopSettingsUseCase,
+  ExportShopSettingsUseCase,
+  GetShopSettingsByIdUseCase,
+  GetShopSettingsStatsUseCase,
+  GetShopSettingsUseCase,
+  ImportShopSettingsUseCase,
+  ResetShopSettingsUseCase,
+  UpdateShopSettingsUseCase,
+  ValidateShopSettingsUseCase,
+} from '@/src/application/usecases/shop/backend/shops/settings';
 
 // Shop Settings interface and types
 export interface ShopSettings {
@@ -72,13 +86,13 @@ export interface ShopSettingsStats {
 
 export interface IShopSettingsBackendService {
   getShopSettings(shopId: string): Promise<ShopSettings | null>;
-  updateShopSettings(
-    shopId: string,
-    data: Partial<ShopSettings>
-  ): Promise<ShopSettings>;
-  resetToDefaults(shopId: string): Promise<ShopSettings>;
-  getSettingsStats(shopId: string): Promise<ShopSettingsStats>;
-  validateSettings(
+  getShopSettingsById(id: string): Promise<ShopSettings | null>;
+  createShopSettings(settings: Omit<ShopSettings, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopSettings>;
+  updateShopSettings(shopId: string, data: Partial<ShopSettings>): Promise<ShopSettings>;
+  deleteShopSettings(shopId: string): Promise<boolean>;
+  resetShopSettings(shopId: string): Promise<ShopSettings>;
+  getShopSettingsStats(shopId: string): Promise<ShopSettingsStats>;
+  validateShopSettings(
     settings: Partial<ShopSettings>
   ): Promise<{ isValid: boolean; errors: string[] }>;
   exportSettings(shopId: string): Promise<string>;
@@ -86,397 +100,572 @@ export interface IShopSettingsBackendService {
 }
 
 export class ShopSettingsBackendService implements IShopSettingsBackendService {
-  private mockSettings: ShopSettings = {
-    id: "settings_1",
-    shopId: "shop1",
-    // Basic Shop Information
-    shopName: "ร้านตัดผมสไตล์โมเดิร์น",
-    shopDescription: "ร้านตัดผมและจัดแต่งทรงผม บริการครบครัน ด้วยช่างมืออาชีพ",
-    shopPhone: "02-123-4567",
-    shopEmail: "info@modernhair.com",
-    shopAddress: "123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110",
-    shopWebsite: "https://modernhair.com",
-    shopLogo: "/images/shop-logo.png",
-
-    // Business Hours
-    timezone: "Asia/Bangkok",
-    defaultOpenTime: "09:00",
-    defaultCloseTime: "20:00",
-
-    // Queue Settings
-    maxQueuePerService: 10,
-    queueTimeoutMinutes: 15,
-    allowWalkIn: true,
-    allowAdvanceBooking: true,
-    maxAdvanceBookingDays: 7,
-
-    // Points System
-    pointsEnabled: true,
-    pointsPerBaht: 1,
-    pointsExpiryMonths: 12,
-    minimumPointsToRedeem: 100,
-
-    // Notification Settings
-    smsEnabled: true,
-    emailEnabled: true,
-    lineNotifyEnabled: false,
-    notifyBeforeMinutes: 30,
-
-    // Payment Settings
-    acceptCash: true,
-    acceptCreditCard: true,
-    acceptBankTransfer: true,
-    acceptPromptPay: true,
-    promptPayId: "0212345678",
-
-    // Display Settings
-    theme: "light",
-    language: "th",
-    currency: "THB",
-    dateFormat: "DD/MM/YYYY",
-    timeFormat: "24h",
-
-    // Advanced Settings
-    autoConfirmBooking: false,
-    requireCustomerPhone: true,
-    allowGuestBooking: true,
-    showPricesPublic: true,
-    enableReviews: true,
-
-    createdAt: new Date("2024-01-01T00:00:00Z"),
-    updatedAt: new Date("2024-01-15T10:30:00Z"),
-  };
-
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly getShopSettingsUseCase: GetShopSettingsUseCase,
+    private readonly getShopSettingsByIdUseCase: GetShopSettingsByIdUseCase,
+    private readonly createShopSettingsUseCase: CreateShopSettingsUseCase,
+    private readonly updateShopSettingsUseCase: UpdateShopSettingsUseCase,
+    private readonly deleteShopSettingsUseCase: DeleteShopSettingsUseCase,
+    private readonly resetShopSettingsUseCase: ResetShopSettingsUseCase,
+    private readonly getShopSettingsStatsUseCase: GetShopSettingsStatsUseCase,
+    private readonly validateShopSettingsUseCase: ValidateShopSettingsUseCase,
+    private readonly exportShopSettingsUseCase: ExportShopSettingsUseCase,
+    private readonly importShopSettingsUseCase: ImportShopSettingsUseCase,
+    private readonly logger: Logger
+  ) {}
 
   async getShopSettings(shopId: string): Promise<ShopSettings | null> {
-    this.logger.info("ShopSettingsBackendService: Getting shop settings", {
-      shopId,
-    });
+    try {
+      this.logger.info('ShopSettingsBackendService: Getting shop settings', { shopId });
+      
+      const result = await this.getShopSettingsUseCase.execute({ shopId });
+      
+      // Convert DTO to domain model
+      if (!result) return null;
+      
+      const settings: ShopSettings = {
+        id: result.id,
+        shopId: result.shopId,
+        shopName: result.shopName,
+        shopDescription: result.shopDescription || undefined,
+        shopPhone: result.shopPhone || undefined,
+        shopEmail: result.shopEmail || undefined,
+        shopAddress: result.shopAddress || undefined,
+        shopWebsite: result.shopWebsite || undefined,
+        shopLogo: result.shopLogo || undefined,
+        timezone: result.timezone,
+        defaultOpenTime: result.defaultOpenTime,
+        defaultCloseTime: result.defaultCloseTime,
+        maxQueuePerService: result.maxQueuePerService,
+        queueTimeoutMinutes: result.queueTimeoutMinutes,
+        allowWalkIn: result.allowWalkIn,
+        allowAdvanceBooking: result.allowAdvanceBooking,
+        maxAdvanceBookingDays: result.maxAdvanceBookingDays,
+        pointsEnabled: result.pointsEnabled,
+        pointsPerBaht: result.pointsPerBaht,
+        pointsExpiryMonths: result.pointsExpiryMonths,
+        minimumPointsToRedeem: result.minimumPointsToRedeem,
+        smsEnabled: result.smsEnabled,
+        emailEnabled: result.emailEnabled,
+        lineNotifyEnabled: result.lineNotifyEnabled,
+        notifyBeforeMinutes: result.notifyBeforeMinutes,
+        acceptCash: result.acceptCash,
+        acceptCreditCard: result.acceptCreditCard,
+        acceptBankTransfer: result.acceptBankTransfer,
+        acceptPromptPay: result.acceptPromptPay,
+        promptPayId: result.promptPayId || undefined,
+        theme: result.theme,
+        language: result.language,
+        currency: result.currency,
+        dateFormat: result.dateFormat,
+        timeFormat: result.timeFormat,
+        autoConfirmBooking: result.autoConfirmBooking,
+        requireCustomerPhone: result.requireCustomerPhone,
+        allowGuestBooking: result.allowGuestBooking,
+        showPricesPublic: result.showPricesPublic,
+        enableReviews: result.enableReviews,
+        createdAt: new Date(result.createdAt),
+        updatedAt: new Date(result.updatedAt),
+      };
+      
+      this.logger.info('ShopSettingsBackendService: Retrieved shop settings', { shopId });
+      return settings;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error getting shop settings', { error, shopId });
+      throw error;
+    }
+  }
 
-    this.logger.info("ShopSettingsBackendService: Retrieved shop settings", {
-      shopId,
-    });
-    return this.mockSettings;
+  async getShopSettingsById(id: string): Promise<ShopSettings | null> {
+    try {
+      this.logger.info('ShopSettingsBackendService: Getting shop settings by id', { id });
+      
+      const result = await this.getShopSettingsByIdUseCase.execute(id);
+      
+      // Convert DTO to domain model
+      if (!result) return null;
+      
+      const settings: ShopSettings = {
+        id: result.id,
+        shopId: result.shopId,
+        shopName: result.shopName,
+        shopDescription: result.shopDescription || undefined,
+        shopPhone: result.shopPhone || undefined,
+        shopEmail: result.shopEmail || undefined,
+        shopAddress: result.shopAddress || undefined,
+        shopWebsite: result.shopWebsite || undefined,
+        shopLogo: result.shopLogo || undefined,
+        timezone: result.timezone,
+        defaultOpenTime: result.defaultOpenTime,
+        defaultCloseTime: result.defaultCloseTime,
+        maxQueuePerService: result.maxQueuePerService,
+        queueTimeoutMinutes: result.queueTimeoutMinutes,
+        allowWalkIn: result.allowWalkIn,
+        allowAdvanceBooking: result.allowAdvanceBooking,
+        maxAdvanceBookingDays: result.maxAdvanceBookingDays,
+        pointsEnabled: result.pointsEnabled,
+        pointsPerBaht: result.pointsPerBaht,
+        pointsExpiryMonths: result.pointsExpiryMonths,
+        minimumPointsToRedeem: result.minimumPointsToRedeem,
+        smsEnabled: result.smsEnabled,
+        emailEnabled: result.emailEnabled,
+        lineNotifyEnabled: result.lineNotifyEnabled,
+        notifyBeforeMinutes: result.notifyBeforeMinutes,
+        acceptCash: result.acceptCash,
+        acceptCreditCard: result.acceptCreditCard,
+        acceptBankTransfer: result.acceptBankTransfer,
+        acceptPromptPay: result.acceptPromptPay,
+        promptPayId: result.promptPayId || undefined,
+        theme: result.theme,
+        language: result.language,
+        currency: result.currency,
+        dateFormat: result.dateFormat,
+        timeFormat: result.timeFormat,
+        autoConfirmBooking: result.autoConfirmBooking,
+        requireCustomerPhone: result.requireCustomerPhone,
+        allowGuestBooking: result.allowGuestBooking,
+        showPricesPublic: result.showPricesPublic,
+        enableReviews: result.enableReviews,
+        createdAt: new Date(result.createdAt),
+        updatedAt: new Date(result.updatedAt),
+      };
+      
+      this.logger.info('ShopSettingsBackendService: Retrieved shop settings by id', { id });
+      return settings;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error getting shop settings by id', { error, id });
+      throw error;
+    }
+  }
+
+  async createShopSettings(settings: Omit<ShopSettings, 'id' | 'createdAt' | 'updatedAt'>): Promise<ShopSettings> {
+    try {
+      this.logger.info('ShopSettingsBackendService: Creating shop settings', { settings });
+      
+      const createData: CreateShopSettingsInputDTO = {
+        shopId: settings.shopId,
+        shopName: settings.shopName,
+        shopDescription: settings.shopDescription,
+        shopPhone: settings.shopPhone,
+        shopEmail: settings.shopEmail,
+        shopAddress: settings.shopAddress,
+        shopWebsite: settings.shopWebsite,
+        shopLogo: settings.shopLogo,
+        timezone: settings.timezone,
+        defaultOpenTime: settings.defaultOpenTime,
+        defaultCloseTime: settings.defaultCloseTime,
+        maxQueuePerService: settings.maxQueuePerService,
+        queueTimeoutMinutes: settings.queueTimeoutMinutes,
+        allowWalkIn: settings.allowWalkIn,
+        allowAdvanceBooking: settings.allowAdvanceBooking,
+        maxAdvanceBookingDays: settings.maxAdvanceBookingDays,
+        pointsEnabled: settings.pointsEnabled,
+        pointsPerBaht: settings.pointsPerBaht,
+        pointsExpiryMonths: settings.pointsExpiryMonths,
+        minimumPointsToRedeem: settings.minimumPointsToRedeem,
+        smsEnabled: settings.smsEnabled,
+        emailEnabled: settings.emailEnabled,
+        lineNotifyEnabled: settings.lineNotifyEnabled,
+        notifyBeforeMinutes: settings.notifyBeforeMinutes,
+        acceptCash: settings.acceptCash,
+        acceptCreditCard: settings.acceptCreditCard,
+        acceptBankTransfer: settings.acceptBankTransfer,
+        acceptPromptPay: settings.acceptPromptPay,
+        promptPayId: settings.promptPayId,
+        theme: settings.theme,
+        language: settings.language,
+        currency: settings.currency,
+        dateFormat: settings.dateFormat,
+        timeFormat: settings.timeFormat,
+        autoConfirmBooking: settings.autoConfirmBooking,
+        requireCustomerPhone: settings.requireCustomerPhone,
+        allowGuestBooking: settings.allowGuestBooking,
+        showPricesPublic: settings.showPricesPublic,
+        enableReviews: settings.enableReviews,
+      };
+      
+      const result = await this.createShopSettingsUseCase.execute(createData);
+      
+      // Convert DTO to domain model
+      const newSettings: ShopSettings = {
+        id: result.id,
+        shopId: result.shopId,
+        shopName: result.shopName,
+        shopDescription: result.shopDescription || undefined,
+        shopPhone: result.shopPhone || undefined,
+        shopEmail: result.shopEmail || undefined,
+        shopAddress: result.shopAddress || undefined,
+        shopWebsite: result.shopWebsite || undefined,
+        shopLogo: result.shopLogo || undefined,
+        timezone: result.timezone,
+        defaultOpenTime: result.defaultOpenTime,
+        defaultCloseTime: result.defaultCloseTime,
+        maxQueuePerService: result.maxQueuePerService,
+        queueTimeoutMinutes: result.queueTimeoutMinutes,
+        allowWalkIn: result.allowWalkIn,
+        allowAdvanceBooking: result.allowAdvanceBooking,
+        maxAdvanceBookingDays: result.maxAdvanceBookingDays,
+        pointsEnabled: result.pointsEnabled,
+        pointsPerBaht: result.pointsPerBaht,
+        pointsExpiryMonths: result.pointsExpiryMonths,
+        minimumPointsToRedeem: result.minimumPointsToRedeem,
+        smsEnabled: result.smsEnabled,
+        emailEnabled: result.emailEnabled,
+        lineNotifyEnabled: result.lineNotifyEnabled,
+        notifyBeforeMinutes: result.notifyBeforeMinutes,
+        acceptCash: result.acceptCash,
+        acceptCreditCard: result.acceptCreditCard,
+        acceptBankTransfer: result.acceptBankTransfer,
+        acceptPromptPay: result.acceptPromptPay,
+        promptPayId: result.promptPayId || undefined,
+        theme: result.theme,
+        language: result.language,
+        currency: result.currency,
+        dateFormat: result.dateFormat,
+        timeFormat: result.timeFormat,
+        autoConfirmBooking: result.autoConfirmBooking,
+        requireCustomerPhone: result.requireCustomerPhone,
+        allowGuestBooking: result.allowGuestBooking,
+        showPricesPublic: result.showPricesPublic,
+        enableReviews: result.enableReviews,
+        createdAt: new Date(result.createdAt),
+        updatedAt: new Date(result.updatedAt),
+      };
+      
+      this.logger.info('ShopSettingsBackendService: Shop settings created', {
+        shopId: settings.shopId,
+        settingsId: newSettings.id,
+      });
+      
+      return newSettings;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error creating shop settings', { error, settings });
+      throw error;
+    }
   }
 
   async updateShopSettings(
     shopId: string,
     data: Partial<ShopSettings>
   ): Promise<ShopSettings> {
-    this.logger.info("ShopSettingsBackendService: Updating shop settings", {
-      shopId,
-      data,
-    });
-
-    if (this.mockSettings.shopId !== shopId) {
-      this.logger.error(
-        "ShopSettingsBackendService: Shop not found for settings update",
-        { shopId }
-      );
-      throw new Error("Shop not found");
+    try {
+      this.logger.info('ShopSettingsBackendService: Updating shop settings', { shopId, data });
+      
+      // Create update data with only the fields that should be updated
+      const updateData: UpdateShopSettingsInputDTO = {
+        shopId: shopId,
+        shopName: data.shopName,
+        shopDescription: data.shopDescription,
+        shopPhone: data.shopPhone,
+        shopEmail: data.shopEmail,
+        shopAddress: data.shopAddress,
+        shopWebsite: data.shopWebsite,
+        shopLogo: data.shopLogo,
+        timezone: data.timezone,
+        defaultOpenTime: data.defaultOpenTime,
+        defaultCloseTime: data.defaultCloseTime,
+        maxQueuePerService: data.maxQueuePerService,
+        queueTimeoutMinutes: data.queueTimeoutMinutes,
+        allowWalkIn: data.allowWalkIn,
+        allowAdvanceBooking: data.allowAdvanceBooking,
+        maxAdvanceBookingDays: data.maxAdvanceBookingDays,
+        pointsEnabled: data.pointsEnabled,
+        pointsPerBaht: data.pointsPerBaht,
+        pointsExpiryMonths: data.pointsExpiryMonths,
+        minimumPointsToRedeem: data.minimumPointsToRedeem,
+        smsEnabled: data.smsEnabled,
+        emailEnabled: data.emailEnabled,
+        lineNotifyEnabled: data.lineNotifyEnabled,
+        notifyBeforeMinutes: data.notifyBeforeMinutes,
+        acceptCash: data.acceptCash,
+        acceptCreditCard: data.acceptCreditCard,
+        acceptBankTransfer: data.acceptBankTransfer,
+        acceptPromptPay: data.acceptPromptPay,
+        promptPayId: data.promptPayId,
+        theme: data.theme,
+        language: data.language,
+        currency: data.currency,
+        dateFormat: data.dateFormat,
+        timeFormat: data.timeFormat,
+        autoConfirmBooking: data.autoConfirmBooking,
+        requireCustomerPhone: data.requireCustomerPhone,
+        allowGuestBooking: data.allowGuestBooking,
+        showPricesPublic: data.showPricesPublic,
+        enableReviews: data.enableReviews,
+      };
+      
+      const result = await this.updateShopSettingsUseCase.execute(updateData);
+      
+      // Convert DTO to domain model
+      const settings: ShopSettings = {
+        id: result.id,
+        shopId: result.shopId,
+        shopName: result.shopName,
+        shopDescription: result.shopDescription || undefined,
+        shopPhone: result.shopPhone || undefined,
+        shopEmail: result.shopEmail || undefined,
+        shopAddress: result.shopAddress || undefined,
+        shopWebsite: result.shopWebsite || undefined,
+        shopLogo: result.shopLogo || undefined,
+        timezone: result.timezone,
+        defaultOpenTime: result.defaultOpenTime,
+        defaultCloseTime: result.defaultCloseTime,
+        maxQueuePerService: result.maxQueuePerService,
+        queueTimeoutMinutes: result.queueTimeoutMinutes,
+        allowWalkIn: result.allowWalkIn,
+        allowAdvanceBooking: result.allowAdvanceBooking,
+        maxAdvanceBookingDays: result.maxAdvanceBookingDays,
+        pointsEnabled: result.pointsEnabled,
+        pointsPerBaht: result.pointsPerBaht,
+        pointsExpiryMonths: result.pointsExpiryMonths,
+        minimumPointsToRedeem: result.minimumPointsToRedeem,
+        smsEnabled: result.smsEnabled,
+        emailEnabled: result.emailEnabled,
+        lineNotifyEnabled: result.lineNotifyEnabled,
+        notifyBeforeMinutes: result.notifyBeforeMinutes,
+        acceptCash: result.acceptCash,
+        acceptCreditCard: result.acceptCreditCard,
+        acceptBankTransfer: result.acceptBankTransfer,
+        acceptPromptPay: result.acceptPromptPay,
+        promptPayId: result.promptPayId || undefined,
+        theme: result.theme,
+        language: result.language,
+        currency: result.currency,
+        dateFormat: result.dateFormat,
+        timeFormat: result.timeFormat,
+        autoConfirmBooking: result.autoConfirmBooking,
+        requireCustomerPhone: result.requireCustomerPhone,
+        allowGuestBooking: result.allowGuestBooking,
+        showPricesPublic: result.showPricesPublic,
+        enableReviews: result.enableReviews,
+        createdAt: new Date(result.createdAt),
+        updatedAt: new Date(result.updatedAt),
+      };
+      
+      this.logger.info('ShopSettingsBackendService: Shop settings updated', {
+        shopId,
+        updatedFields: Object.keys(data),
+      });
+      
+      return settings;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error updating shop settings', { error, shopId, data });
+      throw error;
     }
-
-    // Update settings
-    this.mockSettings = {
-      ...this.mockSettings,
-      ...data,
-      updatedAt: new Date(),
-    };
-
-    this.logger.info("ShopSettingsBackendService: Shop settings updated", {
-      shopId,
-      updatedFields: Object.keys(data),
-    });
-
-    return this.mockSettings;
   }
 
-  async resetToDefaults(shopId: string): Promise<ShopSettings> {
-    this.logger.info(
-      "ShopSettingsBackendService: Resetting settings to defaults",
-      { shopId }
-    );
-
-    const defaultSettings: ShopSettings = {
-      id: this.mockSettings.id,
-      shopId,
-      // Basic Shop Information
-      shopName: "ร้านของฉัน",
-      shopDescription: undefined,
-      shopPhone: undefined,
-      shopEmail: undefined,
-      shopAddress: undefined,
-      shopWebsite: undefined,
-      shopLogo: undefined,
-
-      // Business Hours
-      timezone: "Asia/Bangkok",
-      defaultOpenTime: "09:00",
-      defaultCloseTime: "18:00",
-
-      // Queue Settings
-      maxQueuePerService: 5,
-      queueTimeoutMinutes: 10,
-      allowWalkIn: true,
-      allowAdvanceBooking: false,
-      maxAdvanceBookingDays: 3,
-
-      // Points System
-      pointsEnabled: false,
-      pointsPerBaht: 1,
-      pointsExpiryMonths: 12,
-      minimumPointsToRedeem: 50,
-
-      // Notification Settings
-      smsEnabled: false,
-      emailEnabled: false,
-      lineNotifyEnabled: false,
-      notifyBeforeMinutes: 15,
-
-      // Payment Settings
-      acceptCash: true,
-      acceptCreditCard: false,
-      acceptBankTransfer: false,
-      acceptPromptPay: false,
-      promptPayId: undefined,
-
-      // Display Settings
-      theme: "light",
-      language: "th",
-      currency: "THB",
-      dateFormat: "DD/MM/YYYY",
-      timeFormat: "24h",
-
-      // Advanced Settings
-      autoConfirmBooking: false,
-      requireCustomerPhone: false,
-      allowGuestBooking: true,
-      showPricesPublic: false,
-      enableReviews: false,
-
-      createdAt: this.mockSettings.createdAt,
-      updatedAt: new Date(),
-    };
-
-    this.mockSettings = defaultSettings;
-
-    this.logger.info("ShopSettingsBackendService: Settings reset to defaults", {
-      shopId,
-    });
-    return this.mockSettings;
+  async deleteShopSettings(shopId: string): Promise<boolean> {
+    try {
+      this.logger.info('ShopSettingsBackendService: Deleting shop settings', { shopId });
+      
+      const result = await this.deleteShopSettingsUseCase.execute({ shopId });
+      
+      this.logger.info('ShopSettingsBackendService: Shop settings deleted', { shopId, success: result });
+      return result;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error deleting shop settings', { error, shopId });
+      throw error;
+    }
   }
 
-  async getSettingsStats(shopId: string): Promise<ShopSettingsStats> {
-    this.logger.info("ShopSettingsBackendService: Getting settings stats", {
-      shopId,
-    });
-
-    const settings = await this.getShopSettings(shopId);
-    if (!settings) {
-      throw new Error("Shop settings not found");
-    }
-
-    const enabledFeatures: string[] = [];
-    const disabledFeatures: string[] = [];
-
-    // Check feature status
-    const features = [
-      { key: "pointsEnabled", name: "ระบบแต้มสะสม" },
-      { key: "allowAdvanceBooking", name: "จองล่วงหน้า" },
-      { key: "smsEnabled", name: "แจ้งเตือน SMS" },
-      { key: "emailEnabled", name: "แจ้งเตือน Email" },
-      { key: "lineNotifyEnabled", name: "แจ้งเตือน LINE" },
-      { key: "acceptCreditCard", name: "รับบัตรเครดิต" },
-      { key: "acceptPromptPay", name: "รับ PromptPay" },
-      { key: "autoConfirmBooking", name: "ยืนยันการจองอัตโนมัติ" },
-      { key: "enableReviews", name: "ระบบรีวิว" },
-    ];
-
-    features.forEach((feature) => {
-      if (settings[feature.key as keyof ShopSettings]) {
-        enabledFeatures.push(feature.name);
-      } else {
-        disabledFeatures.push(feature.name);
+  async resetShopSettings(shopId: string): Promise<ShopSettings> {
+    try {
+      this.logger.info('ShopSettingsBackendService: Resetting shop settings', { shopId });
+      
+      const resetResult = await this.resetShopSettingsUseCase.execute({ shopId });
+      
+      this.logger.info('ShopSettingsBackendService: Shop settings reset', { shopId, success: resetResult.success });
+      
+      // Fetch the updated settings after reset
+      const result = await this.getShopSettingsUseCase.execute({ shopId });
+      
+      // Convert DTO to domain model
+      if (!result) {
+        throw new Error('Failed to fetch shop settings after reset');
       }
-    });
-
-    const integrationStatus = {
-      "SMS Gateway": settings.smsEnabled,
-      "Email Service": settings.emailEnabled,
-      "LINE Notify": settings.lineNotifyEnabled,
-      "Payment Gateway": settings.acceptCreditCard || settings.acceptPromptPay,
-      "Points System": settings.pointsEnabled,
-    };
-
-    const stats = {
-      totalSettings: Object.keys(settings).length - 4, // Exclude id, shopId, createdAt, updatedAt
-      lastUpdated: settings.updatedAt,
-      enabledFeatures,
-      disabledFeatures,
-      integrationStatus,
-    };
-
-    this.logger.info("ShopSettingsBackendService: Settings stats calculated", {
-      shopId,
-      enabledCount: enabledFeatures.length,
-      disabledCount: disabledFeatures.length,
-    });
-
-    return stats;
+      
+      const settings: ShopSettings = {
+        id: result.id,
+        shopId: result.shopId,
+        shopName: result.shopName,
+        shopDescription: result.shopDescription || undefined,
+        shopPhone: result.shopPhone || undefined,
+        shopEmail: result.shopEmail || undefined,
+        shopAddress: result.shopAddress || undefined,
+        shopWebsite: result.shopWebsite || undefined,
+        shopLogo: result.shopLogo || undefined,
+        timezone: result.timezone,
+        defaultOpenTime: result.defaultOpenTime,
+        defaultCloseTime: result.defaultCloseTime,
+        maxQueuePerService: result.maxQueuePerService,
+        queueTimeoutMinutes: result.queueTimeoutMinutes,
+        allowWalkIn: result.allowWalkIn,
+        allowAdvanceBooking: result.allowAdvanceBooking,
+        maxAdvanceBookingDays: result.maxAdvanceBookingDays,
+        pointsEnabled: result.pointsEnabled,
+        pointsPerBaht: result.pointsPerBaht,
+        pointsExpiryMonths: result.pointsExpiryMonths,
+        minimumPointsToRedeem: result.minimumPointsToRedeem,
+        smsEnabled: result.smsEnabled,
+        emailEnabled: result.emailEnabled,
+        lineNotifyEnabled: result.lineNotifyEnabled,
+        notifyBeforeMinutes: result.notifyBeforeMinutes,
+        acceptCash: result.acceptCash,
+        acceptCreditCard: result.acceptCreditCard,
+        acceptBankTransfer: result.acceptBankTransfer,
+        acceptPromptPay: result.acceptPromptPay,
+        promptPayId: result.promptPayId || undefined,
+        theme: result.theme,
+        language: result.language,
+        currency: result.currency,
+        dateFormat: result.dateFormat,
+        timeFormat: result.timeFormat,
+        autoConfirmBooking: result.autoConfirmBooking,
+        requireCustomerPhone: result.requireCustomerPhone,
+        allowGuestBooking: result.allowGuestBooking,
+        showPricesPublic: result.showPricesPublic,
+        enableReviews: result.enableReviews,
+        createdAt: new Date(result.createdAt),
+        updatedAt: new Date(result.updatedAt)
+      };
+      
+      return settings;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error resetting shop settings', { error, shopId });
+      throw error;
+    }
   }
 
-  async validateSettings(
+  async getShopSettingsStats(shopId: string): Promise<ShopSettingsStats> {
+    try {
+      this.logger.info('ShopSettingsBackendService: Getting settings stats', { shopId });
+      
+      const result = await this.getShopSettingsStatsUseCase.execute({ shopId });
+      
+      // Convert DTO to domain model
+      const stats: ShopSettingsStats = {
+        totalSettings: result.totalSettings,
+        lastUpdated: new Date(result.lastUpdated),
+        enabledFeatures: result.enabledFeatures,
+        disabledFeatures: result.disabledFeatures,
+        integrationStatus: result.integrationStatus,
+      };
+      
+      this.logger.info('ShopSettingsBackendService: Settings stats retrieved', { shopId });
+      return stats;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error getting settings stats', { error, shopId });
+      throw error;
+    }
+  }
+
+  async validateShopSettings(
     settings: Partial<ShopSettings>
   ): Promise<{ isValid: boolean; errors: string[] }> {
-    this.logger.info("ShopSettingsBackendService: Validating settings", {
-      settings,
-    });
-
-    const errors: string[] = [];
-
-    // Validate shop name
-    if (
-      settings.shopName !== undefined &&
-      settings.shopName.trim().length === 0
-    ) {
-      errors.push("ชื่อร้านไม่สามารถเป็นค่าว่างได้");
+    try {
+      this.logger.info('ShopSettingsBackendService: Validating settings', { settings });
+      
+      const result = await this.validateShopSettingsUseCase.execute({ 
+        settings: {
+          ...settings,
+          createdAt: settings.createdAt?.toISOString(),
+          updatedAt: settings.updatedAt?.toISOString()
+        }
+      });
+      
+      this.logger.info('ShopSettingsBackendService: Settings validation completed', {
+        isValid: result.isValid,
+        errorCount: result.errors.length,
+      });
+      
+      return result;
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error validating settings', { error, settings });
+      throw error;
     }
-
-    // Validate email format
-    if (
-      settings.shopEmail &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.shopEmail)
-    ) {
-      errors.push("รูปแบบอีเมลไม่ถูกต้อง");
-    }
-
-    // Validate phone format
-    if (settings.shopPhone && !/^[0-9\-\s\+\(\)]+$/.test(settings.shopPhone)) {
-      errors.push("รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง");
-    }
-
-    // Validate time format
-    if (
-      settings.defaultOpenTime &&
-      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultOpenTime)
-    ) {
-      errors.push("รูปแบบเวลาเปิดไม่ถูกต้อง");
-    }
-
-    if (
-      settings.defaultCloseTime &&
-      !/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.defaultCloseTime)
-    ) {
-      errors.push("รูปแบบเวลาปิดไม่ถูกต้อง");
-    }
-
-    // Validate numeric values
-    if (
-      settings.maxQueuePerService !== undefined &&
-      settings.maxQueuePerService < 1
-    ) {
-      errors.push("จำนวนคิวสูงสุดต้องมากกว่า 0");
-    }
-
-    if (settings.pointsPerBaht !== undefined && settings.pointsPerBaht < 0) {
-      errors.push("อัตราแต้มต่อบาทต้องไม่น้อยกว่า 0");
-    }
-
-    if (
-      settings.minimumPointsToRedeem !== undefined &&
-      settings.minimumPointsToRedeem < 0
-    ) {
-      errors.push("แต้มขั้นต่ำในการใช้ต้องไม่น้อยกว่า 0");
-    }
-
-    // Validate PromptPay ID
-    if (
-      settings.acceptPromptPay &&
-      settings.promptPayId &&
-      !/^[0-9]{10,13}$/.test(settings.promptPayId.replace(/\-/g, ""))
-    ) {
-      errors.push("รูปแบบ PromptPay ID ไม่ถูกต้อง");
-    }
-
-    const isValid = errors.length === 0;
-
-    this.logger.info(
-      "ShopSettingsBackendService: Settings validation completed",
-      {
-        isValid,
-        errorCount: errors.length,
-      }
-    );
-
-    return { isValid, errors };
   }
 
   async exportSettings(shopId: string): Promise<string> {
-    this.logger.info("ShopSettingsBackendService: Exporting settings", {
-      shopId,
-    });
-
-    const settings = await this.getShopSettings(shopId);
-    if (!settings) {
-      throw new Error("Shop settings not found");
+    try {
+      this.logger.info('ShopSettingsBackendService: Exporting settings', { shopId });
+      
+      const result = await this.exportShopSettingsUseCase.execute({ 
+        shopId, 
+        format: 'json' 
+      });
+      
+      // The interface expects a string, but the use case returns ExportShopSettingsOutput
+      // We need to convert the output to a string representation
+      return JSON.stringify(result, null, 2);
+    } catch (error) {
+      this.logger.error('ShopSettingsBackendService: Error exporting settings', { error, shopId });
+      throw error;
     }
-
-    // Remove sensitive or non-exportable fields
-    const exportData = {
-      ...settings,
-      id: undefined,
-      shopId: undefined,
-      createdAt: undefined,
-      updatedAt: undefined,
-    };
-
-    const exportString = JSON.stringify(exportData, null, 2);
-
-    this.logger.info("ShopSettingsBackendService: Settings exported", {
-      shopId,
-      dataSize: exportString.length,
-    });
-
-    return exportString;
   }
 
   async importSettings(
     shopId: string,
     settingsData: string
   ): Promise<ShopSettings> {
-    this.logger.info("ShopSettingsBackendService: Importing settings", {
-      shopId,
-    });
-
     try {
-      const importedData = JSON.parse(settingsData);
-
-      // Validate imported data
-      const validation = await this.validateSettings(importedData);
-      if (!validation.isValid) {
-        throw new Error(
-          `การตรวจสอบข้อมูลไม่ผ่าน: ${validation.errors.join(", ")}`
-        );
+      this.logger.info('ShopSettingsBackendService: Importing settings', { shopId });
+      
+      const validationResult = await this.importShopSettingsUseCase.execute({ shopId, settingsData });
+      
+      if (!validationResult.isValid) {
+        throw new Error(`Import validation failed: ${validationResult.errors.join(', ')}`);
       }
-
-      // Update settings with imported data
-      const updatedSettings = await this.updateShopSettings(
-        shopId,
-        importedData
-      );
-
-      this.logger.info(
-        "ShopSettingsBackendService: Settings imported successfully",
-        { shopId }
-      );
+      
+      // After successful import, fetch the updated settings
+      const updatedSettings = await this.getShopSettings(shopId);
+      
+      if (!updatedSettings) {
+        throw new Error('Failed to retrieve updated settings after import');
+      }
+      
+      this.logger.info('ShopSettingsBackendService: Settings imported successfully', { shopId });
       return updatedSettings;
     } catch (error) {
-      this.logger.error(
-        "ShopSettingsBackendService: Failed to import settings",
-        error
-      );
-      throw new Error("ไม่สามารถนำเข้าการตั้งค่าได้: รูปแบบข้อมูลไม่ถูกต้อง");
+      this.logger.error('ShopSettingsBackendService: Error importing settings', { error, shopId });
+      throw error;
     }
+  }
+}
+
+/**
+ * Factory for creating ShopSettingsBackendService instances
+ * Following Clean Architecture and Factory pattern principles
+ */
+export class ShopSettingsBackendServiceFactory {
+  static create(
+    repository: ShopBackendShopSettingsRepository,
+    logger: Logger
+  ): ShopSettingsBackendService {
+    // Create all use cases with their dependencies
+    const getShopSettingsUseCase = new GetShopSettingsUseCase(repository);
+    const getShopSettingsByIdUseCase = new GetShopSettingsByIdUseCase(repository);
+    const createShopSettingsUseCase = new CreateShopSettingsUseCase(repository);
+    const updateShopSettingsUseCase = new UpdateShopSettingsUseCase(repository);
+    const deleteShopSettingsUseCase = new DeleteShopSettingsUseCase(repository);
+    const resetShopSettingsUseCase = new ResetShopSettingsUseCase(repository);
+    const getShopSettingsStatsUseCase = new GetShopSettingsStatsUseCase(repository);
+    const validateShopSettingsUseCase = new ValidateShopSettingsUseCase(repository);
+    const exportShopSettingsUseCase = new ExportShopSettingsUseCase(repository);
+    const importShopSettingsUseCase = new ImportShopSettingsUseCase(repository, validateShopSettingsUseCase);
+
+    // Create and return the service instance
+    return new ShopSettingsBackendService(
+      getShopSettingsUseCase,
+      getShopSettingsByIdUseCase,
+      createShopSettingsUseCase,
+      updateShopSettingsUseCase,
+      deleteShopSettingsUseCase,
+      resetShopSettingsUseCase,
+      getShopSettingsStatsUseCase,
+      validateShopSettingsUseCase,
+      exportShopSettingsUseCase,
+      importShopSettingsUseCase,
+      logger
+    );
   }
 }

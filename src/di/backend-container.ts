@@ -14,6 +14,7 @@ import { BackendServicesServiceFactory } from "../application/services/backend/B
 import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
 import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/backend/BackendSubscriptionService";
 import { ShopBackendDashboardServiceFactory } from "../application/services/shop/backend/BackendDashboardService";
+import { ShopSettingsBackendServiceFactory } from "../application/services/shop/backend/shop-settings-backend-service";
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import {
@@ -36,6 +37,7 @@ import { SupabaseBackendQueueRepository } from "../infrastructure/repositories/b
 import { SupabaseBackendRewardRepository } from "../infrastructure/repositories/backend/supabase-backend-reward-repository";
 import { SupabaseBackendServiceRepository } from "../infrastructure/repositories/backend/supabase-backend-service-repository";
 import { SupabaseBackendShopRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-repository";
+import { SupabaseBackendShopSettingsRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-settings-repository";
 import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository";
 import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository";
 import { Container, createContainer } from "./container";
@@ -114,6 +116,10 @@ export async function createBackendContainer(): Promise<Container> {
       databaseDatasource,
       logger
     );
+    const shopSettingsRepository = new SupabaseBackendShopSettingsRepository(
+      databaseDatasource,
+      logger
+    );
 
     // Create subscription repository instances
     const subscriptionPlanRepository =
@@ -184,6 +190,10 @@ export async function createBackendContainer(): Promise<Container> {
     );
     const backendCustomersService = BackendCustomersServiceFactory.create(
       customerRepository,
+      logger
+    );
+    const backendShopSettingsService = ShopSettingsBackendServiceFactory.create(
+      shopSettingsRepository,
       logger
     );
 

@@ -21,7 +21,6 @@ import { PosterTemplateBackendService } from "../application/services/shop/backe
 import { QueueServiceBackendService } from "../application/services/shop/backend/queue-services-backend-service";
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
-import { ShopSettingsBackendService } from "../application/services/shop/backend/shop-settings-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
@@ -144,7 +143,6 @@ export function createClientContainer(): Container {
     const queueServiceBackendService = new QueueServiceBackendService(logger);
     const customerPointsTransactionBackendService =
       new CustomerPointsTransactionBackendService(logger);
-    const shopSettingsBackendService = new ShopSettingsBackendService(logger);
     const notificationSettingsBackendService =
       new NotificationSettingsBackendService(logger);
     const rewardTransactionBackendService = new RewardTransactionBackendService(
@@ -243,10 +241,6 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "CustomerPointsTransactionBackendService",
       customerPointsTransactionBackendService
-    );
-    container.registerInstance(
-      "ShopSettingsBackendService",
-      shopSettingsBackendService
     );
     container.registerInstance(
       "NotificationSettingsBackendService",

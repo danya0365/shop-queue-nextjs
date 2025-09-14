@@ -12,8 +12,6 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  console.log(viewModel);
-
   if (!viewModel.settings) {
     return (
       <div className="p-6 text-center">
