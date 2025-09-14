@@ -223,7 +223,7 @@ export function QueueManagementView({
   console.log(viewModel.shop.status);
 
   return (
-    <div className="space-y-8 relative">
+    <div className="flex flex-col gap-8 relative">
       {/* Draft Status Overlay */}
       {viewModel.shop.status === "draft" && (
         <div className="absolute inset-0 z-50 flex items-center justify-center">

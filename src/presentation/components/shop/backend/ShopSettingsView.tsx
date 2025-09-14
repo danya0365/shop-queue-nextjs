@@ -1,15 +1,17 @@
 "use client";
 
-import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
 import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
-import React from "react";
+import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
 
 interface ShopSettingsViewProps {
   shopId: string;
   initialViewModel?: ShopSettingsViewModel;
 }
 
-export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewProps) {
+export function ShopSettingsView({
+  shopId,
+  initialViewModel,
+}: ShopSettingsViewProps) {
   const {
     // Data
     viewModel,
@@ -310,7 +312,16 @@ export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewP
   );
 
   const renderPointsSettings = () => (
-    <div className="space-y-6">
+    <div className="flex gap-6 relative min-h-[200px]">
+      <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="text-center py-8 z-10">
+          <div className="text-4xl mb-4">🚧</div>
+          <p className="text-gray-600 dark:text-gray-400">
+            หมวดหมู่นี้กำลังพัฒนา
+          </p>
+        </div>
+      </div>
       <div className="flex items-center">
         <input
           type="checkbox"
@@ -393,7 +404,16 @@ export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewP
   );
 
   const renderPaymentSettings = () => (
-    <div className="space-y-6">
+    <div className="flex gap-6 relative">
+      <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="text-center py-8 z-10">
+          <div className="text-4xl mb-4">🚧</div>
+          <p className="text-gray-600 dark:text-gray-400">
+            หมวดหมู่นี้กำลังพัฒนา
+          </p>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -496,7 +516,16 @@ export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewP
   );
 
   const renderAdvancedSettings = () => (
-    <div className="space-y-6">
+    <div className="flex gap-6 relative">
+      <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="text-center py-8 z-10">
+          <div className="text-4xl mb-4">🚧</div>
+          <p className="text-gray-600 dark:text-gray-400">
+            หมวดหมู่นี้กำลังพัฒนา
+          </p>
+        </div>
+      </div>
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           ⚙️ การตั้งค่าขั้นสูง
@@ -872,12 +901,12 @@ export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewP
                   อัปเดตล่าสุด
                 </p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {new Date(stats.lastUpdated).toLocaleString('th-TH', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                  {new Date(stats.lastUpdated).toLocaleString("th-TH", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}
                 </p>
               </div>
@@ -1002,11 +1031,15 @@ export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewP
                   <button
                     onClick={() => {
                       if (exportData) {
-                        const blob = new Blob([exportData], { type: 'application/json' });
+                        const blob = new Blob([exportData], {
+                          type: "application/json",
+                        });
                         const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
+                        const a = document.createElement("a");
                         a.href = url;
-                        a.download = `shop-settings-${new Date().toISOString().split('T')[0]}.json`;
+                        a.download = `shop-settings-${
+                          new Date().toISOString().split("T")[0]
+                        }.json`;
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);

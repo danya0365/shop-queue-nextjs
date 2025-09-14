@@ -44,7 +44,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
   });
 
   return (
-    <div className="space-y-8 relative">
+    <div className="flex flex-col gap-8 relative">
       {/* Development Status Overlay */}
       <div className="absolute inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>

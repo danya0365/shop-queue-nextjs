@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import { PaymentsViewModel } from '@/src/presentation/presenters/shop/backend/PaymentsPresenter';
-import { usePaymentsPresenter } from '@/src/presentation/presenters/shop/backend/usePaymentsPresenter';
-import { PaymentMethod, PaymentStatus } from '@/src/application/dtos/shop/backend/payments-dto';
-import { useState } from 'react';
+import {
+  PaymentMethod,
+  PaymentStatus,
+} from "@/src/application/dtos/shop/backend/payments-dto";
+import { PaymentsViewModel } from "@/src/presentation/presenters/shop/backend/PaymentsPresenter";
+import { usePaymentsPresenter } from "@/src/presentation/presenters/shop/backend/usePaymentsPresenter";
+import { useState } from "react";
 
 interface PaymentsViewProps {
   viewModel: PaymentsViewModel;
@@ -11,29 +14,29 @@ interface PaymentsViewProps {
 
 export function PaymentsView({ viewModel }: PaymentsViewProps) {
   const [state, actions] = usePaymentsPresenter();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'partial':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'unpaid':
-        return 'bg-red-100 text-red-800';
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "partial":
+        return "bg-yellow-100 text-yellow-800";
+      case "unpaid":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPaymentStatusText = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'ชำระแล้ว';
-      case 'partial':
-        return 'ชำระบางส่วน';
-      case 'unpaid':
-        return 'ยังไม่ชำระ';
+      case "paid":
+        return "ชำระแล้ว";
+      case "partial":
+        return "ชำระบางส่วน";
+      case "unpaid":
+        return "ยังไม่ชำระ";
       default:
         return status;
     }
@@ -41,39 +44,39 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
 
   const getPaymentMethodText = (method: string | null) => {
     switch (method) {
-      case 'cash':
-        return 'เงินสด';
-      case 'card':
-        return 'บัตรเครดิต';
-      case 'qr':
-        return 'QR Code';
-      case 'transfer':
-        return 'โอนเงิน';
+      case "cash":
+        return "เงินสด";
+      case "card":
+        return "บัตรเครดิต";
+      case "qr":
+        return "QR Code";
+      case "transfer":
+        return "โอนเงิน";
       default:
-        return '-';
+        return "-";
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB',
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: "THB",
     }).format(amount);
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Intl.DateTimeFormat('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    if (!dateString) return "-";
+    return new Intl.DateTimeFormat("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(dateString));
   };
 
   return (
-    <div className="space-y-8 relative">
+    <div className="flex flex-col gap-8 relative">
       {/* Development Status Overlay */}
       <div className="absolute inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
@@ -115,8 +118,12 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการการชำระเงิน</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">ติดตามและจัดการการชำระเงินของลูกค้า</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการการชำระเงิน
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            ติดตามและจัดการการชำระเงินของลูกค้า
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
@@ -133,8 +140,16 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
@@ -146,8 +161,16 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                 className="text-red-400 hover:text-red-600"
               >
                 <span className="sr-only">ปิด</span>
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             </div>
@@ -160,7 +183,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ยอดรวมทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ยอดรวมทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {formatCurrency(viewModel.stats.totalRevenue)}
               </p>
@@ -172,7 +197,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ชำระแล้ว</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ชำระแล้ว
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {viewModel.stats.paidPayments}
               </p>
@@ -184,7 +211,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ชำระบางส่วน</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ชำระบางส่วน
+              </p>
               <p className="text-2xl font-bold text-yellow-600">
                 {viewModel.stats.partialPayments}
               </p>
@@ -196,7 +225,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ยังไม่ชำระ</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ยังไม่ชำระ
+              </p>
               <p className="text-2xl font-bold text-red-600">
                 {viewModel.stats.unpaidPayments}
               </p>
@@ -209,27 +240,53 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
       {/* Payment Method Stats */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">สถิติการชำระเงินตามช่องทาง</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            สถิติการชำระเงินตามช่องทาง
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">เงินสด 💵</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{viewModel.methodStats.cash.count}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{viewModel.methodStats.cash.percentage.toFixed(1)}%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เงินสด 💵
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {viewModel.methodStats.cash.count}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {viewModel.methodStats.cash.percentage.toFixed(1)}%
+              </p>
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">บัตรเครดิต 💳</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{viewModel.methodStats.card.count}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{viewModel.methodStats.card.percentage.toFixed(1)}%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                บัตรเครดิต 💳
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {viewModel.methodStats.card.count}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {viewModel.methodStats.card.percentage.toFixed(1)}%
+              </p>
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">QR Code 📱</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{viewModel.methodStats.qr.count}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{viewModel.methodStats.qr.percentage.toFixed(1)}%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                QR Code 📱
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {viewModel.methodStats.qr.count}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {viewModel.methodStats.qr.percentage.toFixed(1)}%
+              </p>
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">โอนเงิน 🏦</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{viewModel.methodStats.transfer.count}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{viewModel.methodStats.transfer.percentage.toFixed(1)}%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                โอนเงิน 🏦
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {viewModel.methodStats.transfer.count}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {viewModel.methodStats.transfer.percentage.toFixed(1)}%
+              </p>
             </div>
           </div>
         </div>
@@ -252,8 +309,13 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
           {/* Status Filter */}
           <div className="lg:w-48">
             <select
-              value={state.filters.paymentStatus || ''}
-              onChange={(e) => actions.setFilters({ ...state.filters, paymentStatus: e.target.value as PaymentStatus || undefined })}
+              value={state.filters.paymentStatus || ""}
+              onChange={(e) =>
+                actions.setFilters({
+                  ...state.filters,
+                  paymentStatus: (e.target.value as PaymentStatus) || undefined,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">สถานะทั้งหมด</option>
@@ -266,8 +328,13 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
           {/* Method Filter */}
           <div className="lg:w-48">
             <select
-              value={state.filters.paymentMethod || ''}
-              onChange={(e) => actions.setFilters({ ...state.filters, paymentMethod: e.target.value as PaymentMethod || undefined })}
+              value={state.filters.paymentMethod || ""}
+              onChange={(e) =>
+                actions.setFilters({
+                  ...state.filters,
+                  paymentMethod: (e.target.value as PaymentMethod) || undefined,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">ช่องทางทั้งหมด</option>
@@ -316,17 +383,22 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">💳</div>
                       <p className="text-lg">
-                        {searchTerm || state.filters.paymentStatus || state.filters.paymentMethod
+                        {searchTerm ||
+                        state.filters.paymentStatus ||
+                        state.filters.paymentMethod
                           ? "ไม่พบรายการการชำระเงินที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีรายการการชำระเงินในระบบ"}
                       </p>
-                      {searchTerm || state.filters.paymentStatus || state.filters.paymentMethod ? (
+                      {searchTerm ||
+                      state.filters.paymentStatus ||
+                      state.filters.paymentMethod ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการการชำระเงินใหม่
                         </p>
                       ) : (
                         <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &lsquo;เพิ่มการชำระเงิน&rsquo; เพื่อเริ่มบันทึกรายการแรกของคุณ
+                          คลิกปุ่ม &lsquo;เพิ่มการชำระเงิน&rsquo;
+                          เพื่อเริ่มบันทึกรายการแรกของคุณ
                         </p>
                       )}
                     </div>
@@ -334,7 +406,10 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                 </tr>
               ) : (
                 viewModel.payments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={payment.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       #{payment.queueNumber}
                     </td>
@@ -343,7 +418,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       <div>
-                        <p className="font-medium">{formatCurrency(payment.totalAmount)}</p>
+                        <p className="font-medium">
+                          {formatCurrency(payment.totalAmount)}
+                        </p>
                         {payment.paidAmount && (
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             ชำระแล้ว: {formatCurrency(payment.paidAmount)}
@@ -355,7 +432,11 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                       {getPaymentMethodText(payment.paymentMethod)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(payment.paymentStatus)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                          payment.paymentStatus
+                        )}`}
+                      >
                         {getPaymentStatusText(payment.paymentStatus)}
                       </span>
                     </td>
@@ -390,13 +471,18 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700 dark:text-gray-300">
-                แสดง {((viewModel.currentPage - 1) * viewModel.perPage) + 1} ถึง{' '}
-                {Math.min(viewModel.currentPage * viewModel.perPage, viewModel.totalCount)} จาก{' '}
-                {viewModel.totalCount} รายการ
+                แสดง {(viewModel.currentPage - 1) * viewModel.perPage + 1} ถึง{" "}
+                {Math.min(
+                  viewModel.currentPage * viewModel.perPage,
+                  viewModel.totalCount
+                )}{" "}
+                จาก {viewModel.totalCount} รายการ
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => actions.setCurrentPage(viewModel.currentPage - 1)}
+                  onClick={() =>
+                    actions.setCurrentPage(viewModel.currentPage - 1)
+                  }
                   disabled={viewModel.currentPage <= 1}
                   className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                 >
@@ -406,8 +492,13 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
                   {viewModel.currentPage}
                 </span>
                 <button
-                  onClick={() => actions.setCurrentPage(viewModel.currentPage + 1)}
-                  disabled={viewModel.currentPage >= Math.ceil(viewModel.totalCount / viewModel.perPage)}
+                  onClick={() =>
+                    actions.setCurrentPage(viewModel.currentPage + 1)
+                  }
+                  disabled={
+                    viewModel.currentPage >=
+                    Math.ceil(viewModel.totalCount / viewModel.perPage)
+                  }
                   className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   ถัดไป
@@ -423,7 +514,9 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span className="text-gray-900 dark:text-white">กำลังดำเนินการ...</span>
+            <span className="text-gray-900 dark:text-white">
+              กำลังดำเนินการ...
+            </span>
           </div>
         </div>
       )}

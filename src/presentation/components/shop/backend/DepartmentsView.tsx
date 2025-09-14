@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
-import { DepartmentsViewModel } from '@/src/presentation/presenters/shop/backend/DepartmentsPresenter';
-import { useState } from 'react';
+import { DepartmentsViewModel } from "@/src/presentation/presenters/shop/backend/DepartmentsPresenter";
+import { useState } from "react";
 
 interface DepartmentsViewProps {
   viewModel: DepartmentsViewModel;
 }
 
 export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Filter departments based on search
-  const filteredDepartments = viewModel.departments.filter(department =>
-    department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (department.description && department.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredDepartments = viewModel.departments.filter(
+    (department) =>
+      department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (department.description &&
+        department.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    <div className="space-y-8 relative">
+    <div className="flex flex-col gap-8 relative">
       {/* Development Status Overlay */}
       <div className="absolute inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
@@ -60,8 +62,12 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการแผนก</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการแผนกงานและการจัดกลุ่มพนักงาน</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการแผนก
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            จัดการแผนกงานและการจัดกลุ่มพนักงาน
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
@@ -78,7 +84,9 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แผนกทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แผนกทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.totalDepartments}
               </p>
@@ -90,7 +98,9 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">พนักงานทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                พนักงานทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-blue-600">
                 {viewModel.totalEmployees}
               </p>
@@ -102,7 +112,9 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">เฉลี่ย/แผนก</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เฉลี่ย/แผนก
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {viewModel.averageEmployeesPerDepartment.toFixed(1)}
               </p>
@@ -114,9 +126,15 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แผนกที่ใหญ่ที่สุด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แผนกที่ใหญ่ที่สุด
+              </p>
               <p className="text-lg font-bold text-purple-600">
-                {Math.max(...viewModel.departments.map(d => d.employeeCount), 0)} คน
+                {Math.max(
+                  ...viewModel.departments.map((d) => d.employeeCount),
+                  0
+                )}{" "}
+                คน
               </p>
             </div>
             <div className="text-2xl">🏆</div>
@@ -156,7 +174,8 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 </p>
               ) : (
                 <p className="text-sm text-gray-400 mt-2">
-                  คลิกปุ่ม &lsquo;เพิ่มแผนกใหม่&rsquo; เพื่อเริ่มเพิ่มแผนกแรกของคุณ
+                  คลิกปุ่ม &lsquo;เพิ่มแผนกใหม่&rsquo;
+                  เพื่อเริ่มเพิ่มแผนกแรกของคุณ
                 </p>
               )}
             </div>
@@ -182,13 +201,33 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 </div>
                 <div className="flex items-center space-x-1">
                   <button className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
                     </svg>
                   </button>
                   <button className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -217,12 +256,14 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
               {/* Department Stats */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">สร้างเมื่อ:</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    สร้างเมื่อ:
+                  </span>
                   <span className="text-gray-900 dark:text-white">
-                    {new Intl.DateTimeFormat('th-TH', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
+                    {new Intl.DateTimeFormat("th-TH", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
                     }).format(department.createdAt)}
                   </span>
                 </div>

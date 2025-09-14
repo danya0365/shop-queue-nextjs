@@ -7,8 +7,8 @@ import type {
 } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
-import { getServerContainer } from "@/src/di/server-container";
 import { getClientContainer } from "@/src/di/client-container";
+import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 // Define ViewModel interface
@@ -66,13 +66,6 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
           icon: "🏪",
           description: "ชื่อร้าน ที่อยู่ ติดต่อ และข้อมูลพื้นฐาน",
           settingsCount: 7,
-        },
-        {
-          id: "hours",
-          name: "เวลาทำการ",
-          icon: "🕐",
-          description: "เวลาเปิด-ปิด และโซนเวลา",
-          settingsCount: 3,
         },
         {
           id: "queue",
@@ -134,46 +127,84 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   }
 
   // CRUD Operations
-  async updateShopSettings(shopId: string, settings: Partial<ShopSettings>): Promise<ShopSettings> {
+  async updateShopSettings(
+    shopId: string,
+    settings: Partial<ShopSettings>
+  ): Promise<ShopSettings> {
     try {
-      this.logger.info("ShopSettingsPresenter: Updating shop settings", { shopId });
-      const updatedSettings = await this.shopBackendShopSettingsService.updateShopSettings(shopId, settings);
+      this.logger.info("ShopSettingsPresenter: Updating shop settings", {
+        shopId,
+      });
+      const updatedSettings =
+        await this.shopBackendShopSettingsService.updateShopSettings(
+          shopId,
+          settings
+        );
       return updatedSettings;
     } catch (error) {
-      this.logger.error("ShopSettingsPresenter: Error updating shop settings", error);
+      this.logger.error(
+        "ShopSettingsPresenter: Error updating shop settings",
+        error
+      );
       throw error;
     }
   }
 
-  async createShopSettings(settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">): Promise<ShopSettings> {
+  async createShopSettings(
+    settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">
+  ): Promise<ShopSettings> {
     try {
-      this.logger.info("ShopSettingsPresenter: Creating shop settings", { shopId: settings.shopId });
-      const newSettings = await this.shopBackendShopSettingsService.createShopSettings(settings);
+      this.logger.info("ShopSettingsPresenter: Creating shop settings", {
+        shopId: settings.shopId,
+      });
+      const newSettings =
+        await this.shopBackendShopSettingsService.createShopSettings(settings);
       return newSettings;
     } catch (error) {
-      this.logger.error("ShopSettingsPresenter: Error creating shop settings", error);
+      this.logger.error(
+        "ShopSettingsPresenter: Error creating shop settings",
+        error
+      );
       throw error;
     }
   }
 
   async exportShopSettings(shopId: string): Promise<string> {
     try {
-      this.logger.info("ShopSettingsPresenter: Exporting shop settings", { shopId });
-      const exportData = await this.shopBackendShopSettingsService.exportSettings(shopId);
+      this.logger.info("ShopSettingsPresenter: Exporting shop settings", {
+        shopId,
+      });
+      const exportData =
+        await this.shopBackendShopSettingsService.exportSettings(shopId);
       return exportData;
     } catch (error) {
-      this.logger.error("ShopSettingsPresenter: Error exporting shop settings", error);
+      this.logger.error(
+        "ShopSettingsPresenter: Error exporting shop settings",
+        error
+      );
       throw error;
     }
   }
 
-  async importShopSettings(shopId: string, importData: string): Promise<ShopSettings> {
+  async importShopSettings(
+    shopId: string,
+    importData: string
+  ): Promise<ShopSettings> {
     try {
-      this.logger.info("ShopSettingsPresenter: Importing shop settings", { shopId });
-      const importedSettings = await this.shopBackendShopSettingsService.importSettings(shopId, importData);
+      this.logger.info("ShopSettingsPresenter: Importing shop settings", {
+        shopId,
+      });
+      const importedSettings =
+        await this.shopBackendShopSettingsService.importSettings(
+          shopId,
+          importData
+        );
       return importedSettings;
     } catch (error) {
-      this.logger.error("ShopSettingsPresenter: Error importing shop settings", error);
+      this.logger.error(
+        "ShopSettingsPresenter: Error importing shop settings",
+        error
+      );
       throw error;
     }
   }
