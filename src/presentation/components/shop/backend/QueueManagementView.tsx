@@ -255,13 +255,15 @@ export function QueueManagementView({
               </div>
             </div>
             <div className="space-y-3">
-              <button 
-                onClick={() => window.location.href = `/shop/${shopId}/backend/settings`}
+              <button
+                onClick={() =>
+                  (window.location.href = `/shop/${shopId}/backend/settings`)
+                }
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 ⚙️ ไปที่การตั้งค่าร้านค้า
               </button>
-              <button 
+              <button
                 onClick={() => window.history.back()}
                 className="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
               >
@@ -271,6 +273,63 @@ export function QueueManagementView({
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <p className="text-xs text-gray-400 dark:text-gray-500">
                 เมื่อตั้งค่าร้านค้าเสร็จสิ้นแล้ว
+                <br />
+                ระบบจะพร้อมให้บริการจัดการคิวลูกค้าของคุณ
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Empty Shop Services Overlay */}
+      {viewModel.shop.servicesCount === 0 && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">🛒</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                ยังไม่มีบริการ
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                กรุณาเพิ่มบริการของคุณก่อนเริ่มใช้งาน
+              </p>
+            </div>
+            <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400 mb-6">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                <span>ยังไม่มีบริการของคุณ</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-100"></div>
+                <span>ต้องทำการเพิ่มบริการของคุณ</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-200"></div>
+                <span>ยังไม่สามารถจัดการคิวลูกค้าได้</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() =>
+                  (window.location.href = `/shop/${shopId}/backend/services`)
+                }
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                📝 เพิ่มบริการใหม่
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+              >
+                ← กลับหน้าก่อนหน้า
+              </button>
+            </div>
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                เมื่อเพิ่มบริการของคุณเสร็จสิ้นแล้ว
                 <br />
                 ระบบจะพร้อมให้บริการจัดการคิวลูกค้าของคุณ
               </p>

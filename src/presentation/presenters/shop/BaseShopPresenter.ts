@@ -15,6 +15,7 @@ export interface ShopInfo {
   logo?: string;
   openingHours: string;
   services: string[];
+  servicesCount: number;
   isOpen: boolean;
   rating: number;
   totalReviews: number;
@@ -43,6 +44,7 @@ export abstract class BaseShopPresenter {
       logo: "/images/shop-logo.png",
       openingHours: this.createOpeningHoursString(shop.openingHours),
       services: this.createServicesString(shop.services),
+      servicesCount: shop.services.length,
       isOpen: true,
       rating: 4.8,
       totalReviews: 256,
