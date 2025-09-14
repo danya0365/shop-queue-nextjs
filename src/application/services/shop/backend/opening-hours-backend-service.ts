@@ -124,8 +124,7 @@ export class ShopBackendOpeningHoursService
       data,
     });
 
-    const result = await this.updateOpeningHourUseCase.execute({
-      id: hourId,
+    const result = await this.updateOpeningHourUseCase.execute(hourId, {
       isOpen: data.isOpen,
       openTime: data.openTime,
       closeTime: data.closeTime,

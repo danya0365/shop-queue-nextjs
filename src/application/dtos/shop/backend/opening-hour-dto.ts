@@ -24,7 +24,6 @@ export interface CreateOpeningHourInputDTO {
 }
 
 export interface UpdateOpeningHourInputDTO {
-  id: string;
   isOpen?: boolean;
   openTime?: string;
   closeTime?: string;

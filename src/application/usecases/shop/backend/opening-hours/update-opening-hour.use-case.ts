@@ -15,24 +15,25 @@ export class UpdateOpeningHourUseCase {
   ) {}
 
   async execute(
+    id: string,
     input: UpdateOpeningHourInputDTO
   ): Promise<UpdateOpeningHourOutput> {
     try {
       this.logger.info("UpdateOpeningHourUseCase: Updating opening hour", {
-        id: input.id,
+        id,
       });
 
       // Validate input
-      if (!input.id) {
+      if (!id) {
         throw OpeningHourError.validationError("Opening hour ID is required");
       }
 
       // Get existing opening hour
       const existingOpeningHour = await this.repository.getOpeningHourById(
-        input.id
+        id
       );
       if (!existingOpeningHour) {
-        throw OpeningHourError.notFound(input.id);
+        throw OpeningHourError.notFound(id);
       }
 
       // Validate time range if opening
@@ -61,7 +62,7 @@ export class UpdateOpeningHourUseCase {
 
       // Save to repository
       const savedOpeningHour = await this.repository.updateOpeningHour(
-        input.id,
+        id,
         updatedOpeningHour
       );
 
@@ -71,7 +72,7 @@ export class UpdateOpeningHourUseCase {
       this.logger.info(
         "UpdateOpeningHourUseCase: Successfully updated opening hour",
         {
-          id: input.id,
+          id,
           shopId: openingHourDTO.shopId,
           dayOfWeek: openingHourDTO.dayOfWeek,
         }
@@ -91,7 +92,7 @@ export class UpdateOpeningHourUseCase {
       }
 
       throw OpeningHourError.databaseError("Failed to update opening hour", {
-        id: input.id,
+        id,
         originalError: error,
       });
     }
