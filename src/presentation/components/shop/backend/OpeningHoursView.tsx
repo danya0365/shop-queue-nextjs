@@ -1,10 +1,7 @@
 "use client";
 
-import { OpeningHourDTO } from "@/src/application/dtos/shop/backend/opening-hour-dto";
-import { DayOfWeek } from "@/src/domain/entities/shop/backend/backend-opening-hour.entity";
 import { OpeningHoursViewModel } from "@/src/presentation/presenters/shop/backend/opening-hours/OpeningHoursPresenter";
 import { useOpeningHoursPresenter } from "@/src/presentation/presenters/shop/backend/opening-hours/useOpeningHoursPresenter";
-import { useState } from "react";
 
 interface OpeningHoursViewProps {
   shopId: string;
@@ -15,298 +12,41 @@ export function OpeningHoursView({
   shopId,
   initialViewModel,
 }: OpeningHoursViewProps) {
-  const [editMode, setEditMode] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({
-    openTime: "",
-    closeTime: "",
-    breakStart: "",
-    breakEnd: "",
-  });
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "success" as "success" | "error",
-  });
-
-  const formatTime = (time: string | null) => {
-    if (!time) return "-";
-    return time;
-  };
-
-  const getDayOrder = () => {
-    return [
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-      "sunday",
-    ];
-  };
-
-  const timeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
-
-  // Integrate with presenter hook
   const {
+    // Data
     openingHours,
     weeklySchedule,
+    viewModel,
     isLoading,
     error,
-    createOpeningHour,
-    updateOpeningHour,
-    deleteOpeningHour,
-    bulkUpdateOpeningHours,
-    refreshOpeningHours,
+    
+    // State
+    editMode,
+    selectedDay,
+    editForm,
+    notification,
+    
+    // State Actions
+    setEditMode,
+    setSelectedDay,
+    setEditForm,
+    setNotification,
+    resetEditForm,
+    resetNotification,
+    
+    // Event Handlers
+    handleToggleDayStatus,
+    handleEditDay,
+    handleSaveDay,
+    handleQuickAction,
+    showNotification,
+    
+    // Utility Functions
+    formatTime,
+    getDayOrder,
+    getStatusColor,
+    calculateWorkingHours,
   } = useOpeningHoursPresenter(shopId, initialViewModel);
-
-  // Calculate average open hours
-  const calculateAverageOpenHours = (
-    schedule: Record<string, OpeningHourDTO>
-  ) => {
-    const openHours = Object.values(schedule).filter((hour) => hour.isOpen);
-    if (openHours.length === 0) return 0;
-
-    const totalHours = openHours.reduce((sum, hour) => {
-      if (hour.openTime && hour.closeTime) {
-        const openMinutes = timeToMinutes(hour.openTime);
-        const closeMinutes = timeToMinutes(hour.closeTime);
-        let totalMinutes = closeMinutes - openMinutes;
-
-        if (hour.breakStart && hour.breakEnd) {
-          const breakStartMinutes = timeToMinutes(hour.breakStart);
-          const breakEndMinutes = timeToMinutes(hour.breakEnd);
-          totalMinutes -= breakEndMinutes - breakStartMinutes;
-        }
-
-        return sum + totalMinutes / 60;
-      }
-      return sum;
-    }, 0);
-
-    return totalHours / openHours.length;
-  };
-
-  // Use the data from the hook
-  const viewModel = {
-    openingHours,
-    weeklySchedule,
-    totalOpenDays: Object.values(weeklySchedule).filter((hour) => hour.isOpen)
-      .length,
-    totalClosedDays: Object.values(weeklySchedule).filter(
-      (hour) => !hour.isOpen
-    ).length,
-    averageOpenHours: calculateAverageOpenHours(weeklySchedule),
-    hasBreakTime: Object.values(weeklySchedule).filter(
-      (hour) => hour.breakStart && hour.breakEnd
-    ).length,
-    dayLabels: {
-      monday: "จันทร์",
-      tuesday: "อังคาร",
-      wednesday: "พุธ",
-      thursday: "พฤหัสบดี",
-      friday: "ศุกร์",
-      saturday: "เสาร์",
-      sunday: "อาทิตย์",
-    } as Record<string, string>,
-    isLoading,
-    error,
-  };
-
-  // Event handlers
-  const handleToggleDayStatus = async (day: string, currentStatus: boolean) => {
-    try {
-      const dayData = weeklySchedule[day];
-      if (dayData) {
-        await updateOpeningHour(dayData.id, {
-          id: dayData.id,
-          isOpen: !currentStatus,
-        });
-        showNotification(
-          `อัปเดตสถานะ${
-            viewModel.dayLabels[day as keyof typeof viewModel.dayLabels]
-          }สำเร็จ`,
-          "success"
-        );
-      }
-    } catch (error) {
-      console.error("Error toggling day status:", error);
-      showNotification("ไม่สามารถอัปเดตสถานะได้", "error");
-    }
-  };
-
-  const handleEditDay = (day: string) => {
-    const dayData = weeklySchedule[day];
-    if (dayData) {
-      setEditForm({
-        openTime: dayData.openTime || "",
-        closeTime: dayData.closeTime || "",
-        breakStart: dayData.breakStart || "",
-        breakEnd: dayData.breakEnd || "",
-      });
-      setSelectedDay(day);
-    }
-  };
-
-  const handleSaveDay = async () => {
-    if (!selectedDay) return;
-
-    try {
-      const dayData = weeklySchedule[selectedDay];
-      if (dayData) {
-        await updateOpeningHour(dayData.id, {
-          id: dayData.id,
-          openTime: editForm.openTime || undefined,
-          closeTime: editForm.closeTime || undefined,
-          breakStart: editForm.breakStart || undefined,
-          breakEnd: editForm.breakEnd || undefined,
-        });
-        setSelectedDay(null);
-        showNotification(
-          `บันทึกเวลาทำการ${
-            viewModel.dayLabels[selectedDay as keyof typeof viewModel.dayLabels]
-          }สำเร็จ`,
-          "success"
-        );
-      }
-    } catch (error) {
-      console.error("Error saving day:", error);
-      showNotification("ไม่สามารถบันทึกข้อมูลได้", "error");
-    }
-  };
-
-  const handleQuickAction = async (action: string) => {
-    try {
-      const updates = [];
-      const days = getDayOrder();
-
-      switch (action) {
-        case "all-days":
-          for (const day of days) {
-            updates.push({
-              dayOfWeek: day as DayOfWeek,
-              isOpen: true,
-              openTime: "09:00",
-              closeTime: "18:00",
-              breakStart: undefined,
-              breakEnd: undefined,
-            });
-          }
-          break;
-        case "weekdays":
-          for (const day of days.slice(0, 5)) {
-            updates.push({
-              dayOfWeek: day as DayOfWeek,
-              isOpen: true,
-              openTime: "09:00",
-              closeTime: "17:00",
-              breakStart: undefined,
-              breakEnd: undefined,
-            });
-          }
-          // Close weekends
-          for (const day of days.slice(5)) {
-            updates.push({
-              dayOfWeek: day as DayOfWeek,
-              isOpen: false,
-              openTime: undefined,
-              closeTime: undefined,
-              breakStart: undefined,
-              breakEnd: undefined,
-            });
-          }
-          break;
-        case "monday-saturday":
-          for (const day of days.slice(0, 6)) {
-            updates.push({
-              dayOfWeek: day as DayOfWeek,
-              isOpen: true,
-              openTime: "10:00",
-              closeTime: "19:00",
-              breakStart: undefined,
-              breakEnd: undefined,
-            });
-          }
-          // Close Sunday
-          updates.push({
-            dayOfWeek: DayOfWeek.SUNDAY,
-            isOpen: false,
-            openTime: undefined,
-            closeTime: undefined,
-            breakStart: undefined,
-            breakEnd: undefined,
-          });
-          break;
-        case "close-sunday":
-          const sundayData = weeklySchedule["sunday"];
-          if (sundayData) {
-            await updateOpeningHour(sundayData.id, {
-              id: sundayData.id,
-              isOpen: false,
-              openTime: undefined,
-              closeTime: undefined,
-              breakStart: undefined,
-              breakEnd: undefined,
-            });
-          }
-          showNotification("ปิดทำการวันอาทิตย์สำเร็จ", "success");
-          return;
-      }
-
-      if (updates.length > 0) {
-        await bulkUpdateOpeningHours(updates);
-        showNotification("อัปเดตเวลาทำการสำเร็จ", "success");
-      }
-    } catch (error) {
-      console.error("Error in quick action:", error);
-      showNotification("ไม่สามารถอัปเดตข้อมูลได้", "error");
-    }
-  };
-
-  const showNotification = (message: string, type: "success" | "error") => {
-    setNotification({ show: true, message, type });
-    setTimeout(
-      () => setNotification({ show: false, message: "", type: "success" }),
-      3000
-    );
-  };
-
-  const getStatusColor = (isOpen: boolean) => {
-    return isOpen
-      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-  };
-
-  const calculateWorkingHours = (
-    openTime: string | null,
-    closeTime: string | null,
-    breakStart: string | null,
-    breakEnd: string | null
-  ) => {
-    if (!openTime || !closeTime) return "0 ชั่วโมง";
-
-    const openMinutes = timeToMinutes(openTime);
-    const closeMinutes = timeToMinutes(closeTime);
-    let totalMinutes = closeMinutes - openMinutes;
-
-    if (breakStart && breakEnd) {
-      const breakStartMinutes = timeToMinutes(breakStart);
-      const breakEndMinutes = timeToMinutes(breakEnd);
-      totalMinutes -= breakEndMinutes - breakStartMinutes;
-    }
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (minutes === 0) {
-      return `${hours} ชั่วโมง`;
-    }
-    return `${hours} ชั่วโมง ${minutes} นาที`;
-  };
 
   return (
     <div className="space-y-6">
