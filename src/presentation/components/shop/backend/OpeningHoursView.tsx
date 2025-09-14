@@ -19,13 +19,13 @@ export function OpeningHoursView({
     viewModel,
     isLoading,
     error,
-    
+
     // State
     editMode,
     selectedDay,
     editForm,
     notification,
-    
+
     // State Actions
     setEditMode,
     setSelectedDay,
@@ -33,14 +33,14 @@ export function OpeningHoursView({
     setNotification,
     resetEditForm,
     resetNotification,
-    
+
     // Event Handlers
     handleToggleDayStatus,
     handleEditDay,
     handleSaveDay,
     handleQuickAction,
     showNotification,
-    
+
     // Utility Functions
     formatTime,
     getDayOrder,
@@ -149,7 +149,43 @@ export function OpeningHoursView({
         </div>
       </div>
 
+      {/* Quick Actions */}
+      {editMode && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            การตั้งค่าด่วน
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => handleQuickAction("all-days")}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+            >
+              เปิดทุกวัน 9:00-18:00
+            </button>
+            <button
+              onClick={() => handleQuickAction("weekdays")}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              เปิดจันทร์-ศุกร์ 9:00-17:00
+            </button>
+            <button
+              onClick={() => handleQuickAction("monday-saturday")}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+            >
+              เปิดจันทร์-เสาร์ 10:00-19:00
+            </button>
+            <button
+              onClick={() => handleQuickAction("close-sunday")}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+            >
+              ปิดทุกวันอาทิตย์
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Opening Hours */}
+
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -369,41 +405,6 @@ export function OpeningHoursView({
           </div>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      {editMode && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            การตั้งค่าด่วน
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => handleQuickAction("all-days")}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-            >
-              เปิดทุกวัน 9:00-18:00
-            </button>
-            <button
-              onClick={() => handleQuickAction("weekdays")}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-            >
-              เปิดจันทร์-ศุกร์ 9:00-17:00
-            </button>
-            <button
-              onClick={() => handleQuickAction("monday-saturday")}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
-            >
-              เปิดจันทร์-เสาร์ 10:00-19:00
-            </button>
-            <button
-              onClick={() => handleQuickAction("close-sunday")}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-            >
-              ปิดทุกวันอาทิตย์
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
