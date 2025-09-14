@@ -10,6 +10,7 @@ import { ShopSettingsViewModel } from "./ShopSettingsPresenter";
 import { useShopSettingsActions } from "./hooks/useShopSettingsActions";
 import { useShopSettingsState } from "./hooks/useShopSettingsState";
 import { useShopSettingsValidation } from "./hooks/useShopSettingsValidation";
+import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 
 interface UseShopSettingsPresenterReturn {
   // Data
@@ -40,6 +41,7 @@ interface UseShopSettingsPresenterReturn {
   importShopSettings: (data: string) => Promise<void>;
   refreshShopSettings: () => Promise<void>;
   updateShopStatus: (status: "open" | "closed") => Promise<void>;
+  updateShop: (data: UpdateShopInputDTO) => Promise<void>;
 
   // State Actions
   setActiveCategory: (category: string) => void;
@@ -132,6 +134,7 @@ export function useShopSettingsPresenter(
     importShopSettings,
     refreshShopSettings,
     updateShopStatus,
+    updateShop,
   } = useShopSettingsActions(shopId, setViewModel, setIsLoading, setError);
 
   const updateShopSettings = useCallback(
@@ -283,8 +286,18 @@ export function useShopSettingsPresenter(
     }
 
     try {
+      // Update shop basic info (name, description, address, phone, etc.)
+      const shopUpdateData: UpdateShopInputDTO = {
+        id: shopId,
+        name: formData.shopName,
+        description: formData.shopDescription,
+        address: formData.shopAddress,
+        phone: formData.shopPhone,
+        email: formData.shopEmail,
+      };
+
       // Convert formData to match UpdateShopSettingsInputDTO type
-      const updateData: UpdateShopSettingsInputDTO = {
+      const settingsUpdateData: UpdateShopSettingsInputDTO = {
         ...formData,
         shopId: shopId, // Add required shopId
         // Convert null to undefined for optional fields
@@ -297,7 +310,12 @@ export function useShopSettingsPresenter(
         promptPayId: formData.promptPayId ?? undefined,
       };
 
-      await updateShopSettings(updateData);
+      // Update both shop and shop settings
+      await Promise.all([
+        updateShop(shopUpdateData),
+        updateShopSettings(settingsUpdateData)
+      ]);
+
       setSaveSuccess(true);
       setIsEditing(false);
 
@@ -313,6 +331,7 @@ export function useShopSettingsPresenter(
     viewModel?.settings?.shopId,
     formData,
     validateForm,
+    updateShop,
     updateShopSettings,
     setIsSaving,
     setSaveError,
@@ -479,6 +498,7 @@ export function useShopSettingsPresenter(
     importShopSettings,
     refreshShopSettings,
     updateShopStatus,
+    updateShop,
 
     // State Actions
     setActiveCategory,

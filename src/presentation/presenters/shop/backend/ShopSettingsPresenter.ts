@@ -13,6 +13,7 @@ import { ShopStatus } from "@/src/domain/entities/backend/backend-shop.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { ShopInfo } from "../BaseShopPresenter";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
+import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 // Define ViewModel interface
 export interface ShopSettingsViewModel {
   shop: ShopInfo;
@@ -236,6 +237,22 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
     } catch (error) {
       this.logger.error(
         "ShopSettingsPresenter: Error updating shop status",
+        error
+      );
+      throw error;
+    }
+  }
+
+  async updateShop(data: UpdateShopInputDTO): Promise<void> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Updating shop", {
+        data: { ...data, email: data.email ? '[REDACTED]' : undefined }
+      });
+
+      await this.shopService.updateShop(data);
+    } catch (error) {
+      this.logger.error(
+        "ShopSettingsPresenter: Error updating shop",
         error
       );
       throw error;

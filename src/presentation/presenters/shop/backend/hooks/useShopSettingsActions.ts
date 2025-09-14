@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import type { ShopSettings } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import { ShopSettingsViewModel } from "../ShopSettingsPresenter";
 import { ClientShopSettingsPresenterFactory } from "../ShopSettingsPresenter";
+import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 
 interface UseShopSettingsActionsReturn {
   getShopSettings: () => Promise<void>;
@@ -13,6 +14,7 @@ interface UseShopSettingsActionsReturn {
   importShopSettings: (data: string) => Promise<void>;
   refreshShopSettings: () => Promise<void>;
   updateShopStatus: (status: "open" | "closed") => Promise<void>;
+  updateShop: (data: UpdateShopInputDTO) => Promise<void>;
 }
 
 export function useShopSettingsActions(
@@ -130,6 +132,26 @@ export function useShopSettingsActions(
     }
   }, [shopId, setViewModel, setIsLoading, setError]);
 
+  const updateShop = useCallback(async (data: UpdateShopInputDTO) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const presenter = await ClientShopSettingsPresenterFactory.create();
+      await presenter.updateShop(data);
+      
+      // Refresh the view model after update
+      const viewModel = await presenter.getViewModel(shopId);
+      setViewModel(viewModel);
+    } catch (error) {
+      setError("ไม่สามารถอัปเดตข้อมูลร้านได้ กรุณาลองใหม่อีกครั้ง");
+      console.error("Error updating shop:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [shopId, setViewModel, setIsLoading, setError]);
+
   return {
     getShopSettings,
     updateShopSettings,
@@ -138,5 +160,6 @@ export function useShopSettingsActions(
     importShopSettings,
     refreshShopSettings,
     updateShopStatus,
+    updateShop,
   };
 }
