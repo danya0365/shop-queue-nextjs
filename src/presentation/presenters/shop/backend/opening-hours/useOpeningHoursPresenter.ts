@@ -6,7 +6,7 @@ import {
   OpeningHourDTO,
   UpdateOpeningHourInputDTO,
 } from "@/src/application/dtos/shop/backend/opening-hour-dto";
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { OpeningHoursViewModel } from "./OpeningHoursPresenter";
 import { useOpeningHoursState } from "./hooks/useOpeningHoursState";
 import { useOpeningHoursCalculations } from "./hooks/useOpeningHoursCalculations";
@@ -87,19 +87,10 @@ export function useOpeningHoursPresenter(
   shopId: string,
   initialViewModel?: OpeningHoursViewModel
 ): UseOpeningHoursPresenterReturn {
-  // Data state
-  const [openingHours, setOpeningHours] = useState<OpeningHourDTO[]>(
-    initialViewModel?.openingHours || []
-  );
-  const [weeklySchedule, setWeeklySchedule] = useState<
-    Record<string, OpeningHourDTO>
-  >(initialViewModel?.weeklySchedule || {});
-  const [isLoading, setIsLoading] = useState(
-    initialViewModel?.isLoading || false
-  );
-  const [error, setError] = useState<string | null>(
-    initialViewModel?.error || null
-  );
+  // Main state - only viewModel
+  const [viewModel, setViewModel] = useState<OpeningHoursViewModel | null>(initialViewModel || null);
+  const [isLoading, setIsLoading] = useState(initialViewModel?.isLoading || false);
+  const [error, setError] = useState<string | null>(initialViewModel?.error || null);
   
   // Custom hooks
   const {
@@ -120,68 +111,50 @@ export function useOpeningHoursPresenter(
     getDayOrder,
     getStatusColor,
     calculateWorkingHours,
-    createViewModel,
   } = useOpeningHoursCalculations();
 
-  const refreshOpeningHours = async () => {
-    setIsLoading(true);
-    setError(null);
-
+  // Function to load data
+  const loadData = useCallback(async () => {
     try {
-      const response = await fetch(
-        `/api/shop/${shopId}/backend/opening-hours`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch opening hours");
-      }
-
-      const viewModel: OpeningHoursViewModel = await response.json();
-      setOpeningHours(viewModel.openingHours);
-      setWeeklySchedule(viewModel.weeklySchedule);
+      setIsLoading(true);
+      setError(null);
+      
+      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+      const presenter = await ClientOpeningHoursPresenterFactory.create();
+      
+      const newViewModel = await presenter.getViewModel(shopId);
+      
+      setViewModel(newViewModel);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load opening hours"
-      );
+      setError(err instanceof Error ? err.message : 'Failed to load opening hours');
+      console.error('Error loading opening hours:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [shopId]);
+
+  // Refresh data
+  const refreshOpeningHours = useCallback(async () => {
+    await loadData();
+  }, [loadData]);
 
   const createOpeningHour = async (data: CreateOpeningHourInputDTO) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(
-        `/api/shop/${shopId}/backend/opening-hours`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to create opening hour");
-      }
-
-      const newOpeningHour: OpeningHourDTO = await response.json();
-      setOpeningHours((prev) => [...prev, newOpeningHour]);
-      await refreshOpeningHours(); // Refresh to update weekly schedule
+      setIsLoading(true);
+      setError(null);
+      
+      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+      const presenter = await ClientOpeningHoursPresenterFactory.create();
+      
+      await presenter.createOpeningHour(shopId, data);
+      
+      // Refresh data after creation
+      await loadData();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create opening hour"
-      );
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create opening hour';
+      setError(errorMessage);
+      console.error('Error creating opening hour:', err);
+      throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
     }
@@ -191,63 +164,44 @@ export function useOpeningHoursPresenter(
     hourId: string,
     data: UpdateOpeningHourInputDTO
   ) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(
-        `/api/shop/${shopId}/backend/opening-hours/${hourId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update opening hour");
-      }
-
-      const updatedOpeningHour: OpeningHourDTO = await response.json();
-      setOpeningHours((prev) =>
-        prev.map((hour) => (hour.id === hourId ? updatedOpeningHour : hour))
-      );
-      await refreshOpeningHours(); // Refresh to update weekly schedule
+      setIsLoading(true);
+      setError(null);
+      
+      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+      const presenter = await ClientOpeningHoursPresenterFactory.create();
+      
+      await presenter.updateOpeningHour(shopId, hourId, data);
+      
+      // Refresh data after update
+      await loadData();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update opening hour"
-      );
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update opening hour';
+      setError(errorMessage);
+      console.error('Error updating opening hour:', err);
+      throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
     }
   };
 
   const deleteOpeningHour = async (hourId: string) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(
-        `/api/shop/${shopId}/backend/opening-hours/${hourId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete opening hour");
-      }
-
-      setOpeningHours((prev) => prev.filter((hour) => hour.id !== hourId));
-      await refreshOpeningHours(); // Refresh to update weekly schedule
+      setIsLoading(true);
+      setError(null);
+      
+      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+      const presenter = await ClientOpeningHoursPresenterFactory.create();
+      
+      await presenter.deleteOpeningHour(shopId, hourId);
+      
+      // Refresh data after delete
+      await loadData();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete opening hour"
-      );
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete opening hour';
+      setError(errorMessage);
+      console.error('Error deleting opening hour:', err);
+      throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
     }
@@ -256,35 +210,22 @@ export function useOpeningHoursPresenter(
   const bulkUpdateOpeningHours = async (
     hours: BulkUpdateOpeningHourInputDTO[]
   ) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(
-        `/api/shop/${shopId}/backend/opening-hours/bulk`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ hours }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to bulk update opening hours");
-      }
-
-      const updatedOpeningHours: OpeningHourDTO[] = await response.json();
-      setOpeningHours(updatedOpeningHours);
-      await refreshOpeningHours(); // Refresh to update weekly schedule
+      setIsLoading(true);
+      setError(null);
+      
+      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+      const presenter = await ClientOpeningHoursPresenterFactory.create();
+      
+      await presenter.bulkUpdateOpeningHours(shopId, hours);
+      
+      // Refresh data after bulk update
+      await loadData();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to bulk update opening hours"
-      );
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to bulk update opening hours';
+      setError(errorMessage);
+      console.error('Error bulk updating opening hours:', err);
+      throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
     }
@@ -292,7 +233,7 @@ export function useOpeningHoursPresenter(
   
   // Initialize actions hook after CRUD operations are defined
   const actions = useOpeningHoursActions({
-    weeklySchedule,
+    weeklySchedule: viewModel?.weeklySchedule || {},
     updateOpeningHour,
     bulkUpdateOpeningHours,
     setEditForm,
@@ -301,17 +242,20 @@ export function useOpeningHoursPresenter(
     getDayOrder,
   });
 
-  // Initialize with data if provided
+  // Initialize with initial view model if provided
   useEffect(() => {
     if (initialViewModel) {
-      setOpeningHours(initialViewModel.openingHours);
-      setWeeklySchedule(initialViewModel.weeklySchedule);
-      setError(initialViewModel.error);
+      setViewModel(initialViewModel);
+      setIsLoading(false);
     }
   }, [initialViewModel]);
 
-  // Create view model
-  const viewModel = createViewModel(openingHours, weeklySchedule, isLoading, error);
+  // Load data when dependencies change, but not if we have initial view model
+  useEffect(() => {
+    if (!initialViewModel) {
+      loadData();
+    }
+  }, [loadData, initialViewModel]);
   
   // Wrapper for handleSaveDay to use current state
   const handleSaveDay = async () => {
@@ -320,9 +264,19 @@ export function useOpeningHoursPresenter(
   
   return {
     // Data
-    openingHours,
-    weeklySchedule,
-    viewModel,
+    openingHours: viewModel?.openingHours || [],
+    weeklySchedule: viewModel?.weeklySchedule || {},
+    viewModel: viewModel || {
+      openingHours: [],
+      weeklySchedule: {},
+      totalOpenDays: 0,
+      totalClosedDays: 0,
+      averageOpenHours: 0,
+      hasBreakTime: 0,
+      dayLabels: {},
+      isLoading: false,
+      error: null,
+    },
     isLoading,
     error,
     
