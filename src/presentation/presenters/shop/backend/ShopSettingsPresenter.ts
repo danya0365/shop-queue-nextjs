@@ -8,6 +8,7 @@ import type {
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
+import { getClientContainer } from "@/src/di/client-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 // Define ViewModel interface
@@ -22,6 +23,8 @@ export interface ShopSettingsViewModel {
     settingsCount: number;
   }>;
   validationErrors: string[];
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 // Main Presenter class
@@ -130,6 +133,51 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
     }
   }
 
+  // CRUD Operations
+  async updateShopSettings(shopId: string, settings: Partial<ShopSettings>): Promise<ShopSettings> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Updating shop settings", { shopId });
+      const updatedSettings = await this.shopBackendShopSettingsService.updateShopSettings(shopId, settings);
+      return updatedSettings;
+    } catch (error) {
+      this.logger.error("ShopSettingsPresenter: Error updating shop settings", error);
+      throw error;
+    }
+  }
+
+  async createShopSettings(settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">): Promise<ShopSettings> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Creating shop settings", { shopId: settings.shopId });
+      const newSettings = await this.shopBackendShopSettingsService.createShopSettings(settings);
+      return newSettings;
+    } catch (error) {
+      this.logger.error("ShopSettingsPresenter: Error creating shop settings", error);
+      throw error;
+    }
+  }
+
+  async exportShopSettings(shopId: string): Promise<string> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Exporting shop settings", { shopId });
+      const exportData = await this.shopBackendShopSettingsService.exportSettings(shopId);
+      return exportData;
+    } catch (error) {
+      this.logger.error("ShopSettingsPresenter: Error exporting shop settings", error);
+      throw error;
+    }
+  }
+
+  async importShopSettings(shopId: string, importData: string): Promise<ShopSettings> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Importing shop settings", { shopId });
+      const importedSettings = await this.shopBackendShopSettingsService.importSettings(shopId, importData);
+      return importedSettings;
+    } catch (error) {
+      this.logger.error("ShopSettingsPresenter: Error importing shop settings", error);
+      throw error;
+    }
+  }
+
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
@@ -140,7 +188,7 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   }
 }
 
-// Factory class
+// Factory class for server-side
 export class ShopSettingsPresenterFactory {
   static async create(): Promise<ShopSettingsPresenter> {
     const serverContainer = await getServerContainer();
@@ -154,6 +202,33 @@ export class ShopSettingsPresenterFactory {
     const profileService =
       serverContainer.resolve<IProfileService>("ProfileService");
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new ShopSettingsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      shopBackendShopSettingsService
+    );
+  }
+}
+
+// Factory class for client-side
+export class ClientShopSettingsPresenterFactory {
+  static async create(): Promise<ShopSettingsPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const shopBackendShopSettingsService =
+      clientContainer.resolve<IShopBackendShopSettingsService>(
+        "ShopBackendShopSettingsService"
+      );
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
     return new ShopSettingsPresenter(

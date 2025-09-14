@@ -51,7 +51,7 @@ export default async function ShopSettingsPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <ShopSettingsView viewModel={viewModel} />
+        <ShopSettingsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

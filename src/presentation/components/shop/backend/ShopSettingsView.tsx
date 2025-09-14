@@ -1,203 +1,71 @@
 "use client";
 
-import type { ShopSettings } from "@/src/application/services/shop/backend/BackendShopSettingsService";
+import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
 import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
-import React, { useState } from "react";
+import React from "react";
 
 interface ShopSettingsViewProps {
-  viewModel: ShopSettingsViewModel;
+  shopId: string;
+  initialViewModel?: ShopSettingsViewModel;
 }
 
-export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
-  const [activeCategory, setActiveCategory] = useState("basic");
-  const [isEditing, setIsEditing] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [exportData, setExportData] = useState<string | null>(null);
-  const [importData, setImportData] = useState<string>("");
-  const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+export function ShopSettingsView({ shopId, initialViewModel }: ShopSettingsViewProps) {
+  const {
+    // Data
+    viewModel,
+    isLoading,
+    error,
 
-  // Form state
-  const [formData, setFormData] = useState<Partial<ShopSettings>>({});
+    // State
+    activeCategory,
+    isEditing,
+    showExportModal,
+    exportData,
+    importData,
+    isExporting,
+    isImporting,
+    importError,
+    isSaving,
+    saveSuccess,
+    saveError,
+    fieldErrors,
+    formData,
 
-  // Initialize form data when settings change
-  React.useEffect(() => {
-    if (viewModel.settings) {
-      setFormData({ ...viewModel.settings });
-    }
-  }, [viewModel.settings]);
+    // CRUD Operations
+    getShopSettings,
+    updateShopSettings,
+    createShopSettings,
+    exportShopSettings,
+    importShopSettings,
+    refreshShopSettings,
 
-  const handleInputChange = (
-    field: keyof ShopSettings,
-    value: string | number | boolean
-  ) => {
-    setFormData((prev: Partial<ShopSettings>) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    // State Actions
+    setActiveCategory,
+    setIsEditing,
+    setShowExportModal,
+    setExportData,
+    setImportData,
+    setIsExporting,
+    setIsImporting,
+    setImportError,
+    setIsSaving,
+    setSaveSuccess,
+    setSaveError,
+    setFieldErrors,
+    setFormData,
 
-  const handleSave = async () => {
-    if (!viewModel.settings?.shopId) return;
-
-    setIsSaving(true);
-    setSaveError(null);
-
-    // Clear previous field errors
-    setFieldErrors({});
-
-    // Basic validation
-    const errors: Record<string, string> = {};
-
-    if (!formData.shopName?.trim()) {
-      errors.shopName = "กรุณาระบุชื่อร้าน";
-    }
-
-    if (formData.shopEmail && !isValidEmail(formData.shopEmail)) {
-      errors.shopEmail = "รูปแบบอีเมลไม่ถูกต้อง";
-    }
-
-    if (
-      formData.maxQueuePerService &&
-      (formData.maxQueuePerService < 1 || formData.maxQueuePerService > 50)
-    ) {
-      errors.maxQueuePerService = "จำนวนคิวสูงสุดต่อบริการต้องอยู่ระหว่าง 1-50";
-    }
-
-    if (
-      formData.queueTimeoutMinutes &&
-      (formData.queueTimeoutMinutes < 5 || formData.queueTimeoutMinutes > 60)
-    ) {
-      errors.queueTimeoutMinutes = "เวลาหมดอายุคิวต้องอยู่ระหว่าง 5-60 นาที";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setSaveError("กรุณาตรวจสอบข้อมูลให้ถูกต้อง");
-      setIsSaving(false);
-      return;
-    }
-
-    try {
-      // Here you would call the service to update settings
-      // For now, we'll simulate the save operation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setSaveSuccess(true);
-      setIsEditing(false);
-
-      // Reset success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch {
-      setSaveError("ไม่สามารถบันทึกการตั้งค่าได้ กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    // Event Handlers
+    handleInputChange,
+    handleSave,
+    handleExport,
+    handleImport,
+    handleResetToDefaults,
+  } = useShopSettingsPresenter(shopId, initialViewModel);
 
   const handleCancel = () => {
-    // Reset form data to original settings
-    if (viewModel.settings) {
-      setFormData({ ...viewModel.settings });
-    }
     setIsEditing(false);
     setSaveError(null);
     setFieldErrors({});
-  };
-
-  // Helper function for email validation
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Export settings handler
-  const handleExportSettings = async () => {
-    if (!viewModel.settings?.shopId) return;
-
-    setIsExporting(true);
-    try {
-      // Simulate export - in real implementation, this would call the backend service
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const settingsJson = JSON.stringify(viewModel.settings, null, 2);
-      setExportData(settingsJson);
-    } catch (error) {
-      console.error("Export failed:", error);
-      setSaveError("ส่งออกข้อมูลล้มเหลว");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Import settings handler
-  const handleImportSettings = async () => {
-    if (!viewModel.settings?.shopId || !importData.trim()) return;
-
-    setIsImporting(true);
-    setImportError(null);
-
-    try {
-      // Validate JSON
-      const parsedData = JSON.parse(importData);
-
-      // Basic validation
-      if (!parsedData.shopName || !parsedData.shopId) {
-        throw new Error("ข้อมูลนำเข้าไม่ถูกต้อง");
-      }
-
-      // Simulate import - in real implementation, this would call the backend service
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update form data with imported settings
-      setFormData({ ...parsedData });
-
-      // Close modal and show success
-      setShowExportModal(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-
-      // Reset import data
-      setImportData("");
-    } catch (error) {
-      console.error("Import failed:", error);
-      setImportError("นำเข้าข้อมูลล้มเหลว: รูปแบบข้อมูลไม่ถูกต้อง");
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  // Download exported data as file
-  const downloadExportFile = () => {
-    if (!exportData) return;
-
-    const blob = new Blob([exportData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `shop-settings-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  // Handle file upload for import
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      setImportData(content);
-    };
-    reader.readAsText(file);
   };
 
   if (!viewModel.settings) {
@@ -219,16 +87,6 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
 
   // Use form data for editing, original settings for display
   const currentSettings = isEditing ? formData : settings;
-
-  const formatDateTime = (date: Date) => {
-    return new Intl.DateTimeFormat("th-TH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
 
   const renderBasicSettings = () => (
     <div className="space-y-6">
@@ -1014,7 +872,13 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
                   อัปเดตล่าสุด
                 </p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {formatDateTime(stats.lastUpdated)}
+                  {new Date(stats.lastUpdated).toLocaleString('th-TH', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </p>
               </div>
               <div className="text-2xl">🕐</div>
@@ -1101,7 +965,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
 
               <div className="flex gap-3">
                 <button
-                  onClick={handleExportSettings}
+                  onClick={handleExport}
                   disabled={isExporting}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                 >
@@ -1136,7 +1000,19 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
 
                 {exportData && (
                   <button
-                    onClick={downloadExportFile}
+                    onClick={() => {
+                      if (exportData) {
+                        const blob = new Blob([exportData], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `shop-settings-${new Date().toISOString().split('T')[0]}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }
+                    }}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors"
                   >
                     📥 ดาวน์โหลดไฟล์
@@ -1176,7 +1052,18 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
                 <input
                   type="file"
                   accept=".json"
-                  onChange={handleFileUpload}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          setImportData(event.target.result as string);
+                        }
+                      };
+                      reader.readAsText(file);
+                    }
+                  }}
                   className="block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-lg file:border-0
@@ -1221,7 +1108,7 @@ export function ShopSettingsView({ viewModel }: ShopSettingsViewProps) {
                 </button>
 
                 <button
-                  onClick={handleImportSettings}
+                  onClick={handleImport}
                   disabled={isImporting || !importData.trim()}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                 >
