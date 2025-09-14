@@ -14,8 +14,6 @@ export function OpeningHoursView({
 }: OpeningHoursViewProps) {
   const {
     // Data
-    openingHours,
-    weeklySchedule,
     viewModel,
     isLoading,
     error,

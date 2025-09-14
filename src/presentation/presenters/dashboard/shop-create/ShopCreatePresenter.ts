@@ -11,7 +11,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseSubscriptionPresenter } from '../../base/BaseSubscriptionPresenter';
 
 // Define opening hours type
-interface OpeningHours {
+export interface OpeningHours {
   dayOfWeek: string;
   isOpen: boolean;
   openTime?: string;

@@ -168,8 +168,8 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
       errors.category = "กรุณาเลือกประเภทร้านค้า";
     }
 
-    if (!data.address.trim()) {
-      errors.address = "กรุณาระบุที่อยู่ร้านค้า";
+    if (data.address.trim() && data.address.trim().length < 5) {
+      errors.address = "ที่อยู่ต้องมีอย่างน้อย 5 ตัวอักษร";
     }
 
     if (!data.phone.trim()) {
@@ -178,9 +178,7 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
       errors.phone = "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง";
     }
 
-    if (!data.email.trim()) {
-      errors.email = "กรุณาระบุอีเมล";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    if (data.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
     }
 

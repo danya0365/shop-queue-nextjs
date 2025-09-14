@@ -3,23 +3,20 @@
 import {
   BulkUpdateOpeningHourInputDTO,
   CreateOpeningHourInputDTO,
-  OpeningHourDTO,
   UpdateOpeningHourInputDTO,
 } from "@/src/application/dtos/shop/backend/opening-hour-dto";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { OpeningHoursViewModel } from "./OpeningHoursPresenter";
-import { useOpeningHoursState } from "./hooks/useOpeningHoursState";
-import { useOpeningHoursCalculations } from "./hooks/useOpeningHoursCalculations";
 import { useOpeningHoursActions } from "./hooks/useOpeningHoursActions";
+import { useOpeningHoursCalculations } from "./hooks/useOpeningHoursCalculations";
+import { useOpeningHoursState } from "./hooks/useOpeningHoursState";
 
 interface UseOpeningHoursPresenterReturn {
   // Data
-  openingHours: OpeningHourDTO[];
-  weeklySchedule: Record<string, OpeningHourDTO>;
   viewModel: OpeningHoursViewModel;
   isLoading: boolean;
   error: string | null;
-  
+
   // State
   editMode: boolean;
   selectedDay: string | null;
@@ -34,7 +31,7 @@ interface UseOpeningHoursPresenterReturn {
     message: string;
     type: "success" | "error";
   };
-  
+
   // CRUD Operations
   createOpeningHour: (data: CreateOpeningHourInputDTO) => Promise<void>;
   updateOpeningHour: (
@@ -46,7 +43,7 @@ interface UseOpeningHoursPresenterReturn {
     hours: BulkUpdateOpeningHourInputDTO[]
   ) => Promise<void>;
   refreshOpeningHours: () => Promise<void>;
-  
+
   // State Actions
   setEditMode: (editMode: boolean) => void;
   setSelectedDay: (selectedDay: string | null) => void;
@@ -63,14 +60,14 @@ interface UseOpeningHoursPresenterReturn {
   }) => void;
   resetEditForm: () => void;
   resetNotification: () => void;
-  
+
   // Event Handlers
   handleToggleDayStatus: (day: string, currentStatus: boolean) => Promise<void>;
   handleEditDay: (day: string) => void;
   handleSaveDay: () => Promise<void>;
   handleQuickAction: (action: string) => Promise<void>;
   showNotification: (message: string, type: "success" | "error") => void;
-  
+
   // Utility Functions
   formatTime: (time: string | null) => string;
   getDayOrder: () => string[];
@@ -88,10 +85,16 @@ export function useOpeningHoursPresenter(
   initialViewModel?: OpeningHoursViewModel
 ): UseOpeningHoursPresenterReturn {
   // Main state - only viewModel
-  const [viewModel, setViewModel] = useState<OpeningHoursViewModel | null>(initialViewModel || null);
-  const [isLoading, setIsLoading] = useState(initialViewModel?.isLoading || false);
-  const [error, setError] = useState<string | null>(initialViewModel?.error || null);
-  
+  const [viewModel, setViewModel] = useState<OpeningHoursViewModel | null>(
+    initialViewModel || null
+  );
+  const [isLoading, setIsLoading] = useState(
+    initialViewModel?.isLoading || false
+  );
+  const [error, setError] = useState<string | null>(
+    initialViewModel?.error || null
+  );
+
   // Custom hooks
   const {
     editMode,
@@ -105,29 +108,29 @@ export function useOpeningHoursPresenter(
     resetEditForm,
     resetNotification,
   } = useOpeningHoursState();
-  
-  const {
-    formatTime,
-    getDayOrder,
-    getStatusColor,
-    calculateWorkingHours,
-  } = useOpeningHoursCalculations();
+
+  const { formatTime, getDayOrder, getStatusColor, calculateWorkingHours } =
+    useOpeningHoursCalculations();
 
   // Function to load data
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+
+      const { ClientOpeningHoursPresenterFactory } = await import(
+        "./OpeningHoursPresenter"
+      );
       const presenter = await ClientOpeningHoursPresenterFactory.create();
-      
+
       const newViewModel = await presenter.getViewModel(shopId);
-      
+
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load opening hours');
-      console.error('Error loading opening hours:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load opening hours"
+      );
+      console.error("Error loading opening hours:", err);
     } finally {
       setIsLoading(false);
     }
@@ -142,18 +145,21 @@ export function useOpeningHoursPresenter(
     try {
       setIsLoading(true);
       setError(null);
-      
-      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+
+      const { ClientOpeningHoursPresenterFactory } = await import(
+        "./OpeningHoursPresenter"
+      );
       const presenter = await ClientOpeningHoursPresenterFactory.create();
-      
+
       await presenter.createOpeningHour(shopId, data);
-      
+
       // Refresh data after creation
       await loadData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create opening hour';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create opening hour";
       setError(errorMessage);
-      console.error('Error creating opening hour:', err);
+      console.error("Error creating opening hour:", err);
       throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
@@ -167,18 +173,21 @@ export function useOpeningHoursPresenter(
     try {
       setIsLoading(true);
       setError(null);
-      
-      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+
+      const { ClientOpeningHoursPresenterFactory } = await import(
+        "./OpeningHoursPresenter"
+      );
       const presenter = await ClientOpeningHoursPresenterFactory.create();
-      
+
       await presenter.updateOpeningHour(shopId, hourId, data);
-      
+
       // Refresh data after update
       await loadData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update opening hour';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update opening hour";
       setError(errorMessage);
-      console.error('Error updating opening hour:', err);
+      console.error("Error updating opening hour:", err);
       throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
@@ -189,18 +198,21 @@ export function useOpeningHoursPresenter(
     try {
       setIsLoading(true);
       setError(null);
-      
-      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+
+      const { ClientOpeningHoursPresenterFactory } = await import(
+        "./OpeningHoursPresenter"
+      );
       const presenter = await ClientOpeningHoursPresenterFactory.create();
-      
+
       await presenter.deleteOpeningHour(shopId, hourId);
-      
+
       // Refresh data after delete
       await loadData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete opening hour';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete opening hour";
       setError(errorMessage);
-      console.error('Error deleting opening hour:', err);
+      console.error("Error deleting opening hour:", err);
       throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
@@ -213,24 +225,29 @@ export function useOpeningHoursPresenter(
     try {
       setIsLoading(true);
       setError(null);
-      
-      const { ClientOpeningHoursPresenterFactory } = await import('./OpeningHoursPresenter');
+
+      const { ClientOpeningHoursPresenterFactory } = await import(
+        "./OpeningHoursPresenter"
+      );
       const presenter = await ClientOpeningHoursPresenterFactory.create();
-      
+
       await presenter.bulkUpdateOpeningHours(shopId, hours);
-      
+
       // Refresh data after bulk update
       await loadData();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to bulk update opening hours';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to bulk update opening hours";
       setError(errorMessage);
-      console.error('Error bulk updating opening hours:', err);
+      console.error("Error bulk updating opening hours:", err);
       throw err; // Re-throw to let UI handle it
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   // Initialize actions hook after CRUD operations are defined
   const actions = useOpeningHoursActions({
     weeklySchedule: viewModel?.weeklySchedule || {},
@@ -256,16 +273,14 @@ export function useOpeningHoursPresenter(
       loadData();
     }
   }, [loadData, initialViewModel]);
-  
+
   // Wrapper for handleSaveDay to use current state
   const handleSaveDay = async () => {
     await actions.handleSaveDay(selectedDay, editForm);
   };
-  
+
   return {
     // Data
-    openingHours: viewModel?.openingHours || [],
-    weeklySchedule: viewModel?.weeklySchedule || {},
     viewModel: viewModel || {
       openingHours: [],
       weeklySchedule: {},
@@ -279,20 +294,20 @@ export function useOpeningHoursPresenter(
     },
     isLoading,
     error,
-    
+
     // State
     editMode,
     selectedDay,
     editForm,
     notification,
-    
+
     // CRUD Operations
     createOpeningHour,
     updateOpeningHour,
     deleteOpeningHour,
     bulkUpdateOpeningHours,
     refreshOpeningHours,
-    
+
     // State Actions
     setEditMode,
     setSelectedDay,
@@ -300,14 +315,14 @@ export function useOpeningHoursPresenter(
     setNotification,
     resetEditForm,
     resetNotification,
-    
+
     // Event Handlers
     handleToggleDayStatus: actions.handleToggleDayStatus,
     handleEditDay: actions.handleEditDay,
     handleSaveDay,
     handleQuickAction: actions.handleQuickAction,
     showNotification: actions.showNotification,
-    
+
     // Utility Functions
     formatTime,
     getDayOrder,
