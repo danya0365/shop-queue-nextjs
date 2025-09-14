@@ -1,14 +1,8 @@
 import AuthInitializerWrapper from "@/src/presentation/components/auth/AuthInitializerWrapper";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
-import { Geist_Mono, Kanit } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "../public/styles/index.css";
-
-const kanit = Kanit({
-  variable: "--font-sans",
-  subsets: ["latin", "thai"],
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -114,7 +108,7 @@ export default function RootLayout({
   return (
     <html lang="th" suppressHydrationWarning>
       <body
-        className={`${kanit.variable} ${geistMono.variable} antialiased`}
+        className={`${geistMono.variable} antialiased`}
       >
         <AuthInitializerWrapper />
         <ThemeProvider>{children}</ThemeProvider>

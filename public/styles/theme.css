@@ -1,7 +1,8 @@
 /* 🎨 Theme Tokens */
 @theme {
-  --font-sans: "Kanit", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  /* Custom Font Variables */
+  --font-sans: "MiSans Thai", "MiSans Thai Variable", system-ui, -apple-system,
+    sans-serif;
 
   /* Light defaults */
   --color-background: #ffffff;
@@ -44,7 +45,7 @@
   --color-input-focus: #ffffff;
   --color-input-placeholder: #9ca3af;
   --color-input-border: #d1d5db;
-  
+
   /* Focus and interaction colors */
   --color-ring: #3b82f6;
   --color-ring-offset-background: #ffffff;
@@ -86,7 +87,7 @@
   --color-secondary-light: #ffedd5;
   --color-secondary-dark: #f97316;
   --color-secondary-foreground: #ffffff;
-  
+
   /* Hero Section Colors */
   --color-hero-text-light: #ffedd5;
   --color-hero-text-accent: #ea580c;
@@ -95,13 +96,13 @@
   --color-hero-status-waiting: #fb923c;
   --color-hero-status-pending: #fdba74;
   --color-hero-accent-soft: #fdba74;
-  
+
   /* Hero Demo Card Colors - Better Contrast */
   --color-hero-card-bg: rgba(0, 0, 0, 0.3);
   --color-hero-card-text: #ffffff;
   --color-hero-card-text-muted: #e5e7eb;
   --color-hero-card-border: rgba(255, 255, 255, 0.2);
-  
+
   /* Theme Toggle Colors */
   --color-theme-toggle-bg: rgba(249, 115, 22, 0.1);
   --color-theme-toggle-border: rgba(249, 115, 22, 0.2);
@@ -117,7 +118,7 @@
   /* Header colors (light mode) */
   --color-header-bg: rgba(255, 255, 255, 0.5);
   --color-header-border: rgba(229, 231, 235, 0.8);
-  
+
   /* Footer colors (light mode) */
   --color-footer-bg: #ffffff;
   --color-footer-border: #e5e7eb;

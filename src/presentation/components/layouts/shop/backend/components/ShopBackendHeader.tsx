@@ -51,9 +51,7 @@ const ShopBackendHeader: React.FC<ShopBackendHeaderProps> = ({
         <div className="flex items-center space-x-4">
           <div className="hidden md:block text-sm shop-backend-text-muted">
             ร้าน :
-            <span className="font-mono shop-backend-primary">
-              {shop?.name || ""}
-            </span>
+            <span className="shop-backend-primary">{shop?.name || ""}</span>
           </div>
           <ShopBackendThemeToggle />
           <Link
