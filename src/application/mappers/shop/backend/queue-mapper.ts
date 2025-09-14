@@ -46,12 +46,25 @@ export class QueueMapper {
    */
   public static statsToDTO(entity: QueueStatsEntity): QueueStatsDTO {
     return {
-      totalQueues: entity.totalQueues,
-      waitingQueues: entity.waitingQueues,
-      inProgressQueues: entity.inProgressQueues,
-      completedToday: entity.completedToday,
-      cancelledToday: entity.cancelledToday,
-      averageWaitTime: entity.averageWaitTime
+      // Today's statistics
+      totalQueueToday: entity.totalQueueToday,
+      waitingQueueToday: entity.waitingQueueToday,
+      inProgressQueueToday: entity.inProgressQueueToday,
+      totalCompletedToday: entity.totalCompletedToday,
+      totalCancelledToday: entity.totalCancelledToday,
+      
+      // All-time statistics
+      allQueueTotal: entity.allQueueTotal,
+      allWaitingQueue: entity.allWaitingQueue,
+      allInProgressQueue: entity.allInProgressQueue,
+      allCompletedTotal: entity.allCompletedTotal,
+      allCancelledTotal: entity.allCancelledTotal,
+      
+      // Performance metrics
+      avgWaitTimeMinutes: entity.avgWaitTimeMinutes,
+      
+      // Shop-specific data (optional)
+      shopId: entity.shopId
     };
   }
 }

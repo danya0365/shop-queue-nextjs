@@ -103,12 +103,25 @@ export class SupabaseBackendQueueMapper {
    */
   public static statsToEntity(schema: QueueStatsSchema): QueueStatsEntity {
     return {
-      totalQueues: schema.total_queues,
-      waitingQueues: schema.waiting_queues,
-      inProgressQueues: schema.in_progress_queues,
-      completedToday: schema.completed_today,
-      cancelledToday: schema.cancelled_today,
-      averageWaitTime: schema.average_wait_time
+      // Today's statistics
+      totalQueueToday: schema.total_queue_today,
+      waitingQueueToday: schema.waiting_queue_today,
+      inProgressQueueToday: schema.in_progress_queue_today,
+      totalCompletedToday: schema.total_completed_today,
+      totalCancelledToday: schema.total_cancelled_today,
+      
+      // All-time statistics
+      allQueueTotal: schema.all_queue_total,
+      allWaitingQueue: schema.all_waiting_queue,
+      allInProgressQueue: schema.all_in_progress_queue,
+      allCompletedTotal: schema.all_completed_total,
+      allCancelledTotal: schema.all_cancelled_total,
+      
+      // Performance metrics
+      avgWaitTimeMinutes: schema.avg_wait_time_minutes,
+      
+      // Shop-specific data (optional)
+      shopId: schema.shop_id
     };
   }
 

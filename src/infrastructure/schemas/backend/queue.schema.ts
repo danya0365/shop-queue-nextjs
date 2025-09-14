@@ -55,12 +55,26 @@ export interface ServiceSchema {
 
 /**
  * Queue stats database schema
+ * Matches the queue_stats_summary_view and queue_stats_by_shop_view
  */
 export interface QueueStatsSchema {
-  total_queues: number;
-  waiting_queues: number;
-  in_progress_queues: number;
-  completed_today: number;
-  cancelled_today: number;
-  average_wait_time: number;
+  // Today's statistics
+  total_queue_today: number;
+  waiting_queue_today: number;
+  in_progress_queue_today: number;
+  total_completed_today: number;
+  total_cancelled_today: number;
+  
+  // All-time statistics
+  all_queue_total: number;
+  all_waiting_queue: number;
+  all_in_progress_queue: number;
+  all_completed_total: number;
+  all_cancelled_total: number;
+  
+  // Performance metrics
+  avg_wait_time_minutes: number;
+  
+  // For shop-specific stats (queue_stats_by_shop_view)
+  shop_id?: string;
 }

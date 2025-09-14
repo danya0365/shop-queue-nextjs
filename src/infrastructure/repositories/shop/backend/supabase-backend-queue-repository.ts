@@ -322,12 +322,25 @@ export class SupabaseShopBackendQueueRepository
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
         return {
-          totalQueues: 0,
-          waitingQueues: 0,
-          inProgressQueues: 0,
-          completedToday: 0,
-          cancelledToday: 0,
-          averageWaitTime: 0,
+          // Today's statistics
+          totalQueueToday: 0,
+          waitingQueueToday: 0,
+          inProgressQueueToday: 0,
+          totalCompletedToday: 0,
+          totalCancelledToday: 0,
+          
+          // All-time statistics
+          allQueueTotal: 0,
+          allWaitingQueue: 0,
+          allInProgressQueue: 0,
+          allCompletedTotal: 0,
+          allCancelledTotal: 0,
+          
+          // Performance metrics
+          avgWaitTimeMinutes: 0,
+          
+          // Shop-specific data (optional)
+          shopId: shopId
         };
       }
 

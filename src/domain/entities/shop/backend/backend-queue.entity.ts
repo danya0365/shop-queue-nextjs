@@ -99,14 +99,28 @@ export enum QueuePriority {
 
 /**
  * Queue statistics entity
+ * Contains comprehensive queue statistics for a shop
  */
 export interface QueueStatsEntity {
-  totalQueues: number;
-  waitingQueues: number;
-  inProgressQueues: number;
-  completedToday: number;
-  cancelledToday: number;
-  averageWaitTime: number;
+  // Today's statistics
+  totalQueueToday: number;
+  waitingQueueToday: number;
+  inProgressQueueToday: number;
+  totalCompletedToday: number;
+  totalCancelledToday: number;
+  
+  // All-time statistics
+  allQueueTotal: number;
+  allWaitingQueue: number;
+  allInProgressQueue: number;
+  allCompletedTotal: number;
+  allCancelledTotal: number;
+  
+  // Performance metrics
+  avgWaitTimeMinutes: number;
+  
+  // Shop-specific data (optional)
+  shopId?: string;
 }
 
 /**

@@ -67,13 +67,30 @@ export interface QueueServiceDTO {
   total: number;
 }
 
+/**
+ * Queue statistics DTO
+ * Contains comprehensive queue statistics for a shop
+ */
 export interface QueueStatsDTO {
-  totalQueues: number;
-  waitingQueues: number;
-  inProgressQueues: number;
-  completedToday: number;
-  cancelledToday: number;
-  averageWaitTime: number;
+  // Today's statistics
+  totalQueueToday: number;
+  waitingQueueToday: number;
+  inProgressQueueToday: number;
+  totalCompletedToday: number;
+  totalCancelledToday: number;
+  
+  // All-time statistics
+  allQueueTotal: number;
+  allWaitingQueue: number;
+  allInProgressQueue: number;
+  allCompletedTotal: number;
+  allCancelledTotal: number;
+  
+  // Performance metrics
+  avgWaitTimeMinutes: number;
+  
+  // Shop-specific data (optional)
+  shopId?: string;
 }
 
 export interface QueuesDataDTO {

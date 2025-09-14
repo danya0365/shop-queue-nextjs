@@ -2609,13 +2609,18 @@ export type Database = {
       }
       queue_stats_by_shop_view: {
         Row: {
-          average_wait_time: number | null
-          cancelled_today: number | null
-          completed_today: number | null
-          in_progress_queues: number | null
+          all_cancelled_total: number | null
+          all_completed_total: number | null
+          all_in_progress_queue: number | null
+          all_queue_total: number | null
+          all_waiting_queue: number | null
+          avg_wait_time_minutes: number | null
+          in_progress_queue_today: number | null
           shop_id: string | null
-          total_queues: number | null
-          waiting_queues: number | null
+          total_cancelled_today: number | null
+          total_completed_today: number | null
+          total_queue_today: number | null
+          waiting_queue_today: number | null
         }
         Relationships: [
           {
@@ -2643,12 +2648,17 @@ export type Database = {
       }
       queue_stats_summary_view: {
         Row: {
-          average_wait_time: number | null
-          cancelled_today: number | null
-          completed_today: number | null
-          in_progress_queues: number | null
-          total_queues: number | null
-          waiting_queues: number | null
+          all_cancelled_total: number | null
+          all_completed_total: number | null
+          all_in_progress_queue: number | null
+          all_queue_total: number | null
+          all_waiting_queue: number | null
+          avg_wait_time_minutes: number | null
+          in_progress_queue_today: number | null
+          total_cancelled_today: number | null
+          total_completed_today: number | null
+          total_queue_today: number | null
+          waiting_queue_today: number | null
         }
         Relationships: []
       }

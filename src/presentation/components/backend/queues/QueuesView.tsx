@@ -119,7 +119,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
       </div>
 
       {/* Stats Cards */}
-      {queuesData.stats.totalQueues === 0 ? (
+      {queuesData.stats.totalQueueToday === 0 ? (
         <div className="backend-sidebar-bg rounded-lg p-12 backend-sidebar-border border text-center">
           <div className="text-6xl mb-4">📊</div>
           <h3 className="text-lg font-medium backend-text mb-2">ยังไม่มีข้อมูลสถิติคิว</h3>
@@ -130,8 +130,8 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
           <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="backend-text-muted text-xs font-medium">คิวทั้งหมด</h3>
-                <p className="text-xl font-bold backend-text mt-1">{queuesData.stats.totalQueues}</p>
+                <h3 className="backend-text-muted text-xs font-medium">คิวทั้งหมดวันนี้</h3>
+                <p className="text-xl font-bold backend-text mt-1">{queuesData.stats.totalQueueToday}</p>
               </div>
               <div className="p-2 rounded-full text-blue-600 bg-blue-50">
                 <Users size={20} />
@@ -141,8 +141,8 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
           <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="backend-text-muted text-xs font-medium">รอคิว</h3>
-                <p className="text-xl font-bold text-yellow-600 mt-1">{queuesData.stats.waitingQueues}</p>
+                <h3 className="backend-text-muted text-xs font-medium">รอคิววันนี้</h3>
+                <p className="text-xl font-bold text-yellow-600 mt-1">{queuesData.stats.waitingQueueToday}</p>
               </div>
               <div className="p-2 rounded-full text-yellow-600 bg-yellow-50">
                 <Clock size={20} />
@@ -152,8 +152,8 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
           <div className="backend-sidebar-bg rounded-lg p-4 backend-sidebar-border border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="backend-text-muted text-xs font-medium">กำลังให้บริการ</h3>
-                <p className="text-xl font-bold text-blue-600 mt-1">{queuesData.stats.inProgressQueues}</p>
+                <h3 className="backend-text-muted text-xs font-medium">กำลังให้บริการวันนี้</h3>
+                <p className="text-xl font-bold text-blue-600 mt-1">{queuesData.stats.inProgressQueueToday}</p>
               </div>
               <div className="p-2 rounded-full text-blue-600 bg-blue-50">
                 <Activity size={20} />
@@ -164,7 +164,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="backend-text-muted text-xs font-medium">เสร็จสิ้นวันนี้</h3>
-                <p className="text-xl font-bold text-green-600 mt-1">{queuesData.stats.completedToday}</p>
+                <p className="text-xl font-bold text-green-600 mt-1">{queuesData.stats.totalCompletedToday}</p>
               </div>
               <div className="p-2 rounded-full text-green-600 bg-green-50">
                 <CheckCircle size={20} />
@@ -175,7 +175,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="backend-text-muted text-xs font-medium">ยกเลิกวันนี้</h3>
-                <p className="text-xl font-bold text-red-600 mt-1">{queuesData.stats.cancelledToday}</p>
+                <p className="text-xl font-bold text-red-600 mt-1">{queuesData.stats.totalCancelledToday}</p>
               </div>
               <div className="p-2 rounded-full text-red-600 bg-red-50">
                 <XCircle size={20} />
@@ -186,7 +186,7 @@ export function QueuesView({ viewModel }: QueuesViewProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="backend-text-muted text-xs font-medium">เวลารอเฉลี่ย</h3>
-                <p className="text-xl font-bold text-purple-600 mt-1">{queuesData.stats.averageWaitTime} นาที</p>
+                <p className="text-xl font-bold text-purple-600 mt-1">{queuesData.stats.avgWaitTimeMinutes} นาที</p>
               </div>
               <div className="p-2 rounded-full text-purple-600 bg-purple-50">
                 <Timer size={20} />
