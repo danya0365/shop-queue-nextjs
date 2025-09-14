@@ -1,5 +1,6 @@
 import { ServiceDTO } from "@/src/application/dtos/backend/services-dto";
 import { OpeningHourDTO } from "@/src/application/dtos/shop/backend/opening-hour-dto";
+import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { Metadata } from "next";
@@ -17,6 +18,7 @@ export interface ShopInfo {
   isOpen: boolean;
   rating: number;
   totalReviews: number;
+  status: ShopDTO["status"];
 }
 
 /**
@@ -44,6 +46,7 @@ export abstract class BaseShopPresenter {
       isOpen: true,
       rating: 4.8,
       totalReviews: 256,
+      status: shop.status,
     };
   }
 

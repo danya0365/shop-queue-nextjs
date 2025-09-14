@@ -21,7 +21,7 @@ export interface ShopDTO {
   categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;
-  status: "active" | "inactive" | "pending";
+  status: "active" | "inactive" | "suspended" | "draft";
   openingHours: OpeningHourDTO[];
   services: Partial<ServiceDTO>[];
   queueCount: number;

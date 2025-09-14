@@ -88,7 +88,7 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
       icon: BarChart3,
     },
     {
-      href: `/shop/${shop.id}/backend/shop-settings`,
+      href: `/shop/${shop.id}/backend/settings`,
       label: "ตั้งค่าร้านค้า",
       icon: Settings,
     },

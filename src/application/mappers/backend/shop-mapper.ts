@@ -1,5 +1,14 @@
-import { PaginatedShopsDTO, ShopCategoryDTO, ShopDTO, ShopStatsDTO } from '@/src/application/dtos/backend/shops-dto';
-import { PaginatedShopsEntity, ShopEntity, ShopStatsEntity } from '@/src/domain/entities/backend/backend-shop.entity';
+import {
+  PaginatedShopsDTO,
+  ShopCategoryDTO,
+  ShopDTO,
+  ShopStatsDTO,
+} from "@/src/application/dtos/backend/shops-dto";
+import {
+  PaginatedShopsEntity,
+  ShopEntity,
+  ShopStatsEntity,
+} from "@/src/domain/entities/backend/backend-shop.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -22,9 +31,9 @@ export class ShopMapper {
       email: entity.email,
       categories,
       ownerId: entity.ownerId,
-      ownerName: entity.ownerName || '',
+      ownerName: entity.ownerName || "",
       status: this.mapShopStatus(entity.status),
-      openingHours: entity.openingHours.map(hour => ({
+      openingHours: entity.openingHours.map((hour) => ({
         id: `${entity.id}-${hour.dayOfWeek}`,
         shopId: entity.id,
         dayOfWeek: this.mapDayOfWeekToString(hour.dayOfWeek),
@@ -34,14 +43,14 @@ export class ShopMapper {
         breakStart: null,
         breakEnd: null,
         createdAt: new Date(entity.createdAt),
-        updatedAt: new Date(entity.updatedAt)
+        updatedAt: new Date(entity.updatedAt),
       })),
       queueCount: entity.queueCount,
       totalServices: entity.totalServices,
       rating: entity.rating,
       totalReviews: entity.totalReviews,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -55,7 +64,7 @@ export class ShopMapper {
       totalShops: entity.totalShops,
       activeShops: entity.activeShops,
       pendingApproval: entity.pendingApproval,
-      newThisMonth: entity.newThisMonth
+      newThisMonth: entity.newThisMonth,
     };
   }
 
@@ -64,17 +73,19 @@ export class ShopMapper {
    * @param entity Paginated shops entity
    * @returns Paginated shops DTO
    */
-  public static toPaginatedDTO(entity: PaginatedShopsEntity): PaginatedShopsDTO {
+  public static toPaginatedDTO(
+    entity: PaginatedShopsEntity
+  ): PaginatedShopsDTO {
     return {
-      data: entity.data.map(shop => this.toDTO(shop)),
+      data: entity.data.map((shop) => this.toDTO(shop)),
       pagination: {
         currentPage: entity.pagination.currentPage,
         totalPages: entity.pagination.totalPages,
         totalItems: entity.pagination.totalItems,
         itemsPerPage: entity.pagination.itemsPerPage,
         hasNextPage: entity.pagination.hasNextPage,
-        hasPrevPage: entity.pagination.hasPrevPage
-      }
+        hasPrevPage: entity.pagination.hasPrevPage,
+      },
     };
   }
 
@@ -83,14 +94,18 @@ export class ShopMapper {
    * @param status Shop status from domain entity
    * @returns Shop status string for DTO
    */
-  private static mapShopStatus(status: string): 'active' | 'inactive' | 'pending' {
+  private static mapShopStatus(status: string): ShopDTO["status"] {
     switch (status) {
-      case 'active':
-        return 'active';
-      case 'inactive':
-        return 'inactive';
+      case "active":
+        return "active";
+      case "inactive":
+        return "inactive";
+      case "suspended":
+        return "inactive";
+      case "draft":
+        return "draft";
       default:
-        return 'pending';
+        return "draft";
     }
   }
 
@@ -100,14 +115,22 @@ export class ShopMapper {
    * @returns Day of week string
    */
   private static mapDayOfWeekToString(dayOfWeek: number): string {
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    return days[dayOfWeek] || 'sunday';
+    const days = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    return days[dayOfWeek] || "sunday";
   }
 
   private static mapShopCategories(entity: ShopEntity): ShopCategoryDTO[] {
-    return entity.categories.map(category => ({
+    return entity.categories.map((category) => ({
       id: category.id,
-      name: category.name
+      name: category.name,
     }));
   }
 }

@@ -7,12 +7,13 @@ import { IProfileService } from "@/src/application/interfaces/profile-service.in
 import { IShopBackendQueuesService } from "@/src/application/services/shop/backend/BackendQueuesService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
-import { getServerContainer } from "@/src/di/server-container";
-import { Container } from "@/src/di/container";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 import { getClientContainer } from "@/src/di/client-container";
+import { Container } from "@/src/di/container";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import { ShopInfo } from "../BaseShopPresenter";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define interfaces for data structures
 export interface QueueItem {
@@ -36,6 +37,7 @@ export interface QueueFilter {
 
 // Define ViewModel interface
 export interface QueueManagementViewModel {
+  shop: ShopInfo;
   // ข้อมูลคิวพร้อม pagination
   queues: {
     data: QueueItem[]; // ข้อมูลคิว (เฉพาะหน้าปัจจุบัน)
@@ -111,6 +113,11 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
         throw new Error("Profile not found");
       }
 
+      const shop = await this.getShopInfo(shopId);
+      if (!shop) {
+        throw new Error("Shop not found");
+      }
+
       const subscriptionPlan = await this.getSubscriptionPlan(
         profile.id,
         profile.role
@@ -120,13 +127,16 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
 
       // Get queues data with pagination and filters from service
       // Transform filters to match the expected format
-      const transformedFilters = filters ? {
-        searchQuery: filters.search,
-        statusFilter: filters.status !== 'all' ? filters.status : undefined,
-        priorityFilter: filters.priority !== 'all' ? filters.priority : undefined,
-        shopId: shopId
-      } : undefined;
-      
+      const transformedFilters = filters
+        ? {
+            searchQuery: filters.search,
+            statusFilter: filters.status !== "all" ? filters.status : undefined,
+            priorityFilter:
+              filters.priority !== "all" ? filters.priority : undefined,
+            shopId: shopId,
+          }
+        : undefined;
+
       const queuesData = await this.backendQueuesService.getQueuesData(
         shopId,
         page,
@@ -169,6 +179,7 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       const canCreateQueue = !dailyLimitReached;
 
       return {
+        shop,
         queues: {
           data: queues,
           pagination: {

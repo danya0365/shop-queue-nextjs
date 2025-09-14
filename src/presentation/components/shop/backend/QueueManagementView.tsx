@@ -220,8 +220,65 @@ export function QueueManagementView({
     }
   };
 
+  console.log(viewModel.shop.status);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      {/* Draft Status Overlay */}
+      {viewModel.shop.status === "draft" && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">🏗️</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                ร้านค้ายังไม่พร้อมเปิด
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                กรุณาตั้งค่าร้านค้าก่อนเริ่มใช้งาน
+              </p>
+            </div>
+            <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400 mb-6">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                <span>ร้านค้าอยู่ในสถานะร่าง (Draft)</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-100"></div>
+                <span>ต้องทำการตั้งค่าข้อมูลร้านค้าให้สมบูรณ์</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-200"></div>
+                <span>ยังไม่สามารถเปิดรับคิวลูกค้าได้</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <button 
+                onClick={() => window.location.href = `/shop/${shopId}/backend/settings`}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                ⚙️ ไปที่การตั้งค่าร้านค้า
+              </button>
+              <button 
+                onClick={() => window.history.back()}
+                className="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+              >
+                ← กลับหน้าก่อนหน้า
+              </button>
+            </div>
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                เมื่อตั้งค่าร้านค้าเสร็จสิ้นแล้ว
+                <br />
+                ระบบจะพร้อมให้บริการจัดการคิวลูกค้าของคุณ
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -424,7 +481,6 @@ export function QueueManagementView({
               )}
             </div>
           )}
-
         </div>
         <div className="relative min-h-[200px]">
           {/* Loading and Error Overlay */}
@@ -450,356 +506,357 @@ export function QueueManagementView({
               </div>
             </div>
           )}
-          
+
           {/* List Data */}
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {queueData.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="text-gray-500 dark:text-gray-400">
-                <div className="text-4xl mb-4">📋</div>
-                <p className="text-lg">
+            {queueData.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="text-gray-500 dark:text-gray-400">
+                  <div className="text-4xl mb-4">📋</div>
+                  <p className="text-lg">
+                    {filters.search ||
+                    filters.status !== "all" ||
+                    filters.priority !== "all"
+                      ? "ไม่พบรายการคิวที่ตรงกับเงื่อนไขการค้นหา"
+                      : "ยังไม่มีรายการคิวในระบบ"}
+                  </p>
                   {filters.search ||
                   filters.status !== "all" ||
-                  filters.priority !== "all"
-                    ? "ไม่พบรายการคิวที่ตรงกับเงื่อนไขการค้นหา"
-                    : "ยังไม่มีรายการคิวในระบบ"}
-                </p>
-                {filters.search ||
-                filters.status !== "all" ||
-                filters.priority !== "all" ? (
-                  <p className="text-sm text-gray-400 mt-2">
-                    ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการคิวใหม่
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-400 mt-2">
-                    คลิกปุ่ม &lsquo;เพิ่มคิวใหม่&rsquo;
-                    เพื่อเริ่มบันทึกรายการแรกของคุณ
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            queueData.map((queue: QueueItem) => (
-              <div
-                key={queue.id}
-                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 dark:text-blue-300 font-bold">
-                          {queue.queueNumber}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                          {queue.customerName}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            queue.status
-                          )}`}
-                        >
-                          {getStatusText(queue.status)}
-                        </span>
-                        {queue.priority !== "normal" && (
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                              queue.priority
-                            )}`}
-                          >
-                            {getPriorityText(queue.priority)}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {queue.customerPhone}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        บริการ: {queue.services.join(", ")}
-                      </p>
-                      {queue.notes && (
-                        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                          หมายเหตุ: {queue.notes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        เวลา
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {queue.createdAt}
-                      </p>
-                      {queue.estimatedTime > 0 && (
-                        <p className="text-xs text-orange-600 dark:text-orange-400">
-                          รอ ~{queue.estimatedTime} นาที
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col space-y-2">
-                      {queue.status === "waiting" && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(queue.id, "confirmed")
-                            }
-                            disabled={actionLoading.updateStatus}
-                            className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
-                          >
-                            ยืนยัน
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(queue.id, "serving")
-                            }
-                            disabled={actionLoading.updateStatus}
-                            className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
-                          >
-                            เรียก
-                          </button>
-                        </>
-                      )}
-                      {queue.status === "serving" && (
-                        <button
-                          onClick={() =>
-                            handleStatusUpdate(queue.id, "completed")
-                          }
-                          disabled={actionLoading.updateStatus}
-                          className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
-                        >
-                          เสร็จสิ้น
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleEditQueue(queue)}
-                        disabled={actionLoading.updateQueue}
-                        className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                      >
-                        แก้ไข
-                      </button>
-                      {queue.status === "waiting" && (
-                        <button
-                          onClick={() => handleDeleteQueue(queue.id)}
-                          disabled={actionLoading.deleteQueue}
-                          className="bg-red-500 dark:bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50"
-                        >
-                          ลบ
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Pagination */}
-        {viewModel?.queues.pagination.totalPages > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            {/* Mobile Layout - Stacked */}
-            <div className="flex flex-col space-y-4 sm:hidden">
-              {/* Info and Per Page Dropdown */}
-              <div className="flex flex-col space-y-3">
-                <div className="text-sm text-gray-700 dark:text-gray-300 text-center">
-                  แสดง{" "}
-                  {(viewModel.queues.pagination.currentPage - 1) *
-                    viewModel.queues.pagination.perPage +
-                    1}{" "}
-                  -{" "}
-                  {Math.min(
-                    viewModel.queues.pagination.currentPage *
-                      viewModel.queues.pagination.perPage,
-                    viewModel.queues.pagination.totalCount
-                  )}{" "}
-                  จาก {viewModel.queues.pagination.totalCount} รายการ
-                </div>
-
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    แสดงต่อหน้า:
-                  </span>
-                  <select
-                    value={viewModel.queues.pagination.perPage}
-                    onChange={(e) =>
-                      handlePerPageChange(Number(e.target.value))
-                    }
-                    disabled={loading}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {getPaginationConfig().PER_PAGE_OPTIONS.map(
-                      (option: number) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Pagination Controls - Mobile */}
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage <= 1 || loading}
-                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
-                    currentPage > 1 && !loading
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  ก่อนหน้า
-                </button>
-
-                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  หน้า {currentPage} / {viewModel.queues.pagination.totalPages}
-                </div>
-
-                <button
-                  onClick={handleNextPage}
-                  disabled={
-                    currentPage >= viewModel.queues.pagination.totalPages ||
-                    loading
-                  }
-                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
-                    currentPage < viewModel.queues.pagination.totalPages &&
-                    !loading
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  ถัดไป
-                </button>
-              </div>
-            </div>
-
-            {/* Desktop Layout - Horizontal */}
-            <div className="hidden sm:flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  แสดง{" "}
-                  {(viewModel.queues.pagination.currentPage - 1) *
-                    viewModel.queues.pagination.perPage +
-                    1}{" "}
-                  -{" "}
-                  {Math.min(
-                    viewModel.queues.pagination.currentPage *
-                      viewModel.queues.pagination.perPage,
-                    viewModel.queues.pagination.totalCount
-                  )}{" "}
-                  จาก {viewModel.queues.pagination.totalCount} รายการ
-                </div>
-
-                {/* Per Page Dropdown */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    แสดงต่อหน้า:
-                  </span>
-                  <select
-                    value={viewModel.queues.pagination.perPage}
-                    onChange={(e) =>
-                      handlePerPageChange(Number(e.target.value))
-                    }
-                    disabled={loading}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {getPaginationConfig().PER_PAGE_OPTIONS.map(
-                      (option: number) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage <= 1 || loading}
-                  className={`px-3 py-1 rounded-md text-sm font-medium ${
-                    currentPage > 1 && !loading
-                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  ก่อนหน้า
-                </button>
-
-                <div className="flex space-x-1">
-                  {Array.from(
-                    {
-                      length: Math.min(
-                        viewModel.queues.pagination.totalPages,
-                        5
-                      ),
-                    },
-                    (_, i) => {
-                      let pageNum;
-                      if (viewModel.queues.pagination.totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (
-                        currentPage >=
-                        viewModel.queues.pagination.totalPages - 2
-                      ) {
-                        pageNum =
-                          viewModel.queues.pagination.totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          disabled={loading}
-                          className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            pageNum === currentPage
-                              ? "bg-blue-500 text-white"
-                              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    }
+                  filters.priority !== "all" ? (
+                    <p className="text-sm text-gray-400 mt-2">
+                      ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการคิวใหม่
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-400 mt-2">
+                      คลิกปุ่ม &lsquo;เพิ่มคิวใหม่&rsquo;
+                      เพื่อเริ่มบันทึกรายการแรกของคุณ
+                    </p>
                   )}
                 </div>
-
-                <button
-                  onClick={handleNextPage}
-                  disabled={
-                    currentPage >= viewModel.queues.pagination.totalPages ||
-                    loading
-                  }
-                  className={`px-3 py-1 rounded-md text-sm font-medium ${
-                    currentPage < viewModel.queues.pagination.totalPages &&
-                    !loading
-                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  }`}
+              </div>
+            ) : (
+              queueData.map((queue: QueueItem) => (
+                <div
+                  key={queue.id}
+                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  ถัดไป
-                </button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 dark:text-blue-300 font-bold">
+                            {queue.queueNumber}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            {queue.customerName}
+                          </h3>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                              queue.status
+                            )}`}
+                          >
+                            {getStatusText(queue.status)}
+                          </span>
+                          {queue.priority !== "normal" && (
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                                queue.priority
+                              )}`}
+                            >
+                              {getPriorityText(queue.priority)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {queue.customerPhone}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          บริการ: {queue.services.join(", ")}
+                        </p>
+                        {queue.notes && (
+                          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                            หมายเหตุ: {queue.notes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          เวลา
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {queue.createdAt}
+                        </p>
+                        {queue.estimatedTime > 0 && (
+                          <p className="text-xs text-orange-600 dark:text-orange-400">
+                            รอ ~{queue.estimatedTime} นาที
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col space-y-2">
+                        {queue.status === "waiting" && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(queue.id, "confirmed")
+                              }
+                              disabled={actionLoading.updateStatus}
+                              className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
+                            >
+                              ยืนยัน
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(queue.id, "serving")
+                              }
+                              disabled={actionLoading.updateStatus}
+                              className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            >
+                              เรียก
+                            </button>
+                          </>
+                        )}
+                        {queue.status === "serving" && (
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(queue.id, "completed")
+                            }
+                            disabled={actionLoading.updateStatus}
+                            className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
+                          >
+                            เสร็จสิ้น
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleEditQueue(queue)}
+                          disabled={actionLoading.updateQueue}
+                          className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                        >
+                          แก้ไข
+                        </button>
+                        {queue.status === "waiting" && (
+                          <button
+                            onClick={() => handleDeleteQueue(queue.id)}
+                            disabled={actionLoading.deleteQueue}
+                            className="bg-red-500 dark:bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-600 dark:hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            ลบ
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Pagination */}
+          {viewModel?.queues.pagination.totalPages > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+              {/* Mobile Layout - Stacked */}
+              <div className="flex flex-col space-y-4 sm:hidden">
+                {/* Info and Per Page Dropdown */}
+                <div className="flex flex-col space-y-3">
+                  <div className="text-sm text-gray-700 dark:text-gray-300 text-center">
+                    แสดง{" "}
+                    {(viewModel.queues.pagination.currentPage - 1) *
+                      viewModel.queues.pagination.perPage +
+                      1}{" "}
+                    -{" "}
+                    {Math.min(
+                      viewModel.queues.pagination.currentPage *
+                        viewModel.queues.pagination.perPage,
+                      viewModel.queues.pagination.totalCount
+                    )}{" "}
+                    จาก {viewModel.queues.pagination.totalCount} รายการ
+                  </div>
+
+                  <div className="flex items-center justify-center space-x-2">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      แสดงต่อหน้า:
+                    </span>
+                    <select
+                      value={viewModel.queues.pagination.perPage}
+                      onChange={(e) =>
+                        handlePerPageChange(Number(e.target.value))
+                      }
+                      disabled={loading}
+                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {getPaginationConfig().PER_PAGE_OPTIONS.map(
+                        (option: number) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Pagination Controls - Mobile */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage <= 1 || loading}
+                    className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                      currentPage > 1 && !loading
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    ก่อนหน้า
+                  </button>
+
+                  <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    หน้า {currentPage} /{" "}
+                    {viewModel.queues.pagination.totalPages}
+                  </div>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={
+                      currentPage >= viewModel.queues.pagination.totalPages ||
+                      loading
+                    }
+                    className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                      currentPage < viewModel.queues.pagination.totalPages &&
+                      !loading
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    ถัดไป
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop Layout - Horizontal */}
+              <div className="hidden sm:flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
+                    แสดง{" "}
+                    {(viewModel.queues.pagination.currentPage - 1) *
+                      viewModel.queues.pagination.perPage +
+                      1}{" "}
+                    -{" "}
+                    {Math.min(
+                      viewModel.queues.pagination.currentPage *
+                        viewModel.queues.pagination.perPage,
+                      viewModel.queues.pagination.totalCount
+                    )}{" "}
+                    จาก {viewModel.queues.pagination.totalCount} รายการ
+                  </div>
+
+                  {/* Per Page Dropdown */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      แสดงต่อหน้า:
+                    </span>
+                    <select
+                      value={viewModel.queues.pagination.perPage}
+                      onChange={(e) =>
+                        handlePerPageChange(Number(e.target.value))
+                      }
+                      disabled={loading}
+                      className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {getPaginationConfig().PER_PAGE_OPTIONS.map(
+                        (option: number) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage <= 1 || loading}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      currentPage > 1 && !loading
+                        ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    ก่อนหน้า
+                  </button>
+
+                  <div className="flex space-x-1">
+                    {Array.from(
+                      {
+                        length: Math.min(
+                          viewModel.queues.pagination.totalPages,
+                          5
+                        ),
+                      },
+                      (_, i) => {
+                        let pageNum;
+                        if (viewModel.queues.pagination.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (
+                          currentPage >=
+                          viewModel.queues.pagination.totalPages - 2
+                        ) {
+                          pageNum =
+                            viewModel.queues.pagination.totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={loading}
+                            className={`px-3 py-1 rounded-md text-sm font-medium ${
+                              pageNum === currentPage
+                                ? "bg-blue-500 text-white"
+                                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={
+                      currentPage >= viewModel.queues.pagination.totalPages ||
+                      loading
+                    }
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      currentPage < viewModel.queues.pagination.totalPages &&
+                      !loading
+                        ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    ถัดไป
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-          </div>
+          )}
         </div>
+      </div>
 
       {/* Edit Queue Modal */}
       <EditQueueModal
