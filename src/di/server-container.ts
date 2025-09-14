@@ -14,7 +14,7 @@ import { CustomerPointsTransactionBackendService } from "../application/services
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
 import { DepartmentsBackendService } from "../application/services/shop/backend/departments-backend-service";
 import { NotificationSettingsBackendService } from "../application/services/shop/backend/notification-settings-backend-service";
-import { OpeningHoursBackendService } from "../application/services/shop/backend/opening-hours-backend-service";
+import { OpeningHoursBackendServiceFactory } from "../application/services/shop/backend/opening-hours-backend-service";
 import { PaymentItemsBackendService } from "../application/services/shop/backend/payment-items-backend-service";
 import { PaymentsBackendService } from "../application/services/shop/backend/payments-backend-service";
 import { PosterTemplateBackendService } from "../application/services/shop/backend/poster-templates-backend-service";
@@ -34,6 +34,7 @@ import {
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
+import { SupabaseBackendOpeningHoursRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-opening-hours-repository";
 import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
 import { SupabaseShopBackendQueueRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-repository";
@@ -74,18 +75,22 @@ export async function createServerContainer(): Promise<Container> {
       logger
     );
 
+    const shopBackendQueueRepository = new SupabaseShopBackendQueueRepository(
+      databaseDatasource,
+      logger
+    );
     const shopBackendShopRepository = new SupabaseShopBackendShopRepository(
       databaseDatasource,
       logger
     );
+    const shopBackendOpeningHoursRepository =
+      new SupabaseBackendOpeningHoursRepository(databaseDatasource, logger);
     const shopBackendCategoryRepository =
       new SupabaseShopBackendCategoryRepository(databaseDatasource, logger);
     const shopBackendPaymentRepository =
       new SupabaseShopBackendPaymentRepository(databaseDatasource, logger);
     const shopBackendPromotionRepository =
       new SupabaseShopBackendPromotionRepository(databaseDatasource, logger);
-    const shopBackendQueueRepository =
-      new SupabaseShopBackendQueueRepository(databaseDatasource, logger);
     const shopBackendServiceRepository =
       new SupabaseShopBackendServiceRepository(databaseDatasource, logger);
 
@@ -135,7 +140,6 @@ export async function createServerContainer(): Promise<Container> {
     const departmentsBackendService = new DepartmentsBackendService(logger);
     const paymentsBackendService = new PaymentsBackendService(logger);
     const rewardsBackendService = new RewardsBackendService(logger);
-    const openingHoursBackendService = new OpeningHoursBackendService(logger);
     const paymentItemsBackendService = new PaymentItemsBackendService(logger);
     const customerPointsBackendService = new CustomerPointsBackendService(
       logger
@@ -162,15 +166,19 @@ export async function createServerContainer(): Promise<Container> {
         shopBackendPromotionRepository,
         logger
       );
-    const shopBackendQueuesService =
-      ShopBackendQueuesServiceFactory.create(
-        shopBackendQueueRepository,
-        logger
-      );
+    const shopBackendQueuesService = ShopBackendQueuesServiceFactory.create(
+      shopBackendQueueRepository,
+      logger
+    );
     const shopBackendServicesService = ShopBackendServicesServiceFactory.create(
       shopBackendServiceRepository,
       logger
     );
+    const shopBackendOpeningHoursService =
+      OpeningHoursBackendServiceFactory.create(
+        shopBackendOpeningHoursRepository,
+        logger
+      );
 
     // Register all services in the container
     container.registerInstance("AuthService", authService);
@@ -202,6 +210,10 @@ export async function createServerContainer(): Promise<Container> {
       shopBackendServicesService
     );
     container.registerInstance(
+      "ShopBackendOpeningHoursService",
+      shopBackendOpeningHoursService
+    );
+    container.registerInstance(
       "PosterTemplateBackendService",
       posterTemplateBackendService
     );
@@ -218,10 +230,7 @@ export async function createServerContainer(): Promise<Container> {
       paymentsBackendService
     );
     container.registerInstance("RewardsBackendService", rewardsBackendService);
-    container.registerInstance(
-      "OpeningHoursBackendService",
-      openingHoursBackendService
-    );
+
     container.registerInstance(
       "PaymentItemsBackendService",
       paymentItemsBackendService

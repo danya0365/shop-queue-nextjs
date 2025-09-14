@@ -1,11 +1,11 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
-import { OpeningHour } from "../shop/backend/shop-opening-hour-dto";
 import { CategoryDTO } from "./categories-dto";
+import { OpeningHourDTO } from "./opening-hour-dto";
 
 export type ShopCategoryDTO = Partial<CategoryDTO> & {
   id: string;
   name: string;
-}
+};
 
 export interface ShopDTO {
   id: string;
@@ -17,8 +17,8 @@ export interface ShopDTO {
   categories: ShopCategoryDTO[];
   ownerId: string;
   ownerName: string;
-  status: 'active' | 'inactive' | 'pending';
-  openingHours: OpeningHour[];
+  status: "active" | "inactive" | "pending";
+  openingHours: OpeningHourDTO[];
   queueCount: number;
   totalServices: number;
   rating: number;

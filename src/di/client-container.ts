@@ -14,7 +14,7 @@ import { CustomerPointsTransactionBackendService } from "../application/services
 import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
 import { DepartmentsBackendService } from "../application/services/shop/backend/departments-backend-service";
 import { NotificationSettingsBackendService } from "../application/services/shop/backend/notification-settings-backend-service";
-import { OpeningHoursBackendService } from "../application/services/shop/backend/opening-hours-backend-service";
+import { OpeningHoursBackendServiceFactory } from "../application/services/shop/backend/opening-hours-backend-service";
 import { PaymentItemsBackendService } from "../application/services/shop/backend/payment-items-backend-service";
 import { PaymentsBackendService } from "../application/services/shop/backend/payments-backend-service";
 import { PosterTemplateBackendService } from "../application/services/shop/backend/poster-templates-backend-service";
@@ -34,6 +34,7 @@ import {
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
+import { SupabaseBackendOpeningHoursRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-opening-hours-repository";
 import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
 import { SupabaseShopBackendQueueRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-repository";
@@ -87,6 +88,8 @@ export function createClientContainer(): Container {
       databaseDatasource,
       logger
     );
+    const shopBackendOpeningHoursRepository =
+      new SupabaseBackendOpeningHoursRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -134,7 +137,6 @@ export function createClientContainer(): Container {
     const departmentsBackendService = new DepartmentsBackendService(logger);
     const paymentsBackendService = new PaymentsBackendService(logger);
     const rewardsBackendService = new RewardsBackendService(logger);
-    const openingHoursBackendService = new OpeningHoursBackendService(logger);
     const paymentItemsBackendService = new PaymentItemsBackendService(logger);
     const customerPointsBackendService = new CustomerPointsBackendService(
       logger
@@ -169,6 +171,11 @@ export function createClientContainer(): Container {
       shopBackendQueueRepository,
       logger
     );
+    const shopBackendOpeningHoursService =
+      OpeningHoursBackendServiceFactory.create(
+        shopBackendOpeningHoursRepository,
+        logger
+      );
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
@@ -200,6 +207,11 @@ export function createClientContainer(): Container {
       shopBackendServicesService
     );
     container.registerInstance(
+      "ShopBackendOpeningHoursService",
+      shopBackendOpeningHoursService
+    );
+
+    container.registerInstance(
       "PosterTemplateBackendService",
       posterTemplateBackendService
     );
@@ -216,10 +228,6 @@ export function createClientContainer(): Container {
       paymentsBackendService
     );
     container.registerInstance("RewardsBackendService", rewardsBackendService);
-    container.registerInstance(
-      "OpeningHoursBackendService",
-      openingHoursBackendService
-    );
     container.registerInstance(
       "PaymentItemsBackendService",
       paymentItemsBackendService

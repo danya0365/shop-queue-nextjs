@@ -1,5 +1,5 @@
 import { ServiceDTO } from "@/src/application/dtos/backend/services-dto";
-import { OpeningHour } from "@/src/application/dtos/shop/backend/shop-opening-hour-dto";
+import { OpeningHourDTO } from "@/src/application/dtos/shop/backend/opening-hour-dto";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { Metadata } from "next";
@@ -48,11 +48,11 @@ export abstract class BaseShopPresenter {
   }
 
   // create opening hours string from OpeningHour[]
-  protected createOpeningHoursString(openingHours: OpeningHour[]): string {
+  protected createOpeningHoursString(openingHours: OpeningHourDTO[]): string {
     if (!openingHours || openingHours.length === 0) {
       return "ทุกวันตลอด 24 ชั่วโมง";
     }
-    
+
     // create map of dayOfWeek to day and day order
     const dayMap = new Map([
       ["monday", { name: "จันทร์", order: 1 }],
@@ -66,7 +66,7 @@ export abstract class BaseShopPresenter {
 
     // Group days by opening hours
     const hourGroups = new Map<string, string[]>();
-    
+
     // Sort opening hours by day order
     const sortedHours = [...openingHours].sort((a, b) => {
       const orderA = dayMap.get(a.dayOfWeek)?.order || 0;
@@ -92,56 +92,69 @@ export abstract class BaseShopPresenter {
 
     // Create summary strings
     const summaries: string[] = [];
-    
+
     // Process open days
     hourGroups.forEach((days, key) => {
       if (key === "closed") return; // Skip closed days for now
-      
+
       const [openTime, closeTime] = key.split("-");
       const dayRanges = this.createDayRanges(days);
-      
-      dayRanges.forEach(range => {
-        summaries.push(`${range}: ${this.formatTimeString(openTime)} - ${this.formatTimeString(closeTime)}`);
+
+      dayRanges.forEach((range) => {
+        summaries.push(
+          `${range}: ${this.formatTimeString(
+            openTime
+          )} - ${this.formatTimeString(closeTime)}`
+        );
       });
     });
-    
+
     // Process closed days
     const closedDays = hourGroups.get("closed");
     if (closedDays && closedDays.length > 0) {
       const dayRanges = this.createDayRanges(closedDays);
-      dayRanges.forEach(range => {
+      dayRanges.forEach((range) => {
         summaries.push(`${range}: ปิดทำการ`);
       });
     }
-    
+
     return summaries.join(", ");
   }
-  
+
   // Helper method to format time string from 00:00:00 to 00:00
   private formatTimeString(time: string): string {
     if (!time) return time;
     // Remove seconds part if present (format: HH:MM:SS -> HH:MM)
-    return time.includes(':') ? time.substring(0, 5) : time;
+    return time.includes(":") ? time.substring(0, 5) : time;
   }
 
   // Helper method to create day ranges (e.g., "จันทร์ - ศุกร์" or "เสาร์, อาทิตย์")
   private createDayRanges(days: string[]): string[] {
     if (days.length === 0) return [];
     if (days.length === 1) return [days[0]];
-    
-    const dayOrder = ["จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์", "อาทิตย์"];
-    
+
+    const dayOrder = [
+      "จันทร์",
+      "อังคาร",
+      "พุธ",
+      "พฤหัส",
+      "ศุกร์",
+      "เสาร์",
+      "อาทิตย์",
+    ];
+
     // Sort days according to the day order
     days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
-    
+
     const ranges: string[] = [];
     let rangeStart = 0;
-    
+
     for (let i = 1; i <= days.length; i++) {
       // Check if the current day is consecutive with the previous one
-      const isConsecutive = i < days.length && 
-        dayOrder.indexOf(days[i]) === dayOrder.indexOf(days[i-1]) + 1;
-      
+      const isConsecutive =
+        i < days.length &&
+        dayOrder.indexOf(days[i]) === dayOrder.indexOf(days[i - 1]) + 1;
+
       // If not consecutive or at the end of the array, create a range
       if (!isConsecutive || i === days.length) {
         if (rangeStart === i - 1) {
@@ -149,12 +162,12 @@ export abstract class BaseShopPresenter {
           ranges.push(days[rangeStart]);
         } else {
           // Range of days
-          ranges.push(`${days[rangeStart]} - ${days[i-1]}`);
+          ranges.push(`${days[rangeStart]} - ${days[i - 1]}`);
         }
         rangeStart = i;
       }
     }
-    
+
     return ranges;
   }
 

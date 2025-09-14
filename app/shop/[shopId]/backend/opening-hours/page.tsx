@@ -1,6 +1,6 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
 import { OpeningHoursView } from "@/src/presentation/components/shop/backend/OpeningHoursView";
-import { OpeningHoursPresenterFactory } from "@/src/presentation/presenters/shop/backend/OpeningHoursPresenter";
+import { OpeningHoursPresenterFactory } from "@/src/presentation/presenters/shop/backend/opening-hours/OpeningHoursPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -50,7 +50,7 @@ export default async function OpeningHoursPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <OpeningHoursView viewModel={viewModel} />
+        <OpeningHoursView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

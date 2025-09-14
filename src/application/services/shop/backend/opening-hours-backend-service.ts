@@ -1,203 +1,224 @@
-import { CreateOpeningHourData, OpeningHour, UpdateOpeningHourData } from '@/src/application/dtos/shop/backend/shop-opening-hour-dto';
-import type { Logger } from '@/src/domain/interfaces/logger';
+import {
+  BulkUpdateOpeningHourInputDTO,
+  CreateOpeningHourInputDTO,
+  OpeningHourDTO,
+  UpdateOpeningHourInputDTO,
+} from "@/src/application/dtos/shop/backend/opening-hour-dto";
+import {
+  BulkUpdateOpeningHoursUseCase,
+  CreateOpeningHourUseCase,
+  DeleteOpeningHourUseCase,
+  GetOpeningHourByIdUseCase,
+  GetOpeningHoursUseCase,
+  UpdateOpeningHourUseCase,
+} from "@/src/application/usecases/shop/backend/opening-hours";
+import { DayOfWeek } from "@/src/domain/entities/shop/backend/backend-opening-hour.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { ShopBackendOpeningHoursRepository } from "@/src/domain/repositories/shop/backend/backend-opening-hours-repository";
 
-export interface IOpeningHoursBackendService {
-  getOpeningHours(shopId: string): Promise<OpeningHour[]>;
-  getOpeningHourById(shopId: string, hourId: string): Promise<OpeningHour | null>;
-  createOpeningHour(shopId: string, data: CreateOpeningHourData): Promise<OpeningHour>;
-  updateOpeningHour(shopId: string, hourId: string, data: UpdateOpeningHourData): Promise<OpeningHour>;
+export interface IShopBackendOpeningHoursService {
+  getOpeningHours(shopId: string): Promise<OpeningHourDTO[]>;
+  getOpeningHourById(
+    shopId: string,
+    hourId: string
+  ): Promise<OpeningHourDTO | null>;
+  createOpeningHour(
+    shopId: string,
+    data: CreateOpeningHourInputDTO
+  ): Promise<OpeningHourDTO>;
+  updateOpeningHour(
+    shopId: string,
+    hourId: string,
+    data: UpdateOpeningHourInputDTO
+  ): Promise<OpeningHourDTO>;
   deleteOpeningHour(shopId: string, hourId: string): Promise<boolean>;
-  bulkUpdateOpeningHours(shopId: string, hours: UpdateOpeningHourData[]): Promise<OpeningHour[]>;
-  getWeeklySchedule(shopId: string): Promise<Record<string, OpeningHour>>;
+  bulkUpdateOpeningHours(
+    shopId: string,
+    hours: BulkUpdateOpeningHourInputDTO[]
+  ): Promise<OpeningHourDTO[]>;
+  getWeeklySchedule(shopId: string): Promise<Record<string, OpeningHourDTO>>;
 }
 
-export class OpeningHoursBackendService implements IOpeningHoursBackendService {
-  constructor(private readonly logger: Logger) { }
+export class ShopBackendOpeningHoursService
+  implements IShopBackendOpeningHoursService
+{
+  constructor(
+    private readonly logger: Logger,
+    private readonly getOpeningHoursUseCase: GetOpeningHoursUseCase,
+    private readonly getOpeningHourByIdUseCase: GetOpeningHourByIdUseCase,
+    private readonly createOpeningHourUseCase: CreateOpeningHourUseCase,
+    private readonly updateOpeningHourUseCase: UpdateOpeningHourUseCase,
+    private readonly deleteOpeningHourUseCase: DeleteOpeningHourUseCase,
+    private readonly bulkUpdateOpeningHoursUseCase: BulkUpdateOpeningHoursUseCase
+  ) {}
 
-  async getOpeningHours(shopId: string): Promise<OpeningHour[]> {
-    this.logger.info('OpeningHoursBackendService: Getting opening hours', { shopId });
-
-    // Mock data for all days of the week
-    const mockOpeningHours: OpeningHour[] = [
-      {
-        id: '1',
-        shopId,
-        dayOfWeek: 'monday',
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '18:00',
-        breakStart: '12:00',
-        breakEnd: '13:00',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '2',
-        shopId,
-        dayOfWeek: 'tuesday',
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '18:00',
-        breakStart: '12:00',
-        breakEnd: '13:00',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '3',
-        shopId,
-        dayOfWeek: 'wednesday',
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '18:00',
-        breakStart: '12:00',
-        breakEnd: '13:00',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '4',
-        shopId,
-        dayOfWeek: 'thursday',
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '18:00',
-        breakStart: '12:00',
-        breakEnd: '13:00',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '5',
-        shopId,
-        dayOfWeek: 'friday',
-        isOpen: true,
-        openTime: '09:00',
-        closeTime: '18:00',
-        breakStart: '12:00',
-        breakEnd: '13:00',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '6',
-        shopId,
-        dayOfWeek: 'saturday',
-        isOpen: true,
-        openTime: '10:00',
-        closeTime: '17:00',
-        breakStart: null,
-        breakEnd: null,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: '7',
-        shopId,
-        dayOfWeek: 'sunday',
-        isOpen: false,
-        openTime: null,
-        closeTime: null,
-        breakStart: null,
-        breakEnd: null,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-    ];
-
-    return mockOpeningHours;
+  private dtoToOpeningHour(dto: OpeningHourDTO): OpeningHourDTO {
+    return {
+      id: dto.id,
+      shopId: dto.shopId,
+      dayOfWeek: dto.dayOfWeek,
+      isOpen: dto.isOpen,
+      openTime: dto.openTime,
+      closeTime: dto.closeTime,
+      breakStart: dto.breakStart,
+      breakEnd: dto.breakEnd,
+      createdAt: dto.createdAt,
+      updatedAt: dto.updatedAt,
+    };
   }
 
-  async getOpeningHourById(shopId: string, hourId: string): Promise<OpeningHour | null> {
-    this.logger.info('OpeningHoursBackendService: Getting opening hour by ID', { shopId, hourId });
-
-    const hours = await this.getOpeningHours(shopId);
-    return hours.find(hour => hour.id === hourId) || null;
-  }
-
-  async createOpeningHour(shopId: string, data: CreateOpeningHourData): Promise<OpeningHour> {
-    this.logger.info('OpeningHoursBackendService: Creating opening hour', { shopId, data });
-
-    const newHour: OpeningHour = {
-      id: Date.now().toString(),
+  async getOpeningHours(shopId: string): Promise<OpeningHourDTO[]> {
+    this.logger.info("OpeningHoursBackendService: Getting opening hours", {
       shopId,
-      dayOfWeek: data.dayOfWeek,
-      isOpen: data.isOpen,
-      openTime: data.openTime || null,
-      closeTime: data.closeTime || null,
-      breakStart: data.breakStart || null,
-      breakEnd: data.breakEnd || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
-    return newHour;
+    const result = await this.getOpeningHoursUseCase.execute({ shopId });
+    return result.openingHours;
   }
 
-  async updateOpeningHour(shopId: string, hourId: string, data: UpdateOpeningHourData): Promise<OpeningHour> {
-    this.logger.info('OpeningHoursBackendService: Updating opening hour', { shopId, hourId, data });
+  async getOpeningHourById(
+    shopId: string,
+    hourId: string
+  ): Promise<OpeningHourDTO | null> {
+    this.logger.info("OpeningHoursBackendService: Getting opening hour by ID", {
+      shopId,
+      hourId,
+    });
 
-    const existingHour = await this.getOpeningHourById(shopId, hourId);
-    if (!existingHour) {
-      throw new Error(`Opening hour with ID ${hourId} not found`);
-    }
+    const result = await this.getOpeningHourByIdUseCase.execute({ id: hourId });
+    return result.openingHour
+      ? this.dtoToOpeningHour(result.openingHour)
+      : null;
+  }
 
-    const updatedHour: OpeningHour = {
-      ...existingHour,
-      isOpen: data.isOpen !== undefined ? data.isOpen : existingHour.isOpen,
-      openTime: data.openTime !== undefined ? data.openTime || null : existingHour.openTime,
-      closeTime: data.closeTime !== undefined ? data.closeTime || null : existingHour.closeTime,
-      breakStart: data.breakStart !== undefined ? data.breakStart || null : existingHour.breakStart,
-      breakEnd: data.breakEnd !== undefined ? data.breakEnd || null : existingHour.breakEnd,
-      updatedAt: new Date(),
-    };
+  async createOpeningHour(
+    shopId: string,
+    data: CreateOpeningHourInputDTO
+  ): Promise<OpeningHourDTO> {
+    this.logger.info("OpeningHoursBackendService: Creating opening hour", {
+      shopId,
+      data,
+    });
 
-    return updatedHour;
+    const result = await this.createOpeningHourUseCase.execute({
+      shopId,
+      dayOfWeek: data.dayOfWeek as DayOfWeek,
+      isOpen: data.isOpen,
+      openTime: data.openTime,
+      closeTime: data.closeTime,
+      breakStart: data.breakStart,
+      breakEnd: data.breakEnd,
+    });
+
+    return this.dtoToOpeningHour(result.openingHour);
+  }
+
+  async updateOpeningHour(
+    shopId: string,
+    hourId: string,
+    data: UpdateOpeningHourInputDTO
+  ): Promise<OpeningHourDTO> {
+    this.logger.info("OpeningHoursBackendService: Updating opening hour", {
+      shopId,
+      hourId,
+      data,
+    });
+
+    const result = await this.updateOpeningHourUseCase.execute({
+      id: hourId,
+      isOpen: data.isOpen,
+      openTime: data.openTime,
+      closeTime: data.closeTime,
+      breakStart: data.breakStart,
+      breakEnd: data.breakEnd,
+    });
+
+    return this.dtoToOpeningHour(result.openingHour);
   }
 
   async deleteOpeningHour(shopId: string, hourId: string): Promise<boolean> {
-    this.logger.info('OpeningHoursBackendService: Deleting opening hour', { shopId, hourId });
+    this.logger.info("OpeningHoursBackendService: Deleting opening hour", {
+      shopId,
+      hourId,
+    });
 
-    const existingHour = await this.getOpeningHourById(shopId, hourId);
-    if (!existingHour) {
-      return false;
-    }
-
-    // In real implementation, delete from database
-    return true;
+    const result = await this.deleteOpeningHourUseCase.execute({ id: hourId });
+    return result.success;
   }
 
-  async bulkUpdateOpeningHours(shopId: string, hours: UpdateOpeningHourData[]): Promise<OpeningHour[]> {
-    this.logger.info('OpeningHoursBackendService: Bulk updating opening hours', { shopId, count: hours.length });
+  async bulkUpdateOpeningHours(
+    shopId: string,
+    hours: BulkUpdateOpeningHourInputDTO[]
+  ): Promise<OpeningHourDTO[]> {
+    this.logger.info(
+      "OpeningHoursBackendService: Bulk updating opening hours",
+      { shopId, count: hours.length }
+    );
 
-    // Mock implementation - in real app, this would be a batch update
-    const updatedHours: OpeningHour[] = [];
+    const result = await this.bulkUpdateOpeningHoursUseCase.execute({
+      shopId,
+      openingHours: hours,
+    });
 
-    for (let i = 0; i < hours.length; i++) {
-      const hourData = hours[i];
-      const hourId = (i + 1).toString(); // Mock ID mapping
-
-      try {
-        const updatedHour = await this.updateOpeningHour(shopId, hourId, hourData);
-        updatedHours.push(updatedHour);
-      } catch (error) {
-        this.logger.error('Error updating opening hour in bulk', { shopId, hourId, error });
-      }
-    }
-
-    return updatedHours;
+    return result.openingHours.map((dto) => this.dtoToOpeningHour(dto));
   }
 
-  async getWeeklySchedule(shopId: string): Promise<Record<string, OpeningHour>> {
-    this.logger.info('OpeningHoursBackendService: Getting weekly schedule', { shopId });
+  async getWeeklySchedule(
+    shopId: string
+  ): Promise<Record<string, OpeningHourDTO>> {
+    this.logger.info("OpeningHoursBackendService: Getting weekly schedule", {
+      shopId,
+    });
 
     const hours = await this.getOpeningHours(shopId);
-    const schedule: Record<string, OpeningHour> = {};
+    const schedule: Record<string, OpeningHourDTO> = {};
 
-    hours.forEach(hour => {
+    hours.forEach((hour) => {
       schedule[hour.dayOfWeek] = hour;
     });
 
     return schedule;
+  }
+}
+
+export class OpeningHoursBackendServiceFactory {
+  static create(
+    repository: ShopBackendOpeningHoursRepository,
+    logger: Logger
+  ): ShopBackendOpeningHoursService {
+    const getOpeningHoursUseCase = new GetOpeningHoursUseCase(
+      repository,
+      logger
+    );
+    const getOpeningHourByIdUseCase = new GetOpeningHourByIdUseCase(
+      repository,
+      logger
+    );
+    const createOpeningHourUseCase = new CreateOpeningHourUseCase(
+      repository,
+      logger
+    );
+    const updateOpeningHourUseCase = new UpdateOpeningHourUseCase(
+      repository,
+      logger
+    );
+    const deleteOpeningHourUseCase = new DeleteOpeningHourUseCase(
+      repository,
+      logger
+    );
+    const bulkUpdateOpeningHoursUseCase = new BulkUpdateOpeningHoursUseCase(
+      repository,
+      logger
+    );
+
+    return new ShopBackendOpeningHoursService(
+      logger,
+      getOpeningHoursUseCase,
+      getOpeningHourByIdUseCase,
+      createOpeningHourUseCase,
+      updateOpeningHourUseCase,
+      deleteOpeningHourUseCase,
+      bulkUpdateOpeningHoursUseCase
+    );
   }
 }
