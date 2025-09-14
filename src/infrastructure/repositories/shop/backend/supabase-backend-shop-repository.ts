@@ -1,3 +1,4 @@
+import { ServiceEntity } from "@/src/domain/entities/backend/backend-service.entity";
 import {
   CreateShopEntity,
   PaginatedShopsEntity,
@@ -33,6 +34,7 @@ type ShopWithJoins = ShopSchema & {
   profiles?: { full_name?: string };
   categories?: ShopCategoryEntity[];
   opening_hours?: ShopOpeningHourEntity[];
+  services?: Partial<ServiceEntity>[];
 };
 type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
 type ShopStatsSchemaRecord = Record<string, unknown> & ShopStatsSchema;
@@ -358,6 +360,30 @@ export class SupabaseShopBackendShopRepository
         return null;
       }
 
+      // Get services for this shop
+      const servicesQuery: QueryOptions = {
+        select: ["*"],
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: id,
+          },
+        ],
+      };
+
+      const servicesRecords = await this.dataSource.getAdvanced<
+        Record<string, unknown>
+      >("services", servicesQuery);
+
+      const services = servicesRecords.map((service) => ({
+        id: service.id as string,
+        name: service.name as string,
+        slug: service.slug as string,
+        description: service.description as string,
+        price: service.price as number,
+      }));
+
       // Get categories for this shop
       const categoriesQuery: QueryOptions = {
         // Only select from shop_categories table, we'll get categories data via join
@@ -442,6 +468,7 @@ export class SupabaseShopBackendShopRepository
         owner_name: shopWithJoinedData.profiles?.full_name,
         categories: categories,
         opening_hours: openingHoursMap.get(id) || [],
+        services: services,
       };
 
       // Map database result to domain entity

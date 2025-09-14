@@ -96,7 +96,6 @@ export interface ShopStatsEntity {
   pendingApproval: number;
   newThisMonth: number;
 }
-
 /**
  * Paginated shops result
  */

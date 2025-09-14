@@ -35,7 +35,7 @@ export interface ShopSchema {
   // Joined data from opening_hours table
   opening_hours?: ShopOpeningHourSchema[];
 
-  services?: ServiceSchema[];
+  services?: Partial<ServiceSchema>[];
 }
 
 export interface ShopCategorySchema {
