@@ -643,6 +643,7 @@ export class SupabaseShopBackendShopSettingsRepository
 
       // Get existing shop settings
       const existingSettings = await this.getShopSettingsByShopId(shopId);
+
       if (!existingSettings) {
         throw new ShopBackendShopSettingsError(
           ShopBackendShopSettingsErrorType.NOT_FOUND,
@@ -674,7 +675,7 @@ export class SupabaseShopBackendShopSettingsRepository
       // Update the shop settings
       const result = await this.dataSource.update<ShopSettingsSchemaRecord>(
         "shop_settings",
-        shopId,
+        existingSettings.id,
         updateData
       );
 

@@ -4,13 +4,13 @@ import {
   CreateShopSettingsInputDTO,
   UpdateShopSettingsInputDTO,
 } from "@/src/application/dtos/shop/backend/shop-settings-dto";
+import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import type { ShopSettings } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import { useCallback, useEffect, useState } from "react";
 import { ShopSettingsViewModel } from "./ShopSettingsPresenter";
 import { useShopSettingsActions } from "./hooks/useShopSettingsActions";
 import { useShopSettingsState } from "./hooks/useShopSettingsState";
 import { useShopSettingsValidation } from "./hooks/useShopSettingsValidation";
-import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 
 interface UseShopSettingsPresenterReturn {
   // Data
@@ -141,14 +141,7 @@ export function useShopSettingsPresenter(
     async (data: UpdateShopSettingsInputDTO) => {
       const convertedData: Partial<ShopSettings> = {
         ...data,
-        // Convert null to undefined for optional fields
-        shopDescription: data.shopDescription ?? undefined,
-        shopPhone: data.shopPhone ?? undefined,
-        shopEmail: data.shopEmail ?? undefined,
-        shopAddress: data.shopAddress ?? undefined,
-        shopWebsite: data.shopWebsite ?? undefined,
-        shopLogo: data.shopLogo ?? undefined,
-        promptPayId: data.promptPayId ?? undefined,
+        promptPayId: data.promptPayId || undefined,
       };
       await updateShopSettingsInternal(convertedData);
     },
@@ -159,17 +152,12 @@ export function useShopSettingsPresenter(
   const createShopSettings = useCallback(
     async (data: CreateShopSettingsInputDTO) => {
       const convertedData: Omit<
-        ShopSettings,
+        CreateShopSettingsInputDTO,
         "id" | "createdAt" | "updatedAt"
       > = {
         ...data,
         // Ensure required fields are present with defaults
         shopId: shopId,
-        currency: data.currency || "THB",
-        language: data.language || "th",
-        timezone: data.timezone || "Asia/Bangkok",
-        defaultOpenTime: data.defaultOpenTime || "09:00",
-        defaultCloseTime: data.defaultCloseTime || "18:00",
         maxQueuePerService: data.maxQueuePerService || 10,
         queueTimeoutMinutes: data.queueTimeoutMinutes || 30,
         allowWalkIn: data.allowWalkIn ?? true,
@@ -203,14 +191,6 @@ export function useShopSettingsPresenter(
         allowDataExport: data.allowDataExport ?? true,
         apiKey: data.apiKey || `shop_${shopId}_${Date.now()}`,
         enableWebhooks: data.enableWebhooks ?? false,
-        // Convert null to undefined for optional fields
-        shopDescription: data.shopDescription ?? undefined,
-        shopPhone: data.shopPhone ?? undefined,
-        shopEmail: data.shopEmail ?? undefined,
-        shopAddress: data.shopAddress ?? undefined,
-        shopWebsite: data.shopWebsite ?? undefined,
-        shopLogo: data.shopLogo ?? undefined,
-        promptPayId: data.promptPayId ?? undefined,
       };
       await createShopSettingsInternal(convertedData);
     },
@@ -299,21 +279,13 @@ export function useShopSettingsPresenter(
       // Convert formData to match UpdateShopSettingsInputDTO type
       const settingsUpdateData: UpdateShopSettingsInputDTO = {
         ...formData,
-        shopId: shopId, // Add required shopId
-        // Convert null to undefined for optional fields
-        shopDescription: formData.shopDescription ?? undefined,
-        shopPhone: formData.shopPhone ?? undefined,
-        shopEmail: formData.shopEmail ?? undefined,
-        shopAddress: formData.shopAddress ?? undefined,
-        shopWebsite: formData.shopWebsite ?? undefined,
-        shopLogo: formData.shopLogo ?? undefined,
-        promptPayId: formData.promptPayId ?? undefined,
+        shopId: shopId,
       };
 
       // Update both shop and shop settings
       await Promise.all([
         updateShop(shopUpdateData),
-        updateShopSettings(settingsUpdateData)
+        updateShopSettings(settingsUpdateData),
       ]);
 
       setSaveSuccess(true);

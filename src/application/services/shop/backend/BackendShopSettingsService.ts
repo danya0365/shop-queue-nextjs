@@ -105,11 +105,11 @@ export interface IShopBackendShopSettingsService {
   getShopSettings(shopId: string): Promise<ShopSettings | null>;
   getShopSettingsById(id: string): Promise<ShopSettings | null>;
   createShopSettings(
-    settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">
+    settings: Omit<CreateShopSettingsInputDTO, "id" | "createdAt" | "updatedAt">
   ): Promise<ShopSettings>;
   updateShopSettings(
     shopId: string,
-    data: Partial<ShopSettings>
+    data: Partial<UpdateShopSettingsInputDTO>
   ): Promise<ShopSettings>;
   deleteShopSettings(shopId: string): Promise<boolean>;
   resetShopSettings(shopId: string): Promise<ShopSettings>;
@@ -309,16 +309,6 @@ export class ShopBackendShopSettingsService
 
       const createData: CreateShopSettingsInputDTO = {
         shopId: settings.shopId,
-        shopName: settings.shopName,
-        shopDescription: settings.shopDescription,
-        shopPhone: settings.shopPhone,
-        shopEmail: settings.shopEmail,
-        shopAddress: settings.shopAddress,
-        shopWebsite: settings.shopWebsite,
-        shopLogo: settings.shopLogo,
-        timezone: settings.timezone,
-        defaultOpenTime: settings.defaultOpenTime,
-        defaultCloseTime: settings.defaultCloseTime,
         maxQueuePerService: settings.maxQueuePerService,
         queueTimeoutMinutes: settings.queueTimeoutMinutes,
         allowWalkIn: settings.allowWalkIn,
@@ -452,16 +442,6 @@ export class ShopBackendShopSettingsService
       // Create update data with only the fields that should be updated
       const updateData: UpdateShopSettingsInputDTO = {
         shopId: shopId,
-        shopName: data.shopName,
-        shopDescription: data.shopDescription,
-        shopPhone: data.shopPhone,
-        shopEmail: data.shopEmail,
-        shopAddress: data.shopAddress,
-        shopWebsite: data.shopWebsite,
-        shopLogo: data.shopLogo,
-        timezone: data.timezone,
-        defaultOpenTime: data.defaultOpenTime,
-        defaultCloseTime: data.defaultCloseTime,
         maxQueuePerService: data.maxQueuePerService,
         queueTimeoutMinutes: data.queueTimeoutMinutes,
         allowWalkIn: data.allowWalkIn,

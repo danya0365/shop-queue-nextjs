@@ -84,16 +84,6 @@ export interface ShopSettingsDTO {
  */
 export interface CreateShopSettingsInputDTO {
   shopId: string;
-  shopName: string;
-  shopDescription?: string | null;
-  shopPhone?: string | null;
-  shopEmail?: string | null;
-  shopAddress?: string | null;
-  shopWebsite?: string | null;
-  shopLogo?: string | null;
-  timezone?: string;
-  defaultOpenTime?: string;
-  defaultCloseTime?: string;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
   allowWalkIn?: boolean;
@@ -142,16 +132,6 @@ export interface CreateShopSettingsInputDTO {
  */
 export interface UpdateShopSettingsInputDTO {
   shopId: string;
-  shopName?: string;
-  shopDescription?: string | null;
-  shopPhone?: string | null;
-  shopEmail?: string | null;
-  shopAddress?: string | null;
-  shopWebsite?: string | null;
-  shopLogo?: string | null;
-  timezone?: string;
-  defaultOpenTime?: string;
-  defaultCloseTime?: string;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
   allowWalkIn?: boolean;

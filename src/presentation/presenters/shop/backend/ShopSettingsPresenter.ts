@@ -1,3 +1,8 @@
+import {
+  CreateShopSettingsInputDTO,
+  UpdateShopSettingsInputDTO,
+} from "@/src/application/dtos/shop/backend/shop-settings-dto";
+import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type {
@@ -13,7 +18,6 @@ import { ShopStatus } from "@/src/domain/entities/backend/backend-shop.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { ShopInfo } from "../BaseShopPresenter";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
-import type { UpdateShopInputDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 // Define ViewModel interface
 export interface ShopSettingsViewModel {
   shop: ShopInfo;
@@ -135,7 +139,7 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   // CRUD Operations
   async updateShopSettings(
     shopId: string,
-    settings: Partial<ShopSettings>
+    settings: Partial<UpdateShopSettingsInputDTO>
   ): Promise<ShopSettings> {
     try {
       this.logger.info("ShopSettingsPresenter: Updating shop settings", {
@@ -157,7 +161,7 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   }
 
   async createShopSettings(
-    settings: Omit<ShopSettings, "id" | "createdAt" | "updatedAt">
+    settings: Omit<CreateShopSettingsInputDTO, "id" | "createdAt" | "updatedAt">
   ): Promise<ShopSettings> {
     try {
       this.logger.info("ShopSettingsPresenter: Creating shop settings", {
@@ -246,15 +250,12 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
   async updateShop(data: UpdateShopInputDTO): Promise<void> {
     try {
       this.logger.info("ShopSettingsPresenter: Updating shop", {
-        data: { ...data, email: data.email ? '[REDACTED]' : undefined }
+        data: { ...data, email: data.email ? "[REDACTED]" : undefined },
       });
 
       await this.shopService.updateShop(data);
     } catch (error) {
-      this.logger.error(
-        "ShopSettingsPresenter: Error updating shop",
-        error
-      );
+      this.logger.error("ShopSettingsPresenter: Error updating shop", error);
       throw error;
     }
   }
