@@ -1,4 +1,4 @@
-import type { CreateShopInputDTO, GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO, UpdateShopInputDTO } from '@/src/application/dtos/shop/backend/shops-dto';
+import type { CreateShopInputDTO, GetShopsPaginatedInput, PaginatedShopsDTO, ShopDTO, ShopStatsDTO, ShopsDataDTO, UpdateShopInputDTO, UpdateShopStatusInputDTO } from '@/src/application/dtos/shop/backend/shops-dto';
 import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
 import { CreateShopUseCase } from '@/src/application/usecases/shop/backend/shops/CreateShopUseCase';
 import { DeleteShopUseCase } from '@/src/application/usecases/shop/backend/shops/DeleteShopUseCase';
@@ -18,6 +18,7 @@ export interface IShopService {
   getShopById(id: string): Promise<ShopDTO>;
   createShop(params: CreateShopInputDTO): Promise<ShopDTO>;
   updateShop(params: UpdateShopInputDTO): Promise<ShopDTO>;
+  updateShopStatus(params: UpdateShopStatusInputDTO): Promise<ShopDTO>;
   deleteShop(id: string): Promise<boolean>;
 }
 
@@ -143,6 +144,24 @@ export class ShopService implements IShopService {
       return result;
     } catch (error) {
       this.logger.error('Error deleting shop', { error, id });
+      throw error;
+    }
+  }
+
+  async updateShopStatus(params: UpdateShopStatusInputDTO): Promise<ShopDTO> {
+    try {
+      this.logger.info('Updating shop status', { params: { id: params.id, status: params.status } });
+
+      // Use the existing updateShopUseCase with the status parameter
+      const updateParams: UpdateShopInputDTO = {
+        id: params.id,
+        status: params.status
+      };
+
+      const result = await this.updateShopUseCase.execute(updateParams);
+      return result;
+    } catch (error) {
+      this.logger.error('Error updating shop status', { error, params: { id: params.id, status: params.status } });
       throw error;
     }
   }

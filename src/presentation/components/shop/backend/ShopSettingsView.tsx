@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
 import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
 
@@ -40,6 +41,7 @@ export function ShopSettingsView({
     exportShopSettings,
     importShopSettings,
     refreshShopSettings,
+    updateShopStatus,
 
     // State Actions
     setActiveCategory,
@@ -64,13 +66,36 @@ export function ShopSettingsView({
     handleResetToDefaults,
   } = useShopSettingsPresenter(shopId, initialViewModel);
 
+  // Shop status state (separate from form data since it's part of Shop entity, not ShopSettings)
+  const [shopStatus, setShopStatus] = useState<"open" | "closed">("open");
+  
+  // Initialize shop status from shop data
+  useEffect(() => {
+    if (viewModel.shop) {
+      // Map shop status from DTO to UI format
+      const shopStatus = viewModel.shop.status;
+      setShopStatus(shopStatus === "active" ? "open" : "closed");
+    }
+  }, [viewModel.shop, shopId]);
+
+  const handleShopStatusChange = async (newStatus: "open" | "closed") => {
+    try {
+      await updateShopStatus(newStatus);
+      // The shop status will be updated from the refreshed viewModel
+      // No need to manually setShopStatus as it will be updated from the useEffect
+    } catch (error) {
+      console.error("Failed to update shop status:", error);
+      // You could show an error message here
+    }
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     setSaveError(null);
     setFieldErrors({});
   };
 
-  if (!viewModel.settings) {
+  if (!viewModel || !viewModel.settings) {
     return (
       <div className="p-6 text-center">
         <div className="text-4xl mb-4">⚙️</div>
@@ -845,6 +870,59 @@ export function ShopSettingsView({
           {saveError}
         </div>
       )}
+
+      {/* Shop Status Toggle - Prominent Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 shadow-lg">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            สถานะการเปิดร้าน
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            ควบคุมสถานะการเปิด-ปิดร้านของคุณ
+          </p>
+        </div>
+        
+        <div className="flex justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-2 shadow-inner flex">
+            <button
+              onClick={() => handleShopStatusChange("open")}
+              className={`px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center gap-3 min-w-[140px] justify-center ${
+                shopStatus === "open"
+                  ? "bg-green-500 text-white shadow-lg transform scale-105"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+              } hover:shadow-md`}
+            >
+              <span className="text-2xl">🟢</span>
+              เปิดร้าน
+            </button>
+            
+            <button
+              onClick={() => handleShopStatusChange("closed")}
+              className={`px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center gap-3 min-w-[140px] justify-center ml-2 ${
+                shopStatus === "closed"
+                  ? "bg-red-500 text-white shadow-lg transform scale-105"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+              } hover:shadow-md`}
+            >
+              <span className="text-2xl">🔴</span>
+              ปิดร้าน
+            </button>
+          </div>
+        </div>
+        
+        <div className="text-center mt-6">
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+            shopStatus === "open"
+              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
+              : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+          }`}>
+            <span className={`w-2 h-2 rounded-full animate-pulse ${
+              shopStatus === "open" ? "bg-green-500" : "bg-red-500"
+            }`}></span>
+            สถานะปัจจุบัน: {shopStatus === "open" ? "เปิดร้าน" : "ปิดร้าน"}
+          </div>
+        </div>
+      </div>
 
       {/* Stats Cards */}
       {stats && (

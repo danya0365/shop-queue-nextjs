@@ -9,10 +9,13 @@ import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
+import { ShopStatus } from "@/src/domain/entities/backend/backend-shop.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
+import { ShopInfo } from "../BaseShopPresenter";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 // Define ViewModel interface
 export interface ShopSettingsViewModel {
+  shop: ShopInfo;
   settings: ShopSettings | null;
   stats: ShopSettingsStats | null;
   settingsCategories: Array<{
@@ -51,7 +54,8 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
       this.logger.info("ShopSettingsPresenter: Getting view model", { shopId });
 
       // Get settings and stats
-      const [settings, stats] = await Promise.all([
+      const [shop, settings, stats] = await Promise.all([
+        this.getShopInfo(shopId),
         this.shopBackendShopSettingsService.getShopSettings(shopId),
         this.shopBackendShopSettingsService
           .getShopSettingsStats(shopId)
@@ -112,6 +116,7 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
       ];
 
       return {
+        shop,
         settings,
         stats,
         settingsCategories,
@@ -203,6 +208,34 @@ export class ShopSettingsPresenter extends BaseShopBackendPresenter {
     } catch (error) {
       this.logger.error(
         "ShopSettingsPresenter: Error importing shop settings",
+        error
+      );
+      throw error;
+    }
+  }
+
+  async updateShopStatus(
+    shopId: string,
+    status: "open" | "closed"
+  ): Promise<void> {
+    try {
+      this.logger.info("ShopSettingsPresenter: Updating shop status", {
+        shopId,
+        status,
+      });
+
+      // Map the UI status to the ShopStatus enum
+      const shopStatus =
+        status === "open" ? ShopStatus.ACTIVE : ShopStatus.INACTIVE;
+
+      // Use the shopService to update the shop status
+      await this.shopService.updateShopStatus({
+        id: shopId,
+        status: shopStatus,
+      });
+    } catch (error) {
+      this.logger.error(
+        "ShopSettingsPresenter: Error updating shop status",
         error
       );
       throw error;

@@ -92,3 +92,11 @@ export interface GetShopsPaginatedInput {
 }
 
 export type PaginatedShopsDTO = PaginatedResult<ShopDTO>;
+
+/**
+ * Input DTO for updating shop status specifically
+ */
+export interface UpdateShopStatusInputDTO {
+  id: string;
+  status: ShopStatus;
+}

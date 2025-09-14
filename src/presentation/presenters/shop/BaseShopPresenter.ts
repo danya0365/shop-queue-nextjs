@@ -45,7 +45,7 @@ export abstract class BaseShopPresenter {
       openingHours: this.createOpeningHoursString(shop.openingHours),
       services: this.createServicesString(shop.services),
       servicesCount: shop.services.length,
-      isOpen: true,
+      isOpen: shop.status === "active",
       rating: 4.8,
       totalReviews: 256,
       status: shop.status,

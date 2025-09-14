@@ -12,6 +12,7 @@ interface UseShopSettingsActionsReturn {
   exportShopSettings: () => Promise<string>;
   importShopSettings: (data: string) => Promise<void>;
   refreshShopSettings: () => Promise<void>;
+  updateShopStatus: (status: "open" | "closed") => Promise<void>;
 }
 
 export function useShopSettingsActions(
@@ -109,6 +110,26 @@ export function useShopSettingsActions(
     await getShopSettings();
   }, [getShopSettings]);
 
+  const updateShopStatus = useCallback(async (status: "open" | "closed") => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const presenter = await ClientShopSettingsPresenterFactory.create();
+      await presenter.updateShopStatus(shopId, status);
+      
+      // Refresh the view model after update
+      const viewModel = await presenter.getViewModel(shopId);
+      setViewModel(viewModel);
+    } catch (error) {
+      setError("ไม่สามารถอัปเดตสถานะร้านได้ กรุณาลองใหม่อีกครั้ง");
+      console.error("Error updating shop status:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [shopId, setViewModel, setIsLoading, setError]);
+
   return {
     getShopSettings,
     updateShopSettings,
@@ -116,5 +137,6 @@ export function useShopSettingsActions(
     exportShopSettings,
     importShopSettings,
     refreshShopSettings,
+    updateShopStatus,
   };
 }

@@ -39,6 +39,7 @@ interface UseShopSettingsPresenterReturn {
   exportShopSettings: () => Promise<void>;
   importShopSettings: (data: string) => Promise<void>;
   refreshShopSettings: () => Promise<void>;
+  updateShopStatus: (status: "open" | "closed") => Promise<void>;
 
   // State Actions
   setActiveCategory: (category: string) => void;
@@ -130,6 +131,7 @@ export function useShopSettingsPresenter(
     exportShopSettings: exportShopSettingsInternal,
     importShopSettings,
     refreshShopSettings,
+    updateShopStatus,
   } = useShopSettingsActions(shopId, setViewModel, setIsLoading, setError);
 
   const updateShopSettings = useCallback(
@@ -476,6 +478,7 @@ export function useShopSettingsPresenter(
     exportShopSettings,
     importShopSettings,
     refreshShopSettings,
+    updateShopStatus,
 
     // State Actions
     setActiveCategory,
