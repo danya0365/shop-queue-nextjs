@@ -3,6 +3,7 @@ import { IProfileService } from "@/src/application/interfaces/profile-service.in
 import { IShopBackendPaymentsService } from "@/src/application/services/shop/backend/BackendPaymentsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -179,6 +180,32 @@ export class PaymentsPresenterFactory {
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const paymentsService =
       serverContainer.resolve<IShopBackendPaymentsService>(
+        "ShopBackendPaymentsService"
+      );
+    return new PaymentsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      paymentsService
+    );
+  }
+}
+
+export class ClientPaymentsPresenterFactory {
+  static async create(): Promise<PaymentsPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const paymentsService =
+      clientContainer.resolve<IShopBackendPaymentsService>(
         "ShopBackendPaymentsService"
       );
     return new PaymentsPresenter(

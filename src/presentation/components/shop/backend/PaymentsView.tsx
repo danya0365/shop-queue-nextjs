@@ -9,12 +9,14 @@ import { usePaymentsPresenter } from "@/src/presentation/presenters/shop/backend
 import { useState } from "react";
 
 interface PaymentsViewProps {
-  viewModel: PaymentsViewModel;
+  shopId: string;
+  initialViewModel?: PaymentsViewModel;
 }
 
-export function PaymentsView({ viewModel }: PaymentsViewProps) {
-  const [state, actions] = usePaymentsPresenter();
+export function PaymentsView({ shopId, initialViewModel }: PaymentsViewProps) {
+  const [state, actions] = usePaymentsPresenter(shopId, initialViewModel);
   const [searchTerm, setSearchTerm] = useState("");
+  const viewModel = state.viewModel;
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
@@ -74,6 +76,72 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
       minute: "2-digit",
     }).format(new Date(dateString));
   };
+
+  // Show loading only on initial load or when explicitly loading
+  if (state.loading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลการชำระเงิน...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (state.error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                เกิดข้อผิดพลาด
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {state.error}
+              </p>
+              <button
+                onClick={actions.refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have no view model and not loading, show empty state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-6xl mb-4">🔧</div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
+                ยังไม่มีข้อมูลการชำระเงิน
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 mb-4">
+                ข้อมูลการชำระเงินจะแสดงที่นี่เมื่อมีการสร้างการชำระเงิน
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -510,7 +578,7 @@ export function PaymentsView({ viewModel }: PaymentsViewProps) {
       </div>
 
       {/* Loading Overlay */}
-      {state.isLoading && (
+      {state.loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>

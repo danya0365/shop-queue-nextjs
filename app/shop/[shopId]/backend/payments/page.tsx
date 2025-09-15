@@ -48,7 +48,7 @@ export default async function PaymentsPage({ params }: PaymentsPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <PaymentsView viewModel={viewModel} />
+        <PaymentsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {
