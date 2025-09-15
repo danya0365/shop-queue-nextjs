@@ -5,15 +5,20 @@ import type {
   PostersViewModel,
   PosterTemplate,
 } from "@/src/presentation/presenters/shop/backend/PostersPresenter";
+import { usePostersPresenter } from "@/src/presentation/presenters/shop/backend/usePostersPresenter";
 import { useState } from "react";
 import { PaymentModal } from "../../pricing/PaymentModal";
 import { SubscriptionUpgradeButton } from "../../shared/SubscriptionUpgradeButton";
 
 interface PostersViewProps {
-  viewModel: PostersViewModel;
+  shopId: string;
+  initialViewModel: PostersViewModel;
 }
 
-export function PostersView({ viewModel }: PostersViewProps) {
+export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
+  const [state, actions] = usePostersPresenter(shopId, initialViewModel);
+  const viewModel = state.viewModel;
+  
   const [selectedTemplate, setSelectedTemplate] =
     useState<PosterTemplate | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -29,6 +34,70 @@ export function PostersView({ viewModel }: PostersViewProps) {
     customText: "",
   });
 
+  // Show loading only on initial load or when explicitly loading
+  if (state.isLoading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลโปสเตอร์...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (state.error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                เกิดข้อผิดพลาด
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{state.error}</p>
+              <button
+                onClick={actions.refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have no view model and not loading, show empty state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-6xl mb-4">📄</div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
+                ยังไม่มีข้อมูลโปสเตอร์
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 mb-4">
+                ข้อมูลโปสเตอร์จะแสดงที่นี่เมื่อมีการสร้างโปสเตอร์
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleTemplateSelect = (template: PosterTemplate) => {
     if (template.isPremium && !viewModel.userSubscription.isPremium) {
       alert("โปสเตอร์นี้ต้องสมัครแพ็คเกจ Premium เท่านั้น");
@@ -37,28 +106,44 @@ export function PostersView({ viewModel }: PostersViewProps) {
     setSelectedTemplate(template);
   };
 
-  const handleCreatePoster = () => {
+  const handleCreatePoster = async () => {
     if (!selectedTemplate) return;
 
-    const { usage, limits } = viewModel.userSubscription;
+    const success = await actions.createPoster({
+      templateId: selectedTemplate.id,
+      customization: {
+        customText: customization.customText || "",
+        showServices: customization.showServices || false,
+        showOpeningHours: customization.showOpeningHours || false,
+        showPhone: customization.showPhone || false,
+        showAddress: customization.showAddress || false,
+        qrCodeSize: customization.qrCodeSize || "medium",
+      },
+    });
 
-    // Check if user can create free poster
-    if (usage.canCreateFree || limits.hasUnlimitedPosters) {
-      handlePrint();
-      return;
+    if (success) {
+      setShowPreview(false);
+      // Reset selection
+      setSelectedTemplate(null);
+      setCustomization({
+        showServices: true,
+        showOpeningHours: true,
+        showPhone: true,
+        showAddress: true,
+        qrCodeSize: "medium",
+        customText: "",
+      });
     }
+  };
 
-    // Show payment modal for paid poster
-    setShowPaymentModal(true);
+  const handlePrint = () => {
+    // For free posters, just create without payment
+    handleCreatePoster();
   };
 
   const handlePreview = () => {
     if (!selectedTemplate) return;
     setShowPreview(true);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const getCategoryIcon = (category: string) => {

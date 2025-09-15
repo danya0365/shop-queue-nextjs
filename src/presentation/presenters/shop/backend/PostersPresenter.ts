@@ -3,6 +3,7 @@ import type { IAuthService } from '@/src/application/interfaces/auth-service.int
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
+import { getClientContainer } from '@/src/di/client-container';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopInfo } from '../BaseShopPresenter';
@@ -366,6 +367,18 @@ export class PostersPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
+    return new PostersPresenter(logger, shopService, authService, profileService, subscriptionService);
+  }
+}
+
+export class ClientPostersPresenterFactory {
+  static async create(): Promise<PostersPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>("SubscriptionService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService = clientContainer.resolve<IProfileService>("ProfileService");
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
     return new PostersPresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }

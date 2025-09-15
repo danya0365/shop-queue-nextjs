@@ -48,7 +48,7 @@ export default async function PostersPage({ params }: PostersPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <PostersView viewModel={viewModel} />
+        <PostersView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {
