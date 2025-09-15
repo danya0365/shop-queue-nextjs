@@ -918,16 +918,18 @@ export function QueueManagementView({
       </div>
 
       {/* Edit Queue Modal */}
-      <EditQueueModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setSelectedQueue(null);
-        }}
-        queue={selectedQueue}
-        onSave={handleUpdateQueue}
-        isLoading={actionLoading.updateQueue}
-      />
+      {selectedQueue ? (
+        <EditQueueModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedQueue(null);
+          }}
+          queue={selectedQueue}
+          onSave={handleUpdateQueue}
+          isLoading={actionLoading.updateQueue}
+        />
+      ) : null}
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

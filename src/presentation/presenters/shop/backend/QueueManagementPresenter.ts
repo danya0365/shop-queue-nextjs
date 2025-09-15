@@ -27,6 +27,7 @@ export interface QueueItem {
   createdAt: string;
   notes?: string;
   services: string[];
+  shopId: string;
 }
 
 export interface QueueFilter {
@@ -155,6 +156,7 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       // Map QueueDTO to QueueItem
       const queues: QueueItem[] = queueDTOs.map((queue) => ({
         id: queue.id,
+        shopId: queue.shopId,
         queueNumber: queue.queueNumber,
         customerName: queue.customerName,
         customerPhone: queue.customerPhone,
@@ -214,65 +216,6 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       );
       throw error;
     }
-  }
-
-  // Private methods for data preparation
-  private getQueueData(): QueueItem[] {
-    return [
-      {
-        id: "1",
-        queueNumber: "A015",
-        customerName: "สมชาย ใจดี",
-        customerPhone: "081-234-5678",
-        status: "waiting",
-        priority: "normal",
-        estimatedTime: 10,
-        createdAt: "10:30",
-        services: ["กาแฟ", "ขนมปัง"],
-      },
-      {
-        id: "2",
-        queueNumber: "A016",
-        customerName: "สมหญิง รักดี",
-        customerPhone: "082-345-6789",
-        status: "serving",
-        priority: "high",
-        estimatedTime: 5,
-        createdAt: "10:35",
-        services: ["กาแฟพิเศษ", "เค้ก"],
-        notes: "ลูกค้า VIP",
-      },
-      {
-        id: "3",
-        queueNumber: "A017",
-        customerName: "สมศรี มีสุข",
-        customerPhone: "083-456-7890",
-        status: "waiting",
-        priority: "vip",
-        estimatedTime: 15,
-        createdAt: "10:40",
-        services: ["เซ็ตอาหารเช้า"],
-      },
-      {
-        id: "4",
-        queueNumber: "A014",
-        customerName: "สมปอง ดีใจ",
-        customerPhone: "084-567-8901",
-        status: "completed",
-        priority: "normal",
-        estimatedTime: 0,
-        createdAt: "10:15",
-        services: ["กาแฟ"],
-      },
-    ];
-  }
-
-  private calculateStats(queues: QueueItem[]) {
-    return {
-      waiting: queues.filter((q) => q.status === "waiting").length,
-      serving: queues.filter((q) => q.status === "serving").length,
-      completed: queues.filter((q) => q.status === "completed").length,
-    };
   }
 
   // Metadata generation

@@ -1,12 +1,13 @@
 "use client";
 
+import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
 import { QueueItem } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
 import { useState } from "react";
 
 interface EditQueueModalProps {
   isOpen: boolean;
   onClose: () => void;
-  queue: QueueItem | null;
+  queue: QueueItem;
   onSave: (
     queueId: string,
     data: {
@@ -18,17 +19,6 @@ interface EditQueueModalProps {
   isLoading?: boolean;
 }
 
-// Mock services data - ในอนาคตควรดึงจาก service จริง
-const mockServices = [
-  { id: "1", name: "กาแฟ", price: 50 },
-  { id: "2", name: "กาแฟพิเศษ", price: 70 },
-  { id: "3", name: "เค้ก", price: 80 },
-  { id: "4", name: "ขนมปัง", price: 30 },
-  { id: "5", name: "เซ็ตอาหารเช้า", price: 120 },
-  { id: "6", name: "ชาเย็น", price: 40 },
-  { id: "7", name: "น้ำผลไม้", price: 60 },
-];
-
 export function EditQueueModal({
   isOpen,
   onClose,
@@ -37,18 +27,23 @@ export function EditQueueModal({
   isLoading = false,
 }: EditQueueModalProps) {
   const [selectedServices, setSelectedServices] = useState<string[]>(
-    queue?.services || []
+    queue.services || []
   );
   const [priority, setPriority] = useState<"normal" | "high" | "vip">(
-    queue?.priority || "normal"
+    queue.priority || "normal"
   );
-  const [notes, setNotes] = useState(queue?.notes || "");
+  const [notes, setNotes] = useState(queue.notes || "");
   const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { services, loading: servicesLoading } = useServices(queue.shopId);
 
   if (!isOpen || !queue) return null;
 
-  const filteredServices = mockServices.filter((service) =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = services.filter(
+    (service) =>
+      service.isAvailable &&
+      service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleServiceToggle = (serviceName: string) => {
@@ -57,13 +52,28 @@ export function EditQueueModal({
         ? prev.filter((s) => s !== serviceName)
         : [...prev, serviceName]
     );
+
+    // Clear service error when user selects a service
+    if (errors.services) {
+      setErrors((prev) => ({ ...prev, services: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (selectedServices.length === 0) {
+      newErrors.services = "กรุณาเลือกอย่างน้อย 1 บริการ";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (selectedServices.length === 0) {
-      alert("กรุณาเลือกอย่างน้อย 1 บริการ");
+    if (!validateForm()) {
       return;
     }
 
@@ -102,11 +112,20 @@ export function EditQueueModal({
     }
   };
 
+  const calculateTotalPrice = () => {
+    return selectedServices.reduce((total, serviceId) => {
+      const service = services.find((s) => s.id === serviceId);
+      return total + (service?.price || 0);
+    }, 0);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">แก้ไขคิว #{queue.queueNumber}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            แก้ไขคิว #{queue.queueNumber}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
@@ -131,15 +150,25 @@ export function EditQueueModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Info (Read-only) */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">ข้อมูลลูกค้า</h3>
+            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              ข้อมูลลูกค้า
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-400">ชื่อลูกค้า</label>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{queue.customerName}</p>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  ชื่อลูกค้า
+                </label>
+                <p className="font-medium text-gray-900 dark:text-gray-100">
+                  {queue.customerName}
+                </p>
               </div>
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-400">เบอร์โทร</label>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{queue.customerPhone}</p>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  เบอร์โทร
+                </label>
+                <p className="font-medium text-gray-900 dark:text-gray-100">
+                  {queue.customerPhone}
+                </p>
               </div>
             </div>
           </div>
@@ -158,35 +187,88 @@ export function EditQueueModal({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={servicesLoading}
               />
             </div>
 
             {/* Services Grid */}
-            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-3">
-              {filteredServices.map((service) => (
-                <label
-                  key={service.id}
-                  className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedServices.includes(service.name)}
-                    onChange={() => handleServiceToggle(service.name)}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    disabled={isLoading}
-                  />
-                  <span className="flex-1">{service.name}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    ฿{service.price}
+            <div
+              className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
+                errors.services
+                  ? "border-red-500"
+                  : "border-gray-200 dark:border-gray-600"
+              }`}
+            >
+              {servicesLoading ? (
+                <div className="col-span-2 flex items-center justify-center py-8">
+                  <svg
+                    className="animate-spin h-6 w-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                    กำลังโหลดบริการ...
                   </span>
-                </label>
-              ))}
+                </div>
+              ) : filteredServices.length === 0 ? (
+                <div className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                  ไม่พบบริการที่ตรงกับการค้นหา
+                </div>
+              ) : (
+                filteredServices.map((service) => (
+                  <label
+                    key={service.id}
+                    className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedServices.includes(service.id)}
+                      onChange={() => handleServiceToggle(service.id)}
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                      disabled={isLoading || servicesLoading}
+                    />
+                    <span className="flex-1">{service.name}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      ฿{service.price}
+                    </span>
+                  </label>
+                ))
+              )}
             </div>
 
-            {selectedServices.length === 0 && (
-              <p className="text-sm text-red-500 mt-1">
-                กรุณาเลือกอย่างน้อย 1 บริการ
-              </p>
+            {errors.services && (
+              <p className="text-sm text-red-500 mt-1">{errors.services}</p>
+            )}
+
+            {/* Selected Services Summary */}
+            {selectedServices.length > 0 && (
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                    บริการที่เลือก ({selectedServices.length})
+                  </span>
+                  <span className="text-sm font-bold text-blue-900 dark:text-blue-200">
+                    รวม: ฿{calculateTotalPrice()}
+                  </span>
+                </div>
+                <div className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                  {selectedServices.join(", ")}
+                </div>
+              </div>
             )}
           </div>
 
