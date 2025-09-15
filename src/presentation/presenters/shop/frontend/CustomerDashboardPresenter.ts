@@ -6,7 +6,7 @@ import {
   ShopInfo,
 } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
-export interface QueueStatus {
+export interface QueueStatusStats {
   currentNumber: string;
   totalWaiting: number;
   estimatedWaitTime: number;
@@ -34,7 +34,7 @@ export interface Promotion {
 // Define ViewModel interface
 export interface CustomerDashboardViewModel {
   shopInfo: ShopInfo;
-  queueStatus: QueueStatus;
+  queueStatus: QueueStatusStats;
   popularServices: PopularService[];
   promotions: Promotion[];
   canJoinQueue: boolean;
@@ -77,7 +77,7 @@ export class CustomerDashboardPresenter extends BaseShopPresenter {
     }
   }
 
-  private getQueueStatus(): QueueStatus {
+  private getQueueStatus(): QueueStatusStats {
     return {
       currentNumber: "A016",
       totalWaiting: 12,

@@ -1,22 +1,33 @@
-import { AutoAssignQueueInput, AutoAssignQueueResult } from '@/src/application/dtos/shop/backend/queue-advanced-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { ILogger } from '@/src/application/interfaces/logger.interface';
-import { QueueEntity } from '@/src/domain/entities/shop/backend/backend-queue.entity';
-import { ShopBackendQueueError, ShopBackendQueueErrorType } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
-import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
-import { ShopBackendEmployeeRepository } from '@/src/domain/repositories/shop/backend/backend-employee-repository';
-import { EmployeeEntity, EmployeeStatus } from '@/src/domain/entities/shop/backend/backend-employee.entity';
+import {
+  AutoAssignQueueInput,
+  AutoAssignQueueResult,
+} from "@/src/application/dtos/shop/backend/queue-advanced-dto";
+import { ILogger } from "@/src/application/interfaces/logger.interface";
+import { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import {
+  EmployeeEntity,
+  EmployeeStatus,
+} from "@/src/domain/entities/shop/backend/backend-employee.entity";
+import { QueueEntity } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { ShopBackendEmployeeRepository } from "@/src/domain/repositories/shop/backend/backend-employee-repository";
+import {
+  ShopBackendQueueError,
+  ShopBackendQueueErrorType,
+  ShopBackendQueueRepository,
+} from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 
 /**
  * Use case for automatically assigning queues to employees
  * Following SOLID principles and Clean Architecture
  */
-export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, AutoAssignQueueResult> {
+export class AutoAssignQueueUseCase
+  implements IUseCase<AutoAssignQueueInput, AutoAssignQueueResult>
+{
   constructor(
     private readonly queueRepository: ShopBackendQueueRepository,
     private readonly employeeRepository: ShopBackendEmployeeRepository,
     private readonly logger: ILogger
-  ) { }
+  ) {}
 
   /**
    * Execute the use case to auto-assign a queue
@@ -27,23 +38,23 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
     try {
       // Validate input
       if (!input.queueId) {
-        throw new Error('Queue ID is required');
+        throw new Error("Queue ID is required");
       }
 
       if (!input.shopId) {
-        throw new Error('Shop ID is required');
+        throw new Error("Shop ID is required");
       }
 
-      this.logger.info('Starting auto-assign queue', { 
+      this.logger.info("Starting auto-assign queue", {
         queueId: input.queueId,
         shopId: input.shopId,
-        strategy: input.strategy || 'load-balancing'
+        strategy: input.strategy || "load-balancing",
       });
 
       // Get the queue to be assigned
       const queue = await this.queueRepository.getQueueById(input.queueId);
       if (!queue) {
-        throw new Error('Queue not found');
+        throw new Error("Queue not found");
       }
 
       // Validate queue can be assigned
@@ -51,16 +62,23 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
 
       // Get available employees
       const availableEmployees = await this.getAvailableEmployees(input.shopId);
-      
+
       if (availableEmployees.length === 0) {
-        throw new Error('No available employees found');
+        throw new Error("No available employees found");
       }
 
       // Select the best employee using the specified strategy
-      const selectedEmployee = this.applyAssignmentStrategy(availableEmployees, queue, input.strategy);
+      const selectedEmployee = this.applyAssignmentStrategy(
+        availableEmployees,
+        queue,
+        input.strategy
+      );
 
       // Assign the queue to the selected employee
-      const updatedQueue = await this.assignQueueToEmployee(queue, selectedEmployee);
+      const updatedQueue = await this.assignQueueToEmployee(
+        queue,
+        selectedEmployee
+      );
 
       const result: AutoAssignQueueResult = {
         success: true,
@@ -68,27 +86,31 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
         queueId: input.queueId,
         assignedEmployeeId: selectedEmployee.id,
         assignedEmployeeName: selectedEmployee.name,
-        strategy: input.strategy || 'load-balancing',
-        assignmentReason: `Queue successfully assigned to ${selectedEmployee.name}`
+        strategy: input.strategy || "load-balancing",
+        assignmentReason: `Queue successfully assigned to ${selectedEmployee.name}`,
       };
 
-      this.logger.info('Auto-assign queue completed', { 
+      this.logger.info("Auto-assign queue completed", {
         result: {
           queueId: result.queueId,
           assignedEmployeeId: result.assignedEmployeeId,
           assignedEmployeeName: result.assignedEmployeeName,
-          strategy: result.strategy
+          strategy: result.strategy,
         },
         updatedQueue: {
           id: updatedQueue.id,
           status: updatedQueue.status,
-          servedByEmployeeId: updatedQueue.servedByEmployeeId
-        }
+          servedByEmployeeId: updatedQueue.servedByEmployeeId,
+        },
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to auto-assign queue', error instanceof Error ? error : undefined, { input });
+      this.logger.error(
+        "Failed to auto-assign queue",
+        error instanceof Error ? error : undefined,
+        { input }
+      );
 
       if (error instanceof ShopBackendQueueError) {
         throw error;
@@ -96,8 +118,8 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
 
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.OPERATION_FAILED,
-        'Failed to auto-assign queue',
-        'autoAssignQueue',
+        "Failed to auto-assign queue",
+        "autoAssignQueue",
         { input },
         error
       );
@@ -112,11 +134,11 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
   private validateQueueForAssignment(queue: QueueEntity): void {
     // Check if queue is already assigned
     if (queue.servedByEmployeeId) {
-      throw new Error('Queue is already assigned to an employee');
+      throw new Error("Queue is already assigned to an employee");
     }
 
     // Check if queue is in a state that can be assigned
-    if (queue.status !== 'waiting') {
+    if (queue.status !== "waiting") {
       throw new Error(`Cannot assign queue with status: ${queue.status}`);
     }
   }
@@ -139,27 +161,31 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
         limit: 100,
         filters: {
           departmentFilter: departmentId,
-          statusFilter: 'active'
-        }
+          statusFilter: "active",
+        },
       });
 
       // Filter employees based on availability and skills
-      return employees.data.filter(employee => {
+      return employees.data.filter((employee) => {
         // Check if employee is currently available (not overloaded)
         const isAvailable = this.isEmployeeAvailable(employee);
-        
+
         // Check if employee has required skills
-        const hasRequiredSkills = requiredSkills 
+        const hasRequiredSkills = requiredSkills
           ? this.employeeHasRequiredSkills(employee, requiredSkills)
           : true;
 
         return isAvailable && hasRequiredSkills;
       });
     } catch (error) {
-      this.logger.error('Failed to get available employees', error instanceof Error ? error : undefined, { 
-        shopId, 
-        departmentId 
-      });
+      this.logger.error(
+        "Failed to get available employees",
+        error instanceof Error ? error : undefined,
+        {
+          shopId,
+          departmentId,
+        }
+      );
       throw error;
     }
   }
@@ -197,7 +223,10 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
    * @param requiredSkills Required skills
    * @returns True if employee has all required skills
    */
-  private employeeHasRequiredSkills(_employee: EmployeeEntity, _requiredSkills: string[]): boolean {
+  private employeeHasRequiredSkills(
+    _employee: EmployeeEntity,
+    _requiredSkills: string[]
+  ): boolean {
     // For now, we'll assume all employees have the required skills since we don't have skills in EmployeeEntity
     // In a real implementation, you would check employee permissions or skills here
     return true;
@@ -216,13 +245,13 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
     strategy: string
   ): EmployeeEntity {
     switch (strategy) {
-      case 'load-balancing':
+      case "load-balancing":
         return this.selectByLoadBalancing(employees);
-      case 'priority':
+      case "priority":
         return this.selectByPriority(employees, queue);
-      case 'round-robin':
+      case "round-robin":
         return this.selectByRoundRobin(employees);
-      case 'skills':
+      case "skills":
         return this.selectBySkills(employees, queue);
       default:
         return this.selectByLoadBalancing(employees);
@@ -246,7 +275,10 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
    * @param queue Queue to assign
    * @returns Selected employee
    */
-  private selectByPriority(employees: EmployeeEntity[], _queue: QueueEntity): EmployeeEntity {
+  private selectByPriority(
+    employees: EmployeeEntity[],
+    _queue: QueueEntity
+  ): EmployeeEntity {
     // For priority-based assignment, we can assign to employees who handle high-priority queues well
     // This is a simplified version - in reality, you might track employee performance with different priority levels
     // For now, just return the first employee
@@ -272,7 +304,10 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
    * @param queue Queue to assign
    * @returns Selected employee
    */
-  private selectBySkills(employees: EmployeeEntity[], queue: QueueEntity): EmployeeEntity {
+  private selectBySkills(
+    employees: EmployeeEntity[],
+    queue: QueueEntity
+  ): EmployeeEntity {
     // For now, just return the first employee since we don't have skills in EmployeeEntity
     // In a real implementation, you would match employee skills with queue services
     return employees[0];
@@ -284,21 +319,31 @@ export class AutoAssignQueueUseCase implements IUseCase<AutoAssignQueueInput, Au
    * @param employee Employee to assign
    * @returns Updated queue
    */
-  private async assignQueueToEmployee(queue: QueueEntity, employee: EmployeeEntity): Promise<QueueEntity> {
+  private async assignQueueToEmployee(
+    queue: QueueEntity,
+    employee: EmployeeEntity
+  ): Promise<QueueEntity> {
     try {
       const updateData = {
         servedByEmployeeId: employee.id,
-        status: 'in_progress' as const,
-        calledAt: new Date().toISOString()
+        status: "serving" as const,
+        calledAt: new Date().toISOString(),
       };
 
-      const updatedQueue = await this.queueRepository.updateQueue(queue.id, updateData);
+      const updatedQueue = await this.queueRepository.updateQueue(
+        queue.id,
+        updateData
+      );
       return updatedQueue;
     } catch (error) {
-      this.logger.error('Failed to assign queue to employee', error instanceof Error ? error : undefined, { 
-        queueId: queue.id, 
-        employeeId: employee.id 
-      });
+      this.logger.error(
+        "Failed to assign queue to employee",
+        error instanceof Error ? error : undefined,
+        {
+          queueId: queue.id,
+          employeeId: employee.id,
+        }
+      );
       throw error;
     }
   }

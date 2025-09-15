@@ -29,7 +29,7 @@ SELECT
     COALESCE(queue_stats.completed_queues, 0) AS completed_queues,
     COALESCE(queue_stats.cancelled_queues, 0) AS cancelled_queues,
     COALESCE(queue_stats.high_priority_queues, 0) AS high_priority_queues,
-    COALESCE(queue_stats.vip_queues, 0) AS vip_queues,
+    COALESCE(queue_stats.urgent_priority_queues, 0) AS urgent_priority_queues,
     
     -- สถิติคิววันนี้
     COALESCE(today_queue_stats.today_total_queues, 0) AS today_total_queues,
@@ -114,7 +114,7 @@ LEFT JOIN (
         COUNT(*) FILTER (WHERE status = 'completed') AS completed_queues,
         COUNT(*) FILTER (WHERE status = 'cancelled') AS cancelled_queues,
         COUNT(*) FILTER (WHERE priority = 'high') AS high_priority_queues,
-        COUNT(*) FILTER (WHERE priority = 'vip') AS vip_queues
+        COUNT(*) FILTER (WHERE priority = 'urgent') AS urgent_priority_queues
     FROM queues
     GROUP BY shop_id
 ) queue_stats ON s.id = queue_stats.shop_id

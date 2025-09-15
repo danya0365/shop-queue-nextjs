@@ -1,3 +1,4 @@
+import { QueueDTO } from "@/src/application/dtos/backend/queues-dto";
 import {
   SubscriptionLimits,
   UsageStatsDto,
@@ -10,24 +11,15 @@ import { ISubscriptionService } from "@/src/application/services/subscription/Su
 import { getClientContainer } from "@/src/di/client-container";
 import { Container } from "@/src/di/container";
 import { getServerContainer } from "@/src/di/server-container";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { ShopInfo } from "../BaseShopPresenter";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define interfaces for data structures
-export interface QueueItem {
-  id: string;
-  queueNumber: string;
-  customerName: string;
-  customerPhone: string;
-  status: "waiting" | "confirmed" | "serving" | "completed" | "cancelled";
-  priority: "normal" | "high" | "vip";
-  estimatedTime: number;
-  createdAt: string;
-  notes?: string;
-  services: string[];
-  shopId: string;
+export interface QueueItem extends QueueDTO {
+  serviceNames: string[];
 }
 
 export interface QueueFilter {
@@ -155,22 +147,8 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
 
       // Map QueueDTO to QueueItem
       const queues: QueueItem[] = queueDTOs.map((queue) => ({
-        id: queue.id,
-        shopId: queue.shopId,
-        queueNumber: queue.queueNumber,
-        customerName: queue.customerName,
-        customerPhone: queue.customerPhone,
-        status:
-          queue.status === "in_progress"
-            ? "serving"
-            : queue.status === "no_show"
-            ? "cancelled"
-            : queue.status,
-        priority: queue.priority === "urgent" ? "vip" : queue.priority,
-        estimatedTime: queue.estimatedWaitTime,
-        createdAt: queue.createdAt,
-        notes: queue.notes,
-        services: queue.queueServices.map((qs) => qs.serviceName),
+        ...queue,
+        serviceNames: queue.queueServices.map((qs) => qs.serviceName),
       }));
 
       const totalPages = Math.ceil(totalCount / responsePerPage);
@@ -231,7 +209,7 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
   async updateQueueStatus(
     shopId: string,
     queueId: string,
-    status: "waiting" | "confirmed" | "serving" | "completed" | "cancelled"
+    status: QueueStatus
   ) {
     try {
       this.logger.info("QueueManagementPresenter: Updating queue status", {
@@ -250,19 +228,9 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
         throw new Error("Profile not found");
       }
 
-      // Map UI status to backend status
-      const backendStatus =
-        status === "serving"
-          ? "in_progress"
-          : status === "cancelled"
-          ? "no_show"
-          : status === "confirmed"
-          ? "waiting"
-          : status;
-
       const result = await this.backendQueuesService.updateQueueStatus({
         queueId,
-        status: backendStatus,
+        status,
         shopId,
       });
 

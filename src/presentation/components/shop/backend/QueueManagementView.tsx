@@ -1,11 +1,16 @@
 "use client";
 
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import {
   QueueItem,
   QueueManagementViewModel,
 } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
-import { useQueueManagementPresenter } from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
+import {
+  PriorityFilter,
+  StatusFilter,
+  useQueueManagementPresenter,
+} from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
 import { useState } from "react";
 import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -99,7 +104,7 @@ export function QueueManagementView({
     viewModel;
   const { data: queueData, pagination } = queues;
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: QueueItem["status"]) => {
     switch (status) {
       case "waiting":
         return "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200";
@@ -116,11 +121,11 @@ export function QueueManagementView({
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: QueueItem["priority"]) => {
     switch (priority) {
       case "high":
         return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
-      case "vip":
+      case "urgent":
         return "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200";
       default:
         return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
@@ -144,12 +149,12 @@ export function QueueManagementView({
     }
   };
 
-  const getPriorityText = (priority: string) => {
+  const getPriorityText = (priority: QueueItem["priority"]) => {
     switch (priority) {
       case "high":
-        return "สำคัญ";
-      case "vip":
-        return "VIP";
+        return "สูง";
+      case "urgent":
+        return "ด่วน";
       case "normal":
         return "ปกติ";
       default:
@@ -167,7 +172,7 @@ export function QueueManagementView({
     queueId: string,
     data: {
       services: string[];
-      priority: "normal" | "high" | "vip";
+      priority: QueueItem["priority"];
       notes?: string;
     }
   ) => {
@@ -178,7 +183,10 @@ export function QueueManagementView({
     });
   };
 
-  const handleStatusUpdate = async (queueId: string, newStatus: string) => {
+  const handleStatusUpdate = async (
+    queueId: string,
+    newStatus: QueueStatus
+  ) => {
     try {
       await updateQueueStatus(queueId, newStatus);
     } catch (error) {
@@ -456,7 +464,9 @@ export function QueueManagementView({
                 </label>
                 <select
                   value={filters.status}
-                  onChange={(e) => handleStatusFilter(e.target.value)}
+                  onChange={(e) =>
+                    handleStatusFilter(e.target.value as StatusFilter)
+                  }
                   className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">ทั้งหมด</option>
@@ -474,13 +484,15 @@ export function QueueManagementView({
                 </label>
                 <select
                   value={filters.priority}
-                  onChange={(e) => handlePriorityFilter(e.target.value)}
+                  onChange={(e) =>
+                    handlePriorityFilter(e.target.value as PriorityFilter)
+                  }
                   className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">ทั้งหมด</option>
                   <option value="normal">ปกติ</option>
                   <option value="high">สำคัญ</option>
-                  <option value="vip">VIP</option>
+                  <option value="urgent">ด่วน</option>
                 </select>
               </div>
             </div>
@@ -635,7 +647,7 @@ export function QueueManagementView({
                           {queue.customerPhone}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          บริการ: {queue.services.join(", ")}
+                          บริการ: {queue.serviceNames.join(", ")}
                         </p>
                         {queue.notes && (
                           <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
@@ -653,9 +665,9 @@ export function QueueManagementView({
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {queue.createdAt}
                         </p>
-                        {queue.estimatedTime > 0 && (
+                        {queue.estimatedWaitTime > 0 && (
                           <p className="text-xs text-orange-600 dark:text-orange-400">
-                            รอ ~{queue.estimatedTime} นาที
+                            รอ ~{queue.estimatedWaitTime} นาที
                           </p>
                         )}
                       </div>
@@ -665,7 +677,10 @@ export function QueueManagementView({
                           <>
                             <button
                               onClick={() =>
-                                handleStatusUpdate(queue.id, "confirmed")
+                                handleStatusUpdate(
+                                  queue.id,
+                                  QueueStatus.CONFIRMED
+                                )
                               }
                               disabled={actionLoading.updateStatus}
                               className="bg-green-500 dark:bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -674,7 +689,10 @@ export function QueueManagementView({
                             </button>
                             <button
                               onClick={() =>
-                                handleStatusUpdate(queue.id, "serving")
+                                handleStatusUpdate(
+                                  queue.id,
+                                  QueueStatus.SERVING
+                                )
                               }
                               disabled={actionLoading.updateStatus}
                               className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
@@ -686,7 +704,10 @@ export function QueueManagementView({
                         {queue.status === "serving" && (
                           <button
                             onClick={() =>
-                              handleStatusUpdate(queue.id, "completed")
+                              handleStatusUpdate(
+                                queue.id,
+                                QueueStatus.COMPLETED
+                              )
                             }
                             disabled={actionLoading.updateStatus}
                             className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"

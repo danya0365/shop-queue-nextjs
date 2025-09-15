@@ -31,8 +31,14 @@ export interface CreateQueueEntity {
   customerId: string;
   shopId: string;
   queueNumber: number;
-  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority: 'normal' | 'high' | 'urgent';
+  status:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  priority: "normal" | "high" | "urgent";
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
@@ -47,8 +53,14 @@ export interface CreateQueueEntity {
  */
 export interface UpdateQueueEntity {
   queueNumber?: number;
-  status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority?: 'normal' | 'high' | 'urgent';
+  status?:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  priority?: "normal" | "high" | "urgent";
   estimatedWaitTime?: number;
   actualWaitTime?: number;
   notes?: string;
@@ -74,20 +86,21 @@ export interface QueueServiceEntity {
  * Queue status enum
  */
 export enum QueueStatus {
-  WAITING = 'waiting',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  NO_SHOW = 'no_show'
+  WAITING = "waiting",
+  CONFIRMED = "confirmed",
+  SERVING = "serving",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  NO_SHOW = "no_show",
 }
 
 /**
  * Queue priority enum
  */
 export enum QueuePriority {
-  NORMAL = 'normal',
-  HIGH = 'high',
-  URGENT = 'urgent'
+  NORMAL = "normal",
+  HIGH = "high",
+  URGENT = "urgent",
 }
 
 /**
@@ -101,17 +114,17 @@ export interface QueueStatsEntity {
   inProgressQueueToday: number;
   totalCompletedToday: number;
   totalCancelledToday: number;
-  
+
   // All-time statistics
   allQueueTotal: number;
   allWaitingQueue: number;
   allInProgressQueue: number;
   allCompletedTotal: number;
   allCancelledTotal: number;
-  
+
   // Performance metrics
   avgWaitTimeMinutes: number;
-  
+
   // Shop-specific data (optional)
   shopId?: string;
 }

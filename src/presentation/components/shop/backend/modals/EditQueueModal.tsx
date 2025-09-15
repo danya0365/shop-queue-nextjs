@@ -2,7 +2,7 @@
 
 import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
 import { QueueItem } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface EditQueueModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface EditQueueModalProps {
     queueId: string,
     data: {
       services: string[];
-      priority: "normal" | "high" | "vip";
+      priority: QueueItem["priority"];
       notes?: string;
     }
   ) => Promise<void>;
@@ -26,17 +26,26 @@ export function EditQueueModal({
   onSave,
   isLoading = false,
 }: EditQueueModalProps) {
-  const [selectedServices, setSelectedServices] = useState<string[]>(
-    queue.services || []
-  );
-  const [priority, setPriority] = useState<"normal" | "high" | "vip">(
-    queue.priority || "normal"
-  );
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [priority, setPriority] = useState(queue.priority);
   const [notes, setNotes] = useState(queue.notes || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { services, loading: servicesLoading } = useServices(queue.shopId);
+
+  // Effect to set initial selected services when services are loaded
+  useEffect(() => {
+    if (!servicesLoading && services.length > 0) {
+      // Filter and set only services that exist in the available services list
+      const validSelectedServices = queue.queueServices.filter((queueService) =>
+        services.some((service) => service.id === queueService.serviceId)
+      );
+      setSelectedServices(
+        validSelectedServices.map((queueService) => queueService.serviceId)
+      );
+    }
+  }, [servicesLoading, services, queue.queueServices]);
 
   if (!isOpen || !queue) return null;
 
@@ -90,23 +99,23 @@ export function EditQueueModal({
     }
   };
 
-  const getPriorityColor = (pri: "normal" | "high" | "vip") => {
+  const getPriorityColor = (pri: "normal" | "high" | "urgent") => {
     switch (pri) {
       case "high":
         return "text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30";
-      case "vip":
+      case "urgent":
         return "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30";
       default:
         return "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700";
     }
   };
 
-  const getPriorityText = (pri: "normal" | "high" | "vip") => {
+  const getPriorityText = (pri: "normal" | "high" | "urgent") => {
     switch (pri) {
       case "high":
         return "สูง";
-      case "vip":
-        return "VIP";
+      case "urgent":
+        return "ด่วน";
       default:
         return "ปกติ";
     }
@@ -278,7 +287,7 @@ export function EditQueueModal({
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
-              {(["normal", "high", "vip"] as const).map((pri) => (
+              {(["normal", "high", "urgent"] as const).map((pri) => (
                 <label
                   key={pri}
                   className="flex items-center space-x-2 cursor-pointer"

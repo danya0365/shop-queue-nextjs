@@ -35,7 +35,13 @@ export interface CreateQueueEntity {
   customerEmail?: string;
   shopId: string;
   queueNumber: number;
-  status: "waiting" | "in_progress" | "completed" | "cancelled" | "no_show";
+  status:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
   priority: "normal" | "high" | "urgent";
   estimatedWaitTime: number;
   notes?: string;
@@ -51,7 +57,13 @@ export interface CreateQueueEntity {
  */
 export interface UpdateQueueEntity {
   queueNumber?: number;
-  status?: "waiting" | "in_progress" | "completed" | "cancelled" | "no_show";
+  status?:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
   priority?: "normal" | "high" | "urgent";
   estimatedWaitTime?: number;
   actualWaitTime?: number;
@@ -82,7 +94,8 @@ export interface QueueServiceEntity {
  */
 export enum QueueStatus {
   WAITING = "waiting",
-  IN_PROGRESS = "in_progress",
+  CONFIRMED = "confirmed",
+  SERVING = "serving",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
   NO_SHOW = "no_show",
@@ -108,17 +121,17 @@ export interface QueueStatsEntity {
   inProgressQueueToday: number;
   totalCompletedToday: number;
   totalCancelledToday: number;
-  
+
   // All-time statistics
   allQueueTotal: number;
   allWaitingQueue: number;
   allInProgressQueue: number;
   allCompletedTotal: number;
   allCancelledTotal: number;
-  
+
   // Performance metrics
   avgWaitTimeMinutes: number;
-  
+
   // Shop-specific data (optional)
   shopId?: string;
 }

@@ -6,8 +6,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create ENUM types
 CREATE TYPE shop_status AS ENUM ('draft', 'active', 'inactive', 'suspended');
-CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'serving', 'completed', 'cancelled');
-CREATE TYPE queue_priority AS ENUM ('normal', 'high', 'vip');
+CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'serving', 'completed', 'cancelled', 'no_show');
+CREATE TYPE queue_priority AS ENUM ('normal', 'high', 'urgent');
 CREATE TYPE payment_status AS ENUM ('unpaid', 'partial', 'paid');
 CREATE TYPE payment_method AS ENUM ('cash', 'card', 'qr', 'transfer');
 CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'suspended');

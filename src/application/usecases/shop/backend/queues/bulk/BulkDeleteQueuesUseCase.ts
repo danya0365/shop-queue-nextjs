@@ -1,19 +1,30 @@
-import { BulkDeleteQueuesInput, BulkDeleteQueuesResult } from '@/src/application/dtos/shop/backend/queue-bulk-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopBackendQueueError, ShopBackendQueueErrorType } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
-import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
-import type { QueueEntity } from '@/src/domain/entities/shop/backend/backend-queue.entity';
+import {
+  BulkDeleteQueuesInput,
+  BulkDeleteQueuesResult,
+} from "@/src/application/dtos/shop/backend/queue-bulk-dto";
+import { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import {
+  QueueStatus,
+  type QueueEntity,
+} from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import {
+  ShopBackendQueueError,
+  ShopBackendQueueErrorType,
+  ShopBackendQueueRepository,
+} from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 
 /**
  * Use case for bulk deleting queues
  * Following SOLID principles and Clean Architecture
  */
-export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, BulkDeleteQueuesResult> {
+export class BulkDeleteQueuesUseCase
+  implements IUseCase<BulkDeleteQueuesInput, BulkDeleteQueuesResult>
+{
   constructor(
     private readonly queueRepository: ShopBackendQueueRepository,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   /**
    * Execute the use case to bulk delete queues
@@ -24,20 +35,23 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
     try {
       // Validate input
       if (!input.queueIds || input.queueIds.length === 0) {
-        throw new Error('Queue IDs are required');
+        throw new Error("Queue IDs are required");
       }
 
       if (input.queueIds.length > 100) {
-        throw new Error('Cannot delete more than 100 queues at once');
+        throw new Error("Cannot delete more than 100 queues at once");
       }
 
-      this.logger.info('Starting bulk delete queues', { 
+      this.logger.info("Starting bulk delete queues", {
         queueCount: input.queueIds.length,
-        shopId: input.shopId
+        shopId: input.shopId,
       });
 
       // Validate that all queues exist and belong to the same shop
-      const existingQueues = await this.validateQueuesExist(input.queueIds, input.shopId);
+      const existingQueues = await this.validateQueuesExist(
+        input.queueIds,
+        input.shopId
+      );
 
       // Check if any queues can be deleted (not in progress or completed)
       const deletableQueues = this.validateDeletableQueues(existingQueues);
@@ -52,25 +66,25 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
         deletedCount: results.deleted.length,
         failedCount: results.failed.length,
         deletedQueues: results.deleted,
-        failedQueues: results.failed.map(f => f.queueId),
+        failedQueues: results.failed.map((f) => f.queueId),
         summary: {
           successRate: results.deleted.length / input.queueIds.length,
-          averageProcessingTime: 0 // TODO: Calculate actual processing time
-        }
+          averageProcessingTime: 0, // TODO: Calculate actual processing time
+        },
       };
 
-      this.logger.info('Bulk delete queues completed', { 
+      this.logger.info("Bulk delete queues completed", {
         result: {
           totalQueues: result.totalQueues,
           deletedQueues: result.deletedQueues.length,
           failedQueues: result.failedQueues.length,
-          successRate: result.summary?.successRate || 0
-        }
+          successRate: result.summary?.successRate || 0,
+        },
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to bulk delete queues', { error, input });
+      this.logger.error("Failed to bulk delete queues", { error, input });
 
       if (error instanceof ShopBackendQueueError) {
         throw error;
@@ -78,8 +92,8 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
 
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.OPERATION_FAILED,
-        'Failed to bulk delete queues',
-        'bulkDeleteQueues',
+        "Failed to bulk delete queues",
+        "bulkDeleteQueues",
         { input },
         error
       );
@@ -92,30 +106,39 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
    * @param shopId Shop ID
    * @returns Array of existing queues
    */
-  private async validateQueuesExist(queueIds: string[], shopId: string): Promise<QueueEntity[]> {
+  private async validateQueuesExist(
+    queueIds: string[],
+    shopId: string
+  ): Promise<QueueEntity[]> {
     try {
       // Get all queues by IDs
       const queues = await this.queueRepository.getQueuesByIds(queueIds);
 
       if (queues.length !== queueIds.length) {
         const foundIds = queues.map((q: QueueEntity) => q.id);
-        const missingIds = queueIds.filter(id => !foundIds.includes(id));
-        throw new Error(`Queues not found: ${missingIds.join(', ')}`);
+        const missingIds = queueIds.filter((id) => !foundIds.includes(id));
+        throw new Error(`Queues not found: ${missingIds.join(", ")}`);
       }
 
       // Validate all queues belong to the same shop
-      const queueShopIds = [...new Set(queues.map((q: QueueEntity) => q.shopId))];
+      const queueShopIds = [
+        ...new Set(queues.map((q: QueueEntity) => q.shopId)),
+      ];
       if (queueShopIds.length > 1) {
-        throw new Error('Queues must belong to the same shop');
+        throw new Error("Queues must belong to the same shop");
       }
 
       if (queueShopIds[0] !== shopId) {
-        throw new Error('Queues do not belong to the specified shop');
+        throw new Error("Queues do not belong to the specified shop");
       }
 
       return queues;
     } catch (error) {
-      this.logger.error('Failed to validate queues exist', { error, queueIds, shopId });
+      this.logger.error("Failed to validate queues exist", {
+        error,
+        queueIds,
+        shopId,
+      });
       throw error;
     }
   }
@@ -128,12 +151,17 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
   private validateDeletableQueues(queues: QueueEntity[]): QueueEntity[] {
     const nonDeletableQueues = queues.filter((queue: QueueEntity) => {
       // Queues in progress or completed cannot be deleted
-      return queue.status === 'in_progress' || queue.status === 'completed';
+      return (
+        queue.status === QueueStatus.SERVING ||
+        queue.status === QueueStatus.COMPLETED
+      );
     });
 
     if (nonDeletableQueues.length > 0) {
-      const nonDeletableIds = nonDeletableQueues.map(q => q.id).join(', ');
-      throw new Error(`Cannot delete queues that are in progress or completed: ${nonDeletableIds}`);
+      const nonDeletableIds = nonDeletableQueues.map((q) => q.id).join(", ");
+      throw new Error(
+        `Cannot delete queues that are in progress or completed: ${nonDeletableIds}`
+      );
     }
 
     return queues;
@@ -167,14 +195,14 @@ export class BulkDeleteQueuesUseCase implements IUseCase<BulkDeleteQueuesInput, 
           await this.queueRepository.deleteQueue(queue.id);
           deleted.push(queue.id);
         } catch (error) {
-          this.logger.error('Failed to delete queue', { 
-            queueId: queue.id, 
-            error 
+          this.logger.error("Failed to delete queue", {
+            queueId: queue.id,
+            error,
           });
-          
+
           failed.push({
             queueId: queue.id,
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : "Unknown error",
           });
         }
       });

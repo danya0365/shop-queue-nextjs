@@ -9,8 +9,14 @@ export interface QueueDTO {
   shopName: string; // joined from shops table
   queueServices: QueueServiceDTO[];
   queueNumber: string;
-  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority: 'normal' | 'high' | 'urgent';
+  status:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  priority: "normal" | "high" | "urgent";
   estimatedWaitTime: number; // in minutes
   actualWaitTime?: number; // in minutes
   notes?: string;
@@ -27,8 +33,14 @@ export interface CreateQueueInput {
   customerId: string;
   shopId: string;
   queueNumber: number;
-  status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority: 'normal' | 'high' | 'urgent';
+  status:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  priority: "normal" | "high" | "urgent";
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
@@ -43,8 +55,14 @@ export interface CreateQueueInput {
  */
 export interface UpdateQueueInput {
   id: string;
-  status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-  priority?: 'normal' | 'high' | 'urgent';
+  status?:
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | "no_show";
+  priority?: "normal" | "high" | "urgent";
   estimatedWaitTime?: number;
   notes?: string;
   calledAt?: string | null;
@@ -55,7 +73,6 @@ export interface UpdateQueueInput {
     price: number;
   }[];
 }
-
 
 export interface QueueServiceDTO {
   serviceId: string;
@@ -72,17 +89,17 @@ export interface QueueStatsDTO {
   inProgressQueueToday: number;
   totalCompletedToday: number;
   totalCancelledToday: number;
-  
+
   // All-time statistics
   allQueueTotal: number;
   allWaitingQueue: number;
   allInProgressQueue: number;
   allCompletedTotal: number;
   allCancelledTotal: number;
-  
+
   // Performance metrics
   avgWaitTimeMinutes: number;
-  
+
   // Shop-specific data (optional)
   shopId?: string;
 }

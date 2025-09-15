@@ -121,23 +121,23 @@ export function CreateQueueModal({
     }
   };
 
-  const getPriorityColor = (pri: "normal" | "high" | "vip") => {
+  const getPriorityColor = (pri: "normal" | "high" | "urgent") => {
     switch (pri) {
       case "high":
         return "text-orange-600 dark:text-orange-200 bg-orange-100 dark:bg-orange-900";
-      case "vip":
+      case "urgent":
         return "text-purple-600 dark:text-purple-200 bg-purple-100 dark:bg-purple-900";
       default:
         return "text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-700";
     }
   };
 
-  const getPriorityText = (pri: "normal" | "high" | "vip") => {
+  const getPriorityText = (pri: "normal" | "high" | "urgent") => {
     switch (pri) {
       case "high":
         return "สูง";
-      case "vip":
-        return "VIP";
+      case "urgent":
+        return "ด่วน";
       default:
         return "ปกติ";
     }
@@ -154,7 +154,9 @@ export function CreateQueueModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">สร้างคิวใหม่</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            สร้างคิวใหม่
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -179,7 +181,9 @@ export function CreateQueueModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Information */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">ข้อมูลลูกค้า</h3>
+            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
+              ข้อมูลลูกค้า
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -193,7 +197,9 @@ export function CreateQueueModal({
                   }
                   placeholder="กรอกชื่อลูกค้า"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerName ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    errors.customerName
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
                   }`}
                   disabled={isLoading}
                 />
@@ -216,7 +222,9 @@ export function CreateQueueModal({
                   }
                   placeholder="0xxxxxxxxx"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                    errors.customerPhone
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
                   }`}
                   disabled={isLoading}
                 />
@@ -250,7 +258,9 @@ export function CreateQueueModal({
             {/* Services Grid */}
             <div
               className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
-                errors.services ? "border-red-500" : "border-gray-200 dark:border-gray-600"
+                errors.services
+                  ? "border-red-500"
+                  : "border-gray-200 dark:border-gray-600"
               }`}
             >
               {filteredServices.map((service) => (
@@ -301,7 +311,7 @@ export function CreateQueueModal({
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
-              {(["normal", "high", "vip"] as const).map((pri) => (
+              {(["normal", "high", "urgent"] as const).map((pri) => (
                 <label
                   key={pri}
                   className="flex items-center space-x-2 cursor-pointer"
