@@ -35,7 +35,6 @@ export interface PostersPresenterState {
 
 // Define actions interface
 export interface PostersPresenterActions {
-  createPoster: (data: CreatePosterData) => Promise<boolean>;
   refreshData: () => Promise<void>;
   setError: (error: string | null) => void;
   setSelectedTemplate: (template: PosterTemplate | null) => void;
@@ -122,38 +121,6 @@ export const usePostersPresenter = (
     }
   }, [loadData, initialViewModel]);
 
-  const createPoster = async (data: CreatePosterData): Promise<boolean> => {
-    setIsCreating(true);
-    setError(null);
-
-    try {
-      // Validation logic
-      if (!data.templateId?.trim()) {
-        throw new Error("กรุณาเลือกเทมเพลตโปสเตอร์");
-      }
-
-      if (!data.customization) {
-        throw new Error("กรุณากำหนดการปรับแต่งโปสเตอร์");
-      }
-
-      // API call would go here
-      // const result = await postersService.createPoster(data);
-
-      logger.info("PostersPresenter: Poster created successfully");
-      return true;
-    } catch (error) {
-      logger.error("PostersPresenter: Error creating poster", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "เกิดข้อผิดพลาดในการสร้างโปสเตอร์"
-      );
-      return false;
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   const refreshData = async () => {
     await loadData();
   };
@@ -216,29 +183,23 @@ export const usePostersPresenter = (
   const handleCreatePoster = async (): Promise<boolean> => {
     if (!selectedTemplate) return false;
 
-    const success = await createPoster({
-      templateId: selectedTemplate.id,
-      customization: {
-        customText: customization.customText || "",
-        showServices: customization.showServices || false,
-        showOpeningHours: customization.showOpeningHours || false,
-        showPhone: customization.showPhone || false,
-        showAddress: customization.showAddress || false,
-        qrCodeSize: customization.qrCodeSize || "medium",
-      },
-    });
-
-    if (success) {
+    if (
+      viewModel?.userSubscription.usage.canCreateFree ||
+      viewModel?.userSubscription.limits.hasUnlimitedPosters
+    ) {
+      handlePrint();
       setShowPreview(false);
       setSelectedTemplate(null);
       resetCustomization();
+    } else {
+      setShowPaymentModal(true);
     }
 
-    return success;
+    return true;
   };
 
   const handlePrint = () => {
-    handleCreatePoster();
+    window.print();
   };
 
   const handlePreview = () => {
@@ -253,7 +214,6 @@ export const usePostersPresenter = (
   };
 
   const actions: PostersPresenterActions = {
-    createPoster,
     refreshData,
     setError,
     setSelectedTemplate,
