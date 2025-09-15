@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useServices } from '@/src/presentation/hooks/shop/backend/useServices';
+import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
+import { useState } from "react";
 
 interface CreateQueueModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface CreateQueueModalProps {
     customerName: string;
     customerPhone: string;
     services: string[];
-    priority: 'normal' | 'high' | 'vip';
+    priority: "normal" | "high" | "vip";
     notes?: string;
   }) => Promise<void>;
   isLoading?: boolean;
@@ -25,41 +25,43 @@ export function CreateQueueModal({
   shopId,
 }: CreateQueueModalProps) {
   const [formData, setFormData] = useState({
-    customerName: '',
-    customerPhone: '',
-    priority: 'normal' as 'normal' | 'high' | 'vip',
-    notes: '',
+    customerName: "",
+    customerPhone: "",
+    priority: "normal" as "normal" | "high" | "vip",
+    notes: "",
   });
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const { services, loading: servicesLoading } = useServices(shopId);
 
   if (!isOpen) return null;
 
-  const filteredServices = services.filter((service) =>
-    service.isAvailable && service.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = services.filter(
+    (service) =>
+      service.isAvailable &&
+      service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleServiceToggle = (serviceName: string) => {
-    setSelectedServices(prev => 
+    setSelectedServices((prev) =>
       prev.includes(serviceName)
-        ? prev.filter(s => s !== serviceName)
+        ? prev.filter((s) => s !== serviceName)
         : [...prev, serviceName]
     );
-    
+
     // Clear service error when user selects a service
     if (errors.services) {
-      setErrors(prev => ({ ...prev, services: '' }));
+      setErrors((prev) => ({ ...prev, services: "" }));
     }
   };
 
@@ -67,17 +69,18 @@ export function CreateQueueModal({
     const newErrors: Record<string, string> = {};
 
     if (!formData.customerName.trim()) {
-      newErrors.customerName = 'กรุณากรอกชื่อลูกค้า';
+      newErrors.customerName = "กรุณากรอกชื่อลูกค้า";
     }
 
     if (!formData.customerPhone.trim()) {
-      newErrors.customerPhone = 'กรุณากรอกเบอร์โทร';
+      newErrors.customerPhone = "กรุณากรอกเบอร์โทร";
     } else if (!/^0[0-9]{9}$/.test(formData.customerPhone)) {
-      newErrors.customerPhone = 'เบอร์โทรไม่ถูกต้อง (ต้องขึ้นต้นด้วย 0 และมี 10 หลัก)';
+      newErrors.customerPhone =
+        "เบอร์โทรไม่ถูกต้อง (ต้องขึ้นต้นด้วย 0 และมี 10 หลัก)";
     }
 
     if (selectedServices.length === 0) {
-      newErrors.services = 'กรุณาเลือกอย่างน้อย 1 บริการ';
+      newErrors.services = "กรุณาเลือกอย่างน้อย 1 บริการ";
     }
 
     setErrors(newErrors);
@@ -86,7 +89,7 @@ export function CreateQueueModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -99,38 +102,44 @@ export function CreateQueueModal({
         priority: formData.priority,
         notes: formData.notes.trim() || undefined,
       });
-      
+
       // Reset form
       setFormData({
-        customerName: '',
-        customerPhone: '',
-        priority: 'normal',
-        notes: '',
+        customerName: "",
+        customerPhone: "",
+        priority: "normal",
+        notes: "",
       });
       setSelectedServices([]);
-      setSearchTerm('');
+      setSearchTerm("");
       setErrors({});
-      
+
       onClose();
     } catch (error) {
-      console.error('Error creating queue:', error);
-      alert('เกิดข้อผิดพลาดในการสร้างคิว');
+      console.error("Error creating queue:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างคิว");
     }
   };
 
-  const getPriorityColor = (pri: 'normal' | 'high' | 'vip') => {
+  const getPriorityColor = (pri: "normal" | "high" | "vip") => {
     switch (pri) {
-      case 'high': return 'text-orange-600 bg-orange-100';
-      case 'vip': return 'text-purple-600 bg-purple-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case "high":
+        return "text-orange-600 bg-orange-100";
+      case "vip":
+        return "text-purple-600 bg-purple-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
 
-  const getPriorityText = (pri: 'normal' | 'high' | 'vip') => {
+  const getPriorityText = (pri: "normal" | "high" | "vip") => {
     switch (pri) {
-      case 'high': return 'สูง';
-      case 'vip': return 'VIP';
-      default: return 'ปกติ';
+      case "high":
+        return "สูง";
+      case "vip":
+        return "VIP";
+      default:
+        return "ปกติ";
     }
   };
 
@@ -142,7 +151,7 @@ export function CreateQueueModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">สร้างคิวใหม่</h2>
@@ -151,8 +160,18 @@ export function CreateQueueModal({
             className="text-gray-500 hover:text-gray-700"
             disabled={isLoading}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -169,18 +188,22 @@ export function CreateQueueModal({
                 <input
                   type="text"
                   value={formData.customerName}
-                  onChange={(e) => handleInputChange('customerName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("customerName", e.target.value)
+                  }
                   placeholder="กรอกชื่อลูกค้า"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerName ? 'border-red-500' : 'border-gray-300'
+                    errors.customerName ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={isLoading}
                 />
                 {errors.customerName && (
-                  <p className="text-sm text-red-500 mt-1">{errors.customerName}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.customerName}
+                  </p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   เบอร์โทร <span className="text-red-500">*</span>
@@ -188,15 +211,19 @@ export function CreateQueueModal({
                 <input
                   type="tel"
                   value={formData.customerPhone}
-                  onChange={(e) => handleInputChange('customerPhone', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("customerPhone", e.target.value)
+                  }
                   placeholder="0xxxxxxxxx"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerPhone ? 'border-red-500' : 'border-gray-300'
+                    errors.customerPhone ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={isLoading}
                 />
                 {errors.customerPhone && (
-                  <p className="text-sm text-red-500 mt-1">{errors.customerPhone}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.customerPhone}
+                  </p>
                 )}
               </div>
             </div>
@@ -207,7 +234,7 @@ export function CreateQueueModal({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               บริการ <span className="text-red-500">*</span>
             </label>
-            
+
             {/* Search */}
             <div className="mb-3">
               <input
@@ -221,9 +248,11 @@ export function CreateQueueModal({
             </div>
 
             {/* Services Grid */}
-            <div className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
-              errors.services ? 'border-red-500' : 'border-gray-200'
-            }`}>
+            <div
+              className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
+                errors.services ? "border-red-500" : "border-gray-200"
+              }`}
+            >
               {filteredServices.map((service) => (
                 <label
                   key={service.id}
@@ -237,7 +266,9 @@ export function CreateQueueModal({
                     disabled={isLoading}
                   />
                   <span className="flex-1">{service.name}</span>
-                  <span className="text-sm text-gray-600">฿{service.price}</span>
+                  <span className="text-sm text-gray-600">
+                    ฿{service.price}
+                  </span>
                 </label>
               ))}
             </div>
@@ -258,7 +289,7 @@ export function CreateQueueModal({
                   </span>
                 </div>
                 <div className="mt-1 text-sm text-blue-700">
-                  {selectedServices.join(', ')}
+                  {selectedServices.join(", ")}
                 </div>
               </div>
             )}
@@ -270,7 +301,7 @@ export function CreateQueueModal({
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
-              {(['normal', 'high', 'vip'] as const).map(pri => (
+              {(["normal", "high", "vip"] as const).map((pri) => (
                 <label
                   key={pri}
                   className="flex items-center space-x-2 cursor-pointer"
@@ -279,11 +310,15 @@ export function CreateQueueModal({
                     type="radio"
                     name="priority"
                     checked={formData.priority === pri}
-                    onChange={() => handleInputChange('priority', pri)}
+                    onChange={() => handleInputChange("priority", pri)}
                     className="text-blue-600 focus:ring-blue-500"
                     disabled={isLoading}
                   />
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(pri)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(
+                      pri
+                    )}`}
+                  >
                     {getPriorityText(pri)}
                   </span>
                 </label>
@@ -298,7 +333,7 @@ export function CreateQueueModal({
             </label>
             <textarea
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder="เพิ่มหมายเหตุ (ไม่บังคับ)..."
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -322,9 +357,24 @@ export function CreateQueueModal({
               disabled={isLoading}
             >
               {isLoading && (
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               )}
               <span>สร้างคิว</span>
