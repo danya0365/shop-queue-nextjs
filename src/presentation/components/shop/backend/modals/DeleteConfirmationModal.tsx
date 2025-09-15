@@ -31,12 +31,12 @@ export function DeleteConfirmationModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
         <div className="text-center">
           {/* Warning Icon */}
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
             <svg
-              className="h-6 w-6 text-red-600"
+              className="h-6 w-6 text-red-600 dark:text-red-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -51,20 +51,20 @@ export function DeleteConfirmationModal({
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">
             ยืนยันการลบคิว
-          </h3>
+          </h2>
 
           {/* Content */}
-          <div className="text-sm text-gray-500 mb-6">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             {queueNumber && customerName ? (
               <p>
                 คุณแน่ใจหรือไม่ว่าต้องการลบคิว{" "}
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   #{queueNumber}
                 </span>{" "}
                 ของลูกค้า{" "}
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   {customerName}
                 </span>
                 ?
@@ -72,18 +72,18 @@ export function DeleteConfirmationModal({
             ) : (
               <p>คุณแน่ใจหรือไม่ว่าต้องการลบคิวนี้?</p>
             )}
-            <p className="mt-2 text-red-600">
+            <p className="mt-2 text-red-600 dark:text-red-400">
               ⚠️ การกระทำนี้ไม่สามารถย้อนกลับได้
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-center space-x-3">
+          <div className="flex justify-center space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
             >
               ยกเลิก
             </button>
@@ -91,7 +91,7 @@ export function DeleteConfirmationModal({
               type="button"
               onClick={handleConfirm}
               disabled={isLoading}
-              className="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 text-white bg-red-600 dark:bg-red-700 rounded-md hover:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50 transition-colors flex items-center space-x-2"
             >
               {isLoading && (
                 <svg

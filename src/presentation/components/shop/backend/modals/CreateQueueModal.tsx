@@ -124,11 +124,11 @@ export function CreateQueueModal({
   const getPriorityColor = (pri: "normal" | "high" | "vip") => {
     switch (pri) {
       case "high":
-        return "text-orange-600 bg-orange-100";
+        return "text-orange-600 dark:text-orange-200 bg-orange-100 dark:bg-orange-900";
       case "vip":
-        return "text-purple-600 bg-purple-100";
+        return "text-purple-600 dark:text-purple-200 bg-purple-100 dark:bg-purple-900";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-700";
     }
   };
 
@@ -152,12 +152,12 @@ export function CreateQueueModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">สร้างคิวใหม่</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">สร้างคิวใหม่</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             disabled={isLoading}
           >
             <svg
@@ -178,11 +178,11 @@ export function CreateQueueModal({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Information */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 mb-4">ข้อมูลลูกค้า</h3>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">ข้อมูลลูกค้า</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ชื่อลูกค้า <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -193,7 +193,7 @@ export function CreateQueueModal({
                   }
                   placeholder="กรอกชื่อลูกค้า"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerName ? "border-red-500" : "border-gray-300"
+                    errors.customerName ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                   }`}
                   disabled={isLoading}
                 />
@@ -205,7 +205,7 @@ export function CreateQueueModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   เบอร์โทร <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -216,7 +216,7 @@ export function CreateQueueModal({
                   }
                   placeholder="0xxxxxxxxx"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerPhone ? "border-red-500" : "border-gray-300"
+                    errors.customerPhone ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                   }`}
                   disabled={isLoading}
                 />
@@ -231,7 +231,7 @@ export function CreateQueueModal({
 
           {/* Services Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               บริการ <span className="text-red-500">*</span>
             </label>
 
@@ -242,7 +242,7 @@ export function CreateQueueModal({
                 placeholder="ค้นหาบริการ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isLoading}
               />
             </div>
@@ -250,23 +250,23 @@ export function CreateQueueModal({
             {/* Services Grid */}
             <div
               className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
-                errors.services ? "border-red-500" : "border-gray-200"
+                errors.services ? "border-red-500" : "border-gray-200 dark:border-gray-600"
               }`}
             >
               {filteredServices.map((service) => (
                 <label
                   key={service.id}
-                  className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                 >
                   <input
                     type="checkbox"
                     checked={selectedServices.includes(service.id)}
                     onChange={() => handleServiceToggle(service.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                     disabled={isLoading}
                   />
                   <span className="flex-1">{service.name}</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     ฿{service.price}
                   </span>
                 </label>
@@ -279,16 +279,16 @@ export function CreateQueueModal({
 
             {/* Selected Services Summary */}
             {selectedServices.length > 0 && (
-              <div className="mt-3 p-3 bg-blue-50 rounded-md">
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-blue-900">
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
                     บริการที่เลือก ({selectedServices.length})
                   </span>
-                  <span className="text-sm font-bold text-blue-900">
+                  <span className="text-sm font-bold text-blue-900 dark:text-blue-200">
                     รวม: ฿{calculateTotalPrice()}
                   </span>
                 </div>
-                <div className="mt-1 text-sm text-blue-700">
+                <div className="mt-1 text-sm text-blue-700 dark:text-blue-300">
                   {selectedServices.join(", ")}
                 </div>
               </div>
@@ -297,7 +297,7 @@ export function CreateQueueModal({
 
           {/* Priority Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
@@ -328,7 +328,7 @@ export function CreateQueueModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               หมายเหตุ
             </label>
             <textarea
@@ -336,17 +336,17 @@ export function CreateQueueModal({
               onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder="เพิ่มหมายเหตุ (ไม่บังคับ)..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
               disabled={isLoading}
             >
               ยกเลิก

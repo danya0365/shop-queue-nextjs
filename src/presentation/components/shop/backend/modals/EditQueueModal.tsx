@@ -83,11 +83,11 @@ export function EditQueueModal({
   const getPriorityColor = (pri: "normal" | "high" | "vip") => {
     switch (pri) {
       case "high":
-        return "text-orange-600 bg-orange-100";
+        return "text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30";
       case "vip":
-        return "text-purple-600 bg-purple-100";
+        return "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700";
     }
   };
 
@@ -104,12 +104,12 @@ export function EditQueueModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">แก้ไขคิว #{queue.queueNumber}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">แก้ไขคิว #{queue.queueNumber}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
             disabled={isLoading}
           >
             <svg
@@ -130,23 +130,23 @@ export function EditQueueModal({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Info (Read-only) */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 mb-2">ข้อมูลลูกค้า</h3>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">ข้อมูลลูกค้า</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-600">ชื่อลูกค้า</label>
-                <p className="font-medium">{queue.customerName}</p>
+                <label className="text-sm text-gray-600 dark:text-gray-400">ชื่อลูกค้า</label>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{queue.customerName}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-600">เบอร์โทร</label>
-                <p className="font-medium">{queue.customerPhone}</p>
+                <label className="text-sm text-gray-600 dark:text-gray-400">เบอร์โทร</label>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{queue.customerPhone}</p>
               </div>
             </div>
           </div>
 
           {/* Services Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               บริการ <span className="text-red-500">*</span>
             </label>
 
@@ -157,26 +157,26 @@ export function EditQueueModal({
                 placeholder="ค้นหาบริการ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             {/* Services Grid */}
-            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-3">
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-3">
               {filteredServices.map((service) => (
                 <label
                   key={service.id}
-                  className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                 >
                   <input
                     type="checkbox"
                     checked={selectedServices.includes(service.name)}
                     onChange={() => handleServiceToggle(service.name)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                     disabled={isLoading}
                   />
                   <span className="flex-1">{service.name}</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     ฿{service.price}
                   </span>
                 </label>
@@ -192,7 +192,7 @@ export function EditQueueModal({
 
           {/* Priority Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
@@ -206,7 +206,7 @@ export function EditQueueModal({
                     name="priority"
                     checked={priority === pri}
                     onChange={() => setPriority(pri)}
-                    className="text-blue-600 focus:ring-blue-500"
+                    className="text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                     disabled={isLoading}
                   />
                   <span
@@ -223,7 +223,7 @@ export function EditQueueModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               หมายเหตุ
             </label>
             <textarea
@@ -231,24 +231,24 @@ export function EditQueueModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="เพิ่มหมายเหตุ (ไม่บังคับ)..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
               disabled={isLoading}
             >
               ยกเลิก
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+              className="px-4 py-2 text-white bg-blue-600 dark:bg-blue-700 rounded-md hover:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50 flex items-center space-x-2"
               disabled={isLoading || selectedServices.length === 0}
             >
               {isLoading && (
