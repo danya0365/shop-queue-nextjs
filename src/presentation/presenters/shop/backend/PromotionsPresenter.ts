@@ -4,6 +4,7 @@ import { IProfileService } from "@/src/application/interfaces/profile-service.in
 import type { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -174,6 +175,32 @@ export class PromotionsPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
+    return new PromotionsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      promotionsService
+    );
+  }
+}
+
+export class ClientPromotionsPresenterFactory {
+  static async create(): Promise<PromotionsPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const promotionsService =
+      clientContainer.resolve<IShopBackendPromotionsService>(
+        "ShopBackendPromotionsService"
+      );
     return new PromotionsPresenter(
       logger,
       shopService,

@@ -49,7 +49,7 @@ export default async function PromotionsPage({ params }: PromotionsPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <PromotionsView viewModel={viewModel} />
+        <PromotionsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

@@ -1,6 +1,7 @@
 import { getClientService } from '@/src/di/client-container';
 import { Logger } from '@/src/domain/interfaces/logger';
-import { useState } from 'react';
+import { PromotionsViewModel } from './PromotionsPresenter';
+import { useCallback, useEffect, useState } from 'react';
 
 // Define form/action data interfaces
 export interface CreatePromotionData {
@@ -33,6 +34,7 @@ export interface UpdatePromotionData {
 
 // Define state interface
 export interface PromotionsPresenterState {
+  viewModel: PromotionsViewModel | null;
   isLoading: boolean;
   error: string | null;
   isCreating: boolean;
@@ -42,18 +44,25 @@ export interface PromotionsPresenterState {
   showCreateModal: boolean;
   showEditModal: boolean;
   showDeleteModal: boolean;
+  searchTerm: string;
+  statusFilter: string;
 }
 
 // Define actions interface
 export interface PromotionsPresenterActions {
   createPromotion: (data: CreatePromotionData) => Promise<boolean>;
   updatePromotion: (data: UpdatePromotionData) => Promise<boolean>;
-  deletePromotion: (promotionId: string) => Promise<boolean>;
+  deletePromotion: (id: string) => Promise<boolean>;
   setSelectedPromotion: (promotion: any | null) => void;
-  setShowCreateModal: (show: boolean) => void;
-  setShowEditModal: (show: boolean) => void;
-  setShowDeleteModal: (show: boolean) => void;
-  reset: () => void;
+  openCreateModal: () => void;
+  closeCreateModal: () => void;
+  openEditModal: (promotion: any) => void;
+  closeEditModal: () => void;
+  openDeleteModal: (promotion: any) => void;
+  closeDeleteModal: () => void;
+  setSearchTerm: (term: string) => void;
+  setStatusFilter: (status: string) => void;
+  refreshData: () => Promise<void>;
   setError: (error: string | null) => void;
 }
 
@@ -64,8 +73,16 @@ export type PromotionsPresenterHook = [
 ];
 
 // Custom hook implementation
-export const usePromotionsPresenter = (): PromotionsPresenterHook => {
-  const [isLoading, setIsLoading] = useState(false);
+export const usePromotionsPresenter = (
+  shopId: string,
+  initialViewModel?: PromotionsViewModel
+): PromotionsPresenterHook => {
+  const logger = getClientService<Logger>('Logger');
+  
+  const [viewModel, setViewModel] = useState<PromotionsViewModel | null>(
+    initialViewModel || null
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -74,9 +91,48 @@ export const usePromotionsPresenter = (): PromotionsPresenterHook => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
-  const logger = getClientService<Logger>('Logger');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
+  // Initialize with initial view model if provided
+  useEffect(() => {
+    if (initialViewModel) {
+      setViewModel(initialViewModel);
+      setIsLoading(false);
+    }
+  }, [initialViewModel]);
+
+  // Function to load data
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const { ClientPromotionsPresenterFactory } = await import(
+        './PromotionsPresenter'
+      );
+      const presenter = await ClientPromotionsPresenterFactory.create();
+
+      const newViewModel = await presenter.getViewModel(shopId);
+
+      setViewModel(newViewModel);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to load promotions data'
+      );
+      console.error('Error loading promotions data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [shopId]);
+
+  // Load data when dependencies change, but not if we have initial view model
+  useEffect(() => {
+    if (!initialViewModel) {
+      loadData();
+    }
+  }, [loadData, initialViewModel]);
+  
   const createPromotion = async (data: CreatePromotionData): Promise<boolean> => {
     setIsCreating(true);
     setError(null);
@@ -212,6 +268,7 @@ export const usePromotionsPresenter = (): PromotionsPresenterHook => {
 
   return [
     { 
+      viewModel,
       isLoading, 
       error, 
       isCreating, 
@@ -220,18 +277,31 @@ export const usePromotionsPresenter = (): PromotionsPresenterHook => {
       selectedPromotion,
       showCreateModal,
       showEditModal,
-      showDeleteModal
+      showDeleteModal,
+      searchTerm,
+      statusFilter
     },
     { 
       createPromotion, 
       updatePromotion, 
       deletePromotion,
       setSelectedPromotion,
-      setShowCreateModal,
-      setShowEditModal,
-      setShowDeleteModal,
-      reset, 
+      openCreateModal: () => setShowCreateModal(true),
+      closeCreateModal: () => setShowCreateModal(false),
+      openEditModal: (promotion: any) => {
+        setSelectedPromotion(promotion);
+        setShowEditModal(true);
+      },
+      closeEditModal: () => setShowEditModal(false),
+      openDeleteModal: (promotion: any) => {
+        setSelectedPromotion(promotion);
+        setShowDeleteModal(true);
+      },
+      closeDeleteModal: () => setShowDeleteModal(false),
+      setSearchTerm,
+      setStatusFilter,
+      refreshData: loadData,
       setError 
-    },
-  ];
+    }
+  ] as const;
 };
