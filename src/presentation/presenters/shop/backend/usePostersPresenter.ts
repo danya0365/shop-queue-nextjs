@@ -1,12 +1,10 @@
-import { getClientService } from "@/src/di/client-container";
-import { Logger } from "@/src/domain/interfaces/logger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 import {
   PosterCustomization,
   PostersViewModel,
   PosterTemplate,
 } from "./PostersPresenter";
-const logger = getClientService<Logger>("Logger");
 
 // Define form/action data interfaces
 export interface CreatePosterData {
@@ -31,6 +29,7 @@ export interface PostersPresenterState {
   showPreview: boolean;
   showPaymentModal: boolean;
   customization: Partial<PosterCustomization>;
+  posterPreviewRef: React.RefObject<HTMLDivElement | null>;
 }
 
 // Define actions interface
@@ -81,6 +80,8 @@ export const usePostersPresenter = (
     qrCodeSize: "medium",
     customText: "",
   });
+  const posterPreviewRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef: posterPreviewRef });
 
   // Initialize with initial view model if provided
   useEffect(() => {
@@ -199,7 +200,7 @@ export const usePostersPresenter = (
   };
 
   const handlePrint = () => {
-    window.print();
+    reactToPrintFn();
   };
 
   const handlePreview = () => {
@@ -238,6 +239,7 @@ export const usePostersPresenter = (
     showPreview,
     showPaymentModal,
     customization,
+    posterPreviewRef,
   };
 
   return [state, actions];

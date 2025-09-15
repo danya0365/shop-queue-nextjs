@@ -424,30 +424,13 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-6">
+          <div className="flex gap-4 mt-6 flex-end justify-end">
             <button
               onClick={actions.handlePreview}
               className="bg-blue-600 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors"
             >
-              🔍 ดูตัวอย่าง
+              🔍 ดูตัวอย่างก่อนปริ้น
             </button>
-
-            {viewModel.userSubscription.usage.canCreateFree ||
-            viewModel.userSubscription.limits.hasUnlimitedPosters ? (
-              <button
-                onClick={actions.handlePrint}
-                className="bg-green-600 dark:bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-700 transition-colors"
-              >
-                🖨️ สร้างโปสเตอร์ฟรี
-              </button>
-            ) : (
-              <button
-                onClick={actions.handleCreatePoster}
-                className="bg-orange-600 dark:bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 dark:hover:bg-orange-700 transition-colors"
-              >
-                💳 สร้างโปสเตอร์ ({viewModel.payPerPosterPrice} บาท)
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -548,7 +531,10 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
               </div>
 
               {/* Poster Preview */}
-              <div className="flex justify-center mb-6">
+              <div
+                className="flex justify-center p-6"
+                ref={state.posterPreviewRef}
+              >
                 <div
                   className={`${
                     selectedTemplate.layout === "portrait"
@@ -643,14 +629,100 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                 >
                   {viewModel.userSubscription.usage.canCreateFree ||
                   viewModel.userSubscription.limits.hasUnlimitedPosters
-                    ? "🖨️ สร้างโปสเตอร์ฟรี"
-                    : `💳 สร้างโปสเตอร์ (${viewModel.payPerPosterPrice} บาท)`}
+                    ? "🖨️ ปริ้นฟรี"
+                    : `💳 ซื้อ (${viewModel.payPerPosterPrice} บาท)`}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Print Target with hidden visibility */}
+      <div className="hidden">
+        {selectedTemplate ? (
+          <div className="flex justify-center p-6">
+            <div
+              className={`${
+                selectedTemplate.layout === "portrait"
+                  ? "w-80 h-96"
+                  : "w-96 h-72"
+              } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between`}
+              style={{
+                background: selectedTemplate.backgroundColor,
+                color: selectedTemplate.textColor,
+              }}
+            >
+              {/* Header */}
+              <div>
+                <h1 className="text-2xl font-bold mb-2">
+                  {viewModel.shopInfo.name}
+                </h1>
+                <p className="text-sm opacity-90 mb-4">
+                  {viewModel.shopInfo.description}
+                </p>
+              </div>
+
+              {/* QR Code Area */}
+              <div className="flex-1 flex items-center justify-center">
+                <div
+                  className={`bg-white rounded-lg flex items-center justify-center ${
+                    customization.qrCodeSize === "small"
+                      ? "w-20 h-20"
+                      : customization.qrCodeSize === "large"
+                      ? "w-32 h-32"
+                      : "w-24 h-24"
+                  }`}
+                >
+                  <span className="text-gray-600 text-xs">QR Code</span>
+                </div>
+              </div>
+
+              {/* Footer Info */}
+              <div className="space-y-2 text-sm">
+                {customization.customText && (
+                  <p
+                    className="font-medium"
+                    style={{ color: selectedTemplate.accentColor }}
+                  >
+                    {customization.customText}
+                  </p>
+                )}
+                {customization.showPhone && (
+                  <p>📞 {viewModel.shopInfo.phone}</p>
+                )}
+                {customization.showOpeningHours && (
+                  <p>🕒 {viewModel.shopInfo.openingHours}</p>
+                )}
+                {customization.showAddress && (
+                  <p className="text-xs opacity-80">
+                    📍 {viewModel.shopInfo.address}
+                  </p>
+                )}
+                {customization.showServices && (
+                  <div className="flex flex-wrap gap-1 justify-center mt-2">
+                    {viewModel.shopInfo.services
+                      .slice(0, 3)
+                      .map((service, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 rounded-full text-xs"
+                          style={{
+                            backgroundColor:
+                              selectedTemplate.accentColor + "20",
+                            color: selectedTemplate.accentColor,
+                          }}
+                        >
+                          {service}
+                        </span>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
 
       {/* Payment Modal for Pay-per-Poster */}
       <PaymentModal
