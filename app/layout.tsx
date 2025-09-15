@@ -1,14 +1,7 @@
 import AuthInitializerWrapper from "@/src/presentation/components/auth/AuthInitializerWrapper";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
 import "../public/styles/index.css";
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 
 export const metadata: Metadata = {
   title: "Shop Queue - ระบบจัดการคิวร้านค้า",
@@ -41,20 +34,20 @@ export const metadata: Metadata = {
     apple: "/favicon/apple-touch-icon.png",
     other: [
       {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '32x32',
-        url: '/favicon/favicon-32x32.png',
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: "/favicon/favicon-32x32.png",
       },
       {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '16x16',
-        url: '/favicon/favicon-16x16.png',
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        url: "/favicon/favicon-16x16.png",
       },
       {
-        rel: 'manifest',
-        url: '/favicon/site.webmanifest',
+        rel: "manifest",
+        url: "/favicon/site.webmanifest",
       },
     ],
   },
@@ -107,9 +100,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" suppressHydrationWarning>
-      <body
-        className={`${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <AuthInitializerWrapper />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
