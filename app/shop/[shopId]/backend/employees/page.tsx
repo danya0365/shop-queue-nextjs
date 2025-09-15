@@ -49,7 +49,7 @@ export default async function EmployeesPage({ params }: EmployeesPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <EmployeesView viewModel={viewModel} />
+        <EmployeesView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

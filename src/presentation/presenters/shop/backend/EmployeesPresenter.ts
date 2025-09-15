@@ -4,6 +4,7 @@ import { IProfileService } from '@/src/application/interfaces/profile-service.in
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
+import { getClientContainer } from '@/src/di/client-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
@@ -297,10 +298,37 @@ export class EmployeesPresenterFactory {
   static async create(): Promise<EmployeesPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const shopService = serverContainer.resolve<IShopService>('ShopService');
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new EmployeesPresenter(logger, shopService, authService, profileService, subscriptionService);
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+
+    return new EmployeesPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+    );
+  }
+}
+
+// Client-side factory for use in React hooks
+export class ClientEmployeesPresenterFactory {
+  static async create(): Promise<EmployeesPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const shopService = clientContainer.resolve<IShopService>('ShopService');
+    const authService = clientContainer.resolve<IAuthService>('AuthService');
+    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+
+    return new EmployeesPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+    );
   }
 }

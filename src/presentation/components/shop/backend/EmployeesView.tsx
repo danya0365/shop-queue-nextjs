@@ -1,47 +1,86 @@
 "use client";
 
 import { EmployeesViewModel } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
-import { useState } from "react";
+import { useEmployeesPresenter } from "@/src/presentation/presenters/shop/backend/useEmployeesPresenter";
 import { EmployeeLimitsWarning } from "./EmployeeLimitsWarning";
 
 interface EmployeesViewProps {
-  viewModel: EmployeesViewModel;
+  shopId: string;
+  initialViewModel?: EmployeesViewModel;
 }
 
-export function EmployeesView({ viewModel }: EmployeesViewProps) {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-  const [filters, setFilters] = useState({
-    search: "",
-    status: "all",
-    department: "all",
-    position: "all",
-  });
+export function EmployeesView({
+  shopId,
+  initialViewModel,
+}: EmployeesViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    refreshData,
+    // Modal states
+    showAddModal,
+    showDetailsModal,
+    selectedEmployee,
+    // Filter states
+    filters,
+    // Event handlers
+    handleEmployeeClick,
+    handleSearchChange,
+    handleStatusChange,
+    handleDepartmentChange,
+    openAddModal,
+    closeAddModal,
+    closeDetailsModal,
+    // Computed data
+    filteredEmployees,
+  } = useEmployeesPresenter(shopId, initialViewModel);
 
-  const handleEmployeeClick = (employee: any) => {
-    setSelectedEmployee(employee);
-    setShowDetailsModal(true);
-  };
+  // Show loading only on initial load or when explicitly loading
+  if (loading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลพนักงาน...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const filteredEmployees = viewModel.employees.filter((employee) => {
-    if (filters.status !== "all" && employee.status !== filters.status)
-      return false;
-    if (
-      filters.department !== "all" &&
-      employee.department !== filters.department
-    )
-      return false;
-    if (filters.position !== "all" && employee.position !== filters.position)
-      return false;
-    if (
-      filters.search &&
-      !employee.name.toLowerCase().includes(filters.search.toLowerCase()) &&
-      !employee.email.toLowerCase().includes(filters.search.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  // Show error state if there's an error but we have no data
+  if (error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                {error}
+              </p>
+              <button
+                onClick={refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!viewModel) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -95,7 +134,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
         </div>
         <div className="flex space-x-4">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className={`px-4 py-2 rounded-lg transition-colors ${
               viewModel.subscription.canAddEmployee
                 ? "bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700"
@@ -197,9 +236,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               <input
                 type="text"
                 value={filters.search}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value })
-                }
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="ชื่อหรืออีเมล"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -211,9 +248,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               </label>
               <select
                 value={filters.status}
-                onChange={(e) =>
-                  setFilters({ ...filters, status: e.target.value })
-                }
+                onChange={(e) => handleStatusChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">สถานะทั้งหมด</option>
@@ -229,9 +264,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               </label>
               <select
                 value={filters.department}
-                onChange={(e) =>
-                  setFilters({ ...filters, department: e.target.value })
-                }
+                onChange={(e) => handleDepartmentChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">แผนกทั้งหมด</option>
@@ -287,7 +320,8 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
               {filteredEmployees.map((employee) => (
                 <tr
                   key={employee.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  onClick={() => handleEmployeeClick(employee)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -387,7 +421,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
                 รายละเอียดพนักงาน
               </h3>
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={closeDetailsModal}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 ✕
@@ -513,7 +547,7 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
 
             <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
               <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={closeDetailsModal}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 ปิด
@@ -600,13 +634,13 @@ export function EmployeesView({ viewModel }: EmployeesViewProps) {
 
             <div className="mt-6 flex justify-end space-x-3">
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeAddModal}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 ยกเลิก
               </button>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeAddModal}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 เพิ่มพนักงาน
