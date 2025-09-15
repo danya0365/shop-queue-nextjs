@@ -1,6 +1,6 @@
-import type { DatabaseDataSource } from '@/src/domain/interfaces/datasources/database-datasource';
+import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
-import { SupabaseClientType } from '../../datasources/supabase-datasource';
+import { SupabaseClientType } from "../../datasources/supabase-datasource";
 
 /**
  * Base repository class that provides common functionality and enforces datasource type checking
@@ -32,22 +32,31 @@ export abstract class BaseRepository {
    * @throws Error if client type is not allowed
    */
   protected verifyClientType(): void {
-    const clientType = (this.dataSource as { getClientType?: () => SupabaseClientType }).getClientType?.();
+    const clientType = (
+      this.dataSource as { getClientType?: () => SupabaseClientType }
+    ).getClientType?.();
 
     if (!clientType) {
-      this.logger.warn(`${this.entityName} repository: Unable to determine client type, proceeding with caution`);
+      this.logger.warn(
+        `${this.entityName} repository: Unable to determine client type, proceeding with caution`
+      );
       return;
     }
 
     if (!this.allowedClientTypes.includes(clientType)) {
       const error = new Error(
-        `${this.entityName} repository requires one of these client types: ${this.allowedClientTypes.join(', ')}, but got: ${clientType}`
+        `${
+          this.entityName
+        } repository requires one of these client types: ${this.allowedClientTypes.join(
+          ", "
+        )}, but got: ${clientType}`
       );
-      this.logger.error(`Client type verification failed for ${this.entityName} repository`, error);
+      this.logger.error(
+        `Client type verification failed for ${this.entityName} repository`,
+        error
+      );
       throw error;
     }
-
-    this.logger.debug(`${this.entityName} repository initialized with client type: ${clientType}`);
   }
 
   /**
@@ -55,7 +64,9 @@ export abstract class BaseRepository {
    * @returns boolean indicating if the datasource has admin privileges
    */
   protected hasAdminPrivileges(): boolean {
-    const clientType = (this.dataSource as { getClientType?: () => SupabaseClientType }).getClientType?.();
+    const clientType = (
+      this.dataSource as { getClientType?: () => SupabaseClientType }
+    ).getClientType?.();
     return clientType === SupabaseClientType.ADMIN;
   }
 }

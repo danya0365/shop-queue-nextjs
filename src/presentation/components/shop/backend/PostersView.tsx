@@ -1,12 +1,10 @@
 "use client";
 
 import type {
-  PosterCustomization,
   PostersViewModel,
   PosterTemplate,
 } from "@/src/presentation/presenters/shop/backend/PostersPresenter";
 import { usePostersPresenter } from "@/src/presentation/presenters/shop/backend/usePostersPresenter";
-import { useState } from "react";
 import { PaymentModal } from "../../pricing/PaymentModal";
 import { SubscriptionUpgradeButton } from "../../shared/SubscriptionUpgradeButton";
 
@@ -18,21 +16,8 @@ interface PostersViewProps {
 export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
   const [state, actions] = usePostersPresenter(shopId, initialViewModel);
   const viewModel = state.viewModel;
-  
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<PosterTemplate | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [customization, setCustomization] = useState<
-    Partial<PosterCustomization>
-  >({
-    showServices: true,
-    showOpeningHours: true,
-    showPhone: true,
-    showAddress: true,
-    qrCodeSize: "medium",
-    customText: "",
-  });
+  const { selectedTemplate, showPreview, showPaymentModal, customization } =
+    state;
 
   // Show loading only on initial load or when explicitly loading
   if (state.isLoading && !viewModel) {
@@ -63,7 +48,9 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
               <p className="text-red-600 dark:text-red-400 font-medium mb-2">
                 เกิดข้อผิดพลาด
               </p>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">{state.error}</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {state.error}
+              </p>
               <button
                 onClick={actions.refreshData}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
@@ -97,84 +84,6 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
       </div>
     );
   }
-
-  const handleTemplateSelect = (template: PosterTemplate) => {
-    if (template.isPremium && !viewModel.userSubscription.isPremium) {
-      alert("โปสเตอร์นี้ต้องสมัครแพ็คเกจ Premium เท่านั้น");
-      return;
-    }
-    setSelectedTemplate(template);
-  };
-
-  const handleCreatePoster = async () => {
-    if (!selectedTemplate) return;
-
-    const success = await actions.createPoster({
-      templateId: selectedTemplate.id,
-      customization: {
-        customText: customization.customText || "",
-        showServices: customization.showServices || false,
-        showOpeningHours: customization.showOpeningHours || false,
-        showPhone: customization.showPhone || false,
-        showAddress: customization.showAddress || false,
-        qrCodeSize: customization.qrCodeSize || "medium",
-      },
-    });
-
-    if (success) {
-      setShowPreview(false);
-      // Reset selection
-      setSelectedTemplate(null);
-      setCustomization({
-        showServices: true,
-        showOpeningHours: true,
-        showPhone: true,
-        showAddress: true,
-        qrCodeSize: "medium",
-        customText: "",
-      });
-    }
-  };
-
-  const handlePrint = () => {
-    // For free posters, just create without payment
-    handleCreatePoster();
-  };
-
-  const handlePreview = () => {
-    if (!selectedTemplate) return;
-    setShowPreview(true);
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "minimal":
-        return "✨";
-      case "colorful":
-        return "🎨";
-      case "professional":
-        return "💼";
-      case "creative":
-        return "🎭";
-      default:
-        return "📄";
-    }
-  };
-
-  const getCategoryName = (category: string) => {
-    switch (category) {
-      case "minimal":
-        return "เรียบง่าย";
-      case "colorful":
-        return "สีสันสดใส";
-      case "professional":
-        return "มืออาชีพ";
-      case "creative":
-        return "สร้างสรรค์";
-      default:
-        return category;
-    }
-  };
 
   const groupedTemplates = viewModel.templates.reduce((acc, template) => {
     if (!acc[template.category]) {
@@ -281,9 +190,11 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
             className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
           >
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-2xl">{getCategoryIcon(category)}</span>
+              <span className="text-2xl">
+                {actions.getCategoryIcon(category)}
+              </span>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                {getCategoryName(category)}
+                {actions.getCategoryName(category)}
               </h3>
               <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full text-sm">
                 {templates.length} แบบ
@@ -303,7 +214,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                       ? "opacity-60"
                       : ""
                   }`}
-                  onClick={() => handleTemplateSelect(template)}
+                  onClick={() => actions.handleTemplateSelect(template)}
                 >
                   {/* Premium Badge */}
                   {template.isPremium && (
@@ -406,7 +317,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                     type="checkbox"
                     checked={customization.showServices}
                     onChange={(e) =>
-                      setCustomization({
+                      actions.updateCustomization({
                         ...customization,
                         showServices: e.target.checked,
                       })
@@ -423,7 +334,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                     type="checkbox"
                     checked={customization.showOpeningHours}
                     onChange={(e) =>
-                      setCustomization({
+                      actions.updateCustomization({
                         ...customization,
                         showOpeningHours: e.target.checked,
                       })
@@ -440,7 +351,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                     type="checkbox"
                     checked={customization.showPhone}
                     onChange={(e) =>
-                      setCustomization({
+                      actions.updateCustomization({
                         ...customization,
                         showPhone: e.target.checked,
                       })
@@ -457,7 +368,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                     type="checkbox"
                     checked={customization.showAddress}
                     onChange={(e) =>
-                      setCustomization({
+                      actions.updateCustomization({
                         ...customization,
                         showAddress: e.target.checked,
                       })
@@ -479,7 +390,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
               <select
                 value={customization.qrCodeSize}
                 onChange={(e) =>
-                  setCustomization({
+                  actions.updateCustomization({
                     ...customization,
                     qrCodeSize: e.target.value as "small" | "medium" | "large",
                   })
@@ -499,7 +410,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                 <textarea
                   value={customization.customText}
                   onChange={(e) =>
-                    setCustomization({
+                    actions.updateCustomization({
                       ...customization,
                       customText: e.target.value,
                     })
@@ -515,7 +426,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
           {/* Action Buttons */}
           <div className="flex gap-4 mt-6">
             <button
-              onClick={handlePreview}
+              onClick={actions.handlePreview}
               className="bg-blue-600 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors"
             >
               🔍 ดูตัวอย่าง
@@ -524,14 +435,14 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
             {viewModel.userSubscription.usage.canCreateFree ||
             viewModel.userSubscription.limits.hasUnlimitedPosters ? (
               <button
-                onClick={handlePrint}
+                onClick={actions.handlePrint}
                 className="bg-green-600 dark:bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-700 transition-colors"
               >
                 🖨️ สร้างโปสเตอร์ฟรี
               </button>
             ) : (
               <button
-                onClick={handleCreatePoster}
+                onClick={actions.handleCreatePoster}
                 className="bg-orange-600 dark:bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 dark:hover:bg-orange-700 transition-colors"
               >
                 💳 สร้างโปสเตอร์ ({viewModel.payPerPosterPrice} บาท)
@@ -560,7 +471,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
-                    onClick={() => setShowPaymentModal(true)}
+                    onClick={() => actions.setShowPaymentModal(true)}
                     className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                   >
                     💳 ซื้อโปสเตอร์ ({viewModel.payPerPosterPrice} บาท/ใบ)
@@ -621,7 +532,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
 
       {/* Print Preview Modal */}
       {showPreview && selectedTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -629,7 +540,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                   ตัวอย่างโปสเตอร์
                 </h3>
                 <button
-                  onClick={() => setShowPreview(false)}
+                  onClick={() => actions.setShowPreview(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   ✕
@@ -721,13 +632,13 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
               {/* Action Buttons */}
               <div className="flex justify-center gap-4">
                 <button
-                  onClick={() => setShowPreview(false)}
+                  onClick={() => actions.setShowPreview(false)}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   ปิด
                 </button>
                 <button
-                  onClick={handleCreatePoster}
+                  onClick={actions.handleCreatePoster}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   {viewModel.userSubscription.usage.canCreateFree ||
@@ -744,7 +655,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
       {/* Payment Modal for Pay-per-Poster */}
       <PaymentModal
         isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={() => actions.setShowPaymentModal(false)}
         plan={{
           id: "poster-payment",
           name: "โปสเตอร์แบบจ่ายต่อใบ",

@@ -1,7 +1,12 @@
-import { getClientService } from '@/src/di/client-container';
-import { Logger } from '@/src/domain/interfaces/logger';
-import { PosterTemplate, PosterCustomization, PostersViewModel } from './PostersPresenter';
-import { useCallback, useEffect, useState } from 'react';
+import { getClientService } from "@/src/di/client-container";
+import { Logger } from "@/src/domain/interfaces/logger";
+import { useCallback, useEffect, useState } from "react";
+import {
+  PosterCustomization,
+  PostersViewModel,
+  PosterTemplate,
+} from "./PostersPresenter";
+const logger = getClientService<Logger>("Logger");
 
 // Define form/action data interfaces
 export interface CreatePosterData {
@@ -12,7 +17,7 @@ export interface CreatePosterData {
     showOpeningHours: boolean;
     showPhone: boolean;
     showAddress: boolean;
-    qrCodeSize: 'small' | 'medium' | 'large';
+    qrCodeSize: "small" | "medium" | "large";
   };
 }
 
@@ -57,24 +62,25 @@ export const usePostersPresenter = (
   shopId: string,
   initialViewModel?: PostersViewModel
 ): PostersPresenterHook => {
-  const logger = getClientService<Logger>('Logger');
-  
   const [viewModel, setViewModel] = useState<PostersViewModel | null>(
     initialViewModel || null
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<PosterTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<PosterTemplate | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [customization, setCustomization] = useState<Partial<PosterCustomization>>({
+  const [customization, setCustomization] = useState<
+    Partial<PosterCustomization>
+  >({
     showServices: true,
     showOpeningHours: true,
     showPhone: true,
     showAddress: true,
-    qrCodeSize: 'medium',
-    customText: '',
+    qrCodeSize: "medium",
+    customText: "",
   });
 
   // Initialize with initial view model if provided
@@ -92,7 +98,7 @@ export const usePostersPresenter = (
       setError(null);
 
       const { ClientPostersPresenterFactory } = await import(
-        './PostersPresenter'
+        "./PostersPresenter"
       );
       const presenter = await ClientPostersPresenterFactory.create();
 
@@ -101,9 +107,9 @@ export const usePostersPresenter = (
       setViewModel(newViewModel);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to load posters data'
+        err instanceof Error ? err.message : "Failed to load posters data"
       );
-      console.error('Error loading posters data:', err);
+      console.error("Error loading posters data:", err);
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +121,7 @@ export const usePostersPresenter = (
       loadData();
     }
   }, [loadData, initialViewModel]);
-  
+
   const createPoster = async (data: CreatePosterData): Promise<boolean> => {
     setIsCreating(true);
     setError(null);
@@ -123,21 +129,25 @@ export const usePostersPresenter = (
     try {
       // Validation logic
       if (!data.templateId?.trim()) {
-        throw new Error('กรุณาเลือกเทมเพลตโปสเตอร์');
+        throw new Error("กรุณาเลือกเทมเพลตโปสเตอร์");
       }
 
       if (!data.customization) {
-        throw new Error('กรุณากำหนดการปรับแต่งโปสเตอร์');
+        throw new Error("กรุณากำหนดการปรับแต่งโปสเตอร์");
       }
 
       // API call would go here
       // const result = await postersService.createPoster(data);
-      
-      logger.info('PostersPresenter: Poster created successfully');
+
+      logger.info("PostersPresenter: Poster created successfully");
       return true;
     } catch (error) {
-      logger.error('PostersPresenter: Error creating poster', error);
-      setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการสร้างโปสเตอร์');
+      logger.error("PostersPresenter: Error creating poster", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการสร้างโปสเตอร์"
+      );
       return false;
     } finally {
       setIsCreating(false);
@@ -151,29 +161,29 @@ export const usePostersPresenter = (
   // Helper functions
   const getCategoryIcon = (category: string): string => {
     switch (category) {
-      case 'minimal':
-        return '✨';
-      case 'colorful':
-        return '🎨';
-      case 'professional':
-        return '💼';
-      case 'creative':
-        return '🎭';
+      case "minimal":
+        return "✨";
+      case "colorful":
+        return "🎨";
+      case "professional":
+        return "💼";
+      case "creative":
+        return "🎭";
       default:
-        return '📄';
+        return "📄";
     }
   };
 
   const getCategoryName = (category: string): string => {
     switch (category) {
-      case 'minimal':
-        return 'เรียบง่าย';
-      case 'colorful':
-        return 'สีสันสดใส';
-      case 'professional':
-        return 'มืออาชีพ';
-      case 'creative':
-        return 'สร้างสรรค์';
+      case "minimal":
+        return "เรียบง่าย";
+      case "colorful":
+        return "สีสันสดใส";
+      case "professional":
+        return "มืออาชีพ";
+      case "creative":
+        return "สร้างสรรค์";
       default:
         return category;
     }
@@ -185,15 +195,19 @@ export const usePostersPresenter = (
       showOpeningHours: true,
       showPhone: true,
       showAddress: true,
-      qrCodeSize: 'medium',
-      customText: '',
+      qrCodeSize: "medium",
+      customText: "",
     });
   };
 
   // Event handlers
   const handleTemplateSelect = (template: PosterTemplate) => {
-    if (viewModel && template.isPremium && !viewModel.userSubscription.isPremium) {
-      alert('โปสเตอร์นี้ต้องสมัครแพ็คเกจ Premium เท่านั้น');
+    if (
+      viewModel &&
+      template.isPremium &&
+      !viewModel.userSubscription.isPremium
+    ) {
+      alert("โปสเตอร์นี้ต้องสมัครแพ็คเกจ Premium เท่านั้น");
       return;
     }
     setSelectedTemplate(template);
@@ -205,12 +219,12 @@ export const usePostersPresenter = (
     const success = await createPoster({
       templateId: selectedTemplate.id,
       customization: {
-        customText: customization.customText || '',
+        customText: customization.customText || "",
         showServices: customization.showServices || false,
         showOpeningHours: customization.showOpeningHours || false,
         showPhone: customization.showPhone || false,
         showAddress: customization.showAddress || false,
-        qrCodeSize: customization.qrCodeSize || 'medium',
+        qrCodeSize: customization.qrCodeSize || "medium",
       },
     });
 
@@ -232,8 +246,10 @@ export const usePostersPresenter = (
     setShowPreview(true);
   };
 
-  const updateCustomization = (newCustomization: Partial<PosterCustomization>) => {
-    setCustomization(prev => ({ ...prev, ...newCustomization }));
+  const updateCustomization = (
+    newCustomization: Partial<PosterCustomization>
+  ) => {
+    setCustomization((prev) => ({ ...prev, ...newCustomization }));
   };
 
   const actions: PostersPresenterActions = {
