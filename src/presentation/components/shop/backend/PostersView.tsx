@@ -5,6 +5,7 @@ import type {
   PosterTemplate,
 } from "@/src/presentation/presenters/shop/backend/PostersPresenter";
 import { usePostersPresenter } from "@/src/presentation/presenters/shop/backend/usePostersPresenter";
+import { useQRCode } from "next-qrcode";
 import { PaymentModal } from "../../pricing/PaymentModal";
 import { SubscriptionUpgradeButton } from "../../shared/SubscriptionUpgradeButton";
 
@@ -18,6 +19,8 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
   const viewModel = state.viewModel;
   const { selectedTemplate, showPreview, showPaymentModal, customization } =
     state;
+
+  const { Canvas } = useQRCode();
 
   // Show loading only on initial load or when explicitly loading
   if (state.isLoading && !viewModel) {
@@ -532,7 +535,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
 
               {/* Poster Preview */}
               <div
-                className="flex justify-center p-6"
+                className="flex justify-center p-6 gap-4"
                 ref={state.posterPreviewRef}
               >
                 <div
@@ -540,7 +543,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                     selectedTemplate.layout === "portrait"
                       ? "w-80 h-96"
                       : "w-96 h-72"
-                  } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between`}
+                  } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between gap-2`}
                   style={{
                     background: selectedTemplate.backgroundColor,
                     color: selectedTemplate.textColor,
@@ -548,7 +551,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                 >
                   {/* Header */}
                   <div>
-                    <h1 className="text-2xl font-bold mb-2">
+                    <h1 className="text-2xl font-bold">
                       {viewModel.shopInfo.name}
                     </h1>
                     <p className="text-sm opacity-90 mb-4">
@@ -558,17 +561,24 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
 
                   {/* QR Code Area */}
                   <div className="flex-1 flex items-center justify-center">
-                    <div
-                      className={`bg-white rounded-lg flex items-center justify-center ${
-                        customization.qrCodeSize === "small"
-                          ? "w-20 h-20"
-                          : customization.qrCodeSize === "large"
-                          ? "w-32 h-32"
-                          : "w-24 h-24"
-                      }`}
-                    >
-                      <span className="text-gray-600 text-xs">QR Code</span>
-                    </div>
+                    <Canvas
+                      text={`${viewModel.shopInfo.qrCodeUrl}`}
+                      options={{
+                        errorCorrectionLevel: "M",
+                        margin: 3,
+                        scale: 4,
+                        width:
+                          customization.qrCodeSize === "small"
+                            ? 100
+                            : customization.qrCodeSize === "large"
+                            ? 200
+                            : 150,
+                      }}
+                      logo={{
+                        src: "/qr-logo.png",
+                        options: { width: 50 },
+                      }}
+                    />
                   </div>
 
                   {/* Footer Info */}

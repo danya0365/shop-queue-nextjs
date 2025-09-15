@@ -3,6 +3,7 @@ import { OpeningHourDTO } from "@/src/application/dtos/shop/backend/opening-hour
 import { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import type { Logger } from "@/src/domain/interfaces/logger";
+import { getAppUrl } from "@/src/infrastructure/config/AppConfig";
 import type { Metadata } from "next";
 
 export interface ShopInfo {
@@ -13,6 +14,7 @@ export interface ShopInfo {
   phone: string;
   website: string;
   qrCodeUrl: string;
+  qrCodeJoinQueueUrl: string;
   logo?: string;
   openingHours: string;
   services: string[];
@@ -42,7 +44,8 @@ export abstract class BaseShopPresenter {
       address: shop.address || "",
       phone: shop.phone || "",
       website: shop.website || "",
-      qrCodeUrl: `https://shopqueue.app/shop/${shopId}`,
+      qrCodeUrl: `${getAppUrl()}/shop/${shopId}`,
+      qrCodeJoinQueueUrl: `${getAppUrl()}/shop/${shopId}/queue`,
       logo: "/images/shop-logo.png",
       openingHours: this.createOpeningHoursString(shop.openingHours),
       services: this.createServicesString(shop.services),
