@@ -1,9 +1,13 @@
 import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import type { Department, DepartmentsBackendService } from '@/src/application/services/shop/backend/departments-backend-service';
+
+// Re-export Department type for use in components
+export type { Department };
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
 import { getServerContainer } from '@/src/di/server-container';
+import { getClientContainer } from '@/src/di/client-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
 
@@ -66,6 +70,21 @@ export class DepartmentsPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
     const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new DepartmentsPresenter(logger, shopService, authService, profileService, subscriptionService, departmentsBackendService);
+  }
+}
+
+// Client-side factory for use in React hooks
+export class ClientDepartmentsPresenterFactory {
+  static async create(): Promise<DepartmentsPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const shopService = clientContainer.resolve<IShopService>('ShopService');
+    const authService = clientContainer.resolve<IAuthService>('AuthService');
+    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const departmentsBackendService = clientContainer.resolve<DepartmentsBackendService>('DepartmentsBackendService');
+
     return new DepartmentsPresenter(logger, shopService, authService, profileService, subscriptionService, departmentsBackendService);
   }
 }

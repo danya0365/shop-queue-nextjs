@@ -50,7 +50,7 @@ export default async function DepartmentsPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <DepartmentsView viewModel={viewModel} />
+        <DepartmentsView initialViewModel={viewModel} shopId={shopId} />
       </BackendLayout>
     );
   } catch (error) {

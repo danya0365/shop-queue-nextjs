@@ -1,23 +1,78 @@
 "use client";
 
 import { DepartmentsViewModel } from "@/src/presentation/presenters/shop/backend/DepartmentsPresenter";
-import { useState } from "react";
+import { useDepartmentsPresenter } from "@/src/presentation/presenters/shop/backend/useDepartmentsPresenter";
 
 interface DepartmentsViewProps {
-  viewModel: DepartmentsViewModel;
+  shopId: string;
+  initialViewModel?: DepartmentsViewModel;
 }
 
-export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
+export function DepartmentsView({ shopId, initialViewModel }: DepartmentsViewProps) {
+  
+  const {
+    viewModel,
+    loading,
+    error,
+    actionLoading,
+    refreshData,
+    showCreateModal,
+    showDetailsModal,
+    selectedDepartment,
+    filters,
+    handleDepartmentClick,
+    handleSearchChange,
+    openCreateModal,
+    closeCreateModal,
+    closeDetailsModal,
+    filteredDepartments,
+  } = useDepartmentsPresenter(shopId, initialViewModel);
 
-  // Filter departments based on search
-  const filteredDepartments = viewModel.departments.filter(
-    (department) =>
-      department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (department.description &&
-        department.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Show loading only on initial load or when explicitly loading
+  if (loading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลแผนก...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                {error}
+              </p>
+              <button
+                onClick={refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!viewModel) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -71,7 +126,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
         </div>
         <div className="flex space-x-4">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={openCreateModal}
             className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
           >
             🏢 เพิ่มแผนกใหม่
@@ -88,7 +143,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 แผนกทั้งหมด
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {viewModel.totalDepartments}
+                {viewModel?.totalDepartments || 0}
               </p>
             </div>
             <div className="text-2xl">🏢</div>
@@ -102,7 +157,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 พนักงานทั้งหมด
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {viewModel.totalEmployees}
+                {viewModel?.totalEmployees || 0}
               </p>
             </div>
             <div className="text-2xl">👥</div>
@@ -116,7 +171,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
                 เฉลี่ย/แผนก
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {viewModel.averageEmployeesPerDepartment.toFixed(1)}
+                {viewModel?.averageEmployeesPerDepartment?.toFixed(1) || '0.0'}
               </p>
             </div>
             <div className="text-2xl">📊</div>
@@ -131,7 +186,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
               </p>
               <p className="text-lg font-bold text-purple-600">
                 {Math.max(
-                  ...viewModel.departments.map((d) => d.employeeCount),
+                  ...(viewModel?.departments?.map((d) => d.employeeCount) || []),
                   0
                 )}{" "}
                 คน
@@ -149,8 +204,8 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             <input
               type="text"
               placeholder="ค้นหาแผนก..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.search}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -164,11 +219,11 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             <div className="text-gray-500 dark:text-gray-400">
               <div className="text-4xl mb-4">🏢</div>
               <p className="text-lg">
-                {searchTerm
+                {filters.search
                   ? "ไม่พบแผนกที่ตรงกับเงื่อนไขการค้นหา"
                   : "ยังไม่มีแผนกในระบบ"}
               </p>
-              {searchTerm ? (
+              {filters.search ? (
                 <p className="text-sm text-gray-400 mt-2">
                   ลองปรับเงื่อนไขการค้นหาหรือเพิ่มแผนกใหม่
                 </p>
@@ -184,7 +239,8 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
           filteredDepartments.map((department) => (
             <div
               key={department.id}
-              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => handleDepartmentClick(department)}
             >
               {/* Department Header */}
               <div className="flex items-start justify-between mb-4">
@@ -295,7 +351,7 @@ export function DepartmentsView({ viewModel }: DepartmentsViewProps) {
             </p>
             <div className="flex justify-end space-x-2">
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={closeCreateModal}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 ปิด
