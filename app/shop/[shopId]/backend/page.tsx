@@ -46,11 +46,11 @@ export default async function BackendDashboardPage({
 
   try {
     // Get view model from presenter
-    const viewModel = await presenter.getViewModel(shopId);
+    const initialViewModel = await presenter.getViewModel(shopId);
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <BackendDashboardView viewModel={viewModel} />
+        <BackendDashboardView initialViewModel={initialViewModel} shopId={shopId} />
       </BackendLayout>
     );
   } catch (error) {

@@ -191,3 +191,17 @@ export class BackendDashboardPresenterFactory {
     return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService);
   }
 }
+
+// Client-side Factory class
+export class ClientBackendDashboardPresenterFactory {
+  static async create(): Promise<BackendDashboardPresenter> {
+    const { getClientContainer } = await import('@/src/di/client-container');
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const authService = clientContainer.resolve<IAuthService>('AuthService');
+    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+    const shopService = clientContainer.resolve<IShopService>('ShopService');
+    return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService);
+  }
+}
