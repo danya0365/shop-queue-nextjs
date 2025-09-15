@@ -542,7 +542,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                   className={`${
                     selectedTemplate.layout === "portrait"
                       ? "w-80 h-96"
-                      : "w-96 h-72"
+                      : "w-120 h-96"
                   } rounded-lg shadow-lg p-8 text-center flex flex-col justify-between gap-2`}
                   style={{
                     background: selectedTemplate.backgroundColor,
