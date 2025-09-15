@@ -5,6 +5,7 @@ import { ShopSettingsViewModel } from "@/src/presentation/presenters/shop/backen
 import { useShopSettingsPresenter } from "@/src/presentation/presenters/shop/backend/useShopSettingsPresenter";
 import { useEffect, useState } from "react";
 
+const SHOW_STATS = false;
 interface ShopSettingsViewProps {
   shopId: string;
   initialViewModel?: ShopSettingsViewModel;
@@ -939,7 +940,7 @@ export function ShopSettingsView({
       </div>
 
       {/* Stats Cards */}
-      {stats && (
+      {stats && SHOW_STATS && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
