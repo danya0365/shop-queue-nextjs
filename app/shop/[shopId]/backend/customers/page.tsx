@@ -49,7 +49,10 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <CustomersView viewModel={viewModel} />
+        <CustomersView 
+          shopId={shopId}
+          initialViewModel={viewModel}
+        />
       </BackendLayout>
     );
   } catch (error) {

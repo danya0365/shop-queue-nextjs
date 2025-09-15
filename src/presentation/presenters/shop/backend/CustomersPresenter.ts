@@ -75,3 +75,18 @@ export class CustomersPresenterFactory {
     return new CustomersPresenter(logger, shopService, authService, profileService, subscriptionService, customersBackendService);
   }
 }
+
+// Client-side Factory class
+export class ClientCustomersPresenterFactory {
+  static async create(): Promise<CustomersPresenter> {
+    const { getClientContainer } = await import('@/src/di/client-container');
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const customersBackendService = clientContainer.resolve<CustomersBackendService>('CustomersBackendService');
+    const shopService = clientContainer.resolve<IShopService>('ShopService');
+    const authService = clientContainer.resolve<IAuthService>('AuthService');
+    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new CustomersPresenter(logger, shopService, authService, profileService, subscriptionService, customersBackendService);
+  }
+}
