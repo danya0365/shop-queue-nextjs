@@ -97,3 +97,18 @@ export class RewardsPresenterFactory {
     return new RewardsPresenter(logger, shopService, authService, profileService, subscriptionService, rewardsBackendService);
   }
 }
+
+// Client Factory class
+export class ClientRewardsPresenterFactory {
+  static async create(): Promise<RewardsPresenter> {
+    const { getClientContainer } = await import('@/src/di/client-container');
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const rewardsBackendService = clientContainer.resolve<RewardsBackendService>('RewardsBackendService');
+    const shopService = clientContainer.resolve<IShopService>('ShopService');
+    const authService = clientContainer.resolve<IAuthService>('AuthService');
+    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+    return new RewardsPresenter(logger, shopService, authService, profileService, subscriptionService, rewardsBackendService);
+  }
+}

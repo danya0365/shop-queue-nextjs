@@ -1,26 +1,16 @@
 "use client";
 
 import { RewardsViewModel } from "@/src/presentation/presenters/shop/backend/RewardsPresenter";
-import { useState } from "react";
+import { useRewardsPresenter } from "@/src/presentation/presenters/shop/backend/useRewardsPresenter";
 
 interface RewardsViewProps {
-  viewModel: RewardsViewModel;
+  shopId: string;
+  initialViewModel?: RewardsViewModel;
 }
 
-export function RewardsView({ viewModel }: RewardsViewProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // Filter rewards based on search and type
-  const filteredRewards = viewModel.rewards.filter((reward) => {
-    const matchesSearch =
-      reward.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (reward.description &&
-        reward.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesType = selectedType === "all" || reward.type === selectedType;
-    return matchesSearch && matchesType;
-  });
+export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
+  const [state, actions] = useRewardsPresenter(shopId, initialViewModel);
+  const viewModel = state.viewModel;
 
   const formatPoints = (points: number) => {
     return new Intl.NumberFormat("th-TH").format(points);
@@ -66,6 +56,82 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
         return reward.value;
     }
   };
+
+  // Filter rewards based on search and type
+  const filteredRewards = viewModel?.rewards.filter((reward) => {
+    const matchesSearch =
+      reward.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+      (reward.description &&
+        reward.description.toLowerCase().includes(state.searchTerm.toLowerCase()));
+    const matchesType = state.selectedType === "all" || reward.type === state.selectedType;
+    return matchesSearch && matchesType;
+  }) || [];
+
+  // Show loading only on initial load or when explicitly loading
+  if (state.loading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลรางวัล...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (state.error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                เกิดข้อผิดพลาด
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {state.error}
+              </p>
+              <button
+                onClick={actions.refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have no view model and not loading, show empty state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-gray-400 text-6xl mb-4">🎁</div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium mb-2">
+                ยังไม่มีข้อมูลรางวัล
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 mb-4">
+                ข้อมูลรางวัลจะแสดงที่นี่เมื่อมีการสร้างรางวัล
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -119,7 +185,7 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
         </div>
         <div className="flex space-x-4">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={actions.openCreateModal}
             className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
           >
             🎁 สร้างรางวัล
@@ -218,8 +284,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
             <input
               type="text"
               placeholder="ค้นหารางวัล..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={state.searchTerm}
+              onChange={(e) => actions.setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
@@ -227,8 +293,8 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
           {/* Type Filter */}
           <div className="sm:w-48">
             <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
+              value={state.selectedType}
+              onChange={(e) => actions.setSelectedType(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">ประเภททั้งหมด</option>
@@ -248,11 +314,11 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
             <div className="text-gray-500 dark:text-gray-400">
               <div className="text-4xl mb-4">🎁</div>
               <p className="text-lg">
-                {searchTerm || selectedType !== "all"
+                {state.searchTerm || state.selectedType !== "all"
                   ? "ไม่พบรางวัลที่ตรงกับเงื่อนไขการค้นหา"
                   : "ยังไม่มีรางวัลในระบบ"}
               </p>
-              {searchTerm || selectedType !== "all" ? (
+              {state.searchTerm || state.selectedType !== "all" ? (
                 <p className="text-sm text-gray-400 mt-2">
                   ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรางวัลใหม่
                 </p>
@@ -407,7 +473,7 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
       </div>
 
       {/* Create Reward Modal Placeholder */}
-      {showCreateModal && (
+      {state.isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
@@ -418,7 +484,7 @@ export function RewardsView({ viewModel }: RewardsViewProps) {
             </p>
             <div className="flex justify-end space-x-2">
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={actions.closeCreateModal}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 ปิด

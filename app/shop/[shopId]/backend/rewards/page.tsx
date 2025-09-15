@@ -48,7 +48,7 @@ export default async function RewardsPage({ params }: RewardsPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <RewardsView viewModel={viewModel} />
+        <RewardsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {
