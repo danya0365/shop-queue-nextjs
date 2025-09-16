@@ -733,7 +733,10 @@ AFTER INSERT ON public.customers
 FOR EACH ROW
 EXECUTE FUNCTION create_customer_points_on_customer_create();
 
--- Enable Row Level Security on all shop tables
+-- =============================================================================
+-- ENABLE ROW LEVEL SECURITY ON ALL SHOP TABLES
+-- =============================================================================
+
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shops ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.category_shops ENABLE ROW LEVEL SECURITY;
@@ -794,7 +797,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Table policies
+-- =============================================================================
+-- CATEGORIES TABLE RLS POLICIES
+-- =============================================================================
 
 -- Categories table policies
 -- Categories are viewable by everyone
@@ -816,6 +821,10 @@ CREATE POLICY "Only admins can delete categories"
   ON public.categories FOR DELETE
   USING (is_admin());
 
+
+-- =============================================================================
+-- SHOPS TABLE RLS POLICIES
+-- =============================================================================
 
 -- Shops table policies
 -- Anyone can view shops
@@ -1083,15 +1092,15 @@ CREATE POLICY "Shop employees, managers and owners can view queues"
   ON public.queues FOR SELECT
   USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Only shop managers can update/delete queues directly
-CREATE POLICY "Shop managers can update queues"
+-- Only shop employees, managers and owners can update/delete queues directly
+CREATE POLICY "Shop employees, managers and owners can update queues"
   ON public.queues FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id))
+  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
-CREATE POLICY "Shop managers can delete queues"
+CREATE POLICY "Shop employees, managers and owners can delete queues"
   ON public.queues FOR DELETE
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
 -- Remove direct INSERT access - queues are created through queue API functions
 REVOKE INSERT ON TABLE public.queues FROM anon;
