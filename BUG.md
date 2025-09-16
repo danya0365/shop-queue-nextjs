@@ -6,3 +6,4 @@
 - แก้ไขคิวในหน้า shop backend ไม่ได้
 - ลบคิวในหน้า shop backend ไม่ได้
 - สร้างคิวในหน้า shop backend ยังไม่ได้ส่ง param service price
+- สร้างคิวในหน้า shop backend ยังไม่สามารถกดสร้าง customer ได้ (ห้ามกดสร้าง customer) แต่สามารถสร้างคิวได้ปกติ

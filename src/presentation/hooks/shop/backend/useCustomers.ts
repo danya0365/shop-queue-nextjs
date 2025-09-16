@@ -4,6 +4,8 @@ import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-
 import { ClientCustomerSelectionPresenterFactory } from "@/src/presentation/presenters/shop/backend/CustomerSelectionPresenter";
 import { useCallback, useEffect, useState } from "react";
 
+const presenter = await ClientCustomerSelectionPresenterFactory.create();
+
 export interface Customer {
   id: string;
   name: string;
@@ -46,8 +48,6 @@ export function useCustomers(shopId?: string): UseCustomersReturn {
       setError(null);
 
       try {
-        const presenter =
-          await ClientCustomerSelectionPresenterFactory.create();
         const result = await presenter.getViewModel(shopId, 1, 100, {
           searchQuery,
           isActiveFilter: true, // Only fetch active customers by default
@@ -110,8 +110,6 @@ export function useCustomers(shopId?: string): UseCustomersReturn {
       setError(null);
 
       try {
-        const presenter =
-          await ClientCustomerSelectionPresenterFactory.create();
         const newCustomer = await presenter.createCustomer({
           shopId,
           name: customerData.name,

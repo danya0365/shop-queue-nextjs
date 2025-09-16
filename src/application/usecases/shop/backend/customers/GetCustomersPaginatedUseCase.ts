@@ -36,7 +36,6 @@ export class GetCustomersPaginatedUseCase
     input: GetCustomersPaginatedUseCaseInput
   ): Promise<PaginatedCustomersDTO> {
     const { page, perPage } = input;
-
     // Validate input
     if (page < 1) {
       throw new ShopBackendCustomerError(

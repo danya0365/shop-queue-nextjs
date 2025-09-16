@@ -50,28 +50,27 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
     }
   ): Promise<CustomerSelectionViewModel> {
     try {
-      this.logger.info("CustomerSelectionPresenter: Getting view model", {
-        shopId,
+      // Get customers data with filters
+      const customersData = await this.customersService.getCustomersPaginated({
         page,
         perPage,
-        filters,
+        searchTerm: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+        filters: {
+          shopId,
+          ...filters,
+        },
       });
 
-      // Get customers data with filters
-      const customersData = await this.customersService.getCustomersData(
-        page,
-        perPage,
-        undefined, // searchTerm
-        undefined, // sortBy
-        undefined, // sortOrder
-        filters
-      );
+      const totalCount = customersData.pagination.totalItems;
+      const currentPage = customersData.pagination.currentPage;
 
       return {
-        customers: customersData.customers,
-        totalCount: customersData.totalCount,
-        currentPage: customersData.currentPage,
-        perPage: customersData.perPage,
+        customers: customersData.data,
+        totalCount,
+        currentPage,
+        perPage,
       };
     } catch (error) {
       this.logger.error(

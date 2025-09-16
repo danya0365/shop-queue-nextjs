@@ -34,6 +34,7 @@ export interface IShopBackendCustomersService {
     sortBy?: string,
     sortOrder?: "asc" | "desc",
     filters?: {
+      shopId?: string;
       searchQuery?: string;
       membershipTierFilter?: string;
       isActiveFilter?: boolean;
@@ -87,6 +88,7 @@ export class ShopBackendCustomersService
     sortBy?: string,
     sortOrder?: "asc" | "desc",
     filters?: {
+      shopId?: string;
       searchQuery?: string;
       membershipTierFilter?: string;
       isActiveFilter?: boolean;
