@@ -1,5 +1,11 @@
-import { QueueDTO, QueueStatsDTO } from '@/src/application/dtos/shop/backend/queues-dto';
-import { QueueEntity, QueueStatsEntity } from '@/src/domain/entities/shop/backend/backend-queue.entity';
+import {
+  QueueDTO,
+  QueueStatsDTO,
+} from "@/src/application/dtos/shop/backend/queues-dto";
+import {
+  QueueEntity,
+  QueueStatsEntity,
+} from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -19,12 +25,12 @@ export class QueueMapper {
       customerPhone: entity.customerPhone,
       shopId: entity.shopId,
       shopName: entity.shopName,
-      queueServices: entity.queueServices.map(service => ({
+      queueServices: entity.queueServices.map((service) => ({
         serviceId: service.serviceId,
         serviceName: service.serviceName,
         quantity: service.quantity,
         price: service.price,
-        total: service.total
+        total: service.total,
       })),
       queueNumber: entity.queueNumber,
       status: entity.status,
@@ -35,7 +41,7 @@ export class QueueMapper {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       calledAt: entity.calledAt,
-      completedAt: entity.completedAt
+      completedAt: entity.completedAt,
     };
   }
 
@@ -49,22 +55,26 @@ export class QueueMapper {
       // Today's statistics
       totalQueueToday: entity.totalQueueToday,
       waitingQueueToday: entity.waitingQueueToday,
+      confirmedQueueToday: entity.confirmedQueueToday,
+      servingQueueToday: entity.servingQueueToday,
       inProgressQueueToday: entity.inProgressQueueToday,
       totalCompletedToday: entity.totalCompletedToday,
       totalCancelledToday: entity.totalCancelledToday,
-      
+
       // All-time statistics
       allQueueTotal: entity.allQueueTotal,
       allWaitingQueue: entity.allWaitingQueue,
+      allConfirmedQueue: entity.allConfirmedQueue,
+      allServingQueue: entity.allServingQueue,
       allInProgressQueue: entity.allInProgressQueue,
       allCompletedTotal: entity.allCompletedTotal,
       allCancelledTotal: entity.allCancelledTotal,
-      
+
       // Performance metrics
       avgWaitTimeMinutes: entity.avgWaitTimeMinutes,
-      
+
       // Shop-specific data (optional)
-      shopId: entity.shopId
+      shopId: entity.shopId,
     };
   }
 }

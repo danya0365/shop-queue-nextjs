@@ -186,17 +186,21 @@ export class SupabaseBackendQueueRepository
           // Today's statistics
           totalQueueToday: 0,
           waitingQueueToday: 0,
+          confirmedQueueToday: 0,
+          servingQueueToday: 0,
           inProgressQueueToday: 0,
           totalCompletedToday: 0,
           totalCancelledToday: 0,
-          
+
           // All-time statistics
           allQueueTotal: 0,
           allWaitingQueue: 0,
+          allConfirmedQueue: 0,
+          allServingQueue: 0,
           allInProgressQueue: 0,
           allCompletedTotal: 0,
           allCancelledTotal: 0,
-          
+
           // Performance metrics
           avgWaitTimeMinutes: 0,
         };

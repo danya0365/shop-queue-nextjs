@@ -71,20 +71,24 @@ export interface QueueStatsSchema {
   // Today's statistics
   total_queue_today: number;
   waiting_queue_today: number;
+  confirmed_queue_today: number;
+  serving_queue_today: number;
   in_progress_queue_today: number;
   total_completed_today: number;
   total_cancelled_today: number;
-  
+
   // All-time statistics
   all_queue_total: number;
   all_waiting_queue: number;
+  all_confirmed_queue: number;
+  all_serving_queue: number;
   all_in_progress_queue: number;
   all_completed_total: number;
   all_cancelled_total: number;
-  
+
   // Performance metrics
   avg_wait_time_minutes: number;
-  
+
   // Shop-specific data (optional)
   shop_id?: string;
 }

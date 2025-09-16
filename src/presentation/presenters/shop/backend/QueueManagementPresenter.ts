@@ -47,8 +47,10 @@ export interface QueueManagementViewModel {
 
   // ข้อมูลสถิติ (ยังคงเดิม)
   waitingCount: number;
+  confirmedCount: number;
   servingCount: number;
   completedToday: number;
+  completedCount: number;
   averageWaitTime: number;
   filters: QueueFilter;
   subscription: {
@@ -172,8 +174,10 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
           },
         },
         waitingCount: stats.allWaitingQueue,
-        servingCount: stats.allInProgressQueue,
+        confirmedCount: stats.allConfirmedQueue,
+        servingCount: stats.allServingQueue,
         completedToday: stats.totalCompletedToday,
+        completedCount: stats.allCompletedTotal,
         averageWaitTime: stats.avgWaitTimeMinutes,
         filters: {
           status: filters?.status || "all",

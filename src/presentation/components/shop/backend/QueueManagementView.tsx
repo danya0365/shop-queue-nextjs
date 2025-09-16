@@ -102,8 +102,14 @@ export function QueueManagementView({
     return null;
   }
 
-  const { queues, waitingCount, servingCount, completedToday, subscription } =
-    viewModel;
+  const {
+    queues,
+    waitingCount,
+    confirmedCount,
+    servingCount,
+    completedCount,
+    subscription,
+  } = viewModel;
   const { data: queueData, pagination } = queues;
 
   const getStatusColor = (status: QueueItem["status"]) => {
@@ -243,8 +249,6 @@ export function QueueManagementView({
       // Error is already handled by the presenter and shown in the UI
     }
   };
-
-  console.log(viewModel.shop.status);
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -446,6 +450,20 @@ export function QueueManagementView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  ยืนยันแล้ว
+                </p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {confirmedCount}
+                </p>
+              </div>
+              <span className="text-3xl">✔️</span>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   กำลังให้บริการ
                 </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -460,13 +478,13 @@ export function QueueManagementView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  เสร็จสิ้นวันนี้
+                  เสร็จสิ้น
                 </p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {completedToday}
+                  {completedCount}
                 </p>
               </div>
-              <span className="text-3xl">✅</span>
+              <span className="text-3xl">🎉</span>
             </div>
           </div>
         </div>

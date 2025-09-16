@@ -4,6 +4,8 @@ SELECT
     -- Today's statistics
     COUNT(*) FILTER (WHERE created_at::date = CURRENT_DATE) AS total_queue_today,
     COUNT(*) FILTER (WHERE status = 'waiting' AND created_at::date = CURRENT_DATE) AS waiting_queue_today,
+    COUNT(*) FILTER (WHERE status = 'confirmed' AND created_at::date = CURRENT_DATE) AS confirmed_queue_today,
+    COUNT(*) FILTER (WHERE status = 'serving' AND created_at::date = CURRENT_DATE) AS serving_queue_today,
     COUNT(*) FILTER (WHERE status IN ('confirmed','serving') AND created_at::date = CURRENT_DATE) AS in_progress_queue_today,
     COUNT(*) FILTER (
         WHERE status = 'completed'
@@ -17,6 +19,8 @@ SELECT
     -- All-time statistics
     COUNT(*) AS all_queue_total,
     COUNT(*) FILTER (WHERE status = 'waiting') AS all_waiting_queue,
+    COUNT(*) FILTER (WHERE status = 'confirmed') AS all_confirmed_queue,
+    COUNT(*) FILTER (WHERE status = 'serving') AS all_serving_queue,
     COUNT(*) FILTER (WHERE status IN ('confirmed','serving')) AS all_in_progress_queue,
     COUNT(*) FILTER (WHERE status = 'completed') AS all_completed_total,
     COUNT(*) FILTER (WHERE status = 'cancelled') AS all_cancelled_total,
@@ -39,6 +43,8 @@ SELECT
     -- Today's statistics
     COUNT(*) FILTER (WHERE created_at::date = CURRENT_DATE) AS total_queue_today,
     COUNT(*) FILTER (WHERE status = 'waiting' AND created_at::date = CURRENT_DATE) AS waiting_queue_today,
+    COUNT(*) FILTER (WHERE status = 'confirmed' AND created_at::date = CURRENT_DATE) AS confirmed_queue_today,
+    COUNT(*) FILTER (WHERE status = 'serving' AND created_at::date = CURRENT_DATE) AS serving_queue_today,
     COUNT(*) FILTER (WHERE status IN ('confirmed','serving') AND created_at::date = CURRENT_DATE) AS in_progress_queue_today,
     COUNT(*) FILTER (
         WHERE status = 'completed'
@@ -52,6 +58,8 @@ SELECT
     -- All-time statistics
     COUNT(*) AS all_queue_total,
     COUNT(*) FILTER (WHERE status = 'waiting') AS all_waiting_queue,
+    COUNT(*) FILTER (WHERE status = 'confirmed') AS all_confirmed_queue,
+    COUNT(*) FILTER (WHERE status = 'serving') AS all_serving_queue,
     COUNT(*) FILTER (WHERE status IN ('confirmed','serving')) AS all_in_progress_queue,
     COUNT(*) FILTER (WHERE status = 'completed') AS all_completed_total,
     COUNT(*) FILTER (WHERE status = 'cancelled') AS all_cancelled_total,

@@ -28,6 +28,7 @@ CREATE OR REPLACE VIEW public.queue_status_distribution_view AS
 SELECT 
     -- Count queues by status for all queues
     COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'confirmed' THEN 1 END) as confirmed,
     COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
     COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
     COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
@@ -47,6 +48,7 @@ CREATE OR REPLACE VIEW public.queue_status_distribution_today_view AS
 SELECT 
     -- Count queues by status for today
     COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'confirmed' THEN 1 END) as confirmed,
     COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
     COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
     COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
@@ -72,6 +74,7 @@ SELECT
     s.name as shop_name,
     -- Count queues by status for today
     COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'confirmed' THEN 1 END) as confirmed,
     COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
     COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
     COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
@@ -102,6 +105,7 @@ SELECT
     DATE(q.created_at) as queue_date,
     -- Count queues by status
     COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+    COUNT(CASE WHEN q.status = 'confirmed' THEN 1 END) as confirmed,
     COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
     COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
     COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
@@ -129,6 +133,7 @@ CREATE OR REPLACE FUNCTION public.get_queue_status_distribution(
     p_end_date DATE DEFAULT CURRENT_DATE
 ) RETURNS TABLE(
     waiting BIGINT,
+    confirmed BIGINT,
     serving BIGINT,
     completed BIGINT,
     cancelled BIGINT,
@@ -147,6 +152,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         COUNT(CASE WHEN q.status = 'waiting' THEN 1 END) as waiting,
+        COUNT(CASE WHEN q.status = 'confirmed' THEN 1 END) as confirmed,
         COUNT(CASE WHEN q.status = 'serving' THEN 1 END) as serving,
         COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
         COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
@@ -164,14 +170,6 @@ BEGIN
     AND q.created_at < p_end_date + INTERVAL '1 day';
 END;
 $$;
-
--- Row Level Security for the views
--- Views inherit RLS from underlying tables, but we can add explicit policies if needed
-
--- Grant usage permissions
-GRANT SELECT ON public.queue_status_distribution_view TO authenticated;
-GRANT SELECT ON public.queue_status_distribution_flexible_view TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_queue_status_distribution(UUID, DATE, DATE) TO authenticated;
 
 
 -- สร้าง View สำหรับ Popular Services

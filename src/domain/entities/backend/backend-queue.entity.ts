@@ -111,6 +111,8 @@ export interface QueueStatsEntity {
   // Today's statistics
   totalQueueToday: number;
   waitingQueueToday: number;
+  confirmedQueueToday: number;
+  servingQueueToday: number;
   inProgressQueueToday: number;
   totalCompletedToday: number;
   totalCancelledToday: number;
@@ -118,6 +120,8 @@ export interface QueueStatsEntity {
   // All-time statistics
   allQueueTotal: number;
   allWaitingQueue: number;
+  allConfirmedQueue: number;
+  allServingQueue: number;
   allInProgressQueue: number;
   allCompletedTotal: number;
   allCancelledTotal: number;
