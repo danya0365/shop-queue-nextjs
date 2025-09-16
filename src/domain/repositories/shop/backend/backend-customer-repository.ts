@@ -1,15 +1,19 @@
-import type { CustomerEntity, CustomerStatsEntity, PaginatedCustomersEntity } from '@/src/domain/entities/shop/backend/backend-customer.entity';
-import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type {
+  CustomerEntity,
+  CustomerStatsEntity,
+  PaginatedCustomersEntity,
+} from "@/src/domain/entities/shop/backend/backend-customer.entity";
+import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 
 /**
  * Customer repository error types
  */
 export enum ShopBackendCustomerErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -22,10 +26,10 @@ export class ShopBackendCustomerError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendCustomerError';
+    this.name = "ShopBackendCustomerError";
   }
 }
 
@@ -40,17 +44,20 @@ export interface ShopBackendCustomerRepository {
    * @returns Paginated customers data
    * @throws ShopBackendCustomerError if the operation fails
    */
-  getPaginatedCustomers(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      membershipTierFilter?: string;
-      isActiveFilter?: boolean;
-      minTotalPoints?: number;
-      maxTotalPoints?: number;
-      minTotalQueues?: number;
-      maxTotalQueues?: number;
-    };
-  }): Promise<PaginatedCustomersEntity>;
+  getPaginatedCustomers(
+    params: PaginationParams & {
+      filters?: {
+        shopId?: string;
+        searchQuery?: string;
+        membershipTierFilter?: string;
+        isActiveFilter?: boolean;
+        minTotalPoints?: number;
+        maxTotalPoints?: number;
+        minTotalQueues?: number;
+        maxTotalQueues?: number;
+      };
+    }
+  ): Promise<PaginatedCustomersEntity>;
 
   /**
    * Get customer statistics
@@ -73,7 +80,18 @@ export interface ShopBackendCustomerRepository {
    * @returns Created customer entity
    * @throws ShopBackendCustomerError if the operation fails
    */
-  createCustomer(customer: Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>): Promise<CustomerEntity>;
+  createCustomer(
+    customer: Omit<
+      CustomerEntity,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "totalQueues"
+      | "totalPoints"
+      | "membershipTier"
+      | "lastVisit"
+    >
+  ): Promise<CustomerEntity>;
 
   /**
    * Update an existing customer
@@ -82,7 +100,21 @@ export interface ShopBackendCustomerRepository {
    * @returns Updated customer entity
    * @throws ShopBackendCustomerError if the operation fails
    */
-  updateCustomer(id: string, customer: Partial<Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>>): Promise<CustomerEntity>;
+  updateCustomer(
+    id: string,
+    customer: Partial<
+      Omit<
+        CustomerEntity,
+        | "id"
+        | "createdAt"
+        | "updatedAt"
+        | "totalQueues"
+        | "totalPoints"
+        | "membershipTier"
+        | "lastVisit"
+      >
+    >
+  ): Promise<CustomerEntity>;
 
   /**
    * Delete a customer
