@@ -182,8 +182,12 @@ export function useQueueManagementPresenter(
     async (
       queueId: string,
       data: {
-        services?: string[];
-        priority?: string;
+        services?: {
+          serviceId: string;
+          quantity: number;
+          price?: number;
+        }[];
+        priority?: QueueItem["priority"];
         notes?: string;
       }
     ) => {
@@ -200,8 +204,12 @@ export function useQueueManagementPresenter(
           shopId,
           queueId,
           data as {
-            services: string[];
-            priority: "normal" | "high" | "vip";
+            services: {
+              serviceId: string;
+              quantity: number;
+              price?: number;
+            }[];
+            priority: QueueItem["priority"];
             notes?: string;
           }
         );
@@ -233,7 +241,7 @@ export function useQueueManagementPresenter(
         );
         const presenter = await ClientQueueManagementPresenterFactory.create();
 
-        await presenter.deleteQueue(shopId, queueId);
+        await presenter.deleteQueue(queueId);
 
         // Refresh data after delete
         await loadData();
@@ -247,7 +255,7 @@ export function useQueueManagementPresenter(
         setActionLoading((prev) => ({ ...prev, deleteQueue: false }));
       }
     },
-    [shopId, loadData]
+    [loadData]
   );
 
   // Create new queue (with inline customer creation)
@@ -255,9 +263,13 @@ export function useQueueManagementPresenter(
     async (data: {
       customerName: string;
       customerPhone: string;
-      services: string[];
-      priority: "normal" | "high" | "vip";
+      priority: QueueItem["priority"];
       notes?: string;
+      services: {
+        serviceId: string;
+        price?: number;
+        quantity: number;
+      }[];
     }) => {
       try {
         setActionLoading((prev) => ({ ...prev, createQueue: true }));

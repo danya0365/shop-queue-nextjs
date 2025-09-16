@@ -2974,8 +2974,8 @@ export type Database = {
           total_services: number | null
           unavailable_services: number | null
           unpaid_payments: number | null
+          urgent_priority_queues: number | null
           used_reward_usages: number | null
-          vip_queues: number | null
           waiting_queues: number | null
         }
         Relationships: []
@@ -3659,13 +3659,14 @@ export type Database = {
         | "fixed_amount"
         | "buy_x_get_y"
         | "free_item"
-      queue_priority: "normal" | "high" | "vip"
+      queue_priority: "normal" | "high" | "urgent"
       queue_status:
         | "waiting"
         | "confirmed"
         | "serving"
         | "completed"
         | "cancelled"
+        | "no_show"
       redemption_type:
         | "points_redemption"
         | "free_reward"
@@ -3869,13 +3870,14 @@ export const Constants = {
         "buy_x_get_y",
         "free_item",
       ],
-      queue_priority: ["normal", "high", "vip"],
+      queue_priority: ["normal", "high", "urgent"],
       queue_status: [
         "waiting",
         "confirmed",
         "serving",
         "completed",
         "cancelled",
+        "no_show",
       ],
       redemption_type: [
         "points_redemption",

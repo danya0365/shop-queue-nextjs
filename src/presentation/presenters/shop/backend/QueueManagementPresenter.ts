@@ -212,37 +212,11 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     status: QueueStatus
   ) {
     try {
-      this.logger.info("QueueManagementPresenter: Updating queue status", {
-        shopId,
-        queueId,
-        status,
-      });
-
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const profile = await this.getActiveProfile(user);
-      if (!profile) {
-        throw new Error("Profile not found");
-      }
-
       const result = await this.backendQueuesService.updateQueueStatus({
         queueId,
         status,
         shopId,
       });
-
-      this.logger.info(
-        "QueueManagementPresenter: Queue status updated successfully",
-        {
-          shopId,
-          queueId,
-          status,
-          result,
-        }
-      );
 
       return result;
     } catch (error) {
@@ -258,46 +232,25 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     shopId: string,
     queueId: string,
     data: {
-      services: string[];
-      priority: "normal" | "high" | "vip";
+      services: {
+        serviceId: string;
+        quantity: number;
+        price?: number;
+      }[];
+      priority: QueueItem["priority"];
       notes?: string;
     }
   ) {
     try {
-      this.logger.info("QueueManagementPresenter: Updating queue", {
-        shopId,
-        queueId,
-        data,
-      });
-
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const profile = await this.getActiveProfile(user);
-      if (!profile) {
-        throw new Error("Profile not found");
-      }
-
-      // Map UI priority to backend priority
-      const backendPriority =
-        data.priority === "vip" ? "urgent" : data.priority;
-
       const result = await this.backendQueuesService.updateQueue(queueId, {
-        priority: backendPriority,
+        priority: data.priority,
         notes: data.notes,
-        // Note: services update requires queueServices array with serviceId, quantity, price
-        // This will be handled in the actual implementation
+        queueServices: data.services.map((service) => ({
+          serviceId: service.serviceId,
+          quantity: service.quantity,
+          price: service.price,
+        })),
       });
-
-      this.logger.info("QueueManagementPresenter: Queue updated successfully", {
-        shopId,
-        queueId,
-        data,
-        result,
-      });
-
       return result;
     } catch (error) {
       this.logger.error(
@@ -308,30 +261,9 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     }
   }
 
-  async deleteQueue(shopId: string, queueId: string) {
+  async deleteQueue(queueId: string) {
     try {
-      this.logger.info("QueueManagementPresenter: Deleting queue", {
-        shopId,
-        queueId,
-      });
-
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const profile = await this.getActiveProfile(user);
-      if (!profile) {
-        throw new Error("Profile not found");
-      }
-
       const result = await this.backendQueuesService.deleteQueue(queueId);
-
-      this.logger.info("QueueManagementPresenter: Queue deleted successfully", {
-        shopId,
-        queueId,
-        result,
-      });
 
       return result;
     } catch (error) {
@@ -348,31 +280,16 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     data: {
       customerName: string;
       customerPhone: string;
-      services: string[];
-      priority: "normal" | "high" | "vip";
+      priority: "normal" | "high" | "urgent";
       notes?: string;
+      services: {
+        serviceId: string;
+        price?: number;
+        quantity: number;
+      }[];
     }
   ) {
     try {
-      this.logger.info("QueueManagementPresenter: Creating queue", {
-        shopId,
-        data,
-      });
-
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const profile = await this.getActiveProfile(user);
-      if (!profile) {
-        throw new Error("Profile not found");
-      }
-
-      // Map UI priority to backend priority
-      const backendPriority =
-        data.priority === "vip" ? "urgent" : data.priority;
-
       // For now, we'll create a simple queue without customer lookup
       // In a real implementation, we would:
       // 1. Check if customer exists by phone
@@ -390,19 +307,14 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
         shopId,
         queueNumber,
         status: "waiting",
-        priority: backendPriority,
+        priority: data.priority,
         estimatedWaitTime: 15, // Default 15 minutes
         notes: data.notes,
-        queueServices: data.services.map((serviceId) => ({
-          serviceId,
-          quantity: 1,
+        queueServices: data.services.map((service) => ({
+          serviceId: service.serviceId,
+          quantity: service.quantity,
+          price: service.price,
         })),
-      });
-
-      this.logger.info("QueueManagementPresenter: Queue created successfully", {
-        shopId,
-        data,
-        result,
       });
 
       return result;

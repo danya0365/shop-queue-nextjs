@@ -171,7 +171,11 @@ export function QueueManagementView({
   const handleUpdateQueue = async (
     queueId: string,
     data: {
-      services: string[];
+      services: {
+        serviceId: string;
+        quantity: number;
+        price?: number;
+      }[];
       priority: QueueItem["priority"];
       notes?: string;
     }
@@ -214,12 +218,22 @@ export function QueueManagementView({
   const handleCreateQueue = async (data: {
     customerName: string;
     customerPhone: string;
-    services: string[];
-    priority: "normal" | "high" | "vip";
+    services: {
+      serviceId: string;
+      price?: number;
+      quantity: number;
+    }[];
+    priority: QueueItem["priority"];
     notes?: string;
   }) => {
     try {
-      await createQueue(data);
+      await createQueue({
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        services: data.services,
+        priority: data.priority,
+        notes: data.notes,
+      });
       setCreateModalOpen(false);
       // Success notification could be added here
     } catch (error) {

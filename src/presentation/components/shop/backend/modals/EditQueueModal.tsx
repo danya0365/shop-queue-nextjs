@@ -11,7 +11,11 @@ interface EditQueueModalProps {
   onSave: (
     queueId: string,
     data: {
-      services: string[];
+      services: {
+        serviceId: string;
+        quantity: number;
+        price?: number;
+      }[];
       priority: QueueItem["priority"];
       notes?: string;
     }
@@ -86,9 +90,16 @@ export function EditQueueModal({
       return;
     }
 
+    // TODO: will implement quantity and price later
+    const servicesWithDetails = selectedServices.map((serviceId) => ({
+      serviceId,
+      quantity: 1,
+      price: undefined,
+    }));
+
     try {
       await onSave(queue.id, {
-        services: selectedServices,
+        services: servicesWithDetails,
         priority,
         notes: notes.trim() || undefined,
       });
