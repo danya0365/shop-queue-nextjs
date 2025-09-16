@@ -942,10 +942,10 @@ $$;
 -- CUSTOMERS TABLE RLS POLICIES
 -- =============================================================================
 
--- Customers can be viewed by everyone (for queue system)
-CREATE POLICY "Everyone can view customers"
+-- Only shop employees, managers, and owner can view customers
+CREATE POLICY "Shop employees, managers, and owner can view customers"
   ON public.customers FOR SELECT
-  USING (true);
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
 -- Only shop managers can update/delete customers directly
 CREATE POLICY "Shop managers can update customers"
