@@ -1474,17 +1474,20 @@ $$;
 -- QUEUE SERVICES TABLE RLS POLICIES
 -- =============================================================================
 
--- Everyone can view queue services
-CREATE POLICY "Everyone can view queue services"
+-- Only shop employees, managers and owners can view queue services
+CREATE POLICY "Only shop employees, managers and owners can view queue services"
   ON public.queue_services FOR SELECT
-  USING (true);
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  ));
 
 -- Only shop employees, managers and owners can insert queue services
 CREATE POLICY "Only shop employees, managers and owners can insert queue services"
   ON public.queue_services FOR INSERT
   WITH CHECK (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
 -- Only shop employees, managers and owners can update queue services
@@ -1492,7 +1495,7 @@ CREATE POLICY "Only shop employees, managers and owners can update queue service
   ON public.queue_services FOR UPDATE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
 -- Only shop employees, managers and owners can delete queue services
@@ -1500,7 +1503,7 @@ CREATE POLICY "Only shop employees, managers and owners can delete queue service
   ON public.queue_services FOR DELETE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
 
