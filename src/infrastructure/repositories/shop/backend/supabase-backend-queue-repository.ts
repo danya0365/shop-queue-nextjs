@@ -26,7 +26,6 @@ import {
   ServiceSchema,
 } from "@/src/infrastructure/schemas/shop/backend/queue.schema";
 import { StandardRepository } from "../../base/standard-repository";
-import { CustomerSchema } from "@/src/infrastructure/schemas/backend/customer.schema";
 
 // Extended types for joined data
 type QueueWithCustomerAndShop = QueueSchema & {
@@ -328,19 +327,19 @@ export class SupabaseShopBackendQueueRepository
           inProgressQueueToday: 0,
           totalCompletedToday: 0,
           totalCancelledToday: 0,
-          
+
           // All-time statistics
           allQueueTotal: 0,
           allWaitingQueue: 0,
           allInProgressQueue: 0,
           allCompletedTotal: 0,
           allCancelledTotal: 0,
-          
+
           // Performance metrics
           avgWaitTimeMinutes: 0,
-          
+
           // Shop-specific data (optional)
-          shopId: shopId
+          shopId: shopId,
         };
       }
 
@@ -560,7 +559,7 @@ export class SupabaseShopBackendQueueRepository
 
       // Insert queue in database
       // call rpc function to create queue
-      const createdQueue = await this.dataSource.callRpc<QueueSchemaRecord>(
+      const createdQueueId = await this.dataSource.callRpc<string>(
         "create_queue",
         {
           p_shop_id: queueSchema.shop_id,
@@ -579,12 +578,7 @@ export class SupabaseShopBackendQueueRepository
         }
       );
 
-      // const createdQueue = await this.dataSource.insert<QueueSchemaRecord>(
-      //   'queues',
-      //   queueSchema
-      // );
-
-      if (!createdQueue) {
+      if (!createdQueueId) {
         throw new ShopBackendQueueError(
           ShopBackendQueueErrorType.OPERATION_FAILED,
           "Failed to create queue",
@@ -593,26 +587,8 @@ export class SupabaseShopBackendQueueRepository
         );
       }
 
-      // Create queue services
-      const queueServices = queue.queueServices.map((service) => ({
-        queue_id: createdQueue.id,
-        service_id: service.serviceId,
-        quantity: service.quantity,
-        price: service.price,
-      }));
-
-      // Create queue services in database - one by one since createMany doesn't exist
-      if (queueServices.length > 0) {
-        for (const service of queueServices) {
-          await this.dataSource.insert<QueueServiceSchemaRecord>(
-            "queue_services",
-            service
-          );
-        }
-      }
-
       // Get the created queue with all relations
-      return this.getQueueById(createdQueue.id) as Promise<QueueEntity>;
+      return this.getQueueById(createdQueueId) as Promise<QueueEntity>;
     } catch (error) {
       if (error instanceof ShopBackendQueueError) {
         throw error;

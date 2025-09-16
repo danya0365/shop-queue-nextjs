@@ -1044,24 +1044,19 @@ $$;
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================
 
--- Everyone can view queues (for public queue display)
-CREATE POLICY "Everyone can view queues"
-  ON public.queues FOR SELECT
-  USING (true);
+-- Only shop managers can update/delete queues directly
+CREATE POLICY "Shop managers can update queues"
+  ON public.queues FOR UPDATE
+  USING (public.is_shop_manager(shop_id))
+  WITH CHECK (public.is_shop_manager(shop_id));
 
--- No direct INSERT/UPDATE/DELETE - must use API functions
--- Only shop managers can delete queues (emergency cleanup)
 CREATE POLICY "Shop managers can delete queues"
   ON public.queues FOR DELETE
   USING (public.is_shop_manager(shop_id));
 
--- Remove direct table access for queues - all operations must go through API functions
-REVOKE ALL ON TABLE public.queues FROM anon;
-REVOKE ALL ON TABLE public.queues FROM authenticated;
-
--- Grant SELECT access for viewing queues
-GRANT SELECT ON TABLE public.queues TO anon;
-GRANT SELECT ON TABLE public.queues TO authenticated;
+-- Remove direct INSERT access - queues are created through queue API functions
+REVOKE INSERT ON TABLE public.queues FROM anon;
+REVOKE INSERT ON TABLE public.queues FROM authenticated;
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR QUEUE OPERATIONS
