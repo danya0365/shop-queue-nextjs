@@ -1,6 +1,7 @@
 "use client";
 
 import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import { useState } from "react";
 
 interface CreateCustomerModalProps {
@@ -22,7 +23,7 @@ export function CreateCustomerModal({
     name: "",
     email: "",
     phone: "",
-    membershipTier: "regular" as const,
+    membershipTier: MembershipTier.REGULAR,
     isActive: true,
   });
 
@@ -60,6 +61,7 @@ export function CreateCustomerModal({
     try {
       await onSubmit({
         ...formData,
+        profileId: null,
         totalPoints: 0,
         totalQueues: 0,
       });
@@ -69,7 +71,7 @@ export function CreateCustomerModal({
         name: "",
         email: "",
         phone: "",
-        membershipTier: "regular",
+        membershipTier: MembershipTier.REGULAR,
         isActive: true,
       });
       setErrors({});

@@ -64,7 +64,7 @@ export interface ShopBackendCustomerRepository {
    * @returns Customer statistics data
    * @throws ShopBackendCustomerError if the operation fails
    */
-  getCustomerStats(): Promise<CustomerStatsEntity>;
+  getCustomerStats(shopId: string): Promise<CustomerStatsEntity>;
 
   /**
    * Get customer by ID

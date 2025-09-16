@@ -22,6 +22,7 @@ export class SupabaseShopBackendCustomerMapper {
   public static toDomain(schema: CustomerSchema): CustomerEntity {
     return {
       shopId: schema.shop_id,
+      profileId: schema.profile_id,
       id: schema.id,
       name: schema.name,
       phone: schema.phone,
@@ -49,6 +50,7 @@ export class SupabaseShopBackendCustomerMapper {
   public static toSchema(entity: CustomerEntity): CustomerSchema {
     return {
       shop_id: entity.shopId,
+      profile_id: entity.profileId,
       id: entity.id,
       name: entity.name,
       phone: entity.phone,
@@ -73,6 +75,7 @@ export class SupabaseShopBackendCustomerMapper {
   ): CustomerStatsEntity {
     return {
       totalCustomers: schema.total_customers,
+      totalRegisteredCustomers: schema.total_registered_customers,
       newCustomersThisMonth: schema.new_customers_this_month,
       activeCustomersToday: schema.active_customers_today,
       goldMembers: schema.gold_members,

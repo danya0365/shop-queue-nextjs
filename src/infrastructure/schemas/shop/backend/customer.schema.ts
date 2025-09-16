@@ -8,6 +8,7 @@
  */
 export interface CustomerSchema {
   shop_id: string;
+  profile_id: string | null;
   id: string;
   name: string;
   phone: string | null;
@@ -30,6 +31,7 @@ export interface CustomerSchema {
  */
 export interface CustomerStatsSchema {
   total_customers: number;
+  total_registered_customers: number;
   new_customers_this_month: number;
   active_customers_today: number;
   gold_members: number;

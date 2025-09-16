@@ -5,17 +5,17 @@ import type {
   PaginatedCustomersDTO,
 } from "@/src/application/dtos/shop/backend/customers-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
-import { DeleteCustomerUseCase } from "@/src/application/usecases/backend/customers/DeleteCustomerUseCase";
-import { GetCustomerByIdUseCase } from "@/src/application/usecases/backend/customers/GetCustomerByIdUseCase";
-import { GetCustomerStatsUseCase } from "@/src/application/usecases/backend/customers/GetCustomerStatsUseCase";
 import {
   CreateCustomerUseCase,
   type CreateCustomerUseCaseInput,
 } from "@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase";
+import { DeleteCustomerUseCase } from "@/src/application/usecases/shop/backend/customers/DeleteCustomerUseCase";
+import { GetCustomerByIdUseCase } from "@/src/application/usecases/shop/backend/customers/GetCustomerByIdUseCase";
 import {
   GetCustomersPaginatedUseCase,
   type GetCustomersPaginatedUseCaseInput,
 } from "@/src/application/usecases/shop/backend/customers/GetCustomersPaginatedUseCase";
+import { GetCustomerStatsUseCase } from "@/src/application/usecases/shop/backend/customers/GetCustomerStatsUseCase";
 import {
   UpdateCustomerUseCase,
   type UpdateCustomerUseCaseInput,
@@ -28,13 +28,13 @@ export interface IShopBackendCustomersService {
     input: GetCustomersPaginatedUseCaseInput
   ): Promise<PaginatedCustomersDTO>;
   getCustomersData(
+    shopId: string,
     page?: number,
     perPage?: number,
     searchTerm?: string,
     sortBy?: string,
     sortOrder?: "asc" | "desc",
     filters?: {
-      shopId?: string;
       searchQuery?: string;
       membershipTierFilter?: string;
       isActiveFilter?: boolean;
@@ -61,7 +61,10 @@ export class ShopBackendCustomersService
       GetCustomersPaginatedUseCaseInput,
       PaginatedCustomersDTO
     >,
-    private readonly getCustomerStatsUseCase: IUseCase<void, CustomerStatsDTO>,
+    private readonly getCustomerStatsUseCase: IUseCase<
+      string,
+      CustomerStatsDTO
+    >,
     private readonly getCustomerByIdUseCase: IUseCase<string, CustomerDTO>,
     private readonly createCustomerUseCase: IUseCase<
       CreateCustomerUseCaseInput,
@@ -82,13 +85,13 @@ export class ShopBackendCustomersService
   }
 
   async getCustomersData(
+    shopId: string,
     page: number = 1,
     perPage: number = 10,
     searchTerm?: string,
     sortBy?: string,
     sortOrder?: "asc" | "desc",
     filters?: {
-      shopId?: string;
       searchQuery?: string;
       membershipTierFilter?: string;
       isActiveFilter?: boolean;
@@ -100,6 +103,12 @@ export class ShopBackendCustomersService
   ): Promise<CustomersDataDTO> {
     try {
       // Get customers and stats in parallel
+      // Merge shopId with provided filters
+      const mergedFilters = {
+        ...filters,
+        shopId: shopId,
+      };
+
       const [customersResult, stats] = await Promise.all([
         this.getCustomersPaginatedUseCase.execute({
           page,
@@ -107,9 +116,9 @@ export class ShopBackendCustomersService
           searchTerm,
           sortBy,
           sortOrder,
-          filters,
+          filters: mergedFilters,
         }),
-        this.getCustomerStatsUseCase.execute(),
+        this.getCustomerStatsUseCase.execute(shopId),
       ]);
 
       this.logger.info(

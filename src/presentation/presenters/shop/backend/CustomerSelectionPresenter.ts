@@ -97,6 +97,7 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
       });
 
       const customer = await this.customersService.createCustomer({
+        profileId: null,
         shopId: customerData.shopId,
         name: customerData.name,
         phone: customerData.phone,

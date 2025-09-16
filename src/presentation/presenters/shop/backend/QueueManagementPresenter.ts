@@ -91,13 +91,6 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     }
   ): Promise<QueueManagementViewModel> {
     try {
-      this.logger.info("QueueManagementPresenter: Getting view model", {
-        shopId,
-        page,
-        perPage,
-        filters,
-      });
-
       const user = await this.getUser();
       if (!user) {
         throw new Error("User not authenticated");

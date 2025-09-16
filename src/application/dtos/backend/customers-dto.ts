@@ -1,16 +1,18 @@
+import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 
 export interface CustomerDTO {
   id: string;
+  profileId: string | null;
   name: string;
   phone?: string;
   email?: string;
   dateOfBirth?: string;
-  gender?: 'male' | 'female' | 'other';
+  gender?: "male" | "female" | "other";
   address?: string;
   totalQueues: number; // joined from queue history
   totalPoints: number; // joined from customer points
-  membershipTier: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum';  // joined from customer points
+  membershipTier: MembershipTier; // joined from customer points
   lastVisit?: string;
   notes?: string;
   isActive: boolean;
@@ -20,6 +22,7 @@ export interface CustomerDTO {
 
 export interface CustomerStatsDTO {
   totalCustomers: number;
+  totalRegisteredCustomers: number;
   newCustomersThisMonth: number;
   activeCustomersToday: number;
   goldMembers: number;

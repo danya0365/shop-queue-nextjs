@@ -26,7 +26,7 @@ import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type CustomerWithJoinedData = CustomerSchema & {
-  queue_history?: { count?: number };
+  queues?: { count?: number };
   customer_points?: { total_points?: number; membership_tier?: string };
 };
 type CustomerSchemaRecord = Record<string, unknown> & CustomerSchema;
@@ -147,7 +147,7 @@ export class SupabaseShopBackendCustomerRepository
 
         const customerWithJoinedFields = {
           ...customer,
-          total_queues: customerWithJoinedData.queue_history?.count || 0,
+          total_queues: customerWithJoinedData.queues?.count || 0,
           total_points:
             customerWithJoinedData.customer_points?.total_points || 0,
           membership_tier: membershipTier,
@@ -232,11 +232,18 @@ export class SupabaseShopBackendCustomerRepository
    * Get customer statistics from database
    * @returns Customer statistics
    */
-  async getCustomerStats(): Promise<CustomerStatsEntity> {
+  async getCustomerStats(shopId: string): Promise<CustomerStatsEntity> {
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
         select: ["*"],
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: shopId,
+          },
+        ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
@@ -245,7 +252,7 @@ export class SupabaseShopBackendCustomerRepository
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData =
         await this.dataSource.getAdvanced<CustomerStatsSchemaRecord>(
-          "customer_stats_view",
+          "customer_stats_by_shop_view",
           queryOptions
         );
 
@@ -253,6 +260,7 @@ export class SupabaseShopBackendCustomerRepository
         // If no stats are found, return default values
         return {
           totalCustomers: 0,
+          totalRegisteredCustomers: 0,
           newCustomersThisMonth: 0,
           activeCustomersToday: 0,
           goldMembers: 0,
@@ -320,7 +328,7 @@ export class SupabaseShopBackendCustomerRepository
 
       const customerWithJoinedFields = {
         ...customer,
-        total_queues: customerWithJoinedData.queue_history?.count || 0,
+        total_queues: customerWithJoinedData.queues?.count || 0,
         total_points: customerWithJoinedData.customer_points?.total_points || 0,
         membership_tier: membershipTier,
       };

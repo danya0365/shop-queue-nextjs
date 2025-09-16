@@ -1,5 +1,11 @@
-import { CustomerDTO, CustomerStatsDTO } from '@/src/application/dtos/shop/backend/customers-dto';
-import { CustomerEntity, CustomerStatsEntity } from '@/src/domain/entities/shop/backend/backend-customer.entity';
+import {
+  CustomerDTO,
+  CustomerStatsDTO,
+} from "@/src/application/dtos/shop/backend/customers-dto";
+import {
+  CustomerEntity,
+  CustomerStatsEntity,
+} from "@/src/domain/entities/shop/backend/backend-customer.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -14,6 +20,7 @@ export class CustomerMapper {
   public static toDTO(entity: CustomerEntity): CustomerDTO {
     return {
       id: entity.id,
+      profileId: entity.profileId,
       name: entity.name,
       phone: entity.phone || undefined,
       email: entity.email || undefined,
@@ -27,7 +34,7 @@ export class CustomerMapper {
       notes: entity.notes || undefined,
       isActive: entity.isActive,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -39,12 +46,13 @@ export class CustomerMapper {
   public static statsToDTO(entity: CustomerStatsEntity): CustomerStatsDTO {
     return {
       totalCustomers: entity.totalCustomers,
+      totalRegisteredCustomers: entity.totalRegisteredCustomers,
       newCustomersThisMonth: entity.newCustomersThisMonth,
       activeCustomersToday: entity.activeCustomersToday,
       goldMembers: entity.goldMembers,
       silverMembers: entity.silverMembers,
       bronzeMembers: entity.bronzeMembers,
-      regularMembers: entity.regularMembers
+      regularMembers: entity.regularMembers,
     };
   }
 }

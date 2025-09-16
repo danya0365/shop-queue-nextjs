@@ -25,7 +25,7 @@ import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
 type CustomerWithJoinedData = CustomerSchema & {
-  queue_history?: { count?: number };
+  queues?: { count?: number };
   customer_points?: { total_points?: number; membership_tier?: string };
 };
 type CustomerSchemaRecord = Record<string, unknown> & CustomerSchema;
@@ -91,7 +91,7 @@ export class SupabaseBackendCustomerRepository
 
         const customerWithJoinedFields = {
           ...customer,
-          total_queues: customerWithJoinedData.queue_history?.count || 0,
+          total_queues: customerWithJoinedData.queues?.count || 0,
           total_points:
             customerWithJoinedData.customer_points?.total_points || 0,
           membership_tier: membershipTier,
@@ -143,7 +143,7 @@ export class SupabaseBackendCustomerRepository
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData =
         await this.dataSource.getAdvanced<CustomerStatsSchemaRecord>(
-          "customer_stats_view",
+          "customer_stats_summary_view",
           queryOptions
         );
 
@@ -151,6 +151,7 @@ export class SupabaseBackendCustomerRepository
         // If no stats are found, return default values
         return {
           totalCustomers: 0,
+          totalRegisteredCustomers: 0,
           newCustomersThisMonth: 0,
           activeCustomersToday: 0,
           goldMembers: 0,
@@ -195,7 +196,7 @@ export class SupabaseBackendCustomerRepository
           select: ["*"],
           joins: [
             {
-              table: "queue_history",
+              table: "queues",
               on: { fromField: "id", toField: "customer_id" },
             },
             {
@@ -218,7 +219,7 @@ export class SupabaseBackendCustomerRepository
 
       const customerWithJoinedFields = {
         ...customer,
-        total_queues: customerWithJoinedData.queue_history?.count || 0,
+        total_queues: customerWithJoinedData.queues?.count || 0,
         total_points: customerWithJoinedData.customer_points?.total_points || 0,
         membership_tier: membershipTier,
       };

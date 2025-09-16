@@ -9,6 +9,7 @@ import {
 
 export interface CreateCustomerUseCaseInput {
   shopId: string;
+  profileId: string;
   name: string;
   phone?: string;
   email?: string;
@@ -36,6 +37,7 @@ export class CreateCustomerUseCase
 
     const customerData = {
       shopId: input.shopId,
+      profileId: input.profileId,
       name: input.name,
       phone: input.phone || null,
       email: input.email || null,

@@ -1,6 +1,7 @@
 "use client";
 
 import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 import { useEffect, useState } from "react";
 
 interface EditCustomerModalProps {
@@ -22,13 +23,13 @@ export function EditCustomerModal({
     name: string;
     email: string;
     phone: string;
-    membershipTier: "bronze" | "silver" | "gold" | "platinum" | "regular";
+    membershipTier: MembershipTier;
     isActive: boolean;
   }>({
     name: "",
     email: "",
     phone: "",
-    membershipTier: "regular",
+    membershipTier: MembershipTier.REGULAR,
     isActive: true,
   });
 

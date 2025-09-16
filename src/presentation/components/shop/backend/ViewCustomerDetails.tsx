@@ -1,6 +1,7 @@
 "use client";
 
 import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 
 interface ViewCustomerDetailsProps {
   isOpen: boolean;
@@ -15,26 +16,26 @@ export function ViewCustomerDetails({
 }: ViewCustomerDetailsProps) {
   if (!isOpen || !customer) return null;
 
-  const getMembershipTierColor = (tier: string) => {
+  const getMembershipTierColor = (tier: MembershipTier) => {
     switch (tier) {
-      case "platinum":
+      case MembershipTier.PLATINUM:
         return "text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900";
-      case "gold":
+      case MembershipTier.GOLD:
         return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900";
-      case "silver":
+      case MembershipTier.SILVER:
         return "text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900";
       default:
         return "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900";
     }
   };
 
-  const getMembershipTierIcon = (tier: string) => {
+  const getMembershipTierIcon = (tier: MembershipTier) => {
     switch (tier) {
-      case "platinum":
+      case MembershipTier.PLATINUM:
         return "💎";
-      case "gold":
+      case MembershipTier.GOLD:
         return "🥇";
-      case "silver":
+      case MembershipTier.SILVER:
         return "🥈";
       default:
         return "👤";

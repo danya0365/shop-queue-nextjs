@@ -1,8 +1,25 @@
--- Create customer_stats_view for aggregated customer statistics
-CREATE OR REPLACE VIEW customer_stats_view AS
+-- Create customer_stats_summary_view for aggregated customer statistics (all shops combined)
+CREATE OR REPLACE VIEW customer_stats_summary_view AS
+SELECT
+    COUNT(c.id) AS total_customers,
+    COUNT(c.id) FILTER (WHERE c.profile_id IS NOT NULL) AS total_registered_customers,
+    COUNT(c.id) FILTER (WHERE c.created_at >= DATE_TRUNC('month', NOW())) AS new_customers_this_month,
+    COUNT(c.id) FILTER (WHERE c.last_visit >= CURRENT_DATE) AS active_customers_today,
+    COUNT(c.id) FILTER (WHERE cp.membership_tier = 'gold') AS gold_members,
+    COUNT(c.id) FILTER (WHERE cp.membership_tier = 'silver') AS silver_members,
+    COUNT(c.id) FILTER (WHERE cp.membership_tier = 'bronze') AS bronze_members,
+    COUNT(c.id) FILTER (WHERE cp.membership_tier IS NULL OR cp.membership_tier = 'bronze') AS regular_members
+FROM
+    customers c
+LEFT JOIN
+    customer_points cp ON cp.customer_id = c.id;
+
+-- Create customer_stats_by_shop_view for aggregated customer statistics
+CREATE OR REPLACE VIEW customer_stats_by_shop_view AS
 SELECT
     s.id AS shop_id,
     COUNT(c.id) AS total_customers,
+    COUNT(c.id) FILTER (WHERE c.profile_id IS NOT NULL) AS total_registered_customers,
     COUNT(c.id) FILTER (WHERE c.created_at >= DATE_TRUNC('month', NOW())) AS new_customers_this_month,
     COUNT(c.id) FILTER (WHERE c.last_visit >= CURRENT_DATE) AS active_customers_today,
     COUNT(c.id) FILTER (WHERE cp.membership_tier = 'gold') AS gold_members,
@@ -35,6 +52,7 @@ BEGIN
 
     SELECT json_build_object(
         'total_customers', total_customers,
+        'total_registered_customers', total_registered_customers,
         'new_customers_this_month', new_customers_this_month,
         'active_customers_today', active_customers_today,
         'gold_members', gold_members,
@@ -42,7 +60,7 @@ BEGIN
         'bronze_members', bronze_members,
         'regular_members', regular_members
     ) INTO result
-    FROM customer_stats_view
+    FROM customer_stats_by_shop_view
     WHERE shop_id = shop_id_param;
 
     RETURN COALESCE(result, '{}'::json);
@@ -179,7 +197,7 @@ BEGIN
         'regular_members', regular_members
     )
     INTO stats_json
-    FROM customer_stats_view
+    FROM customer_stats_by_shop_view
     WHERE shop_id = shop_id_param;
 
     -- Build final result

@@ -7,6 +7,7 @@ import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 export interface CustomerEntity {
   id: string;
   shopId: string;
+  profileId: string | null;
   name: string;
   phone: string | null;
   email: string | null;
@@ -39,6 +40,7 @@ export enum MembershipTier {
  */
 export interface CustomerStatsEntity {
   totalCustomers: number;
+  totalRegisteredCustomers: number;
   newCustomersThisMonth: number;
   activeCustomersToday: number;
   goldMembers: number;

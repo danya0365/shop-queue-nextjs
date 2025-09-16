@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { CustomersViewModel } from './CustomersPresenter';
-import type { CustomerDTO } from '@/src/application/dtos/shop/backend/customers-dto';
-import { getPaginationConfig } from '@/src/infrastructure/config/PaginationConfig';
-import type { CreateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase';
-import type { UpdateCustomerUseCaseInput } from '@/src/application/usecases/shop/backend/customers/UpdateCustomerUseCase';
+import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import type { CreateCustomerUseCaseInput } from "@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase";
+import type { UpdateCustomerUseCaseInput } from "@/src/application/usecases/shop/backend/customers/UpdateCustomerUseCase";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import { useCallback, useEffect, useState } from "react";
+import type { CustomersViewModel } from "./CustomersPresenter";
 
 interface UseCustomersPresenterReturn {
   viewModel: CustomersViewModel | null;
@@ -63,8 +63,13 @@ interface UseCustomersPresenterReturn {
   handleToggleCustomerStatus: (id: string, isActive: boolean) => Promise<void>;
 }
 
-export function useCustomersPresenter(shopId: string, initialViewModel?: CustomersViewModel): UseCustomersPresenterReturn {
-  const [viewModel, setViewModel] = useState<CustomersViewModel | null>(initialViewModel || null);
+export function useCustomersPresenter(
+  shopId: string,
+  initialViewModel?: CustomersViewModel
+): UseCustomersPresenterReturn {
+  const [viewModel, setViewModel] = useState<CustomersViewModel | null>(
+    initialViewModel || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState({
@@ -76,7 +81,9 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(getPaginationConfig().CUSTOMERS_PER_PAGE);
+  const [perPage, setPerPage] = useState(
+    getPaginationConfig().CUSTOMERS_PER_PAGE
+  );
   const [filters, setFilters] = useState({
     searchQuery: "",
     membershipTierFilter: "all",
@@ -100,29 +107,47 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
     try {
       setLoading(true);
       setError(null);
-      
-      const { ClientCustomersPresenterFactory } = await import('./CustomersPresenter');
+
+      const { ClientCustomersPresenterFactory } = await import(
+        "./CustomersPresenter"
+      );
       const presenter = await ClientCustomersPresenterFactory.create();
-      
+
       const newViewModel = await presenter.getViewModel(
         shopId,
         currentPage,
         perPage,
         {
           searchQuery: filters.searchQuery || undefined,
-          membershipTierFilter: filters.membershipTierFilter !== "all" ? filters.membershipTierFilter : undefined,
-          isActiveFilter: filters.isActiveFilter !== "all" ? filters.isActiveFilter === "true" : undefined,
-          minTotalPoints: filters.minTotalPoints ? parseInt(filters.minTotalPoints) : undefined,
-          maxTotalPoints: filters.maxTotalPoints ? parseInt(filters.maxTotalPoints) : undefined,
-          minTotalQueues: filters.minTotalQueues ? parseInt(filters.minTotalQueues) : undefined,
-          maxTotalQueues: filters.maxTotalQueues ? parseInt(filters.maxTotalQueues) : undefined,
+          membershipTierFilter:
+            filters.membershipTierFilter !== "all"
+              ? filters.membershipTierFilter
+              : undefined,
+          isActiveFilter:
+            filters.isActiveFilter !== "all"
+              ? filters.isActiveFilter === "true"
+              : undefined,
+          minTotalPoints: filters.minTotalPoints
+            ? parseInt(filters.minTotalPoints)
+            : undefined,
+          maxTotalPoints: filters.maxTotalPoints
+            ? parseInt(filters.maxTotalPoints)
+            : undefined,
+          minTotalQueues: filters.minTotalQueues
+            ? parseInt(filters.minTotalQueues)
+            : undefined,
+          maxTotalQueues: filters.maxTotalQueues
+            ? parseInt(filters.maxTotalQueues)
+            : undefined,
         }
       );
-      
+
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load customers data');
-      console.error('Error loading customers data:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load customers data"
+      );
+      console.error("Error loading customers data:", err);
     } finally {
       setLoading(false);
     }
@@ -231,10 +256,12 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
   const createCustomer = useCallback(
     async (data: CreateCustomerUseCaseInput) => {
       try {
-        setActionLoading(prev => ({ ...prev, create: true }));
+        setActionLoading((prev) => ({ ...prev, create: true }));
         setError(null); // Clear previous errors
 
-        const { ClientCustomersPresenterFactory } = await import('./CustomersPresenter');
+        const { ClientCustomersPresenterFactory } = await import(
+          "./CustomersPresenter"
+        );
         const presenter = await ClientCustomersPresenterFactory.create();
 
         await presenter.createCustomer(shopId, data);
@@ -247,7 +274,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
-        setActionLoading(prev => ({ ...prev, create: false }));
+        setActionLoading((prev) => ({ ...prev, create: false }));
       }
     },
     [shopId, loadData]
@@ -257,7 +284,9 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
   const getCustomerById = useCallback(
     async (id: string): Promise<CustomerDTO | null> => {
       try {
-        const { ClientCustomersPresenterFactory } = await import('./CustomersPresenter');
+        const { ClientCustomersPresenterFactory } = await import(
+          "./CustomersPresenter"
+        );
         const presenter = await ClientCustomersPresenterFactory.create();
         const customer = await presenter.getCustomerById(id);
         return customer;
@@ -275,10 +304,12 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
   const updateCustomer = useCallback(
     async (data: UpdateCustomerUseCaseInput) => {
       try {
-        setActionLoading(prev => ({ ...prev, update: true }));
+        setActionLoading((prev) => ({ ...prev, update: true }));
         setError(null); // Clear previous errors
 
-        const { ClientCustomersPresenterFactory } = await import('./CustomersPresenter');
+        const { ClientCustomersPresenterFactory } = await import(
+          "./CustomersPresenter"
+        );
         const presenter = await ClientCustomersPresenterFactory.create();
 
         await presenter.updateCustomer(data.id, {
@@ -300,7 +331,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
-        setActionLoading(prev => ({ ...prev, update: false }));
+        setActionLoading((prev) => ({ ...prev, update: false }));
       }
     },
     [loadData]
@@ -331,7 +362,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         errors.name = "ชื่อลูกค้าต้องมีอย่างน้อย 2 ตัวอักษร";
       }
 
-      if (phone && !/^0[0-9]{9}$/.test(phone.replace(/[-\s]/g, ''))) {
+      if (phone && !/^0[0-9]{9}$/.test(phone.replace(/[-\s]/g, ""))) {
         errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
       }
 
@@ -346,12 +377,15 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
 
       // Create customer data
       const createCustomerData = {
+        profileId: null,
         shopId,
         name: name.trim(),
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toISOString() : undefined,
-        gender: (gender as 'male' | 'female' | 'other') || undefined,
+        dateOfBirth: dateOfBirth
+          ? new Date(dateOfBirth).toISOString()
+          : undefined,
+        gender: (gender as "male" | "female" | "other") || undefined,
         address: address.trim() || undefined,
         notes: notes.trim() || undefined,
         isActive: true,
@@ -394,7 +428,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         errors.name = "ชื่อลูกค้าต้องมีอย่างน้อย 2 ตัวอักษร";
       }
 
-      if (phone && !/^0[0-9]{9}$/.test(phone.replace(/[-\s]/g, ''))) {
+      if (phone && !/^0[0-9]{9}$/.test(phone.replace(/[-\s]/g, ""))) {
         errors.phone = "เบอร์โทรศัพท์ไม่ถูกต้อง";
       }
 
@@ -413,11 +447,13 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         name: name.trim(),
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toISOString() : undefined,
-        gender: (gender as 'male' | 'female' | 'other') || undefined,
+        dateOfBirth: dateOfBirth
+          ? new Date(dateOfBirth).toISOString()
+          : undefined,
+        gender: (gender as "male" | "female" | "other") || undefined,
         address: address.trim() || undefined,
         notes: notes.trim() || undefined,
-        isActive: isActive === 'true',
+        isActive: isActive === "true",
       };
 
       // Call updateCustomer
@@ -430,14 +466,16 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
   const deleteCustomer = useCallback(
     async (id: string) => {
       try {
-        setActionLoading(prev => ({ ...prev, delete: true }));
+        setActionLoading((prev) => ({ ...prev, delete: true }));
         setError(null); // Clear previous errors
 
-        const { ClientCustomersPresenterFactory } = await import('./CustomersPresenter');
+        const { ClientCustomersPresenterFactory } = await import(
+          "./CustomersPresenter"
+        );
         const presenter = await ClientCustomersPresenterFactory.create();
 
         await presenter.deleteCustomer(id);
-        
+
         // Refresh data after successful deletion
         await loadData();
       } catch (err) {
@@ -446,7 +484,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         setError(errorMessage);
         throw err;
       } finally {
-        setActionLoading(prev => ({ ...prev, delete: false }));
+        setActionLoading((prev) => ({ ...prev, delete: false }));
       }
     },
     [loadData]
@@ -469,7 +507,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
   const toggleCustomerStatus = useCallback(
     async (id: string, isActive: boolean) => {
       try {
-        setActionLoading(prev => ({ ...prev, delete: true }));
+        setActionLoading((prev) => ({ ...prev, delete: true }));
         setError(null); // Clear previous errors
 
         const { ClientCustomersPresenterFactory } = await import(
@@ -493,11 +531,11 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
           totalQueues: customer.totalQueues || undefined,
           lastVisit: customer.lastVisit || undefined,
           notes: customer.notes || undefined,
-          isActive: !isActive // Toggle the active status
+          isActive: !isActive, // Toggle the active status
         };
 
         await presenter.updateCustomer(id, updateData);
-        
+
         // Refresh data after successful toggle
         await loadData();
       } catch (err) {
@@ -506,7 +544,7 @@ export function useCustomersPresenter(shopId: string, initialViewModel?: Custome
         setError(errorMessage);
         throw err;
       } finally {
-        setActionLoading(prev => ({ ...prev, delete: false }));
+        setActionLoading((prev) => ({ ...prev, delete: false }));
       }
     },
     [loadData]

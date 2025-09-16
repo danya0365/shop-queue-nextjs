@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { CustomersViewModel } from '@/src/presentation/presenters/shop/backend/CustomersPresenter';
-import { useCustomersPresenter } from '@/src/presentation/presenters/shop/backend/useCustomersPresenter';
-import type { CustomerDTO } from '@/src/application/dtos/shop/backend/customers-dto';
-import { CreateCustomerModal } from './CreateCustomerModal';
-import { EditCustomerModal } from './EditCustomerModal';
-import { DeleteCustomerConfirmation } from './DeleteCustomerConfirmation';
-import { ViewCustomerDetails } from './ViewCustomerDetails';
-import { useState } from 'react';
+import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import { CustomersViewModel } from "@/src/presentation/presenters/shop/backend/CustomersPresenter";
+import { useCustomersPresenter } from "@/src/presentation/presenters/shop/backend/useCustomersPresenter";
+import { useState } from "react";
+import { CreateCustomerModal } from "./CreateCustomerModal";
+import { DeleteCustomerConfirmation } from "./DeleteCustomerConfirmation";
+import { EditCustomerModal } from "./EditCustomerModal";
+import { ViewCustomerDetails } from "./ViewCustomerDetails";
 
 interface CustomersViewProps {
   shopId: string;
@@ -22,6 +23,7 @@ export function CustomersView({
     viewModel,
     loading,
     error,
+    currentPage,
     filters,
     handlePageChange,
     handleNextPage,
@@ -51,7 +53,9 @@ export function CustomersView({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDTO | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDTO | null>(
+    null
+  );
 
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
@@ -102,29 +106,29 @@ export function CustomersView({
   // Data is already extracted above
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB',
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: "THB",
     }).format(price);
   };
 
   const formatDate = (date: string | undefined) => {
-    if (!date) return 'ไม่เคย';
-    return new Intl.DateTimeFormat('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    if (!date) return "ไม่เคย";
+    return new Intl.DateTimeFormat("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     }).format(new Date(date));
   };
 
   const getCustomerTypeLabel = (customer: CustomerDTO) => {
-    return customer.email ? 'สมาชิก' : 'ลูกค้าทั่วไป';
+    return customer.profileId ? "สมาชิก" : "ลูกค้าทั่วไป";
   };
 
   const getCustomerTypeColor = (customer: CustomerDTO) => {
-    return customer.email 
-      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return customer.profileId
+      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
   };
 
   return (
@@ -132,8 +136,12 @@ export function CustomersView({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการลูกค้า</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการข้อมูลลูกค้า ดูประวัติการใช้บริการ และจัดการโปรแกรมสมาชิก</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการลูกค้า
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            จัดการข้อมูลลูกค้า ดูประวัติการใช้บริการ และจัดการโปรแกรมสมาชิก
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
@@ -150,7 +158,9 @@ export function CustomersView({
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ลูกค้าทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ลูกค้าทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.totalCustomers}
               </p>
@@ -174,7 +184,9 @@ export function CustomersView({
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ลูกค้าทั่วไป</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ลูกค้าทั่วไป
+              </p>
               <p className="text-2xl font-bold text-gray-600">
                 {viewModel.guestCustomers}
               </p>
@@ -186,7 +198,9 @@ export function CustomersView({
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">รายได้รวม</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                รายได้รวม
+              </p>
               <p className="text-lg font-bold text-blue-600">
                 {formatPrice(viewModel.totalRevenue)}
               </p>
@@ -198,7 +212,9 @@ export function CustomersView({
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ค่าเฉลี่ย/คน</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ค่าเฉลี่ย/คน
+              </p>
               <p className="text-lg font-bold text-purple-600">
                 {formatPrice(viewModel.averageSpent)}
               </p>
@@ -210,9 +226,18 @@ export function CustomersView({
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">อัตราสมาชิก</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                อัตราสมาชิก
+              </p>
               <p className="text-lg font-bold text-orange-600">
-                {viewModel.totalCustomers > 0 ? Math.round((viewModel.registeredCustomers / viewModel.totalCustomers) * 100) : 0}%
+                {viewModel.totalCustomers > 0
+                  ? Math.round(
+                      (viewModel.registeredCustomers /
+                        viewModel.totalCustomers) *
+                        100
+                    )
+                  : 0}
+                %
               </p>
             </div>
             <div className="text-2xl">📈</div>
@@ -229,7 +254,7 @@ export function CustomersView({
               <input
                 type="text"
                 placeholder="ค้นหาลูกค้า (ชื่อ หรือ เบอร์โทร)..."
-                value={filters.searchQuery ?? ''}
+                value={filters.searchQuery ?? ""}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -238,7 +263,7 @@ export function CustomersView({
             {/* Membership Tier Filter */}
             <div className="lg:w-48">
               <select
-                value={filters.membershipTierFilter ?? ''}
+                value={filters.membershipTierFilter ?? ""}
                 onChange={(e) => handleMembershipTierChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
@@ -253,7 +278,7 @@ export function CustomersView({
             {/* Active Status Filter */}
             <div className="lg:w-48">
               <select
-                value={filters.isActiveFilter?.toString() ?? ''}
+                value={filters.isActiveFilter?.toString() ?? ""}
                 onChange={(e) => handleIsActiveChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
@@ -283,7 +308,7 @@ export function CustomersView({
               <input
                 type="number"
                 placeholder="0"
-                value={filters.minTotalPoints?.toString() ?? ''}
+                value={filters.minTotalPoints?.toString() ?? ""}
                 onChange={(e) => handleMinTotalPointsChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -295,7 +320,7 @@ export function CustomersView({
               <input
                 type="number"
                 placeholder="ไม่จำกัด"
-                value={filters.maxTotalPoints?.toString() ?? ''}
+                value={filters.maxTotalPoints?.toString() ?? ""}
                 onChange={(e) => handleMaxTotalPointsChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -307,7 +332,7 @@ export function CustomersView({
               <input
                 type="number"
                 placeholder="0"
-                value={filters.minTotalQueues?.toString() ?? ''}
+                value={filters.minTotalQueues?.toString() ?? ""}
                 onChange={(e) => handleMinTotalQueuesChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -319,7 +344,7 @@ export function CustomersView({
               <input
                 type="number"
                 placeholder="ไม่จำกัด"
-                value={filters.maxTotalQueues?.toString() ?? ''}
+                value={filters.maxTotalQueues?.toString() ?? ""}
                 onChange={(e) => handleMaxTotalQueuesChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -374,30 +399,30 @@ export function CustomersView({
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">👥</div>
                       <p className="text-lg">
-                        {filters.searchQuery || 
-                       filters.membershipTierFilter || 
-                       filters.isActiveFilter !== undefined ||
-                       filters.minTotalPoints !== undefined ||
-                       filters.maxTotalPoints !== undefined ||
-                       filters.minTotalQueues !== undefined ||
-                       filters.maxTotalQueues !== undefined
+                        {filters.searchQuery ||
+                        filters.membershipTierFilter ||
+                        filters.isActiveFilter !== undefined ||
+                        filters.minTotalPoints !== undefined ||
+                        filters.maxTotalPoints !== undefined ||
+                        filters.minTotalQueues !== undefined ||
+                        filters.maxTotalQueues !== undefined
                           ? "ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีลูกค้าในระบบ"}
                       </p>
-                      {filters.searchQuery || 
-                       filters.membershipTierFilter || 
-                       filters.isActiveFilter !== undefined ||
-                       filters.minTotalPoints !== undefined ||
-                       filters.maxTotalPoints !== undefined ||
-                       filters.minTotalQueues !== undefined ||
-                       filters.maxTotalQueues !== undefined
-                        ? (
-                          <p className="text-sm text-gray-400 mt-2">
-                            ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
-                          </p>
-                        ) : (
+                      {filters.searchQuery ||
+                      filters.membershipTierFilter ||
+                      filters.isActiveFilter !== undefined ||
+                      filters.minTotalPoints !== undefined ||
+                      filters.maxTotalPoints !== undefined ||
+                      filters.minTotalQueues !== undefined ||
+                      filters.maxTotalQueues !== undefined ? (
                         <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &lsquo;เพิ่มลูกค้าใหม่&rsquo; เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
+                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400 mt-2">
+                          คลิกปุ่ม &lsquo;เพิ่มลูกค้าใหม่&rsquo;
+                          เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
                         </p>
                       )}
                     </div>
@@ -405,24 +430,31 @@ export function CustomersView({
                 </tr>
               ) : (
                 customers.map((customer: CustomerDTO) => (
-                  <tr key={customer.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="text-2xl mr-3">
-                          {customer.email ? '⭐' : '👤'}
+                          {customer.email ? "⭐" : "👤"}
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {customer.name}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {customer.phone || 'ไม่ระบุเบอร์โทร'}
+                            {customer.phone || "ไม่ระบุเบอร์โทร"}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCustomerTypeColor(customer)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCustomerTypeColor(
+                          customer
+                        )}`}
+                      >
                         {getCustomerTypeLabel(customer)}
                       </span>
                     </td>
@@ -442,7 +474,7 @@ export function CustomersView({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedCustomer(customer);
                             setShowViewModal(true);
@@ -451,7 +483,7 @@ export function CustomersView({
                         >
                           ดูรายละเอียด
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedCustomer(customer);
                             setShowEditModal(true);
@@ -460,7 +492,7 @@ export function CustomersView({
                         >
                           แก้ไข
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedCustomer(customer);
                             setShowDeleteModal(true);
@@ -478,46 +510,128 @@ export function CustomersView({
           </table>
         </div>
 
-        {/* Pagination Controls */}
-        {pagination && pagination.total > pagination.perPage && (
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  แสดง {(pagination.page - 1) * pagination.perPage + 1} - {Math.min(pagination.page * pagination.perPage, pagination.total)} จาก {pagination.total} รายการ
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                {/* Per Page Selector */}
-                <select
-                  value={pagination.perPage}
-                  onChange={(e) => handlePerPageChange(parseInt(e.target.value))}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                >
-                  <option value={10}>10 รายการ</option>
-                  <option value={20}>20 รายการ</option>
-                  <option value={50}>50 รายการ</option>
-                  <option value={100}>100 รายการ</option>
-                </select>
+            {/* Mobile Layout - Stacked */}
+            <div className="flex flex-col space-y-4 sm:hidden">
+              {/* Info and Per Page Dropdown */}
+              <div className="flex flex-col space-y-3">
+                <div className="text-sm text-gray-700 dark:text-gray-300 text-center">
+                  แสดง {(pagination.page - 1) * pagination.perPage + 1} -{" "}
+                  {Math.min(
+                    pagination.page * pagination.perPage,
+                    pagination.total
+                  )}{" "}
+                  จาก {pagination.total} รายการ
+                </div>
 
-                {/* Pagination Buttons */}
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={!pagination.hasPrev}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                      pagination.hasPrev
-                        ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                    }`}
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    แสดงต่อหน้า:
+                  </span>
+                  <select
+                    value={pagination.perPage}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
+                    disabled={loading}
+                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    ก่อนหน้า
-                  </button>
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-                  {/* Page Numbers */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+              {/* Pagination Controls - Mobile */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={!pagination.hasPrev || loading}
+                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                    pagination.hasPrev && !loading
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ก่อนหน้า
+                </button>
+
+                <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  หน้า {pagination.page} / {pagination.totalPages}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={!pagination.hasNext || loading}
+                  className={`px-4 py-2 rounded-md text-sm font-medium min-w-[80px] ${
+                    pagination.hasNext && !loading
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ถัดไป
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Layout - Horizontal */}
+            <div className="hidden sm:flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  แสดง {(pagination.page - 1) * pagination.perPage + 1} -{" "}
+                  {Math.min(
+                    pagination.page * pagination.perPage,
+                    pagination.total
+                  )}{" "}
+                  จาก {pagination.total} รายการ
+                </div>
+
+                {/* Per Page Dropdown */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    แสดงต่อหน้า:
+                  </span>
+                  <select
+                    value={pagination.perPage}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
+                    disabled={loading}
+                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {getPaginationConfig().PER_PAGE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={!pagination.hasPrev || loading}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    pagination.hasPrev && !loading
+                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ก่อนหน้า
+                </button>
+
+                <div className="flex space-x-1">
+                  {Array.from(
+                    {
+                      length: Math.min(pagination.totalPages, 5),
+                    },
+                    (_, i) => {
                       let pageNum;
                       if (pagination.totalPages <= 5) {
                         pageNum = i + 1;
@@ -528,35 +642,36 @@ export function CustomersView({
                       } else {
                         pageNum = pagination.page - 2 + i;
                       }
-                      
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                          disabled={loading}
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${
                             pageNum === pagination.page
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                              ? "bg-blue-500 text-white"
+                              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                           }`}
                         >
                           {pageNum}
                         </button>
                       );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={handleNextPage}
-                    disabled={!pagination.hasNext}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                      pagination.hasNext
-                        ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                    }`}
-                  >
-                    ถัดไป
-                  </button>
+                    }
+                  )}
                 </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={!pagination.hasNext || loading}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    pagination.hasNext && !loading
+                      ? "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  ถัดไป
+                </button>
               </div>
             </div>
           </div>
@@ -568,7 +683,7 @@ export function CustomersView({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={async (customerData) => {
-          await createCustomer({ ...customerData, shopId });
+          await createCustomer({ ...customerData, shopId, profileId: null });
           setShowCreateModal(false);
         }}
         loading={actionLoading.create}
