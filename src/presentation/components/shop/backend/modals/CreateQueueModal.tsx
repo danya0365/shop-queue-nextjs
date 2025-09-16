@@ -1,8 +1,22 @@
 "use client";
 
+import { CustomerSelectionDropdown } from "@/src/presentation/components/shop/backend/CustomerSelectionDropdown";
+import { useCustomers } from "@/src/presentation/hooks/shop/backend/useCustomers";
 import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
 import { QueueItem } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
 import { useState } from "react";
+
+interface Customer {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  membershipTier: "regular" | "bronze" | "silver" | "gold" | "platinum";
+  totalQueues: number;
+  totalPoints: number;
+  isActive: boolean;
+  lastVisit?: string;
+}
 
 interface CreateQueueModalProps {
   isOpen: boolean;
@@ -44,8 +58,13 @@ export function CreateQueueModal({
   >([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
+  const [showCreateCustomerForm, setShowCreateCustomerForm] = useState(false);
 
   const { services, loading: servicesLoading } = useServices(shopId);
+  const { createCustomer } = useCustomers(shopId);
 
   if (!isOpen) return null;
 
@@ -54,6 +73,62 @@ export function CreateQueueModal({
       service.isAvailable &&
       service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleCustomerSelect = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setFormData((prev) => ({
+      ...prev,
+      customerName: customer.name,
+      customerPhone: customer.phone || "",
+    }));
+    // Clear customer-related errors
+    if (errors.customerName || errors.customerPhone) {
+      setErrors((prev) => ({
+        ...prev,
+        customerName: "",
+        customerPhone: "",
+      }));
+    }
+  };
+
+  const handleCreateNewCustomer = () => {
+    setShowCreateCustomerForm(true);
+    setSelectedCustomer(null);
+    setFormData((prev) => ({
+      ...prev,
+      customerName: "",
+      customerPhone: "",
+    }));
+  };
+
+  const handleCreateCustomer = async () => {
+    try {
+      const newCustomer = await createCustomer({
+        name: formData.customerName,
+        phone: formData.customerPhone,
+        email: undefined,
+        dateOfBirth: undefined,
+        gender: undefined,
+        address: undefined,
+        notes: undefined,
+      });
+
+      setSelectedCustomer(newCustomer);
+      setShowCreateCustomerForm(false);
+
+      // Clear customer-related errors
+      if (errors.customerName || errors.customerPhone) {
+        setErrors((prev) => ({
+          ...prev,
+          customerName: "",
+          customerPhone: "",
+        }));
+      }
+    } catch (error) {
+      console.error("Error creating customer:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างลูกค้าใหม่");
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -109,15 +184,23 @@ export function CreateQueueModal({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.customerName.trim()) {
-      newErrors.customerName = "กรุณากรอกชื่อลูกค้า";
+    // If no customer is selected and not creating a new one, show error
+    if (!selectedCustomer && !showCreateCustomerForm) {
+      newErrors.customer = "กรุณาเลือกลูกค้าหรือสร้างลูกค้าใหม่";
     }
 
-    if (!formData.customerPhone.trim()) {
-      newErrors.customerPhone = "กรุณากรอกเบอร์โทร";
-    } else if (!/^0[0-9]{9}$/.test(formData.customerPhone)) {
-      newErrors.customerPhone =
-        "เบอร์โทรไม่ถูกต้อง (ต้องขึ้นต้นด้วย 0 และมี 10 หลัก)";
+    // If creating a new customer, validate the form
+    if (showCreateCustomerForm) {
+      if (!formData.customerName.trim()) {
+        newErrors.customerName = "กรุณากรอกชื่อลูกค้า";
+      }
+
+      if (!formData.customerPhone.trim()) {
+        newErrors.customerPhone = "กรุณากรอกเบอร์โทร";
+      } else if (!/^0[0-9]{9}$/.test(formData.customerPhone)) {
+        newErrors.customerPhone =
+          "เบอร์โทรไม่ถูกต้อง (ต้องขึ้นต้นด้วย 0 และมี 10 หลัก)";
+      }
     }
 
     if (selectedServices.length === 0) {
@@ -137,8 +220,12 @@ export function CreateQueueModal({
 
     try {
       await onSave({
-        customerName: formData.customerName.trim(),
-        customerPhone: formData.customerPhone.trim(),
+        customerName: selectedCustomer
+          ? selectedCustomer.name
+          : formData.customerName.trim(),
+        customerPhone: selectedCustomer
+          ? selectedCustomer.phone || ""
+          : formData.customerPhone.trim(),
         services: selectedServices.map((s) => ({
           serviceId: s.serviceId,
           price: s.price,
@@ -158,6 +245,8 @@ export function CreateQueueModal({
       setSelectedServices([]);
       setSearchTerm("");
       setErrors({});
+      setSelectedCustomer(null);
+      setShowCreateCustomerForm(false);
 
       onClose();
     } catch (error) {
@@ -248,57 +337,105 @@ export function CreateQueueModal({
             <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
               ข้อมูลลูกค้า
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  ชื่อลูกค้า <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.customerName}
-                  onChange={(e) =>
-                    handleInputChange("customerName", e.target.value)
-                  }
-                  placeholder="กรอกชื่อลูกค้า"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerName
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-600"
-                  }`}
-                  disabled={isLoading}
-                />
-                {errors.customerName && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.customerName}
-                  </p>
-                )}
-              </div>
 
+            {!showCreateCustomerForm ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  เบอร์โทร <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={formData.customerPhone}
-                  onChange={(e) =>
-                    handleInputChange("customerPhone", e.target.value)
-                  }
-                  placeholder="0xxxxxxxxx"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.customerPhone
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-600"
-                  }`}
+                <CustomerSelectionDropdown
+                  shopId={shopId || ""}
+                  selectedCustomer={selectedCustomer}
+                  onCustomerSelect={handleCustomerSelect}
+                  onCreateNewCustomer={handleCreateNewCustomer}
+                  placeholder="เลือกลูกค้า..."
                   disabled={isLoading}
                 />
-                {errors.customerPhone && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.customerPhone}
-                  </p>
+                {errors.customer && (
+                  <p className="text-sm text-red-500 mt-2">{errors.customer}</p>
                 )}
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    สร้างลูกค้าใหม่
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateCustomerForm(false)}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    disabled={isLoading}
+                  >
+                    ← เลือกลูกค้าที่มีอยู่แล้ว
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      ชื่อลูกค้า <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.customerName}
+                      onChange={(e) =>
+                        handleInputChange("customerName", e.target.value)
+                      }
+                      placeholder="กรอกชื่อลูกค้า"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerName
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                      disabled={isLoading}
+                    />
+                    {errors.customerName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.customerName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      เบอร์โทร <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.customerPhone}
+                      onChange={(e) =>
+                        handleInputChange("customerPhone", e.target.value)
+                      }
+                      placeholder="0xxxxxxxxx"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.customerPhone
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                      disabled={isLoading}
+                    />
+                    {errors.customerPhone && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.customerPhone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCreateCustomer}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    disabled={
+                      isLoading ||
+                      !formData.customerName.trim() ||
+                      !formData.customerPhone.trim()
+                    }
+                  >
+                    สร้างลูกค้า
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Services Selection */}

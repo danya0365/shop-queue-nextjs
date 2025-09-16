@@ -230,9 +230,9 @@ export function QueueManagementView({
       await createQueue({
         customerName: data.customerName,
         customerPhone: data.customerPhone,
-        services: data.services,
         priority: data.priority,
         notes: data.notes,
+        services: data.services,
       });
       setCreateModalOpen(false);
       // Success notification could be added here

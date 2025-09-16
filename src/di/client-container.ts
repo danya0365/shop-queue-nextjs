@@ -4,6 +4,7 @@ import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
 import { ProfileService } from "../application/services/profile-service";
+import { ShopBackendCustomersServiceFactory } from "../application/services/shop/backend/BackendCustomersService";
 import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/backend/BackendPaymentsService";
 import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
 import { ShopBackendQueuesServiceFactory } from "../application/services/shop/backend/BackendQueuesService";
@@ -34,6 +35,7 @@ import {
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
+import { SupabaseShopBackendCustomerRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-customer-repository";
 import { SupabaseBackendOpeningHoursRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-opening-hours-repository";
 import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
@@ -93,6 +95,8 @@ export function createClientContainer(): Container {
       new SupabaseBackendOpeningHoursRepository(databaseDatasource, logger);
     const shopBackendShopSettingsRepository =
       new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
+    const shopBackendCustomerRepository =
+      new SupabaseShopBackendCustomerRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -183,6 +187,11 @@ export function createClientContainer(): Container {
         shopBackendShopSettingsRepository,
         logger
       );
+    const shopBackendCustomersService =
+      ShopBackendCustomersServiceFactory.create(
+        shopBackendCustomerRepository,
+        logger
+      );
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
@@ -220,6 +229,10 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "ShopBackendShopSettingsService",
       shopBackendShopSettingsService
+    );
+    container.registerInstance(
+      "ShopBackendCustomersService",
+      shopBackendCustomersService
     );
 
     container.registerInstance(
