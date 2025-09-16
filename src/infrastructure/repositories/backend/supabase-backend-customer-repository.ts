@@ -1,10 +1,26 @@
-import { CustomerEntity, CustomerStatsEntity, MembershipTier, PaginatedCustomersEntity } from "../../../domain/entities/backend/backend-customer.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
+import {
+  CustomerEntity,
+  CustomerStatsEntity,
+  MembershipTier,
+  PaginatedCustomersEntity,
+} from "../../../domain/entities/backend/backend-customer.entity";
+import {
+  DatabaseDataSource,
+  QueryOptions,
+  SortDirection,
+} from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
-import { BackendCustomerError, BackendCustomerErrorType, BackendCustomerRepository } from "../../../domain/repositories/backend/backend-customer-repository";
+import {
+  BackendCustomerError,
+  BackendCustomerErrorType,
+  BackendCustomerRepository,
+} from "../../../domain/repositories/backend/backend-customer-repository";
 import { SupabaseBackendCustomerMapper } from "../../mappers/backend/supabase-backend-customer.mapper";
-import { CustomerSchema, CustomerStatsSchema } from "../../schemas/backend/customer.schema";
+import {
+  CustomerSchema,
+  CustomerStatsSchema,
+} from "../../schemas/backend/customer.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
@@ -19,11 +35,11 @@ type CustomerStatsSchemaRecord = Record<string, unknown> & CustomerStatsSchema;
  * Supabase implementation of the customer repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseBackendCustomerRepository extends BackendRepository implements BackendCustomerRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseBackendCustomerRepository
+  extends BackendRepository
+  implements BackendCustomerRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "BackendCustomer");
   }
 
@@ -32,67 +48,78 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
    * @param params Pagination parameters
    * @returns Paginated customers data
    */
-  async getPaginatedCustomers(params: PaginationParams): Promise<PaginatedCustomersEntity> {
+  async getPaginatedCustomers(
+    params: PaginationParams
+  ): Promise<PaginatedCustomersEntity> {
     try {
       const { page, limit } = params;
       const offset = (page - 1) * limit;
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'queues', on: { fromField: 'id', toField: 'customer_id' } },
-          { table: 'customer_points', on: { fromField: 'id', toField: 'customer_id' } }
+          { table: "queues", on: { fromField: "id", toField: "customer_id" } },
+          {
+            table: "customer_points",
+            on: { fromField: "id", toField: "customer_id" },
+          },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
-        }
+          offset,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const customers = await this.dataSource.getAdvanced<CustomerSchemaRecord>(
-        'customers',
+        "customers",
         queryOptions
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count('customers');
+      const totalItems = await this.dataSource.count("customers");
 
       // Map database results to domain entities
-      const mappedCustomers = customers.map(customer => {
+      const mappedCustomers = customers.map((customer) => {
         // Handle joined data using our CustomerWithJoinedData type
         const customerWithJoinedData = customer as CustomerWithJoinedData;
 
-        const membershipTier = (customerWithJoinedData.customer_points?.membership_tier || 'regular') as MembershipTier;
+        const membershipTier = (customerWithJoinedData.customer_points
+          ?.membership_tier || "regular") as MembershipTier;
 
         const customerWithJoinedFields = {
           ...customer,
           total_queues: customerWithJoinedData.queue_history?.count || 0,
-          total_points: customerWithJoinedData.customer_points?.total_points || 0,
-          membership_tier: membershipTier
+          total_points:
+            customerWithJoinedData.customer_points?.total_points || 0,
+          membership_tier: membershipTier,
         };
         return SupabaseBackendCustomerMapper.toDomain(customerWithJoinedFields);
       });
 
       // Create pagination metadata
-      const pagination = SupabaseBackendCustomerMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseBackendCustomerMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
         data: mappedCustomers,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof BackendCustomerError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedCustomers', { error });
+      this.logger.error("Error in getPaginatedCustomers", { error });
       throw new BackendCustomerError(
         BackendCustomerErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching customers',
-        'getPaginatedCustomers',
+        "An unexpected error occurred while fetching customers",
+        "getPaginatedCustomers",
         {},
         error
       );
@@ -107,17 +134,18 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for customer statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<CustomerStatsSchemaRecord>(
-        'customer_stats_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<CustomerStatsSchemaRecord>(
+          "customer_stats_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -128,7 +156,7 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
           goldMembers: 0,
           silverMembers: 0,
           bronzeMembers: 0,
-          regularMembers: 0
+          regularMembers: 0,
         };
       }
 
@@ -140,11 +168,11 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         throw error;
       }
 
-      this.logger.error('Error in getCustomerStats', { error });
+      this.logger.error("Error in getCustomerStats", { error });
       throw new BackendCustomerError(
         BackendCustomerErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching customer statistics',
-        'getCustomerStats',
+        "An unexpected error occurred while fetching customer statistics",
+        "getCustomerStats",
         {},
         error
       );
@@ -161,14 +189,20 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const customer = await this.dataSource.getById<CustomerSchemaRecord>(
-        'customers',
+        "customers",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'queue_history', on: { fromField: 'id', toField: 'customer_id' } },
-            { table: 'customer_points', on: { fromField: 'id', toField: 'customer_id' } }
-          ]
+            {
+              table: "queue_history",
+              on: { fromField: "id", toField: "customer_id" },
+            },
+            {
+              table: "customer_points",
+              on: { fromField: "id", toField: "customer_id" },
+            },
+          ],
         }
       );
 
@@ -179,13 +213,14 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
       // Handle joined data using our CustomerWithJoinedData type
       const customerWithJoinedData = customer as CustomerWithJoinedData;
 
-      const membershipTier = (customerWithJoinedData.customer_points?.membership_tier || 'regular') as MembershipTier;
+      const membershipTier = (customerWithJoinedData.customer_points
+        ?.membership_tier || "regular") as MembershipTier;
 
       const customerWithJoinedFields = {
         ...customer,
         total_queues: customerWithJoinedData.queue_history?.count || 0,
         total_points: customerWithJoinedData.customer_points?.total_points || 0,
-        membership_tier: membershipTier
+        membership_tier: membershipTier,
       };
 
       // Map database result to domain entity
@@ -195,11 +230,11 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         throw error;
       }
 
-      this.logger.error('Error in getCustomerById', { error, id });
+      this.logger.error("Error in getCustomerById", { error, id });
       throw new BackendCustomerError(
         BackendCustomerErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching customer',
-        'getCustomerById',
+        "An unexpected error occurred while fetching customer",
+        "getCustomerById",
         { id },
         error
       );
@@ -211,10 +246,22 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
    * @param customer Customer data to create
    * @returns Created customer entity
    */
-  async createCustomer(customer: Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>): Promise<CustomerEntity> {
+  async createCustomer(
+    customer: Omit<
+      CustomerEntity,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "totalQueues"
+      | "totalPoints"
+      | "membershipTier"
+      | "lastVisit"
+    >
+  ): Promise<CustomerEntity> {
     try {
       // Convert domain entity to database schema
       const customerSchema: Partial<CustomerSchema> = {
+        shop_id: customer.shopId,
         name: customer.name,
         phone: customer.phone,
         email: customer.email,
@@ -222,37 +269,30 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         gender: customer.gender,
         address: customer.address,
         notes: customer.notes,
-        is_active: customer.isActive
+        is_active: customer.isActive,
       };
 
       // Insert customer into database
-      const createdCustomer = await this.dataSource.insert<CustomerSchemaRecord>(
-        'customers',
-        customerSchema
-      );
-
-      // Initialize customer points with default values
-      await this.dataSource.insert(
-        'customer_points',
-        {
-          customer_id: createdCustomer.id,
-          total_points: 0,
-          membership_tier: 'regular'
-        }
-      );
+      const createdCustomer =
+        await this.dataSource.insert<CustomerSchemaRecord>(
+          "customers",
+          customerSchema
+        );
 
       // Return the created customer as a domain entity
-      return this.getCustomerById(createdCustomer.id) as Promise<CustomerEntity>;
+      return this.getCustomerById(
+        createdCustomer.id
+      ) as Promise<CustomerEntity>;
     } catch (error) {
       if (error instanceof BackendCustomerError) {
         throw error;
       }
 
-      this.logger.error('Error in createCustomer', { error, customer });
+      this.logger.error("Error in createCustomer", { error, customer });
       throw new BackendCustomerError(
         BackendCustomerErrorType.OPERATION_FAILED,
-        'An unexpected error occurred while creating customer',
-        'createCustomer',
+        "An unexpected error occurred while creating customer",
+        "createCustomer",
         { customer },
         error
       );
@@ -265,7 +305,21 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
    * @param customer Customer data to update
    * @returns Updated customer entity
    */
-  async updateCustomer(id: string, customer: Partial<Omit<CustomerEntity, 'id' | 'createdAt' | 'updatedAt' | 'totalQueues' | 'totalPoints' | 'membershipTier' | 'lastVisit'>>): Promise<CustomerEntity> {
+  async updateCustomer(
+    id: string,
+    customer: Partial<
+      Omit<
+        CustomerEntity,
+        | "id"
+        | "createdAt"
+        | "updatedAt"
+        | "totalQueues"
+        | "totalPoints"
+        | "membershipTier"
+        | "lastVisit"
+      >
+    >
+  ): Promise<CustomerEntity> {
     try {
       // Check if customer exists
       const existingCustomer = await this.getCustomerById(id);
@@ -273,7 +327,7 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         throw new BackendCustomerError(
           BackendCustomerErrorType.NOT_FOUND,
           `Customer with ID ${id} not found`,
-          'updateCustomer',
+          "updateCustomer",
           { id }
         );
       }
@@ -284,15 +338,19 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
       if (customer.name !== undefined) customerSchema.name = customer.name;
       if (customer.phone !== undefined) customerSchema.phone = customer.phone;
       if (customer.email !== undefined) customerSchema.email = customer.email;
-      if (customer.dateOfBirth !== undefined) customerSchema.date_of_birth = customer.dateOfBirth;
-      if (customer.gender !== undefined) customerSchema.gender = customer.gender;
-      if (customer.address !== undefined) customerSchema.address = customer.address;
+      if (customer.dateOfBirth !== undefined)
+        customerSchema.date_of_birth = customer.dateOfBirth;
+      if (customer.gender !== undefined)
+        customerSchema.gender = customer.gender;
+      if (customer.address !== undefined)
+        customerSchema.address = customer.address;
       if (customer.notes !== undefined) customerSchema.notes = customer.notes;
-      if (customer.isActive !== undefined) customerSchema.is_active = customer.isActive;
+      if (customer.isActive !== undefined)
+        customerSchema.is_active = customer.isActive;
 
       // Update customer in database
       await this.dataSource.update<CustomerSchemaRecord>(
-        'customers',
+        "customers",
         id,
         customerSchema
       );
@@ -304,11 +362,11 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         throw error;
       }
 
-      this.logger.error('Error in updateCustomer', { error, id, customer });
+      this.logger.error("Error in updateCustomer", { error, id, customer });
       throw new BackendCustomerError(
         BackendCustomerErrorType.OPERATION_FAILED,
-        'An unexpected error occurred while updating customer',
-        'updateCustomer',
+        "An unexpected error occurred while updating customer",
+        "updateCustomer",
         { id, customer },
         error
       );
@@ -328,23 +386,23 @@ export class SupabaseBackendCustomerRepository extends BackendRepository impleme
         throw new BackendCustomerError(
           BackendCustomerErrorType.NOT_FOUND,
           `Customer with ID ${id} not found`,
-          'deleteCustomer',
+          "deleteCustomer",
           { id }
         );
       }
 
       // Delete customer from database
-      await this.dataSource.delete('customers', id);
+      await this.dataSource.delete("customers", id);
     } catch (error) {
       if (error instanceof BackendCustomerError) {
         throw error;
       }
 
-      this.logger.error('Error in deleteCustomer', { error, id });
+      this.logger.error("Error in deleteCustomer", { error, id });
       throw new BackendCustomerError(
         BackendCustomerErrorType.OPERATION_FAILED,
-        'An unexpected error occurred while deleting customer',
-        'deleteCustomer',
+        "An unexpected error occurred while deleting customer",
+        "deleteCustomer",
         { id },
         error
       );

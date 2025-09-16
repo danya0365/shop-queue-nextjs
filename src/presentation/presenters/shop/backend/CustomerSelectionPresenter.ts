@@ -1,12 +1,12 @@
-import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import { IShopBackendCustomersService } from '@/src/application/services/shop/backend/BackendCustomersService';
-import { IShopService } from '@/src/application/services/shop/ShopService';
-import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
-import type { CustomerDTO } from '@/src/application/dtos/shop/backend/customers-dto';
+import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-dto";
+import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IShopBackendCustomersService } from "@/src/application/services/shop/backend/BackendCustomersService";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define ViewModel interface for customer selection
 export interface CustomerSelectionViewModel {
@@ -24,8 +24,16 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly customersService: IShopBackendCustomersService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    private readonly customersService: IShopBackendCustomersService
+  ) {
+    super(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
+  }
 
   async getViewModel(
     shopId: string,
@@ -42,7 +50,12 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
     }
   ): Promise<CustomerSelectionViewModel> {
     try {
-      this.logger.info('CustomerSelectionPresenter: Getting view model', { shopId, page, perPage, filters });
+      this.logger.info("CustomerSelectionPresenter: Getting view model", {
+        shopId,
+        page,
+        perPage,
+        filters,
+      });
 
       // Get customers data with filters
       const customersData = await this.customersService.getCustomersData(
@@ -61,28 +74,46 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
         perPage: customersData.perPage,
       };
     } catch (error) {
-      this.logger.error('CustomerSelectionPresenter: Error getting view model', error);
+      this.logger.error(
+        "CustomerSelectionPresenter: Error getting view model",
+        error
+      );
       throw error;
     }
   }
 
   async createCustomer(customerData: {
+    shopId: string;
     name: string;
     phone?: string;
     email?: string;
     dateOfBirth?: string;
-    gender?: 'male' | 'female' | 'other';
+    gender?: "male" | "female" | "other";
     address?: string;
     notes?: string;
   }): Promise<CustomerDTO> {
     try {
-      this.logger.info('CustomerSelectionPresenter: Creating customer', { name: customerData.name });
+      this.logger.info("CustomerSelectionPresenter: Creating customer", {
+        name: customerData.name,
+      });
 
-      const customer = await this.customersService.createCustomer(customerData);
+      const customer = await this.customersService.createCustomer({
+        shopId: customerData.shopId,
+        name: customerData.name,
+        phone: customerData.phone,
+        email: customerData.email,
+        dateOfBirth: customerData.dateOfBirth,
+        gender: customerData.gender,
+        address: customerData.address,
+        notes: customerData.notes,
+      });
 
       return customer;
     } catch (error) {
-      this.logger.error('CustomerSelectionPresenter: Error creating customer', error);
+      this.logger.error(
+        "CustomerSelectionPresenter: Error creating customer",
+        error
+      );
       throw error;
     }
   }
@@ -92,27 +123,53 @@ export class CustomerSelectionPresenter extends BaseShopBackendPresenter {
 export class CustomerSelectionPresenterFactory {
   static async create(): Promise<CustomerSelectionPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const customersService = serverContainer.resolve<IShopBackendCustomersService>('ShopBackendCustomersService');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
-    return new CustomerSelectionPresenter(logger, shopService, authService, profileService, subscriptionService, customersService);
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const customersService =
+      serverContainer.resolve<IShopBackendCustomersService>(
+        "ShopBackendCustomersService"
+      );
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new CustomerSelectionPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      customersService
+    );
   }
 }
 
 // Client-side Factory class
 export class ClientCustomerSelectionPresenterFactory {
   static async create(): Promise<CustomerSelectionPresenter> {
-    const { getClientContainer } = await import('@/src/di/client-container');
+    const { getClientContainer } = await import("@/src/di/client-container");
     const clientContainer = await getClientContainer();
-    const logger = clientContainer.resolve<Logger>('Logger');
-    const customersService = clientContainer.resolve<IShopBackendCustomersService>('ShopBackendCustomersService');
-    const shopService = clientContainer.resolve<IShopService>('ShopService');
-    const authService = clientContainer.resolve<IAuthService>('AuthService');
-    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
-    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
-    return new CustomerSelectionPresenter(logger, shopService, authService, profileService, subscriptionService, customersService);
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const customersService =
+      clientContainer.resolve<IShopBackendCustomersService>(
+        "ShopBackendCustomersService"
+      );
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new CustomerSelectionPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      customersService
+    );
   }
 }

@@ -290,7 +290,7 @@ CREATE TABLE poster_templates (
 CREATE TABLE customer_points (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
-    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE UNIQUE,
     current_points INTEGER DEFAULT 0,
     total_earned INTEGER DEFAULT 0,
     total_redeemed INTEGER DEFAULT 0,
@@ -698,6 +698,40 @@ CREATE TRIGGER trigger_create_shop_settings_on_shop_create
 AFTER INSERT ON public.shops
 FOR EACH ROW
 EXECUTE FUNCTION create_shop_settings_on_shop_create();
+
+-- Trigger function to automatically create customer_points when a customer is created
+CREATE OR REPLACE FUNCTION create_customer_points_on_customer_create()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Insert default customer points for the new customer
+  INSERT INTO public.customer_points (
+    shop_id,
+    customer_id,
+    current_points,
+    total_earned,
+    total_redeemed,
+    membership_tier,
+    tier_benefits
+  ) VALUES (
+    NEW.shop_id,
+    NEW.id,
+    0, -- current_points
+    0, -- total_earned
+    0, -- total_redeemed
+    'bronze', -- membership_tier
+    ARRAY[]::TEXT[] -- tier_benefits (empty array by default)
+  )
+  ON CONFLICT (customer_id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to automatically insert customer_points when a customer is created
+CREATE TRIGGER trigger_create_customer_points_on_customer_create
+AFTER INSERT ON public.customers
+FOR EACH ROW
+EXECUTE FUNCTION create_customer_points_on_customer_create();
 
 -- Enable Row Level Security on all shop tables
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;

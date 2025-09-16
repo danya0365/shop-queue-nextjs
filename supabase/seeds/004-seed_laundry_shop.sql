@@ -450,49 +450,38 @@ customer_data AS (
   FROM customers c
   JOIN shop_data sd ON c.shop_id = sd.shop_id
 )
-INSERT INTO customer_points (
-  shop_id,
-  customer_id,
-  current_points,
-  total_earned,
-  total_redeemed,
-  membership_tier,
-  tier_benefits,
-  created_at,
-  updated_at
-)
-SELECT
-  sd.shop_id,
-  cd.customer_id,
-  CASE 
+UPDATE customer_points
+SET
+  current_points = CASE 
     WHEN cd.name = 'คุณสมศรี ใส่สะอาด' THEN 80
     WHEN cd.name = 'คุณวิชัย เรียบร้อย' THEN 60
     WHEN cd.name = 'คุณมาลี สะอาดใส' THEN 120
-  END AS current_points,
-  CASE 
+  END,
+  total_earned = CASE 
     WHEN cd.name = 'คุณสมศรี ใส่สะอาด' THEN 80
     WHEN cd.name = 'คุณวิชัย เรียบร้อย' THEN 60
     WHEN cd.name = 'คุณมาลี สะอาดใส' THEN 120
-  END AS total_earned,
-  0 AS total_redeemed,
-  CASE 
+  END,
+  total_redeemed = 0,
+  membership_tier = CASE 
     WHEN cd.name = 'คุณสมศรี ใส่สะอาด' THEN 'silver'::public.membership_tier
     WHEN cd.name = 'คุณวิชัย เรียบร้อย' THEN 'bronze'::public.membership_tier
     WHEN cd.name = 'คุณมาลี สะอาดใส' THEN 'gold'::public.membership_tier
-  END AS membership_tier,
-  CASE 
+  END,
+  tier_benefits = CASE 
     WHEN cd.name = 'คุณสมศรี ใส่สะอาด' THEN ARRAY['10% discount', 'Express service']
     WHEN cd.name = 'คุณวิชัย เรียบร้อย' THEN ARRAY['5% discount', 'Birthday gift']
     WHEN cd.name = 'คุณมาลี สะอาดใส' THEN ARRAY['15% discount', 'Priority service', 'Free pickup']
-  END AS tier_benefits,
-  CASE 
+  END,
+  created_at = CASE 
     WHEN cd.name = 'คุณสมศรี ใส่สะอาด' THEN NOW() - INTERVAL '6 months'
     WHEN cd.name = 'คุณวิชัย เรียบร้อย' THEN NOW() - INTERVAL '4 months'
     WHEN cd.name = 'คุณมาลี สะอาดใส' THEN NOW() - INTERVAL '3 months'
-  END AS created_at,
-  cd.last_visit AS updated_at
+  END,
+  updated_at = cd.last_visit
 FROM shop_data sd
-CROSS JOIN customer_data cd;
+CROSS JOIN customer_data cd
+WHERE customer_points.customer_id = cd.customer_id;
 
 -- Insert queue services
 WITH shop_data AS (

@@ -7,16 +7,17 @@
  * Customer database schema
  */
 export interface CustomerSchema {
+  shop_id: string;
   id: string;
   name: string;
   phone: string | null;
   email: string | null;
   date_of_birth: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: "male" | "female" | "other" | null;
   address: string | null;
   total_queues?: number; // Joined data
   total_points?: number; // Joined data
-  membership_tier?: 'regular' | 'bronze' | 'silver' | 'gold' | 'platinum'; // Joined data
+  membership_tier?: "regular" | "bronze" | "silver" | "gold" | "platinum"; // Joined data
   last_visit?: string | null; // Joined data
   notes: string | null;
   is_active: boolean;

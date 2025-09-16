@@ -736,45 +736,38 @@ customer_data AS (
   FROM customers c
   JOIN shop_data sd ON c.shop_id = sd.shop_id
 )
-INSERT INTO customer_points (
-  shop_id,
-  customer_id,
-  current_points,
-  total_earned,
-  total_redeemed,
-  membership_tier,
-  tier_benefits,
-  created_at,
-  updated_at
-)
-SELECT
-  sd.shop_id,
-  cd.customer_id,
-  CASE 
+UPDATE customer_points
+SET
+  current_points = CASE 
     WHEN cd.name = 'วิชัย รักสวย' THEN 50
     WHEN cd.name = 'สมหญิง ใจงาม' THEN 150
-  END AS current_points,
-  CASE 
+    ELSE 0
+  END,
+  total_earned = CASE 
     WHEN cd.name = 'วิชัย รักสวย' THEN 50
     WHEN cd.name = 'สมหญิง ใจงาม' THEN 150
-  END AS total_earned,
-  0 AS total_redeemed,
-  CASE 
+    ELSE 0
+  END,
+  total_redeemed = 0,
+  membership_tier = CASE 
     WHEN cd.name = 'วิชัย รักสวย' THEN 'bronze'::public.membership_tier
     WHEN cd.name = 'สมหญิง ใจงาม' THEN 'silver'::public.membership_tier
-  END AS membership_tier,
-  CASE 
+    ELSE 'bronze'::public.membership_tier
+  END,
+  tier_benefits = CASE 
     WHEN cd.name = 'วิชัย รักสวย' THEN ARRAY['5% discount', 'Birthday gift']
     WHEN cd.name = 'สมหญิง ใจงาม' THEN ARRAY['10% discount', 'Birthday gift', 'Priority booking']
-  END AS tier_benefits,
-  CASE 
+    ELSE ARRAY[]::TEXT[]
+  END,
+  created_at = CASE 
     WHEN cd.name = 'วิชัย รักสวย' THEN NOW() - INTERVAL '6 months'
     WHEN cd.name = 'สมหญิง ใจงาม' THEN NOW() - INTERVAL '5 months'
-  END AS created_at,
-  cd.last_visit AS updated_at
-FROM shop_data sd
-CROSS JOIN customer_data cd
-WHERE cd.name IN ('วิชัย รักสวย', 'สมหญิง ใจงาม');
+    ELSE NOW()
+  END,
+  updated_at = cd.last_visit
+FROM customer_data cd
+WHERE customer_points.customer_id = cd.customer_id
+AND cd.name IN ('วิชัย รักสวย', 'สมหญิง ใจงาม');
 
 -- Insert customer point transactions
 WITH shop_data AS (

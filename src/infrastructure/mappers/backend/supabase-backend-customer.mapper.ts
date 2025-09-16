@@ -1,6 +1,13 @@
-import { CustomerEntity, CustomerStatsEntity, MembershipTier } from "../../../domain/entities/backend/backend-customer.entity";
+import {
+  CustomerEntity,
+  CustomerStatsEntity,
+  MembershipTier,
+} from "../../../domain/entities/backend/backend-customer.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
-import { CustomerSchema, CustomerStatsSchema } from "../../schemas/backend/customer.schema";
+import {
+  CustomerSchema,
+  CustomerStatsSchema,
+} from "../../schemas/backend/customer.schema";
 
 /**
  * Mapper class for converting between customer database schema and domain entities
@@ -14,6 +21,7 @@ export class SupabaseBackendCustomerMapper {
    */
   public static toDomain(schema: CustomerSchema): CustomerEntity {
     return {
+      shopId: schema.shop_id,
       id: schema.id,
       name: schema.name,
       phone: schema.phone,
@@ -23,12 +31,13 @@ export class SupabaseBackendCustomerMapper {
       address: schema.address,
       totalQueues: schema.total_queues || 0,
       totalPoints: schema.total_points || 0,
-      membershipTier: (schema.membership_tier as MembershipTier) || MembershipTier.REGULAR,
+      membershipTier:
+        (schema.membership_tier as MembershipTier) || MembershipTier.REGULAR,
       lastVisit: schema.last_visit || null,
       notes: schema.notes,
       isActive: schema.is_active,
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
     };
   }
 
@@ -39,6 +48,7 @@ export class SupabaseBackendCustomerMapper {
    */
   public static toSchema(entity: CustomerEntity): CustomerSchema {
     return {
+      shop_id: entity.shopId,
       id: entity.id,
       name: entity.name,
       phone: entity.phone,
@@ -49,7 +59,7 @@ export class SupabaseBackendCustomerMapper {
       notes: entity.notes,
       is_active: entity.isActive,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
     };
   }
 
@@ -58,7 +68,9 @@ export class SupabaseBackendCustomerMapper {
    * @param schema Customer stats database schema
    * @returns Customer stats domain entity
    */
-  public static statsToEntity(schema: CustomerStatsSchema): CustomerStatsEntity {
+  public static statsToEntity(
+    schema: CustomerStatsSchema
+  ): CustomerStatsEntity {
     return {
       totalCustomers: schema.total_customers,
       newCustomersThisMonth: schema.new_customers_this_month,
@@ -66,7 +78,7 @@ export class SupabaseBackendCustomerMapper {
       goldMembers: schema.gold_members,
       silverMembers: schema.silver_members,
       bronzeMembers: schema.bronze_members,
-      regularMembers: schema.regular_members
+      regularMembers: schema.regular_members,
     };
   }
 
@@ -90,7 +102,7 @@ export class SupabaseBackendCustomerMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }

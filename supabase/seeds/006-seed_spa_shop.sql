@@ -453,49 +453,38 @@ customer_data AS (
   FROM customers c
   JOIN shop_data sd ON c.shop_id = sd.shop_id
 )
-INSERT INTO customer_points (
-  shop_id,
-  customer_id,
-  current_points,
-  total_earned,
-  total_redeemed,
-  membership_tier,
-  tier_benefits,
-  created_at,
-  updated_at
-)
-SELECT
-  sd.shop_id,
-  cd.customer_id,
-  CASE 
+UPDATE customer_points
+SET
+  current_points = CASE 
     WHEN cd.name = 'คุณสมหวัง ผ่อนคลาย' THEN 180
     WHEN cd.name = 'คุณวิมลรัตน์ สบายใจ' THEN 250
     WHEN cd.name = 'คุณประยุทธ์ สุขสบาย' THEN 320
-  END AS current_points,
-  CASE 
+  END,
+  total_earned = CASE 
     WHEN cd.name = 'คุณสมหวัง ผ่อนคลาย' THEN 180
     WHEN cd.name = 'คุณวิมลรัตน์ สบายใจ' THEN 250
     WHEN cd.name = 'คุณประยุทธ์ สุขสบาย' THEN 320
-  END AS total_earned,
-  0 AS total_redeemed,
-  CASE 
+  END,
+  total_redeemed = 0,
+  membership_tier = CASE 
     WHEN cd.name = 'คุณสมหวัง ผ่อนคลาย' THEN 'gold'::public.membership_tier
     WHEN cd.name = 'คุณวิมลรัตน์ สบายใจ' THEN 'platinum'::public.membership_tier
     WHEN cd.name = 'คุณประยุทธ์ สุขสบาย' THEN 'platinum'::public.membership_tier
-  END AS membership_tier,
-  CASE 
+  END,
+  tier_benefits = CASE 
     WHEN cd.name = 'คุณสมหวัง ผ่อนคลาย' THEN ARRAY['15% discount', 'Priority booking', 'Complimentary tea']
     WHEN cd.name = 'คุณวิมลรัตน์ สบายใจ' THEN ARRAY['20% discount', 'VIP room', 'Free aromatherapy upgrade']
     WHEN cd.name = 'คุณประยุทธ์ สุขสบาย' THEN ARRAY['25% discount', 'VIP treatment', 'Free couple upgrade']
-  END AS tier_benefits,
-  CASE 
+  END,
+  created_at = CASE 
     WHEN cd.name = 'คุณสมหวัง ผ่อนคลาย' THEN NOW() - INTERVAL '10 months'
     WHEN cd.name = 'คุณวิมลรัตน์ สบายใจ' THEN NOW() - INTERVAL '8 months'
     WHEN cd.name = 'คุณประยุทธ์ สุขสบาย' THEN NOW() - INTERVAL '6 months'
-  END AS created_at,
-  cd.last_visit AS updated_at
+  END,
+  updated_at = cd.last_visit
 FROM shop_data sd
-CROSS JOIN customer_data cd;
+CROSS JOIN customer_data cd
+WHERE customer_points.customer_id = cd.customer_id;
 
 -- Insert queue services
 WITH shop_data AS (

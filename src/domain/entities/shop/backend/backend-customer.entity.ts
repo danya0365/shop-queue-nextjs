@@ -6,11 +6,12 @@ import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
  */
 export interface CustomerEntity {
   id: string;
+  shopId: string;
   name: string;
   phone: string | null;
   email: string | null;
   dateOfBirth: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: "male" | "female" | "other" | null;
   address: string | null;
   totalQueues: number;
   totalPoints: number;
@@ -26,11 +27,11 @@ export interface CustomerEntity {
  * Membership tier enum
  */
 export enum MembershipTier {
-  REGULAR = 'regular',
-  BRONZE = 'bronze',
-  SILVER = 'silver',
-  GOLD = 'gold',
-  PLATINUM = 'platinum'
+  REGULAR = "regular",
+  BRONZE = "bronze",
+  SILVER = "silver",
+  GOLD = "gold",
+  PLATINUM = "platinum",
 }
 
 /**

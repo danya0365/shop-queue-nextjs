@@ -696,28 +696,16 @@ FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 WHERE p.username = 'restaurant_owner';
 
--- Insert customer points for the restaurant
-INSERT INTO customer_points (
-  shop_id,
-  customer_id,
-  current_points,
-  total_earned,
-  total_redeemed,
-  membership_tier,
-  tier_benefits,
-  created_at,
-  updated_at
-)
-SELECT
-  s.id AS shop_id,
-  c.id AS customer_id,
-  cp_info.current_points,
-  cp_info.total_earned,
-  cp_info.total_redeemed,
-  cp_info.membership_tier,
-  cp_info.tier_benefits,
-  NOW(),
-  NOW()
+-- Update customer points for the restaurant
+UPDATE customer_points
+SET
+  current_points = cp_info.current_points,
+  total_earned = cp_info.total_earned,
+  total_redeemed = cp_info.total_redeemed,
+  membership_tier = cp_info.membership_tier,
+  tier_benefits = cp_info.tier_benefits,
+  created_at = NOW(),
+  updated_at = NOW()
 FROM shops s
 JOIN profiles p ON s.owner_id = p.id
 JOIN customers c ON c.shop_id = s.id
@@ -729,7 +717,8 @@ CROSS JOIN (
     ('customer3'::text, 25::integer, 25::integer, 0::integer, 'bronze'::public.membership_tier, ARRAY['5% discount', 'Birthday gift']::text[])
 ) AS cp_info(username, current_points, total_earned, total_redeemed, membership_tier, tier_benefits)
 WHERE p.username = 'restaurant_owner'
-AND p_cust.username = cp_info.username;
+AND p_cust.username = cp_info.username
+AND customer_points.customer_id = c.id;
 
 -- Insert customer point transactions for the restaurant
 INSERT INTO customer_point_transactions (

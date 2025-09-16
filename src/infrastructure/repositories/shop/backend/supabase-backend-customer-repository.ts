@@ -365,6 +365,7 @@ export class SupabaseShopBackendCustomerRepository
     try {
       // Convert domain entity to database schema
       const customerSchema: Partial<CustomerSchema> = {
+        shop_id: customer.shopId,
         name: customer.name,
         phone: customer.phone,
         email: customer.email,
@@ -381,13 +382,6 @@ export class SupabaseShopBackendCustomerRepository
           "customers",
           customerSchema
         );
-
-      // Initialize customer points with default values
-      await this.dataSource.insert("customer_points", {
-        customer_id: createdCustomer.id,
-        total_points: 0,
-        membership_tier: "regular",
-      });
 
       // Return the created customer as a domain entity
       return this.getCustomerById(
