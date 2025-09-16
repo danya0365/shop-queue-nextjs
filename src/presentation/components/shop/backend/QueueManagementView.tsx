@@ -15,6 +15,7 @@ import { useState } from "react";
 import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
+import { QRCodeModal } from "./modals/QRCodeModal";
 import { QueueLimitsWarning } from "./QueueLimitsWarning";
 
 interface QueueManagementViewProps {
@@ -52,6 +53,7 @@ export function QueueManagementView({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<QueueItem | null>(null);
 
   // Show loading only on initial load or when explicitly loading
@@ -382,7 +384,10 @@ export function QueueManagementView({
           >
             📝 เพิ่มคิวใหม่
           </button>
-          <button className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => setQrCodeModalOpen(true)}
+            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+          >
             📱 สร้าง QR Code
           </button>
         </div>
@@ -985,6 +990,15 @@ export function QueueManagementView({
         onClose={() => setCreateModalOpen(false)}
         onSave={handleCreateQueue}
         isLoading={actionLoading.createQueue}
+        shopId={shopId}
+      />
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        isOpen={qrCodeModalOpen}
+        onClose={() => setQrCodeModalOpen(false)}
+        shopName={viewModel.shop.name}
+        shopDescription={viewModel.shop.description}
         shopId={shopId}
       />
     </div>
