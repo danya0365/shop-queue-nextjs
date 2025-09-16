@@ -30,7 +30,13 @@ export function EditQueueModal({
   onSave,
   isLoading = false,
 }: EditQueueModalProps) {
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<
+    {
+      serviceId: string;
+      quantity: number;
+      price?: number;
+    }[]
+  >([]);
   const [priority, setPriority] = useState(queue.priority);
   const [notes, setNotes] = useState(queue.notes || "");
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,7 +52,11 @@ export function EditQueueModal({
         services.some((service) => service.id === queueService.serviceId)
       );
       setSelectedServices(
-        validSelectedServices.map((queueService) => queueService.serviceId)
+        validSelectedServices.map((queueService) => ({
+          serviceId: queueService.serviceId,
+          quantity: queueService.quantity || 1,
+          price: queueService.price,
+        }))
       );
     }
   }, [servicesLoading, services, queue.queueServices]);
@@ -59,17 +69,47 @@ export function EditQueueModal({
       service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleServiceToggle = (serviceName: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(serviceName)
-        ? prev.filter((s) => s !== serviceName)
-        : [...prev, serviceName]
-    );
+  const handleServiceToggle = (serviceId: string) => {
+    setSelectedServices((prev) => {
+      const existingIndex = prev.findIndex((s) => s.serviceId === serviceId);
+      if (existingIndex >= 0) {
+        // Remove service if already selected
+        return prev.filter((s) => s.serviceId !== serviceId);
+      } else {
+        // Add new service with default quantity 1 and no custom price
+        return [
+          ...prev,
+          {
+            serviceId,
+            quantity: 1,
+            price: undefined,
+          },
+        ];
+      }
+    });
 
     // Clear service error when user selects a service
     if (errors.services) {
       setErrors((prev) => ({ ...prev, services: "" }));
     }
+  };
+
+  const handleServicePriceChange = (
+    serviceId: string,
+    price: number | undefined
+  ) => {
+    setSelectedServices((prev) =>
+      prev.map((s) => (s.serviceId === serviceId ? { ...s, price } : s))
+    );
+  };
+
+  const handleServiceQuantityChange = (serviceId: string, quantity: number) => {
+    if (quantity < 1) quantity = 1;
+    if (quantity > 99) quantity = 99; // Set reasonable max limit
+
+    setSelectedServices((prev) =>
+      prev.map((s) => (s.serviceId === serviceId ? { ...s, quantity } : s))
+    );
   };
 
   const validateForm = () => {
@@ -90,11 +130,11 @@ export function EditQueueModal({
       return;
     }
 
-    // TODO: will implement quantity and price later
-    const servicesWithDetails = selectedServices.map((serviceId) => ({
-      serviceId,
-      quantity: 1,
-      price: undefined,
+    // Use the selected services with their details
+    const servicesWithDetails = selectedServices.map((s) => ({
+      serviceId: s.serviceId,
+      quantity: s.quantity,
+      price: s.price,
     }));
 
     try {
@@ -133,10 +173,29 @@ export function EditQueueModal({
   };
 
   const calculateTotalPrice = () => {
-    return selectedServices.reduce((total, serviceId) => {
-      const service = services.find((s) => s.id === serviceId);
-      return total + (service?.price || 0);
+    return selectedServices.reduce((total, selectedService) => {
+      const service = services.find((s) => s.id === selectedService.serviceId);
+      const price = selectedService.price || service?.price || 0;
+      return total + price * selectedService.quantity;
     }, 0);
+  };
+
+  const getServicePrice = (serviceId: string) => {
+    const selectedService = selectedServices.find(
+      (s) => s.serviceId === serviceId
+    );
+    const service = services.find((s) => s.id === serviceId);
+    return selectedService?.price || service?.price || 0;
+  };
+
+  const getServiceQuantity = (serviceId: string) => {
+    return (
+      selectedServices.find((s) => s.serviceId === serviceId)?.quantity || 1
+    );
+  };
+
+  const isServiceSelected = (serviceId: string) => {
+    return selectedServices.some((s) => s.serviceId === serviceId);
   };
 
   return (
@@ -213,14 +272,14 @@ export function EditQueueModal({
 
             {/* Services Grid */}
             <div
-              className={`grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
+              className={`grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border rounded-md p-3 ${
                 errors.services
                   ? "border-red-500"
                   : "border-gray-200 dark:border-gray-600"
               }`}
             >
               {servicesLoading ? (
-                <div className="col-span-2 flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-8">
                   <svg
                     className="animate-spin h-6 w-6 text-blue-600"
                     fill="none"
@@ -245,28 +304,122 @@ export function EditQueueModal({
                   </span>
                 </div>
               ) : filteredServices.length === 0 ? (
-                <div className="col-span-2 text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   ไม่พบบริการที่ตรงกับการค้นหา
                 </div>
               ) : (
-                filteredServices.map((service) => (
-                  <label
-                    key={service.id}
-                    className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.includes(service.id)}
-                      onChange={() => handleServiceToggle(service.id)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                      disabled={isLoading || servicesLoading}
-                    />
-                    <span className="flex-1">{service.name}</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      ฿{service.price}
-                    </span>
-                  </label>
-                ))
+                filteredServices.map((service) => {
+                  const isSelected = isServiceSelected(service.id);
+                  const currentPrice = getServicePrice(service.id);
+                  const quantity = getServiceQuantity(service.id);
+
+                  return (
+                    <div key={service.id} className="space-y-2">
+                      <div className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleServiceToggle(service.id)}
+                          className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                          disabled={isLoading || servicesLoading}
+                        />
+                        <span className="flex-1 font-medium">{service.name}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          ราคาพื้นฐาน: ฿{service.price}
+                        </span>
+                      </div>
+
+                      {isSelected && (
+                        <div className="ml-6 grid grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                          {/* Custom Price Input */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              ราคาต่อหน่วย (฿)
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={currentPrice}
+                                onChange={(e) =>
+                                  handleServicePriceChange(
+                                    service.id,
+                                    e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : undefined
+                                  )
+                                }
+                                placeholder={service.price.toString()}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                disabled={isLoading || servicesLoading}
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleServicePriceChange(service.id, undefined)
+                                }
+                                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
+                                disabled={isLoading || servicesLoading}
+                              >
+                                ค่าเริ่มต้น
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Quantity Input */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              จำนวน
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleServiceQuantityChange(
+                                    service.id,
+                                    quantity - 1
+                                  )
+                                }
+                                className="w-8 h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50"
+                                disabled={isLoading || servicesLoading || quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                max="99"
+                                value={quantity}
+                                onChange={(e) =>
+                                  handleServiceQuantityChange(
+                                    service.id,
+                                    parseInt(e.target.value) || 1
+                                  )
+                                }
+                                className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
+                                disabled={isLoading || servicesLoading}
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleServiceQuantityChange(
+                                    service.id,
+                                    quantity + 1
+                                  )
+                                }
+                                className="w-8 h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50"
+                                disabled={isLoading || servicesLoading || quantity >= 99}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
 
@@ -277,7 +430,7 @@ export function EditQueueModal({
             {/* Selected Services Summary */}
             {selectedServices.length > 0 && (
               <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
                     บริการที่เลือก ({selectedServices.length})
                   </span>
@@ -285,8 +438,24 @@ export function EditQueueModal({
                     รวม: ฿{calculateTotalPrice()}
                   </span>
                 </div>
-                <div className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                  {selectedServices.join(", ")}
+                <div className="space-y-1">
+                  {selectedServices.map((selectedService) => {
+                    const service = services.find(
+                      (s) => s.id === selectedService.serviceId
+                    );
+                    const price = selectedService.price || service?.price || 0;
+                    return (
+                      <div
+                        key={selectedService.serviceId}
+                        className="text-sm text-blue-700 dark:text-blue-300 flex justify-between"
+                      >
+                        <span>
+                          {service?.name} x{selectedService.quantity}
+                        </span>
+                        <span>฿{price * selectedService.quantity}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
