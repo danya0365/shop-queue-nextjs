@@ -2,6 +2,11 @@
 
 import { CustomersViewModel } from '@/src/presentation/presenters/shop/backend/CustomersPresenter';
 import { useCustomersPresenter } from '@/src/presentation/presenters/shop/backend/useCustomersPresenter';
+import type { CustomerDTO } from '@/src/application/dtos/shop/backend/customers-dto';
+import { CreateCustomerModal } from './CreateCustomerModal';
+import { EditCustomerModal } from './EditCustomerModal';
+import { DeleteCustomerConfirmation } from './DeleteCustomerConfirmation';
+import { ViewCustomerDetails } from './ViewCustomerDetails';
 import { useState } from 'react';
 
 interface CustomersViewProps {
@@ -17,12 +22,36 @@ export function CustomersView({
     viewModel,
     loading,
     error,
+    filters,
+    handlePageChange,
+    handleNextPage,
+    handlePrevPage,
+    handlePerPageChange,
+    handleSearchChange,
+    handleMembershipTierChange,
+    handleIsActiveChange,
+    handleMinTotalPointsChange,
+    handleMaxTotalPointsChange,
+    handleMinTotalQueuesChange,
+    handleMaxTotalQueuesChange,
+    resetFilters,
     refreshData,
+    createCustomer,
+    updateCustomer,
+    handleDeleteCustomer,
+    actionLoading,
   } = useCustomersPresenter(shopId, initialViewModel);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'registered' | 'guest'>('all');
+  // Extract data from view model with null checks
+  const customers = viewModel?.customers?.data || [];
+  const pagination = viewModel?.customers?.pagination || null;
+
+  // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDTO | null>(null);
 
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
@@ -70,20 +99,7 @@ export function CustomersView({
     return null;
   }
 
-  // Filter customers based on search and type
-  const filteredCustomers = viewModel.customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (customer.phone && customer.phone.includes(searchTerm));
-    
-    let matchesType = true;
-    if (filterType === 'registered') {
-      matchesType = customer.profileId !== null;
-    } else if (filterType === 'guest') {
-      matchesType = customer.profileId === null;
-    }
-    
-    return matchesSearch && matchesType;
-  });
+  // Data is already extracted above
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('th-TH', {
@@ -92,21 +108,21 @@ export function CustomersView({
     }).format(price);
   };
 
-  const formatDate = (date: Date | undefined) => {
+  const formatDate = (date: string | undefined) => {
     if (!date) return 'ไม่เคย';
     return new Intl.DateTimeFormat('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-    }).format(date);
+    }).format(new Date(date));
   };
 
-  const getCustomerTypeLabel = (customer: { profileId?: string | null }) => {
-    return customer.profileId ? 'สมาชิก' : 'ลูกค้าทั่วไป';
+  const getCustomerTypeLabel = (customer: CustomerDTO) => {
+    return customer.email ? 'สมาชิก' : 'ลูกค้าทั่วไป';
   };
 
-  const getCustomerTypeColor = (customer: { profileId?: string | null }) => {
-    return customer.profileId 
+  const getCustomerTypeColor = (customer: CustomerDTO) => {
+    return customer.email 
       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
       : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
@@ -207,38 +223,122 @@ export function CustomersView({
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="ค้นหาลูกค้า (ชื่อ หรือ เบอร์โทร)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="ค้นหาลูกค้า (ชื่อ หรือ เบอร์โทร)..."
+                value={filters.searchQuery ?? ''}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            {/* Membership Tier Filter */}
+            <div className="lg:w-48">
+              <select
+                value={filters.membershipTierFilter ?? ''}
+                onChange={(e) => handleMembershipTierChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">ทุกระดับสมาชิก</option>
+                <option value="bronze">Bronze</option>
+                <option value="silver">Silver</option>
+                <option value="gold">Gold</option>
+                <option value="platinum">Platinum</option>
+              </select>
+            </div>
+
+            {/* Active Status Filter */}
+            <div className="lg:w-48">
+              <select
+                value={filters.isActiveFilter?.toString() ?? ''}
+                onChange={(e) => handleIsActiveChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">ทุกสถานะ</option>
+                <option value="true">ใช้งานอยู่</option>
+                <option value="false">ระงับการใช้งาน</option>
+              </select>
+            </div>
+
+            {/* Reset Filters */}
+            <div className="lg:w-auto">
+              <button
+                onClick={resetFilters}
+                className="w-full lg:w-auto px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                รีเซ็ตตัวกรอง
+              </button>
+            </div>
           </div>
 
-          {/* Type Filter */}
-          <div className="sm:w-48">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'registered' | 'guest')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="all">ลูกค้าทั้งหมด</option>
-              <option value="registered">สมาชิก</option>
-              <option value="guest">ลูกค้าทั่วไป</option>
-            </select>
+          {/* Advanced Filters */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                แต้มขั้นต่ำ
+              </label>
+              <input
+                type="number"
+                placeholder="0"
+                value={filters.minTotalPoints?.toString() ?? ''}
+                onChange={(e) => handleMinTotalPointsChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                แต้มสูงสุด
+              </label>
+              <input
+                type="number"
+                placeholder="ไม่จำกัด"
+                value={filters.maxTotalPoints?.toString() ?? ''}
+                onChange={(e) => handleMaxTotalPointsChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                จำนวนครั้งขั้นต่ำ
+              </label>
+              <input
+                type="number"
+                placeholder="0"
+                value={filters.minTotalQueues?.toString() ?? ''}
+                onChange={(e) => handleMinTotalQueuesChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                จำนวนครั้งสูงสุด
+              </label>
+              <input
+                type="number"
+                placeholder="ไม่จำกัด"
+                value={filters.maxTotalQueues?.toString() ?? ''}
+                onChange={(e) => handleMaxTotalQueuesChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
       {/* Customers Table */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">รายการลูกค้า ({filteredCustomers.length})</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            รายการลูกค้า ({customers.length})
+            {pagination && pagination.total > pagination.perPage && (
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                หน้า {pagination.page} จาก {pagination.totalPages}
+              </span>
+            )}
+          </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -268,21 +368,34 @@ export function CustomersView({
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredCustomers.length === 0 ? (
+              {customers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">👥</div>
                       <p className="text-lg">
-                        {searchTerm || filterType !== 'all'
+                        {filters.searchQuery || 
+                       filters.membershipTierFilter || 
+                       filters.isActiveFilter !== undefined ||
+                       filters.minTotalPoints !== undefined ||
+                       filters.maxTotalPoints !== undefined ||
+                       filters.minTotalQueues !== undefined ||
+                       filters.maxTotalQueues !== undefined
                           ? "ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีลูกค้าในระบบ"}
                       </p>
-                      {searchTerm || filterType !== 'all' ? (
-                        <p className="text-sm text-gray-400 mt-2">
-                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
-                        </p>
-                      ) : (
+                      {filters.searchQuery || 
+                       filters.membershipTierFilter || 
+                       filters.isActiveFilter !== undefined ||
+                       filters.minTotalPoints !== undefined ||
+                       filters.maxTotalPoints !== undefined ||
+                       filters.minTotalQueues !== undefined ||
+                       filters.maxTotalQueues !== undefined
+                        ? (
+                          <p className="text-sm text-gray-400 mt-2">
+                            ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
+                          </p>
+                        ) : (
                         <p className="text-sm text-gray-400 mt-2">
                           คลิกปุ่ม &lsquo;เพิ่มลูกค้าใหม่&rsquo; เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
                         </p>
@@ -291,12 +404,12 @@ export function CustomersView({
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
+                customers.map((customer: CustomerDTO) => (
                   <tr key={customer.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="text-2xl mr-3">
-                          {customer.profileId ? '⭐' : '👤'}
+                          {customer.email ? '⭐' : '👤'}
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -314,28 +427,46 @@ export function CustomersView({
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {customer.totalVisits || 0} ครั้ง
+                      {customer.totalQueues || 0} ครั้ง
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {formatDate(customer.lastVisit)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {formatPrice(customer.totalSpent || 0)}
+                      {formatPrice(0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                        {customer.loyaltyPoints || 0} แต้ม
+                        {customer.totalPoints || 0} แต้ม
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <button 
+                          onClick={() => {
+                            setSelectedCustomer(customer);
+                            setShowViewModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
                           ดูรายละเอียด
                         </button>
-                        <button className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                        <button 
+                          onClick={() => {
+                            setSelectedCustomer(customer);
+                            setShowEditModal(true);
+                          }}
+                          className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                        >
                           แก้ไข
                         </button>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <button 
+                          onClick={() => {
+                            setSelectedCustomer(customer);
+                            setShowDeleteModal(true);
+                          }}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
                           ลบ
                         </button>
                       </div>
@@ -346,29 +477,145 @@ export function CustomersView({
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Create Customer Modal Placeholder */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              เพิ่มลูกค้าใหม่
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
+        {/* Pagination Controls */}
+        {pagination && pagination.total > pagination.perPage && (
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  แสดง {(pagination.page - 1) * pagination.perPage + 1} - {Math.min(pagination.page * pagination.perPage, pagination.total)} จาก {pagination.total} รายการ
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {/* Per Page Selector */}
+                <select
+                  value={pagination.perPage}
+                  onChange={(e) => handlePerPageChange(parseInt(e.target.value))}
+                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                >
+                  <option value={10}>10 รายการ</option>
+                  <option value={20}>20 รายการ</option>
+                  <option value={50}>50 รายการ</option>
+                  <option value={100}>100 รายการ</option>
+                </select>
+
+                {/* Pagination Buttons */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={!pagination.hasPrev}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      pagination.hasPrev
+                        ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                    }`}
+                  >
+                    ก่อนหน้า
+                  </button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = pagination.page - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                            pageNum === pagination.page
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={!pagination.hasNext}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      pagination.hasNext
+                        ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                    }`}
+                  >
+                    ถัดไป
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Modals */}
+      <CreateCustomerModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={async (customerData) => {
+          await createCustomer({ ...customerData, shopId });
+          setShowCreateModal(false);
+        }}
+        loading={actionLoading.create}
+      />
+
+      <EditCustomerModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedCustomer(null);
+        }}
+        onSubmit={async (customerData) => {
+          if (selectedCustomer) {
+            await updateCustomer({ ...customerData, id: selectedCustomer.id });
+            setShowEditModal(false);
+            setSelectedCustomer(null);
+          }
+        }}
+        customer={selectedCustomer}
+        loading={actionLoading.update}
+      />
+
+      <DeleteCustomerConfirmation
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedCustomer(null);
+        }}
+        onConfirm={async () => {
+          if (selectedCustomer) {
+            await handleDeleteCustomer(selectedCustomer.id);
+            setShowDeleteModal(false);
+            setSelectedCustomer(null);
+          }
+        }}
+        customer={selectedCustomer}
+        loading={actionLoading.delete}
+      />
+
+      <ViewCustomerDetails
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedCustomer(null);
+        }}
+        customer={selectedCustomer}
+      />
     </div>
   );
 }
