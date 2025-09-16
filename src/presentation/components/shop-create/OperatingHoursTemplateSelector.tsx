@@ -21,7 +21,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ร้านทั่วไป',
     description: 'เปิด 9:00-18:00 จันทร์-เสาร์, ปิดอาทิตย์',
     icon: '🏪',
-    color: 'bg-blue-100 hover:bg-blue-200 border-blue-300',
+    color: 'bg-blue-100 hover:bg-blue-200 border-blue-300 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 dark:border-blue-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: true, openTime: '09:00', closeTime: '18:00' },
       { dayOfWeek: 'tuesday', isOpen: true, openTime: '09:00', closeTime: '18:00' },
@@ -37,7 +37,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ร้านอาหาร',
     description: 'เปิด 10:00-22:00 ทุกวัน',
     icon: '🍽️',
-    color: 'bg-orange-100 hover:bg-orange-200 border-orange-300',
+    color: 'bg-orange-100 hover:bg-orange-200 border-orange-300 dark:bg-orange-900/30 dark:hover:bg-orange-800/40 dark:border-orange-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: true, openTime: '10:00', closeTime: '22:00' },
       { dayOfWeek: 'tuesday', isOpen: true, openTime: '10:00', closeTime: '22:00' },
@@ -53,7 +53,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ร้านสะดวกซื้อ',
     description: 'เปิด 24 ชั่วโมงทุกวัน',
     icon: '🏪',
-    color: 'bg-green-100 hover:bg-green-200 border-green-300',
+    color: 'bg-green-100 hover:bg-green-200 border-green-300 dark:bg-green-900/30 dark:hover:bg-green-800/40 dark:border-green-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: true, is24Hours: true },
       { dayOfWeek: 'tuesday', isOpen: true, is24Hours: true },
@@ -69,7 +69,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ทำงานทั่วไป',
     description: 'เปิด 8:00-17:00 จันทร์-ศุกร์, ปิดเสาร์-อาทิตย์',
     icon: '🏢',
-    color: 'bg-purple-100 hover:bg-purple-200 border-purple-300',
+    color: 'bg-purple-100 hover:bg-purple-200 border-purple-300 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 dark:border-purple-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: true, openTime: '08:00', closeTime: '17:00' },
       { dayOfWeek: 'tuesday', isOpen: true, openTime: '08:00', closeTime: '17:00' },
@@ -85,7 +85,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ร้านวันหยุด',
     description: 'เปิดเฉพาะเสาร์-อาทิตย์ 10:00-20:00',
     icon: '🎯',
-    color: 'bg-pink-100 hover:bg-pink-200 border-pink-300',
+    color: 'bg-pink-100 hover:bg-pink-200 border-pink-300 dark:bg-pink-900/30 dark:hover:bg-pink-800/40 dark:border-pink-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: false },
       { dayOfWeek: 'tuesday', isOpen: false },
@@ -101,7 +101,7 @@ const templates: OperatingHoursTemplate[] = [
     name: 'ร้านกาแฟ',
     description: 'เปิด 7:00-20:00 ทุกวัน',
     icon: '☕',
-    color: 'bg-amber-100 hover:bg-amber-200 border-amber-300',
+    color: 'bg-amber-100 hover:bg-amber-200 border-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-800/40 dark:border-amber-700',
     hours: [
       { dayOfWeek: 'monday', isOpen: true, openTime: '07:00', closeTime: '20:00' },
       { dayOfWeek: 'tuesday', isOpen: true, openTime: '07:00', closeTime: '20:00' },

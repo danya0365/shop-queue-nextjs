@@ -38,7 +38,11 @@ export default async function ShopCreatePage() {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel();
 
-    return <FrontendLayout><ShopCreateView viewModel={viewModel} /></FrontendLayout>;
+    return (
+      <FrontendLayout>
+        <ShopCreateView viewModel={viewModel} />
+      </FrontendLayout>
+    );
   } catch (error) {
     console.error("Error fetching shop create data:", error);
 

@@ -1044,6 +1044,11 @@ $$;
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================
 
+-- Only shop employees, shop managers and shop owners can view queues
+CREATE POLICY "Shop employees, managers and owners can view queues"
+  ON public.queues FOR SELECT
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+
 -- Only shop managers can update/delete queues directly
 CREATE POLICY "Shop managers can update queues"
   ON public.queues FOR UPDATE
@@ -1440,26 +1445,30 @@ CREATE POLICY "Everyone can view queue services"
   ON public.queue_services FOR SELECT
   USING (true);
 
--- Anyone can insert queue services (when creating queue)
-CREATE POLICY "Anyone can insert queue services"
+-- Only shop employees, managers and owners can insert queue services
+CREATE POLICY "Only shop employees, managers and owners can insert queue services"
   ON public.queue_services FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  ));
 
--- Only shop managers can update queue services
-CREATE POLICY "Shop managers can update queue services"
+-- Only shop employees, managers and owners can update queue services
+CREATE POLICY "Only shop employees, managers and owners can update queue services"
   ON public.queue_services FOR UPDATE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
--- Only shop managers can delete queue services
-CREATE POLICY "Shop managers can delete queue services"
+-- Only shop employees, managers and owners can delete queue services
+CREATE POLICY "Only shop employees, managers and owners can delete queue services"
   ON public.queue_services FOR DELETE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
+
 
 -- =============================================================================
 -- SERVICES TABLE RLS POLICIES

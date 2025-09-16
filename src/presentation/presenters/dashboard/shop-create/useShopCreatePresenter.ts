@@ -20,10 +20,18 @@ const mapDayToOpeningHours = (
   return {
     dayOfWeek,
     isOpen: !dayData.closed,
-    openTime: dayData.closed || dayData.is24Hours ? undefined : dayData.openTime,
-    closeTime: dayData.closed || dayData.is24Hours ? undefined : dayData.closeTime,
-    breakStart: dayData.closed || dayData.is24Hours || !dayData.hasBreak ? undefined : dayData.breakStart,
-    breakEnd: dayData.closed || dayData.is24Hours || !dayData.hasBreak ? undefined : dayData.breakEnd,
+    openTime:
+      dayData.closed || dayData.is24Hours ? undefined : dayData.openTime,
+    closeTime:
+      dayData.closed || dayData.is24Hours ? undefined : dayData.closeTime,
+    breakStart:
+      dayData.closed || dayData.is24Hours || !dayData.hasBreak
+        ? undefined
+        : dayData.breakStart,
+    breakEnd:
+      dayData.closed || dayData.is24Hours || !dayData.hasBreak
+        ? undefined
+        : dayData.breakEnd,
     is24Hours: !dayData.closed && dayData.is24Hours,
   };
 };
@@ -32,10 +40,21 @@ const mapDayToOpeningHours = (
 const mapOperatingHoursToOpeningHours = (
   operatingHours: ShopCreateData["operatingHours"]
 ) => {
-  const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-  
-  return daysOfWeek.map(day => 
-    mapDayToOpeningHours(day, operatingHours[day as keyof typeof operatingHours])
+  const daysOfWeek = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+
+  return daysOfWeek.map((day) =>
+    mapDayToOpeningHours(
+      day,
+      operatingHours[day as keyof typeof operatingHours]
+    )
   );
 };
 
@@ -223,6 +242,7 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
         address: data.address,
         phone: data.phone,
         email: data.email || undefined,
+        website: data.website || undefined,
         ownerId: currentProfile.id,
         categoryIds: [data.category], // Convert single category to array
         openingHours: mapOperatingHoursToOpeningHours(data.operatingHours),
@@ -246,7 +266,11 @@ export const useShopCreatePresenter = (): ShopCreatePresenterHook => {
       return result;
     } catch (error) {
       logger.error("ShopCreatePresenter: Error creating shop", error);
-      setError(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการสร้างร้านค้า กรุณาลองใหม่อีกครั้ง");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการสร้างร้านค้า กรุณาลองใหม่อีกครั้ง"
+      );
       return false;
     } finally {
       setIsLoading(false);
