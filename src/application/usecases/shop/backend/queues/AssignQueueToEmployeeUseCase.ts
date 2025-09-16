@@ -1,6 +1,7 @@
 import { QueueDTO } from "@/src/application/dtos/shop/backend/queues-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { QueueMapper } from "@/src/application/mappers/shop/backend/queue-mapper";
+import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { ShopBackendQueueRepository } from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 import {
@@ -78,7 +79,7 @@ export class AssignQueueToEmployeeUseCase
       const updatedQueue = await this.queueRepository.updateQueue(
         input.queueId,
         {
-          status: "serving" as const,
+          status: QueueStatus.SERVING,
           servedByEmployeeId: input.employeeId,
           calledAt: new Date().toISOString(),
         }

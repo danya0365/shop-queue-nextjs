@@ -1,20 +1,29 @@
-import { PrioritizeQueuesInput, PrioritizeQueuesResult } from '@/src/application/dtos/shop/backend/queue-advanced-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { UpdateQueueInput } from '@/src/application/dtos/shop/backend/queues-dto';
-import { QueueMapper } from '@/src/application/mappers/shop/backend/queue-mapper';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopBackendQueueError, ShopBackendQueueErrorType } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
-import { ShopBackendQueueRepository } from '@/src/domain/repositories/shop/backend/backend-queue-repository';
+import {
+  PrioritizeQueuesInput,
+  PrioritizeQueuesResult,
+} from "@/src/application/dtos/shop/backend/queue-advanced-dto";
+import { UpdateQueueInput } from "@/src/application/dtos/shop/backend/queues-dto";
+import { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import { QueueMapper } from "@/src/application/mappers/shop/backend/queue-mapper";
+import { QueuePriority } from "@/src/domain/entities/backend/backend-queue.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import {
+  ShopBackendQueueError,
+  ShopBackendQueueErrorType,
+  ShopBackendQueueRepository,
+} from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 
 /**
  * Use case for prioritizing queues based on various criteria
  * Following SOLID principles and Clean Architecture
  */
-export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, PrioritizeQueuesResult> {
+export class PrioritizeQueuesUseCase
+  implements IUseCase<PrioritizeQueuesInput, PrioritizeQueuesResult>
+{
   constructor(
     private readonly queueRepository: ShopBackendQueueRepository,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   /**
    * Execute the use case to prioritize queues
@@ -25,27 +34,30 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
     try {
       // Validate input
       if (!input.shopId) {
-        throw new Error('Shop ID is required');
+        throw new Error("Shop ID is required");
       }
 
       if (!input.queues || input.queues.length === 0) {
-        throw new Error('Queues are required');
+        throw new Error("Queues are required");
       }
 
-      this.logger.info('Starting prioritize queues', { 
+      this.logger.info("Starting prioritize queues", {
         shopId: input.shopId,
         queueCount: input.queues.length,
-        strategy: input.strategy || 'wait-time'
+        strategy: input.strategy || "wait-time",
       });
 
       // Get current queues from repository
-      const currentQueues = await this.getCurrentQueues(input.shopId, input.departmentId);
+      const currentQueues = await this.getCurrentQueues(
+        input.shopId,
+        input.departmentId
+      );
 
       // Calculate priority scores for each queue
       const prioritizedQueues = this.calculatePriorities(
         currentQueues,
         input.queues,
-        input.strategy || 'wait-time'
+        input.strategy || "wait-time"
       );
 
       // Update queue priorities in repository
@@ -55,12 +67,12 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
       let normalPriorityCount = 0;
       let urgentPriorityCount = 0;
 
-      prioritizedQueues.forEach(queue => {
-        if (queue.priority === 'high') {
+      prioritizedQueues.forEach((queue) => {
+        if (queue.priority === "high") {
           highPriorityCount++;
-        } else if (queue.priority === 'normal') {
+        } else if (queue.priority === "normal") {
           normalPriorityCount++;
-        } else if (queue.priority === 'urgent') {
+        } else if (queue.priority === "urgent") {
           urgentPriorityCount++;
         }
       });
@@ -69,29 +81,29 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
         success: true,
         shopId: input.shopId,
         prioritizedQueues: prioritizedQueues,
-        strategy: input.strategy || 'wait-time',
+        strategy: input.strategy || "wait-time",
         summary: {
           totalQueues: prioritizedQueues.length,
           highPriorityCount,
           normalPriorityCount,
-          urgentPriorityCount
-        }
+          urgentPriorityCount,
+        },
       };
 
-      this.logger.info('Prioritize queues completed', { 
+      this.logger.info("Prioritize queues completed", {
         result: {
           shopId: result.shopId,
           totalQueues: result.summary.totalQueues,
           highPriorityCount: result.summary.highPriorityCount,
           normalPriorityCount: result.summary.normalPriorityCount,
           urgentPriorityCount: result.summary.urgentPriorityCount,
-          strategy: result.strategy
-        }
+          strategy: result.strategy,
+        },
       });
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to prioritize queues', { error, input });
+      this.logger.error("Failed to prioritize queues", { error, input });
 
       if (error instanceof ShopBackendQueueError) {
         throw error;
@@ -99,8 +111,8 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
 
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.OPERATION_FAILED,
-        'Failed to prioritize queues',
-        'prioritizeQueues',
+        "Failed to prioritize queues",
+        "prioritizeQueues",
         { input },
         error
       );
@@ -113,20 +125,27 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @param departmentId Department ID
    * @returns Array of current queues
    */
-  private async getCurrentQueues(shopId: string, departmentId?: string): Promise<any[]> {
+  private async getCurrentQueues(
+    shopId: string,
+    departmentId?: string
+  ): Promise<any[]> {
     try {
       const queues = await this.queueRepository.getPaginatedQueues({
         page: 1,
         limit: 1000,
         filters: {
           shopId,
-          statusFilter: 'waiting' // Only prioritize waiting queues
-        }
+          statusFilter: "waiting", // Only prioritize waiting queues
+        },
       });
 
       return queues.data;
     } catch (error) {
-      this.logger.error('Failed to get current queues', { error, shopId, departmentId });
+      this.logger.error("Failed to get current queues", {
+        error,
+        shopId,
+        departmentId,
+      });
       throw error;
     }
   }
@@ -144,29 +163,34 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
     strategy: string
   ): Array<{
     queueId: string;
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   }> {
-    return inputQueues.map(inputQueue => {
-      const currentQueue = currentQueues.find(q => q.id === inputQueue.queueId);
-      
+    return inputQueues.map((inputQueue) => {
+      const currentQueue = currentQueues.find(
+        (q) => q.id === inputQueue.queueId
+      );
+
       if (!currentQueue) {
         return {
           queueId: inputQueue.queueId,
-          priority: 'normal',
+          priority: QueuePriority.NORMAL,
           score: 50,
-          reason: 'Queue not found in current list'
+          reason: "Queue not found in current list",
         };
       }
 
-      const priorityResult = this.calculateQueuePriority(currentQueue, strategy);
-      
+      const priorityResult = this.calculateQueuePriority(
+        currentQueue,
+        strategy
+      );
+
       return {
         queueId: inputQueue.queueId,
         priority: priorityResult.priority,
         score: priorityResult.score,
-        reason: priorityResult.reason
+        reason: priorityResult.reason,
       };
     });
   }
@@ -181,20 +205,20 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
     queue: any,
     strategy: string
   ): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
     switch (strategy) {
-      case 'wait-time':
+      case "wait-time":
         return this.calculateWaitTimePriority(queue);
-      case 'customer-tier':
+      case "customer-tier":
         return this.calculateCustomerTierPriority(queue);
-      case 'service-complexity':
+      case "service-complexity":
         return this.calculateServiceComplexityPriority(queue);
-      case 'revenue':
+      case "revenue":
         return this.calculateRevenuePriority(queue);
-      case 'combined':
+      case "combined":
         return this.calculateCombinedPriority(queue);
       default:
         return this.calculateWaitTimePriority(queue);
@@ -207,29 +231,29 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @returns Priority result
    */
   private calculateWaitTimePriority(queue: any): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
     const waitTime = queue.actualWaitTime || 0;
-    
+
     if (waitTime > 30) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 90,
-        reason: `Long wait time: ${waitTime} minutes`
+        reason: `Long wait time: ${waitTime} minutes`,
       };
     } else if (waitTime > 15) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 60,
-        reason: `Moderate wait time: ${waitTime} minutes`
+        reason: `Moderate wait time: ${waitTime} minutes`,
       };
     } else {
       return {
-        priority: 'normal',
+        priority: QueuePriority.NORMAL,
         score: 30,
-        reason: `Short wait time: ${waitTime} minutes`
+        reason: `Short wait time: ${waitTime} minutes`,
       };
     }
   }
@@ -240,42 +264,42 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @returns Priority result
    */
   private calculateCustomerTierPriority(queue: any): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
-    const customerTier = queue.customer?.membershipTier || 'regular';
-    
+    const customerTier = queue.customer?.membershipTier || "regular";
+
     switch (customerTier) {
-      case 'vip':
+      case "vip":
         return {
-          priority: 'high',
+          priority: QueuePriority.HIGH,
           score: 90,
-          reason: 'VIP customer'
+          reason: "VIP customer",
         };
-      case 'premium':
+      case "premium":
         return {
-          priority: 'high',
+          priority: QueuePriority.HIGH,
           score: 80,
-          reason: 'Premium customer'
+          reason: "Premium customer",
         };
-      case 'gold':
+      case "gold":
         return {
-          priority: 'high',
+          priority: QueuePriority.HIGH,
           score: 70,
-          reason: 'Gold customer'
+          reason: "Gold customer",
         };
-      case 'silver':
+      case "silver":
         return {
-          priority: 'high',
+          priority: QueuePriority.HIGH,
           score: 60,
-          reason: 'Silver customer'
+          reason: "Silver customer",
         };
       default:
         return {
-          priority: 'normal',
+          priority: QueuePriority.NORMAL,
           score: 40,
-          reason: 'Regular customer'
+          reason: "Regular customer",
         };
     }
   }
@@ -286,29 +310,29 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @returns Priority result
    */
   private calculateServiceComplexityPriority(queue: any): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
     const serviceComplexity = this.calculateServiceComplexity(queue);
-    
+
     if (serviceComplexity > 80) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 85,
-        reason: `High complexity service: ${serviceComplexity}%`
+        reason: `High complexity service: ${serviceComplexity}%`,
       };
     } else if (serviceComplexity > 50) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 60,
-        reason: `Medium complexity service: ${serviceComplexity}%`
+        reason: `Medium complexity service: ${serviceComplexity}%`,
       };
     } else {
       return {
-        priority: 'normal',
+        priority: QueuePriority.NORMAL,
         score: 35,
-        reason: `Low complexity service: ${serviceComplexity}%`
+        reason: `Low complexity service: ${serviceComplexity}%`,
       };
     }
   }
@@ -319,29 +343,29 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @returns Priority result
    */
   private calculateRevenuePriority(queue: any): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
     const revenue = this.calculateQueueRevenue(queue);
-    
+
     if (revenue > 1000) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 90,
-        reason: `High revenue: ${revenue} THB`
+        reason: `High revenue: ${revenue} THB`,
       };
     } else if (revenue > 500) {
       return {
-        priority: 'high',
+        priority: QueuePriority.HIGH,
         score: 65,
-        reason: `Medium revenue: ${revenue} THB`
+        reason: `Medium revenue: ${revenue} THB`,
       };
     } else {
       return {
-        priority: 'normal',
+        priority: QueuePriority.NORMAL,
         score: 40,
-        reason: `Low revenue: ${revenue} THB`
+        reason: `Low revenue: ${revenue} THB`,
       };
     }
   }
@@ -352,41 +376,47 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
    * @returns Priority result
    */
   private calculateCombinedPriority(queue: any): {
-    priority: 'normal' | 'high' | 'urgent';
+    priority: QueuePriority;
     score: number;
     reason: string;
   } {
     const waitTimePriority = this.calculateWaitTimePriority(queue);
     const customerTierPriority = this.calculateCustomerTierPriority(queue);
-    const serviceComplexityPriority = this.calculateServiceComplexityPriority(queue);
+    const serviceComplexityPriority =
+      this.calculateServiceComplexityPriority(queue);
     const revenuePriority = this.calculateRevenuePriority(queue);
 
     // Weighted average
-    const combinedScore = (
+    const combinedScore =
       waitTimePriority.score * 0.3 +
       customerTierPriority.score * 0.25 +
       serviceComplexityPriority.score * 0.25 +
-      revenuePriority.score * 0.2
-    );
+      revenuePriority.score * 0.2;
 
-    let priority: 'normal' | 'high' | 'urgent';
+    let priority: QueuePriority;
     let reason: string;
 
     if (combinedScore >= 75) {
-      priority = 'urgent';
-      reason = `Urgent combined priority (${Math.round(combinedScore)}): ${waitTimePriority.reason}, ${customerTierPriority.reason}`;
+      priority = QueuePriority.URGENT;
+      reason = `Urgent combined priority (${Math.round(combinedScore)}): ${
+        waitTimePriority.reason
+      }, ${customerTierPriority.reason}`;
     } else if (combinedScore >= 50) {
-      priority = 'high';
-      reason = `High combined priority (${Math.round(combinedScore)}): ${waitTimePriority.reason}, ${customerTierPriority.reason}`;
+      priority = QueuePriority.HIGH;
+      reason = `High combined priority (${Math.round(combinedScore)}): ${
+        waitTimePriority.reason
+      }, ${customerTierPriority.reason}`;
     } else {
-      priority = 'normal';
-      reason = `Normal combined priority (${Math.round(combinedScore)}): ${waitTimePriority.reason}, ${customerTierPriority.reason}`;
+      priority = QueuePriority.NORMAL;
+      reason = `Normal combined priority (${Math.round(combinedScore)}): ${
+        waitTimePriority.reason
+      }, ${customerTierPriority.reason}`;
     }
 
     return {
       priority,
       score: combinedScore,
-      reason
+      reason,
     };
   }
 
@@ -405,11 +435,14 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
     const baseComplexity = Math.min(serviceCount * 20, 60);
 
     // Add complexity based on service types
-    const serviceTypes = queue.queueServices.map((s: any) => s.serviceName || '').join(' ').toLowerCase();
-    const typeComplexity = 
-      (serviceTypes.includes('complex') ? 20 : 0) +
-      (serviceTypes.includes('premium') ? 15 : 0) +
-      (serviceTypes.includes('special') ? 10 : 0);
+    const serviceTypes = queue.queueServices
+      .map((s: any) => s.serviceName || "")
+      .join(" ")
+      .toLowerCase();
+    const typeComplexity =
+      (serviceTypes.includes("complex") ? 20 : 0) +
+      (serviceTypes.includes("premium") ? 15 : 0) +
+      (serviceTypes.includes("special") ? 10 : 0);
 
     return Math.min(baseComplexity + typeComplexity, 100);
   }
@@ -425,7 +458,7 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
     }
 
     return queue.queueServices.reduce((total: number, service: any) => {
-      return total + (service.price * service.quantity);
+      return total + service.price * service.quantity;
     }, 0);
   }
 
@@ -437,7 +470,7 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
   private async updateQueuePriorities(
     prioritizedQueues: Array<{
       queueId: string;
-      priority: 'normal' | 'high' | 'urgent';
+      priority: QueuePriority;
       score: number;
       reason: string;
     }>
@@ -449,15 +482,15 @@ export class PrioritizeQueuesUseCase implements IUseCase<PrioritizeQueuesInput, 
         const updatedQueue = await this.queueRepository.updateQueue(
           prioritizedQueue.queueId,
           {
-            priority: prioritizedQueue.priority
+            priority: prioritizedQueue.priority,
           }
         );
 
         updatedQueues.push(QueueMapper.toDTO(updatedQueue));
       } catch (error) {
-        this.logger.error('Failed to update queue priority', { 
-          queueId: prioritizedQueue.queueId, 
-          error 
+        this.logger.error("Failed to update queue priority", {
+          queueId: prioritizedQueue.queueId,
+          error,
         });
         // Continue with other queues even if one fails
       }

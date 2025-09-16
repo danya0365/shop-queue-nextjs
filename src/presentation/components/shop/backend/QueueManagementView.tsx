@@ -384,7 +384,7 @@ export function QueueManagementView({
           >
             📝 เพิ่มคิวใหม่
           </button>
-          <button 
+          <button
             onClick={() => setQrCodeModalOpen(true)}
             className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
           >
@@ -692,7 +692,7 @@ export function QueueManagementView({
                       </div>
 
                       <div className="flex flex-col space-y-2">
-                        {queue.status === "waiting" && (
+                        {queue.status === QueueStatus.WAITING && (
                           <>
                             <button
                               onClick={() =>
@@ -720,7 +720,18 @@ export function QueueManagementView({
                             </button>
                           </>
                         )}
-                        {queue.status === "serving" && (
+                        {queue.status === QueueStatus.CONFIRMED && (
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(queue.id, QueueStatus.SERVING)
+                            }
+                            disabled={actionLoading.updateStatus}
+                            className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          >
+                            เรียก
+                          </button>
+                        )}
+                        {queue.status === QueueStatus.SERVING && (
                           <button
                             onClick={() =>
                               handleStatusUpdate(
@@ -741,7 +752,7 @@ export function QueueManagementView({
                         >
                           แก้ไข
                         </button>
-                        {queue.status === "waiting" && (
+                        {queue.status === QueueStatus.WAITING && (
                           <button
                             onClick={() => handleDeleteQueue(queue.id)}
                             disabled={actionLoading.deleteQueue}

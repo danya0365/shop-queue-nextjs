@@ -1,3 +1,7 @@
+import {
+  QueuePriority,
+  QueueStatus,
+} from "@/src/domain/entities/backend/backend-queue.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 
 export interface QueueDTO {
@@ -9,14 +13,8 @@ export interface QueueDTO {
   shopName: string; // joined from shops table
   queueServices: QueueServiceDTO[];
   queueNumber: string;
-  status:
-    | "waiting"
-    | "confirmed"
-    | "serving"
-    | "completed"
-    | "cancelled"
-    | "no_show";
-  priority: "normal" | "high" | "urgent";
+  status: QueueStatus;
+  priority: QueuePriority;
   estimatedWaitTime: number; // in minutes
   actualWaitTime?: number; // in minutes
   notes?: string;
@@ -35,15 +33,8 @@ export interface CreateQueueInput {
   customerPhone?: string;
   customerEmail?: string;
   shopId: string;
-  queueNumber: number;
-  status:
-    | "waiting"
-    | "confirmed"
-    | "serving"
-    | "completed"
-    | "cancelled"
-    | "no_show";
-  priority: "normal" | "high" | "urgent";
+  status: QueueStatus;
+  priority: QueuePriority;
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
@@ -58,14 +49,8 @@ export interface CreateQueueInput {
  */
 export interface UpdateQueueInput {
   id: string;
-  status?:
-    | "waiting"
-    | "confirmed"
-    | "serving"
-    | "completed"
-    | "cancelled"
-    | "no_show";
-  priority?: "normal" | "high" | "urgent";
+  status?: QueueStatus;
+  priority?: QueuePriority;
   estimatedWaitTime?: number;
   notes?: string;
   calledAt?: string | null;

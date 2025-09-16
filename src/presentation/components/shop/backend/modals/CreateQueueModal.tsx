@@ -1,5 +1,6 @@
 "use client";
 
+import { QueuePriority } from "@/src/domain/entities/backend/backend-queue.entity";
 import { CustomerSelectionDropdown } from "@/src/presentation/components/shop/backend/CustomerSelectionDropdown";
 import { useCustomers } from "@/src/presentation/hooks/shop/backend/useCustomers";
 import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
@@ -239,7 +240,7 @@ export function CreateQueueModal({
       setFormData({
         customerName: "",
         customerPhone: "",
-        priority: "normal",
+        priority: QueuePriority.NORMAL,
         notes: "",
       });
       setSelectedServices([]);
@@ -255,22 +256,22 @@ export function CreateQueueModal({
     }
   };
 
-  const getPriorityColor = (pri: "normal" | "high" | "urgent") => {
+  const getPriorityColor = (pri: QueuePriority) => {
     switch (pri) {
-      case "high":
+      case QueuePriority.HIGH:
         return "text-orange-600 dark:text-orange-200 bg-orange-100 dark:bg-orange-900";
-      case "urgent":
+      case QueuePriority.URGENT:
         return "text-purple-600 dark:text-purple-200 bg-purple-100 dark:bg-purple-900";
       default:
         return "text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-700";
     }
   };
 
-  const getPriorityText = (pri: "normal" | "high" | "urgent") => {
+  const getPriorityText = (pri: QueuePriority) => {
     switch (pri) {
-      case "high":
+      case QueuePriority.HIGH:
         return "สูง";
-      case "urgent":
+      case QueuePriority.URGENT:
         return "ด่วน";
       default:
         return "ปกติ";
@@ -630,7 +631,13 @@ export function CreateQueueModal({
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
-              {(["normal", "high", "urgent"] as const).map((pri) => (
+              {(
+                [
+                  QueuePriority.NORMAL,
+                  QueuePriority.HIGH,
+                  QueuePriority.URGENT,
+                ] as const
+              ).map((pri) => (
                 <label
                   key={pri}
                   className="flex items-center space-x-2 cursor-pointer"

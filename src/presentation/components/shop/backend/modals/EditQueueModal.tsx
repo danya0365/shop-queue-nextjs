@@ -1,5 +1,6 @@
 "use client";
 
+import { QueuePriority } from "@/src/domain/entities/backend/backend-queue.entity";
 import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
 import { QueueItem } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
 import { useEffect, useState } from "react";
@@ -323,7 +324,9 @@ export function EditQueueModal({
                           className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                           disabled={isLoading || servicesLoading}
                         />
-                        <span className="flex-1 font-medium">{service.name}</span>
+                        <span className="flex-1 font-medium">
+                          {service.name}
+                        </span>
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                           ราคาพื้นฐาน: ฿{service.price}
                         </span>
@@ -357,7 +360,10 @@ export function EditQueueModal({
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleServicePriceChange(service.id, undefined)
+                                  handleServicePriceChange(
+                                    service.id,
+                                    undefined
+                                  )
                                 }
                                 className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                                 disabled={isLoading || servicesLoading}
@@ -382,7 +388,9 @@ export function EditQueueModal({
                                   )
                                 }
                                 className="w-8 h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50"
-                                disabled={isLoading || servicesLoading || quantity <= 1}
+                                disabled={
+                                  isLoading || servicesLoading || quantity <= 1
+                                }
                               >
                                 -
                               </button>
@@ -409,7 +417,9 @@ export function EditQueueModal({
                                   )
                                 }
                                 className="w-8 h-8 flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50"
-                                disabled={isLoading || servicesLoading || quantity >= 99}
+                                disabled={
+                                  isLoading || servicesLoading || quantity >= 99
+                                }
                               >
                                 +
                               </button>
@@ -467,7 +477,13 @@ export function EditQueueModal({
               ความสำคัญ
             </label>
             <div className="flex space-x-3">
-              {(["normal", "high", "urgent"] as const).map((pri) => (
+              {(
+                [
+                  QueuePriority.NORMAL,
+                  QueuePriority.HIGH,
+                  QueuePriority.URGENT,
+                ] as const
+              ).map((pri) => (
                 <label
                   key={pri}
                   className="flex items-center space-x-2 cursor-pointer"

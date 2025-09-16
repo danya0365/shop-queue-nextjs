@@ -48,7 +48,6 @@ export class CreateQueueUseCase
         customerPhone: input.customerPhone,
         customerEmail: input.customerEmail,
         shopId: input.shopId,
-        queueNumber: input.queueNumber,
         status: input.status,
         priority: input.priority,
         estimatedWaitTime: input.estimatedWaitTime,

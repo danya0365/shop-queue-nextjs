@@ -550,7 +550,6 @@ export class SupabaseShopBackendQueueRepository
         customer_phone: queue.customerPhone,
         customer_email: queue.customerEmail,
         shop_id: queue.shopId,
-        queue_number: queue.queueNumber.toString(),
         status: queue.status,
         priority: queue.priority,
         estimated_duration: queue.estimatedWaitTime,

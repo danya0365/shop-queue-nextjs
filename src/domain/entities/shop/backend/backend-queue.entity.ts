@@ -34,15 +34,8 @@ export interface CreateQueueEntity {
   customerPhone?: string;
   customerEmail?: string;
   shopId: string;
-  queueNumber: number;
-  status:
-    | "waiting"
-    | "confirmed"
-    | "serving"
-    | "completed"
-    | "cancelled"
-    | "no_show";
-  priority: "normal" | "high" | "urgent";
+  status: QueueStatus;
+  priority: QueuePriority;
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
@@ -56,15 +49,8 @@ export interface CreateQueueEntity {
  * Input DTO for UpdateQueueUseCase
  */
 export interface UpdateQueueEntity {
-  queueNumber?: number;
-  status?:
-    | "waiting"
-    | "confirmed"
-    | "serving"
-    | "completed"
-    | "cancelled"
-    | "no_show";
-  priority?: "normal" | "high" | "urgent";
+  status?: QueueStatus;
+  priority?: QueuePriority;
   estimatedWaitTime?: number;
   actualWaitTime?: number;
   servedByEmployeeId?: string;

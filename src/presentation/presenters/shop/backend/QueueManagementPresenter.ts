@@ -280,7 +280,7 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     data: {
       customerName: string;
       customerPhone: string;
-      priority: "normal" | "high" | "urgent";
+      priority: QueueItem["priority"];
       notes?: string;
       services: {
         serviceId: string;
@@ -290,23 +290,13 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     }
   ) {
     try {
-      // For now, we'll create a simple queue without customer lookup
-      // In a real implementation, we would:
-      // 1. Check if customer exists by phone
-      // 2. If not exists, create customer first
-      // 3. Use customerId for queue creation
-
-      // Generate a simple queue number (in real implementation, this would be handled by backend)
-      const queueNumber = Math.floor(Math.random() * 1000) + 1;
-
       // Create queue with minimal required data
       // Note: This is a simplified version for now
       const result = await this.backendQueuesService.createQueue({
         customerName: data.customerName,
         customerPhone: data.customerPhone,
         shopId,
-        queueNumber,
-        status: "waiting",
+        status: QueueStatus.WAITING,
         priority: data.priority,
         estimatedWaitTime: 15, // Default 15 minutes
         notes: data.notes,

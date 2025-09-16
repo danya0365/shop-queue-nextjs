@@ -113,12 +113,6 @@ export class UpdateQueueStatusUseCase
         updateData
       );
 
-      this.logger.info("Queue status updated successfully", {
-        queueId: input.queueId,
-        oldStatus: queue.status,
-        newStatus: input.status,
-      });
-
       return QueueMapper.toDTO(updatedQueue);
     } catch (error) {
       if (error instanceof ShopBackendQueueError) {
@@ -143,16 +137,31 @@ export class UpdateQueueStatusUseCase
    * @param employeeId Employee ID (required for certain transitions)
    */
   private validateStatusTransition(
-    currentStatus: string,
-    newStatus: string,
+    currentStatus: QueueStatus,
+    newStatus: QueueStatus,
     employeeId?: string
   ): void {
-    const validTransitions: Record<string, string[]> = {
-      waiting: ["in_progress", "cancelled", "no_show"],
-      in_progress: ["completed", "cancelled", "no_show", "waiting"],
-      completed: [], // Cannot change from completed
-      cancelled: [], // Cannot change from cancelled
-      no_show: [], // Cannot change from no_show
+    const validTransitions: Record<QueueStatus, QueueStatus[]> = {
+      [QueueStatus.WAITING]: [
+        QueueStatus.CONFIRMED,
+        QueueStatus.SERVING,
+        QueueStatus.CANCELLED,
+        QueueStatus.NO_SHOW,
+      ],
+      [QueueStatus.CONFIRMED]: [
+        QueueStatus.SERVING,
+        QueueStatus.CANCELLED,
+        QueueStatus.NO_SHOW,
+        QueueStatus.WAITING,
+      ],
+      [QueueStatus.SERVING]: [
+        QueueStatus.COMPLETED,
+        QueueStatus.CANCELLED,
+        QueueStatus.NO_SHOW,
+      ],
+      [QueueStatus.COMPLETED]: [], // Cannot change from completed
+      [QueueStatus.CANCELLED]: [], // Cannot change from cancelled
+      [QueueStatus.NO_SHOW]: [], // Cannot change from no_show
     };
 
     if (!validTransitions[currentStatus].includes(newStatus)) {
@@ -164,11 +173,13 @@ export class UpdateQueueStatusUseCase
       );
     }
 
+    const isRequiredEmployeeId = [QueueStatus.NO_SHOW].includes(newStatus);
+
     // Additional validation for specific transitions
-    if (newStatus === "in_progress" && !employeeId) {
+    if (isRequiredEmployeeId && !employeeId) {
       throw new ShopBackendQueueError(
         ShopBackendQueueErrorType.VALIDATION_ERROR,
-        "Employee ID is required when changing status to in_progress",
+        "Employee ID is required when changing status to serving",
         "updateQueueStatus",
         { currentStatus, newStatus }
       );

@@ -8,7 +8,10 @@ import {
   EmployeeEntity,
   EmployeeStatus,
 } from "@/src/domain/entities/shop/backend/backend-employee.entity";
-import { QueueEntity } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import {
+  QueueEntity,
+  QueueStatus,
+} from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { ShopBackendEmployeeRepository } from "@/src/domain/repositories/shop/backend/backend-employee-repository";
 import {
   ShopBackendQueueError,
@@ -326,7 +329,7 @@ export class AutoAssignQueueUseCase
     try {
       const updateData = {
         servedByEmployeeId: employee.id,
-        status: "serving" as const,
+        status: QueueStatus.SERVING,
         calledAt: new Date().toISOString(),
       };
 
