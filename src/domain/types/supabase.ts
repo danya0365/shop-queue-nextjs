@@ -750,57 +750,6 @@ export type Database = {
           },
         ]
       }
-      poster_templates: {
-        Row: {
-          accent_color: string | null
-          background_color: string | null
-          category: Database["public"]["Enums"]["poster_category"]
-          created_at: string | null
-          description: string | null
-          features: string[] | null
-          id: string
-          is_premium: boolean | null
-          layout: Database["public"]["Enums"]["poster_layout"] | null
-          name: string
-          preview_image: string | null
-          price: number | null
-          text_color: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          accent_color?: string | null
-          background_color?: string | null
-          category: Database["public"]["Enums"]["poster_category"]
-          created_at?: string | null
-          description?: string | null
-          features?: string[] | null
-          id?: string
-          is_premium?: boolean | null
-          layout?: Database["public"]["Enums"]["poster_layout"] | null
-          name: string
-          preview_image?: string | null
-          price?: number | null
-          text_color?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          accent_color?: string | null
-          background_color?: string | null
-          category?: Database["public"]["Enums"]["poster_category"]
-          created_at?: string | null
-          description?: string | null
-          features?: string[] | null
-          id?: string
-          is_premium?: boolean | null
-          layout?: Database["public"]["Enums"]["poster_layout"] | null
-          name?: string
-          preview_image?: string | null
-          price?: number | null
-          text_color?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       profile_roles: {
         Row: {
           granted_at: string | null

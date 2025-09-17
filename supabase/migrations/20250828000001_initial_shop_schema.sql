@@ -174,14 +174,14 @@ CREATE TABLE employees (
 -- 9. Queues
 CREATE TABLE queues (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
-    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE RESTRICT,
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
     queue_number TEXT NOT NULL,
     status queue_status DEFAULT 'waiting',
     priority queue_priority DEFAULT 'normal',
     estimated_duration INTEGER DEFAULT 15, -- minutes
     estimated_call_time TIMESTAMP WITH TIME ZONE,
-    served_by_employee_id UUID REFERENCES employees(id) ON DELETE SET NULL,
+    served_by_employee_id UUID REFERENCES employees(id) ON DELETE RESTRICT,
     note TEXT,
     feedback TEXT,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
@@ -267,26 +267,7 @@ CREATE TABLE promotion_usage_logs (
     used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-
--- 14. Poster Templates
-CREATE TABLE poster_templates (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    description TEXT,
-    category poster_category NOT NULL,
-    is_premium BOOLEAN DEFAULT false,
-    preview_image TEXT,
-    background_color TEXT,
-    text_color TEXT,
-    accent_color TEXT,
-    layout poster_layout DEFAULT 'portrait',
-    features TEXT[],
-    price DECIMAL(10,2) DEFAULT 0, -- for premium templates
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 15. Customer Points
+-- 14. Customer Points
 CREATE TABLE customer_points (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -300,7 +281,7 @@ CREATE TABLE customer_points (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 16. Customer Point Transactions
+-- 15. Customer Point Transactions
 CREATE TABLE customer_point_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_point_id UUID NOT NULL REFERENCES customer_points(id) ON DELETE CASCADE,
@@ -313,7 +294,7 @@ CREATE TABLE customer_point_transactions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 17. Customer Point Expiry
+-- 16. Customer Point Expiry
 CREATE TABLE customer_point_expiry (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_point_transaction_id UUID NOT NULL REFERENCES customer_point_transactions(id) ON DELETE CASCADE,
@@ -322,7 +303,7 @@ CREATE TABLE customer_point_expiry (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 18. Rewards
+-- 17. Rewards
 CREATE TABLE rewards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -339,7 +320,7 @@ CREATE TABLE rewards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 19. Reward Usage
+-- 18. Reward Usage
 CREATE TABLE reward_usages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -378,7 +359,7 @@ CREATE TABLE reward_usages (
     CONSTRAINT positive_reward_value CHECK (reward_value >= 0)
 );
 
--- 20. Shop Settings
+-- 19. Shop Settings
 CREATE TABLE shop_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -465,7 +446,7 @@ CREATE TABLE shop_settings (
     CONSTRAINT shop_settings_notify_before_minutes_check CHECK (notify_before_minutes >= 0)
 );
 
--- 21. Notification Settings
+-- 20. Notification Settings
 CREATE TABLE notification_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -481,7 +462,7 @@ CREATE TABLE notification_settings (
     UNIQUE(shop_id)
 );
 
--- 22. Activity Log
+-- 21. Activity Log
 CREATE TABLE shop_activity_log (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
@@ -581,7 +562,6 @@ CREATE TRIGGER update_employees_updated_at BEFORE UPDATE ON employees FOR EACH R
 CREATE TRIGGER update_queues_updated_at BEFORE UPDATE ON queues FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_promotions_updated_at BEFORE UPDATE ON promotions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_poster_templates_updated_at BEFORE UPDATE ON poster_templates FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_customer_points_updated_at BEFORE UPDATE ON customer_points FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_rewards_updated_at BEFORE UPDATE ON rewards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_shop_settings_updated_at BEFORE UPDATE ON shop_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -752,7 +732,6 @@ ALTER TABLE public.payment_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promotion_services ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promotion_usage_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.poster_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_point_expiry ENABLE ROW LEVEL SECURITY;
@@ -2465,29 +2444,6 @@ CREATE POLICY "Shop managers can delete promotion usage logs"
     SELECT 1 FROM public.promotions p 
     WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
   ));
-
--- =============================================================================
--- POSTER TEMPLATES TABLE RLS POLICIES
--- =============================================================================
-
--- Everyone can view poster templates
-CREATE POLICY "Everyone can view poster templates"
-  ON public.poster_templates FOR SELECT
-  USING (true);
-
--- Only admins can manage poster templates
-CREATE POLICY "Only admins can insert poster templates"
-  ON public.poster_templates FOR INSERT
-  WITH CHECK (is_admin());
-
-CREATE POLICY "Only admins can update poster templates"
-  ON public.poster_templates FOR UPDATE
-  USING (is_admin())
-  WITH CHECK (is_admin());
-
-CREATE POLICY "Only admins can delete poster templates"
-  ON public.poster_templates FOR DELETE
-  USING (is_admin());
 
 -- =============================================================================
 -- CUSTOMER POINTS TABLE RLS POLICIES

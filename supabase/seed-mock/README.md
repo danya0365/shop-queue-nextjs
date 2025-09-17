@@ -5,6 +5,7 @@ This directory contains comprehensive seed data for the Shop Queue application d
 ## File Structure
 
 ### Core Data (Required First)
+
 - `001-init_seed.sql` - Initial users, profiles, and categories
 - `002-seed_shop1.sql` to `007-seed_shop7.sql` - Shop-specific data including:
   - Shop owners and employees
@@ -16,6 +17,7 @@ This directory contains comprehensive seed data for the Shop Queue application d
   - Payments
 
 ### Additional Data (Depends on Core Data)
+
 - `008-seed_poster_templates.sql` - Poster templates for shop displays
 - `009-seed_shop_settings.sql` - Shop configuration settings
 - `010-seed_notification_settings.sql` - Notification preferences per shop
@@ -32,18 +34,22 @@ This directory contains comprehensive seed data for the Shop Queue application d
 - `021-seed_category_shops.sql` - Links shops to categories
 
 ### Master File
+
 - `000-master_seed.sql` - Executes all seed files in correct dependency order
 
 ## Key Features
 
 ### Reward System Implementation
+
 The seed data includes a complete reward system where:
+
 1. Customers earn points through `customer_point_transactions` (type: 'earned')
 2. Customers redeem points through `customer_point_transactions` (type: 'redeemed')
 3. Reward redemptions are tracked in `reward_transactions` table
 4. Points have expiration dates tracked in `customer_point_expiry`
 
 ### Realistic Data Relationships
+
 - All foreign key relationships are properly maintained
 - Data includes realistic Thai business names and descriptions
 - Multiple membership tiers (bronze, silver, gold, platinum)
@@ -52,6 +58,7 @@ The seed data includes a complete reward system where:
 - Multiple payment methods and statuses
 
 ### Business Logic
+
 - Shops have realistic opening hours
 - Services have appropriate pricing and duration
 - Customers have varied point balances and membership levels
@@ -61,16 +68,19 @@ The seed data includes a complete reward system where:
 ## Usage
 
 ### Run All Seeds
+
 ```sql
 \i 000-master_seed.sql
 ```
 
 ### Run Individual Seeds
+
 Execute files in dependency order, starting with `001-init_seed.sql`
 
 ## Database Schema Coverage
 
 This seed data covers all tables in the Shop Queue schema:
+
 - ✅ categories
 - ✅ shops
 - ✅ category_shops
@@ -86,7 +96,6 @@ This seed data covers all tables in the Shop Queue schema:
 - ✅ promotions
 - ✅ promotion_services
 - ✅ promotion_usage_logs
-- ✅ poster_templates
 - ✅ customer_points
 - ✅ customer_point_transactions
 - ✅ customer_point_expiry
