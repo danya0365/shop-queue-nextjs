@@ -1,5 +1,13 @@
-import { EmployeeDTO, EmployeeStatsDTO, PaginatedEmployeesDTO } from '@/src/application/dtos/shop/backend/employees-dto';
-import { EmployeeEntity, EmployeeStatsEntity, PaginatedEmployeesEntity } from '@/src/domain/entities/shop/backend/backend-employee.entity';
+import {
+  EmployeeDTO,
+  EmployeeStatsDTO,
+  PaginatedEmployeesDTO,
+} from "@/src/application/dtos/shop/backend/employees-dto";
+import {
+  EmployeeEntity,
+  EmployeeStatsEntity,
+  PaginatedEmployeesEntity,
+} from "@/src/domain/entities/shop/backend/backend-employee.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -30,7 +38,13 @@ export class EmployeeMapper {
       salary: entity.salary || undefined,
       notes: entity.notes || undefined,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
+      todayStats: {
+        queuesServed: 0,
+        revenue: 0,
+        averageServiceTime: 0,
+        rating: 0,
+      },
     };
   }
 
@@ -50,8 +64,8 @@ export class EmployeeMapper {
         customerService: entity.byDepartment.customerService,
         technical: entity.byDepartment.technical,
         sales: entity.byDepartment.sales,
-        other: entity.byDepartment.other
-      }
+        other: entity.byDepartment.other,
+      },
     };
   }
 
@@ -60,17 +74,19 @@ export class EmployeeMapper {
    * @param entity Paginated employees entity
    * @returns Paginated employees DTO
    */
-  public static toPaginatedDTO(entity: PaginatedEmployeesEntity): PaginatedEmployeesDTO {
+  public static toPaginatedDTO(
+    entity: PaginatedEmployeesEntity
+  ): PaginatedEmployeesDTO {
     return {
-      data: entity.data.map(employee => this.toDTO(employee)),
+      data: entity.data.map((employee) => this.toDTO(employee)),
       pagination: {
         currentPage: entity.pagination.currentPage,
         totalPages: entity.pagination.totalPages,
         totalItems: entity.pagination.totalItems,
         itemsPerPage: entity.pagination.itemsPerPage,
         hasNextPage: entity.pagination.hasNextPage,
-        hasPrevPage: entity.pagination.hasPrevPage
-      }
+        hasPrevPage: entity.pagination.hasPrevPage,
+      },
     };
   }
 }

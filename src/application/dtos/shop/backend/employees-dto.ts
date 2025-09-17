@@ -20,6 +20,12 @@ export interface EmployeeDTO {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  todayStats: {
+    queuesServed: number;
+    revenue: number;
+    averageServiceTime: number;
+    rating: number;
+  };
 }
 
 export interface CreateEmployeeParams {
