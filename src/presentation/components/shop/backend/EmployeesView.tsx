@@ -32,8 +32,6 @@ export function EmployeesView({
     openAddModal,
     closeAddModal,
     closeDetailsModal,
-    // Computed data
-    filteredEmployees,
   } = useEmployeesPresenter(shopId, initialViewModel);
 
   // Show loading only on initial load or when explicitly loading
@@ -84,44 +82,6 @@ export function EmployeesView({
 
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* Development Status Overlay */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🚧</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              กำลังพัฒนาระบบ
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              เปิดใช้งานเร็วๆ นี้
-            </p>
-          </div>
-          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>กำลังปรับปรุงฟีเจอร์การจัดการพนักงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
-              <span>เพิ่มประสิทธิภาพการทำงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
-              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ขออภัยในความไม่สะดวก
-              <br />
-              ทีมงานกำลังพัฒนาเพื่อคุณ
-            </p>
-          </div>
-        </div>
-      </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -268,6 +228,7 @@ export function EmployeesView({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="all">แผนกทั้งหมด</option>
+                {/* Department options will be populated from employee data */}
                 {viewModel.departments.map((dept) => (
                   <option key={dept.id} value={dept.name}>
                     {dept.name}
@@ -289,7 +250,7 @@ export function EmployeesView({
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-            รายชื่อพนักงาน ({filteredEmployees.length})
+            รายชื่อพนักงาน ({viewModel.employees.length})
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -317,7 +278,7 @@ export function EmployeesView({
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredEmployees.map((employee) => (
+              {viewModel.employees.map((employee) => (
                 <tr
                   key={employee.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
@@ -327,7 +288,7 @@ export function EmployeesView({
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-lg">
-                          {employee.avatar || "👤"}
+                          👤
                         </div>
                       </div>
                       <div className="ml-4">
@@ -387,7 +348,7 @@ export function EmployeesView({
           </table>
         </div>
 
-        {filteredEmployees.length === 0 && (
+        {viewModel.employees.length === 0 && (
           <div className="text-center py-8">
             <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
               👥
