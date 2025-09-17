@@ -1,4 +1,4 @@
-import { EmployeeEntity, EmployeeStatsEntity, EmployeeStatus } from "../../../domain/entities/backend/backend-employee.entity";
+import { EmployeeEntity, EmployeeStatsEntity, EmployeeStatus, EmployeePermission } from "../../../domain/entities/backend/backend-employee.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
 import { EmployeeSchema, EmployeeStatsSchema } from "../../schemas/backend/employee.schema";
 
@@ -27,7 +27,7 @@ export class SupabaseBackendEmployeeMapper {
       status: schema.status as EmployeeStatus,
       hireDate: schema.hire_date,
       lastLogin: schema.last_login,
-      permissions: schema.permissions,
+      permissions: schema.permissions.map(p => p as EmployeePermission),
       salary: schema.salary,
       notes: schema.notes,
       createdAt: schema.created_at,

@@ -1,6 +1,14 @@
-import { EmployeeEntity, EmployeeStatsEntity, EmployeeStatus } from "@/src/domain/entities/shop/backend/backend-employee.entity";
+import {
+  EmployeeEntity,
+  EmployeePermission,
+  EmployeeStatsEntity,
+  EmployeeStatus,
+} from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
-import { EmployeeSchema, EmployeeStatsSchema } from "@/src/infrastructure/schemas/shop/backend/employee.schema";
+import {
+  EmployeeSchema,
+  EmployeeStatsSchema,
+} from "@/src/infrastructure/schemas/shop/backend/employee.schema";
 
 /**
  * Mapper class for converting between employee database schema and domain entities
@@ -27,11 +35,11 @@ export class SupabaseShopBackendEmployeeMapper {
       status: schema.status as EmployeeStatus,
       hireDate: schema.hire_date,
       lastLogin: schema.last_login,
-      permissions: schema.permissions,
+      permissions: schema.permissions.map((p) => p as EmployeePermission),
       salary: schema.salary,
       notes: schema.notes,
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
     };
   }
 
@@ -59,7 +67,7 @@ export class SupabaseShopBackendEmployeeMapper {
       salary: entity.salary,
       notes: entity.notes,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
     };
   }
 
@@ -68,7 +76,9 @@ export class SupabaseShopBackendEmployeeMapper {
    * @param schema Employee stats database schema
    * @returns Employee stats domain entity
    */
-  public static statsToEntity(schema: EmployeeStatsSchema): EmployeeStatsEntity {
+  public static statsToEntity(
+    schema: EmployeeStatsSchema
+  ): EmployeeStatsEntity {
     return {
       totalEmployees: schema.total_employees,
       activeEmployees: schema.active_employees,
@@ -79,8 +89,8 @@ export class SupabaseShopBackendEmployeeMapper {
         customerService: schema.customer_service_count,
         technical: schema.technical_count,
         sales: schema.sales_count,
-        other: schema.other_count
-      }
+        other: schema.other_count,
+      },
     };
   }
 
@@ -104,7 +114,7 @@ export class SupabaseShopBackendEmployeeMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }
