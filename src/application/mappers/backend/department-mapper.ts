@@ -1,5 +1,13 @@
-import { DepartmentDTO, DepartmentStatsDTO, DepartmentsDataDTO } from '@/src/application/dtos/backend/department-dto';
-import { DepartmentEntity, DepartmentStatsEntity, PaginatedDepartmentsEntity } from '@/src/domain/entities/backend/backend-department.entity';
+import {
+  DepartmentDTO,
+  DepartmentStatsDTO,
+  DepartmentsDataDTO,
+} from "@/src/application/dtos/backend/department-dto";
+import {
+  DepartmentEntity,
+  DepartmentStatsEntity,
+  PaginatedDepartmentsEntity,
+} from "@/src/domain/entities/backend/backend-department.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -19,8 +27,9 @@ export class DepartmentMapper {
       slug: entity.slug,
       description: entity.description,
       employeeCount: entity.employeeCount,
+      isActive: entity.isActive,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -34,7 +43,7 @@ export class DepartmentMapper {
       totalDepartments: entity.totalDepartments,
       totalEmployees: entity.totalEmployees,
       activeDepartments: entity.activeDepartments,
-      averageEmployeesPerDepartment: entity.averageEmployeesPerDepartment
+      averageEmployeesPerDepartment: entity.averageEmployeesPerDepartment,
     };
   }
 
@@ -44,11 +53,14 @@ export class DepartmentMapper {
    * @param stats Department stats entity
    * @returns Departments data DTO
    */
-  public static toDepartmentsDataDTO(entity: PaginatedDepartmentsEntity, stats: DepartmentStatsEntity): DepartmentsDataDTO {
+  public static toDepartmentsDataDTO(
+    entity: PaginatedDepartmentsEntity,
+    stats: DepartmentStatsEntity
+  ): DepartmentsDataDTO {
     return {
-      departments: entity.data.map(department => this.toDTO(department)),
+      departments: entity.data.map((department) => this.toDTO(department)),
       stats: this.statsToDTO(stats),
-      totalCount: entity.pagination.totalItems
+      totalCount: entity.pagination.totalItems,
     };
   }
 }

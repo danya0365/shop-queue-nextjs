@@ -5,10 +5,10 @@ import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfi
 import { CustomersViewModel } from "@/src/presentation/presenters/shop/backend/CustomersPresenter";
 import { useCustomersPresenter } from "@/src/presentation/presenters/shop/backend/useCustomersPresenter";
 import { useState } from "react";
-import { CreateCustomerModal } from "./CreateCustomerModal";
-import { DeleteCustomerConfirmation } from "./DeleteCustomerConfirmation";
-import { EditCustomerModal } from "./EditCustomerModal";
-import { ViewCustomerDetails } from "./ViewCustomerDetails";
+import { CreateCustomerModal } from "./modals/CreateCustomerModal";
+import { DeleteCustomerConfirmation } from "./modals/DeleteCustomerConfirmation";
+import { EditCustomerModal } from "./modals/EditCustomerModal";
+import { ViewCustomerDetails } from "./modals/ViewCustomerDetails";
 
 interface CustomersViewProps {
   shopId: string;

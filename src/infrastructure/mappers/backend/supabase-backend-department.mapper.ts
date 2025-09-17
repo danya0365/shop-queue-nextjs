@@ -1,6 +1,12 @@
-import { DepartmentEntity, DepartmentStatsEntity } from "../../../domain/entities/backend/backend-department.entity";
+import {
+  DepartmentEntity,
+  DepartmentStatsEntity,
+} from "../../../domain/entities/backend/backend-department.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
-import { DepartmentSchema, DepartmentStatsSchema } from "../../schemas/backend/department.schema";
+import {
+  DepartmentSchema,
+  DepartmentStatsSchema,
+} from "../../schemas/backend/department.schema";
 
 /**
  * Mapper class for converting between department database schema and domain entities
@@ -21,8 +27,9 @@ export class SupabaseBackendDepartmentMapper {
       slug: schema.slug,
       description: schema.description,
       employeeCount: schema.employee_count,
+      isActive: true,
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
     };
   }
 
@@ -41,7 +48,7 @@ export class SupabaseBackendDepartmentMapper {
       description: entity.description,
       employee_count: entity.employeeCount,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
     };
   }
 
@@ -50,12 +57,14 @@ export class SupabaseBackendDepartmentMapper {
    * @param schema Department stats database schema
    * @returns Department stats domain entity
    */
-  public static statsToEntity(schema: DepartmentStatsSchema): DepartmentStatsEntity {
+  public static statsToEntity(
+    schema: DepartmentStatsSchema
+  ): DepartmentStatsEntity {
     return {
       totalDepartments: schema.total_departments,
       totalEmployees: schema.total_employees,
       activeDepartments: schema.active_departments,
-      averageEmployeesPerDepartment: schema.average_employees_per_department
+      averageEmployeesPerDepartment: schema.average_employees_per_department,
     };
   }
 
@@ -79,7 +88,7 @@ export class SupabaseBackendDepartmentMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }

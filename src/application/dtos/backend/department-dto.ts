@@ -7,6 +7,7 @@ export interface DepartmentDTO {
   slug: string;
   description: string | null;
   employeeCount: number;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

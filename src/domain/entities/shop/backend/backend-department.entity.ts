@@ -12,6 +12,7 @@ export interface DepartmentEntity {
   slug: string;
   description: string | null;
   employeeCount: number;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

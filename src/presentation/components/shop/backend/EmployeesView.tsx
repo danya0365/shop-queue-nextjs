@@ -1,8 +1,15 @@
 "use client";
 
-import { EmployeesViewModel } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
+import {
+  EmployeesViewModel,
+  type Employee,
+} from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
 import { useEmployeesPresenter } from "@/src/presentation/presenters/shop/backend/useEmployeesPresenter";
 import { EmployeeLimitsWarning } from "./EmployeeLimitsWarning";
+import { CreateEmployeeModal } from "./modals/CreateEmployeeModal";
+import { DeleteEmployeeConfirmation } from "./modals/DeleteEmployeeConfirmation";
+import { EditEmployeeModal } from "./modals/EditEmployeeModal";
+import { ViewEmployeeDetails } from "./modals/ViewEmployeeDetails";
 
 interface EmployeesViewProps {
   shopId: string;
@@ -18,20 +25,39 @@ export function EmployeesView({
     loading,
     error,
     refreshData,
-    // Modal states
+    selectedEmployee,
     showAddModal,
     showDetailsModal,
-    selectedEmployee,
-    // Filter states
+    showEditModal,
+    showDeleteModal,
+    showViewModal,
     filters,
-    // Event handlers
+    filteredEmployees,
+    uniquePositions,
     handleEmployeeClick,
     handleSearchChange,
     handleStatusChange,
     handleDepartmentChange,
+    handlePositionChange,
     openAddModal,
     closeAddModal,
     closeDetailsModal,
+    openEditModal,
+    closeEditModal,
+    openDeleteModal,
+    closeDeleteModal,
+    openViewModal,
+    closeViewModal,
+    updateEmployee,
+    actionLoading,
+    // Helper functions from presenter
+    getStatusBadgeClasses,
+    getStatusText,
+    getEmptyStateMessage,
+    getPermissionName,
+    formatRating,
+    handleCreateEmployee,
+    handleDeleteEmployee,
   } = useEmployeesPresenter(shopId, initialViewModel);
 
   // Show loading only on initial load or when explicitly loading
@@ -188,7 +214,7 @@ export function EmployeesView({
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
             ตัวกรอง
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 ค้นหา
@@ -237,21 +263,45 @@ export function EmployeesView({
               </select>
             </div>
 
-            <div className="flex items-end">
-              <button className="w-full bg-blue-600 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors">
-                ค้นหา
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                ตำแหน่ง
+              </label>
+              <select
+                value={filters.position}
+                onChange={(e) => handlePositionChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="all">ตำแหน่งทั้งหมด</option>
+                {/* Position options will be populated from employee data */}
+                {uniquePositions.map((position, index) => (
+                  <option key={index} value={position}>
+                    {position}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <button className="bg-blue-600 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors">
+              ค้นหา
+            </button>
           </div>
         </div>
       </div>
 
       {/* Employees List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-            รายชื่อพนักงาน ({viewModel.employees.length})
+            รายชื่อพนักงาน ({filteredEmployees.length})
           </h3>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              แสดง {filteredEmployees.length} รายการ
+            </span>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -278,7 +328,7 @@ export function EmployeesView({
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {viewModel.employees.map((employee) => (
+              {filteredEmployees.map((employee: Employee) => (
                 <tr
                   key={employee.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
@@ -311,19 +361,11 @@ export function EmployeesView({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        employee.status === "active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : employee.status === "on_leave"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                      }`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClasses(
+                        employee.status
+                      )}`}
                     >
-                      {employee.status === "active"
-                        ? "ทำงาน"
-                        : employee.status === "on_leave"
-                        ? "ลา"
-                        : "ไม่ทำงาน"}
+                      {getStatusText(employee.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
@@ -335,10 +377,31 @@ export function EmployeesView({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
-                        onClick={() => handleEmployeeClick(employee)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openViewModal(employee);
+                        }}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                       >
                         ดูรายละเอียด
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(employee);
+                        }}
+                        className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(employee);
+                        }}
+                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                      >
+                        ลบ
                       </button>
                     </div>
                   </td>
@@ -348,26 +411,16 @@ export function EmployeesView({
           </table>
         </div>
 
-        {viewModel.employees.length === 0 && (
+        {filteredEmployees.length === 0 && (
           <div className="text-center py-8">
             <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
               👥
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              {filters.search ||
-              filters.status !== "all" ||
-              filters.department !== "all" ||
-              filters.position !== "all"
-                ? "ไม่พบพนักงานที่ตรงกับเงื่อนไขการค้นหา"
-                : "ยังไม่มีพนักงานในระบบ"}
+              {getEmptyStateMessage().title}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              {filters.search ||
-              filters.status !== "all" ||
-              filters.department !== "all" ||
-              filters.position !== "all"
-                ? "ลองปรับเงื่อนไขการค้นหาหรือเพิ่มพนักงานใหม่"
-                : "คลิกปุ่ม 'เพิ่มพนักงาน' เพื่อเริ่มเพิ่มพนักงานคนแรกของคุณ"}
+              {getEmptyStateMessage().description}
             </p>
           </div>
         )}
@@ -472,10 +525,7 @@ export function EmployeesView({
                       คะแนนเฉลี่ย
                     </p>
                     <p className="text-lg font-bold text-purple-600">
-                      {selectedEmployee?.todayStats?.rating &&
-                      selectedEmployee?.todayStats?.rating > 0
-                        ? selectedEmployee.todayStats.rating.toFixed(1)
-                        : "-"}
+                      {formatRating(selectedEmployee?.todayStats?.rating)}
                     </p>
                   </div>
                 </div>
@@ -489,15 +539,13 @@ export function EmployeesView({
                 <div className="flex flex-wrap gap-2">
                   {selectedEmployee?.permissions?.map(
                     (permissionId: string) => {
-                      const permission = viewModel.permissions.find(
-                        (p) => p.id === permissionId
-                      );
-                      return permission ? (
+                      const permissionName = getPermissionName(permissionId);
+                      return permissionName ? (
                         <span
-                          key={permission.id}
+                          key={permissionId}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                         >
-                          {permission.name}
+                          {permissionName}
                         </span>
                       ) : null;
                     }
@@ -516,6 +564,49 @@ export function EmployeesView({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create Employee Modal */}
+      {showAddModal && (
+        <CreateEmployeeModal
+          isOpen={showAddModal}
+          onClose={closeAddModal}
+          onSubmit={handleCreateEmployee}
+          loading={actionLoading.create}
+        />
+      )}
+
+      {/* Edit Employee Modal */}
+      {showEditModal && selectedEmployee && (
+        <EditEmployeeModal
+          isOpen={showEditModal}
+          employee={selectedEmployee}
+          onClose={closeEditModal}
+          onSuccess={() => {
+            closeEditModal();
+            refreshData();
+          }}
+        />
+      )}
+
+      {/* Delete Employee Confirmation */}
+      {showDeleteModal && selectedEmployee && (
+        <DeleteEmployeeConfirmation
+          isOpen={showDeleteModal}
+          employee={selectedEmployee}
+          onClose={closeDeleteModal}
+          onConfirm={() => handleDeleteEmployee(selectedEmployee.id)}
+          loading={actionLoading.delete}
+        />
+      )}
+
+      {/* View Employee Details Modal */}
+      {showViewModal && selectedEmployee && (
+        <ViewEmployeeDetails
+          isOpen={showViewModal}
+          employee={selectedEmployee}
+          onClose={closeViewModal}
+        />
       )}
     </div>
   );
