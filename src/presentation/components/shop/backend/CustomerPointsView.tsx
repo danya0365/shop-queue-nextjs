@@ -1,30 +1,36 @@
-'use client';
+"use client";
 
-import { CustomerPointsViewModel } from '@/src/presentation/presenters/shop/backend/CustomerPointsPresenter';
-import { useEffect, useState } from 'react';
+import { CustomerPointsViewModel } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
+import { useEffect, useState } from "react";
 
 interface CustomerPointsViewProps {
   viewModel: CustomerPointsViewModel;
 }
 
 export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTier, setSelectedTier] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'name' | 'currentPoints' | 'totalEarned' | 'tier'>('currentPoints');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTier, setSelectedTier] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<
+    "name" | "currentPoints" | "totalEarned" | "tier"
+  >("currentPoints");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAddPointsModal, setShowAddPointsModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('CustomerPointsView selectedCustomer', selectedCustomer);
+    console.log("CustomerPointsView selectedCustomer", selectedCustomer);
   }, [selectedCustomer]);
 
   // Filter and sort customer points
   const filteredCustomers = viewModel.customerPoints
-    .filter(customer => {
-      const matchesSearch = customer.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    .filter((customer) => {
+      const matchesSearch =
+        customer.customerName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         customer.customerPhone?.includes(searchTerm);
-      const matchesTier = selectedTier === 'all' || customer.membershipTier === selectedTier;
+      const matchesTier =
+        selectedTier === "all" || customer.membershipTier === selectedTier;
       return matchesSearch && matchesTier;
     })
     .sort((a, b) => {
@@ -32,19 +38,19 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
       let bValue: number | string;
 
       switch (sortBy) {
-        case 'name':
-          aValue = a.customerName || '';
-          bValue = b.customerName || '';
+        case "name":
+          aValue = a.customerName || "";
+          bValue = b.customerName || "";
           break;
-        case 'currentPoints':
+        case "currentPoints":
           aValue = a.currentPoints;
           bValue = b.currentPoints;
           break;
-        case 'totalEarned':
+        case "totalEarned":
           aValue = a.totalEarned;
           bValue = b.totalEarned;
           break;
-        case 'tier':
+        case "tier":
           aValue = a.membershipTier;
           bValue = b.membershipTier;
           break;
@@ -53,45 +59,54 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           bValue = b.currentPoints;
       }
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortOrder === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
 
-      return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+      return sortOrder === "asc"
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
     });
 
   const formatPoints = (points: number) => {
-    return new Intl.NumberFormat('th-TH').format(points);
+    return new Intl.NumberFormat("th-TH").format(points);
   };
 
   const getTierColor = (tier: string) => {
     const colors = {
-      bronze: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      silver: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-      gold: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      platinum: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+      bronze:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+      silver: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      gold: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      platinum:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
     };
-    return colors[tier as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return (
+      colors[tier as keyof typeof colors] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    );
   };
 
   const getTierLabel = (tier: string) => {
     const labels = {
-      bronze: 'บรอนซ์',
-      silver: 'เงิน',
-      gold: 'ทอง',
-      platinum: 'แพลทินัม'
+      bronze: "บรอนซ์",
+      silver: "เงิน",
+      gold: "ทอง",
+      platinum: "แพลทินัม",
     };
     return labels[tier as keyof typeof labels] || tier;
   };
 
   const getTierIcon = (tier: string) => {
     const icons = {
-      bronze: '🥉',
-      silver: '🥈',
-      gold: '🥇',
-      platinum: '💎'
+      bronze: "🥉",
+      silver: "🥈",
+      gold: "🥇",
+      platinum: "💎",
     };
-    return icons[tier as keyof typeof icons] || '🏆';
+    return icons[tier as keyof typeof icons] || "🏆";
   };
 
   return (
@@ -99,8 +114,12 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">จัดการแต้มลูกค้า</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูและจัดการแต้มสะสมของลูกค้าทั้งหมด</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            จัดการแต้มลูกค้า
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            ดูและจัดการแต้มสะสมของลูกค้าทั้งหมด
+          </p>
         </div>
         <button
           onClick={() => setShowAddPointsModal(true)}
@@ -116,7 +135,9 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">สมาชิกทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                สมาชิกทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.totalCustomers}
               </p>
@@ -128,7 +149,9 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่แจกแล้ว</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มที่แจกแล้ว
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {formatPoints(viewModel.totalPointsIssued)}
               </p>
@@ -140,7 +163,9 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่ใช้แล้ว</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มที่ใช้แล้ว
+              </p>
               <p className="text-2xl font-bold text-red-600">
                 {formatPoints(viewModel.totalPointsRedeemed)}
               </p>
@@ -152,7 +177,9 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">เฉลี่ยต่อคน</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เฉลี่ยต่อคน
+              </p>
               <p className="text-2xl font-bold text-blue-600">
                 {formatPoints(Math.round(viewModel.averagePointsPerCustomer))}
               </p>
@@ -164,9 +191,12 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">สมาชิกทอง+</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                สมาชิกทอง+
+              </p>
               <p className="text-2xl font-bold text-yellow-600">
-                {(viewModel.tierDistribution.gold || 0) + (viewModel.tierDistribution.platinum || 0)}
+                {(viewModel.tierDistribution.gold || 0) +
+                  (viewModel.tierDistribution.platinum || 0)}
               </p>
             </div>
             <div className="text-2xl">🏆</div>
@@ -187,8 +217,12 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                 className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center"
               >
                 <div className="text-3xl mb-2">{getTierIcon(tier)}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{getTierLabel(tier)}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{count}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {getTierLabel(tier)}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {count}
+                </p>
               </div>
             ))}
           </div>
@@ -208,19 +242,34 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
               >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' :
-                      index === 1 ? 'bg-gray-400' :
-                        index === 2 ? 'bg-orange-600' :
-                          'bg-blue-500'
-                    }`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                      index === 0
+                        ? "bg-yellow-500"
+                        : index === 1
+                        ? "bg-gray-400"
+                        : index === 2
+                        ? "bg-orange-600"
+                        : "bg-blue-500"
+                    }`}
+                  >
                     {index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{customer.customerName}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{customer.customerPhone}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {customer.customerName}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {customer.customerPhone}
+                    </p>
                   </div>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierColor(customer.membershipTier)}`}>
-                    {getTierIcon(customer.membershipTier)} {getTierLabel(customer.membershipTier)}
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierColor(
+                      customer.membershipTier
+                    )}`}
+                  >
+                    {getTierIcon(customer.membershipTier)}{" "}
+                    {getTierLabel(customer.membershipTier)}
                   </span>
                 </div>
                 <div className="text-right">
@@ -270,7 +319,15 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           <div className="lg:w-40">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'name' | 'currentPoints' | 'totalEarned' | 'tier')}
+              onChange={(e) =>
+                setSortBy(
+                  e.target.value as
+                    | "name"
+                    | "currentPoints"
+                    | "totalEarned"
+                    | "tier"
+                )
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="currentPoints">เรียงตามแต้มปัจจุบัน</option>
@@ -284,7 +341,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
           <div className="lg:w-32">
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="desc">มาก → น้อย</option>
@@ -327,17 +384,18 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">👥</div>
                       <p className="text-lg">
-                        {searchTerm || selectedTier !== 'all'
+                        {searchTerm || selectedTier !== "all"
                           ? "ไม่พบลูกค้าที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีลูกค้าในระบบ"}
                       </p>
-                      {searchTerm || selectedTier !== 'all' ? (
+                      {searchTerm || selectedTier !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มลูกค้าใหม่
                         </p>
                       ) : (
                         <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &lsquo;เพิ่มลูกค้า&rsquo; เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
+                          คลิกปุ่ม &lsquo;เพิ่มลูกค้า&rsquo;
+                          เพื่อเริ่มเพิ่มลูกค้าคนแรกของคุณ
                         </p>
                       )}
                     </div>
@@ -345,7 +403,10 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -357,14 +418,21 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierColor(customer.membershipTier)}`}>
-                        {getTierIcon(customer.membershipTier)} {getTierLabel(customer.membershipTier)}
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTierColor(
+                          customer.membershipTier
+                        )}`}
+                      >
+                        {getTierIcon(customer.membershipTier)}{" "}
+                        {getTierLabel(customer.membershipTier)}
                       </span>
-                      {customer.pointsToNextTier && customer.pointsToNextTier > 0 && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          อีก {formatPoints(customer.pointsToNextTier)} แต้ม → {getTierLabel(customer.nextTier || '')}
-                        </div>
-                      )}
+                      {customer.pointsToNextTier &&
+                        customer.pointsToNextTier > 0 && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            อีก {formatPoints(customer.pointsToNextTier)} แต้ม →{" "}
+                            {getTierLabel(customer.nextTier || "")}
+                          </div>
+                        )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-blue-600">
@@ -406,7 +474,7 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
 
       {/* Add/Redeem Points Modal Placeholder */}
       {showAddPointsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               จัดการแต้มลูกค้า

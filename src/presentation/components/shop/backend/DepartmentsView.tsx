@@ -8,8 +8,10 @@ interface DepartmentsViewProps {
   initialViewModel?: DepartmentsViewModel;
 }
 
-export function DepartmentsView({ shopId, initialViewModel }: DepartmentsViewProps) {
-  
+export function DepartmentsView({
+  shopId,
+  initialViewModel,
+}: DepartmentsViewProps) {
   const {
     viewModel,
     loading,
@@ -171,7 +173,7 @@ export function DepartmentsView({ shopId, initialViewModel }: DepartmentsViewPro
                 เฉลี่ย/แผนก
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {viewModel?.averageEmployeesPerDepartment?.toFixed(1) || '0.0'}
+                {viewModel?.averageEmployeesPerDepartment?.toFixed(1) || "0.0"}
               </p>
             </div>
             <div className="text-2xl">📊</div>
@@ -186,7 +188,8 @@ export function DepartmentsView({ shopId, initialViewModel }: DepartmentsViewPro
               </p>
               <p className="text-lg font-bold text-purple-600">
                 {Math.max(
-                  ...(viewModel?.departments?.map((d) => d.employeeCount) || []),
+                  ...(viewModel?.departments?.map((d) => d.employeeCount) ||
+                    []),
                   0
                 )}{" "}
                 คน
@@ -341,7 +344,7 @@ export function DepartmentsView({ shopId, initialViewModel }: DepartmentsViewPro
 
       {/* Create Department Modal Placeholder */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มแผนกใหม่

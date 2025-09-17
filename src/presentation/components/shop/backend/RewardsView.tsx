@@ -58,14 +58,18 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
   };
 
   // Filter rewards based on search and type
-  const filteredRewards = viewModel?.rewards.filter((reward) => {
-    const matchesSearch =
-      reward.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-      (reward.description &&
-        reward.description.toLowerCase().includes(state.searchTerm.toLowerCase()));
-    const matchesType = state.selectedType === "all" || reward.type === state.selectedType;
-    return matchesSearch && matchesType;
-  }) || [];
+  const filteredRewards =
+    viewModel?.rewards.filter((reward) => {
+      const matchesSearch =
+        reward.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        (reward.description &&
+          reward.description
+            .toLowerCase()
+            .includes(state.searchTerm.toLowerCase()));
+      const matchesType =
+        state.selectedType === "all" || reward.type === state.selectedType;
+      return matchesSearch && matchesType;
+    }) || [];
 
   // Show loading only on initial load or when explicitly loading
   if (state.loading && !viewModel) {
@@ -474,7 +478,7 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
 
       {/* Create Reward Modal Placeholder */}
       {state.isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มรางวัลใหม่

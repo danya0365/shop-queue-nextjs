@@ -1,49 +1,55 @@
-'use client';
+"use client";
 
-import { QueueServicesViewModel } from '@/src/presentation/presenters/shop/backend/QueueServicesPresenter';
-import { useState } from 'react';
+import { QueueServicesViewModel } from "@/src/presentation/presenters/shop/backend/QueueServicesPresenter";
+import { useState } from "react";
 
 interface QueueServicesViewProps {
   viewModel: QueueServicesViewModel;
 }
 
 export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'serviceName' | 'currentQueue' | 'estimatedDuration' | 'priority'>('priority');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<
+    "serviceName" | "currentQueue" | "estimatedDuration" | "priority"
+  >("priority");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
 
   // Filter and sort queue services
   const filteredServices = viewModel.queueServices
-    .filter(service => {
-      const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           service.departmentName.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDepartment = selectedDepartment === 'all' || service.departmentId === selectedDepartment;
-      const matchesStatus = selectedStatus === 'all' || 
-                           (selectedStatus === 'active' && service.isActive) ||
-                           (selectedStatus === 'inactive' && !service.isActive);
+    .filter((service) => {
+      const matchesSearch =
+        service.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.departmentName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDepartment =
+        selectedDepartment === "all" ||
+        service.departmentId === selectedDepartment;
+      const matchesStatus =
+        selectedStatus === "all" ||
+        (selectedStatus === "active" && service.isActive) ||
+        (selectedStatus === "inactive" && !service.isActive);
       return matchesSearch && matchesDepartment && matchesStatus;
     })
     .sort((a, b) => {
       let aValue: number | string;
       let bValue: number | string;
-      
+
       switch (sortBy) {
-        case 'serviceName':
+        case "serviceName":
           aValue = a.serviceName;
           bValue = b.serviceName;
           break;
-        case 'currentQueue':
+        case "currentQueue":
           aValue = a.currentQueue;
           bValue = b.currentQueue;
           break;
-        case 'estimatedDuration':
+        case "estimatedDuration":
           aValue = a.estimatedDuration;
           bValue = b.estimatedDuration;
           break;
-        case 'priority':
+        case "priority":
           aValue = a.priority;
           bValue = b.priority;
           break;
@@ -52,11 +58,15 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
           bValue = b.priority;
       }
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortOrder === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
-      
-      return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+
+      return sortOrder === "asc"
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
     });
 
   const formatDuration = (minutes: number) => {
@@ -65,32 +75,55 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours} ชม. ${remainingMinutes} นาที` : `${hours} ชั่วโมง`;
+    return remainingMinutes > 0
+      ? `${hours} ชม. ${remainingMinutes} นาที`
+      : `${hours} ชั่วโมง`;
   };
 
-  const getQueueStatus = (service: { currentQueue: number; maxCapacity: number; isActive: boolean }) => {
+  const getQueueStatus = (service: {
+    currentQueue: number;
+    maxCapacity: number;
+    isActive: boolean;
+  }) => {
     if (!service.isActive) {
-      return { label: 'ปิดบริการ', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' };
+      return {
+        label: "ปิดบริการ",
+        color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      };
     }
-    
+
     const utilizationRate = service.currentQueue / service.maxCapacity;
-    
+
     if (utilizationRate >= 1) {
-      return { label: 'เต็ม', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' };
+      return {
+        label: "เต็ม",
+        color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      };
     } else if (utilizationRate >= 0.7) {
-      return { label: 'คิวเยอะ', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' };
+      return {
+        label: "คิวเยอะ",
+        color:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      };
     } else if (utilizationRate >= 0.3) {
-      return { label: 'ปกติ', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' };
+      return {
+        label: "ปกติ",
+        color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      };
     } else {
-      return { label: 'ว่าง', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' };
+      return {
+        label: "ว่าง",
+        color:
+          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      };
     }
   };
 
   const getPriorityColor = (priority: number) => {
-    if (priority <= 2) return 'text-red-600 font-bold';
-    if (priority <= 4) return 'text-orange-600 font-semibold';
-    if (priority <= 6) return 'text-blue-600';
-    return 'text-gray-600';
+    if (priority <= 2) return "text-red-600 font-bold";
+    if (priority <= 4) return "text-orange-600 font-semibold";
+    if (priority <= 6) return "text-blue-600";
+    return "text-gray-600";
   };
 
   return (
@@ -98,8 +131,12 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">บริการในคิว</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">จัดการบริการที่ให้ในระบบคิว</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            บริการในคิว
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            จัดการบริการที่ให้ในระบบคิว
+          </p>
         </div>
         <div className="flex space-x-4">
           <button
@@ -116,7 +153,9 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">บริการทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                บริการทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.stats.totalServices}
               </p>
@@ -128,7 +167,9 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">บริการที่เปิด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                บริการที่เปิด
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {viewModel.stats.activeServices}
               </p>
@@ -152,7 +193,9 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">เวลารอเฉลี่ย</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                เวลารอเฉลี่ย
+              </p>
               <p className="text-2xl font-bold text-orange-600">
                 {formatDuration(viewModel.stats.averageWaitTime)}
               </p>
@@ -178,8 +221,13 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
             ) : (
               <div className="space-y-2">
                 {viewModel.busyDepartments.map((dept, index) => (
-                  <div key={index} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <p className="font-medium text-red-800 dark:text-red-200">{dept}</p>
+                  <div
+                    key={index}
+                    className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+                  >
+                    <p className="font-medium text-red-800 dark:text-red-200">
+                      {dept}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -201,8 +249,13 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
             ) : (
               <div className="space-y-2">
                 {viewModel.availableDepartments.map((dept, index) => (
-                  <div key={index} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="font-medium text-green-800 dark:text-green-200">{dept}</p>
+                  <div
+                    key={index}
+                    className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
+                  >
+                    <p className="font-medium text-green-800 dark:text-green-200">
+                      {dept}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -233,7 +286,7 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">ทุกแผนก</option>
-              {viewModel.departments.map(dept => (
+              {viewModel.departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name} ({dept.serviceCount})
                 </option>
@@ -258,7 +311,15 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
           <div className="lg:w-40">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'serviceName' | 'currentQueue' | 'estimatedDuration' | 'priority')}
+              onChange={(e) =>
+                setSortBy(
+                  e.target.value as
+                    | "serviceName"
+                    | "currentQueue"
+                    | "estimatedDuration"
+                    | "priority"
+                )
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="priority">เรียงตามลำดับ</option>
@@ -272,7 +333,7 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
           <div className="lg:w-32">
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="asc">น้อย → มาก</option>
@@ -318,17 +379,22 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">🛎️</div>
                       <p className="text-lg">
-                        {searchTerm || selectedDepartment !== 'all' || selectedStatus !== 'all'
+                        {searchTerm ||
+                        selectedDepartment !== "all" ||
+                        selectedStatus !== "all"
                           ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีบริการในระบบ"}
                       </p>
-                      {searchTerm || selectedDepartment !== 'all' || selectedStatus !== 'all' ? (
+                      {searchTerm ||
+                      selectedDepartment !== "all" ||
+                      selectedStatus !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
                         </p>
                       ) : (
                         <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &lsquo;เพิ่มบริการ&rsquo; เพื่อเริ่มบันทึกรายการแรกของคุณ
+                          คลิกปุ่ม &lsquo;เพิ่มบริการ&rsquo;
+                          เพื่อเริ่มบันทึกรายการแรกของคุณ
                         </p>
                       )}
                     </div>
@@ -338,9 +404,16 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                 filteredServices.map((service) => {
                   const queueStatus = getQueueStatus(service);
                   return (
-                    <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr
+                      key={service.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`text-sm font-medium ${getPriorityColor(service.priority)}`}>
+                        <span
+                          className={`text-sm font-medium ${getPriorityColor(
+                            service.priority
+                          )}`}
+                        >
                           #{service.priority}
                         </span>
                       </td>
@@ -364,7 +437,9 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                           <span className="text-sm font-semibold text-gray-900 dark:text-white">
                             {service.currentQueue}
                           </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400 mx-1">/</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400 mx-1">
+                            /
+                          </span>
                           <span className="text-sm text-gray-600 dark:text-gray-300">
                             {service.maxCapacity}
                           </span>
@@ -372,11 +447,20 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
                           <div
                             className={`h-1.5 rounded-full ${
-                              service.currentQueue / service.maxCapacity >= 0.8 ? 'bg-red-500' :
-                              service.currentQueue / service.maxCapacity >= 0.5 ? 'bg-yellow-500' :
-                              'bg-green-500'
+                              service.currentQueue / service.maxCapacity >= 0.8
+                                ? "bg-red-500"
+                                : service.currentQueue / service.maxCapacity >=
+                                  0.5
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
                             }`}
-                            style={{ width: `${Math.min((service.currentQueue / service.maxCapacity) * 100, 100)}%` }}
+                            style={{
+                              width: `${Math.min(
+                                (service.currentQueue / service.maxCapacity) *
+                                  100,
+                                100
+                              )}%`,
+                            }}
                           ></div>
                         </div>
                       </td>
@@ -384,7 +468,9 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                         {formatDuration(service.estimatedDuration)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${queueStatus.color}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${queueStatus.color}`}
+                        >
                           {queueStatus.label}
                         </span>
                       </td>
@@ -394,7 +480,7 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
                             แก้ไข
                           </button>
                           <button className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                            {service.isActive ? 'ปิด' : 'เปิด'}
+                            {service.isActive ? "ปิด" : "เปิด"}
                           </button>
                           <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                             ลบ
@@ -412,7 +498,7 @@ export function QueueServicesView({ viewModel }: QueueServicesViewProps) {
 
       {/* Add Service Modal Placeholder */}
       {showAddServiceModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มบริการใหม่

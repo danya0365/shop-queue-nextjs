@@ -287,7 +287,7 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
 
       {/* Cancel Confirmation Modal */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="frontend-card p-6 max-w-md w-full">
             <div className="text-center mb-6">
               <span className="text-6xl mb-4 block">⚠️</span>

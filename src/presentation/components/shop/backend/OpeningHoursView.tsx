@@ -50,7 +50,7 @@ export function OpeningHoursView({
     <div className="space-y-6 relative">
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
             <p className="text-gray-700 dark:text-gray-300 font-medium">

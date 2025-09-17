@@ -1,108 +1,128 @@
-'use client';
+"use client";
 
-import { CustomerPointsTransactionsViewModel } from '@/src/presentation/presenters/shop/backend/CustomerPointsTransactionsPresenter';
-import { useState } from 'react';
+import { CustomerPointsTransactionsViewModel } from "@/src/presentation/presenters/shop/backend/CustomerPointsTransactionsPresenter";
+import { useState } from "react";
 
 interface CustomerPointsTransactionsViewProps {
   viewModel: CustomerPointsTransactionsViewModel;
 }
 
-export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTransactionsViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [selectedCustomer, setSelectedCustomer] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'points' | 'customerName'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+export function CustomerPointsTransactionsView({
+  viewModel,
+}: CustomerPointsTransactionsViewProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"createdAt" | "points" | "customerName">(
+    "createdAt"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
 
   // Get unique customers for filter
   const uniqueCustomers = Array.from(
     new Map(
       viewModel.transactions
-        .filter(t => t.customerName)
-        .map(t => [t.customerId, { id: t.customerId, name: t.customerName! }])
+        .filter((t) => t.customerName)
+        .map((t) => [t.customerId, { id: t.customerId, name: t.customerName! }])
     ).values()
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   // Filter and sort transactions
   const filteredTransactions = viewModel.transactions
-    .filter(transaction => {
-      const matchesSearch = transaction.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           transaction.customerPhone?.includes(searchTerm) ||
-                           transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = selectedType === 'all' || transaction.transactionType === selectedType;
-      const matchesCustomer = selectedCustomer === 'all' || transaction.customerId === selectedCustomer;
+    .filter((transaction) => {
+      const matchesSearch =
+        transaction.customerName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        transaction.customerPhone?.includes(searchTerm) ||
+        transaction.description
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      const matchesType =
+        selectedType === "all" || transaction.transactionType === selectedType;
+      const matchesCustomer =
+        selectedCustomer === "all" ||
+        transaction.customerId === selectedCustomer;
       return matchesSearch && matchesType && matchesCustomer;
     })
     .sort((a, b) => {
       let aValue: string | number | Date;
       let bValue: string | number | Date;
-      
+
       switch (sortBy) {
-        case 'createdAt':
+        case "createdAt":
           aValue = a.createdAt.getTime();
           bValue = b.createdAt.getTime();
           break;
-        case 'points':
+        case "points":
           aValue = Math.abs(a.points);
           bValue = Math.abs(b.points);
           break;
-        case 'customerName':
-          aValue = a.customerName || '';
-          bValue = b.customerName || '';
+        case "customerName":
+          aValue = a.customerName || "";
+          bValue = b.customerName || "";
           break;
         default:
           aValue = a.createdAt.getTime();
           bValue = b.createdAt.getTime();
       }
 
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortOrder === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
       }
-      
-      return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+
+      return sortOrder === "asc"
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
     });
 
   const formatPoints = (points: number) => {
-    return new Intl.NumberFormat('th-TH').format(Math.abs(points));
+    return new Intl.NumberFormat("th-TH").format(Math.abs(points));
   };
 
   const formatDateTime = (date: Date) => {
-    return new Intl.DateTimeFormat('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const getTransactionTypeColor = (type: string) => {
     const colors = {
-      earned: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      redeemed: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-      expired: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-      adjusted: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+      earned:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      redeemed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      expired: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      adjusted: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return (
+      colors[type as keyof typeof colors] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    );
   };
 
   const getTransactionTypeIcon = (type: string) => {
     const icons = {
-      earned: '➕',
-      redeemed: '➖',
-      expired: '⏰',
-      adjusted: '🔧'
+      earned: "➕",
+      redeemed: "➖",
+      expired: "⏰",
+      adjusted: "🔧",
     };
-    return icons[type as keyof typeof icons] || '📝';
+    return icons[type as keyof typeof icons] || "📝";
   };
 
   const getTransactionTypeLabel = (type: string) => {
     const labels = {
-      earned: 'ได้รับแต้ม',
-      redeemed: 'ใช้แต้ม',
-      expired: 'หมดอายุ',
-      adjusted: 'ปรับแต้ม'
+      earned: "ได้รับแต้ม",
+      redeemed: "ใช้แต้ม",
+      expired: "หมดอายุ",
+      adjusted: "ปรับแต้ม",
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -112,8 +132,12 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">ประวัติการใช้แต้ม</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">ดูประวัติการสะสมและการใช้แต้มของลูกค้าทั้งหมด</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            ประวัติการใช้แต้ม
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            ดูประวัติการสะสมและการใช้แต้มของลูกค้าทั้งหมด
+          </p>
         </div>
       </div>
 
@@ -122,7 +146,9 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">รายการทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                รายการทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {viewModel.stats.totalTransactions}
               </p>
@@ -134,7 +160,9 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่แจก</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มที่แจก
+              </p>
               <p className="text-2xl font-bold text-green-600">
                 {formatPoints(viewModel.stats.totalPointsEarned)}
               </p>
@@ -146,7 +174,9 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่ใช้</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มที่ใช้
+              </p>
               <p className="text-2xl font-bold text-red-600">
                 {formatPoints(viewModel.stats.totalPointsRedeemed)}
               </p>
@@ -158,7 +188,9 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มหมดอายุ</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มหมดอายุ
+              </p>
               <p className="text-2xl font-bold text-gray-600">
                 {formatPoints(viewModel.stats.totalPointsExpired)}
               </p>
@@ -170,9 +202,18 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มปรับ</p>
-              <p className={`text-2xl font-bold ${viewModel.stats.totalPointsAdjusted >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {viewModel.stats.totalPointsAdjusted >= 0 ? '+' : ''}{formatPoints(viewModel.stats.totalPointsAdjusted)}
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มปรับ
+              </p>
+              <p
+                className={`text-2xl font-bold ${
+                  viewModel.stats.totalPointsAdjusted >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {viewModel.stats.totalPointsAdjusted >= 0 ? "+" : ""}
+                {formatPoints(viewModel.stats.totalPointsAdjusted)}
               </p>
             </div>
             <div className="text-2xl">🔧</div>
@@ -189,7 +230,10 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
           <div className="overflow-x-auto">
             <div className="flex space-x-4 min-w-max">
               {viewModel.monthlyTrends.slice(0, 6).map((trend) => (
-                <div key={trend.month} className="flex-shrink-0 w-32 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                <div
+                  key={trend.month}
+                  className="flex-shrink-0 w-32 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-center"
+                >
                   <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                     {trend.monthLabel}
                   </p>
@@ -200,8 +244,13 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                     <div className="text-xs text-red-600">
                       -{formatPoints(trend.redeemed)}
                     </div>
-                    <div className={`text-sm font-semibold ${trend.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {trend.net >= 0 ? '+' : ''}{formatPoints(trend.net)}
+                    <div
+                      className={`text-sm font-semibold ${
+                        trend.net >= 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {trend.net >= 0 ? "+" : ""}
+                      {formatPoints(trend.net)}
                     </div>
                   </div>
                 </div>
@@ -223,9 +272,15 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                 key={type.value}
                 className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center"
               >
-                <div className="text-2xl mb-2">{getTransactionTypeIcon(type.value)}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{type.label}</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">{type.count}</p>
+                <div className="text-2xl mb-2">
+                  {getTransactionTypeIcon(type.value)}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {type.label}
+                </p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  {type.count}
+                </p>
               </div>
             ))}
           </div>
@@ -245,17 +300,26 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
               >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                    index === 0 ? 'bg-yellow-500' :
-                    index === 1 ? 'bg-gray-400' :
-                    index === 2 ? 'bg-orange-600' :
-                    'bg-blue-500'
-                  }`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                      index === 0
+                        ? "bg-yellow-500"
+                        : index === 1
+                        ? "bg-gray-400"
+                        : index === 2
+                        ? "bg-orange-600"
+                        : "bg-blue-500"
+                    }`}
+                  >
                     {index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{customer.customerName}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{customer.transactionCount} รายการ</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {customer.customerName}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {customer.transactionCount} รายการ
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -291,7 +355,7 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">ทุกประเภท</option>
-              {viewModel.transactionTypes.map(type => (
+              {viewModel.transactionTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label} ({type.count})
                 </option>
@@ -307,7 +371,7 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">ทุกลูกค้า</option>
-              {uniqueCustomers.map(customer => (
+              {uniqueCustomers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
                 </option>
@@ -319,7 +383,11 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
           <div className="lg:w-40">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'points' | 'customerName')}
+              onChange={(e) =>
+                setSortBy(
+                  e.target.value as "createdAt" | "points" | "customerName"
+                )
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="createdAt">เรียงตามวันที่</option>
@@ -332,7 +400,7 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
           <div className="lg:w-32">
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="desc">ใหม่ → เก่า</option>
@@ -378,17 +446,22 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                     <div className="text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">📋</div>
                       <p className="text-lg">
-                        {searchTerm || selectedType !== 'all' || selectedCustomer !== 'all'
+                        {searchTerm ||
+                        selectedType !== "all" ||
+                        selectedCustomer !== "all"
                           ? "ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา"
                           : "ยังไม่มีรายการธุรกรรมแต้มในระบบ"}
                       </p>
-                      {searchTerm || selectedType !== 'all' || selectedCustomer !== 'all' ? (
+                      {searchTerm ||
+                      selectedType !== "all" ||
+                      selectedCustomer !== "all" ? (
                         <p className="text-sm text-gray-400 mt-2">
                           ลองปรับเงื่อนไขการค้นหาหรือเพิ่มรายการธุรกรรมใหม่
                         </p>
                       ) : (
                         <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &lsquo;เพิ่มรายการธุรกรรม&rsquo; เพื่อเริ่มบันทึกธุรกรรมแรกของคุณ
+                          คลิกปุ่ม &lsquo;เพิ่มรายการธุรกรรม&rsquo;
+                          เพื่อเริ่มบันทึกธุรกรรมแรกของคุณ
                         </p>
                       )}
                     </div>
@@ -396,7 +469,10 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                 </tr>
               ) : (
                 filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={transaction.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {formatDateTime(transaction.createdAt)}
                     </td>
@@ -411,21 +487,32 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionTypeColor(transaction.transactionType)}`}>
-                        {getTransactionTypeIcon(transaction.transactionType)} {getTransactionTypeLabel(transaction.transactionType)}
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionTypeColor(
+                          transaction.transactionType
+                        )}`}
+                      >
+                        {getTransactionTypeIcon(transaction.transactionType)}{" "}
+                        {getTransactionTypeLabel(transaction.transactionType)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm font-semibold ${
-                        transaction.points > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {transaction.points > 0 ? '+' : ''}{formatPoints(transaction.points)}
+                      <span
+                        className={`text-sm font-semibold ${
+                          transaction.points > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {transaction.points > 0 ? "+" : ""}
+                        {formatPoints(transaction.points)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
                         <div className="text-gray-500 dark:text-gray-400">
-                          {formatPoints(transaction.previousBalance)} → {formatPoints(transaction.newBalance)}
+                          {formatPoints(transaction.previousBalance)} →{" "}
+                          {formatPoints(transaction.newBalance)}
                         </div>
                       </div>
                     </td>
@@ -440,7 +527,7 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {transaction.employeeName || '-'}
+                      {transaction.employeeName || "-"}
                     </td>
                   </tr>
                 ))
@@ -452,7 +539,7 @@ export function CustomerPointsTransactionsView({ viewModel }: CustomerPointsTran
 
       {/* Add Transaction Modal Placeholder */}
       {showAddTransactionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มรายการแต้ม
