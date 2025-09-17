@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { ShopSettingsView } from "@/src/presentation/components/shop/backend/ShopSettingsView";
+import { ShopSettingsView } from "@/src/presentation/components/shop/backend/setting/ShopSettingsView";
 import { ShopSettingsPresenterFactory } from "@/src/presentation/presenters/shop/backend/ShopSettingsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

@@ -16,7 +16,7 @@ import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
 import { QRCodeModal } from "./modals/QRCodeModal";
-import { QueueLimitsWarning } from "./QueueLimitsWarning";
+import { QueueLimitsWarning } from "./components/QueueLimitsWarning";
 
 interface QueueManagementViewProps {
   shopId: string;

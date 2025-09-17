@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { PaymentsView } from "@/src/presentation/components/shop/backend/PaymentsView";
+import { PaymentsView } from "@/src/presentation/components/shop/backend/payment/PaymentsView";
 import { PaymentsPresenterFactory } from "@/src/presentation/presenters/shop/backend/PaymentsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

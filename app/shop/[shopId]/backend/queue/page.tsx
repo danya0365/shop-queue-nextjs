@@ -1,9 +1,9 @@
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { QueueManagementView } from "@/src/presentation/components/shop/backend/QueueManagementView";
+import { QueueManagementView } from "@/src/presentation/components/shop/backend/queue/QueueManagementView";
 import { QueueManagementPresenterFactory } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 
 // Tell Next.js this is a dynamic page
 export const dynamic = "force-dynamic";
@@ -47,11 +47,18 @@ export default async function QueueManagementPage({
 
   try {
     // Get view model from presenter with initial pagination
-    const initialViewModel = await presenter.getViewModel(shopId, 1, getPaginationConfig().QUEUES_PER_PAGE);
+    const initialViewModel = await presenter.getViewModel(
+      shopId,
+      1,
+      getPaginationConfig().QUEUES_PER_PAGE
+    );
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <QueueManagementView initialViewModel={initialViewModel} shopId={shopId} />
+        <QueueManagementView
+          initialViewModel={initialViewModel}
+          shopId={shopId}
+        />
       </BackendLayout>
     );
   } catch (error) {

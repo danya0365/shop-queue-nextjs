@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { OpeningHoursView } from "@/src/presentation/components/shop/backend/OpeningHoursView";
+import { OpeningHoursView } from "@/src/presentation/components/shop/backend/opening-hour/OpeningHoursView";
 import { OpeningHoursPresenterFactory } from "@/src/presentation/presenters/shop/backend/opening-hours/OpeningHoursPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

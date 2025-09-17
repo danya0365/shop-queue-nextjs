@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { DepartmentsView } from "@/src/presentation/components/shop/backend/DepartmentsView";
+import { DepartmentsView } from "@/src/presentation/components/shop/backend/department/DepartmentsView";
 import { DepartmentsPresenterFactory } from "@/src/presentation/presenters/shop/backend/DepartmentsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

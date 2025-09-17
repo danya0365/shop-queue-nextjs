@@ -5,7 +5,7 @@ import {
   type Employee,
 } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
 import { useEmployeesPresenter } from "@/src/presentation/presenters/shop/backend/useEmployeesPresenter";
-import { EmployeeLimitsWarning } from "./EmployeeLimitsWarning";
+import { EmployeeLimitsWarning } from "./components/EmployeeLimitsWarning";
 import { CreateEmployeeModal } from "./modals/CreateEmployeeModal";
 import { DeleteEmployeeConfirmation } from "./modals/DeleteEmployeeConfirmation";
 import { EditEmployeeModal } from "./modals/EditEmployeeModal";

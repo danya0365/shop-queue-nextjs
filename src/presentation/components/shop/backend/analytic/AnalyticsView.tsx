@@ -6,7 +6,7 @@ import type {
 } from "@/src/presentation/presenters/shop/backend/AnalyticsPresenter";
 import Link from "next/link";
 import { useState } from "react";
-import { DataRetentionWarning } from "./DataRetentionWarning";
+import { DataRetentionWarning } from "./components/DataRetentionWarning";
 
 // define enum
 enum Tab {

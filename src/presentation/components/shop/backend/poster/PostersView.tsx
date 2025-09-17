@@ -6,8 +6,8 @@ import type {
 } from "@/src/presentation/presenters/shop/backend/PostersPresenter";
 import { usePostersPresenter } from "@/src/presentation/presenters/shop/backend/usePostersPresenter";
 import { useQRCode } from "next-qrcode";
-import { PaymentModal } from "../../pricing/PaymentModal";
-import { SubscriptionUpgradeButton } from "../../shared/SubscriptionUpgradeButton";
+import { PaymentModal } from "../../../pricing/PaymentModal";
+import { SubscriptionUpgradeButton } from "../../../shared/SubscriptionUpgradeButton";
 
 interface PostersViewProps {
   shopId: string;

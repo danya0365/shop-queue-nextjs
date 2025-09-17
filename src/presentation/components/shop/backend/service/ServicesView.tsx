@@ -5,7 +5,7 @@ import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfi
 import { ServicesViewModel } from "@/src/presentation/presenters/shop/backend/ServicesPresenter";
 import { useServicesPresenter } from "@/src/presentation/presenters/shop/backend/useServicesPresenter";
 import { useState } from "react";
-import { EmojiPicker } from "./EmojiPicker";
+import { EmojiPicker } from "./modals/EmojiPicker";
 
 interface ServicesViewProps {
   initialViewModel: ServicesViewModel;
@@ -415,7 +415,6 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               )}
             </div>
           )}
-
         </div>
         <div className="relative min-h-[200px]">
           {/* Loading and Error Overlay */}
@@ -441,148 +440,148 @@ export function ServicesView({ initialViewModel, shopId }: ServicesViewProps) {
               </div>
             </div>
           )}
-          
+
           {/* Services Table */}
           <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  บริการ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  หมวดหมู่
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  ราคา
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  ระยะเวลา
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  สถานะ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  การจัดการ
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {viewModel.services.data.length === 0 ? (
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
-                  >
-                    <div className="text-gray-500 dark:text-gray-400">
-                      <div className="text-4xl mb-4">🛎️</div>
-                      <p className="text-lg">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    บริการ
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    หมวดหมู่
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    ราคา
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    ระยะเวลา
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    สถานะ
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    การจัดการ
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {viewModel.services.data.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      <div className="text-gray-500 dark:text-gray-400">
+                        <div className="text-4xl mb-4">🛎️</div>
+                        <p className="text-lg">
+                          {searchQuery ||
+                          categoryFilter !== "all" ||
+                          availabilityFilter !== "all"
+                            ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
+                            : "ยังไม่มีบริการในระบบ"}
+                        </p>
                         {searchQuery ||
                         categoryFilter !== "all" ||
-                        availabilityFilter !== "all"
-                          ? "ไม่พบบริการที่ตรงกับเงื่อนไขการค้นหา"
-                          : "ยังไม่มีบริการในระบบ"}
-                      </p>
-                      {searchQuery ||
-                      categoryFilter !== "all" ||
-                      availabilityFilter !== "all" ? (
-                        <p className="text-sm text-gray-400 mt-2">
-                          ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
-                        </p>
-                      ) : (
-                        <p className="text-sm text-gray-400 mt-2">
-                          คลิกปุ่ม &ldquo;เพิ่มบริการใหม่&rdquo;
-                          เพื่อเริ่มเพิ่มบริการแรกของคุณ
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                viewModel.services.data.map((service) => (
-                  <tr
-                    key={service.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="text-2xl mr-3">
-                          {service.icon || "🔧"}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {service.name}
-                          </div>
-                          {service.description && (
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {service.description}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {service.category || "ไม่ระบุ"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {formatPrice(service.price)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {formatDuration(service.estimatedDuration || null)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          service.isAvailable
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                        }`}
-                      >
-                        {service.isAvailable ? "เปิดใช้งาน" : "ปิดใช้งาน"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEditService(service.id)}
-                          disabled={editLoading}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          แก้ไข
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (service.id) {
-                              handleToggleServiceAvailability(
-                                service.id,
-                                service.isAvailable ?? false
-                              );
-                            }
-                          }}
-                          disabled={actionLoading?.toggle}
-                          className={`${
-                            service.isAvailable
-                              ? "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                              : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          {service.isAvailable ? "ปิดใช้งาน" : "เปิดใช้งาน"}
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(service)}
-                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                        >
-                          ลบ
-                        </button>
+                        availabilityFilter !== "all" ? (
+                          <p className="text-sm text-gray-400 mt-2">
+                            ลองปรับเงื่อนไขการค้นหาหรือเพิ่มบริการใหม่
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-400 mt-2">
+                            คลิกปุ่ม &ldquo;เพิ่มบริการใหม่&rdquo;
+                            เพื่อเริ่มเพิ่มบริการแรกของคุณ
+                          </p>
+                        )}
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  viewModel.services.data.map((service) => (
+                    <tr
+                      key={service.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="text-2xl mr-3">
+                            {service.icon || "🔧"}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {service.name}
+                            </div>
+                            {service.description && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {service.description}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {service.category || "ไม่ระบุ"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {formatPrice(service.price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {formatDuration(service.estimatedDuration || null)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            service.isAvailable
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                          }`}
+                        >
+                          {service.isAvailable ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleEditService(service.id)}
+                            disabled={editLoading}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (service.id) {
+                                handleToggleServiceAvailability(
+                                  service.id,
+                                  service.isAvailable ?? false
+                                );
+                              }
+                            }}
+                            disabled={actionLoading?.toggle}
+                            className={`${
+                              service.isAvailable
+                                ? "text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {service.isAvailable ? "ปิดใช้งาน" : "เปิดใช้งาน"}
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(service)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            ลบ
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 

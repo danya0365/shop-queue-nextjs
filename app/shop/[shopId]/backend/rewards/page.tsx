@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { RewardsView } from "@/src/presentation/components/shop/backend/RewardsView";
+import { RewardsView } from "@/src/presentation/components/shop/backend/reward/RewardsView";
 import { RewardsPresenterFactory } from "@/src/presentation/presenters/shop/backend/RewardsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

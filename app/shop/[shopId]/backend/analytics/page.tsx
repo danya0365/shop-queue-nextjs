@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { AnalyticsView } from "@/src/presentation/components/shop/backend/AnalyticsView";
+import { AnalyticsView } from "@/src/presentation/components/shop/backend/analytic/AnalyticsView";
 import { AnalyticsPresenterFactory } from "@/src/presentation/presenters/shop/backend/AnalyticsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

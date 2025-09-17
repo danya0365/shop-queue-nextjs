@@ -1,7 +1,7 @@
 "use client";
 
 import { QueuePriority } from "@/src/domain/entities/backend/backend-queue.entity";
-import { CustomerSelectionDropdown } from "@/src/presentation/components/shop/backend/CustomerSelectionDropdown";
+import { CustomerSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/CustomerSelectionDropdown";
 import { useCustomers } from "@/src/presentation/hooks/shop/backend/useCustomers";
 import { useServices } from "@/src/presentation/hooks/shop/backend/useServices";
 import { QueueItem } from "@/src/presentation/presenters/shop/backend/QueueManagementPresenter";

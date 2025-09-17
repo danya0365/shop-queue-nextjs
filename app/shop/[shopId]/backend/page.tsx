@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { BackendDashboardView } from "@/src/presentation/components/shop/backend/BackendDashboardView";
+import { BackendDashboardView } from "@/src/presentation/components/shop/backend/dashboard/BackendDashboardView";
 import { BackendDashboardPresenterFactory } from "@/src/presentation/presenters/shop/backend/DashboardPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -50,7 +50,10 @@ export default async function BackendDashboardPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <BackendDashboardView initialViewModel={initialViewModel} shopId={shopId} />
+        <BackendDashboardView
+          initialViewModel={initialViewModel}
+          shopId={shopId}
+        />
       </BackendLayout>
     );
   } catch (error) {

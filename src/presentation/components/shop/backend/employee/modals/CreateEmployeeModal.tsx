@@ -2,8 +2,11 @@
 
 import type { CreateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
 import { EmployeeStatus } from "@/src/application/dtos/shop/backend/employees-dto";
-import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/DepartmentSelectionDropdown";
-import { useDepartments, type Department } from "@/src/presentation/hooks/shop/backend/useDepartments";
+import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
+import {
+  useDepartments,
+  type Department,
+} from "@/src/presentation/hooks/shop/backend/useDepartments";
 import { useState } from "react";
 
 interface CreateEmployeeModalProps {

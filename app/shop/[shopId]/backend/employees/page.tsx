@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { EmployeesView } from "@/src/presentation/components/shop/backend/EmployeesView";
+import { EmployeesView } from "@/src/presentation/components/shop/backend/employee/EmployeesView";
 import { EmployeesPresenterFactory } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

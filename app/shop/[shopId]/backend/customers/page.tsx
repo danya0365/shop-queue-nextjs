@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { CustomersView } from "@/src/presentation/components/shop/backend/CustomersView";
+import { CustomersView } from "@/src/presentation/components/shop/backend/customer/CustomersView";
 import { CustomersPresenterFactory } from "@/src/presentation/presenters/shop/backend/CustomersPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -49,10 +49,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <CustomersView 
-          shopId={shopId}
-          initialViewModel={viewModel}
-        />
+        <CustomersView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {
