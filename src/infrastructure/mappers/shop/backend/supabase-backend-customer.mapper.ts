@@ -37,7 +37,7 @@ export class SupabaseShopBackendCustomerMapper {
         MembershipTier.REGULAR,
       lastVisit: schema.last_visit || null,
       notes: schema.notes,
-      isActive: schema.is_active || true,
+      isActive: schema.is_active ?? true,
       createdAt: schema.created_at || "",
       updatedAt: schema.updated_at || "",
     };
@@ -60,7 +60,7 @@ export class SupabaseShopBackendCustomerMapper {
       gender: entity.gender,
       address: entity.address,
       notes: entity.notes,
-      is_active: entity.isActive,
+      is_active: entity.isActive ?? true,
       last_visit: entity.lastVisit || "",
       created_at: entity.createdAt || "",
       updated_at: entity.updatedAt || "",
