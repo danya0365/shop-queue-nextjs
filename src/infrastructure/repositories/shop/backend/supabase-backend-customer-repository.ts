@@ -19,6 +19,7 @@ import {
 } from "@/src/domain/repositories/shop/backend/backend-customer-repository";
 import { SupabaseShopBackendCustomerMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-customer.mapper";
 import {
+  CustomerPointsSchema,
   CustomerSchema,
   CustomerStatsSchema,
 } from "@/src/infrastructure/schemas/shop/backend/customer.schema";
@@ -26,8 +27,7 @@ import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type CustomerWithJoinedData = CustomerSchema & {
-  queues?: { count?: number };
-  customer_points?: { total_points?: number; membership_tier?: string };
+  customer_points?: CustomerPointsSchema;
 };
 type CustomerSchemaRecord = Record<string, unknown> & CustomerSchema;
 type CustomerStatsSchemaRecord = Record<string, unknown> & CustomerStatsSchema;
@@ -115,7 +115,6 @@ export class SupabaseShopBackendCustomerRepository
         select: ["*"],
         filters: queryFilters.length > 0 ? queryFilters : undefined,
         joins: [
-          { table: "queues", on: { fromField: "id", toField: "customer_id" } },
           {
             table: "customer_points",
             on: { fromField: "id", toField: "customer_id" },
@@ -145,11 +144,13 @@ export class SupabaseShopBackendCustomerRepository
         const membershipTier = (customerWithJoinedData.customer_points
           ?.membership_tier || "regular") as MembershipTier;
 
+        const total_queues = 0;
+
         const customerWithJoinedFields = {
           ...customer,
-          total_queues: customerWithJoinedData.queues?.count || 0,
+          total_queues: total_queues,
           total_points:
-            customerWithJoinedData.customer_points?.total_points || 0,
+            customerWithJoinedData.customer_points?.current_points || 0,
           membership_tier: membershipTier,
         };
         return SupabaseShopBackendCustomerMapper.toDomain(
@@ -305,10 +306,6 @@ export class SupabaseShopBackendCustomerRepository
           select: ["*"],
           joins: [
             {
-              table: "queue_history",
-              on: { fromField: "id", toField: "customer_id" },
-            },
-            {
               table: "customer_points",
               on: { fromField: "id", toField: "customer_id" },
             },
@@ -326,10 +323,13 @@ export class SupabaseShopBackendCustomerRepository
       const membershipTier = (customerWithJoinedData.customer_points
         ?.membership_tier || "regular") as MembershipTier;
 
+      const totalQueues = 0;
+
       const customerWithJoinedFields = {
         ...customer,
-        total_queues: customerWithJoinedData.queues?.count || 0,
-        total_points: customerWithJoinedData.customer_points?.total_points || 0,
+        total_queues: totalQueues,
+        total_points:
+          customerWithJoinedData.customer_points?.current_points || 0,
         membership_tier: membershipTier,
       };
 

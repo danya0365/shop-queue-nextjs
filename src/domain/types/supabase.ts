@@ -89,7 +89,7 @@ export type Database = {
             foreignKeyName: "category_shops_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -236,7 +236,7 @@ export type Database = {
           {
             foreignKeyName: "customer_points_customer_id_fkey"
             columns: ["customer_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
@@ -244,7 +244,7 @@ export type Database = {
             foreignKeyName: "customer_points_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -324,7 +324,7 @@ export type Database = {
             foreignKeyName: "customers_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -376,7 +376,7 @@ export type Database = {
             foreignKeyName: "departments_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -485,7 +485,7 @@ export type Database = {
             foreignKeyName: "employees_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -608,7 +608,7 @@ export type Database = {
             foreignKeyName: "notification_settings_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: true
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1141,7 +1141,7 @@ export type Database = {
             foreignKeyName: "promotions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1306,7 +1306,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1438,7 +1438,7 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1522,7 +1522,7 @@ export type Database = {
             foreignKeyName: "rewards_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1592,7 +1592,7 @@ export type Database = {
             foreignKeyName: "services_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1644,7 +1644,7 @@ export type Database = {
             foreignKeyName: "shop_activity_log_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1705,7 +1705,7 @@ export type Database = {
             foreignKeyName: "shop_opening_hours_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1883,7 +1883,7 @@ export type Database = {
             foreignKeyName: "shop_settings_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: true
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2183,7 +2183,7 @@ export type Database = {
             foreignKeyName: "subscription_usage_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2232,7 +2232,7 @@ export type Database = {
         }
         Relationships: []
       }
-      customer_stats_view: {
+      customer_stats_by_shop_view: {
         Row: {
           active_customers_today: number | null
           bronze_members: number | null
@@ -2242,6 +2242,20 @@ export type Database = {
           shop_id: string | null
           silver_members: number | null
           total_customers: number | null
+          total_registered_customers: number | null
+        }
+        Relationships: []
+      }
+      customer_stats_summary_view: {
+        Row: {
+          active_customers_today: number | null
+          bronze_members: number | null
+          gold_members: number | null
+          new_customers_this_month: number | null
+          regular_members: number | null
+          silver_members: number | null
+          total_customers: number | null
+          total_registered_customers: number | null
         }
         Relationships: []
       }
@@ -2270,7 +2284,7 @@ export type Database = {
             foreignKeyName: "departments_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2303,7 +2317,7 @@ export type Database = {
             foreignKeyName: "departments_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2362,7 +2376,7 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2394,7 +2408,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2441,7 +2455,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2501,7 +2515,7 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2572,7 +2586,7 @@ export type Database = {
             foreignKeyName: "promotions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2611,11 +2625,15 @@ export type Database = {
         Row: {
           all_cancelled_total: number | null
           all_completed_total: number | null
+          all_confirmed_queue: number | null
           all_in_progress_queue: number | null
           all_queue_total: number | null
+          all_serving_queue: number | null
           all_waiting_queue: number | null
           avg_wait_time_minutes: number | null
+          confirmed_queue_today: number | null
           in_progress_queue_today: number | null
+          serving_queue_today: number | null
           shop_id: string | null
           total_cancelled_today: number | null
           total_completed_today: number | null
@@ -2627,7 +2645,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2650,11 +2668,15 @@ export type Database = {
         Row: {
           all_cancelled_total: number | null
           all_completed_total: number | null
+          all_confirmed_queue: number | null
           all_in_progress_queue: number | null
           all_queue_total: number | null
+          all_serving_queue: number | null
           all_waiting_queue: number | null
           avg_wait_time_minutes: number | null
+          confirmed_queue_today: number | null
           in_progress_queue_today: number | null
+          serving_queue_today: number | null
           total_cancelled_today: number | null
           total_completed_today: number | null
           total_queue_today: number | null
@@ -2667,6 +2689,7 @@ export type Database = {
           avg_queue_time_minutes: number | null
           cancelled: number | null
           completed: number | null
+          confirmed: number | null
           no_show: number | null
           queue_date: string | null
           serving: number | null
@@ -2680,7 +2703,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2703,6 +2726,7 @@ export type Database = {
         Row: {
           cancelled: number | null
           completed: number | null
+          confirmed: number | null
           last_queue_update: string | null
           no_show: number | null
           serving: number | null
@@ -2716,7 +2740,7 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2739,6 +2763,7 @@ export type Database = {
         Row: {
           cancelled: number | null
           completed: number | null
+          confirmed: number | null
           last_queue_update: string | null
           no_show: number | null
           serving: number | null
@@ -2751,6 +2776,7 @@ export type Database = {
         Row: {
           cancelled: number | null
           completed: number | null
+          confirmed: number | null
           last_queue_update: string | null
           no_show: number | null
           serving: number | null
@@ -2776,7 +2802,7 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2844,7 +2870,7 @@ export type Database = {
             foreignKeyName: "rewards_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2889,7 +2915,7 @@ export type Database = {
             foreignKeyName: "services_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -3024,7 +3050,7 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "customer_stats_view"
+            referencedRelation: "customer_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -3355,6 +3381,7 @@ export type Database = {
         Args: { p_shop_id: string; p_start_date?: string; p_end_date?: string }
         Returns: {
           waiting: number
+          confirmed: number
           serving: number
           completed: number
           cancelled: number
