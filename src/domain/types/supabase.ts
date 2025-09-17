@@ -3617,7 +3617,7 @@ export type Database = {
         | "shop_opened"
         | "shop_closed"
       billing_period: "monthly" | "yearly" | "lifetime"
-      employee_status: "active" | "inactive" | "suspended"
+      employee_status: "active" | "inactive" | "suspended" | "on_leave"
       feature_type:
         | "poster_design"
         | "api_access"
@@ -3826,7 +3826,7 @@ export const Constants = {
         "shop_closed",
       ],
       billing_period: ["monthly", "yearly", "lifetime"],
-      employee_status: ["active", "inactive", "suspended"],
+      employee_status: ["active", "inactive", "suspended", "on_leave"],
       feature_type: [
         "poster_design",
         "api_access",

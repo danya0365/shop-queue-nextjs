@@ -10,7 +10,7 @@ CREATE TYPE queue_status AS ENUM ('waiting', 'confirmed', 'serving', 'completed'
 CREATE TYPE queue_priority AS ENUM ('normal', 'high', 'urgent');
 CREATE TYPE payment_status AS ENUM ('unpaid', 'partial', 'paid');
 CREATE TYPE payment_method AS ENUM ('cash', 'card', 'qr', 'transfer');
-CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'suspended');
+CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'suspended', 'on_leave');
 CREATE TYPE promotion_type AS ENUM ('percentage', 'fixed_amount', 'buy_x_get_y', 'free_item');
 CREATE TYPE promotion_status AS ENUM ('active', 'inactive', 'expired', 'scheduled');
 CREATE TYPE poster_category AS ENUM ('modern', 'classic', 'minimal', 'professional');

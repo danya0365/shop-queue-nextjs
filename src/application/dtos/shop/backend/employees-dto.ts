@@ -1,3 +1,4 @@
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 
 export interface EmployeeDTO {
@@ -14,7 +15,7 @@ export interface EmployeeDTO {
   status: EmployeeStatus;
   hireDate: string;
   lastLogin?: string;
-  permissions: string[];
+  permissions: EmployeePermission[];
   salary?: number;
   notes?: string;
   createdAt: string;
@@ -31,7 +32,7 @@ export interface CreateEmployeeParams {
   shopId?: string;
   status: EmployeeStatus;
   hireDate: string;
-  permissions?: string[];
+  permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
 }
@@ -47,7 +48,7 @@ export interface UpdateEmployeeParams {
   shopId?: string;
   status?: EmployeeStatus;
   hireDate?: string;
-  permissions?: string[];
+  permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
 }
@@ -56,9 +57,9 @@ export interface UpdateEmployeeParams {
  * Employee status enum
  */
 export enum EmployeeStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
 }
 
 export interface EmployeeStatsDTO {

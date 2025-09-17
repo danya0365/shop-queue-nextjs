@@ -18,7 +18,7 @@ export interface EmployeeEntity {
   status: EmployeeStatus;
   hireDate: string;
   lastLogin: string | null;
-  permissions: string[];
+  permissions: EmployeePermission[];
   salary: number | null;
   notes: string | null;
   createdAt: string;
@@ -35,7 +35,7 @@ export interface CreateEmployeeEntity {
   shopId?: string;
   status: EmployeeStatus;
   hireDate: string;
-  permissions?: string[];
+  permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
 }
@@ -50,7 +50,7 @@ export interface UpdateEmployeeEntity {
   shopId?: string;
   status?: EmployeeStatus;
   hireDate?: string;
-  permissions?: string[];
+  permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
 }
@@ -59,9 +59,17 @@ export interface UpdateEmployeeEntity {
  * Employee status enum
  */
 export enum EmployeeStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
+}
+
+export enum EmployeePermission {
+  MANAGE_QUEUES = "manage_queues",
+  MANAGE_EMPLOYEES = "manage_employees",
+  MANAGE_SERVICES = "manage_services",
+  MANAGE_CUSTOMERS = "manage_customers",
+  MANAGE_SETTINGS = "manage_settings",
 }
 
 /**

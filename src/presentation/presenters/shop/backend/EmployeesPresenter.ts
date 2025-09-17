@@ -1,12 +1,15 @@
-import { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
-import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import { IShopService } from '@/src/application/services/shop/ShopService';
-import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
-import { getServerContainer } from '@/src/di/server-container';
-import { getClientContainer } from '@/src/di/client-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
+import {
+  SubscriptionLimits,
+  UsageStatsDto,
+} from "@/src/application/dtos/subscription-dto";
+import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define interfaces for data structures
 export interface Employee {
@@ -16,7 +19,7 @@ export interface Employee {
   phone: string;
   position: string;
   department: string;
-  status: 'active' | 'inactive' | 'on_leave';
+  status: "active" | "inactive" | "on_leave" | "suspended";
   hireDate: string;
   salary: number;
   permissions: string[];
@@ -44,9 +47,8 @@ export interface Permission {
   category: string;
 }
 
-
 export interface EmployeeFilters {
-  status: 'all' | 'active' | 'inactive' | 'on_leave';
+  status: "all" | "active" | "inactive" | "on_leave" | "suspended";
   department: string;
   position: string;
   search: string;
@@ -77,12 +79,22 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
     shopService: IShopService,
     authService: IAuthService,
     profileService: IProfileService,
-    subscriptionService: ISubscriptionService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    subscriptionService: ISubscriptionService
+  ) {
+    super(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
+  }
 
   async getViewModel(shopId: string): Promise<EmployeesViewModel> {
     try {
-      this.logger.info('EmployeesPresenter: Getting view model for shop', { shopId });
+      this.logger.info("EmployeesPresenter: Getting view model for shop", {
+        shopId,
+      });
 
       const user = await this.getUser();
       if (!user) {
@@ -94,7 +106,10 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         throw new Error("Profile not found");
       }
 
-      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const subscriptionPlan = await this.getSubscriptionPlan(
+        profile.id,
+        profile.role
+      );
       const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
       const usage = await this.getUsageStats(profile.id);
 
@@ -103,7 +118,8 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       const departments = this.getDepartments();
       const permissions = this.getPermissions();
 
-      const staffLimitReached = limits.maxStaff !== null && usage.currentStaff >= limits.maxStaff;
+      const staffLimitReached =
+        limits.maxStaff !== null && usage.currentStaff >= limits.maxStaff;
       const canAddEmployee = !staffLimitReached;
 
       return {
@@ -111,24 +127,25 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         departments,
         permissions,
         filters: {
-          status: 'all',
-          department: 'all',
-          position: 'all',
-          search: '',
+          status: "all",
+          department: "all",
+          position: "all",
+          search: "",
         },
         totalEmployees: employees.length,
-        activeEmployees: employees.filter(e => e.status === 'active').length,
-        onLeaveEmployees: employees.filter(e => e.status === 'on_leave').length,
+        activeEmployees: employees.filter((e) => e.status === "active").length,
+        onLeaveEmployees: employees.filter((e) => e.status === "on_leave")
+          .length,
         totalSalaryExpense: employees.reduce((sum, e) => sum + e.salary, 0),
         subscription: {
           limits,
           usage,
           canAddEmployee,
-          staffLimitReached
-        }
+          staffLimitReached,
+        },
       };
     } catch (error) {
-      this.logger.error('EmployeesPresenter: Error getting view model', error);
+      this.logger.error("EmployeesPresenter: Error getting view model", error);
       throw error;
     }
   }
@@ -137,18 +154,18 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
   private getEmployees(): Employee[] {
     return [
       {
-        id: '1',
-        name: 'สมชาย ใจดี',
-        email: 'somchai@example.com',
-        phone: '081-234-5678',
-        position: 'พนักงานบริการ',
-        department: 'บริการลูกค้า',
-        status: 'active',
-        hireDate: '2023-01-15',
+        id: "1",
+        name: "สมชาย ใจดี",
+        email: "somchai@example.com",
+        phone: "081-234-5678",
+        position: "พนักงานบริการ",
+        department: "บริการลูกค้า",
+        status: "active",
+        hireDate: "2023-01-15",
         salary: 18000,
-        permissions: ['serve_customers', 'process_payments', 'view_queue'],
-        avatar: '👨‍💼',
-        lastLogin: '2024-01-15 09:30',
+        permissions: ["serve_customers", "process_payments", "view_queue"],
+        avatar: "👨‍💼",
+        lastLogin: "2024-01-15 09:30",
         todayStats: {
           queuesServed: 12,
           revenue: 2450,
@@ -157,18 +174,24 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         },
       },
       {
-        id: '2',
-        name: 'สมหญิง รักงาน',
-        email: 'somying@example.com',
-        phone: '082-345-6789',
-        position: 'หัวหน้าแผนก',
-        department: 'บริการลูกค้า',
-        status: 'active',
-        hireDate: '2022-06-01',
+        id: "2",
+        name: "สมหญิง รักงาน",
+        email: "somying@example.com",
+        phone: "082-345-6789",
+        position: "หัวหน้าแผนก",
+        department: "บริการลูกค้า",
+        status: "active",
+        hireDate: "2022-06-01",
         salary: 25000,
-        permissions: ['serve_customers', 'process_payments', 'view_queue', 'manage_employees', 'view_reports'],
-        avatar: '👩‍💼',
-        lastLogin: '2024-01-15 08:45',
+        permissions: [
+          "serve_customers",
+          "process_payments",
+          "view_queue",
+          "manage_employees",
+          "view_reports",
+        ],
+        avatar: "👩‍💼",
+        lastLogin: "2024-01-15 08:45",
         todayStats: {
           queuesServed: 8,
           revenue: 1890,
@@ -177,18 +200,18 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         },
       },
       {
-        id: '3',
-        name: 'สมปอง มีความสุข',
-        email: 'sompong@example.com',
-        phone: '083-456-7890',
-        position: 'พนักงานบริการ',
-        department: 'บริการลูกค้า',
-        status: 'on_leave',
-        hireDate: '2023-03-20',
+        id: "3",
+        name: "สมปอง มีความสุข",
+        email: "sompong@example.com",
+        phone: "083-456-7890",
+        position: "พนักงานบริการ",
+        department: "บริการลูกค้า",
+        status: "on_leave",
+        hireDate: "2023-03-20",
         salary: 18000,
-        permissions: ['serve_customers', 'process_payments', 'view_queue'],
-        avatar: '👨‍🍳',
-        lastLogin: '2024-01-12 17:30',
+        permissions: ["serve_customers", "process_payments", "view_queue"],
+        avatar: "👨‍🍳",
+        lastLogin: "2024-01-12 17:30",
         todayStats: {
           queuesServed: 0,
           revenue: 0,
@@ -197,18 +220,18 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         },
       },
       {
-        id: '4',
-        name: 'สมศรี ขยันทำงาน',
-        email: 'somsri@example.com',
-        phone: '084-567-8901',
-        position: 'แคชเชียร์',
-        department: 'การเงิน',
-        status: 'active',
-        hireDate: '2023-08-10',
+        id: "4",
+        name: "สมศรี ขยันทำงาน",
+        email: "somsri@example.com",
+        phone: "084-567-8901",
+        position: "แคชเชียร์",
+        department: "การเงิน",
+        status: "active",
+        hireDate: "2023-08-10",
         salary: 16000,
-        permissions: ['process_payments', 'view_queue', 'manage_cash'],
-        avatar: '👩‍💻',
-        lastLogin: '2024-01-15 10:15',
+        permissions: ["process_payments", "view_queue", "manage_cash"],
+        avatar: "👩‍💻",
+        lastLogin: "2024-01-15 10:15",
         todayStats: {
           queuesServed: 15,
           revenue: 3200,
@@ -222,21 +245,21 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
   private getDepartments(): Department[] {
     return [
       {
-        id: '1',
-        name: 'บริการลูกค้า',
-        description: 'ให้บริการลูกค้าและจัดการคิว',
+        id: "1",
+        name: "บริการลูกค้า",
+        description: "ให้บริการลูกค้าและจัดการคิว",
         employeeCount: 3,
       },
       {
-        id: '2',
-        name: 'การเงิน',
-        description: 'จัดการการชำระเงินและบัญชี',
+        id: "2",
+        name: "การเงิน",
+        description: "จัดการการชำระเงินและบัญชี",
         employeeCount: 1,
       },
       {
-        id: '3',
-        name: 'จัดการ',
-        description: 'บริหารจัดการและกำกับดูแล',
+        id: "3",
+        name: "จัดการ",
+        description: "บริหารจัดการและกำกับดูแล",
         employeeCount: 0,
       },
     ];
@@ -245,40 +268,34 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
   private getPermissions(): Permission[] {
     return [
       {
-        id: 'serve_customers',
-        name: 'ให้บริการลูกค้า',
-        description: 'สามารถให้บริการและจัดการคิวลูกค้า',
-        category: 'บริการ',
+        id: "manage_queues",
+        name: "จัดการคิว",
+        description: "สามารถจัดการคิวลูกค้า",
+        category: "คิว",
       },
       {
-        id: 'process_payments',
-        name: 'ประมวลผลการชำระเงิน',
-        description: 'สามารถรับชำระเงินและออกใบเสร็จ',
-        category: 'การเงิน',
+        id: "manage_employees",
+        name: "จัดการพนักงาน",
+        description: "สามารถจัดการพนักงาน",
+        category: "พนักงาน",
       },
       {
-        id: 'view_queue',
-        name: 'ดูข้อมูลคิว',
-        description: 'สามารถดูสถานะและข้อมูลคิว',
-        category: 'ข้อมูล',
+        id: "manage_services",
+        name: "จัดการบริการ",
+        description: "สามารถจัดการบริการ",
+        category: "บริการ",
       },
       {
-        id: 'manage_employees',
-        name: 'จัดการพนักงาน',
-        description: 'สามารถจัดการข้อมูลและสิทธิ์พนักงาน',
-        category: 'จัดการ',
+        id: "manage_customers",
+        name: "จัดการลูกค้า",
+        description: "สามารถจัดการลูกค้า",
+        category: "ลูกค้า",
       },
       {
-        id: 'view_reports',
-        name: 'ดูรายงาน',
-        description: 'สามารถดูรายงานและสถิติต่างๆ',
-        category: 'รายงาน',
-      },
-      {
-        id: 'manage_cash',
-        name: 'จัดการเงินสด',
-        description: 'สามารถจัดการเงินสดและยอดขาย',
-        category: 'การเงิน',
+        id: "manage_settings",
+        name: "จัดการตั้งค่า",
+        description: "สามารถจัดการตั้งค่า",
+        category: "ตั้งค่า",
       },
     ];
   }
@@ -287,8 +304,8 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
       shopId,
-      'จัดการพนักงาน',
-      'จัดการข้อมูลพนักงาน สิทธิ์การเข้าถึง และประสิทธิภาพการทำงาน',
+      "จัดการพนักงาน",
+      "จัดการข้อมูลพนักงาน สิทธิ์การเข้าถึง และประสิทธิภาพการทำงาน"
     );
   }
 }
@@ -297,18 +314,21 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
 export class EmployeesPresenterFactory {
   static async create(): Promise<EmployeesPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
 
     return new EmployeesPresenter(
       logger,
       shopService,
       authService,
       profileService,
-      subscriptionService,
+      subscriptionService
     );
   }
 }
@@ -317,18 +337,21 @@ export class EmployeesPresenterFactory {
 export class ClientEmployeesPresenterFactory {
   static async create(): Promise<EmployeesPresenter> {
     const clientContainer = await getClientContainer();
-    const logger = clientContainer.resolve<Logger>('Logger');
-    const shopService = clientContainer.resolve<IShopService>('ShopService');
-    const authService = clientContainer.resolve<IAuthService>('AuthService');
-    const profileService = clientContainer.resolve<IProfileService>('ProfileService');
-    const subscriptionService = clientContainer.resolve<ISubscriptionService>('SubscriptionService');
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
 
     return new EmployeesPresenter(
       logger,
       shopService,
       authService,
       profileService,
-      subscriptionService,
+      subscriptionService
     );
   }
 }
