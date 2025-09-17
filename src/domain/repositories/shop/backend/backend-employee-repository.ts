@@ -1,15 +1,21 @@
-import type { CreateEmployeeEntity, EmployeeEntity, EmployeeStatsEntity, PaginatedEmployeesEntity, UpdateEmployeeEntity } from '@/src/domain/entities/shop/backend/backend-employee.entity';
-import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type {
+  CreateEmployeeEntity,
+  EmployeeEntity,
+  EmployeeStatsEntity,
+  PaginatedEmployeesEntity,
+  UpdateEmployeeEntity,
+} from "@/src/domain/entities/shop/backend/backend-employee.entity";
+import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 
 /**
  * Employee repository error types
  */
 export enum ShopBackendEmployeeErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -22,10 +28,10 @@ export class ShopBackendEmployeeError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendEmployeeError';
+    this.name = "ShopBackendEmployeeError";
   }
 }
 
@@ -40,25 +46,28 @@ export interface ShopBackendEmployeeRepository {
    * @returns Paginated employees data
    * @throws ShopBackendEmployeeError if the operation fails
    */
-  getPaginatedEmployees(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      departmentFilter?: string;
-      positionFilter?: string;
-      statusFilter?: string;
-      dateFrom?: string;
-      dateTo?: string;
-      minSalary?: number;
-      maxSalary?: number;
-    };
-  }): Promise<PaginatedEmployeesEntity>;
+  getPaginatedEmployees(
+    params: PaginationParams & {
+      filters?: {
+        shopId?: string;
+        searchQuery?: string;
+        departmentFilter?: string;
+        positionFilter?: string;
+        statusFilter?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        minSalary?: number;
+        maxSalary?: number;
+      };
+    }
+  ): Promise<PaginatedEmployeesEntity>;
 
   /**
    * Get employee statistics
    * @returns Employee statistics data
    * @throws ShopBackendEmployeeError if the operation fails
    */
-  getEmployeeStats(): Promise<EmployeeStatsEntity>;
+  getEmployeeStats(shopId: string): Promise<EmployeeStatsEntity>;
 
   /**
    * Get employee by ID
@@ -74,7 +83,9 @@ export interface ShopBackendEmployeeRepository {
    * @returns Created employee entity
    * @throws ShopBackendEmployeeError if the operation fails
    */
-  createEmployee(employee: Omit<CreateEmployeeEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<EmployeeEntity>;
+  createEmployee(
+    employee: Omit<CreateEmployeeEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<EmployeeEntity>;
 
   /**
    * Update an existing employee
@@ -83,7 +94,12 @@ export interface ShopBackendEmployeeRepository {
    * @returns Updated employee entity
    * @throws ShopBackendEmployeeError if the operation fails
    */
-  updateEmployee(id: string, employee: Partial<Omit<UpdateEmployeeEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<EmployeeEntity>;
+  updateEmployee(
+    id: string,
+    employee: Partial<
+      Omit<UpdateEmployeeEntity, "id" | "createdAt" | "updatedAt">
+    >
+  ): Promise<EmployeeEntity>;
 
   /**
    * Delete an employee

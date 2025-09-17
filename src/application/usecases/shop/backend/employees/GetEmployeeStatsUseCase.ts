@@ -1,17 +1,22 @@
-import { EmployeeStatsDTO } from '@/src/application/dtos/shop/backend/employees-dto';
-import { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { EmployeeMapper } from '@/src/application/mappers/shop/backend/employee-mapper';
-import type { ShopBackendEmployeeRepository } from '@/src/domain/repositories/shop/backend/backend-employee-repository';
-import { ShopBackendEmployeeError, ShopBackendEmployeeErrorType } from '@/src/domain/repositories/shop/backend/backend-employee-repository';
+import { EmployeeStatsDTO } from "@/src/application/dtos/shop/backend/employees-dto";
+import { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import { EmployeeMapper } from "@/src/application/mappers/shop/backend/employee-mapper";
+import type { ShopBackendEmployeeRepository } from "@/src/domain/repositories/shop/backend/backend-employee-repository";
+import {
+  ShopBackendEmployeeError,
+  ShopBackendEmployeeErrorType,
+} from "@/src/domain/repositories/shop/backend/backend-employee-repository";
 
-export class GetEmployeeStatsUseCase implements IUseCase<void, EmployeeStatsDTO> {
+export class GetEmployeeStatsUseCase
+  implements IUseCase<string, EmployeeStatsDTO>
+{
   constructor(
     private readonly employeeRepository: ShopBackendEmployeeRepository
-  ) { }
+  ) {}
 
-  async execute(): Promise<EmployeeStatsDTO> {
+  async execute(shopId: string): Promise<EmployeeStatsDTO> {
     try {
-      const stats = await this.employeeRepository.getEmployeeStats();
+      const stats = await this.employeeRepository.getEmployeeStats(shopId);
       return EmployeeMapper.statsToDTO(stats);
     } catch (error) {
       if (error instanceof ShopBackendEmployeeError) {
@@ -20,8 +25,8 @@ export class GetEmployeeStatsUseCase implements IUseCase<void, EmployeeStatsDTO>
 
       throw new ShopBackendEmployeeError(
         ShopBackendEmployeeErrorType.UNKNOWN,
-        'Failed to get employee statistics',
-        'GetEmployeeStatsUseCase.execute',
+        "Failed to get employee statistics",
+        "GetEmployeeStatsUseCase.execute",
         {},
         error
       );
