@@ -3,6 +3,7 @@ import { IAuthService } from '@/src/application/interfaces/auth-service.interfac
 import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
 import { IShopService } from '@/src/application/services/shop/ShopService';
 import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
+import type { IShopBackendDashboardService } from '@/src/application/services/shop/backend/BackendDashboardService';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
@@ -55,13 +56,19 @@ export interface BackendDashboardViewModel {
 
 // Main Presenter class
 export class BackendDashboardPresenter extends BaseShopBackendPresenter {
+  private readonly dashboardService: IShopBackendDashboardService;
+
   constructor(
     logger: Logger,
     shopService: IShopService,
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    dashboardService: IShopBackendDashboardService
+  ) { 
+    super(logger, shopService, authService, profileService, subscriptionService);
+    this.dashboardService = dashboardService;
+  }
 
   async getViewModel(shopId: string): Promise<BackendDashboardViewModel> {
     try {
@@ -81,10 +88,16 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
       const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
       const usage = await this.getUsageStats(profile.id);
 
-      // Mock data - replace with actual service calls
-      const queueStats = this.getQueueStats();
-      const revenueStats = this.getRevenueStats();
-      const employeeStats = this.getEmployeeStats();
+      // Get data from dashboard service
+      const [queueStats, revenueStats, employeeStats, shopName] = await Promise.all([
+        this.dashboardService.getQueueStats(shopId),
+        this.dashboardService.getRevenueStats(shopId),
+        this.dashboardService.getEmployeeStats(shopId),
+        this.dashboardService.getShopName(shopId)
+      ]);
+
+      // Note: recentActivities is not available in the current dashboard service
+      // We'll use the mock data for now until the service is updated
       const recentActivities = this.getRecentActivities();
 
       return {
@@ -92,7 +105,7 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
         revenueStats,
         employeeStats,
         recentActivities,
-        shopName: 'ร้านกาแฟดีใจ',
+        shopName,
         currentTime: new Date().toLocaleString('th-TH'),
         subscription: {
           limits,
@@ -109,29 +122,30 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
   }
 
   // Private methods for data preparation
+  // Note: These methods are kept for backward compatibility and fallback
   private getQueueStats(): QueueStats {
     return {
-      waiting: 12,
-      serving: 3,
-      completed: 45,
-      cancelled: 2,
+      waiting: 0,
+      serving: 0,
+      completed: 0,
+      cancelled: 0,
     };
   }
 
   private getRevenueStats(): RevenueStats {
     return {
-      today: 15420,
-      thisWeek: 89350,
-      thisMonth: 342150,
-      growth: 12.5,
+      today: 0,
+      thisWeek: 0,
+      thisMonth: 0,
+      growth: 0,
     };
   }
 
   private getEmployeeStats(): EmployeeStats {
     return {
-      total: 8,
-      online: 5,
-      serving: 3,
+      total: 0,
+      online: 0,
+      serving: 0,
     };
   }
 
@@ -188,7 +202,8 @@ export class BackendDashboardPresenterFactory {
     const authService = serverContainer.resolve<IAuthService>('AuthService');
     const profileService = serverContainer.resolve<IProfileService>('ProfileService');
     const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService);
+    const dashboardService = serverContainer.resolve<IShopBackendDashboardService>('ShopBackendDashboardService');
+    return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService, dashboardService);
   }
 }
 
@@ -202,6 +217,7 @@ export class ClientBackendDashboardPresenterFactory {
     const authService = clientContainer.resolve<IAuthService>('AuthService');
     const profileService = clientContainer.resolve<IProfileService>('ProfileService');
     const shopService = clientContainer.resolve<IShopService>('ShopService');
-    return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService);
+    const dashboardService = clientContainer.resolve<IShopBackendDashboardService>('ShopBackendDashboardService');
+    return new BackendDashboardPresenter(logger, shopService, authService, profileService, subscriptionService, dashboardService);
   }
 }

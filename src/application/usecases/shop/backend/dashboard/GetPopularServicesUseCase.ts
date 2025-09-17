@@ -3,7 +3,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import type { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/backend/backend-dashboard-repository';
 
 export interface IGetPopularServicesUseCase {
-  execute(): Promise<PopularServicesDTO[]>;
+  execute(shopId: string): Promise<PopularServicesDTO[]>;
 }
 
 export class GetPopularServicesUseCase implements IGetPopularServicesUseCase {
@@ -12,12 +12,12 @@ export class GetPopularServicesUseCase implements IGetPopularServicesUseCase {
     private readonly logger: Logger
   ) { }
 
-  async execute(): Promise<PopularServicesDTO[]> {
+  async execute(shopId: string): Promise<PopularServicesDTO[]> {
     try {
-      this.logger.info('GetPopularServicesUseCase: Executing popular services retrieval');
+      this.logger.info('GetPopularServicesUseCase: Executing popular services retrieval', { shopId });
 
       // Get popular services from repository
-      const popularServices = await this.dashboardRepository.getPopularServices();
+      const popularServices = await this.dashboardRepository.getPopularServices(shopId);
 
       // Map domain entities to DTOs
       const services: PopularServicesDTO[] = popularServices.map(service => ({
@@ -28,7 +28,7 @@ export class GetPopularServicesUseCase implements IGetPopularServicesUseCase {
         category: service.category
       }));
 
-      this.logger.info('GetPopularServicesUseCase: Successfully retrieved popular services');
+      this.logger.info('GetPopularServicesUseCase: Successfully retrieved popular services', { shopId });
       return services;
     } catch (error) {
       this.logger.error('GetPopularServicesUseCase: Error retrieving popular services', error);

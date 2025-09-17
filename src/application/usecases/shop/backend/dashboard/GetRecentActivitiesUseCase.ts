@@ -3,7 +3,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import type { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/backend/backend-dashboard-repository';
 
 export interface IGetRecentActivitiesUseCase {
-  execute(): Promise<RecentActivityDTO[]>;
+  execute(shopId: string): Promise<RecentActivityDTO[]>;
 }
 
 export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
@@ -12,12 +12,12 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
     private readonly logger: Logger
   ) { }
 
-  async execute(): Promise<RecentActivityDTO[]> {
+  async execute(shopId: string): Promise<RecentActivityDTO[]> {
     try {
-      this.logger.info('GetRecentActivitiesUseCase: Executing recent activities retrieval');
+      this.logger.info('GetRecentActivitiesUseCase: Executing recent activities retrieval', { shopId });
 
       // Get recent activities from repository
-      const recentActivities = await this.dashboardRepository.getRecentActivities();
+      const recentActivities = await this.dashboardRepository.getRecentActivities(shopId);
 
       // Map domain entities to DTOs
       const activities: RecentActivityDTO[] = recentActivities.map(activity => ({
@@ -29,7 +29,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         metadata: activity.metadata
       }));
 
-      this.logger.info('GetRecentActivitiesUseCase: Successfully retrieved recent activities');
+      this.logger.info('GetRecentActivitiesUseCase: Successfully retrieved recent activities', { shopId });
       return activities;
     } catch (error) {
       this.logger.error('GetRecentActivitiesUseCase: Error retrieving recent activities', error);

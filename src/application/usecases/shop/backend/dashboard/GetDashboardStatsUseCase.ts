@@ -3,7 +3,7 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import type { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/backend/backend-dashboard-repository';
 
 export interface IGetDashboardStatsUseCase {
-  execute(): Promise<DashboardStatsDTO>;
+  execute(shopId: string): Promise<DashboardStatsDTO>;
 }
 
 export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
@@ -12,12 +12,12 @@ export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
     private readonly logger: Logger
   ) { }
 
-  async execute(): Promise<DashboardStatsDTO> {
+  async execute(shopId: string): Promise<DashboardStatsDTO> {
     try {
-      this.logger.info('GetDashboardStatsUseCase: Executing dashboard stats retrieval');
+      this.logger.info('GetDashboardStatsUseCase: Executing dashboard stats retrieval', { shopId });
 
       // Get dashboard stats from repository
-      const dashboardStats = await this.dashboardRepository.getDashboardStats();
+      const dashboardStats = await this.dashboardRepository.getDashboardStats(shopId);
 
       // Map domain entity to DTO
       const stats: DashboardStatsDTO = {
@@ -31,7 +31,7 @@ export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
         averageWaitTime: dashboardStats.averageWaitTime
       };
 
-      this.logger.info('GetDashboardStatsUseCase: Successfully retrieved dashboard stats');
+      this.logger.info('GetDashboardStatsUseCase: Successfully retrieved dashboard stats', { shopId });
       return stats;
     } catch (error) {
       this.logger.error('GetDashboardStatsUseCase: Error retrieving dashboard stats', error);

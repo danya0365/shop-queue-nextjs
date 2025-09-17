@@ -38,27 +38,73 @@ export class ShopBackendDashboardError extends Error {
 export interface ShopBackendDashboardRepository {
   /**
    * Get dashboard statistics
+   * @param shopId The shop ID
    * @returns Dashboard statistics entity
    */
-  getDashboardStats(): Promise<DashboardStatsEntity>;
+  getDashboardStats(shopId: string): Promise<DashboardStatsEntity>;
 
   /**
    * Get queue status distribution
+   * @param shopId The shop ID
    * @returns Queue status distribution entity
    */
-  getQueueDistribution(): Promise<QueueStatusDistributionEntity>;
+  getQueueDistribution(shopId: string): Promise<QueueStatusDistributionEntity>;
 
   /**
    * Get popular services
+   * @param shopId The shop ID
    * @param limit Number of services to return
    * @returns Array of popular service entities
    */
-  getPopularServices(limit?: number): Promise<PopularServiceEntity[]>;
+  getPopularServices(shopId: string, limit?: number): Promise<PopularServiceEntity[]>;
 
   /**
    * Get recent activities
+   * @param shopId The shop ID
    * @param limit Number of activities to return
    * @returns Array of recent activity entities
    */
-  getRecentActivities(limit?: number): Promise<RecentActivityEntity[]>;
+  getRecentActivities(shopId: string, limit?: number): Promise<RecentActivityEntity[]>;
+
+  /**
+   * Get queue statistics
+   * @param shopId The shop ID
+   * @returns Queue statistics
+   */
+  getQueueStats(shopId: string): Promise<{
+    waiting: number;
+    serving: number;
+    completed: number;
+    cancelled: number;
+  }>;
+
+  /**
+   * Get revenue statistics
+   * @param shopId The shop ID
+   * @returns Revenue statistics
+   */
+  getRevenueStats(shopId: string): Promise<{
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+    growth: number;
+  }>;
+
+  /**
+   * Get employee statistics
+   * @param shopId The shop ID
+   * @returns Employee statistics
+   */
+  getEmployeeStats(shopId: string): Promise<{
+    total: number;
+    online: number;
+    serving: number;
+  }>;
+
+  /**
+   * Get shop name
+   * @param shopId The shop ID
+   * @returns Shop name
+   */
+  getShopName(shopId: string): Promise<string>;
 }

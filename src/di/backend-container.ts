@@ -4,6 +4,7 @@ import { BackendEmployeesServiceFactory } from "@/src/application/services/backe
 import { BackendAuthUsersServiceFactory } from "../application/services/backend/BackendAuthUsersService";
 import { BackendCategoriesServiceFactory } from "../application/services/backend/BackendCategoriesService";
 import { BackendCustomersServiceFactory } from "../application/services/backend/BackendCustomersService";
+import { BackendDashboardServiceFactory } from "../application/services/backend/BackendDashboardService";
 import { BackendDepartmentsServiceFactory } from "../application/services/backend/BackendDepartmentsService";
 import { BackendPaymentsServiceFactory } from "../application/services/backend/BackendPaymentsService";
 import { BackendProfilesServiceFactory } from "../application/services/backend/BackendProfilesService";
@@ -13,7 +14,6 @@ import { BackendRewardsServiceFactory } from "../application/services/backend/Ba
 import { BackendServicesServiceFactory } from "../application/services/backend/BackendServicesService";
 import { BackendShopsServiceFactory } from "../application/services/backend/BackendShopsService";
 import { SubscriptionBackendSubscriptionServiceFactory } from "../application/services/backend/BackendSubscriptionService";
-import { ShopBackendDashboardServiceFactory } from "../application/services/shop/backend/BackendDashboardService";
 import { Logger } from "../domain/interfaces/logger";
 import { createBackendSupabaseClient } from "../infrastructure/config/supabase-backend-client";
 import {
@@ -139,7 +139,7 @@ export async function createBackendContainer(): Promise<Container> {
     );
 
     // Create service instances
-    const backendDashboardService = ShopBackendDashboardServiceFactory.create(
+    const backendDashboardService = BackendDashboardServiceFactory.create(
       dashboardRepository,
       logger
     );
