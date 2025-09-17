@@ -19,16 +19,12 @@ import {
 } from "@/src/domain/repositories/shop/backend/backend-customer-repository";
 import { SupabaseShopBackendCustomerMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-customer.mapper";
 import {
-  CustomerPointsSchema,
   CustomerSchema,
   CustomerStatsSchema,
+  CustomerWithJoinedSchema,
 } from "@/src/infrastructure/schemas/shop/backend/customer.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
-// Extended types for joined data
-type CustomerWithJoinedData = CustomerSchema & {
-  customer_points?: CustomerPointsSchema;
-};
 type CustomerSchemaRecord = Record<string, unknown> & CustomerSchema;
 type CustomerStatsSchemaRecord = Record<string, unknown> & CustomerStatsSchema;
 
@@ -134,24 +130,20 @@ export class SupabaseShopBackendCustomerRepository
       );
 
       // Count total items
-      const totalItems = await this.dataSource.count("customers");
+      const totalItems = await this.dataSource.count("customers", {
+        filters: queryFilters.length > 0 ? queryFilters : undefined,
+      });
 
       // Map database results to domain entities
       const mappedCustomers = customers.map((customer) => {
         // Handle joined data using our CustomerWithJoinedData type
-        const customerWithJoinedData = customer as CustomerWithJoinedData;
-
-        const membershipTier = (customerWithJoinedData.customer_points
-          ?.membership_tier || "regular") as MembershipTier;
+        const customerWithJoinedData = customer as CustomerWithJoinedSchema;
 
         const total_queues = 0;
 
         const customerWithJoinedFields = {
-          ...customer,
+          ...customerWithJoinedData,
           total_queues: total_queues,
-          total_points:
-            customerWithJoinedData.customer_points?.current_points || 0,
-          membership_tier: membershipTier,
         };
         return SupabaseShopBackendCustomerMapper.toDomain(
           customerWithJoinedFields
@@ -318,7 +310,7 @@ export class SupabaseShopBackendCustomerRepository
       }
 
       // Handle joined data using our CustomerWithJoinedData type
-      const customerWithJoinedData = customer as CustomerWithJoinedData;
+      const customerWithJoinedData = customer as CustomerWithJoinedSchema;
 
       const membershipTier = (customerWithJoinedData.customer_points
         ?.membership_tier || "regular") as MembershipTier;

@@ -5,8 +5,8 @@ import {
 } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 import { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
 import {
-  CustomerSchema,
   CustomerStatsSchema,
+  CustomerWithJoinedSchema,
 } from "@/src/infrastructure/schemas/shop/backend/customer.schema";
 
 /**
@@ -19,7 +19,7 @@ export class SupabaseShopBackendCustomerMapper {
    * @param schema Customer database schema
    * @returns Customer domain entity
    */
-  public static toDomain(schema: CustomerSchema): CustomerEntity {
+  public static toDomain(schema: CustomerWithJoinedSchema): CustomerEntity {
     return {
       shopId: schema.shop_id,
       profileId: schema.profile_id,
@@ -28,17 +28,18 @@ export class SupabaseShopBackendCustomerMapper {
       phone: schema.phone,
       email: schema.email,
       dateOfBirth: schema.date_of_birth,
-      gender: schema.gender,
+      gender: schema.gender as CustomerEntity["gender"],
       address: schema.address,
       totalQueues: schema.total_queues || 0,
-      totalPoints: schema.total_points || 0,
+      totalPoints: schema.customer_points?.current_points || 0,
       membershipTier:
-        (schema.membership_tier as MembershipTier) || MembershipTier.REGULAR,
+        (schema.customer_points?.membership_tier as MembershipTier) ||
+        MembershipTier.REGULAR,
       lastVisit: schema.last_visit || null,
       notes: schema.notes,
-      isActive: schema.is_active,
-      createdAt: schema.created_at,
-      updatedAt: schema.updated_at,
+      isActive: schema.is_active || true,
+      createdAt: schema.created_at || "",
+      updatedAt: schema.updated_at || "",
     };
   }
 
@@ -47,7 +48,7 @@ export class SupabaseShopBackendCustomerMapper {
    * @param entity Customer domain entity
    * @returns Customer database schema
    */
-  public static toSchema(entity: CustomerEntity): CustomerSchema {
+  public static toSchema(entity: CustomerEntity): CustomerWithJoinedSchema {
     return {
       shop_id: entity.shopId,
       profile_id: entity.profileId,
@@ -60,8 +61,9 @@ export class SupabaseShopBackendCustomerMapper {
       address: entity.address,
       notes: entity.notes,
       is_active: entity.isActive,
-      created_at: entity.createdAt,
-      updated_at: entity.updatedAt,
+      last_visit: entity.lastVisit || "",
+      created_at: entity.createdAt || "",
+      updated_at: entity.updatedAt || "",
     };
   }
 
@@ -74,14 +76,14 @@ export class SupabaseShopBackendCustomerMapper {
     schema: CustomerStatsSchema
   ): CustomerStatsEntity {
     return {
-      totalCustomers: schema.total_customers,
-      totalRegisteredCustomers: schema.total_registered_customers,
-      newCustomersThisMonth: schema.new_customers_this_month,
-      activeCustomersToday: schema.active_customers_today,
-      goldMembers: schema.gold_members,
-      silverMembers: schema.silver_members,
-      bronzeMembers: schema.bronze_members,
-      regularMembers: schema.regular_members,
+      totalCustomers: schema.total_customers || 0,
+      totalRegisteredCustomers: schema.total_registered_customers || 0,
+      newCustomersThisMonth: schema.new_customers_this_month || 0,
+      activeCustomersToday: schema.active_customers_today || 0,
+      goldMembers: schema.gold_members || 0,
+      silverMembers: schema.silver_members || 0,
+      bronzeMembers: schema.bronze_members || 0,
+      regularMembers: schema.regular_members || 0,
     };
   }
 

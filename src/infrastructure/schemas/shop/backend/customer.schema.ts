@@ -9,6 +9,11 @@ import { Database } from "@/src/domain/types/supabase";
  * Customer database schema
  */
 export type CustomerSchema = Database["public"]["Tables"]["customers"]["Row"];
+export type CustomerWithJoinedSchema = CustomerSchema & {
+  customer_points?: CustomerPointsSchema;
+  queues?: QueueSchema[];
+  total_queues?: number;
+};
 export type CustomerPointsSchema =
   Database["public"]["Tables"]["customer_points"]["Row"];
 export type QueueSchema = Database["public"]["Tables"]["queues"]["Row"];
@@ -17,4 +22,4 @@ export type QueueSchema = Database["public"]["Tables"]["queues"]["Row"];
  * Customer stats database schema
  */
 export type CustomerStatsSchema =
-  Database["public"]["Views"]["customer_stats_view"]["Row"];
+  Database["public"]["Views"]["customer_stats_by_shop_view"]["Row"];
