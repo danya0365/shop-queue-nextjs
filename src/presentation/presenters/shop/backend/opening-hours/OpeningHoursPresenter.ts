@@ -6,7 +6,7 @@ import {
 } from "@/src/application/dtos/shop/backend/opening-hour-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import type { IShopBackendOpeningHoursService } from "@/src/application/services/shop/backend/opening-hours-backend-service";
+import type { IShopBackendOpeningHoursService } from "@/src/application/services/shop/backend/BackendOpeningHoursService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";

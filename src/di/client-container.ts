@@ -5,6 +5,8 @@ import { AuthorizationService } from "../application/services/authorization.serv
 import { CategoryServiceFactory } from "../application/services/category-service";
 import { ProfileService } from "../application/services/profile-service";
 import { ShopBackendCustomersServiceFactory } from "../application/services/shop/backend/BackendCustomersService";
+import { ShopBackendEmployeesServiceFactory } from "../application/services/shop/backend/BackendEmployeesService";
+import { OpeningHoursBackendServiceFactory } from "../application/services/shop/backend/BackendOpeningHoursService";
 import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/backend/BackendPaymentsService";
 import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
 import { ShopBackendQueuesServiceFactory } from "../application/services/shop/backend/BackendQueuesService";
@@ -13,10 +15,8 @@ import { ShopBackendShopSettingsServiceFactory } from "../application/services/s
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
 import { CustomerPointsBackendService } from "../application/services/shop/backend/customer-points-backend-service";
 import { CustomerPointsTransactionBackendService } from "../application/services/shop/backend/customer-points-transactions-backend-service";
-import { CustomersBackendService } from "../application/services/shop/backend/customers-backend-service";
 import { DepartmentsBackendService } from "../application/services/shop/backend/departments-backend-service";
 import { NotificationSettingsBackendService } from "../application/services/shop/backend/notification-settings-backend-service";
-import { OpeningHoursBackendServiceFactory } from "../application/services/shop/backend/opening-hours-backend-service";
 import { PaymentItemsBackendService } from "../application/services/shop/backend/payment-items-backend-service";
 import { PaymentsBackendService } from "../application/services/shop/backend/payments-backend-service";
 import { PosterTemplateBackendService } from "../application/services/shop/backend/poster-templates-backend-service";
@@ -36,6 +36,7 @@ import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-re
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendCustomerRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-customer-repository";
+import { SupabaseShopBackendEmployeeRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-employee-repository";
 import { SupabaseBackendOpeningHoursRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-opening-hours-repository";
 import { SupabaseShopBackendPaymentRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-payment-repository";
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
@@ -97,6 +98,8 @@ export function createClientContainer(): Container {
       new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
     const shopBackendCustomerRepository =
       new SupabaseShopBackendCustomerRepository(databaseDatasource, logger);
+    const shopBackendEmployeeRepository =
+      new SupabaseShopBackendEmployeeRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -140,7 +143,6 @@ export function createClientContainer(): Container {
     const posterTemplateBackendService = new PosterTemplateBackendService(
       logger
     );
-    const customersBackendService = new CustomersBackendService(logger);
     const departmentsBackendService = new DepartmentsBackendService(logger);
     const paymentsBackendService = new PaymentsBackendService(logger);
     const rewardsBackendService = new RewardsBackendService(logger);
@@ -192,6 +194,11 @@ export function createClientContainer(): Container {
         shopBackendCustomerRepository,
         logger
       );
+    const shopBackendEmployeesService =
+      ShopBackendEmployeesServiceFactory.create(
+        shopBackendEmployeeRepository,
+        logger
+      );
 
     // Register services in the container
     container.registerInstance("AuthService", authService);
@@ -234,14 +241,13 @@ export function createClientContainer(): Container {
       "ShopBackendCustomersService",
       shopBackendCustomersService
     );
-
+    container.registerInstance(
+      "ShopBackendEmployeesService",
+      shopBackendEmployeesService
+    );
     container.registerInstance(
       "PosterTemplateBackendService",
       posterTemplateBackendService
-    );
-    container.registerInstance(
-      "CustomersBackendService",
-      customersBackendService
     );
     container.registerInstance(
       "DepartmentsBackendService",
