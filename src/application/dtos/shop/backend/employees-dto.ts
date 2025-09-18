@@ -41,6 +41,7 @@ export interface CreateEmployeeParams {
   permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
+  profileId: string; // Added for profile association
 }
 
 export interface UpdateEmployeeParams {

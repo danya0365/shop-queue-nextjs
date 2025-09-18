@@ -3,10 +3,16 @@
 import type { CreateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
 import { EmployeeStatus } from "@/src/application/dtos/shop/backend/employees-dto";
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
+import { ProfileSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/ProfileSelectionDropdown";
 import {
   useDepartments,
   type Department,
 } from "@/src/presentation/hooks/shop/backend/useDepartments";
+import {
+  useProfiles,
+  type Profile,
+} from "@/src/presentation/hooks/shop/backend/useProfiles";
+import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useState } from "react";
 
 interface CreateEmployeeModalProps {
@@ -34,15 +40,24 @@ export function CreateEmployeeModal({
     salary: 0,
     status: EmployeeStatus.ACTIVE,
     hireDate: "",
+    profileId: "", // Added profileId field
+  });
+  const [formDataProfile, setFormDataProfile] = useState({
+    name: "",
+    username: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedDepartment, setSelectedDepartment] =
     useState<Department | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [showCreateDepartmentForm, setShowCreateDepartmentForm] =
     useState(false);
+  const [showCreateProfileForm, setShowCreateProfileForm] = useState(false);
 
   const { createDepartment } = useDepartments(shopId);
+  const { authAccount } = useAuthStore();
+  const { createProfile } = useProfiles();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -68,6 +83,11 @@ export function CreateEmployeeModal({
 
     if (!formData.departmentId.trim() && !showCreateDepartmentForm) {
       newErrors.department = "กรุณาเลือกแผนกหรือสร้างแผนกใหม่";
+    }
+
+    // Validate profile selection
+    if (!formData.profileId && !showCreateProfileForm) {
+      newErrors.profile = "กรุณาเลือกโปรไฟล์หรือสร้างโปรไฟล์ใหม่";
     }
 
     if (!formData.position.trim()) {
@@ -100,6 +120,7 @@ export function CreateEmployeeModal({
           salary: formData.salary,
           status: formData.status,
           hireDate: formData.hireDate,
+          profileId: formData.profileId, // Added profileId
         });
         onClose();
       } catch (error) {
@@ -123,12 +144,39 @@ export function CreateEmployeeModal({
     }
   };
 
+  const handleProfileSelect = (profile: Profile) => {
+    setSelectedProfile(profile);
+    setFormData((prev) => ({
+      ...prev,
+      profileId: profile.id,
+      // Optionally pre-fill some fields from profile
+      name: profile.name,
+      email: profile.username.includes("@") ? profile.username : "",
+    }));
+    // Clear profile-related errors
+    if (errors.profile) {
+      setErrors((prev) => ({
+        ...prev,
+        profile: "",
+      }));
+    }
+  };
+
   const handleCreateNewDepartment = () => {
     setShowCreateDepartmentForm(true);
     setSelectedDepartment(null);
     setFormData((prev) => ({
       ...prev,
       departmentId: "",
+    }));
+  };
+
+  const handleCreateNewProfile = () => {
+    setShowCreateProfileForm(true);
+    setSelectedProfile(null);
+    setFormData((prev) => ({
+      ...prev,
+      profileId: "",
     }));
   };
 
@@ -168,8 +216,70 @@ export function CreateEmployeeModal({
     }
   };
 
+  const handleCreateProfile = async () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!authAccount) {
+      newErrors.profile = "กรุณาเข้าสู่ระบบ";
+      setErrors(newErrors);
+      return;
+    }
+
+    // Validate profile form
+    if (!formDataProfile.name.trim()) {
+      newErrors.profileName = "กรุณากรอกชื่อโปรไฟล์";
+      setErrors(newErrors);
+      return;
+    }
+
+    if (!formDataProfile.username.trim()) {
+      newErrors.profileUsername = "กรุณากรอกชื่อผู้ใช้";
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      const newProfile = await createProfile({
+        authId: authAccount.id,
+        name: formDataProfile.name,
+        username: formDataProfile.username,
+        bio: undefined,
+        avatarUrl: undefined,
+        isActive: true,
+      });
+
+      setSelectedProfile(newProfile);
+      setShowCreateProfileForm(false);
+      setFormData((prev) => ({
+        ...prev,
+        profileId: newProfile.id,
+      }));
+
+      // Clear profile-related errors
+      if (errors.profile || errors.profileName || errors.profileUsername) {
+        setErrors((prev) => ({
+          ...prev,
+          profile: "",
+          profileName: "",
+          profileUsername: "",
+        }));
+      }
+    } catch (error) {
+      console.error("Error creating profile:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างโปรไฟล์ใหม่");
+    }
+  };
+
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleInputChangeProfile = (field: string, value: string | number) => {
+    setFormDataProfile((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -183,6 +293,114 @@ export function CreateEmployeeModal({
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             เพิ่มพนักงานใหม่
           </h3>
+
+          {/* Profile */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              โปรไฟล์ <span className="text-red-500">*</span>
+            </label>
+            {!showCreateProfileForm ? (
+              <div>
+                <ProfileSelectionDropdown
+                  selectedProfile={selectedProfile}
+                  onProfileSelect={handleProfileSelect}
+                  onCreateNewProfile={handleCreateNewProfile}
+                  placeholder="เลือกโปรไฟล์..."
+                  disabled={loading}
+                />
+                {errors.profile && (
+                  <p className="text-sm text-red-500 mt-2">{errors.profile}</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    สร้างโปรไฟล์ใหม่
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateProfileForm(false)}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    disabled={loading}
+                  >
+                    ← เลือกโปรไฟล์ที่มีอยู่แล้ว
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      ชื่อโปรไฟล์ <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formDataProfile.name}
+                      onChange={(e) =>
+                        handleInputChangeProfile("name", e.target.value)
+                      }
+                      placeholder="กรอกชื่อ"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.profileName
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                      disabled={loading}
+                    />
+                    {errors.profileName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.profileName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      ชื่อผู้ใช้ <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={formDataProfile.username}
+                      onChange={(e) =>
+                        handleInputChangeProfile("username", e.target.value)
+                      }
+                      placeholder="example@email.com"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.profileUsername
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                      disabled={loading}
+                    />
+                    {errors.profileUsername && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.profileUsername}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateProfileForm(false)}
+                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                    disabled={loading}
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateProfile}
+                    disabled={loading}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    สร้างโปรไฟล์
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
@@ -214,7 +432,9 @@ export function CreateEmployeeModal({
               <input
                 type="text"
                 value={formData.employeeCode}
-                onChange={(e) => handleInputChange("employeeCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("employeeCode", e.target.value)
+                }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   errors.employeeCode
                     ? "border-red-500"
@@ -223,7 +443,9 @@ export function CreateEmployeeModal({
                 placeholder="กรอกรหัสพนักงาน"
               />
               {errors.employeeCode && (
-                <p className="text-red-500 text-sm mt-1">{errors.employeeCode}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.employeeCode}
+                </p>
               )}
             </div>
 
