@@ -1,13 +1,38 @@
 import { ActivityType } from "@/src/domain/entities/backend/backend-dashboard.entity";
 
 export interface ShopDashboardStatsDTO {
+  shopId: string | null;
+  shopName: string | null;
+  shopSlug: string | null;
+  shopStatus: string | null;
   totalQueues: number;
   totalCustomers: number;
   totalEmployees: number;
-  activeQueues: number;
-  completedQueuesToday: number;
+  totalServices: number;
   totalRevenue: number;
+  totalReviews: number;
+  totalPointsEarned: number;
+  totalPointsRedeemed: number;
+  activeCustomers: number;
+  activeEmployees: number;
+  activeQueues: number;
+  activePromotions: number;
+  activeRewards: number;
+  availableServices: number;
+  employeesOnDuty: number;
+  waitingQueues: number;
+  servingQueues: number;
+  completedQueuesToday: number;
+  customersVisitedToday: number;
+  revenueToday: number;
+  promotionsUsedToday: number;
+  rewardUsagesToday: number;
+  paidPayments: number;
+  pendingPayments: number;
+  averageRating: number;
   averageWaitTime: number;
+  averageServiceTime: number;
+  statsGeneratedAt: string | null;
 }
 
 export interface RecentActivityDTO {
