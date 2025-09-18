@@ -14,7 +14,7 @@ interface CreateEmployeeModalProps {
   onClose: () => void;
   onSubmit: (employeeData: CreateEmployeeParams) => Promise<void>;
   loading?: boolean;
-  shopId?: string;
+  shopId: string;
 }
 
 export function CreateEmployeeModal({
@@ -49,6 +49,10 @@ export function CreateEmployeeModal({
 
     if (!formData.name.trim()) {
       newErrors.name = "กรุณากรอกชื่อพนักงาน";
+    }
+
+    if (!formData.employeeCode.trim()) {
+      newErrors.employeeCode = "กรุณากรอกรหัสพนักงาน";
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -202,6 +206,27 @@ export function CreateEmployeeModal({
               )}
             </div>
 
+            {/* Employee Code */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                รหัสพนักงาน <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.employeeCode}
+                onChange={(e) => handleInputChange("employeeCode", e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                  errors.employeeCode
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                }`}
+                placeholder="กรอกรหัสพนักงาน"
+              />
+              {errors.employeeCode && (
+                <p className="text-red-500 text-sm mt-1">{errors.employeeCode}</p>
+              )}
+            </div>
+
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -252,7 +277,7 @@ export function CreateEmployeeModal({
               {!showCreateDepartmentForm ? (
                 <div>
                   <DepartmentSelectionDropdown
-                    shopId={shopId || ""}
+                    shopId={shopId}
                     selectedDepartment={selectedDepartment}
                     onDepartmentSelect={handleDepartmentSelect}
                     onCreateNewDepartment={handleCreateNewDepartment}

@@ -24,6 +24,7 @@ export function EditEmployeeModal({
   shopId,
 }: EditEmployeeModalProps) {
   const [formData, setFormData] = useState({
+    employeeCode: "",
     name: "",
     email: "",
     phone: "",
@@ -46,6 +47,7 @@ export function EditEmployeeModal({
   useEffect(() => {
     if (employee) {
       setFormData({
+        employeeCode: employee.employeeCode,
         name: employee.name,
         email: employee.email,
         phone: employee.phone,
@@ -79,6 +81,10 @@ export function EditEmployeeModal({
 
     if (!formData.name.trim()) {
       newErrors.name = "กรุณากรอกชื่อพนักงาน";
+    }
+
+    if (!formData.employeeCode.trim()) {
+      newErrors.employeeCode = "กรุณากรอกรหัสพนักงาน";
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -223,6 +229,27 @@ export function EditEmployeeModal({
               />
               {errors.name && (
                 <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+
+            {/* Employee Code */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                รหัสพนักงาน <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.employeeCode}
+                onChange={(e) => handleInputChange("employeeCode", e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                  errors.employeeCode
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                }`}
+                placeholder="กรอกรหัสพนักงาน"
+              />
+              {errors.employeeCode && (
+                <p className="text-red-500 text-sm mt-1">{errors.employeeCode}</p>
               )}
             </div>
 

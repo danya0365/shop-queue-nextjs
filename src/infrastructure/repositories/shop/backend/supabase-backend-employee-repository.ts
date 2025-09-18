@@ -102,7 +102,7 @@ export class SupabaseShopBackendEmployeeRepository
 
       if (filters?.positionFilter) {
         queryFilters.push({
-          field: "position",
+          field: "position_text",
           operator: FilterOperator.ILIKE,
           value: `%${filters.positionFilter}%`,
         });
@@ -364,7 +364,7 @@ export class SupabaseShopBackendEmployeeRepository
         email: employee.email,
         phone: employee.phone,
         department_id: employee.departmentId,
-        position: employee.position,
+        position_text: employee.position,
         shop_id: employee.shopId,
         status: employee.status,
         hire_date: employee.hireDate,

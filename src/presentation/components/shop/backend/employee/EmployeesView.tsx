@@ -311,6 +311,9 @@ export function EmployeesView({
                   พนักงาน
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  รหัสพนักงาน
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   แผนก/ตำแหน่ง
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -349,6 +352,11 @@ export function EmployeesView({
                           {employee.email}
                         </div>
                       </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {employee.employeeCode}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -573,6 +581,7 @@ export function EmployeesView({
           onClose={closeAddModal}
           onSubmit={handleCreateEmployee}
           loading={actionLoading.create}
+          shopId={shopId}
         />
       )}
 

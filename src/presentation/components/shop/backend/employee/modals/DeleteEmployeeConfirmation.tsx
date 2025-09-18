@@ -71,6 +71,9 @@ export function DeleteEmployeeConfirmation({
                 <div className="text-sm font-medium text-gray-900 dark:text-white">
                   {employee.name}
                 </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  รหัสพนักงาน: {employee.employeeCode}
+                </div>
                 {employee.email && (
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {employee.email}

@@ -29,6 +29,7 @@ export interface EmployeeFilters {
 // Define interfaces for backward compatibility with View
 export interface Employee {
   id: string;
+  employeeCode: string;
   name: string;
   email: string;
   phone: string;
@@ -169,6 +170,7 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       // Transform EmployeeDTO to Employee interface for View compatibility
       const transformedEmployees: Employee[] = employees.map(emp => ({
         id: emp.id,
+        employeeCode: emp.employeeCode,
         name: emp.name,
         email: emp.email || '',
         phone: emp.phone || '',

@@ -126,6 +126,16 @@ export function ViewEmployeeDetails({
             </span>
           </div>
 
+          {/* Employee Code */}
+          <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              รหัสพนักงาน
+            </span>
+            <span className="text-sm text-gray-900 dark:text-white font-mono">
+              {employee.employeeCode}
+            </span>
+          </div>
+
           {/* Email */}
           {employee.email && (
             <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
