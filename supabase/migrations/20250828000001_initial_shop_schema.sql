@@ -1504,20 +1504,20 @@ CREATE POLICY "Everyone can view services"
   ON public.services FOR SELECT
   USING (true);
 
--- Only shop managers can create, update, or delete services
-CREATE POLICY "Only shop managers can create services"
+-- Only shop employees, managers and owners can create services
+CREATE POLICY "Only shop employees, managers and owners can create services"
   ON public.services FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Only shop managers can update services
-CREATE POLICY "Only shop managers can update services"
+-- Only shop employees, managers and owners can update services
+CREATE POLICY "Only shop employees, managers and owners can update services"
   ON public.services FOR UPDATE
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Only shop managers can delete services (emergency cleanup)
-CREATE POLICY "Shop managers can delete services"
+-- Only shop employees, managers and owners can delete services (emergency cleanup)
+CREATE POLICY "Only shop employees, managers and owners can delete services"
   ON public.services FOR DELETE
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR SERVICES
@@ -1662,14 +1662,20 @@ CREATE POLICY "Everyone can view departments"
   ON public.departments FOR SELECT
   USING (true);
 
--- Remove direct INSERT/UPDATE access - use API functions
-REVOKE INSERT, UPDATE ON TABLE public.departments FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.departments FROM anon;
+-- Only shop employees, managers and owners can create departments
+CREATE POLICY "Only shop employees, managers and owners can create departments"
+  ON public.departments FOR INSERT
+  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Only shop managers can delete departments (emergency cleanup)
-CREATE POLICY "Shop managers can delete departments"
+-- Only shop employees, managers and owners can update departments
+CREATE POLICY "Only shop employees, managers and owners can update departments"
+  ON public.departments FOR UPDATE
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+
+-- Only shop employees, managers and owners can delete departments
+CREATE POLICY "Only shop employees, managers and owners can delete departments"
   ON public.departments FOR DELETE
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR DEPARTMENTS
@@ -1776,19 +1782,25 @@ $$;
 -- EMPLOYEES TABLE RLS POLICIES
 -- =============================================================================
 
--- Shop managers can view their employees
-CREATE POLICY "Shop managers can view employees"
+-- Shop managers and owners can view their employees
+CREATE POLICY "Shop managers and owners can view employees"
   ON public.employees FOR SELECT
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Remove direct INSERT/UPDATE access - use API functions for sensitive data
-REVOKE INSERT, UPDATE ON TABLE public.employees FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.employees FROM anon;
+-- Only shop managers and owners can create employees
+CREATE POLICY "Only shop managers and owners can create employees"
+  ON public.employees FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
--- Only shop managers can delete employees (emergency cleanup)
-CREATE POLICY "Shop managers can delete employees"
+-- Only shop managers and owners can update employees
+CREATE POLICY "Only shop managers and owners can update employees"
+  ON public.employees FOR UPDATE
+  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+
+-- Only shop managers and owners can delete employees
+CREATE POLICY "Only shop managers and owners can delete employees"
   ON public.employees FOR DELETE
-  USING (public.is_shop_manager(shop_id));
+  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR EMPLOYEES
@@ -1992,24 +2004,36 @@ $$;
 -- PAYMENTS TABLE RLS POLICIES
 -- =============================================================================
 
--- Shop managers can view payments
-CREATE POLICY "Shop managers can view payments"
+-- Shop managers and owners can view payments
+CREATE POLICY "Shop managers and owners can view payments"
   ON public.payments FOR SELECT
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
--- Remove direct INSERT/UPDATE access - use API functions for financial data
-REVOKE INSERT, UPDATE ON TABLE public.payments FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.payments FROM anon;
+-- Shop managers and owners can insert payments
+CREATE POLICY "Shop managers and owners can insert payments"
+  ON public.payments FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  ));
 
--- Only shop managers can delete payments (emergency cleanup)
-CREATE POLICY "Shop managers can delete payments"
+-- Shop managers and owners can update payments
+CREATE POLICY "Shop managers and owners can update payments"
+  ON public.payments FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  ));
+
+-- Only shop managers and owners can delete payments (emergency cleanup)
+CREATE POLICY "Shop managers and owners can delete payments"
   ON public.payments FOR DELETE
   USING (EXISTS (
     SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND public.is_shop_manager(q.shop_id)
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   ));
 
 -- =============================================================================
@@ -2179,9 +2203,23 @@ CREATE POLICY "Shop managers can view payment items"
     WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
   ));
 
--- Remove direct INSERT/UPDATE access - payment items created through payment API functions
-REVOKE INSERT, UPDATE ON TABLE public.payment_items FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.payment_items FROM anon;
+-- Shop managers can insert payment items
+CREATE POLICY "Shop managers can insert payment items"
+  ON public.payment_items FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
+
+-- Shop managers can update payment items
+CREATE POLICY "Shop managers can update payment items"
+  ON public.payment_items FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
+  ));
 
 -- Only shop managers can delete payment items (emergency cleanup)
 CREATE POLICY "Shop managers can delete payment items"
@@ -2201,9 +2239,15 @@ CREATE POLICY "Everyone can view promotions"
   ON public.promotions FOR SELECT
   USING (true);
 
--- Remove direct INSERT/UPDATE access - use API functions
-REVOKE INSERT, UPDATE ON TABLE public.promotions FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.promotions FROM anon;
+-- Shop managers can insert promotions
+CREATE POLICY "Shop managers can insert promotions"
+  ON public.promotions FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update promotions
+CREATE POLICY "Shop managers can update promotions"
+  ON public.promotions FOR UPDATE
+  USING (public.is_shop_manager(shop_id));
 
 -- Only shop managers can delete promotions (emergency cleanup)
 CREATE POLICY "Shop managers can delete promotions"
@@ -2400,9 +2444,21 @@ CREATE POLICY "Everyone can view promotion services"
   ON public.promotion_services FOR SELECT
   USING (true);
 
--- Remove direct INSERT/UPDATE access - managed through promotion API functions
-REVOKE INSERT, UPDATE ON TABLE public.promotion_services FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.promotion_services FROM anon;
+-- Shop managers can insert promotion services
+CREATE POLICY "Shop managers can insert promotion services"
+  ON public.promotion_services FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
+
+-- Shop managers can update promotion services
+CREATE POLICY "Shop managers can update promotion services"
+  ON public.promotion_services FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
 
 -- Shop managers can delete promotion services
 CREATE POLICY "Shop managers can delete promotion services"
@@ -2424,10 +2480,13 @@ CREATE POLICY "Shop managers can view promotion usage logs"
     WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
   ));
 
--- Anyone can insert promotion usage logs (when using promotion)
-CREATE POLICY "Anyone can insert promotion usage logs"
+-- Shop managers can insert promotion usage logs
+CREATE POLICY "Shop managers can insert promotion usage logs"
   ON public.promotion_usage_logs FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.promotions p 
+    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
+  ));
 
 -- Shop managers can update promotion usage logs
 CREATE POLICY "Shop managers can update promotion usage logs"
@@ -2460,9 +2519,15 @@ CREATE POLICY "Customers and shop managers can view customer points"
     )
   );
 
--- Remove direct INSERT/UPDATE access - use API functions for points management
-REVOKE INSERT, UPDATE ON TABLE public.customer_points FROM authenticated;
-REVOKE INSERT, UPDATE ON TABLE public.customer_points FROM anon;
+-- Shop managers can insert customer points
+CREATE POLICY "Shop managers can insert customer points"
+  ON public.customer_points FOR INSERT
+  WITH CHECK (public.is_shop_manager(shop_id));
+
+-- Shop managers can update customer points
+CREATE POLICY "Shop managers can update customer points"
+  ON public.customer_points FOR UPDATE
+  USING (public.is_shop_manager(shop_id));
 
 -- Shop managers can delete customer points (emergency cleanup)
 CREATE POLICY "Shop managers can delete customer points"

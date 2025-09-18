@@ -1,28 +1,46 @@
-import { CreateDepartmentEntity, DepartmentEntity, DepartmentStatsEntity, PaginatedDepartmentsEntity } from "@/src/domain/entities/shop/backend/backend-department.entity";
-import { DatabaseDataSource, FilterOperator, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  CreateDepartmentEntity,
+  DepartmentEntity,
+  DepartmentStatsEntity,
+  PaginatedDepartmentsEntity,
+} from "@/src/domain/entities/shop/backend/backend-department.entity";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendDepartmentError, ShopBackendDepartmentErrorType, ShopBackendDepartmentRepository } from "@/src/domain/repositories/shop/backend/backend-department-repository";
+import {
+  ShopBackendDepartmentError,
+  ShopBackendDepartmentErrorType,
+  ShopBackendDepartmentRepository,
+} from "@/src/domain/repositories/shop/backend/backend-department-repository";
 import { SupabaseShopBackendDepartmentMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-department.mapper";
-import { DepartmentSchema, DepartmentStatsSchema } from "@/src/infrastructure/schemas/shop/backend/department.schema";
+import {
+  DepartmentSchema,
+  DepartmentStatsSchema,
+} from "@/src/infrastructure/schemas/shop/backend/department.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type DepartmentWithJoins = DepartmentSchema & {
-  shops?: { name?: string }
+  shops?: { name?: string };
 };
 type DepartmentSchemaRecord = Record<string, unknown> & DepartmentSchema;
-type DepartmentStatsSchemaRecord = Record<string, unknown> & DepartmentStatsSchema;
+type DepartmentStatsSchemaRecord = Record<string, unknown> &
+  DepartmentStatsSchema;
 
 /**
  * Supabase implementation of the department repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendDepartmentRepository extends StandardRepository implements ShopBackendDepartmentRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendDepartmentRepository
+  extends StandardRepository
+  implements ShopBackendDepartmentRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendDepartment");
   }
 
@@ -31,14 +49,16 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
    * @param params Pagination and filter parameters
    * @returns Paginated departments data
    */
-  async getPaginatedDepartments(params: PaginationParams & {
-    filters?: {
-      searchQuery?: string;
-      shopFilter?: string;
-      minEmployeeCount?: number;
-      maxEmployeeCount?: number;
-    };
-  }): Promise<PaginatedDepartmentsEntity> {
+  async getPaginatedDepartments(
+    params: PaginationParams & {
+      filters?: {
+        searchQuery?: string;
+        shopFilter?: string;
+        minEmployeeCount?: number;
+        maxEmployeeCount?: number;
+      };
+    }
+  ): Promise<PaginatedDepartmentsEntity> {
     try {
       const { page, limit, filters } = params;
       const offset = (page - 1) * limit;
@@ -53,7 +73,7 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
       // Add optional filters
       if (filters?.searchQuery) {
         queryFilters.push({
-          field: 'name',
+          field: "name",
           operator: FilterOperator.ILIKE,
           value: `%${filters.searchQuery}%`,
         });
@@ -61,7 +81,7 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
 
       if (filters?.shopFilter) {
         queryFilters.push({
-          field: 'shop_id',
+          field: "shop_id",
           operator: FilterOperator.EQ,
           value: filters.shopFilter,
         });
@@ -72,34 +92,39 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: queryFilters.length > 0 ? queryFilters : undefined,
         joins: [
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
+          { table: "shops", on: { fromField: "shop_id", toField: "id" } },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
-        }
+          offset,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
-      const departments = await this.dataSource.getAdvanced<DepartmentSchemaRecord>(
-        'departments',
+      const departments =
+        await this.dataSource.getAdvanced<DepartmentSchemaRecord>(
+          "departments",
+          queryOptions
+        );
+
+      // Count total items
+      const totalItems = await this.dataSource.count(
+        "departments",
         queryOptions
       );
 
-      // Count total items
-      const totalItems = await this.dataSource.count('departments', queryOptions);
-
-      // query employee count for each department into hash map 
-      const employeeCounts = await this.dataSource.getAdvanced<DepartmentSchemaRecord>(
-        'department_employee_counts_view',
-        {
-          select: ['department_id', 'employee_count'],
-        }
-      );
+      // query employee count for each department into hash map
+      const employeeCounts =
+        await this.dataSource.getAdvanced<DepartmentSchemaRecord>(
+          "department_employee_counts_view",
+          {
+            select: ["department_id", "employee_count"],
+          }
+        );
 
       const employeeCountMap = employeeCounts.reduce((acc, employee) => {
         const departmentId = employee.department_id as string;
@@ -110,9 +135,8 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         return acc;
       }, {} as Record<string, number>);
 
-
       // Map database results to domain entities
-      const mappedDepartments = departments.map(department => {
+      const mappedDepartments = departments.map((department) => {
         // Handle joined data from shops table
         const departmentWithJoinedData = department as DepartmentWithJoins;
         const employee_count = employeeCountMap[department.id as string] || 0; // separate query to get employee count
@@ -120,46 +144,62 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         const departmentWithJoins = {
           ...department,
           shop_name: departmentWithJoinedData.shops?.name,
-          employee_count
+          employee_count,
         };
-        return SupabaseShopBackendDepartmentMapper.toDomain(departmentWithJoins);
+        return SupabaseShopBackendDepartmentMapper.toDomain(
+          departmentWithJoins
+        );
       });
 
       // Apply employee count filters if specified
       let filteredDepartments = mappedDepartments;
-      if (filters?.minEmployeeCount !== undefined || filters?.maxEmployeeCount !== undefined) {
-        filteredDepartments = mappedDepartments.filter(department => {
+      if (
+        filters?.minEmployeeCount !== undefined ||
+        filters?.maxEmployeeCount !== undefined
+      ) {
+        filteredDepartments = mappedDepartments.filter((department) => {
           const employeeCount = department.employeeCount;
-          
-          if (filters?.minEmployeeCount !== undefined && employeeCount < filters.minEmployeeCount) {
+
+          if (
+            filters?.minEmployeeCount !== undefined &&
+            employeeCount < filters.minEmployeeCount
+          ) {
             return false;
           }
-          
-          if (filters?.maxEmployeeCount !== undefined && employeeCount > filters.maxEmployeeCount) {
+
+          if (
+            filters?.maxEmployeeCount !== undefined &&
+            employeeCount > filters.maxEmployeeCount
+          ) {
             return false;
           }
-          
+
           return true;
         });
       }
 
       // Create pagination metadata
-      const pagination = SupabaseShopBackendDepartmentMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination =
+        SupabaseShopBackendDepartmentMapper.createPaginationMeta(
+          page,
+          limit,
+          totalItems
+        );
 
       return {
         data: filteredDepartments,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof ShopBackendDepartmentError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedDepartments', { error });
+      this.logger.error("Error in getPaginatedDepartments", { error });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching departments',
-        'getPaginatedDepartments',
+        "An unexpected error occurred while fetching departments",
+        "getPaginatedDepartments",
         {},
         error
       );
@@ -174,17 +214,18 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for department statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<DepartmentStatsSchemaRecord>(
-        'department_stats_summary_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<DepartmentStatsSchemaRecord>(
+          "department_stats_summary_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -192,7 +233,7 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
           totalDepartments: 0,
           totalEmployees: 0,
           activeDepartments: 0,
-          averageEmployeesPerDepartment: 0
+          averageEmployeesPerDepartment: 0,
         };
       }
 
@@ -204,11 +245,11 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw error;
       }
 
-      this.logger.error('Error in getDepartmentStats', { error });
+      this.logger.error("Error in getDepartmentStats", { error });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching department statistics',
-        'getDepartmentStats',
+        "An unexpected error occurred while fetching department statistics",
+        "getDepartmentStats",
         {},
         error
       );
@@ -225,13 +266,13 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const department = await this.dataSource.getById<DepartmentSchemaRecord>(
-        'departments',
+        "departments",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
-          ]
+            { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+          ],
         }
       );
 
@@ -244,7 +285,7 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
 
       const departmentWithJoins = {
         ...department,
-        shop_name: departmentWithJoinedData.shops?.name
+        shop_name: departmentWithJoinedData.shops?.name,
       };
 
       // Map database result to domain entity
@@ -254,11 +295,11 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw error;
       }
 
-      this.logger.error('Error in getDepartmentById', { error, id });
+      this.logger.error("Error in getDepartmentById", { error, id });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching department',
-        'getDepartmentById',
+        "An unexpected error occurred while fetching department",
+        "getDepartmentById",
         { id },
         error
       );
@@ -270,7 +311,9 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
    * @param department Department data to create
    * @returns Created department entity
    */
-  async createDepartment(department: Omit<CreateDepartmentEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<DepartmentEntity> {
+  async createDepartment(
+    department: Omit<CreateDepartmentEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<DepartmentEntity> {
     try {
       // Convert domain entity to database schema
       const departmentSchema = {
@@ -278,36 +321,38 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         name: department.name,
         slug: department.slug,
         description: department.description || null,
-        employee_count: 0 // Default to 0 for new departments
       };
 
       // Create department in database
-      const createdDepartment = await this.dataSource.insert<DepartmentSchemaRecord>(
-        'departments',
-        departmentSchema
-      );
+      const createdDepartment =
+        await this.dataSource.insert<DepartmentSchemaRecord>(
+          "departments",
+          departmentSchema
+        );
 
       if (!createdDepartment) {
         throw new ShopBackendDepartmentError(
           ShopBackendDepartmentErrorType.OPERATION_FAILED,
-          'Failed to create department',
-          'createDepartment',
+          "Failed to create department",
+          "createDepartment",
           { department }
         );
       }
 
       // Get the created department with joined data
-      return this.getDepartmentById(createdDepartment.id) as Promise<DepartmentEntity>;
+      return this.getDepartmentById(
+        createdDepartment.id
+      ) as Promise<DepartmentEntity>;
     } catch (error) {
       if (error instanceof ShopBackendDepartmentError) {
         throw error;
       }
 
-      this.logger.error('Error in createDepartment', { error, department });
+      this.logger.error("Error in createDepartment", { error, department });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while creating department',
-        'createDepartment',
+        "An unexpected error occurred while creating department",
+        "createDepartment",
         { department },
         error
       );
@@ -320,7 +365,12 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
    * @param department Department data to update
    * @returns Updated department entity
    */
-  async updateDepartment(id: string, department: Partial<Omit<DepartmentEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<DepartmentEntity> {
+  async updateDepartment(
+    id: string,
+    department: Partial<
+      Omit<DepartmentEntity, "id" | "createdAt" | "updatedAt">
+    >
+  ): Promise<DepartmentEntity> {
     try {
       // Check if department exists
       const existingDepartment = await this.getDepartmentById(id);
@@ -328,31 +378,37 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw new ShopBackendDepartmentError(
           ShopBackendDepartmentErrorType.NOT_FOUND,
           `Department with ID ${id} not found`,
-          'updateDepartment',
+          "updateDepartment",
           { id, department }
         );
       }
 
       // Convert domain entity to database schema
       const departmentSchema: Partial<DepartmentSchema> = {};
-      if (department.shopId !== undefined) departmentSchema.shop_id = department.shopId;
-      if (department.name !== undefined) departmentSchema.name = department.name;
-      if (department.slug !== undefined) departmentSchema.slug = department.slug;
-      if (department.description !== undefined) departmentSchema.description = department.description;
-      if (department.employeeCount !== undefined) departmentSchema.employee_count = department.employeeCount;
+      if (department.shopId !== undefined)
+        departmentSchema.shop_id = department.shopId;
+      if (department.name !== undefined)
+        departmentSchema.name = department.name;
+      if (department.slug !== undefined)
+        departmentSchema.slug = department.slug;
+      if (department.description !== undefined)
+        departmentSchema.description = department.description;
+      if (department.employeeCount !== undefined)
+        departmentSchema.employee_count = department.employeeCount;
 
       // Update department in database
-      const updatedDepartment = await this.dataSource.update<DepartmentSchemaRecord>(
-        'departments',
-        id,
-        departmentSchema
-      );
+      const updatedDepartment =
+        await this.dataSource.update<DepartmentSchemaRecord>(
+          "departments",
+          id,
+          departmentSchema
+        );
 
       if (!updatedDepartment) {
         throw new ShopBackendDepartmentError(
           ShopBackendDepartmentErrorType.OPERATION_FAILED,
-          'Failed to update department',
-          'updateDepartment',
+          "Failed to update department",
+          "updateDepartment",
           { id, department }
         );
       }
@@ -364,11 +420,11 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw error;
       }
 
-      this.logger.error('Error in updateDepartment', { error, id, department });
+      this.logger.error("Error in updateDepartment", { error, id, department });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while updating department',
-        'updateDepartment',
+        "An unexpected error occurred while updating department",
+        "updateDepartment",
         { id, department },
         error
       );
@@ -388,16 +444,13 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw new ShopBackendDepartmentError(
           ShopBackendDepartmentErrorType.NOT_FOUND,
           `Department with ID ${id} not found`,
-          'deleteDepartment',
+          "deleteDepartment",
           { id }
         );
       }
 
       // Delete department from database
-      await this.dataSource.delete(
-        'departments',
-        id
-      );
+      await this.dataSource.delete("departments", id);
 
       // Since we've already checked if the department exists, we can return true
       return true;
@@ -406,11 +459,11 @@ export class SupabaseShopBackendDepartmentRepository extends StandardRepository 
         throw error;
       }
 
-      this.logger.error('Error in deleteDepartment', { error, id });
+      this.logger.error("Error in deleteDepartment", { error, id });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting department',
-        'deleteDepartment',
+        "An unexpected error occurred while deleting department",
+        "deleteDepartment",
         { id },
         error
       );
