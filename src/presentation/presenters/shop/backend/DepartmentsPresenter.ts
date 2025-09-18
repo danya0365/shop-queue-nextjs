@@ -235,14 +235,20 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
     }
   }
 
-  async createDepartment(params: {
-    shopId: string;
-    name: string;
-    slug: string;
-    description?: string | null;
-  }): Promise<Department> {
-    this.logger.info("DepartmentsPresenter: Creating department", { params });
+  async createDepartment(
+    shopId: string,
+    data: {
+      name: string;
+      slug: string;
+      description?: string | null;
+    }
+  ): Promise<Department> {
+    this.logger.info("DepartmentsPresenter: Creating department", { shopId, data });
     try {
+      const params = {
+        ...data,
+        shopId,
+      };
       const departmentDTO = await this.departmentsBackendService.createDepartment(params);
       
       // Transform DepartmentDTO to Department interface

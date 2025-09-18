@@ -1,11 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { DepartmentsViewModel, Department } from './DepartmentsPresenter';
-import type { CreateDepartmentDTO, UpdateDepartmentDTO } from '@/src/application/dtos/shop/backend/department-dto';
+import type {
+  CreateDepartmentDTO,
+  UpdateDepartmentDTO,
+} from "@/src/application/dtos/shop/backend/department-dto";
+import { useCallback, useEffect, useState } from "react";
+import type { Department, DepartmentsViewModel } from "./DepartmentsPresenter";
 
-export function useDepartmentsPresenter(shopId: string, initialViewModel?: DepartmentsViewModel) {
-  const [viewModel, setViewModel] = useState<DepartmentsViewModel | null>(initialViewModel || null);
+export function useDepartmentsPresenter(
+  shopId: string,
+  initialViewModel?: DepartmentsViewModel
+) {
+  const [viewModel, setViewModel] = useState<DepartmentsViewModel | null>(
+    initialViewModel || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +31,8 @@ export function useDepartmentsPresenter(shopId: string, initialViewModel?: Depar
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<Department | null>(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -43,16 +52,20 @@ export function useDepartmentsPresenter(shopId: string, initialViewModel?: Depar
     try {
       setLoading(true);
       setError(null);
-      
-      const { ClientDepartmentsPresenterFactory } = await import('./DepartmentsPresenter');
+
+      const { ClientDepartmentsPresenterFactory } = await import(
+        "./DepartmentsPresenter"
+      );
       const presenter = await ClientDepartmentsPresenterFactory.create();
-      
+
       const newViewModel = await presenter.getViewModel(shopId);
-      
+
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load departments data');
-      console.error('Error loading departments data:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load departments data"
+      );
+      console.error("Error loading departments data:", err);
     } finally {
       setLoading(false);
     }
@@ -68,21 +81,24 @@ export function useDepartmentsPresenter(shopId: string, initialViewModel?: Depar
   // Refresh data
   const refreshData = useCallback(async () => {
     try {
-      setActionLoading(prev => ({ ...prev, refresh: true }));
+      setActionLoading((prev) => ({ ...prev, refresh: true }));
       await loadData();
     } finally {
-      setActionLoading(prev => ({ ...prev, refresh: false }));
+      setActionLoading((prev) => ({ ...prev, refresh: false }));
     }
   }, [loadData]);
 
   // Filter departments based on search
-  const filteredDepartments = viewModel?.departments.filter(
-    (department) =>
-      filters.search === "" ||
-      department.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      (department.description &&
-        department.description.toLowerCase().includes(filters.search.toLowerCase()))
-  ) || [];
+  const filteredDepartments =
+    viewModel?.departments.filter(
+      (department) =>
+        filters.search === "" ||
+        department.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+        (department.description &&
+          department.description
+            .toLowerCase()
+            .includes(filters.search.toLowerCase()))
+    ) || [];
 
   // Event handlers
   const handleDepartmentClick = useCallback((department: Department) => {
@@ -91,7 +107,7 @@ export function useDepartmentsPresenter(shopId: string, initialViewModel?: Depar
   }, []);
 
   const handleSearchChange = useCallback((value: string) => {
-    setFilters(prev => ({ ...prev, search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   }, []);
 
   const openCreateModal = useCallback(() => {
@@ -138,50 +154,75 @@ export function useDepartmentsPresenter(shopId: string, initialViewModel?: Depar
   }, []);
 
   // CRUD operations
-  const createDepartment = useCallback(async (departmentData: CreateDepartmentDTO) => {
-    try {
-      setActionLoading(prev => ({ ...prev, create: true }));
-      const { ClientDepartmentsPresenterFactory } = await import('./DepartmentsPresenter');
-      const presenter = await ClientDepartmentsPresenterFactory.create();
-      await presenter.createDepartment(departmentData);
-      await loadData(); // Refresh data after creation
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create department');
-      throw err;
-    } finally {
-      setActionLoading(prev => ({ ...prev, create: false }));
-    }
-  }, [loadData]);
+  const createDepartment = useCallback(
+    async (departmentData: Omit<CreateDepartmentDTO, "shopId">) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, create: true }));
+        const { ClientDepartmentsPresenterFactory } = await import(
+          "./DepartmentsPresenter"
+        );
+        const presenter = await ClientDepartmentsPresenterFactory.create();
 
-  const updateDepartment = useCallback(async (departmentId: string, departmentData: Omit<UpdateDepartmentDTO, 'id'>) => {
-    try {
-      setActionLoading(prev => ({ ...prev, update: true }));
-      const { ClientDepartmentsPresenterFactory } = await import('./DepartmentsPresenter');
-      const presenter = await ClientDepartmentsPresenterFactory.create();
-      await presenter.updateDepartment(departmentId, departmentData);
-      await loadData(); // Refresh data after update
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update department');
-      throw err;
-    } finally {
-      setActionLoading(prev => ({ ...prev, update: false }));
-    }
-  }, [loadData]);
+        await presenter.createDepartment(shopId, departmentData);
+        await loadData(); // Refresh data after creation
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to create department"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, create: false }));
+      }
+    },
+    [loadData, shopId]
+  );
 
-  const deleteDepartment = useCallback(async (departmentId: string) => {
-    try {
-      setActionLoading(prev => ({ ...prev, delete: true }));
-      const { ClientDepartmentsPresenterFactory } = await import('./DepartmentsPresenter');
-      const presenter = await ClientDepartmentsPresenterFactory.create();
-      await presenter.deleteDepartment(departmentId);
-      await loadData(); // Refresh data after deletion
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete department');
-      throw err;
-    } finally {
-      setActionLoading(prev => ({ ...prev, delete: false }));
-    }
-  }, [loadData]);
+  const updateDepartment = useCallback(
+    async (
+      departmentId: string,
+      departmentData: Omit<UpdateDepartmentDTO, "id">
+    ) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, update: true }));
+        const { ClientDepartmentsPresenterFactory } = await import(
+          "./DepartmentsPresenter"
+        );
+        const presenter = await ClientDepartmentsPresenterFactory.create();
+        await presenter.updateDepartment(departmentId, departmentData);
+        await loadData(); // Refresh data after update
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update department"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, update: false }));
+      }
+    },
+    [loadData]
+  );
+
+  const deleteDepartment = useCallback(
+    async (departmentId: string) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, delete: true }));
+        const { ClientDepartmentsPresenterFactory } = await import(
+          "./DepartmentsPresenter"
+        );
+        const presenter = await ClientDepartmentsPresenterFactory.create();
+        await presenter.deleteDepartment(departmentId);
+        await loadData(); // Refresh data after deletion
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to delete department"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, delete: false }));
+      }
+    },
+    [loadData]
+  );
 
   return {
     viewModel,
