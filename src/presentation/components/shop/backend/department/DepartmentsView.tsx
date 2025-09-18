@@ -2,6 +2,12 @@
 
 import { DepartmentsViewModel } from "@/src/presentation/presenters/shop/backend/DepartmentsPresenter";
 import { useDepartmentsPresenter } from "@/src/presentation/presenters/shop/backend/useDepartmentsPresenter";
+import {
+  CreateDepartmentModal,
+  EditDepartmentModal,
+  DeleteDepartmentConfirmation,
+  ViewDepartmentDetails,
+} from "./modals";
 
 interface DepartmentsViewProps {
   shopId: string;
@@ -18,12 +24,26 @@ export function DepartmentsView({
     error,
     refreshData,
     showCreateModal,
+    showEditModal,
+    showDeleteModal,
+    showViewModal,
+    selectedDepartment,
     filters,
     handleDepartmentClick,
     handleSearchChange,
     openCreateModal,
     closeCreateModal,
+    openEditModal,
+    closeEditModal,
+    openDeleteModal,
+    closeDeleteModal,
+    openViewModal,
+    closeViewModal,
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
     filteredDepartments,
+    actionLoading,
   } = useDepartmentsPresenter(shopId, initialViewModel);
 
   // Show loading only on initial load or when explicitly loading
@@ -73,45 +93,7 @@ export function DepartmentsView({
   }
 
   return (
-    <div className="flex flex-col gap-8 relative">
-      {/* Development Status Overlay */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🚧</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              กำลังพัฒนาระบบ
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              เปิดใช้งานเร็วๆ นี้
-            </p>
-          </div>
-          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>กำลังปรับปรุงฟีเจอร์การจัดการแผนก</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
-              <span>เพิ่มประสิทธิภาพการทำงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
-              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ขออภัยในความไม่สะดวก
-              <br />
-              ทีมงานกำลังพัฒนาเพื่อคุณ
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -255,7 +237,42 @@ export function DepartmentsView({
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <button className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openViewModal(department);
+                    }}
+                    className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    title="ดูรายละเอียด"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(department);
+                    }}
+                    className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    title="แก้ไข"
+                  >
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -270,7 +287,14 @@ export function DepartmentsView({
                       />
                     </svg>
                   </button>
-                  <button className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDeleteModal(department);
+                    }}
+                    className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                    title="ลบ"
+                  >
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -326,10 +350,22 @@ export function DepartmentsView({
 
               {/* Action Buttons */}
               <div className="mt-4 flex space-x-2">
-                <button className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                  ดูพนักงาน
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openViewModal(department);
+                  }}
+                  className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  ดูรายละเอียด
                 </button>
-                <button className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(department);
+                  }}
+                  className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
                   แก้ไข
                 </button>
               </div>
@@ -338,26 +374,39 @@ export function DepartmentsView({
         )}
       </div>
 
-      {/* Create Department Modal Placeholder */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              เพิ่มแผนกใหม่
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={closeCreateModal}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Modals */}
+      <CreateDepartmentModal
+        isOpen={showCreateModal}
+        onClose={closeCreateModal}
+        onSubmit={createDepartment}
+        loading={actionLoading.create}
+        shopId={shopId}
+      />
+      
+      {selectedDepartment && (
+        <>
+          <EditDepartmentModal
+            isOpen={showEditModal}
+            onClose={closeEditModal}
+            onSubmit={updateDepartment}
+            department={selectedDepartment}
+            loading={actionLoading.update}
+          />
+          
+          <DeleteDepartmentConfirmation
+            isOpen={showDeleteModal}
+            onClose={closeDeleteModal}
+            onConfirm={() => deleteDepartment(selectedDepartment.id)}
+            department={selectedDepartment}
+            loading={actionLoading.delete}
+          />
+          
+          <ViewDepartmentDetails
+            isOpen={showViewModal}
+            onClose={closeViewModal}
+            department={selectedDepartment}
+          />
+        </>
       )}
     </div>
   );
