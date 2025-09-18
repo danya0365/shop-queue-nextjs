@@ -374,7 +374,7 @@ export class SupabaseShopBackendDashboardRepository
       // Assuming a view exists for revenue statistics
       const revenueStatsData =
         await this.dataSource.getAdvanced<RevenueStatsByShopViewSchema>(
-          "revenue_stats_view",
+          "revenue_stats_by_shop_view",
           queryOptions
         );
 
@@ -427,7 +427,9 @@ export class SupabaseShopBackendDashboardRepository
       }
 
       const revenueStats = revenueStatsData[0];
-      return SupabaseShopBackendDashboardMapper.mapToRevenueStatsEntity(revenueStats);
+      return SupabaseShopBackendDashboardMapper.mapToRevenueStatsEntity(
+        revenueStats
+      );
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
