@@ -160,7 +160,7 @@ export function BackendDashboardView({
                 วันนี้
               </span>
               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                ฿{revenueStats.today.toLocaleString()}
+                ฿{(revenueStats.revenueToday || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between">
@@ -168,7 +168,7 @@ export function BackendDashboardView({
                 สัปดาห์นี้
               </span>
               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                ฿{revenueStats.thisWeek.toLocaleString()}
+                ฿{(revenueStats.revenueThisWeek || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between">
@@ -176,7 +176,7 @@ export function BackendDashboardView({
                 เดือนนี้
               </span>
               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                ฿{revenueStats.thisMonth.toLocaleString()}
+                ฿{(revenueStats.revenueThisMonth || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between">
@@ -184,7 +184,7 @@ export function BackendDashboardView({
                 เดือนที่แล้ว
               </span>
               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                ฿{revenueStats.lastMonth.toLocaleString()}
+                ฿{(revenueStats.revenueLastMonth || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -192,7 +192,7 @@ export function BackendDashboardView({
                 เติบโต
               </span>
               <span className="font-semibold text-green-600 dark:text-green-400">
-                +{revenueStats.growth}%
+                +{(revenueStats.monthlyGrowthPercentage || 0).toFixed(1)}%
               </span>
             </div>
           </div>

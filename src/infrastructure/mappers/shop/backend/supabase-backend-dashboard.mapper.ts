@@ -3,12 +3,14 @@ import {
   PopularServiceEntity,
   QueueStatusDistributionEntity,
   RecentActivityEntity,
+  RevenueStatsEntity,
 } from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
 import {
   DashboardStatsByShopViewSchema,
   PopularServiceSchema,
   QueueStatusDistributionSchema,
   RecentActivitySchema,
+  RevenueStatsByShopViewSchema,
 } from "@/src/infrastructure/schemas/shop/backend/dashboard.schema";
 
 /**
@@ -109,6 +111,74 @@ export class SupabaseShopBackendDashboardMapper {
       description: schema.description,
       created_at: schema.created_at,
       metadata: schema.metadata,
+    };
+  }
+
+  /**
+   * Map revenue stats view schema to RevenueStatsEntity
+   */
+  static mapToRevenueStatsEntity(
+    schema: RevenueStatsByShopViewSchema
+  ): RevenueStatsEntity {
+    return {
+      // Shop identification
+      shopId: schema.shop_id || "",
+      shopName: schema.shop_name || null,
+      shopSlug: schema.shop_slug || null,
+      shopStatus: schema.shop_status || null,
+      currency: schema.currency || null,
+      statsGeneratedAt: schema.stats_generated_at || null,
+
+      // Revenue metrics
+      revenueToday: schema.revenue_today || null,
+      revenueThisWeek: schema.revenue_this_week || null,
+      revenueThisMonth: schema.revenue_this_month || null,
+      revenueLastMonth: schema.revenue_last_month || null,
+      revenueLastWeek: schema.revenue_last_week || null,
+      revenueYesterday: schema.revenue_yesterday || null,
+      totalRevenue: schema.total_revenue || null,
+      totalServiceRevenue: schema.total_service_revenue || null,
+
+      // Payment counts
+      paymentsToday: schema.payments_today || null,
+      paymentsThisWeek: schema.payments_this_week || null,
+      paymentsThisMonth: schema.payments_this_month || null,
+      paymentsLastWeek: schema.payments_last_week || null,
+      paymentsLastMonth: schema.payments_last_month || null,
+      paymentsYesterday: schema.payments_yesterday || null,
+      totalPayments: schema.total_payments || null,
+      paidPayments: schema.paid_payments || null,
+      partialPayments: schema.partial_payments || null,
+      pendingPayments: schema.pending_payments || null,
+
+      // Payment method breakdown
+      cashPayments: schema.cash_payments || null,
+      cashRevenue: schema.cash_revenue || null,
+      cardPayments: schema.card_payments || null,
+      cardRevenue: schema.card_revenue || null,
+      qrPayments: schema.qr_payments || null,
+      qrRevenue: schema.qr_revenue || null,
+      transferPayments: schema.transfer_payments || null,
+      transferRevenue: schema.transfer_revenue || null,
+
+      // Payment amounts
+      totalPaidAmount: schema.total_paid_amount || null,
+      totalPartialAmount: schema.total_partial_amount || null,
+      totalPendingAmount: schema.total_pending_amount || null,
+
+      // Growth percentages
+      weeklyGrowthPercentage: schema.weekly_growth_percentage || null,
+      dailyGrowthPercentage: schema.daily_growth_percentage || null,
+      monthlyGrowthPercentage: schema.monthly_growth_percentage || null,
+
+      // Averages
+      averageDailyRevenue: schema.average_daily_revenue || null,
+      averagePaymentAmount: schema.average_payment_amount || null,
+      averageQueueValue: schema.average_queue_value || null,
+
+      // Top performing service
+      mostRevenueServiceName: schema.most_revenue_service_name || null,
+      mostRevenueServiceAmount: schema.most_revenue_service_amount || null,
     };
   }
 }

@@ -3,6 +3,7 @@ import {
   UsageStatsDto,
 } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import type { RevenueStatsDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
@@ -18,14 +19,6 @@ export interface QueueStats {
   serving: number;
   completed: number;
   cancelled: number;
-}
-
-export interface RevenueStats {
-  today: number;
-  thisWeek: number;
-  thisMonth: number;
-  lastMonth: number;
-  growth: number;
 }
 
 export interface EmployeeStats {
@@ -49,7 +42,7 @@ export interface RecentActivity {
 // Define ViewModel interface
 export interface BackendDashboardViewModel {
   queueStats: QueueStats;
-  revenueStats: RevenueStats;
+  revenueStats: RevenueStatsDTO;
   employeeStats: EmployeeStats;
   recentActivities: RecentActivity[];
   shopName: string;

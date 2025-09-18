@@ -3,6 +3,7 @@ import type {
   PopularServiceEntity,
   QueueStatusDistributionEntity,
   RecentActivityEntity,
+  RevenueStatsEntity,
 } from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
 
 /**
@@ -88,15 +89,9 @@ export interface ShopBackendDashboardRepository {
   /**
    * Get revenue statistics
    * @param shopId The shop ID
-   * @returns Revenue statistics
+   * @returns Revenue statistics entity
    */
-  getRevenueStats(shopId: string): Promise<{
-    today: number;
-    thisWeek: number;
-    thisMonth: number;
-    lastMonth: number;
-    growth: number;
-  }>;
+  getRevenueStats(shopId: string): Promise<RevenueStatsEntity>;
 
   /**
    * Get employee statistics

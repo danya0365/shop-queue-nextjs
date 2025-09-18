@@ -60,6 +60,67 @@ export interface PopularServicesDTO {
   category: string;
 }
 
+export interface RevenueStatsDTO {
+  // Shop identification
+  shopId: string;
+  shopName: string | null;
+  shopSlug: string | null;
+  shopStatus: string | null;
+  currency: string | null;
+  statsGeneratedAt: string | null;
+  
+  // Revenue metrics
+  revenueToday: number | null;
+  revenueThisWeek: number | null;
+  revenueThisMonth: number | null;
+  revenueLastMonth: number | null;
+  revenueLastWeek: number | null;
+  revenueYesterday: number | null;
+  totalRevenue: number | null;
+  totalServiceRevenue: number | null;
+  
+  // Payment counts
+  paymentsToday: number | null;
+  paymentsThisWeek: number | null;
+  paymentsThisMonth: number | null;
+  paymentsLastWeek: number | null;
+  paymentsLastMonth: number | null;
+  paymentsYesterday: number | null;
+  totalPayments: number | null;
+  paidPayments: number | null;
+  partialPayments: number | null;
+  pendingPayments: number | null;
+  
+  // Payment method breakdown
+  cashPayments: number | null;
+  cashRevenue: number | null;
+  cardPayments: number | null;
+  cardRevenue: number | null;
+  qrPayments: number | null;
+  qrRevenue: number | null;
+  transferPayments: number | null;
+  transferRevenue: number | null;
+  
+  // Payment amounts
+  totalPaidAmount: number | null;
+  totalPartialAmount: number | null;
+  totalPendingAmount: number | null;
+  
+  // Growth percentages
+  weeklyGrowthPercentage: number | null;
+  dailyGrowthPercentage: number | null;
+  monthlyGrowthPercentage: number | null;
+  
+  // Averages
+  averageDailyRevenue: number | null;
+  averagePaymentAmount: number | null;
+  averageQueueValue: number | null;
+  
+  // Top performing service
+  mostRevenueServiceName: string | null;
+  mostRevenueServiceAmount: number | null;
+}
+
 export interface DashboardDataDTO {
   stats: ShopDashboardStatsDTO;
   recentActivities: RecentActivityDTO[];

@@ -4,7 +4,8 @@ import { GetPopularServicesUseCase, type IGetPopularServicesUseCase } from '@/sr
 import { GetQueueDistributionUseCase, type IGetQueueDistributionUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetQueueDistributionUseCase';
 import { GetRecentActivitiesUseCase, type IGetRecentActivitiesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetRecentActivitiesUseCase';
 import { GetQueueStatsUseCase, type IGetQueueStatsUseCase, type QueueStats } from '@/src/application/usecases/shop/backend/dashboard/GetQueueStatsUseCase';
-import { GetRevenueStatsUseCase, type IGetRevenueStatsUseCase, type RevenueStats } from '@/src/application/usecases/shop/backend/dashboard/GetRevenueStatsUseCase';
+import { GetRevenueStatsUseCase, type IGetRevenueStatsUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetRevenueStatsUseCase';
+import type { RevenueStatsDTO } from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
 import { GetEmployeeStatsUseCase, type IGetEmployeeStatsUseCase, type EmployeeStats } from '@/src/application/usecases/shop/backend/dashboard/GetEmployeeStatsUseCase';
 import { GetShopNameUseCase, type IGetShopNameUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetShopNameUseCase';
 import type { Logger } from '@/src/domain/interfaces/logger';
@@ -13,7 +14,7 @@ import { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/b
 export interface IShopBackendDashboardService {
   getDashboardData(shopId: string): Promise<DashboardDataDTO>;
   getQueueStats(shopId: string): Promise<QueueStats>;
-  getRevenueStats(shopId: string): Promise<RevenueStats>;
+  getRevenueStats(shopId: string): Promise<RevenueStatsDTO>;
   getEmployeeStats(shopId: string): Promise<EmployeeStats>;
   getShopName(shopId: string): Promise<string>;
 }
@@ -72,7 +73,7 @@ export class ShopBackendDashboardService implements IShopBackendDashboardService
     }
   }
 
-  async getRevenueStats(shopId: string): Promise<RevenueStats> {
+  async getRevenueStats(shopId: string): Promise<RevenueStatsDTO> {
     try {
       this.logger.info('ShopBackendDashboardService: Getting revenue stats for shop', { shopId });
       const revenueStats = await this.getRevenueStatsUseCase.execute(shopId);

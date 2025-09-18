@@ -3,6 +3,7 @@ import {
   PopularServiceEntity,
   QueueStatusDistributionEntity,
   RecentActivityEntity,
+  RevenueStatsEntity,
 } from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
 import {
   DatabaseDataSource,
@@ -22,6 +23,7 @@ import {
   PopularServiceSchema,
   QueueStatusDistributionSchema,
   RecentActivitySchema,
+  RevenueStatsByShopViewSchema,
 } from "@/src/infrastructure/schemas/shop/backend/dashboard.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
@@ -358,23 +360,9 @@ export class SupabaseShopBackendDashboardRepository
   /**
    * Get revenue statistics
    * @param shopId The shop ID
-   * @returns Revenue statistics
+   * @returns Revenue statistics entity
    */
-  async getRevenueStats(shopId: string): Promise<{
-    today: number;
-    thisWeek: number;
-    thisMonth: number;
-    lastMonth: number;
-    growth: number;
-  }> {
-    return {
-      today: 0,
-      thisWeek: 0,
-      thisMonth: 0,
-      lastMonth: 0,
-      growth: 0,
-    };
-
+  async getRevenueStats(shopId: string): Promise<RevenueStatsEntity> {
     try {
       const queryOptions: QueryOptions = {
         select: ["*"],
@@ -384,32 +372,62 @@ export class SupabaseShopBackendDashboardRepository
       };
 
       // Assuming a view exists for revenue statistics
-      const revenueStatsData = await this.dataSource.getAdvanced<{
-        today: number;
-        this_week: number;
-        this_month: number;
-        last_month: number;
-        growth: number;
-      }>("revenue_stats_view", queryOptions);
+      const revenueStatsData =
+        await this.dataSource.getAdvanced<RevenueStatsByShopViewSchema>(
+          "revenue_stats_view",
+          queryOptions
+        );
 
       if (!revenueStatsData || revenueStatsData.length === 0) {
         return {
-          today: 0,
-          thisWeek: 0,
-          thisMonth: 0,
-          lastMonth: 0,
-          growth: 0,
+          shopId,
+          shopName: null,
+          shopSlug: null,
+          shopStatus: null,
+          currency: null,
+          statsGeneratedAt: null,
+          revenueToday: 0,
+          revenueThisWeek: 0,
+          revenueThisMonth: 0,
+          revenueLastMonth: 0,
+          revenueLastWeek: 0,
+          revenueYesterday: 0,
+          totalRevenue: 0,
+          totalServiceRevenue: 0,
+          paymentsToday: 0,
+          paymentsThisWeek: 0,
+          paymentsThisMonth: 0,
+          paymentsLastWeek: 0,
+          paymentsLastMonth: 0,
+          paymentsYesterday: 0,
+          totalPayments: 0,
+          paidPayments: 0,
+          partialPayments: 0,
+          pendingPayments: 0,
+          cashPayments: 0,
+          cashRevenue: 0,
+          cardPayments: 0,
+          cardRevenue: 0,
+          qrPayments: 0,
+          qrRevenue: 0,
+          transferPayments: 0,
+          transferRevenue: 0,
+          totalPaidAmount: 0,
+          totalPartialAmount: 0,
+          totalPendingAmount: 0,
+          weeklyGrowthPercentage: 0,
+          dailyGrowthPercentage: 0,
+          monthlyGrowthPercentage: 0,
+          averageDailyRevenue: 0,
+          averagePaymentAmount: 0,
+          averageQueueValue: 0,
+          mostRevenueServiceName: null,
+          mostRevenueServiceAmount: 0,
         };
       }
 
-      const data = revenueStatsData[0];
-      return {
-        today: data.today,
-        thisWeek: data.this_week,
-        thisMonth: data.this_month,
-        lastMonth: data.last_month,
-        growth: data.growth,
-      };
+      const revenueStats = revenueStatsData[0];
+      return SupabaseShopBackendDashboardMapper.mapToRevenueStatsEntity(revenueStats);
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;

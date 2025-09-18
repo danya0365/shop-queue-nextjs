@@ -8,6 +8,9 @@ import { Database } from "@/src/domain/types/supabase";
 export type DashboardStatsByShopViewSchema =
   Database["public"]["Views"]["dashboard_stats_by_shop_view"]["Row"];
 
+export type RevenueStatsByShopViewSchema =
+  Database["public"]["Views"]["revenue_stats_by_shop_view"]["Row"];
+
 export interface RecentActivitySchema {
   id: string;
   type: string;
