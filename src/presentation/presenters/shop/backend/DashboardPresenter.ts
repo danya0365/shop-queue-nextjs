@@ -2,6 +2,7 @@ import {
   SubscriptionLimits,
   UsageStatsDto,
 } from "@/src/application/dtos/subscription-dto";
+import type { RecentActivityDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import type { RevenueStatsDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
@@ -103,23 +104,23 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
       const usage = await this.getUsageStats(profile.id);
 
       // Get data from dashboard service
-      const [queueStats, revenueStats, employeeStats, shopName] =
+      const [queueStats, revenueStats, employeeStats, shopName, recentActivities] =
         await Promise.all([
           this.dashboardService.getQueueStats(shopId),
           this.dashboardService.getRevenueStats(shopId),
           this.dashboardService.getEmployeeStats(shopId),
           this.dashboardService.getShopName(shopId),
+          this.dashboardService.getRecentActivities(shopId),
         ]);
 
-      // Note: recentActivities is not available in the current dashboard service
-      // We'll use the mock data for now until the service is updated
-      const recentActivities = this.getRecentActivities();
+      // Map DTOs to ViewModel format
+      const mappedRecentActivities = this.mapRecentActivities(recentActivities);
 
       return {
         queueStats,
         revenueStats,
         employeeStats,
-        recentActivities,
+        recentActivities: mappedRecentActivities,
         shopName,
         currentTime: new Date().toLocaleString("th-TH"),
         subscription: {
@@ -170,6 +171,49 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
         icon: "👤",
       },
     ];
+  }
+
+  private mapRecentActivities(activities: RecentActivityDTO[]): RecentActivity[] {
+    return activities.map((activity) => {
+      // Map activity type to appropriate icon
+      const iconMap: Record<string, string> = {
+        queue_created: "📝",
+        queue_served: "✅",
+        payment_completed: "💳",
+        employee_login: "👤",
+        queue_cancelled: "❌",
+        customer_joined: "👥",
+        service_completed: "🎯",
+      };
+
+      // Format timestamp to Thai relative time
+      const formatTimestamp = (createdAt: string): string => {
+        const now = new Date();
+        const created = new Date(createdAt);
+        const diffMs = now.getTime() - created.getTime();
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMinutes < 1) return "เมื่อสักครู่";
+        if (diffMinutes < 60) return `${diffMinutes} นาทีที่แล้ว`;
+        if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+        return `${diffDays} วันที่แล้ว`;
+      };
+
+      // Combine title and description into message
+      const message = activity.description
+        ? `${activity.title}: ${activity.description}`
+        : activity.title;
+
+      return {
+        id: activity.id,
+        type: activity.type as RecentActivity["type"], // Cast to match the expected type
+        message,
+        timestamp: formatTimestamp(activity.createdAt),
+        icon: iconMap[activity.type] || "📋",
+      };
+    });
   }
 
   // Metadata generation

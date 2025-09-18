@@ -1,4 +1,4 @@
-import type { DashboardDataDTO } from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
+import type { DashboardDataDTO, RecentActivityDTO } from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
 import { GetDashboardStatsUseCase, type IGetDashboardStatsUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetDashboardStatsUseCase';
 import { GetPopularServicesUseCase, type IGetPopularServicesUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetPopularServicesUseCase';
 import { GetQueueDistributionUseCase, type IGetQueueDistributionUseCase } from '@/src/application/usecases/shop/backend/dashboard/GetQueueDistributionUseCase';
@@ -17,6 +17,7 @@ export interface IShopBackendDashboardService {
   getRevenueStats(shopId: string): Promise<RevenueStatsDTO>;
   getEmployeeStats(shopId: string): Promise<EmployeeStats>;
   getShopName(shopId: string): Promise<string>;
+  getRecentActivities(shopId: string): Promise<RecentActivityDTO[]>;
 }
 
 export class ShopBackendDashboardService implements IShopBackendDashboardService {
@@ -105,6 +106,18 @@ export class ShopBackendDashboardService implements IShopBackendDashboardService
       return shopName;
     } catch (error) {
       this.logger.error('ShopBackendDashboardService: Error getting shop name', error);
+      throw error;
+    }
+  }
+
+  async getRecentActivities(shopId: string): Promise<RecentActivityDTO[]> {
+    try {
+      this.logger.info('ShopBackendDashboardService: Getting recent activities for shop', { shopId });
+      const recentActivities = await this.getRecentActivitiesUseCase.execute(shopId);
+      this.logger.info('ShopBackendDashboardService: Successfully retrieved recent activities', { shopId, count: recentActivities.length });
+      return recentActivities;
+    } catch (error) {
+      this.logger.error('ShopBackendDashboardService: Error getting recent activities', error);
       throw error;
     }
   }
