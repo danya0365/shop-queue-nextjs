@@ -2,6 +2,8 @@
 
 import { BackendDashboardViewModel } from "@/src/presentation/presenters/shop/backend/DashboardPresenter";
 import { useBackendDashboardPresenter } from "@/src/presentation/presenters/shop/backend/useBackendDashboardPresenter";
+import { QRCodeModal } from "@/src/presentation/components/shop/backend/queue/modals/QRCodeModal";
+import { useState } from "react";
 
 interface BackendDashboardViewProps {
   shopId: string;
@@ -14,6 +16,9 @@ export function BackendDashboardView({
 }: BackendDashboardViewProps) {
   const { viewModel, loading, error, refreshData } =
     useBackendDashboardPresenter(shopId, initialViewModel);
+
+  // QR Code modal state
+  const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
 
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
@@ -197,29 +202,22 @@ export function BackendDashboardView({
             </div>
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              การดำเนินการด่วน
-            </h3>
-            <span className="text-2xl">⚡</span>
-          </div>
-          <div className="space-y-2">
-            <button className="w-full bg-blue-500 dark:bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-sm">
-              📱 สร้าง QR Code
-            </button>
-            <button className="w-full bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors text-sm">
-              📢 ประกาศร้าน
-            </button>
-            <button className="w-full bg-purple-500 dark:bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors text-sm">
-              🎁 สร้างโปรโมชัน
-            </button>
-            <button className="w-full bg-orange-500 dark:bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors text-sm">
-              📊 ดูรายงาน
-            </button>
-          </div>
+        <div className="space-y-2">
+          <button 
+            onClick={() => setQrCodeModalOpen(true)}
+            className="w-full bg-blue-500 dark:bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-sm"
+          >
+            📱 สร้าง QR Code
+          </button>
+          <button className="w-full bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors text-sm">
+            📢 ประกาศร้าน
+          </button>
+          <button className="w-full bg-purple-500 dark:bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors text-sm">
+            🎁 สร้างโปรโมชัน
+          </button>
+          <button className="w-full bg-orange-500 dark:bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors text-sm">
+            📊 ดูรายงาน
+          </button>
         </div>
       </div>
 
@@ -299,6 +297,15 @@ export function BackendDashboardView({
           </div>
         </div>
       </div>
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        isOpen={qrCodeModalOpen}
+        onClose={() => setQrCodeModalOpen(false)}
+        shopName={shopName}
+        shopDescription="" // Dashboard doesn't have shop description, using empty string
+        shopId={shopId}
+      />
     </div>
   );
 }
