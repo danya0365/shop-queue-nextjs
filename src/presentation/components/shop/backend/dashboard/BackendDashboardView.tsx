@@ -3,6 +3,7 @@
 import { BackendDashboardViewModel } from "@/src/presentation/presenters/shop/backend/DashboardPresenter";
 import { useBackendDashboardPresenter } from "@/src/presentation/presenters/shop/backend/useBackendDashboardPresenter";
 import { QRCodeModal } from "@/src/presentation/components/shop/backend/queue/modals/QRCodeModal";
+import { UnderConstructionModal } from "./modals/UnderConstructionModal";
 import { useState } from "react";
 
 interface BackendDashboardViewProps {
@@ -19,6 +20,17 @@ export function BackendDashboardView({
 
   // QR Code modal state
   const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
+
+  // Under Construction modal state
+  const [underConstructionModalOpen, setUnderConstructionModalOpen] =
+    useState(false);
+  const [currentFeatureName, setCurrentFeatureName] = useState("");
+
+  // Handle under construction modal
+  const handleUnderConstruction = (featureName: string) => {
+    setCurrentFeatureName(featureName);
+    setUnderConstructionModalOpen(true);
+  };
 
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
@@ -88,10 +100,16 @@ export function BackendDashboardView({
           </p>
         </div>
         <div className="flex space-x-4">
-          <button className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+          <button
+            onClick={() => handleUnderConstruction("ดูรายงานเต็ม")}
+            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+          >
             📊 ดูรายงานเต็ม
           </button>
-          <button className="bg-green-500 dark:bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
+          <button
+            onClick={() => handleUnderConstruction("ตั้งค่าด่วน")}
+            className="bg-green-500 dark:bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
+          >
             ⚙️ ตั้งค่าด่วน
           </button>
         </div>
@@ -203,19 +221,28 @@ export function BackendDashboardView({
           </div>
         </div>
         <div className="space-y-2">
-          <button 
+          <button
             onClick={() => setQrCodeModalOpen(true)}
             className="w-full bg-blue-500 dark:bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-sm"
           >
             📱 สร้าง QR Code
           </button>
-          <button className="w-full bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors text-sm">
+          <button
+            onClick={() => handleUnderConstruction("ประกาศร้าน")}
+            className="w-full bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors text-sm"
+          >
             📢 ประกาศร้าน
           </button>
-          <button className="w-full bg-purple-500 dark:bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors text-sm">
+          <button
+            onClick={() => handleUnderConstruction("สร้างโปรโมชัน")}
+            className="w-full bg-purple-500 dark:bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors text-sm"
+          >
             🎁 สร้างโปรโมชัน
           </button>
-          <button className="w-full bg-orange-500 dark:bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors text-sm">
+          <button
+            onClick={() => handleUnderConstruction("ดูรายงาน")}
+            className="w-full bg-orange-500 dark:bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors text-sm"
+          >
             📊 ดูรายงาน
           </button>
         </div>
@@ -248,7 +275,10 @@ export function BackendDashboardView({
             ))}
           </div>
           <div className="mt-6 text-center">
-            <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+            <button
+              onClick={() => handleUnderConstruction("ดูกิจกรรมทั้งหมด")}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+            >
               ดูกิจกรรมทั้งหมด →
             </button>
           </div>
@@ -305,6 +335,13 @@ export function BackendDashboardView({
         shopName={shopName}
         shopDescription="" // Dashboard doesn't have shop description, using empty string
         shopId={shopId}
+      />
+
+      {/* Under Construction Modal */}
+      <UnderConstructionModal
+        isOpen={underConstructionModalOpen}
+        onClose={() => setUnderConstructionModalOpen(false)}
+        featureName={currentFeatureName}
       />
     </div>
   );
