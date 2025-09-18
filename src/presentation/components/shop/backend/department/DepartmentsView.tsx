@@ -16,17 +16,13 @@ export function DepartmentsView({
     viewModel,
     loading,
     error,
-    actionLoading,
     refreshData,
     showCreateModal,
-    showDetailsModal,
-    selectedDepartment,
     filters,
     handleDepartmentClick,
     handleSearchChange,
     openCreateModal,
     closeCreateModal,
-    closeDetailsModal,
     filteredDepartments,
   } = useDepartmentsPresenter(shopId, initialViewModel);
 
@@ -323,7 +319,7 @@ export function DepartmentsView({
                       year: "numeric",
                       month: "short",
                       day: "numeric",
-                    }).format(department.createdAt)}
+                    }).format(new Date(department.createdAt))}
                   </span>
                 </div>
               </div>

@@ -2,19 +2,26 @@ import { IAuthService } from "@/src/application/interfaces/auth-service.interfac
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { ShopBackendDepartmentsService } from "@/src/application/services/shop/backend/BackendDepartmentsService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
+// Define Department interface for backward compatibility with View
 export interface Department {
   id: string;
-  shopId: string;
   name: string;
+  slug: string;
   description: string | null;
   employeeCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: "active" | "inactive";
+  averageServiceTime?: number;
+  totalQueues?: number;
+  totalRevenue?: number;
 }
 
 // Define ViewModel interface
@@ -23,6 +30,16 @@ export interface DepartmentsViewModel {
   totalDepartments: number;
   totalEmployees: number;
   averageEmployeesPerDepartment: number;
+  activeDepartments: number;
+  inactiveDepartments: number;
+  filters: {
+    search: string;
+    status: "all" | "active" | "inactive";
+    minEmployeeCount?: number;
+    maxEmployeeCount?: number;
+  };
+  search: string;
+  status: "all" | "active" | "inactive";
 }
 
 // Main Presenter class
@@ -32,7 +49,8 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
     shopService: IShopService,
     authService: IAuthService,
     profileService: IProfileService,
-    subscriptionService: ISubscriptionService
+    subscriptionService: ISubscriptionService,
+    private readonly departmentsBackendService: ShopBackendDepartmentsService
   ) {
     super(
       logger,
@@ -43,27 +61,79 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
     );
   }
 
-  async getViewModel(shopId: string): Promise<DepartmentsViewModel> {
+  async getViewModel(
+    shopId: string,
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      statusFilter?: "all" | "active" | "inactive";
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    }
+  ): Promise<DepartmentsViewModel> {
     try {
-      this.logger.info("DepartmentsPresenter: Getting view model", { shopId });
+      this.logger.info("DepartmentsPresenter: Getting view model", { shopId, page, perPage, filters });
 
-      // Get departments data
-      const departments = await this.getDepartments(shopId);
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
 
-      // Calculate statistics
-      const totalDepartments = departments.length;
-      const totalEmployees = departments.reduce(
-        (sum, dept) => sum + dept.employeeCount,
-        0
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      // Get departments data with pagination and filters
+      const departmentsData = await this.departmentsBackendService.getDepartmentsData(
+        page,
+        perPage,
+        {
+          searchQuery: filters?.searchQuery,
+          shopFilter: shopId,
+          minEmployeeCount: filters?.minEmployeeCount,
+          maxEmployeeCount: filters?.maxEmployeeCount,
+        }
       );
-      const averageEmployeesPerDepartment =
-        totalDepartments > 0 ? totalEmployees / totalDepartments : 0;
+
+      const departments = departmentsData.departments;
+      const stats = departmentsData.stats;
+
+      // Transform DepartmentDTO to Department interface for View compatibility
+      const transformedDepartments: Department[] = departments.map(dept => ({
+        id: dept.id,
+        name: dept.name,
+        slug: dept.slug,
+        description: dept.description,
+        employeeCount: dept.employeeCount,
+        isActive: dept.isActive,
+        createdAt: dept.createdAt,
+        updatedAt: dept.updatedAt,
+        status: dept.isActive ? "active" : "inactive",
+        averageServiceTime: Math.floor(Math.random() * 30) + 10, // Mock data for now
+        totalQueues: Math.floor(Math.random() * 100), // Mock data for now
+        totalRevenue: Math.floor(Math.random() * 50000), // Mock data for now
+      }));
+
+      const activeDepartments = transformedDepartments.filter(d => d.status === "active").length;
+      const inactiveDepartments = transformedDepartments.filter(d => d.status === "inactive").length;
 
       return {
-        departments,
-        totalDepartments,
-        totalEmployees,
-        averageEmployeesPerDepartment,
+        departments: transformedDepartments,
+        totalDepartments: stats.totalDepartments,
+        totalEmployees: stats.totalEmployees,
+        averageEmployeesPerDepartment: stats.averageEmployeesPerDepartment,
+        activeDepartments,
+        inactiveDepartments,
+        filters: {
+          search: filters?.searchQuery || "",
+          status: filters?.statusFilter || "all",
+          minEmployeeCount: filters?.minEmployeeCount,
+          maxEmployeeCount: filters?.maxEmployeeCount,
+        },
+        search: filters?.searchQuery || "",
+        status: filters?.statusFilter || "all",
       };
     } catch (error) {
       this.logger.error(
@@ -74,62 +144,165 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
     }
   }
 
-  async getDepartments(shopId: string): Promise<Department[]> {
+  async getDepartments(
+    shopId: string,
+    page: number = 1,
+    perPage: number = 10,
+    filters?: {
+      searchQuery?: string;
+      statusFilter?: "all" | "active" | "inactive";
+      minEmployeeCount?: number;
+      maxEmployeeCount?: number;
+    }
+  ): Promise<Department[]> {
     this.logger.info(
-      "DepartmentsBackendService: Getting departments for shop",
-      { shopId }
+      "DepartmentsPresenter: Getting departments for shop",
+      { shopId, page, perPage, filters }
     );
 
-    // Mock data - replace with actual repository call
-    const mockDepartments: Department[] = [
-      {
-        id: "1",
-        shopId,
-        name: "แผนกตัดผม",
-        description: "แผนกที่ให้บริการตัดผมทุกประเภท",
-        employeeCount: 3,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-      {
-        id: "2",
-        shopId,
-        name: "แผนกย้อมสี",
-        description: "แผนกที่เชี่ยวชาญด้านการย้อมสีผม",
-        employeeCount: 2,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-      {
-        id: "3",
-        shopId,
-        name: "แผนกดัดผม",
-        description: "แผนกที่ให้บริการดัดผมและจัดแต่งทรงผม",
-        employeeCount: 2,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-      {
-        id: "4",
-        shopId,
-        name: "แผนกสระผม",
-        description: "แผนกที่ให้บริการสระผมและนวดศีรษะ",
-        employeeCount: 1,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-      {
-        id: "5",
-        shopId,
-        name: "แผนกบริหาร",
-        description: "แผนกที่ดูแลการบริหารจัดการร้าน",
-        employeeCount: 2,
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-    ];
+    try {
+      const user = await this.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
 
-    return mockDepartments;
+      const profile = await this.getActiveProfile(user);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const departmentsData = await this.departmentsBackendService.getDepartmentsData(
+        page,
+        perPage,
+        {
+          searchQuery: filters?.searchQuery,
+          shopFilter: shopId,
+          minEmployeeCount: filters?.minEmployeeCount,
+          maxEmployeeCount: filters?.maxEmployeeCount,
+        }
+      );
+
+      // Transform DepartmentDTO to Department interface for View compatibility
+      const transformedDepartments: Department[] = departmentsData.departments.map(dept => ({
+        id: dept.id,
+        name: dept.name,
+        slug: dept.slug,
+        description: dept.description,
+        employeeCount: dept.employeeCount,
+        isActive: dept.isActive,
+        createdAt: dept.createdAt,
+        updatedAt: dept.updatedAt,
+        status: dept.isActive ? "active" : "inactive",
+        averageServiceTime: Math.floor(Math.random() * 30) + 10, // Mock data for now
+        totalQueues: Math.floor(Math.random() * 100), // Mock data for now
+        totalRevenue: Math.floor(Math.random() * 50000), // Mock data for now
+      }));
+
+      return transformedDepartments;
+    } catch (error) {
+      this.logger.error(
+        "DepartmentsPresenter: Error getting departments",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // CRUD operations
+  async getDepartmentById(id: string): Promise<Department> {
+    this.logger.info("DepartmentsPresenter: Getting department by ID", { id });
+    try {
+      const departmentDTO = await this.departmentsBackendService.getDepartmentById(id);
+      
+      // Transform DepartmentDTO to Department interface
+      return {
+        id: departmentDTO.id,
+        name: departmentDTO.name,
+        slug: departmentDTO.slug,
+        description: departmentDTO.description,
+        employeeCount: departmentDTO.employeeCount,
+        isActive: departmentDTO.isActive,
+        createdAt: departmentDTO.createdAt,
+        updatedAt: departmentDTO.updatedAt,
+        status: departmentDTO.isActive ? "active" : "inactive",
+        averageServiceTime: Math.floor(Math.random() * 30) + 10,
+        totalQueues: Math.floor(Math.random() * 100),
+        totalRevenue: Math.floor(Math.random() * 50000),
+      };
+    } catch (error) {
+      this.logger.error("DepartmentsPresenter: Error getting department by ID", error);
+      throw error;
+    }
+  }
+
+  async createDepartment(params: {
+    shopId: string;
+    name: string;
+    slug: string;
+    description?: string | null;
+  }): Promise<Department> {
+    this.logger.info("DepartmentsPresenter: Creating department", { params });
+    try {
+      const departmentDTO = await this.departmentsBackendService.createDepartment(params);
+      
+      // Transform DepartmentDTO to Department interface
+      return {
+        id: departmentDTO.id,
+        name: departmentDTO.name,
+        slug: departmentDTO.slug,
+        description: departmentDTO.description,
+        employeeCount: departmentDTO.employeeCount,
+        isActive: departmentDTO.isActive,
+        createdAt: departmentDTO.createdAt,
+        updatedAt: departmentDTO.updatedAt,
+        status: departmentDTO.isActive ? "active" : "inactive",
+        averageServiceTime: Math.floor(Math.random() * 30) + 10,
+        totalQueues: Math.floor(Math.random() * 100),
+        totalRevenue: Math.floor(Math.random() * 50000),
+      };
+    } catch (error) {
+      this.logger.error("DepartmentsPresenter: Error creating department", error);
+      throw error;
+    }
+  }
+
+  async updateDepartment(id: string, params: {
+    name?: string;
+    slug?: string;
+    description?: string | null;
+  }): Promise<Department> {
+    this.logger.info("DepartmentsPresenter: Updating department", { id, params });
+    try {
+      const updateParams = {
+        id,
+        ...params
+      };
+      const departmentDTO = await this.departmentsBackendService.updateDepartment(id, updateParams);
+      
+      // Transform DepartmentDTO to Department interface
+      return {
+        id: departmentDTO.id,
+        name: departmentDTO.name,
+        slug: departmentDTO.slug,
+        description: departmentDTO.description,
+        employeeCount: departmentDTO.employeeCount,
+        isActive: departmentDTO.isActive,
+        createdAt: departmentDTO.createdAt,
+        updatedAt: departmentDTO.updatedAt,
+        status: departmentDTO.isActive ? "active" : "inactive",
+        averageServiceTime: Math.floor(Math.random() * 30) + 10,
+        totalQueues: Math.floor(Math.random() * 100),
+        totalRevenue: Math.floor(Math.random() * 50000),
+      };
+    } catch (error) {
+      this.logger.error("DepartmentsPresenter: Error updating department", error);
+      throw error;
+    }
+  }
+
+  async deleteDepartment(id: string): Promise<boolean> {
+    this.logger.info("DepartmentsPresenter: Deleting department", { id });
+    return await this.departmentsBackendService.deleteDepartment(id);
   }
 
   // Metadata generation
@@ -147,6 +320,10 @@ export class DepartmentsPresenterFactory {
   static async create(): Promise<DepartmentsPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
+    const departmentsBackendService =
+      serverContainer.resolve<ShopBackendDepartmentsService>(
+        "ShopBackendDepartmentsService"
+      );
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -154,12 +331,14 @@ export class DepartmentsPresenterFactory {
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
+    
     return new DepartmentsPresenter(
       logger,
       shopService,
       authService,
       profileService,
-      subscriptionService
+      subscriptionService,
+      departmentsBackendService
     );
   }
 }
@@ -169,6 +348,10 @@ export class ClientDepartmentsPresenterFactory {
   static async create(): Promise<DepartmentsPresenter> {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
+    const departmentsBackendService =
+      clientContainer.resolve<ShopBackendDepartmentsService>(
+        "ShopBackendDepartmentsService"
+      );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -182,7 +365,8 @@ export class ClientDepartmentsPresenterFactory {
       shopService,
       authService,
       profileService,
-      subscriptionService
+      subscriptionService,
+      departmentsBackendService
     );
   }
 }
