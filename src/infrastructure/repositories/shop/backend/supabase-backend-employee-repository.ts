@@ -371,6 +371,7 @@ export class SupabaseShopBackendEmployeeRepository
         permissions: employee.permissions,
         salary: employee.salary,
         notes: employee.notes,
+        profile_id: employee.profileId,
       };
 
       // Create employee in database

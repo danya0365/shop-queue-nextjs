@@ -1,7 +1,7 @@
 "use client";
 
 import type { CreateDepartmentDTO } from "@/src/application/dtos/shop/backend/department-dto";
-import { useState } from "react";
+import { useDepartmentFormState, type DepartmentFormData } from "@/src/presentation/hooks/shop/backend/useDepartmentFormState";
 
 interface CreateDepartmentModalProps {
   isOpen: boolean;
@@ -18,86 +18,46 @@ export function CreateDepartmentModal({
   loading = false,
   shopId,
 }: CreateDepartmentModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!shopId) {
-      newErrors.shopId = "ไม่พบข้อมูลร้านค้า กรุณารีเฟรชหน้าเว็บ";
-    }
-
-    if (!formData.name.trim()) {
-      newErrors.name = "กรุณากรอกชื่อแผนก";
-    }
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = "กรุณากรอก slug";
-    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug)) {
-      newErrors.slug =
-        "Slug ต้องประกอบด้วยตัวพิมพ์เล็ก ตัวเลข และขีดกลางเท่านั้น";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const {
+    formData,
+    errors,
+    validateForm,
+    updateField,
+    resetForm,
+  } = useDepartmentFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (validateForm(shopId)) {
       try {
         await onSubmit({
           shopId: shopId!,
           name: formData.name,
           slug: formData.slug,
-          description: formData.description || null,
+          description: formData.description || undefined,
         });
         onClose();
-        // Reset form
-        setFormData({
-          name: "",
-          slug: "",
-          description: "",
-        });
-        setErrors({});
+        resetForm();
       } catch (error) {
         console.error("Error creating department:", error);
       }
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
   // Auto-generate slug from name
   const handleNameChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      name: value,
-      slug: value
-        .toLowerCase()
-        .replace(/[^a-z0-9ก-๙\s]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim(),
-    }));
-    if (errors.name) {
-      setErrors((prev) => ({ ...prev, name: "" }));
-    }
-    if (errors.slug) {
-      setErrors((prev) => ({ ...prev, slug: "" }));
-    }
+    updateField("name", value);
+    const slug = value
+      .toLowerCase()
+      .replace(/[^a-z0-9ก-๙\s]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
+    updateField("slug", slug);
+  };
+
+  const handleInputChange = (field: keyof DepartmentFormData, value: string) => {
+    updateField(field, value);
   };
 
   if (!isOpen) return null;

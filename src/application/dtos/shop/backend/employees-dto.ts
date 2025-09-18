@@ -33,15 +33,15 @@ export interface CreateEmployeeParams {
   name: string;
   email?: string;
   phone?: string;
-  departmentId?: string;
+  departmentId: string;
   position: string;
-  shopId?: string;
+  shopId: string;
   status: EmployeeStatus;
   hireDate: string;
   permissions?: EmployeePermission[];
   salary?: number;
   notes?: string;
-  profileId: string; // Added for profile association
+  profileId: string;
 }
 
 export interface UpdateEmployeeParams {
