@@ -1,18 +1,12 @@
+import { Database } from "@/src/domain/types/supabase";
+
 /**
  * Database schemas for dashboard data
  * Following Clean Architecture principles for infrastructure schemas
  */
 
-export interface DashboardStatsSchema {
-  total_shops: number;
-  total_queues: number;
-  total_customers: number;
-  total_employees: number;
-  active_queues: number;
-  completed_queues_today: number;
-  total_revenue: number;
-  average_wait_time: number;
-}
+export type DashboardStatsByShopViewSchema =
+  Database["public"]["Views"]["dashboard_stats_by_shop_view"]["Row"];
 
 export interface RecentActivitySchema {
   id: string;

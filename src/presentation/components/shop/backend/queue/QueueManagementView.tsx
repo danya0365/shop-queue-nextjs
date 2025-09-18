@@ -12,11 +12,11 @@ import {
   useQueueManagementPresenter,
 } from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
 import { useState } from "react";
+import { QueueLimitsWarning } from "./components/QueueLimitsWarning";
 import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
 import { QRCodeModal } from "./modals/QRCodeModal";
-import { QueueLimitsWarning } from "./components/QueueLimitsWarning";
 
 interface QueueManagementViewProps {
   shopId: string;
@@ -143,7 +143,7 @@ export function QueueManagementView({
   const getStatusText = (status: string) => {
     switch (status) {
       case "waiting":
-        return "รอดำเนินการ";
+        return "รอยืนยัน";
       case "confirmed":
         return "ยืนยันแล้ว";
       case "serving":
@@ -436,7 +436,7 @@ export function QueueManagementView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  รอดำเนินการ
+                  รอยืนยัน
                 </p>
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                   {waitingCount}
@@ -507,7 +507,7 @@ export function QueueManagementView({
                   className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">ทั้งหมด</option>
-                  <option value="waiting">รอดำเนินการ</option>
+                  <option value="waiting">รอยืนยัน</option>
                   <option value="confirmed">ยืนยันแล้ว</option>
                   <option value="serving">กำลังให้บริการ</option>
                   <option value="completed">เสร็จสิ้น</option>

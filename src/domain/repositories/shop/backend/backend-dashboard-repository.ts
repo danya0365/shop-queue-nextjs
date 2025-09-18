@@ -2,17 +2,17 @@ import type {
   DashboardStatsEntity,
   PopularServiceEntity,
   QueueStatusDistributionEntity,
-  RecentActivityEntity
-} from '@/src/domain/entities/shop/backend/backend-dashboard.entity';
+  RecentActivityEntity,
+} from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
 
 /**
  * Error types for dashboard repository operations
  */
 export enum ShopBackendDashboardErrorType {
-  NOT_FOUND = 'NOT_FOUND',
-  OPERATION_FAILED = 'OPERATION_FAILED',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  UNKNOWN = 'UNKNOWN'
+  NOT_FOUND = "NOT_FOUND",
+  OPERATION_FAILED = "OPERATION_FAILED",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  UNKNOWN = "UNKNOWN",
 }
 
 /**
@@ -27,7 +27,7 @@ export class ShopBackendDashboardError extends Error {
     public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendDashboardError';
+    this.name = "ShopBackendDashboardError";
   }
 }
 
@@ -56,7 +56,10 @@ export interface ShopBackendDashboardRepository {
    * @param limit Number of services to return
    * @returns Array of popular service entities
    */
-  getPopularServices(shopId: string, limit?: number): Promise<PopularServiceEntity[]>;
+  getPopularServices(
+    shopId: string,
+    limit?: number
+  ): Promise<PopularServiceEntity[]>;
 
   /**
    * Get recent activities
@@ -64,7 +67,10 @@ export interface ShopBackendDashboardRepository {
    * @param limit Number of activities to return
    * @returns Array of recent activity entities
    */
-  getRecentActivities(shopId: string, limit?: number): Promise<RecentActivityEntity[]>;
+  getRecentActivities(
+    shopId: string,
+    limit?: number
+  ): Promise<RecentActivityEntity[]>;
 
   /**
    * Get queue statistics
@@ -73,6 +79,7 @@ export interface ShopBackendDashboardRepository {
    */
   getQueueStats(shopId: string): Promise<{
     waiting: number;
+    confirmed: number;
     serving: number;
     completed: number;
     cancelled: number;
@@ -87,6 +94,7 @@ export interface ShopBackendDashboardRepository {
     today: number;
     thisWeek: number;
     thisMonth: number;
+    lastMonth: number;
     growth: number;
   }>;
 

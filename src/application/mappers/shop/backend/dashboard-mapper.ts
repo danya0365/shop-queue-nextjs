@@ -1,14 +1,14 @@
 import type {
   DashboardDataDTO,
-  DashboardStatsDTO,
   PopularServicesDTO,
   QueueStatusDistributionDTO,
-  RecentActivityDTO
-} from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
+  RecentActivityDTO,
+  ShopDashboardStatsDTO,
+} from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 
 export class DashboardMapper {
   static toDashboardData(
-    stats: DashboardStatsDTO,
+    stats: ShopDashboardStatsDTO,
     recentActivities: RecentActivityDTO[],
     queueDistribution: QueueStatusDistributionDTO,
     popularServices: PopularServicesDTO[]
@@ -18,21 +18,21 @@ export class DashboardMapper {
       recentActivities,
       queueDistribution,
       popularServices,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
   }
 
   static formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB',
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: "THB",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   }
 
   static formatNumber(number: number): string {
-    return new Intl.NumberFormat('th-TH').format(number);
+    return new Intl.NumberFormat("th-TH").format(number);
   }
 
   static formatWaitTime(minutes: number): string {
@@ -49,9 +49,11 @@ export class DashboardMapper {
   static formatRelativeTime(timestamp: string): string {
     const now = new Date();
     const time = new Date(timestamp);
-    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+    const diffInMinutes = Math.floor(
+      (now.getTime() - time.getTime()) / (1000 * 60)
+    );
 
-    if (diffInMinutes < 1) return 'เมื่อสักครู่';
+    if (diffInMinutes < 1) return "เมื่อสักครู่";
     if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
 
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -61,33 +63,33 @@ export class DashboardMapper {
     return `${diffInDays} วันที่แล้ว`;
   }
 
-  static getActivityIcon(type: RecentActivityDTO['type']): string {
+  static getActivityIcon(type: RecentActivityDTO["type"]): string {
     switch (type) {
-      case 'queue_created':
-        return '🎫';
-      case 'queue_completed':
-        return '✅';
-      case 'customer_registered':
-        return '👤';
-      case 'shop_created':
-        return '🏪';
+      case "queue_created":
+        return "🎫";
+      case "queue_completed":
+        return "✅";
+      case "customer_registered":
+        return "👤";
+      case "shop_created":
+        return "🏪";
       default:
-        return '📋';
+        return "📋";
     }
   }
 
-  static getActivityColor(type: RecentActivityDTO['type']): string {
+  static getActivityColor(type: RecentActivityDTO["type"]): string {
     switch (type) {
-      case 'queue_created':
-        return 'text-blue-600 bg-blue-50';
-      case 'queue_completed':
-        return 'text-green-600 bg-green-50';
-      case 'customer_registered':
-        return 'text-purple-600 bg-purple-50';
-      case 'shop_created':
-        return 'text-orange-600 bg-orange-50';
+      case "queue_created":
+        return "text-blue-600 bg-blue-50";
+      case "queue_completed":
+        return "text-green-600 bg-green-50";
+      case "customer_registered":
+        return "text-purple-600 bg-purple-50";
+      case "shop_created":
+        return "text-orange-600 bg-orange-50";
       default:
-        return 'text-gray-600 bg-gray-50';
+        return "text-gray-600 bg-gray-50";
     }
   }
 }

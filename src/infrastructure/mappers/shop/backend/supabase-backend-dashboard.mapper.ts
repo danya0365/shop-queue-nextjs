@@ -2,13 +2,13 @@ import {
   DashboardStatsEntity,
   PopularServiceEntity,
   QueueStatusDistributionEntity,
-  RecentActivityEntity
+  RecentActivityEntity,
 } from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
 import {
-  DashboardStatsSchema,
+  DashboardStatsByShopViewSchema,
   PopularServiceSchema,
   QueueStatusDistributionSchema,
-  RecentActivitySchema
+  RecentActivitySchema,
 } from "@/src/infrastructure/schemas/shop/backend/dashboard.schema";
 
 /**
@@ -21,16 +21,17 @@ export class SupabaseShopBackendDashboardMapper {
    * @param schema Dashboard stats schema from database
    * @returns Dashboard stats domain entity
    */
-  static statsToEntity(schema: DashboardStatsSchema): DashboardStatsEntity {
+  static statsToEntity(
+    schema: DashboardStatsByShopViewSchema
+  ): DashboardStatsEntity {
     return {
-      totalShops: schema.total_shops,
-      totalQueues: schema.total_queues,
-      totalCustomers: schema.total_customers,
-      totalEmployees: schema.total_employees,
-      activeQueues: schema.active_queues,
-      completedQueuesToday: schema.completed_queues_today,
-      totalRevenue: schema.total_revenue,
-      averageWaitTime: schema.average_wait_time
+      totalQueues: schema.total_queues ?? 0,
+      totalCustomers: schema.total_customers ?? 0,
+      totalEmployees: schema.total_employees ?? 0,
+      activeQueues: schema.active_queues ?? 0,
+      completedQueuesToday: schema.completed_queues_today ?? 0,
+      totalRevenue: schema.total_revenue ?? 0,
+      averageWaitTime: schema.average_wait_time_minutes ?? 0,
     };
   }
 
@@ -39,13 +40,15 @@ export class SupabaseShopBackendDashboardMapper {
    * @param schema Queue distribution schema from database
    * @returns Queue distribution domain entity
    */
-  static queueDistributionToEntity(schema: QueueStatusDistributionSchema): QueueStatusDistributionEntity {
+  static queueDistributionToEntity(
+    schema: QueueStatusDistributionSchema
+  ): QueueStatusDistributionEntity {
     return {
       waiting: schema.waiting,
       serving: schema.serving,
       completed: schema.completed,
       cancelled: schema.cancelled,
-      noShow: schema.no_show
+      noShow: schema.no_show,
     };
   }
 
@@ -54,13 +57,15 @@ export class SupabaseShopBackendDashboardMapper {
    * @param schema Popular service schema from database
    * @returns Popular service domain entity
    */
-  static popularServiceToEntity(schema: PopularServiceSchema): PopularServiceEntity {
+  static popularServiceToEntity(
+    schema: PopularServiceSchema
+  ): PopularServiceEntity {
     return {
       id: schema.id,
       name: schema.name,
       queueCount: schema.queue_count,
       revenue: schema.revenue,
-      category: schema.category
+      category: schema.category,
     };
   }
 
@@ -69,14 +74,16 @@ export class SupabaseShopBackendDashboardMapper {
    * @param schema Recent activity schema from database
    * @returns Recent activity domain entity
    */
-  static recentActivityToEntity(schema: RecentActivitySchema): RecentActivityEntity {
+  static recentActivityToEntity(
+    schema: RecentActivitySchema
+  ): RecentActivityEntity {
     return {
       id: schema.id,
-      type: schema.type as RecentActivityEntity['type'],
+      type: schema.type as RecentActivityEntity["type"],
       title: schema.title,
       description: schema.description,
       created_at: schema.created_at,
-      metadata: schema.metadata
+      metadata: schema.metadata,
     };
   }
 }

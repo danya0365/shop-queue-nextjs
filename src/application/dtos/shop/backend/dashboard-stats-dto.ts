@@ -1,7 +1,6 @@
 import { ActivityType } from "@/src/domain/entities/backend/backend-dashboard.entity";
 
-export interface DashboardStatsDTO {
-  totalShops: number;
+export interface ShopDashboardStatsDTO {
   totalQueues: number;
   totalCustomers: number;
   totalEmployees: number;
@@ -37,7 +36,7 @@ export interface PopularServicesDTO {
 }
 
 export interface DashboardDataDTO {
-  stats: DashboardStatsDTO;
+  stats: ShopDashboardStatsDTO;
   recentActivities: RecentActivityDTO[];
   queueDistribution: QueueStatusDistributionDTO;
   popularServices: PopularServicesDTO[];

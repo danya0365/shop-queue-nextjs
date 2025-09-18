@@ -1,40 +1,41 @@
-import type { DashboardStatsDTO } from '@/src/application/dtos/shop/backend/dashboard-stats-dto';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import type { ShopBackendDashboardRepository } from '@/src/domain/repositories/shop/backend/backend-dashboard-repository';
+import type { ShopDashboardStatsDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import type { ShopBackendDashboardRepository } from "@/src/domain/repositories/shop/backend/backend-dashboard-repository";
 
 export interface IGetDashboardStatsUseCase {
-  execute(shopId: string): Promise<DashboardStatsDTO>;
+  execute(shopId: string): Promise<ShopDashboardStatsDTO>;
 }
 
 export class GetDashboardStatsUseCase implements IGetDashboardStatsUseCase {
   constructor(
     private readonly dashboardRepository: ShopBackendDashboardRepository,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
-  async execute(shopId: string): Promise<DashboardStatsDTO> {
+  async execute(shopId: string): Promise<ShopDashboardStatsDTO> {
     try {
-      this.logger.info('GetDashboardStatsUseCase: Executing dashboard stats retrieval', { shopId });
-
       // Get dashboard stats from repository
-      const dashboardStats = await this.dashboardRepository.getDashboardStats(shopId);
+      const dashboardStats = await this.dashboardRepository.getDashboardStats(
+        shopId
+      );
 
       // Map domain entity to DTO
-      const stats: DashboardStatsDTO = {
-        totalShops: dashboardStats.totalShops,
+      const stats: ShopDashboardStatsDTO = {
         totalQueues: dashboardStats.totalQueues,
         totalCustomers: dashboardStats.totalCustomers,
         totalEmployees: dashboardStats.totalEmployees,
         activeQueues: dashboardStats.activeQueues,
         completedQueuesToday: dashboardStats.completedQueuesToday,
         totalRevenue: dashboardStats.totalRevenue,
-        averageWaitTime: dashboardStats.averageWaitTime
+        averageWaitTime: dashboardStats.averageWaitTime,
       };
 
-      this.logger.info('GetDashboardStatsUseCase: Successfully retrieved dashboard stats', { shopId });
       return stats;
     } catch (error) {
-      this.logger.error('GetDashboardStatsUseCase: Error retrieving dashboard stats', error);
+      this.logger.error(
+        "GetDashboardStatsUseCase: Error retrieving dashboard stats",
+        error
+      );
       throw error;
     }
   }

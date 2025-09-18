@@ -1,9 +1,13 @@
-'use client';
+"use client";
 
-import type { Feature, LandingViewModel, QueueItem } from '@/src/presentation/presenters/landing/LandingPresenter';
-import { useLandingPresenter } from '@/src/presentation/presenters/landing/useLandingPresenter';
-import Link from 'next/link';
-import { useState } from 'react';
+import type {
+  Feature,
+  LandingViewModel,
+  QueueItem,
+} from "@/src/presentation/presenters/landing/LandingPresenter";
+import { useLandingPresenter } from "@/src/presentation/presenters/landing/useLandingPresenter";
+import Link from "next/link";
+import { useState } from "react";
 
 interface LandingViewProps {
   viewModel: LandingViewModel;
@@ -12,41 +16,41 @@ interface LandingViewProps {
 export function LandingView({ viewModel }: LandingViewProps) {
   const { features, stats, benefits, queueDemo } = viewModel;
   const [state, actions] = useLandingPresenter();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
-  const getStatusColor = (status: QueueItem['status']) => {
+  const getStatusColor = (status: QueueItem["status"]) => {
     switch (status) {
-      case 'waiting':
-        return 'bg-waiting text-white';
-      case 'confirmed':
-        return 'bg-info text-white';
-      case 'served':
-        return 'bg-serving text-white';
-      case 'canceled':
-        return 'bg-cancelled text-white';
+      case "waiting":
+        return "bg-waiting text-white";
+      case "confirmed":
+        return "bg-info text-white";
+      case "served":
+        return "bg-serving text-white";
+      case "canceled":
+        return "bg-cancelled text-white";
       default:
-        return 'bg-muted text-white';
+        return "bg-muted text-white";
     }
   };
 
-  const getStatusText = (status: QueueItem['status']) => {
+  const getStatusText = (status: QueueItem["status"]) => {
     switch (status) {
-      case 'waiting':
-        return 'รอดำเนินการ';
-      case 'confirmed':
-        return 'ยืนยันแล้ว';
-      case 'served':
-        return 'ให้บริการแล้ว';
-      case 'canceled':
-        return 'ยกเลิก';
+      case "waiting":
+        return "รอยืนยัน";
+      case "confirmed":
+        return "ยืนยันแล้ว";
+      case "served":
+        return "ให้บริการแล้ว";
+      case "canceled":
+        return "ยกเลิก";
       default:
         return status;
     }
   };
 
-  const ownerFeatures = features.filter(f => f.category === 'owner');
-  const staffFeatures = features.filter(f => f.category === 'staff');
-  const customerFeatures = features.filter(f => f.category === 'customer');
+  const ownerFeatures = features.filter((f) => f.category === "owner");
+  const staffFeatures = features.filter((f) => f.category === "staff");
+  const customerFeatures = features.filter((f) => f.category === "customer");
 
   return (
     <div className="min-h-screen">
@@ -91,8 +95,18 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   className="group bg-white text-hero-text-accent px-8 py-4 rounded-xl font-semibold text-lg hover:bg-hero-button-bg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center"
                 >
                   เริ่มต้นใช้งาน
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  <svg
+                    className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
                   </svg>
                 </Link>
                 <Link
@@ -100,8 +114,18 @@ export function LandingView({ viewModel }: LandingViewProps) {
                   className="group border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 backdrop-blur-sm transition-all duration-300 flex items-center justify-center"
                 >
                   ดูการทำงาน
-                  <svg className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </Link>
               </div>
@@ -109,20 +133,44 @@ export function LandingView({ viewModel }: LandingViewProps) {
               {/* Trust Indicators */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-hero-text-light">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-5 h-5 text-hero-status-active mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span className="text-sm">ใช้งานฟรี 30 วัน</span>
                 </div>
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-5 h-5 text-hero-status-active mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span className="text-sm">ไม่ต้องติดตั้ง</span>
                 </div>
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-hero-status-active mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-5 h-5 text-hero-status-active mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span className="text-sm">รองรับทุกอุปกรณ์</span>
                 </div>
@@ -134,7 +182,9 @@ export function LandingView({ viewModel }: LandingViewProps) {
               {/* Main Demo Card */}
               <div className="bg-hero-card-bg backdrop-blur-lg rounded-2xl p-6 border border-hero-card-border shadow-2xl hero-glow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-hero-card-text">คิวปัจจุบัน</h3>
+                  <h3 className="text-lg font-semibold text-hero-card-text">
+                    คิวปัจจุบัน
+                  </h3>
                   <div className="flex items-center text-hero-status-active">
                     <div className="w-2 h-2 bg-hero-status-active rounded-full mr-2 animate-pulse"></div>
                     <span className="text-sm">ออนไลน์</span>
@@ -144,21 +194,45 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 {/* Queue Items */}
                 <div className="space-y-3">
                   {[
-                    { number: 'A001', name: 'คุณสมชาย', status: 'กำลังให้บริการ', color: 'bg-hero-status-active' },
-                    { number: 'A002', name: 'คุณสมหญิง', status: 'รอ 5 นาที', color: 'bg-hero-status-waiting' },
-                    { number: 'A003', name: 'คุณสมศักดิ์', status: 'รอ 12 นาที', color: 'bg-hero-status-pending' }
+                    {
+                      number: "A001",
+                      name: "คุณสมชาย",
+                      status: "กำลังให้บริการ",
+                      color: "bg-hero-status-active",
+                    },
+                    {
+                      number: "A002",
+                      name: "คุณสมหญิง",
+                      status: "รอ 5 นาที",
+                      color: "bg-hero-status-waiting",
+                    },
+                    {
+                      number: "A003",
+                      name: "คุณสมศักดิ์",
+                      status: "รอ 12 นาที",
+                      color: "bg-hero-status-pending",
+                    },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-hero-card-bg rounded-lg border border-hero-card-border">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-hero-card-bg rounded-lg border border-hero-card-border"
+                    >
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-hero-card-bg rounded-lg flex items-center justify-center font-bold text-hero-card-text mr-3 border border-hero-card-border">
                           {item.number}
                         </div>
                         <div>
-                          <div className="text-hero-card-text font-medium">{item.name}</div>
-                          <div className="text-hero-card-text-muted text-sm">{item.status}</div>
+                          <div className="text-hero-card-text font-medium">
+                            {item.name}
+                          </div>
+                          <div className="text-hero-card-text-muted text-sm">
+                            {item.status}
+                          </div>
                         </div>
                       </div>
-                      <div className={`w-3 h-3 ${item.color} rounded-full`}></div>
+                      <div
+                        className={`w-3 h-3 ${item.color} rounded-full`}
+                      ></div>
                     </div>
                   ))}
                 </div>
@@ -166,16 +240,28 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-hero-card-border">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-hero-card-text">24</div>
-                    <div className="text-xs text-hero-card-text-muted">วันนี้</div>
+                    <div className="text-2xl font-bold text-hero-card-text">
+                      24
+                    </div>
+                    <div className="text-xs text-hero-card-text-muted">
+                      วันนี้
+                    </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-hero-card-text">8</div>
-                    <div className="text-xs text-hero-card-text-muted">นาที</div>
+                    <div className="text-2xl font-bold text-hero-card-text">
+                      8
+                    </div>
+                    <div className="text-xs text-hero-card-text-muted">
+                      นาที
+                    </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-hero-card-text">3</div>
-                    <div className="text-xs text-hero-card-text-muted">รอคิว</div>
+                    <div className="text-2xl font-bold text-hero-card-text">
+                      3
+                    </div>
+                    <div className="text-xs text-hero-card-text-muted">
+                      รอคิว
+                    </div>
                   </div>
                 </div>
               </div>
@@ -183,8 +269,16 @@ export function LandingView({ viewModel }: LandingViewProps) {
               {/* Floating Cards */}
               <div className="absolute -top-4 -right-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-bounce">
                 <div className="flex items-center text-white">
-                  <svg className="w-4 h-4 mr-2 text-hero-status-active" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-4 h-4 mr-2 text-hero-status-active"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span className="text-sm font-medium">เรียลไทม์</span>
                 </div>
@@ -192,7 +286,11 @@ export function LandingView({ viewModel }: LandingViewProps) {
 
               <div className="absolute -bottom-4 -left-4 bg-white/15 backdrop-blur-sm rounded-lg p-3 border border-white/20 animate-pulse">
                 <div className="flex items-center text-white">
-                  <svg className="w-4 h-4 mr-2 text-hero-accent-soft" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 h-4 mr-2 text-hero-accent-soft"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-sm font-medium">อัตโนมัติ</span>
@@ -205,7 +303,10 @@ export function LandingView({ viewModel }: LandingViewProps) {
         {/* Bottom Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 120" className="w-full h-auto">
-            <path fill="rgba(255,255,255,0.1)" d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
+            <path
+              fill="rgba(255,255,255,0.1)"
+              d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+            ></path>
           </svg>
         </div>
       </section>
@@ -223,9 +324,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 <div className="text-lg font-semibold text-foreground mb-1">
                   {stat.label}
                 </div>
-                <div className="text-sm text-muted">
-                  {stat.description}
-                </div>
+                <div className="text-sm text-muted">{stat.description}</div>
               </div>
             ))}
           </div>
@@ -289,9 +388,7 @@ export function LandingView({ viewModel }: LandingViewProps) {
             <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-4">
               ดูการทำงานแบบเรียลไทม์
             </h2>
-            <p className="text-xl text-muted">
-              ตัวอย่างระบบคิวที่ทำงานจริง
-            </p>
+            <p className="text-xl text-muted">ตัวอย่างระบบคิวที่ทำงานจริง</p>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -346,7 +443,11 @@ export function LandingView({ viewModel }: LandingViewProps) {
                         </div>
                       </div>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(queue.status)}`}>
+                    <div
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
+                        queue.status
+                      )}`}
+                    >
                       {getStatusText(queue.status)}
                     </div>
                   </div>
@@ -396,7 +497,8 @@ export function LandingView({ viewModel }: LandingViewProps) {
               ทดลองใช้งานระบบ
             </h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
-              เข้าถึงระบบจัดการคิวในมุมมองต่างๆ เพื่อสัมผัสประสบการณ์การใช้งานจริง
+              เข้าถึงระบบจัดการคิวในมุมมองต่างๆ
+              เพื่อสัมผัสประสบการณ์การใช้งานจริง
             </p>
           </div>
 
@@ -406,7 +508,8 @@ export function LandingView({ viewModel }: LandingViewProps) {
               <div className="text-6xl mb-6">🏪</div>
               <h3 className="text-3xl font-bold mb-4">ระบบจัดการร้านค้า</h3>
               <p className="text-white/80 mb-8 leading-relaxed text-lg">
-                เข้าสู่ระบบเพื่อจัดการร้านค้าของคุณ สร้างร้านใหม่ หรือเข้าถึงระบบจัดการที่มีอยู่แล้ว
+                เข้าสู่ระบบเพื่อจัดการร้านค้าของคุณ สร้างร้านใหม่
+                หรือเข้าถึงระบบจัดการที่มีอยู่แล้ว
               </p>
               <Link
                 href="/dashboard"
@@ -420,19 +523,33 @@ export function LandingView({ viewModel }: LandingViewProps) {
           {/* Quick Access Info */}
           <div className="mt-16 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-4xl mx-auto border border-white/20">
-              <h4 className="text-xl font-semibold mb-4">🚀 เส้นทางการใช้งาน</h4>
+              <h4 className="text-xl font-semibold mb-4">
+                🚀 เส้นทางการใช้งาน
+              </h4>
               <div className="grid md:grid-cols-3 gap-6 text-sm">
                 <div>
-                  <div className="font-semibold text-blue-200 mb-2">1. เข้าสู่ระบบ</div>
-                  <div className="text-white/80">เข้าสู่แดชบอร์ด → เลือกร้าน → เข้าสู่ระบบจัดการ</div>
+                  <div className="font-semibold text-blue-200 mb-2">
+                    1. เข้าสู่ระบบ
+                  </div>
+                  <div className="text-white/80">
+                    เข้าสู่แดชบอร์ด → เลือกร้าน → เข้าสู่ระบบจัดการ
+                  </div>
                 </div>
                 <div>
-                  <div className="font-semibold text-green-200 mb-2">2. จัดการร้าน</div>
-                  <div className="text-white/80">สร้างร้านใหม่ → ตั้งค่าระบบ → เพิ่มพนักงาน</div>
+                  <div className="font-semibold text-green-200 mb-2">
+                    2. จัดการร้าน
+                  </div>
+                  <div className="text-white/80">
+                    สร้างร้านใหม่ → ตั้งค่าระบบ → เพิ่มพนักงาน
+                  </div>
                 </div>
                 <div>
-                  <div className="font-semibold text-orange-200 mb-2">3. เริ่มใช้งาน</div>
-                  <div className="text-white/80">เปิดระบบคิว → รับลูกค้า → ติดตามสถิติ</div>
+                  <div className="font-semibold text-orange-200 mb-2">
+                    3. เริ่มใช้งาน
+                  </div>
+                  <div className="text-white/80">
+                    เปิดระบบคิว → รับลูกค้า → ติดตามสถิติ
+                  </div>
                 </div>
               </div>
             </div>
@@ -447,7 +564,8 @@ export function LandingView({ viewModel }: LandingViewProps) {
             พร้อมเริ่มต้นแล้วหรือยัง?
           </h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            เริ่มใช้งาน Shop Queue วันนี้ และสัมผัสประสบการณ์การจัดการคิวที่ไม่เหมือนใคร
+            เริ่มใช้งาน Shop Queue วันนี้
+            และสัมผัสประสบการณ์การจัดการคิวที่ไม่เหมือนใคร
           </p>
 
           {/* Newsletter Subscription */}
@@ -466,14 +584,20 @@ export function LandingView({ viewModel }: LandingViewProps) {
                 disabled={state.isLoading || state.isSubscribed}
                 className="bg-secondary text-white px-6 py-3 rounded-lg font-semibold hover:bg-secondary-dark transition-colors disabled:opacity-50"
               >
-                {state.isLoading ? 'กำลังส่ง...' : state.isSubscribed ? 'สำเร็จ!' : 'สมัคร'}
+                {state.isLoading
+                  ? "กำลังส่ง..."
+                  : state.isSubscribed
+                  ? "สำเร็จ!"
+                  : "สมัคร"}
               </button>
             </div>
             {state.error && (
               <p className="text-error text-sm mt-2">{state.error}</p>
             )}
             {state.isSubscribed && (
-              <p className="text-success text-sm mt-2">ขอบคุณที่สมัครรับข่าวสาร!</p>
+              <p className="text-success text-sm mt-2">
+                ขอบคุณที่สมัครรับข่าวสาร!
+              </p>
             )}
           </div>
 
@@ -504,9 +628,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
       <h3 className="text-xl font-semibold text-foreground mb-3">
         {feature.title}
       </h3>
-      <p className="text-muted leading-relaxed">
-        {feature.description}
-      </p>
+      <p className="text-muted leading-relaxed">{feature.description}</p>
     </div>
   );
 }

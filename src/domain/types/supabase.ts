@@ -96,6 +96,20 @@ export type Database = {
             foreignKeyName: "category_shops_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "category_shops_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "category_shops_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -251,6 +265,20 @@ export type Database = {
             foreignKeyName: "customer_points_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "customer_points_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "customer_points_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -331,6 +359,20 @@ export type Database = {
             foreignKeyName: "customers_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "customers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "customers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -377,6 +419,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -486,6 +542,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "employees_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "employees_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -609,6 +679,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: true
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1097,6 +1181,20 @@ export type Database = {
             foreignKeyName: "promotions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -1262,6 +1360,20 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -1394,6 +1506,20 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -1478,6 +1604,20 @@ export type Database = {
             foreignKeyName: "rewards_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -1548,6 +1688,20 @@ export type Database = {
             foreignKeyName: "services_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -1594,6 +1748,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_activity_log_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_activity_log_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1655,6 +1823,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_opening_hours_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_opening_hours_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -1833,6 +2015,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: true
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "shop_settings_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2139,6 +2335,20 @@ export type Database = {
             foreignKeyName: "subscription_usage_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "subscription_usage_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -2208,16 +2418,97 @@ export type Database = {
         }
         Relationships: []
       }
-      dashboard_stats_view: {
+      dashboard_stats_by_shop_view: {
         Row: {
+          active_customers: number | null
+          active_employees: number | null
+          active_promotions: number | null
           active_queues: number | null
-          average_wait_time: number | null
+          active_rewards: number | null
+          available_services: number | null
+          average_rating: number | null
+          average_service_time_minutes: number | null
+          average_wait_time_minutes: number | null
           completed_queues_today: number | null
+          customers_visited_today: number | null
+          employees_on_duty: number | null
+          paid_payments: number | null
+          pending_payments: number | null
+          promotions_used_today: number | null
+          revenue_today: number | null
+          reward_usages_today: number | null
+          serving_queues: number | null
+          shop_id: string | null
+          shop_name: string | null
+          shop_slug: string | null
+          shop_status: Database["public"]["Enums"]["shop_status"] | null
+          stats_generated_at: string | null
           total_customers: number | null
           total_employees: number | null
+          total_points_earned: number | null
+          total_points_redeemed: number | null
           total_queues: number | null
           total_revenue: number | null
+          total_reviews: number | null
+          total_services: number | null
+          waiting_queues: number | null
+        }
+        Relationships: []
+      }
+      dashboard_stats_summary_view: {
+        Row: {
+          active_categories: number | null
+          active_customers: number | null
+          active_employees: number | null
+          active_promotions: number | null
+          active_queues: number | null
+          active_reward_usages: number | null
+          active_rewards: number | null
+          active_shops: number | null
+          available_services: number | null
+          average_rating: number | null
+          average_service_time_minutes: number | null
+          average_wait_time_minutes: number | null
+          bronze_members: number | null
+          cancelled_queues: number | null
+          completed_queues: number | null
+          completed_queues_today: number | null
+          confirmed_queues: number | null
+          current_points_balance: number | null
+          customers_visited_today: number | null
+          draft_shops: number | null
+          employees_on_duty: number | null
+          gold_members: number | null
+          inactive_employees: number | null
+          inactive_shops: number | null
+          new_customers_today: number | null
+          paid_payments: number | null
+          partial_payments: number | null
+          platinum_members: number | null
+          promotions_used_today: number | null
+          queues_created_today: number | null
+          revenue_today: number | null
+          reward_usages_today: number | null
+          serving_queues: number | null
+          silver_members: number | null
+          stats_date: string | null
+          stats_generated_at: string | null
+          total_active_promotions: number | null
+          total_categories: number | null
+          total_customers: number | null
+          total_departments: number | null
+          total_employees: number | null
+          total_points_earned: number | null
+          total_points_redeemed: number | null
+          total_promotion_usage: number | null
+          total_queues: number | null
+          total_revenue: number | null
+          total_reviews: number | null
+          total_services: number | null
           total_shops: number | null
+          unavailable_services: number | null
+          unpaid_payments: number | null
+          waiting_queues: number | null
         }
         Relationships: []
       }
@@ -2234,6 +2525,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2267,6 +2572,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "departments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2332,6 +2651,20 @@ export type Database = {
             foreignKeyName: "reward_usages_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -2358,6 +2691,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2405,6 +2752,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2465,6 +2826,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2542,6 +2917,20 @@ export type Database = {
             foreignKeyName: "promotions_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "promotions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -2595,6 +2984,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2659,6 +3062,20 @@ export type Database = {
             foreignKeyName: "queues_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -2690,6 +3107,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2734,6 +3165,54 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_stats_by_shop_view: {
+        Row: {
+          average_daily_revenue: number | null
+          average_payment_amount: number | null
+          average_queue_value: number | null
+          card_payments: number | null
+          card_revenue: number | null
+          cash_payments: number | null
+          cash_revenue: number | null
+          currency: string | null
+          daily_growth_percentage: number | null
+          monthly_growth_percentage: number | null
+          most_revenue_service_amount: number | null
+          most_revenue_service_name: string | null
+          paid_payments: number | null
+          partial_payments: number | null
+          payments_last_month: number | null
+          payments_last_week: number | null
+          payments_this_month: number | null
+          payments_this_week: number | null
+          payments_today: number | null
+          payments_yesterday: number | null
+          pending_payments: number | null
+          qr_payments: number | null
+          qr_revenue: number | null
+          revenue_last_month: number | null
+          revenue_last_week: number | null
+          revenue_this_month: number | null
+          revenue_this_week: number | null
+          revenue_today: number | null
+          revenue_yesterday: number | null
+          shop_id: string | null
+          shop_name: string | null
+          shop_slug: string | null
+          shop_status: Database["public"]["Enums"]["shop_status"] | null
+          stats_generated_at: string | null
+          total_paid_amount: number | null
+          total_partial_amount: number | null
+          total_payments: number | null
+          total_pending_amount: number | null
+          total_revenue: number | null
+          total_service_revenue: number | null
+          transfer_payments: number | null
+          transfer_revenue: number | null
+          weekly_growth_percentage: number | null
+        }
+        Relationships: []
+      }
       reward_stats_by_redemption_type_view: {
         Row: {
           active_redemptions: number | null
@@ -2752,6 +3231,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -2826,6 +3319,20 @@ export type Database = {
             foreignKeyName: "rewards_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shop_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
@@ -2865,6 +3372,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {
@@ -3000,6 +3521,20 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
             referencedColumns: ["shop_id"]
           },
           {

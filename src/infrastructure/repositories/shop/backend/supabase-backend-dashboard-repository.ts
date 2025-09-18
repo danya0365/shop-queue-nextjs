@@ -2,38 +2,45 @@ import {
   DashboardStatsEntity,
   PopularServiceEntity,
   QueueStatusDistributionEntity,
-  RecentActivityEntity
+  RecentActivityEntity,
 } from "@/src/domain/entities/shop/backend/backend-dashboard.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection, FilterOperator } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import {
   ShopBackendDashboardError,
   ShopBackendDashboardErrorType,
-  ShopBackendDashboardRepository
+  ShopBackendDashboardRepository,
 } from "@/src/domain/repositories/shop/backend/backend-dashboard-repository";
 import { SupabaseShopBackendDashboardMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-dashboard.mapper";
 import {
-  DashboardStatsSchema,
+  DashboardStatsByShopViewSchema,
   PopularServiceSchema,
   QueueStatusDistributionSchema,
-  RecentActivitySchema
+  RecentActivitySchema,
 } from "@/src/infrastructure/schemas/shop/backend/dashboard.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
-type DashboardStatsSchemaRecord = Record<string, unknown> & DashboardStatsSchema;
-type PopularServiceSchemaRecord = Record<string, unknown> & PopularServiceSchema;
-type QueueStatusDistributionSchemaRecord = Record<string, unknown> & QueueStatusDistributionSchema;
-type RecentActivitySchemaRecord = Record<string, unknown> & RecentActivitySchema;
+type PopularServiceSchemaRecord = Record<string, unknown> &
+  PopularServiceSchema;
+type QueueStatusDistributionSchemaRecord = Record<string, unknown> &
+  QueueStatusDistributionSchema;
+type RecentActivitySchemaRecord = Record<string, unknown> &
+  RecentActivitySchema;
 
 /**
  * Supabase implementation of the dashboard repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendDashboardRepository extends StandardRepository implements ShopBackendDashboardRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendDashboardRepository
+  extends StandardRepository
+  implements ShopBackendDashboardRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendDashboard");
   }
 
@@ -46,29 +53,29 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
-        ]
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
       };
 
       // Assuming a view exists for dashboard statistics
-      const statsData = await this.dataSource.getAdvanced<DashboardStatsSchemaRecord>(
-        'dashboard_stats_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<DashboardStatsByShopViewSchema>(
+          "dashboard_stats_by_shop_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
         return {
-          totalShops: 0,
           totalQueues: 0,
           totalCustomers: 0,
           totalEmployees: 0,
           activeQueues: 0,
           completedQueuesToday: 0,
           totalRevenue: 0,
-          averageWaitTime: 0
+          averageWaitTime: 0,
         };
       }
 
@@ -79,11 +86,11 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         throw error;
       }
 
-      this.logger.error('Error in getDashboardStats', { error, shopId });
+      this.logger.error("Error in getDashboardStats", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching dashboard statistics',
-        'getDashboardStats',
+        "An unexpected error occurred while fetching dashboard statistics",
+        "getDashboardStats",
         { shopId },
         error
       );
@@ -95,21 +102,24 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
    * @param shopId The shop ID
    * @returns Queue status distribution entity
    */
-  async getQueueDistribution(shopId: string): Promise<QueueStatusDistributionEntity> {
+  async getQueueDistribution(
+    shopId: string
+  ): Promise<QueueStatusDistributionEntity> {
     try {
       // Use getAdvanced to fetch queue distribution data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
-        ]
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
       };
 
       // Assuming a view exists for queue distribution
-      const distributionData = await this.dataSource.getAdvanced<QueueStatusDistributionSchemaRecord>(
-        'queue_status_distribution_view',
-        queryOptions
-      );
+      const distributionData =
+        await this.dataSource.getAdvanced<QueueStatusDistributionSchemaRecord>(
+          "queue_status_distribution_view",
+          queryOptions
+        );
 
       if (!distributionData || distributionData.length === 0) {
         // If no distribution data is found, return default values
@@ -118,22 +128,24 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
           serving: 0,
           completed: 0,
           cancelled: 0,
-          noShow: 0
+          noShow: 0,
         };
       }
 
       // Map database results to domain entity
-      return SupabaseShopBackendDashboardMapper.queueDistributionToEntity(distributionData[0]);
+      return SupabaseShopBackendDashboardMapper.queueDistributionToEntity(
+        distributionData[0]
+      );
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
       }
 
-      this.logger.error('Error in getQueueDistribution', { error, shopId });
+      this.logger.error("Error in getQueueDistribution", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queue distribution',
-        'getQueueDistribution',
+        "An unexpected error occurred while fetching queue distribution",
+        "getQueueDistribution",
         { shopId },
         error
       );
@@ -146,42 +158,52 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
    * @param limit Number of services to return (default: 5)
    * @returns Array of popular service entities
    */
-  async getPopularServices(shopId: string, limit: number = 5): Promise<PopularServiceEntity[]> {
+  async getPopularServices(
+    shopId: string,
+    limit: number = 5
+  ): Promise<PopularServiceEntity[]> {
     try {
       // Use getAdvanced to fetch popular services data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
         ],
-        sort: [{ field: 'queue_count', direction: SortDirection.DESC }],
+        sort: [{ field: "queue_count", direction: SortDirection.DESC }],
         pagination: {
-          limit
-        }
+          limit,
+        },
       };
 
       // Assuming a view exists for popular services
-      const servicesData = await this.dataSource.getAdvanced<PopularServiceSchemaRecord>(
-        'popular_services_view',
-        queryOptions
-      );
+      const servicesData =
+        await this.dataSource.getAdvanced<PopularServiceSchemaRecord>(
+          "popular_services_view",
+          queryOptions
+        );
 
       if (!servicesData || servicesData.length === 0) {
         return [];
       }
 
       // Map database results to domain entities
-      return servicesData.map(service => SupabaseShopBackendDashboardMapper.popularServiceToEntity(service));
+      return servicesData.map((service) =>
+        SupabaseShopBackendDashboardMapper.popularServiceToEntity(service)
+      );
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
       }
 
-      this.logger.error('Error in getPopularServices', { error, shopId, limit });
+      this.logger.error("Error in getPopularServices", {
+        error,
+        shopId,
+        limit,
+      });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching popular services',
-        'getPopularServices',
+        "An unexpected error occurred while fetching popular services",
+        "getPopularServices",
         { shopId, limit },
         error
       );
@@ -194,42 +216,52 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
    * @param limit Number of activities to return (default: 5)
    * @returns Array of recent activity entities
    */
-  async getRecentActivities(shopId: string, limit: number = 5): Promise<RecentActivityEntity[]> {
+  async getRecentActivities(
+    shopId: string,
+    limit: number = 5
+  ): Promise<RecentActivityEntity[]> {
     try {
       // Use getAdvanced to fetch recent activities data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
-          limit
-        }
+          limit,
+        },
       };
 
       // Assuming a view or table exists for recent activities
-      const activitiesData = await this.dataSource.getAdvanced<RecentActivitySchemaRecord>(
-        'shop_activity_log',
-        queryOptions
-      );
+      const activitiesData =
+        await this.dataSource.getAdvanced<RecentActivitySchemaRecord>(
+          "shop_activity_log",
+          queryOptions
+        );
 
       if (!activitiesData || activitiesData.length === 0) {
         return [];
       }
 
       // Map database results to domain entities
-      return activitiesData.map(activity => SupabaseShopBackendDashboardMapper.recentActivityToEntity(activity));
+      return activitiesData.map((activity) =>
+        SupabaseShopBackendDashboardMapper.recentActivityToEntity(activity)
+      );
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
       }
 
-      this.logger.error('Error in getRecentActivities', { error, shopId, limit });
+      this.logger.error("Error in getRecentActivities", {
+        error,
+        shopId,
+        limit,
+      });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching recent activities',
-        'getRecentActivities',
+        "An unexpected error occurred while fetching recent activities",
+        "getRecentActivities",
         { shopId, limit },
         error
       );
@@ -243,49 +275,55 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
    */
   async getQueueStats(shopId: string): Promise<{
     waiting: number;
+    confirmed: number;
     serving: number;
     completed: number;
     cancelled: number;
   }> {
     try {
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
-        ]
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
       };
 
       // Assuming a view exists for queue statistics
       const queueStatsData = await this.dataSource.getAdvanced<{
-        waiting: number;
-        serving: number;
-        completed: number;
-        cancelled: number;
-      }>(
-        'queue_stats_view',
-        queryOptions
-      );
+        all_waiting_queue: number;
+        all_confirmed_queue: number;
+        all_serving_queue: number;
+        all_completed_total: number;
+        all_cancelled_total: number;
+      }>("queue_stats_by_shop_view", queryOptions);
 
       if (!queueStatsData || queueStatsData.length === 0) {
         return {
           waiting: 0,
+          confirmed: 0,
           serving: 0,
           completed: 0,
-          cancelled: 0
+          cancelled: 0,
         };
       }
 
-      return queueStatsData[0];
+      return {
+        waiting: queueStatsData[0].all_waiting_queue,
+        confirmed: queueStatsData[0].all_confirmed_queue,
+        serving: queueStatsData[0].all_serving_queue,
+        completed: queueStatsData[0].all_completed_total,
+        cancelled: queueStatsData[0].all_cancelled_total,
+      };
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
       }
 
-      this.logger.error('Error in getQueueStats', { error, shopId });
+      this.logger.error("Error in getQueueStats", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching queue statistics',
-        'getQueueStats',
+        "An unexpected error occurred while fetching queue statistics",
+        "getQueueStats",
         { shopId },
         error
       );
@@ -301,14 +339,23 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
     today: number;
     thisWeek: number;
     thisMonth: number;
+    lastMonth: number;
     growth: number;
   }> {
+    return {
+      today: 0,
+      thisWeek: 0,
+      thisMonth: 0,
+      lastMonth: 0,
+      growth: 0,
+    };
+
     try {
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
-        ]
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
       };
 
       // Assuming a view exists for revenue statistics
@@ -316,18 +363,17 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         today: number;
         this_week: number;
         this_month: number;
+        last_month: number;
         growth: number;
-      }>(
-        'revenue_stats_view',
-        queryOptions
-      );
+      }>("revenue_stats_view", queryOptions);
 
       if (!revenueStatsData || revenueStatsData.length === 0) {
         return {
           today: 0,
           thisWeek: 0,
           thisMonth: 0,
-          growth: 0
+          lastMonth: 0,
+          growth: 0,
         };
       }
 
@@ -336,18 +382,19 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         today: data.today,
         thisWeek: data.this_week,
         thisMonth: data.this_month,
-        growth: data.growth
+        lastMonth: data.last_month,
+        growth: data.growth,
       };
     } catch (error) {
       if (error instanceof ShopBackendDashboardError) {
         throw error;
       }
 
-      this.logger.error('Error in getRevenueStats', { error, shopId });
+      this.logger.error("Error in getRevenueStats", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching revenue statistics',
-        'getRevenueStats',
+        "An unexpected error occurred while fetching revenue statistics",
+        "getRevenueStats",
         { shopId },
         error
       );
@@ -364,12 +411,17 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
     online: number;
     serving: number;
   }> {
+    return {
+      total: 0,
+      online: 0,
+      serving: 0,
+    };
     try {
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         filters: [
-          { field: 'shop_id', operator: FilterOperator.EQ, value: shopId }
-        ]
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
       };
 
       // Assuming a view exists for employee statistics
@@ -377,16 +429,13 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         total: number;
         online: number;
         serving: number;
-      }>(
-        'employee_stats_view',
-        queryOptions
-      );
+      }>("employee_stats_view", queryOptions);
 
       if (!employeeStatsData || employeeStatsData.length === 0) {
         return {
           total: 0,
           online: 0,
-          serving: 0
+          serving: 0,
         };
       }
 
@@ -396,11 +445,11 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         throw error;
       }
 
-      this.logger.error('Error in getEmployeeStats', { error, shopId });
+      this.logger.error("Error in getEmployeeStats", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching employee statistics',
-        'getEmployeeStats',
+        "An unexpected error occurred while fetching employee statistics",
+        "getEmployeeStats",
         { shopId },
         error
       );
@@ -415,22 +464,17 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
   async getShopName(shopId: string): Promise<string> {
     try {
       const queryOptions: QueryOptions = {
-        select: ['name'],
-        filters: [
-          { field: 'id', operator: FilterOperator.EQ, value: shopId }
-        ]
+        select: ["name"],
+        filters: [{ field: "id", operator: FilterOperator.EQ, value: shopId }],
       };
 
       // Query the shops table
       const shopData = await this.dataSource.getAdvanced<{
         name: string;
-      }>(
-        'shops',
-        queryOptions
-      );
+      }>("shops", queryOptions);
 
       if (!shopData || shopData.length === 0) {
-        return 'Unknown Shop';
+        return "Unknown Shop";
       }
 
       return shopData[0].name;
@@ -439,11 +483,11 @@ export class SupabaseShopBackendDashboardRepository extends StandardRepository i
         throw error;
       }
 
-      this.logger.error('Error in getShopName', { error, shopId });
+      this.logger.error("Error in getShopName", { error, shopId });
       throw new ShopBackendDashboardError(
         ShopBackendDashboardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching shop name',
-        'getShopName',
+        "An unexpected error occurred while fetching shop name",
+        "getShopName",
         { shopId },
         error
       );
