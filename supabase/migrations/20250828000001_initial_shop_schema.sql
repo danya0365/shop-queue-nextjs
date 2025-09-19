@@ -930,24 +930,32 @@ $$;
 -- CUSTOMERS TABLE RLS POLICIES
 -- =============================================================================
 
+CREATE OR REPLACE FUNCTION is_valid_customer_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Only shop employees, managers, and owner can view customers
 CREATE POLICY "Shop employees, managers, and owner can view customers"
   ON public.customers FOR SELECT
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_customer_access(shop_id));
 
--- Only shop managers can update/delete customers directly
-CREATE POLICY "Shop managers can update customers"
+-- Only shop employees, managers, owner can insert customers
+CREATE POLICY "Shop employees, managers, owner can insert customers"
+  ON public.customers FOR INSERT
+  WITH CHECK (is_valid_customer_access(shop_id));
+
+-- Only shop employees, managers, owner can update/delete customers directly
+CREATE POLICY "Shop employees, managers, owner can update customers"
   ON public.customers FOR UPDATE
-  USING (public.is_shop_manager(shop_id))
-  WITH CHECK (public.is_shop_manager(shop_id));
+  USING (is_valid_customer_access(shop_id))
+  WITH CHECK (is_valid_customer_access(shop_id));
 
-CREATE POLICY "Shop managers can delete customers"
+-- Only shop employees, managers, owner can delete customers
+CREATE POLICY "Shop employees, managers, owner can delete customers"
   ON public.customers FOR DELETE
-  USING (public.is_shop_manager(shop_id));
-
--- Remove direct INSERT access - customers are created through queue API functions
-REVOKE INSERT ON TABLE public.customers FROM anon;
-REVOKE INSERT ON TABLE public.customers FROM authenticated;
+  USING (is_valid_customer_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR CUSTOMER OPERATIONS
@@ -1066,24 +1074,32 @@ $$;
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to queues
+CREATE OR REPLACE FUNCTION is_valid_queue_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Only shop employees, shop managers and shop owners can view queues
 CREATE POLICY "Shop employees, managers and owners can view queues"
   ON public.queues FOR SELECT
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_queue_access(shop_id));
+
+-- Only shop employees, shop managers and shop owners can insert queues
+CREATE POLICY "Shop employees, managers and owners can insert queues"
+  ON public.queues FOR INSERT
+  WITH CHECK (is_valid_queue_access(shop_id));
 
 -- Only shop employees, managers and owners can update/delete queues directly
 CREATE POLICY "Shop employees, managers and owners can update queues"
   ON public.queues FOR UPDATE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id))
-  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_queue_access(shop_id))
+  WITH CHECK (is_valid_queue_access(shop_id));
 
 CREATE POLICY "Shop employees, managers and owners can delete queues"
   ON public.queues FOR DELETE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
-
--- Remove direct INSERT access - queues are created through queue API functions
-REVOKE INSERT ON TABLE public.queues FROM anon;
-REVOKE INSERT ON TABLE public.queues FROM authenticated;
+  USING (is_valid_queue_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR QUEUE OPERATIONS
@@ -1462,42 +1478,46 @@ $$;
 -- QUEUE SERVICES TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to queue services
+CREATE OR REPLACE FUNCTION is_valid_queue_service_access(queue_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Only shop employees, managers and owners can view queue services
 CREATE POLICY "Only shop employees, managers and owners can view queue services"
   ON public.queue_services FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  USING (is_valid_queue_service_access(queue_id));
 
 -- Only shop employees, managers and owners can insert queue services
 CREATE POLICY "Only shop employees, managers and owners can insert queue services"
   ON public.queue_services FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  WITH CHECK (is_valid_queue_service_access(queue_id));
 
 -- Only shop employees, managers and owners can update queue services
 CREATE POLICY "Only shop employees, managers and owners can update queue services"
   ON public.queue_services FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  USING (is_valid_queue_service_access(queue_id));
 
 -- Only shop employees, managers and owners can delete queue services
 CREATE POLICY "Only shop employees, managers and owners can delete queue services"
   ON public.queue_services FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
-
+  USING (is_valid_queue_service_access(queue_id));
 
 -- =============================================================================
 -- SERVICES TABLE RLS POLICIES
 -- =============================================================================
+
+-- Function to check if user has access to services
+CREATE OR REPLACE FUNCTION is_valid_service_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
 -- Everyone can view services (for public service listing)
 CREATE POLICY "Everyone can view services"
@@ -1507,17 +1527,17 @@ CREATE POLICY "Everyone can view services"
 -- Only shop employees, managers and owners can create services
 CREATE POLICY "Only shop employees, managers and owners can create services"
   ON public.services FOR INSERT
-  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  WITH CHECK (is_valid_service_access(shop_id));
 
 -- Only shop employees, managers and owners can update services
 CREATE POLICY "Only shop employees, managers and owners can update services"
   ON public.services FOR UPDATE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_service_access(shop_id));
 
 -- Only shop employees, managers and owners can delete services (emergency cleanup)
 CREATE POLICY "Only shop employees, managers and owners can delete services"
   ON public.services FOR DELETE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_service_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR SERVICES
@@ -1657,6 +1677,13 @@ $$;
 -- DEPARTMENTS TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to departments
+CREATE OR REPLACE FUNCTION is_valid_department_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Everyone can view departments
 CREATE POLICY "Everyone can view departments"
   ON public.departments FOR SELECT
@@ -1665,17 +1692,17 @@ CREATE POLICY "Everyone can view departments"
 -- Only shop employees, managers and owners can create departments
 CREATE POLICY "Only shop employees, managers and owners can create departments"
   ON public.departments FOR INSERT
-  WITH CHECK (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  WITH CHECK (is_valid_department_access(shop_id));
 
 -- Only shop employees, managers and owners can update departments
 CREATE POLICY "Only shop employees, managers and owners can update departments"
   ON public.departments FOR UPDATE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_department_access(shop_id));
 
 -- Only shop employees, managers and owners can delete departments
 CREATE POLICY "Only shop employees, managers and owners can delete departments"
   ON public.departments FOR DELETE
-  USING (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_department_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR DEPARTMENTS
@@ -1782,25 +1809,32 @@ $$;
 -- EMPLOYEES TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to employees
+CREATE OR REPLACE FUNCTION is_valid_employee_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Shop managers and owners can view their employees
 CREATE POLICY "Shop managers and owners can view employees"
   ON public.employees FOR SELECT
-  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_employee_access(shop_id));
 
 -- Only shop managers and owners can create employees
 CREATE POLICY "Only shop managers and owners can create employees"
   ON public.employees FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  WITH CHECK (is_valid_employee_access(shop_id));
 
 -- Only shop managers and owners can update employees
 CREATE POLICY "Only shop managers and owners can update employees"
   ON public.employees FOR UPDATE
-  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_employee_access(shop_id));
 
 -- Only shop managers and owners can delete employees
 CREATE POLICY "Only shop managers and owners can delete employees"
   ON public.employees FOR DELETE
-  USING (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  USING (is_valid_employee_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR EMPLOYEES
@@ -2004,37 +2038,35 @@ $$;
 -- PAYMENTS TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to payments
+CREATE OR REPLACE FUNCTION is_valid_payment_access(queue_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.queues q 
+    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Shop managers and owners can view payments
 CREATE POLICY "Shop managers and owners can view payments"
   ON public.payments FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  USING (is_valid_payment_access(queue_id));
 
 -- Shop managers and owners can insert payments
 CREATE POLICY "Shop managers and owners can insert payments"
   ON public.payments FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  WITH CHECK (is_valid_payment_access(queue_id));
 
 -- Shop managers and owners can update payments
 CREATE POLICY "Shop managers and owners can update payments"
   ON public.payments FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  USING (is_valid_payment_access(queue_id));
 
 -- Only shop managers and owners can delete payments (emergency cleanup)
 CREATE POLICY "Shop managers and owners can delete payments"
   ON public.payments FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.queues q 
-    WHERE q.id = queue_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
-  ));
+  USING (is_valid_payment_access(queue_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR PAYMENTS
@@ -2194,45 +2226,47 @@ $$;
 -- PAYMENT ITEMS TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to payment items
+CREATE OR REPLACE FUNCTION is_valid_payment_item_access(payment_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.payments p
+    JOIN public.queues q ON q.id = p.queue_id
+    WHERE p.id = payment_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Shop managers can view payment items
 CREATE POLICY "Shop managers can view payment items"
   ON public.payment_items FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
+  USING (is_valid_payment_item_access(payment_id));
 
 -- Shop managers can insert payment items
 CREATE POLICY "Shop managers can insert payment items"
   ON public.payment_items FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
+  WITH CHECK (is_valid_payment_item_access(payment_id));
 
 -- Shop managers can update payment items
 CREATE POLICY "Shop managers can update payment items"
   ON public.payment_items FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
+  USING (is_valid_payment_item_access(payment_id));
 
 -- Only shop managers can delete payment items (emergency cleanup)
 CREATE POLICY "Shop managers can delete payment items"
   ON public.payment_items FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.payments p
-    JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND public.is_shop_manager(q.shop_id)
-  ));
+  USING (is_valid_payment_item_access(payment_id));
 
 -- =============================================================================
 -- PROMOTIONS TABLE RLS POLICIES
 -- =============================================================================
+
+-- Function to check if user has access to promotions
+CREATE OR REPLACE FUNCTION is_valid_promotion_access(shop_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
 -- Everyone can view active promotions
 CREATE POLICY "Everyone can view promotions"
@@ -2242,17 +2276,17 @@ CREATE POLICY "Everyone can view promotions"
 -- Shop managers can insert promotions
 CREATE POLICY "Shop managers can insert promotions"
   ON public.promotions FOR INSERT
-  WITH CHECK (public.is_shop_manager(shop_id));
+  WITH CHECK (is_valid_promotion_access(shop_id));
 
 -- Shop managers can update promotions
 CREATE POLICY "Shop managers can update promotions"
   ON public.promotions FOR UPDATE
-  USING (public.is_shop_manager(shop_id));
+  USING (is_valid_promotion_access(shop_id));
 
 -- Only shop managers can delete promotions (emergency cleanup)
 CREATE POLICY "Shop managers can delete promotions"
   ON public.promotions FOR DELETE
-  USING (public.is_shop_manager(shop_id));
+  USING (is_valid_promotion_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR PROMOTIONS
@@ -2439,6 +2473,16 @@ $$;
 -- PROMOTION SERVICES TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to promotion services
+CREATE OR REPLACE FUNCTION is_valid_promotion_service_access(promotion_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.promotions p
+    WHERE p.id = promotion_id AND (public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Everyone can view promotion services
 CREATE POLICY "Everyone can view promotion services"
   ON public.promotion_services FOR SELECT
@@ -2447,62 +2491,51 @@ CREATE POLICY "Everyone can view promotion services"
 -- Shop managers can insert promotion services
 CREATE POLICY "Shop managers can insert promotion services"
   ON public.promotion_services FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  WITH CHECK (is_valid_promotion_service_access(promotion_id));
 
 -- Shop managers can update promotion services
 CREATE POLICY "Shop managers can update promotion services"
   ON public.promotion_services FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  USING (is_valid_promotion_service_access(promotion_id));
 
 -- Shop managers can delete promotion services
 CREATE POLICY "Shop managers can delete promotion services"
   ON public.promotion_services FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  USING (is_valid_promotion_service_access(promotion_id));
 
 -- =============================================================================
 -- PROMOTION USAGE LOGS TABLE RLS POLICIES
 -- =============================================================================
 
+-- Function to check if user has access to promotion usage logs
+CREATE OR REPLACE FUNCTION is_valid_promotion_usage_log_access(promotion_id UUID) RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.promotions p
+    WHERE p.id = promotion_id AND (public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Shop managers can view promotion usage logs
 CREATE POLICY "Shop managers can view promotion usage logs"
   ON public.promotion_usage_logs FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  USING (is_valid_promotion_usage_log_access(promotion_id));
 
 -- Shop managers can insert promotion usage logs
 CREATE POLICY "Shop managers can insert promotion usage logs"
   ON public.promotion_usage_logs FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  WITH CHECK (is_valid_promotion_usage_log_access(promotion_id));
 
 -- Shop managers can update promotion usage logs
 CREATE POLICY "Shop managers can update promotion usage logs"
   ON public.promotion_usage_logs FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  USING (is_valid_promotion_usage_log_access(promotion_id));
 
 -- Shop managers can delete promotion usage logs
 CREATE POLICY "Shop managers can delete promotion usage logs"
   ON public.promotion_usage_logs FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.promotions p 
-    WHERE p.id = promotion_id AND public.is_shop_manager(p.shop_id)
-  ));
+  USING (is_valid_promotion_usage_log_access(promotion_id));
 
 -- =============================================================================
 -- CUSTOMER POINTS TABLE RLS POLICIES
