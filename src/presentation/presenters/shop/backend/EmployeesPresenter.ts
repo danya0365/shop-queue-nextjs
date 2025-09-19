@@ -1,4 +1,8 @@
-import type { EmployeeDTO, CreateEmployeeParams, UpdateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
+import type {
+  CreateEmployeeParams,
+  EmployeeDTO,
+  UpdateEmployeeParams,
+} from "@/src/application/dtos/shop/backend/employees-dto";
 import {
   SubscriptionLimits,
   UsageStatsDto,
@@ -10,9 +14,9 @@ import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
-
 
 // Define filter interface
 export interface EmployeeFilters {
@@ -38,7 +42,7 @@ export interface Employee {
   status: "active" | "inactive" | "on_leave" | "suspended";
   hireDate: string;
   salary: number;
-  permissions: string[];
+  permissions: EmployeePermission[];
   avatar?: string;
   lastLogin?: string;
   todayStats: {
@@ -168,61 +172,63 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       const canAddEmployee = !staffLimitReached;
 
       // Transform EmployeeDTO to Employee interface for View compatibility
-      const transformedEmployees: Employee[] = employees.map(emp => ({
+      const transformedEmployees: Employee[] = employees.map((emp) => ({
         id: emp.id,
         employeeCode: emp.employeeCode,
         name: emp.name,
-        email: emp.email || '',
-        phone: emp.phone || '',
+        email: emp.email || "",
+        phone: emp.phone || "",
         position: emp.position,
-        department: emp.departmentName || 'ไม่ระบุแผนก',
-        status: this.mapEmployeeStatus(emp.status),
+        department: emp.departmentName || "ไม่ระบุแผนก",
+        status: emp.status,
         hireDate: emp.hireDate,
         salary: emp.salary || 0,
-        permissions: emp.permissions?.map(p => p.toString()) || [],
-        avatar: '👤', // Default avatar
+        permissions: emp.permissions,
+        avatar: "👤", // Default avatar
         lastLogin: emp.lastLogin,
         todayStats: emp.todayStats,
       }));
 
       // Create departments from unique department names
       const departments: Department[] = Array.from(
-        new Set(employees.map(emp => emp.departmentName).filter(Boolean))
+        new Set(employees.map((emp) => emp.departmentName).filter(Boolean))
       ).map((deptName, index) => ({
         id: `dept-${index}`,
         name: deptName!,
         description: `แผนก${deptName}`,
-        employeeCount: employees.filter(emp => emp.departmentName === deptName).length,
+        employeeCount: employees.filter(
+          (emp) => emp.departmentName === deptName
+        ).length,
       }));
 
       // Default permissions
       const permissions: Permission[] = [
         {
-          id: "manage_queues",
+          id: EmployeePermission.MANAGE_QUEUES,
           name: "จัดการคิว",
           description: "สามารถจัดการคิวลูกค้า",
           category: "คิว",
         },
         {
-          id: "manage_employees",
+          id: EmployeePermission.MANAGE_EMPLOYEES,
           name: "จัดการพนักงาน",
           description: "สามารถจัดการพนักงาน",
           category: "พนักงาน",
         },
         {
-          id: "manage_services",
+          id: EmployeePermission.MANAGE_SERVICES,
           name: "จัดการบริการ",
           description: "สามารถจัดการบริการ",
           category: "บริการ",
         },
         {
-          id: "manage_customers",
+          id: EmployeePermission.MANAGE_CUSTOMERS,
           name: "จัดการลูกค้า",
           description: "สามารถจัดการลูกค้า",
           category: "ลูกค้า",
         },
         {
-          id: "manage_settings",
+          id: EmployeePermission.MANAGE_SETTINGS,
           name: "จัดการตั้งค่า",
           description: "สามารถจัดการตั้งค่า",
           category: "ตั้งค่า",
@@ -241,8 +247,13 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         },
         totalEmployees: stats.totalEmployees,
         activeEmployees: stats.activeEmployees,
-        onLeaveEmployees: transformedEmployees.filter(e => e.status === "on_leave").length,
-        totalSalaryExpense: transformedEmployees.reduce((sum, e) => sum + e.salary, 0),
+        onLeaveEmployees: transformedEmployees.filter(
+          (e) => e.status === "on_leave"
+        ).length,
+        totalSalaryExpense: transformedEmployees.reduce(
+          (sum, e) => sum + e.salary,
+          0
+        ),
         loggedInToday: stats.loggedInToday,
         newEmployeesThisMonth: stats.newEmployeesThisMonth,
         subscription: {
@@ -255,23 +266,6 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
     } catch (error) {
       this.logger.error("EmployeesPresenter: Error getting view model", error);
       throw error;
-    }
-  }
-
-  // Helper method to map EmployeeStatus enum to string
-  private mapEmployeeStatus(status: string | number): "active" | "inactive" | "on_leave" | "suspended" {
-    switch (status) {
-      case "ACTIVE":
-      case "active":
-        return "active";
-      case "INACTIVE":
-      case "inactive":
-        return "inactive";
-      case "SUSPENDED":
-      case "suspended":
-        return "suspended";
-      default:
-        return "inactive";
     }
   }
 
@@ -331,7 +325,6 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       throw error;
     }
   }
-
 
   // Metadata generation
   async generateMetadata(shopId: string) {

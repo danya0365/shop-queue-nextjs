@@ -22,12 +22,14 @@ import {
   EmployeeSchema,
   EmployeeStatsSchema,
 } from "@/src/infrastructure/schemas/shop/backend/employee.schema";
+import { ProfileSchema } from "@/src/infrastructure/schemas/shop/backend/profile.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type EmployeeWithJoins = EmployeeSchema & {
   departments?: { name?: string };
   shops?: { name?: string };
+  profiles?: ProfileSchema;
 };
 type EmployeeSchemaRecord = Record<string, unknown> & EmployeeSchema;
 type EmployeeStatsSchemaRecord = Record<string, unknown> & EmployeeStatsSchema;
@@ -158,6 +160,7 @@ export class SupabaseShopBackendEmployeeRepository
             on: { fromField: "department_id", toField: "id" },
           },
           { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+          { table: "profiles", on: { fromField: "profile_id", toField: "id" } },
         ],
         sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
