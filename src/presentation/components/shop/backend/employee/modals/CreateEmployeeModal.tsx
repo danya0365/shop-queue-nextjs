@@ -462,9 +462,7 @@ export function CreateEmployeeModal({
                 <input
                   type="number"
                   value={formData.salary}
-                  onChange={(e) =>
-                    handleInputChange("salary", Number(e.target.value))
-                  }
+                  onChange={(e) => handleInputChange("salary", e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                     errors.salary
                       ? "border-red-500"
