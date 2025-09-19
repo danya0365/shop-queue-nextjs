@@ -24,17 +24,27 @@ export function EmployeesView({
     viewModel,
     loading,
     error,
+    actionLoading,
     refreshData,
-    selectedEmployee,
+    // Modal states
     showAddModal,
     showDetailsModal,
     showEditModal,
     showDeleteModal,
     showViewModal,
+    selectedEmployee,
+    // Modal setters
+    setSelectedEmployee,
+    setShowAddModal,
+    setShowDetailsModal,
+    setShowEditModal,
+    setShowDeleteModal,
+    setShowViewModal,
+    // Filter states
     filters,
-    filteredEmployees,
-    uniquePositions,
+    // Event handlers
     handleEmployeeClick,
+    handleFilterChange,
     handleSearchChange,
     handleStatusChange,
     handleDepartmentChange,
@@ -49,15 +59,22 @@ export function EmployeesView({
     closeDeleteModal,
     openViewModal,
     closeViewModal,
+    // CRUD operations
+    createEmployee,
     updateEmployee,
-    actionLoading,
-    // Helper functions from presenter
+    deleteEmployee,
+    // Computed properties
+    employees,
+    filteredEmployees,
+    uniquePositions,
+    // Helper functions
     getStatusBadgeClasses,
     getStatusText,
     getEmptyStateMessage,
     getPermissionName,
     formatRating,
     handleCreateEmployee,
+    handleUpdateEmployee,
     handleDeleteEmployee,
   } = useEmployeesPresenter(shopId, initialViewModel);
 
@@ -595,10 +612,8 @@ export function EmployeesView({
           isOpen={showEditModal}
           employee={selectedEmployee}
           onClose={closeEditModal}
-          onSuccess={() => {
-            closeEditModal();
-            refreshData();
-          }}
+          onSubmit={handleUpdateEmployee}
+          loading={actionLoading.update}
         />
       )}
 
@@ -619,6 +634,7 @@ export function EmployeesView({
           isOpen={showViewModal}
           employee={selectedEmployee}
           onClose={closeViewModal}
+          getPermissionName={getPermissionName}
         />
       )}
     </div>

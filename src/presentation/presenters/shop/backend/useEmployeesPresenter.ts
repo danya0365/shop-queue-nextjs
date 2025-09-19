@@ -322,6 +322,18 @@ export function useEmployeesPresenter(
     }
   }, [deleteEmployee, closeDeleteModal, refreshData]);
 
+  const handleUpdateEmployee = useCallback(async (employeeData: UpdateEmployeeParams) => {
+    try {
+      const { id, ...updateData } = employeeData;
+      await updateEmployee(id, updateData);
+      closeEditModal();
+      refreshData();
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      throw error;
+    }
+  }, [updateEmployee, closeEditModal, refreshData]);
+
   return {
     viewModel,
     loading,
@@ -377,6 +389,7 @@ export function useEmployeesPresenter(
     formatRating,
     // Modal submission handlers
     handleCreateEmployee,
+    handleUpdateEmployee,
     handleDeleteEmployee,
   };
 }

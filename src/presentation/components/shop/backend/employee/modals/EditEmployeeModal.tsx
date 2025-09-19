@@ -1,18 +1,22 @@
 "use client";
 
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
+import { PermissionSelection } from "@/src/presentation/components/shop/backend/employee/PermissionSelection";
 import {
   useDepartments,
   type Department,
 } from "@/src/presentation/hooks/shop/backend/useDepartments";
 import type { Employee } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { useEffect, useState } from "react";
+import type { UpdateEmployeeParams, EmployeeStatus } from "@/src/application/dtos/shop/backend/employees-dto";
 
 interface EditEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
   employee: Employee | null;
-  onSuccess: () => void;
+  onSubmit: (employeeData: UpdateEmployeeParams) => Promise<void>;
+  loading?: boolean;
   shopId?: string;
 }
 
@@ -20,7 +24,8 @@ export function EditEmployeeModal({
   isOpen,
   onClose,
   employee,
-  onSuccess,
+  onSubmit,
+  loading = false,
   shopId,
 }: EditEmployeeModalProps) {
   const [formData, setFormData] = useState({
@@ -33,6 +38,7 @@ export function EditEmployeeModal({
     salary: 0,
     status: "active" as "active" | "inactive" | "on_leave" | "suspended",
     hireDate: "",
+    permissions: [] as EmployeePermission[],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,6 +63,7 @@ export function EditEmployeeModal({
         salary: employee.salary,
         status: employee.status,
         hireDate: employee.hireDate,
+        permissions: employee.permissions || [],
       });
 
       // Set selected department if department exists
@@ -124,12 +131,33 @@ export function EditEmployeeModal({
 
     if (!validateForm()) return;
 
+    if (!employee) return;
+
     try {
-      // TODO: Implement update employee logic through presenter
-      console.log("Updating employee:", formData);
-      onSuccess();
+      // Prepare update data - convert department name to departmentId if needed
+      const updateData: UpdateEmployeeParams = {
+        id: employee.id,
+        employeeCode: formData.employeeCode,
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        departmentId: selectedDepartment?.id || undefined,
+        position: formData.position,
+        shopId: shopId,
+        status: formData.status as EmployeeStatus,
+        hireDate: formData.hireDate,
+        permissions: formData.permissions,
+        salary: formData.salary || undefined,
+      };
+
+      console.log("Updating employee with permissions:", updateData);
+      
+      await onSubmit(updateData);
+      onClose();
     } catch (error) {
       console.error("Error updating employee:", error);
+      // You might want to show an error message to the user here
+      alert("เกิดข้อผิดพลาดในการอัพเดตข้อมูลพนักงาน");
     }
   };
 
@@ -204,6 +232,10 @@ export function EditEmployeeModal({
     }
   };
 
+  const handlePermissionsChange = (permissions: EmployeePermission[]) => {
+    setFormData((prev) => ({ ...prev, permissions }));
+  };
+
   return (
     isOpen && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -226,7 +258,7 @@ export function EditEmployeeModal({
                   errors.name
                     ? "border-red-500"
                     : "border-gray-300 dark:border-gray-600"
-                }`}
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 placeholder="กรอกชื่อพนักงาน"
               />
               {errors.name && (
@@ -249,7 +281,7 @@ export function EditEmployeeModal({
                   errors.employeeCode
                     ? "border-red-500"
                     : "border-gray-300 dark:border-gray-600"
-                }`}
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 placeholder="กรอกรหัสพนักงาน"
               />
               {errors.employeeCode && (
@@ -470,7 +502,7 @@ export function EditEmployeeModal({
                   errors.position
                     ? "border-red-500"
                     : "border-gray-300 dark:border-gray-600"
-                }`}
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 placeholder="กรอกตำแหน่ง"
               />
               {errors.position && (
@@ -493,7 +525,7 @@ export function EditEmployeeModal({
                   errors.salary
                     ? "border-red-500"
                     : "border-gray-300 dark:border-gray-600"
-                }`}
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 placeholder="0"
                 min="0"
               />
@@ -538,6 +570,17 @@ export function EditEmployeeModal({
               )}
             </div>
 
+            {/* Permissions */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                สิทธิ์การเข้าถึง
+              </label>
+              <PermissionSelection
+                selectedPermissions={formData.permissions}
+                onPermissionChange={handlePermissionsChange}
+              />
+            </div>
+
             {/* Action Buttons */}
             <div className="flex justify-end space-x-2 pt-4">
               <button
@@ -549,9 +592,13 @@ export function EditEmployeeModal({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
               >
-                บันทึกการแก้ไข
+                {loading ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
               </button>
             </div>
           </form>

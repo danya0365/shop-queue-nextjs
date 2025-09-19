@@ -6,12 +6,14 @@ interface ViewEmployeeDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   employee: Employee | null;
+  getPermissionName: (permissionId: string) => string | null;
 }
 
 export function ViewEmployeeDetails({
   isOpen,
   onClose,
   employee,
+  getPermissionName,
 }: ViewEmployeeDetailsProps) {
   if (!isOpen || !employee) return null;
 
@@ -283,14 +285,17 @@ export function ViewEmployeeDetails({
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                {employee.permissions.map((permission, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200"
-                  >
-                    {permission}
-                  </span>
-                ))}
+                {employee.permissions.map((permissionId, index) => {
+                  const permissionName = getPermissionName(permissionId);
+                  return permissionName ? (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200"
+                    >
+                      {permissionName}
+                    </span>
+                  ) : null;
+                })}
               </div>
             </div>
           </div>
