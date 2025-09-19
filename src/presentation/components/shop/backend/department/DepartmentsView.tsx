@@ -387,18 +387,20 @@ export function DepartmentsView({
                       e.stopPropagation();
                       openViewModal(department);
                     }}
-                    className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
                   >
-                    ดูรายละเอียด
+                    <span>👁️</span>
+                    <span>ดูรายละเอียด</span>
                   </button>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       openEditModal(department);
                     }}
-                    className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
                   >
-                    แก้ไข
+                    <span>✏️</span>
+                    <span>แก้ไข</span>
                   </button>
                 </div>
               </div>
