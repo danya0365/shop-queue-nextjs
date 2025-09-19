@@ -1,5 +1,10 @@
 "use client";
 
+import type {
+  EmployeeStatus,
+  UpdateEmployeeParams,
+} from "@/src/application/dtos/shop/backend/employees-dto";
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
 import { PermissionSelection } from "@/src/presentation/components/shop/backend/employee/PermissionSelection";
 import {
@@ -7,9 +12,7 @@ import {
   type Department,
 } from "@/src/presentation/hooks/shop/backend/useDepartments";
 import type { Employee } from "@/src/presentation/presenters/shop/backend/EmployeesPresenter";
-import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { useEffect, useState } from "react";
-import type { UpdateEmployeeParams, EmployeeStatus } from "@/src/application/dtos/shop/backend/employees-dto";
 
 interface EditEmployeeModalProps {
   isOpen: boolean;
@@ -151,7 +154,7 @@ export function EditEmployeeModal({
       };
 
       console.log("Updating employee with permissions:", updateData);
-      
+
       await onSubmit(updateData);
       onClose();
     } catch (error) {
@@ -297,7 +300,7 @@ export function EditEmployeeModal({
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 pb-2">
                   ข้อมูลโปรไฟล์ผู้ใช้
                 </h4>
-                
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -307,7 +310,7 @@ export function EditEmployeeModal({
                       {employee.profile.fullName || "-"}
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                       ชื่อผู้ใช้
@@ -316,22 +319,24 @@ export function EditEmployeeModal({
                       {employee.profile.username || "-"}
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                       สถานะโปรไฟล์
                     </label>
                     <div className="text-sm">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        employee.profile.isActive 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      }`}>
-                        {employee.profile.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          employee.profile.isActive
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        }`}
+                      >
+                        {employee.profile.isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                       เบอร์โทรโปรไฟล์
@@ -341,9 +346,10 @@ export function EditEmployeeModal({
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="text-xs text-gray-500 dark:text-gray-400 italic mt-2">
-                  ข้อมูลโปรไฟล์จะแสดงเพื่ออ้างอิงเท่านั้น ไม่สามารถแก้ไขได้ในหน้านี้
+                  ข้อมูลโปรไฟล์จะแสดงเพื่ออ้างอิงเท่านั้น
+                  ไม่สามารถแก้ไขได้ในหน้านี้
                 </div>
               </div>
             )}
@@ -527,7 +533,6 @@ export function EditEmployeeModal({
                     : "border-gray-300 dark:border-gray-600"
                 } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 placeholder="0"
-                min="0"
               />
               {errors.salary && (
                 <p className="text-red-500 text-sm mt-1">{errors.salary}</p>
@@ -593,9 +598,10 @@ export function EditEmployeeModal({
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-4 py-2 rounded-lg ${loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                className={`px-4 py-2 rounded-lg ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
                 {loading ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}

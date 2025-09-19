@@ -5,8 +5,8 @@ import type { CreateEmployeeParams } from "@/src/application/dtos/shop/backend/e
 import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
 import { ProfileSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/ProfileSelectionDropdown";
-import { CreateProfileModal } from "@/src/presentation/components/shop/backend/profile/modals/CreateProfileModal";
 import { PermissionSelection } from "@/src/presentation/components/shop/backend/employee/PermissionSelection";
+import { CreateProfileModal } from "@/src/presentation/components/shop/backend/profile/modals/CreateProfileModal";
 import { useDepartmentFormState } from "@/src/presentation/hooks/shop/backend/useDepartmentFormState";
 import {
   useDepartments,
@@ -471,7 +471,6 @@ export function CreateEmployeeModal({
                       : "border-gray-300 dark:border-gray-600"
                   }`}
                   placeholder="0"
-                  min="0"
                 />
                 {errors.salary && (
                   <p className="text-red-500 text-sm mt-1">{errors.salary}</p>
