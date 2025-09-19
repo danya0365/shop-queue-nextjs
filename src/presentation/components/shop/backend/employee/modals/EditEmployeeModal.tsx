@@ -41,6 +41,7 @@ export function EditEmployeeModal({
   const [showCreateDepartmentForm, setShowCreateDepartmentForm] =
     useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState("");
+  const [newDepartmentSlug, setNewDepartmentSlug] = useState("");
 
   const { createDepartment } = useDepartments(shopId);
 
@@ -169,6 +170,7 @@ export function EditEmployeeModal({
     try {
       const newDepartment = await createDepartment({
         name: newDepartmentName,
+        slug: newDepartmentSlug,
         description: undefined,
         shopId: shopId || "",
       });
@@ -240,7 +242,9 @@ export function EditEmployeeModal({
               <input
                 type="text"
                 value={formData.employeeCode}
-                onChange={(e) => handleInputChange("employeeCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("employeeCode", e.target.value)
+                }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   errors.employeeCode
                     ? "border-red-500"
@@ -249,7 +253,9 @@ export function EditEmployeeModal({
                 placeholder="กรอกรหัสพนักงาน"
               />
               {errors.employeeCode && (
-                <p className="text-red-500 text-sm mt-1">{errors.employeeCode}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.employeeCode}
+                </p>
               )}
             </div>
 
@@ -338,6 +344,28 @@ export function EditEmployeeModal({
                       type="text"
                       value={newDepartmentName}
                       onChange={(e) => setNewDepartmentName(e.target.value)}
+                      placeholder="กรอกชื่อแผนก"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.department
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600"
+                      }`}
+                    />
+                    {errors.department && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.department}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Slug <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newDepartmentSlug}
+                      onChange={(e) => setNewDepartmentSlug(e.target.value)}
                       placeholder="กรอกชื่อแผนก"
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.department

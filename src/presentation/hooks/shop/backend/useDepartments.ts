@@ -23,6 +23,7 @@ interface UseDepartmentsReturn {
   searchDepartments: (searchQuery: string) => Promise<void>;
   createDepartment: (departmentData: {
     name: string;
+    slug: string;
     description?: string;
     shopId: string;
   }) => Promise<Department>;
@@ -85,6 +86,7 @@ export function useDepartments(shopId?: string): UseDepartmentsReturn {
   const createDepartment = useCallback(
     async (departmentData: {
       name: string;
+      slug: string;
       description?: string;
       shopId: string;
     }): Promise<Department> => {
@@ -99,6 +101,7 @@ export function useDepartments(shopId?: string): UseDepartmentsReturn {
         const newDepartment = await presenter.createDepartment({
           shopId: departmentData.shopId,
           name: departmentData.name,
+          slug: departmentData.slug,
           description: departmentData.description,
         });
 

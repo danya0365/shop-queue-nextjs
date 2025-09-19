@@ -36,7 +36,7 @@ export function ViewEmployeeDetails({
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       const years = Math.floor(diffDays / 365);
       const months = Math.floor((diffDays % 365) / 30);
-      
+
       if (years > 0) {
         return `${years} ปี ${months > 0 ? `${months} เดือน` : ""}`;
       } else if (months > 0) {
@@ -85,7 +85,9 @@ export function ViewEmployeeDetails({
             <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
               {employee.name}
             </h4>
-            <p className="text-gray-600 dark:text-gray-400">{employee.position}</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              {employee.position}
+            </p>
           </div>
         </div>
 
@@ -206,17 +208,6 @@ export function ViewEmployeeDetails({
               {calculateWorkDuration(employee.hireDate)}
             </span>
           </div>
-
-          {/* Employee ID */}
-          <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              รหัสพนักงาน
-            </span>
-            <span className="text-sm text-gray-900 dark:text-white font-mono">
-              {employee.id}
-            </span>
-          </div>
-
         </div>
 
         {/* Action Buttons */}

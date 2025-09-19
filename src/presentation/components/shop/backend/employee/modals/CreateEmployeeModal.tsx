@@ -1,20 +1,20 @@
 "use client";
 
+import type { CreateProfileDto } from "@/src/application/dtos/profile-dto";
 import type { CreateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
 import { ProfileSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/ProfileSelectionDropdown";
 import { CreateProfileModal } from "@/src/presentation/components/shop/backend/profile/modals/CreateProfileModal";
+import { useDepartmentFormState } from "@/src/presentation/hooks/shop/backend/useDepartmentFormState";
 import {
   useDepartments,
   type Department,
 } from "@/src/presentation/hooks/shop/backend/useDepartments";
+import { useEmployeeFormState } from "@/src/presentation/hooks/shop/backend/useEmployeeFormState";
 import {
   useProfiles,
   type Profile,
 } from "@/src/presentation/hooks/shop/backend/useProfiles";
-import { useEmployeeFormState } from "@/src/presentation/hooks/shop/backend/useEmployeeFormState";
-import { useDepartmentFormState } from "@/src/presentation/hooks/shop/backend/useDepartmentFormState";
-import type { CreateProfileDto } from "@/src/application/dtos/profile-dto";
 import { useState } from "react";
 
 interface CreateEmployeeModalProps {
@@ -128,7 +128,8 @@ export function CreateEmployeeModal({
 
     try {
       const newDepartment = await createDepartment({
-        shopId: shopId || "",
+        shopId: shopId,
+        slug: departmentFormData.slug,
         name: departmentFormData.name,
         description: departmentFormData.description || undefined,
       });
@@ -146,10 +147,20 @@ export function CreateEmployeeModal({
 
   const handleCreateProfile = async (profileData: CreateProfileDto) => {
     try {
-      await createProfile(profileData);
+      const newProfile = await createProfile(profileData);
       setShowCreateProfileModal(false);
-      // Note: The profile selection will be handled by the parent component
-      // or we can refresh the profiles list and select the newly created one
+
+      // Automatically select the newly created profile
+      setSelectedProfile(newProfile);
+      updateField("profileId", newProfile.id);
+      clearError("profile");
+
+      // Pre-fill some fields from profile
+      updateField("name", newProfile.name);
+      updateField(
+        "email",
+        newProfile.username.includes("@") ? newProfile.username : ""
+      );
     } catch (error) {
       console.error("Error creating profile:", error);
       throw error;
@@ -167,7 +178,7 @@ export function CreateEmployeeModal({
     isOpen && (
       <>
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col gap-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               เพิ่มพนักงานใหม่
             </h3>
@@ -191,7 +202,7 @@ export function CreateEmployeeModal({
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

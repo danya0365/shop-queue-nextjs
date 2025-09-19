@@ -75,6 +75,7 @@ export class DepartmentSelectionPresenter extends BaseShopBackendPresenter {
   async createDepartment(departmentData: {
     shopId: string;
     name: string;
+    slug: string;
     description?: string;
   }): Promise<DepartmentDTO> {
     try {
@@ -82,18 +83,10 @@ export class DepartmentSelectionPresenter extends BaseShopBackendPresenter {
         name: departmentData.name,
       });
 
-      // Generate slug from name
-      const slug = departmentData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-
       const department = await this.departmentsService.createDepartment({
         shopId: departmentData.shopId,
         name: departmentData.name,
-        slug,
+        slug: departmentData.slug,
         description: departmentData.description,
       });
 
