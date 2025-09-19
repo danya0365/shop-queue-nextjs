@@ -185,10 +185,6 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
         },
       };
     } catch (error) {
-      this.logger.error(
-        "QueueManagementPresenter: Error getting view model",
-        error
-      );
       throw error;
     }
   }

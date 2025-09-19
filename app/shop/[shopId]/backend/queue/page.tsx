@@ -61,9 +61,7 @@ export default async function QueueManagementPage({
         />
       </BackendLayout>
     );
-  } catch (error) {
-    console.error("Error fetching queue management data:", error);
-
+  } catch (_) {
     // Fallback UI
     return (
       <BackendLayout>
