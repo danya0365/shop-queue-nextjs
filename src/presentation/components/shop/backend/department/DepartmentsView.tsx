@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { DepartmentsViewModel } from "@/src/presentation/presenters/shop/backend/DepartmentsPresenter";
 import { useDepartmentsPresenter } from "@/src/presentation/presenters/shop/backend/useDepartmentsPresenter";
 import {
@@ -8,6 +9,7 @@ import {
   DeleteDepartmentConfirmation,
   ViewDepartmentDetails,
 } from "./modals";
+import { UnderConstructionModal } from "@/src/presentation/components/shop/backend/dashboard/modals/UnderConstructionModal";
 
 interface DepartmentsViewProps {
   shopId: string;
@@ -45,6 +47,25 @@ export function DepartmentsView({
     filteredDepartments,
     actionLoading,
   } = useDepartmentsPresenter(shopId, initialViewModel);
+
+  // State for Under Construction Modal
+  const [showUnderConstructionModal, setShowUnderConstructionModal] = useState(false);
+  const [selectedDepartmentForEmployees, setSelectedDepartmentForEmployees] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  // Function to handle viewing employees
+  const handleViewEmployees = (departmentId: string, departmentName: string) => {
+    setSelectedDepartmentForEmployees({ id: departmentId, name: departmentName });
+    setShowUnderConstructionModal(true);
+  };
+
+  // Function to close under construction modal
+  const closeUnderConstructionModal = () => {
+    setShowUnderConstructionModal(false);
+    setSelectedDepartmentForEmployees(null);
+  };
 
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
@@ -349,25 +370,37 @@ export function DepartmentsView({
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-4 flex space-x-2">
+              <div className="mt-4 grid grid-cols-1 gap-2">
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    openViewModal(department);
+                    handleViewEmployees(department.id, department.name);
                   }}
-                  className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="w-full bg-purple-50 hover:bg-purple-100 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
                 >
-                  ดูรายละเอียด
+                  <span>👥</span>
+                  <span>ดูรายชื่อพนักงาน</span>
                 </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEditModal(department);
-                  }}
-                  className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  แก้ไข
-                </button>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openViewModal(department);
+                    }}
+                    className="flex-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    ดูรายละเอียด
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(department);
+                    }}
+                    className="flex-1 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    แก้ไข
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -408,6 +441,13 @@ export function DepartmentsView({
           />
         </>
       )}
+
+      {/* Under Construction Modal */}
+      <UnderConstructionModal
+        isOpen={showUnderConstructionModal}
+        onClose={closeUnderConstructionModal}
+        featureName={`ดูรายชื่อพนักงานในแผนก${selectedDepartmentForEmployees?.name || ''}`}
+      />
     </div>
   );
 }
