@@ -1,3 +1,4 @@
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { EmployeeStatus } from "@/src/application/dtos/shop/backend/employees-dto";
 import { useState } from "react";
 
@@ -12,6 +13,7 @@ export interface EmployeeFormData {
   status: EmployeeStatus;
   hireDate: string;
   profileId: string;
+  permissions: EmployeePermission[];
 }
 
 export interface EmployeeFormErrors {
@@ -38,6 +40,7 @@ export function useEmployeeFormState() {
     status: EmployeeStatus.ACTIVE,
     hireDate: "",
     profileId: "",
+    permissions: [],
   });
 
   const [errors, setErrors] = useState<EmployeeFormErrors>({});
@@ -94,7 +97,7 @@ export function useEmployeeFormState() {
 
   const updateField = (
     field: keyof EmployeeFormData,
-    value: string | number
+    value: string | number | EmployeePermission[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
@@ -128,6 +131,7 @@ export function useEmployeeFormState() {
       status: EmployeeStatus.ACTIVE,
       hireDate: "",
       profileId: "",
+      permissions: [],
     });
     setErrors({});
   };

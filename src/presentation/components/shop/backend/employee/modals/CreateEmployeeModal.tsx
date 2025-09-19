@@ -2,9 +2,11 @@
 
 import type { CreateProfileDto } from "@/src/application/dtos/profile-dto";
 import type { CreateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
+import { EmployeePermission } from "@/src/domain/entities/shop/backend/backend-employee.entity";
 import { DepartmentSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/DepartmentSelectionDropdown";
 import { ProfileSelectionDropdown } from "@/src/presentation/components/shop/backend/dropdown/ProfileSelectionDropdown";
 import { CreateProfileModal } from "@/src/presentation/components/shop/backend/profile/modals/CreateProfileModal";
+import { PermissionSelection } from "@/src/presentation/components/shop/backend/employee/PermissionSelection";
 import { useDepartmentFormState } from "@/src/presentation/hooks/shop/backend/useDepartmentFormState";
 import {
   useDepartments,
@@ -81,6 +83,7 @@ export function CreateEmployeeModal({
           status: formData.status,
           hireDate: formData.hireDate,
           profileId: formData.profileId,
+          permissions: formData.permissions,
         });
         resetEmployeeForm();
         onClose();
@@ -172,6 +175,10 @@ export function CreateEmployeeModal({
     value: string | number
   ) => {
     updateField(field, value);
+  };
+
+  const handlePermissionsChange = (permissions: EmployeePermission[]) => {
+    updateField("permissions", permissions);
   };
 
   return (
@@ -507,6 +514,15 @@ export function CreateEmployeeModal({
                 {errors.hireDate && (
                   <p className="text-red-500 text-sm mt-1">{errors.hireDate}</p>
                 )}
+              </div>
+
+              {/* Permissions */}
+              <div>
+                <PermissionSelection
+                  selectedPermissions={formData.permissions}
+                  onPermissionChange={handlePermissionsChange}
+                  disabled={loading}
+                />
               </div>
 
               {/* Action Buttons */}
