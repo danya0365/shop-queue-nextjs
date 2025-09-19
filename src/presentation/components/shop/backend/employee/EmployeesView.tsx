@@ -39,6 +39,7 @@ export function EmployeesView({
     handleStatusChange,
     handleDepartmentChange,
     handlePositionChange,
+    resetFilters,
     openAddModal,
     closeAddModal,
     closeDetailsModal,
@@ -284,8 +285,11 @@ export function EmployeesView({
           </div>
 
           <div className="flex justify-end mt-4">
-            <button className="bg-blue-600 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 transition-colors">
-              ค้นหา
+            <button 
+              onClick={resetFilters}
+              className="bg-gray-500 dark:bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors"
+            >
+              รีเซ็ตตัวกรอง
             </button>
           </div>
         </div>

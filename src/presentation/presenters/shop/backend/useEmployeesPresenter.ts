@@ -118,6 +118,15 @@ export function useEmployeesPresenter(
     setFilters((prev) => ({ ...prev, position: value }));
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setFilters({
+      search: "",
+      status: "all",
+      department: "all",
+      position: "all",
+    });
+  }, []);
+
   const openAddModal = useCallback(() => {
     setShowAddModal(true);
   }, []);
@@ -342,6 +351,7 @@ export function useEmployeesPresenter(
     handleStatusChange,
     handleDepartmentChange,
     handlePositionChange,
+    resetFilters,
     openAddModal,
     closeAddModal,
     closeDetailsModal,
