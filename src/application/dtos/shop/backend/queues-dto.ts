@@ -3,6 +3,7 @@ import {
   QueueStatus,
 } from "@/src/domain/entities/backend/backend-queue.entity";
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { PaymentDTO } from "./payments-dto";
 
 export interface QueueDTO {
   id: string;
@@ -22,6 +23,7 @@ export interface QueueDTO {
   updatedAt: string;
   calledAt?: string;
   completedAt?: string;
+  payments: Partial<PaymentDTO>[];
 }
 
 /**

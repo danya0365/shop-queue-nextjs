@@ -32,6 +32,17 @@ export class QueueMapper {
         price: service.price,
         total: service.total,
       })),
+      payments:
+        entity.payments?.map((payment) => ({
+          id: payment.id,
+          queueId: payment.queueId,
+          totalAmount: payment.totalAmount,
+          paidAmount: payment.paidAmount,
+          paymentMethod: payment.paymentMethod,
+          paymentStatus: payment.paymentStatus,
+          paymentDate: payment.paymentDate,
+          processedByEmployeeId: payment.processedByEmployeeId,
+        })) ?? [],
       queueNumber: entity.queueNumber,
       status: entity.status,
       priority: entity.priority,

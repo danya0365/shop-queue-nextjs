@@ -24,8 +24,6 @@ export interface PaymentEntity {
 
 export interface CreatePaymentEntity {
   queueId: string;
-  queueNumber: string;
-  customerName: string;
   totalAmount: number;
   paidAmount?: number;
   paymentMethod?: PaymentMethod;
@@ -37,8 +35,6 @@ export interface CreatePaymentEntity {
 
 export interface UpdatePaymentEntity {
   queueId?: string;
-  queueNumber?: string;
-  customerName?: string;
   totalAmount?: number;
   paidAmount?: number;
   paymentMethod?: PaymentMethod;
@@ -52,19 +48,19 @@ export interface UpdatePaymentEntity {
  * Payment method enum
  */
 export enum PaymentMethod {
-  CASH = 'cash',
-  CARD = 'card',
-  QR = 'qr',
-  TRANSFER = 'transfer'
+  CASH = "cash",
+  CARD = "card",
+  QR = "qr",
+  TRANSFER = "transfer",
 }
 
 /**
  * Payment status enum
  */
 export enum PaymentStatus {
-  UNPAID = 'unpaid',
-  PARTIAL = 'partial',
-  PAID = 'paid'
+  UNPAID = "unpaid",
+  PARTIAL = "partial",
+  PAID = "paid",
 }
 
 /**

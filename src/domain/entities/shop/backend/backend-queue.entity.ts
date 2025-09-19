@@ -1,4 +1,5 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { PaymentEntity } from "./backend-payment.entity";
 
 /**
  * Queue entity representing a customer queue in the system
@@ -23,6 +24,7 @@ export interface QueueEntity {
   updatedAt: string;
   calledAt?: string;
   completedAt?: string;
+  payments?: PaymentEntity[];
 }
 
 /**

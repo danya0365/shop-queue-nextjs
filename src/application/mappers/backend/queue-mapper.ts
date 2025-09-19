@@ -2,6 +2,7 @@ import {
   QueueDTO,
   QueueStatsDTO,
 } from "@/src/application/dtos/backend/queues-dto";
+import { PaymentDTO } from "@/src/application/dtos/backend/payments-dto";
 import {
   QueueEntity,
   QueueStatsEntity,
@@ -42,6 +43,23 @@ export class QueueMapper {
       updatedAt: entity.updatedAt,
       calledAt: entity.calledAt,
       completedAt: entity.completedAt,
+      payments: entity.payments?.map(payment => ({
+        id: payment.id,
+        queueId: payment.queueId,
+        queueNumber: payment.queueNumber,
+        customerName: payment.customerName,
+        totalAmount: payment.totalAmount,
+        paidAmount: payment.paidAmount,
+        paymentMethod: payment.paymentMethod as 'cash' | 'card' | 'qr' | 'transfer' | null,
+        paymentStatus: payment.paymentStatus as 'unpaid' | 'partial' | 'paid',
+        paymentDate: payment.paymentDate,
+        processedByEmployeeId: payment.processedByEmployeeId,
+        processedByEmployeeName: payment.processedByEmployeeName || null,
+        shopId: payment.shopId,
+        shopName: payment.shopName || "",
+        createdAt: payment.createdAt,
+        updatedAt: payment.updatedAt,
+      })) || [],
     };
   }
 

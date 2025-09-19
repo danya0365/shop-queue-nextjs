@@ -1,5 +1,7 @@
 "use client";
 
+import type { CreatePaymentParams } from "@/src/application/dtos/shop/backend/payments-dto";
+import { PaymentMethod } from "@/src/application/dtos/shop/backend/payments-dto";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import {
@@ -12,6 +14,7 @@ import {
   useQueueManagementPresenter,
 } from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
 import { useState } from "react";
+import { PaymentModal } from "../payment/modals/PaymentModal";
 import { QueueLimitsWarning } from "./components/QueueLimitsWarning";
 import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
@@ -46,6 +49,7 @@ export function QueueManagementView({
     updateQueue,
     deleteQueue,
     createQueue,
+    createQueuePayment,
     actionLoading,
   } = useQueueManagementPresenter(shopId, initialViewModel);
 
@@ -54,6 +58,7 @@ export function QueueManagementView({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<QueueItem | null>(null);
 
   // Show loading only on initial load or when explicitly loading
@@ -170,6 +175,25 @@ export function QueueManagementView({
     }
   };
 
+  // Helper function to check if queue has unpaid balance
+  const hasUnpaidBalance = (queue: QueueItem): boolean => {
+    if (!queue.payments || queue.payments.length === 0) {
+      return true; // No payments means unpaid
+    }
+
+    // Calculate total paid amount from all payments
+    const totalPaid = queue.payments.reduce((sum, payment) => {
+      return sum + (payment.paidAmount || 0);
+    }, 0);
+
+    // Calculate total amount from queue services
+    const totalAmount = queue.queueServices.reduce((sum, service) => {
+      return sum + (service.total || service.price * service.quantity);
+    }, 0);
+
+    return totalPaid < totalAmount;
+  };
+
   // Action handlers
   const handleEditQueue = (queue: QueueItem) => {
     setSelectedQueue(queue);
@@ -247,6 +271,27 @@ export function QueueManagementView({
     } catch (error) {
       console.error("Error creating queue:", error);
       // Error is already handled by the presenter and shown in the UI
+    }
+  };
+
+  const handlePayment = (queue: QueueItem) => {
+    setSelectedQueue(queue);
+    setPaymentModalOpen(true);
+  };
+
+  const handlePaymentSubmit = async (paymentData: CreatePaymentParams) => {
+    try {
+      await createQueuePayment({
+        queueId: paymentData.queueId,
+        totalAmount: paymentData.totalAmount,
+        paymentMethod: paymentData.paymentMethod || PaymentMethod.CASH,
+        processedByEmployeeId: paymentData.processedByEmployeeId || "",
+        shopId: paymentData.shopId,
+      });
+      setPaymentModalOpen(false);
+      setSelectedQueue(null);
+    } catch (error) {
+      console.error("Error creating payment:", error);
     }
   };
 
@@ -739,28 +784,45 @@ export function QueueManagementView({
                           </>
                         )}
                         {queue.status === QueueStatus.CONFIRMED && (
-                          <button
-                            onClick={() =>
-                              handleStatusUpdate(queue.id, QueueStatus.SERVING)
-                            }
-                            disabled={actionLoading.updateStatus}
-                            className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
-                          >
-                            เรียก
-                          </button>
+                          <>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(
+                                  queue.id,
+                                  QueueStatus.SERVING
+                                )
+                              }
+                              disabled={actionLoading.updateStatus}
+                              className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            >
+                              เรียก
+                            </button>
+                          </>
                         )}
                         {queue.status === QueueStatus.SERVING && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(
+                                  queue.id,
+                                  QueueStatus.COMPLETED
+                                )
+                              }
+                              disabled={actionLoading.updateStatus}
+                              className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
+                            >
+                              เสร็จสิ้น
+                            </button>
+                          </>
+                        )}
+
+                        {hasUnpaidBalance(queue) && (
                           <button
-                            onClick={() =>
-                              handleStatusUpdate(
-                                queue.id,
-                                QueueStatus.COMPLETED
-                              )
-                            }
+                            onClick={() => handlePayment(queue)}
                             disabled={actionLoading.updateStatus}
-                            className="bg-purple-500 dark:bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 dark:hover:bg-purple-700 transition-colors disabled:opacity-50"
+                            className="bg-yellow-500 dark:bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 dark:hover:bg-yellow-700 transition-colors disabled:opacity-50"
                           >
-                            เสร็จสิ้น
+                            ชำระเงิน
                           </button>
                         )}
                         <button
@@ -1030,6 +1092,20 @@ export function QueueManagementView({
         shopDescription={viewModel.shop.description}
         shopId={shopId}
       />
+
+      {/* Payment Modal */}
+      {selectedQueue && (
+        <PaymentModal
+          isOpen={paymentModalOpen}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            setSelectedQueue(null);
+          }}
+          onSubmit={handlePaymentSubmit}
+          queue={selectedQueue}
+          shopId={shopId}
+        />
+      )}
     </div>
   );
 }

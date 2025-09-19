@@ -5,7 +5,9 @@ import {
   QueueStatsEntity,
   QueueStatus,
 } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { PaymentEntity, PaymentMethod, PaymentStatus } from "@/src/domain/entities/shop/backend/backend-payment.entity";
 import { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
+import { PaymentSchema } from "@/src/infrastructure/schemas/shop/backend/payment.schema";
 import {
   QueueSchema,
   QueueServiceSchema,
@@ -23,7 +25,9 @@ export class SupabaseShopBackendQueueMapper {
    * @param services Queue services
    * @returns Queue domain entity
    */
-  public static toDomain(schema: QueueSchema): QueueEntity {
+  public static toDomain(
+    schema: QueueSchema & { payments?: PaymentSchema[] }
+  ): QueueEntity {
     return {
       id: schema.id,
       customerId: schema.customer_id,
@@ -35,6 +39,7 @@ export class SupabaseShopBackendQueueMapper {
         schema.queue_services?.map((queue_service) =>
           this.serviceToDomain(queue_service)
         ) || [],
+      payments: schema.payments?.map((payment) => this.paymentToEntity(payment)) || [],
       queueNumber: schema.queue_number,
       status: schema.status as QueueStatus,
       priority: schema.priority as QueuePriority,
@@ -45,6 +50,31 @@ export class SupabaseShopBackendQueueMapper {
       updatedAt: schema.updated_at,
       calledAt: schema.served_at || undefined,
       completedAt: schema.completed_at || undefined,
+    };
+  }
+
+  /**
+   * Map payment schema to domain entity
+   * @param schema Payment database schema
+   * @returns Payment domain entity
+   */
+  public static paymentToEntity(schema: PaymentSchema): PaymentEntity {
+    return {
+      id: schema.id,
+      queueId: schema.queue_id,
+      queueNumber: schema.queue_number,
+      customerName: schema.customer_name,
+      totalAmount: schema.total_amount,
+      paidAmount: schema.paid_amount,
+      paymentMethod: schema.payment_method as PaymentMethod | null,
+      paymentStatus: schema.payment_status as PaymentStatus,
+      paymentDate: schema.payment_date,
+      processedByEmployeeId: schema.processed_by_employee_id,
+      processedByEmployeeName: schema.processed_by_employee_name,
+      shopId: schema.shop_id,
+      shopName: schema.shop_name,
+      createdAt: schema.created_at,
+      updatedAt: schema.updated_at,
     };
   }
 

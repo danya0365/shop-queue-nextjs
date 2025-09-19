@@ -19,6 +19,7 @@ import {
   ShopBackendQueueRepository,
 } from "@/src/domain/repositories/shop/backend/backend-queue-repository";
 import { SupabaseShopBackendQueueMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-queue.mapper";
+import { PaymentSchema } from "@/src/infrastructure/schemas/shop/backend/payment.schema";
 import {
   QueueSchema,
   QueueServiceSchema,
@@ -36,6 +37,7 @@ type QueueWithCustomerAndShop = QueueSchema & {
 type QueueSchemaRecord = Record<string, unknown> & QueueSchema;
 type QueueServiceSchemaRecord = Record<string, unknown> & QueueServiceSchema;
 type QueueStatsSchemaRecord = Record<string, unknown> & QueueStatsSchema;
+type PaymentSchemaRecord = Record<string, unknown> & PaymentSchema;
 
 /**
  * Supabase implementation of the queue repository
@@ -204,6 +206,20 @@ export class SupabaseShopBackendQueueRepository
         QueueServiceSchemaRecord & { services: ServiceSchema }
       >("queue_services", queueServicesOptions);
 
+      // Get payments for each queue
+      const paymentsOptions: QueryOptions = {
+        select: ["*"],
+        filters: [
+          { field: "queue_id", operator: FilterOperator.IN, value: queueIds },
+        ],
+      };
+
+      // Get all payments in a single query
+      const payments = await this.dataSource.getAdvanced<PaymentSchemaRecord>(
+        "payments",
+        paymentsOptions
+      );
+
       // Group queue services by queue_id
       const servicesByQueueId = queueServices.reduce((acc, queueService) => {
         const queueId = queueService.queue_id as string;
@@ -213,6 +229,16 @@ export class SupabaseShopBackendQueueRepository
         acc[queueId].push(queueService);
         return acc;
       }, {} as Record<string, QueueServiceSchemaRecord[]>);
+
+      // Group payments by queue_id
+      const paymentsByQueueId = payments.reduce((acc, payment) => {
+        const queueId = payment.queue_id as string;
+        if (!acc[queueId]) {
+          acc[queueId] = [];
+        }
+        acc[queueId].push(payment);
+        return acc;
+      }, {} as Record<string, PaymentSchemaRecord[]>);
 
       // Count total items with the same filters
       const countQueryOptions: QueryOptions = {
@@ -231,12 +257,18 @@ export class SupabaseShopBackendQueueRepository
         // Get services for this queue
         const services = servicesByQueueId[queue.id] || [];
 
+        // Get payments for this queue
+        const queuePayments = paymentsByQueueId[queue.id] || [];
+
+        console.log("Queue payments", queuePayments);
+
         const queueWithRelations = {
           ...queue,
           customer_name: queueWithJoinedData.customers?.name,
           customer_phone: queueWithJoinedData.customers?.phone,
           shop_name: queueWithJoinedData.shops?.name,
           queue_services: services,
+          payments: queuePayments,
         };
         return SupabaseShopBackendQueueMapper.toDomain(queueWithRelations);
       });

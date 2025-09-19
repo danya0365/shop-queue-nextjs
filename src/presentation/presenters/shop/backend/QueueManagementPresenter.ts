@@ -1,10 +1,15 @@
 import { QueueDTO } from "@/src/application/dtos/backend/queues-dto";
 import {
+  PaymentMethod,
+  PaymentStatus,
+} from "@/src/application/dtos/shop/backend/payments-dto";
+import {
   SubscriptionLimits,
   UsageStatsDto,
 } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IShopBackendPaymentsService } from "@/src/application/services/shop/backend/BackendPaymentsService";
 import { IShopBackendQueuesService } from "@/src/application/services/shop/backend/BackendQueuesService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
@@ -69,7 +74,8 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly backendQueuesService: IShopBackendQueuesService
+    private readonly backendQueuesService: IShopBackendQueuesService,
+    private readonly backendPaymentsService: IShopBackendPaymentsService
   ) {
     super(
       logger,
@@ -141,10 +147,13 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       } = queuesData;
 
       // Map QueueDTO to QueueItem
-      const queues: QueueItem[] = queueDTOs.map((queue) => ({
-        ...queue,
-        serviceNames: queue.queueServices.map((qs) => qs.serviceName),
-      }));
+      const queues: QueueItem[] = queueDTOs.map((queue) => {
+        const queueItem: QueueItem = {
+          ...queue,
+          serviceNames: queue.queueServices.map((qs) => qs.serviceName),
+        };
+        return queueItem;
+      });
 
       const totalPages = Math.ceil(totalCount / responsePerPage);
 
@@ -309,6 +318,76 @@ export class QueueManagementPresenter extends BaseShopBackendPresenter {
       throw error;
     }
   }
+
+  // Payment Methods
+  async getQueuePayment(queueId: string) {
+    try {
+      const payment = await this.backendPaymentsService.getPaymentById(queueId);
+      return payment;
+    } catch (error) {
+      this.logger.error(
+        "QueueManagementPresenter: Error getting queue payment",
+        error
+      );
+      throw error;
+    }
+  }
+
+  async createQueuePayment(data: {
+    queueId: string;
+    totalAmount: number;
+    paymentMethod: PaymentMethod;
+    processedByEmployeeId: string;
+    shopId: string;
+  }) {
+    try {
+      const payment = await this.backendPaymentsService.createPayment({
+        queueId: data.queueId,
+        totalAmount: data.totalAmount,
+        paidAmount: data.totalAmount, // Full payment by default
+        paymentMethod: data.paymentMethod,
+        paymentStatus: PaymentStatus.PAID,
+        paymentDate: new Date().toISOString(),
+        processedByEmployeeId: data.processedByEmployeeId,
+        shopId: data.shopId,
+      });
+
+      return payment;
+    } catch (error) {
+      this.logger.error(
+        "QueueManagementPresenter: Error creating queue payment",
+        error
+      );
+      throw error;
+    }
+  }
+
+  async updateQueuePayment(
+    paymentId: string,
+    data: {
+      paidAmount?: number;
+      paymentStatus?: PaymentStatus;
+      paymentMethod?: PaymentMethod;
+      processedByEmployeeId?: string;
+    }
+  ) {
+    try {
+      const payment = await this.backendPaymentsService.updatePayment(
+        paymentId,
+        {
+          id: paymentId,
+          ...data,
+        }
+      );
+      return payment;
+    } catch (error) {
+      this.logger.error(
+        "QueueManagementPresenter: Error updating queue payment",
+        error
+      );
+      throw error;
+    }
+  }
 }
 
 // Base Factory class for reducing code duplication
@@ -329,6 +408,10 @@ abstract class BaseQueueManagementPresenterFactory {
       const backendQueuesService = container.resolve<IShopBackendQueuesService>(
         "ShopBackendQueuesService"
       );
+      const backendPaymentsService =
+        container.resolve<IShopBackendPaymentsService>(
+          "ShopBackendPaymentsService"
+        );
 
       return new QueueManagementPresenter(
         logger,
@@ -336,7 +419,8 @@ abstract class BaseQueueManagementPresenterFactory {
         authService,
         profileService,
         subscriptionService,
-        backendQueuesService
+        backendQueuesService,
+        backendPaymentsService
       );
     } catch (error) {
       throw new Error(

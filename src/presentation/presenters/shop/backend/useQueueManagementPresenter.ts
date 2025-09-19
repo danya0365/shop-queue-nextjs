@@ -1,6 +1,10 @@
 "use client";
 
 import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
+import {
+  PaymentMethod,
+  PaymentStatus,
+} from "@/src/application/dtos/shop/backend/payments-dto";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { useCallback, useEffect, useState } from "react";
 import type {
@@ -39,6 +43,9 @@ export function useQueueManagementPresenter(
     updateQueue: false,
     deleteQueue: false,
     createQueue: false,
+    getPayment: false,
+    createPayment: false,
+    updatePayment: false,
   });
 
   // Initialize with initial view model if provided
@@ -297,6 +304,102 @@ export function useQueueManagementPresenter(
     [shopId, loadData]
   );
 
+  // Payment Methods
+  const getQueuePayment = useCallback(async (queueId: string) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, getPayment: true }));
+      setError(null);
+
+      const { ClientQueueManagementPresenterFactory } = await import(
+        "./QueueManagementPresenter"
+      );
+      const presenter = await ClientQueueManagementPresenterFactory.create();
+
+      const payment = await presenter.getQueuePayment(queueId);
+      return payment;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to get queue payment";
+      setError(errorMessage);
+      console.error("Error getting queue payment:", err);
+      throw err;
+    } finally {
+      setActionLoading((prev) => ({ ...prev, getPayment: false }));
+    }
+  }, []);
+
+  const createQueuePayment = useCallback(
+    async (data: {
+      queueId: string;
+      totalAmount: number;
+      paymentMethod: PaymentMethod;
+      processedByEmployeeId: string;
+      shopId: string;
+    }) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, createPayment: true }));
+        setError(null);
+
+        const { ClientQueueManagementPresenterFactory } = await import(
+          "./QueueManagementPresenter"
+        );
+        const presenter = await ClientQueueManagementPresenterFactory.create();
+
+        const payment = await presenter.createQueuePayment(data);
+
+        // Refresh data after payment creation
+        await loadData();
+        return payment;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to create queue payment";
+        setError(errorMessage);
+        console.error("Error creating queue payment:", err);
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, createPayment: false }));
+      }
+    },
+    [loadData]
+  );
+
+  const updateQueuePayment = useCallback(
+    async (
+      paymentId: string,
+      data: {
+        paidAmount?: number;
+        paymentStatus?: PaymentStatus;
+        paymentMethod?: PaymentMethod;
+        processedByEmployeeId?: string;
+      }
+    ) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, updatePayment: true }));
+        setError(null);
+
+        const { ClientQueueManagementPresenterFactory } = await import(
+          "./QueueManagementPresenter"
+        );
+        const presenter = await ClientQueueManagementPresenterFactory.create();
+
+        const payment = await presenter.updateQueuePayment(paymentId, data);
+
+        // Refresh data after payment update
+        await loadData();
+        return payment;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to update queue payment";
+        setError(errorMessage);
+        console.error("Error updating queue payment:", err);
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, updatePayment: false }));
+      }
+    },
+    [loadData]
+  );
+
   return {
     // Data
     viewModel,
@@ -328,6 +431,11 @@ export function useQueueManagementPresenter(
     deleteQueue,
     createQueue,
     actionLoading,
+
+    // Payment actions
+    getQueuePayment,
+    createQueuePayment,
+    updateQueuePayment,
 
     // Utility
     refreshData,
