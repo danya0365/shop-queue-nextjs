@@ -21,6 +21,17 @@ export interface EmployeeEntity {
   permissions: EmployeePermission[];
   salary: number | null;
   notes: string | null;
+  profileId: string | null;
+  profile?: {
+    id: string;
+    fullName: string;
+    username: string | null;
+    phone?: string | null;
+    avatar?: string | null;
+    isActive: boolean;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  };
   createdAt: string;
   updatedAt: string;
 }

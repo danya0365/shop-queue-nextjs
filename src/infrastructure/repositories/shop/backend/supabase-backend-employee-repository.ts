@@ -180,13 +180,18 @@ export class SupabaseShopBackendEmployeeRepository
 
       // Map database results to domain entities
       const mappedEmployees = employees.map((employee) => {
-        // Handle joined data from departments and shops tables
+        // Handle joined data from departments, shops, and profiles tables
         const employeeWithJoinedData = employee as EmployeeWithJoins;
 
         const employeeWithJoins = {
           ...employee,
           department_name: employeeWithJoinedData.departments?.name,
           shop_name: employeeWithJoinedData.shops?.name,
+          profile_username: employeeWithJoinedData.profiles?.username,
+          profile_full_name: employeeWithJoinedData.profiles?.full_name,
+          profile_phone: employeeWithJoinedData.profiles?.phone,
+          profile_avatar: employeeWithJoinedData.profiles?.avatar_url,
+          profile_is_active: employeeWithJoinedData.profiles?.is_active,
         };
         return SupabaseShopBackendEmployeeMapper.toDomain(employeeWithJoins);
       });
@@ -316,6 +321,10 @@ export class SupabaseShopBackendEmployeeRepository
               on: { fromField: "department_id", toField: "id" },
             },
             { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+            {
+              table: "profiles",
+              on: { fromField: "profile_id", toField: "id" },
+            },
           ],
         }
       );
@@ -324,14 +333,29 @@ export class SupabaseShopBackendEmployeeRepository
         return null;
       }
 
-      // Handle joined data from departments and shops tables
+      // Handle joined data from departments, shops, and profiles tables
       const employeeWithJoinedData = employee as EmployeeWithJoins;
 
       const employeeWithJoins = {
         ...employee,
         department_name: employeeWithJoinedData.departments?.name,
         shop_name: employeeWithJoinedData.shops?.name,
+        profile_username: employeeWithJoinedData.profiles?.username,
+        profile_phone: employeeWithJoinedData.profiles?.phone,
+        profile_avatar: employeeWithJoinedData.profiles?.avatar_url,
+        profile_is_active: employeeWithJoinedData.profiles?.is_active,
       };
+
+      // Ensure all profile fields are properly typed
+      if (employeeWithJoins.profile_username === null) {
+        employeeWithJoins.profile_username = undefined;
+      }
+      if (employeeWithJoins.profile_phone === null) {
+        employeeWithJoins.profile_phone = undefined;
+      }
+      if (employeeWithJoins.profile_avatar === null) {
+        employeeWithJoins.profile_avatar = undefined;
+      }
 
       // Map database result to domain entity
       return SupabaseShopBackendEmployeeMapper.toDomain(employeeWithJoins);

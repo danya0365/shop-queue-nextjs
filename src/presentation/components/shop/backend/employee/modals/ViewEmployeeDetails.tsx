@@ -210,6 +210,169 @@ export function ViewEmployeeDetails({
           </div>
         </div>
 
+        {/* Profile Information */}
+        {employee.profile && (
+          <div className="mt-8">
+            <div className="flex items-center mb-4">
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent flex-1 dark:via-gray-600"></div>
+              <h4 className="px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800">
+                ข้อมูลโปรไฟล์ผู้ใช้
+              </h4>
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent flex-1 dark:via-gray-600"></div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 border border-blue-100 dark:border-gray-600 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Profile Name */}
+                <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                      ชื่อโปรไฟล์
+                    </p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {employee.profile.fullName || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Username */}
+                <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                      ชื่อผู้ใช้
+                    </p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {employee.profile.username || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Profile Status */}
+                <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="flex-shrink-0">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        employee.profile.isActive
+                          ? "bg-gradient-to-br from-green-500 to-emerald-600"
+                          : "bg-gradient-to-br from-red-500 to-pink-600"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        {employee.profile.isActive ? (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        ) : (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        )}
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                      สถานะโปรไฟล์
+                    </p>
+                    <div className="flex items-center">
+                      <span
+                        className={`w-2 h-2 mr-2 rounded-full ${
+                          employee.profile.isActive
+                            ? "bg-green-400"
+                            : "bg-red-400"
+                        }`}
+                      ></span>
+                      <p
+                        className={`text-sm font-semibold truncate ${
+                          employee.profile.isActive
+                            ? "text-green-700 dark:text-green-400"
+                            : "text-red-700 dark:text-red-400"
+                        }`}
+                      >
+                        {employee.profile.isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                      เบอร์โทรโปรไฟล์
+                    </p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {employee.profile.phone || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex justify-end space-x-2 pt-6">
           <button

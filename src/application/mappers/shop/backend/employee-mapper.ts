@@ -39,6 +39,19 @@ export class EmployeeMapper {
       notes: entity.notes || undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      profileId: entity.profileId || undefined,
+      profile: entity.profile
+        ? {
+            id: entity.profile.id,
+            fullName: entity.profile.fullName,
+            username: entity.profile.username || "",
+            phone: entity.profile.phone || "",
+            avatar: entity.profile.avatar || "",
+            isActive: entity.profile.isActive,
+            createdAt: entity.profile.createdAt || "",
+            updatedAt: entity.profile.updatedAt || "",
+          }
+        : undefined,
       todayStats: {
         queuesServed: 0,
         revenue: 0,

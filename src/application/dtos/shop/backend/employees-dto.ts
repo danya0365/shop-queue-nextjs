@@ -20,6 +20,18 @@ export interface EmployeeDTO {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  profileId?: string;
+  profile?: {
+    id: string;
+    fullName: string;
+    username: string;
+    email?: string;
+    phone?: string;
+    avatar?: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
   todayStats: {
     queuesServed: number;
     revenue: number;

@@ -38,6 +38,19 @@ export class SupabaseShopBackendEmployeeMapper {
       permissions: schema.permissions.map((p) => p as EmployeePermission),
       salary: schema.salary,
       notes: schema.notes,
+      profileId: schema.profile_id,
+      profile: schema.profile_username
+        ? {
+            id: schema.profile_id || "",
+            fullName: schema.profile_full_name || "",
+            username: schema.profile_username || "",
+            phone: schema.profile_phone || "",
+            avatar: schema.profile_avatar || "",
+            isActive: schema.profile_is_active || false,
+            createdAt: "", // Will be populated if needed
+            updatedAt: "", // Will be populated if needed
+          }
+        : undefined,
       createdAt: schema.created_at,
       updatedAt: schema.updated_at,
     };
@@ -66,6 +79,7 @@ export class SupabaseShopBackendEmployeeMapper {
       permissions: entity.permissions,
       salary: entity.salary,
       notes: entity.notes,
+      profile_id: entity.profileId,
       created_at: entity.createdAt,
       updated_at: entity.updatedAt,
     };

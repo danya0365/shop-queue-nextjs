@@ -23,6 +23,12 @@ export interface EmployeeSchema {
   permissions: string[];
   salary: number | null;
   notes: string | null;
+  profile_id: string | null;
+  profile_full_name?: string | null; // Joined data
+  profile_username?: string | null; // Joined data
+  profile_phone?: string | null; // Joined data
+  profile_avatar?: string | null; // Joined data
+  profile_is_active?: boolean | null; // Joined data
   created_at: string;
   updated_at: string;
 }

@@ -45,6 +45,14 @@ export interface Employee {
   permissions: EmployeePermission[];
   avatar?: string;
   lastLogin?: string;
+  profile?: {
+    id: string;
+    fullName: string;
+    username?: string;
+    phone?: string;
+    avatar?: string;
+    isActive: boolean;
+  };
   todayStats: {
     queuesServed: number;
     revenue: number;
@@ -184,8 +192,16 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         hireDate: emp.hireDate,
         salary: emp.salary || 0,
         permissions: emp.permissions,
-        avatar: "👤", // Default avatar
+        avatar: emp.profile?.avatar || "👤", // Use profile avatar if available
         lastLogin: emp.lastLogin,
+        profile: emp.profile ? {
+          id: emp.profile.id,
+          fullName: emp.profile.fullName,
+          username: emp.profile.username || undefined,
+          phone: emp.profile.phone || undefined,
+          avatar: emp.profile.avatar || undefined,
+          isActive: emp.profile.isActive,
+        } : undefined,
         todayStats: emp.todayStats,
       }));
 

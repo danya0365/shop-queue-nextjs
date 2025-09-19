@@ -259,6 +259,63 @@ export function EditEmployeeModal({
               )}
             </div>
 
+            {/* Profile Information */}
+            {employee.profile && (
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 pb-2">
+                  ข้อมูลโปรไฟล์ผู้ใช้
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      ชื่อโปรไฟล์
+                    </label>
+                    <div className="text-sm text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                      {employee.profile.fullName || "-"}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      ชื่อผู้ใช้
+                    </label>
+                    <div className="text-sm text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                      {employee.profile.username || "-"}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      สถานะโปรไฟล์
+                    </label>
+                    <div className="text-sm">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        employee.profile.isActive 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      }`}>
+                        {employee.profile.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      เบอร์โทรโปรไฟล์
+                    </label>
+                    <div className="text-sm text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                      {employee.profile.phone || "-"}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic mt-2">
+                  ข้อมูลโปรไฟล์จะแสดงเพื่ออ้างอิงเท่านั้น ไม่สามารถแก้ไขได้ในหน้านี้
+                </div>
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
