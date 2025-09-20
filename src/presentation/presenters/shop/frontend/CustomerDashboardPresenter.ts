@@ -163,3 +163,14 @@ export class CustomerDashboardPresenterFactory {
     return new CustomerDashboardPresenter(logger, shopService);
   }
 }
+
+// Client-side Factory class
+export class ClientCustomerDashboardPresenterFactory {
+  static async create(): Promise<CustomerDashboardPresenter> {
+    const { getClientContainer } = await import("@/src/di/client-container");
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const shopService = clientContainer.resolve<ShopService>("ShopService");
+    return new CustomerDashboardPresenter(logger, shopService);
+  }
+}

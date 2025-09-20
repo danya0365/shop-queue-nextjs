@@ -50,7 +50,7 @@ export default async function CustomerDashboardPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <CustomerDashboardView viewModel={viewModel} shopId={shopId} />
+        <CustomerDashboardView initialViewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
   } catch (error) {
