@@ -1,3 +1,8 @@
+import type {
+  CustomerRewardDTO,
+  GetRedeemedRewardsInputDTO,
+  PaginationDTO,
+} from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { CustomerRewardMapper } from "@/src/application/mappers/shop/customer/customer-reward-mapper";
 import type { ShopCustomerRewardRepository } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
@@ -5,17 +10,17 @@ import {
   ShopCustomerRewardError,
   ShopCustomerRewardErrorType,
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
-import type { CustomerRewardDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
-import type { PaginationDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
-import type { GetRedeemedRewardsInputDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
 
-export class GetRedeemedRewardsUseCase implements IUseCase<
-  GetRedeemedRewardsInputDTO,
-  {
-    data: CustomerRewardDTO[];
-    pagination: PaginationDTO;
-  }
-> {
+export class GetRedeemedRewardsUseCase
+  implements
+    IUseCase<
+      GetRedeemedRewardsInputDTO,
+      {
+        data: CustomerRewardDTO[];
+        pagination: PaginationDTO;
+      }
+    >
+{
   constructor(
     private readonly customerRewardRepository: ShopCustomerRewardRepository
   ) {}
@@ -25,7 +30,13 @@ export class GetRedeemedRewardsUseCase implements IUseCase<
     pagination: PaginationDTO;
   }> {
     try {
-      const { shopId, customerId, currentPage = 1, perPage = 10, filters } = input;
+      const {
+        shopId,
+        customerId,
+        currentPage = 1,
+        perPage = 10,
+        filters,
+      } = input;
 
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -48,18 +59,20 @@ export class GetRedeemedRewardsUseCase implements IUseCase<
       const result = await this.customerRewardRepository.getRedeemedRewards({
         shopId,
         customerId,
-        currentPage,
-        perPage,
-        filters: filters ? {
-          category: filters.category,
-          type: filters.type,
-          dateRange: filters.dateRange,
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-        } : undefined,
+        page: currentPage,
+        limit: perPage,
+        filters: filters
+          ? {
+              category: filters.category,
+              type: filters.type,
+              dateRange: filters.dateRange,
+              startDate: filters.startDate,
+              endDate: filters.endDate,
+            }
+          : undefined,
       });
 
-      const redeemedRewardsDTOs = result.data.map(reward => 
+      const redeemedRewardsDTOs = result.data.map((reward) =>
         CustomerRewardMapper.toCustomerRewardDTO(reward)
       );
 

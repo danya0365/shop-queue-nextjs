@@ -1,3 +1,7 @@
+import type {
+  CustomerRewardDTO,
+  RedeemRewardInputDTO,
+} from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { CustomerRewardMapper } from "@/src/application/mappers/shop/customer/customer-reward-mapper";
 import type { ShopCustomerRewardRepository } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
@@ -5,13 +9,10 @@ import {
   ShopCustomerRewardError,
   ShopCustomerRewardErrorType,
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
-import type { CustomerRewardDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
-import type { RedeemRewardInputDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
 
-export class RedeemRewardUseCase implements IUseCase<
-  RedeemRewardInputDTO,
-  CustomerRewardDTO
-> {
+export class RedeemRewardUseCase
+  implements IUseCase<RedeemRewardInputDTO, CustomerRewardDTO>
+{
   constructor(
     private readonly customerRewardRepository: ShopCustomerRewardRepository
   ) {}
@@ -48,11 +49,18 @@ export class RedeemRewardUseCase implements IUseCase<
       }
 
       // Get customer points first to check if they have enough points
-      const customerPoints = await this.customerRewardRepository.getCustomerPoints(shopId, customerId);
-      
+      const customerPoints =
+        await this.customerRewardRepository.getCustomerPoints(
+          shopId,
+          customerId
+        );
+
       // Get reward details to check points cost
-      const rewardDetails = await this.customerRewardRepository.getRewardById(shopId, rewardId);
-      
+      const rewardDetails = await this.customerRewardRepository.getRewardById(
+        shopId,
+        rewardId
+      );
+
       if (!rewardDetails) {
         throw new ShopCustomerRewardError(
           ShopCustomerRewardErrorType.NOT_FOUND,
@@ -63,7 +71,7 @@ export class RedeemRewardUseCase implements IUseCase<
       }
 
       // Check if reward is available
-      if ('isAvailable' in rewardDetails && !rewardDetails.isAvailable) {
+      if ("isAvailable" in rewardDetails && !rewardDetails.isAvailable) {
         throw new ShopCustomerRewardError(
           ShopCustomerRewardErrorType.REWARD_UNAVAILABLE,
           "Reward is not available for redemption",
@@ -73,7 +81,10 @@ export class RedeemRewardUseCase implements IUseCase<
       }
 
       // Check if reward is expired
-      if (rewardDetails.expiryDate && new Date(rewardDetails.expiryDate) < new Date()) {
+      if (
+        rewardDetails.expiryDate &&
+        new Date(rewardDetails.expiryDate) < new Date()
+      ) {
         throw new ShopCustomerRewardError(
           ShopCustomerRewardErrorType.REWARD_EXPIRED,
           "Reward has expired",
@@ -88,16 +99,21 @@ export class RedeemRewardUseCase implements IUseCase<
           ShopCustomerRewardErrorType.INSUFFICIENT_POINTS,
           "Insufficient points to redeem reward",
           "RedeemRewardUseCase.execute",
-          { 
-            currentPoints: customerPoints.currentPoints, 
-            requiredPoints: rewardDetails.pointsCost 
+          {
+            currentPoints: customerPoints.currentPoints,
+            requiredPoints: rewardDetails.pointsCost,
           }
         );
       }
 
       // Process the redemption
-      const redeemedRewardEntity = await this.customerRewardRepository.redeemReward(shopId, customerId, rewardId);
-      
+      const redeemedRewardEntity =
+        await this.customerRewardRepository.redeemReward(
+          shopId,
+          customerId,
+          rewardId
+        );
+
       return CustomerRewardMapper.toCustomerRewardDTO(redeemedRewardEntity);
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {

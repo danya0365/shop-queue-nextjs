@@ -1,3 +1,7 @@
+import type {
+  CustomerPointsDTO,
+  GetCustomerPointsInputDTO,
+} from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { CustomerRewardMapper } from "@/src/application/mappers/shop/customer/customer-reward-mapper";
 import type { ShopCustomerRewardRepository } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
@@ -5,13 +9,10 @@ import {
   ShopCustomerRewardError,
   ShopCustomerRewardErrorType,
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
-import type { CustomerPointsDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
-import type { GetCustomerPointsInputDTO } from "@/src/application/dtos/shop/customer/customer-reward-dto";
 
-export class GetCustomerPointsUseCase implements IUseCase<
-  GetCustomerPointsInputDTO,
-  CustomerPointsDTO
-> {
+export class GetCustomerPointsUseCase
+  implements IUseCase<GetCustomerPointsInputDTO, CustomerPointsDTO>
+{
   constructor(
     private readonly customerRewardRepository: ShopCustomerRewardRepository
   ) {}
@@ -38,8 +39,12 @@ export class GetCustomerPointsUseCase implements IUseCase<
         );
       }
 
-      const customerPointsEntity = await this.customerRewardRepository.getCustomerPoints(shopId, customerId);
-      
+      const customerPointsEntity =
+        await this.customerRewardRepository.getCustomerPoints(
+          shopId,
+          customerId
+        );
+
       return CustomerRewardMapper.toCustomerPointsDTO(customerPointsEntity);
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {

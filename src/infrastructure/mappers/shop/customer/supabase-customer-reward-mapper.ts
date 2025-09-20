@@ -31,14 +31,17 @@ export class SupabaseCustomerRewardMapper {
   static toCustomerPointsEntity(data: CustomerPointsSchema): CustomerPointsEntity {
     return {
       id: String(data.id || ""),
+      customerId: data.customer_id || "",
+      shopId: data.shop_id || "",
       currentPoints: Number(data.current_points || 0),
       totalEarned: Number(data.total_earned || 0),
       totalRedeemed: Number(data.total_redeemed || 0),
       pointsExpiring: Number(data.points_expiring || 0),
-      expiryDate: data.expiry_date ? String(data.expiry_date) : undefined,
-      tier: (data.tier as "Bronze" | "Silver" | "Gold" | "Platinum") || "Bronze",
+      expiryDate: data.expiry_date || undefined,
+      tier: data.tier || "Bronze",
       nextTierPoints: Number(data.next_tier_points || 0),
-      tierBenefits: Array.isArray(data.tier_benefits) ? data.tier_benefits.map(String) : [],
+      tierBenefits: data.tier_benefits || [],
+      lastUpdated: data.updated_at || new Date().toISOString(),
     };
   }
 
@@ -48,18 +51,22 @@ export class SupabaseCustomerRewardMapper {
   static toCustomerRewardEntity(data: CustomerRewardSchema): CustomerRewardEntity {
     return {
       id: String(data.id || ""),
-      name: String(data.name || ""),
-      description: String(data.description || ""),
-      type: (data.type as "discount" | "free_item" | "cashback" | "points") || "discount",
+      name: data.name || "",
+      description: data.description || "",
+      type: data.type || "discount",
       value: Number(data.value || 0),
       pointsCost: Number(data.points_cost || 0),
-      category: String(data.category || ""),
-      imageUrl: data.image_url ? String(data.image_url) : undefined,
-      expiryDate: data.expiry_date ? String(data.expiry_date) : undefined,
-      termsAndConditions: Array.isArray(data.terms_and_conditions) ? data.terms_and_conditions.map(String) : [],
+      category: data.category || "",
+      imageUrl: data.image_url || undefined,
+      expiryDate: data.expiry_date || undefined,
+      termsAndConditions: data.terms_and_conditions || [],
       isAvailable: Boolean(data.is_available),
       isRedeemed: Boolean(data.is_redeemed),
-      redeemedAt: data.redeemed_at ? String(data.redeemed_at) : undefined,
+      redeemedAt: data.redeemed_at || undefined,
+      customerId: data.customer_id || undefined,
+      shopId: data.shop_id || "",
+      createdAt: data.created_at || new Date().toISOString(),
+      updatedAt: data.updated_at || new Date().toISOString(),
     };
   }
 
@@ -69,11 +76,17 @@ export class SupabaseCustomerRewardMapper {
   static toRewardTransactionEntity(data: RewardTransactionSchema): RewardTransactionEntity {
     return {
       id: String(data.id || ""),
-      type: (data.type as "earned" | "redeemed" | "expired") || "earned",
+      customerId: data.customer_id || "",
+      shopId: data.shop_id || "",
+      type: data.type || "earned",
       points: Number(data.points || 0),
-      description: String(data.description || ""),
-      date: String(data.date || ""),
-      relatedOrderId: data.related_order_id ? String(data.related_order_id) : undefined,
+      description: data.description || "",
+      date: data.date || "",
+      relatedOrderId: data.related_order_id || undefined,
+      relatedRewardId: undefined, // Not available in schema
+      balanceBefore: 0, // Not available in schema
+      balanceAfter: 0, // Not available in schema
+      createdAt: data.created_at || new Date().toISOString(),
     };
   }
 
@@ -83,13 +96,20 @@ export class SupabaseCustomerRewardMapper {
   static toAvailableRewardEntity(data: AvailableRewardSchema): AvailableRewardEntity {
     return {
       id: String(data.id || ""),
-      name: String(data.name || ""),
-      description: String(data.description || ""),
+      name: data.name || "",
+      description: data.description || "",
       pointsCost: Number(data.points_cost || 0),
-      category: String(data.category || ""),
-      imageUrl: data.image_url ? String(data.image_url) : undefined,
+      category: data.category || "",
+      imageUrl: data.image_url || undefined,
       isAvailable: Boolean(data.is_available),
-      stock: data.stock ? Number(data.stock) : undefined,
+      stock: data.stock !== undefined ? Number(data.stock) : undefined,
+      type: data.type || "discount",
+      value: data.value !== undefined ? Number(data.value) : undefined,
+      expiryDate: data.expiry_date || undefined,
+      termsAndConditions: data.terms_and_conditions,
+      shopId: data.shop_id || "",
+      createdAt: data.created_at || new Date().toISOString(),
+      updatedAt: data.updated_at || new Date().toISOString(),
     };
   }
 
@@ -98,16 +118,17 @@ export class SupabaseCustomerRewardMapper {
    */
   static toCustomerRewardStatsEntity(data: CustomerRewardStatsSchema): CustomerRewardStatsEntity {
     return {
-      id: String(data.id || ""),
+      customerId: data.customer_id || "",
+      shopId: data.shop_id || "",
       totalRewardsAvailable: Number(data.total_rewards_available || 0),
       totalRewardsRedeemed: Number(data.total_rewards_redeemed || 0),
       totalPointsEarned: Number(data.total_points_earned || 0),
       totalPointsRedeemed: Number(data.total_points_redeemed || 0),
       averagePointsPerTransaction: Number(data.average_points_per_transaction || 0),
-      mostRedeemedCategory: String(data.most_redeemed_category || ""),
+      mostRedeemedCategory: data.most_redeemed_category || "",
       redemptionRate: Number(data.redemption_rate || 0),
-      lastRedemptionDate: data.last_redemption_date ? String(data.last_redemption_date) : undefined,
-      lastEarnDate: data.last_earn_date ? String(data.last_earn_date) : undefined,
+      lastRedemptionDate: data.last_redemption_date || undefined,
+      lastEarnDate: data.last_earn_date || undefined,
     };
   }
 
@@ -244,7 +265,8 @@ export class SupabaseCustomerRewardMapper {
 
   static fromCustomerRewardStatsEntity(entity: CustomerRewardStatsEntity): Record<string, unknown> {
     return {
-      id: entity.id,
+      customer_id: entity.customerId,
+      shop_id: entity.shopId,
       total_rewards_available: entity.totalRewardsAvailable,
       total_rewards_redeemed: entity.totalRewardsRedeemed,
       total_points_earned: entity.totalPointsEarned,
