@@ -55,11 +55,19 @@ import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositori
 import { SupabaseSubscriptionUsageRepository } from "../infrastructure/repositories/supabase-subscription-usage-repository";
 import { Container, createContainer } from "./container";
 
+// Static container instance
+let staticContainer: Container | null = null;
+
 /**
  * Initialize a client-side container with all dependencies
- * This function creates a new container instance each time it's called
+ * This function returns a static instance that is created only once
  */
 export function createClientContainer(): Container {
+  // Return existing instance if already created
+  if (staticContainer) {
+    return staticContainer;
+  }
+  
   const container = createContainer();
   const logger = new ConsoleLogger();
 
@@ -322,6 +330,9 @@ export function createClientContainer(): Container {
     console.error("Failed to initialize client container:", error);
   }
 
+  // Store the container as static instance
+  staticContainer = container;
+  
   return container;
 }
 
@@ -338,4 +349,12 @@ export function getClientService<T>(token: string | symbol): T {
 // get client container
 export function getClientContainer(): Container {
   return createClientContainer();
+}
+
+/**
+ * Reset the static container instance (useful for testing or hot reload)
+ * This forces a new container to be created on the next call to createClientContainer
+ */
+export function resetClientContainer(): void {
+  staticContainer = null;
 }
