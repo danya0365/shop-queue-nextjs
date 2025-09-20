@@ -16,7 +16,20 @@ import {
   ShopCustomerDashboardErrorType,
   ShopCustomerDashboardRepository,
 } from "@/src/domain/repositories/shop/customer/customer-dashboard-repository";
+import { SupabaseCustomerDashboardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-dashboard-mapper";
+import {
+  QueueSchema,
+  ServiceSchema,
+  PromotionSchema,
+  ShopSchema,
+} from "@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema";
 import { StandardRepository } from "../../base/standard-repository";
+
+// Extended types for database records
+type QueueSchemaRecord = Record<string, unknown> & QueueSchema;
+type ServiceSchemaRecord = Record<string, unknown> & ServiceSchema;
+type PromotionSchemaRecord = Record<string, unknown> & PromotionSchema;
+type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
 
 /**
  * Supabase implementation of the customer dashboard repository
@@ -83,36 +96,15 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const queuesData = queuesResult as Array<{ status: string; queue_number?: string }>;
-      const waitingQueues = queuesData.filter(
-        (queue) => queue.status === "waiting"
-      );
-      const servingQueues = queuesData.filter(
-        (queue) => queue.status === "serving"
-      );
+      const queuesData = queuesResult as Array<QueueSchemaRecord>;
 
-      // Calculate statistics
-      const totalWaiting = waitingQueues.length;
-      const currentNumber =
-        servingQueues.length > 0
-          ? servingQueues[0].queue_number || "A001"
-          : waitingQueues.length > 0
-          ? waitingQueues[0].queue_number || "A001"
-          : "A001";
-      const estimatedWaitTime = totalWaiting * 5; // 5 minutes per person
-      const averageServiceTime = 15; // 15 minutes average
-
-      const queueStatus: QueueStatusStatsEntity = {
-        totalWaiting,
-        currentNumber,
-        estimatedWaitTime,
-        averageServiceTime,
-      };
+      // Transform the data using the mapper
+      const queueStatus = SupabaseCustomerDashboardMapper.toQueueStatusStatsEntity(queuesData);
 
       this.logger.info("Queue status retrieved successfully", {
         shopId,
-        totalWaiting,
-        currentNumber,
+        totalWaiting: queueStatus.totalWaiting,
+        currentNumber: queueStatus.currentNumber,
       });
 
       return queueStatus;
@@ -191,17 +183,10 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const servicesData = servicesResult as Array<{ id: string; name: string; price?: number; description?: string; estimated_time?: number; icon?: string; queue_count?: number }>;
-      const popularServices = servicesData
-        .filter((service) => (service.queue_count || 0) > 0)
-        .map((service) => ({
-          id: service.id,
-          name: service.name,
-          price: service.price || 0,
-          description: service.description || "",
-          estimatedTime: service.estimated_time || 5,
-          icon: service.icon || "",
-        }));
+      const servicesData = servicesResult as Array<ServiceSchemaRecord>;
+
+      // Transform the data using the mapper
+      const popularServices = SupabaseCustomerDashboardMapper.toPopularServiceEntities(servicesData);
 
       this.logger.info("Popular services retrieved successfully", {
         shopId,
@@ -277,30 +262,10 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const promotionsData = promotionsResult as Array<{ id: string; title: string; description: string; discount_value?: number; valid_until?: string; icon?: string; is_active?: boolean; start_date?: string; end_date?: string }>;
-      const activePromotions = promotionsData.filter(
-        (promotion) => {
-          const now = new Date();
-          const startDate = new Date(promotion.start_date || now);
-          const endDate = new Date(promotion.end_date || now);
-          return (
-            promotion.is_active !== false &&
-            startDate <= now &&
-            endDate >= now
-          );
-        }
-      );
+      const promotionsData = promotionsResult as Array<PromotionSchemaRecord>;
 
-      const promotions: PromotionEntity[] = activePromotions.map(
-        (promotion) => ({
-          id: promotion.id,
-          title: promotion.title,
-          description: promotion.description,
-          discount: promotion.discount_value || 0,
-          validUntil: promotion.valid_until || "",
-          icon: promotion.icon || "",
-        })
-      );
+      // Transform the data using the mapper
+      const promotions = SupabaseCustomerDashboardMapper.toPromotionEntities(promotionsData);
 
       this.logger.info("Promotions retrieved successfully", {
         shopId,
@@ -362,7 +327,7 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const shop = shopResult as { status?: string; announcement?: string | null };
+      const shop = shopResult as ShopSchemaRecord;
 
       const canJoinQueue =
         shop?.status === "active" && queueStatus.totalWaiting < 50;
