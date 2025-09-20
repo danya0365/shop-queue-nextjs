@@ -1,6 +1,7 @@
 "use client";
 
 import { CustomerDashboardViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerDashboardPresenter";
+import { useQRCode } from "next-qrcode";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -13,6 +14,7 @@ export function CustomerDashboardView({
   viewModel,
   shopId,
 }: CustomerDashboardViewProps) {
+  const { Canvas } = useQRCode();
   const {
     shopInfo,
     queueStatus,
@@ -81,7 +83,19 @@ export function CustomerDashboardView({
           <div className="p-6 frontend-qr-section">
             <div className="text-center">
               <div className="w-32 h-32 frontend-qr-code rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <span className="text-4xl">📱</span>
+                <Canvas
+                  text={`${window.location.origin}/shop/${shopId}/queue`}
+                  options={{
+                    errorCorrectionLevel: "M",
+                    margin: 2,
+                    scale: 3,
+                    width: 120,
+                  }}
+                  logo={{
+                    src: "/qr-logo.png",
+                    options: { width: 30 },
+                  }}
+                />
               </div>
               <p className="text-sm frontend-text-secondary">
                 สแกน QR Code เพื่อเข้าคิวด่วน
