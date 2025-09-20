@@ -4,17 +4,33 @@ import type {
   AvailableReward,
   CustomerReward,
   CustomerRewardsViewModel,
+  RewardTransaction,
 } from "@/src/presentation/presenters/shop/frontend/CustomerRewardsPresenter";
+import { useCustomerRewardsPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerRewardsPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
-interface CustomerRewardsViewProps {
-  viewModel: CustomerRewardsViewModel;
+enum TabType {
+  REWARDS = "rewards",
+  REDEEMED = "redeemed",
+  HISTORY = "history",
 }
 
-export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
-  type TabType = "rewards" | "redeemed" | "history";
-  const [activeTab, setActiveTab] = useState<TabType>("rewards");
+interface CustomerRewardsViewProps {
+  shopId: string;
+  initialViewModel?: CustomerRewardsViewModel;
+}
+
+export function CustomerRewardsView({ shopId, initialViewModel }: CustomerRewardsViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    handleRedeemReward: handleRedeemRewardAction,
+    handleViewRewardDetails,
+    refreshData,
+  } = useCustomerRewardsPresenter(shopId, initialViewModel);
+  const [activeTab, setActiveTab] = useState<TabType>(TabType.REWARDS);
   const [selectedReward, setSelectedReward] = useState<
     AvailableReward | CustomerReward | null
   >(null);
@@ -24,6 +40,48 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
     setSelectedReward(reward);
     setShowRedeemModal(true);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted">กำลังโหลดข้อมูลรางวัล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">เกิดข้อผิดพลาด</h1>
+          <p className="text-muted mb-4">{error}</p>
+          <button 
+            onClick={refreshData}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            ลองใหม่อีกครั้ง
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">ไม่มีข้อมูล</h1>
+          <p className="text-muted mb-4">ไม่พบข้อมูลรางวัล</p>
+        </div>
+      </div>
+    );
+  }
 
   const confirmRedeem = () => {
     if (selectedReward) {
@@ -143,13 +201,13 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
         <div className="border-b frontend-card-border">
           <nav className="flex space-x-8 px-6">
             {[
-              { id: "rewards", name: "แลกของรางวัล", icon: "🎁" },
-              { id: "redeemed", name: "ของรางวัลที่แลกแล้ว", icon: "📦" },
-              { id: "history", name: "ประวัติแต้ม", icon: "📊" },
+              { id: TabType.REWARDS, name: "แลกของรางวัล", icon: "🎁" },
+              { id: TabType.REDEEMED, name: "ของรางวัลที่แลกแล้ว", icon: "📦" },
+              { id: TabType.HISTORY, name: "ประวัติแต้ม", icon: "📊" },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? "border-blue-500 frontend-text-primary"
@@ -164,10 +222,10 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
         </div>
 
         {/* Available Rewards Tab */}
-        {activeTab === "rewards" && (
+        {activeTab === TabType.REWARDS && (
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {viewModel.availableRewards.map((reward) => (
+              {viewModel.availableRewards.data.map((reward: AvailableReward) => (
                 <div
                   key={reward.id}
                   className={cn(
@@ -234,9 +292,9 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
         )}
 
         {/* Redeemed Rewards Tab */}
-        {activeTab === "redeemed" && (
+        {activeTab === TabType.REDEEMED && (
           <div className="p-6">
-            {viewModel.redeemedRewards.length === 0 ? (
+            {viewModel.redeemedRewards.data.length === 0 ? (
               <div className="text-center py-8">
                 <div className="frontend-text-muted text-6xl mb-4">📦</div>
                 <h3 className="text-lg font-medium frontend-text-primary mb-2">
@@ -248,7 +306,7 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
               </div>
             ) : (
               <div className="space-y-4">
-                {viewModel.redeemedRewards.map((reward) => (
+                {viewModel.redeemedRewards.data.map((reward: CustomerReward) => (
                   <div
                     key={reward.id}
                     className="frontend-card frontend-card-hover p-4 rounded-lg"
@@ -304,10 +362,10 @@ export function CustomerRewardsView({ viewModel }: CustomerRewardsViewProps) {
         )}
 
         {/* History Tab */}
-        {activeTab === "history" && (
+        {activeTab === TabType.HISTORY && (
           <div className="p-6">
             <div className="space-y-4">
-              {viewModel.rewardTransactions.map((transaction) => (
+              {viewModel.rewardTransactions.data.map((transaction: RewardTransaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between py-3 border-b border-gray-100"

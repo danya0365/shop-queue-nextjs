@@ -50,7 +50,7 @@ export default async function CustomerRewardsPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <CustomerRewardsView viewModel={viewModel} />
+        <CustomerRewardsView shopId={shopId} initialViewModel={viewModel} />
       </FrontendLayout>
     );
   } catch (error) {
