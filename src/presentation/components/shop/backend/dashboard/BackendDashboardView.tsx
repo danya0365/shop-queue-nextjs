@@ -1,10 +1,11 @@
 "use client";
 
+import { QRCodeModal } from "@/src/presentation/components/shop/backend/queue/modals/QRCodeModal";
 import { BackendDashboardViewModel } from "@/src/presentation/presenters/shop/backend/DashboardPresenter";
 import { useBackendDashboardPresenter } from "@/src/presentation/presenters/shop/backend/useBackendDashboardPresenter";
-import { QRCodeModal } from "@/src/presentation/components/shop/backend/queue/modals/QRCodeModal";
-import { UnderConstructionModal } from "./modals/UnderConstructionModal";
 import { useState } from "react";
+import { UnderConstructionModal } from "./modals/UnderConstructionModal";
+import { ShopSetupTutorial } from "./ShopSetupTutorial";
 
 interface BackendDashboardViewProps {
   shopId: string;
@@ -85,6 +86,7 @@ export function BackendDashboardView({
     recentActivities,
     shopName,
     currentTime,
+    setupProgress,
   } = viewModel;
 
   return (
@@ -114,6 +116,11 @@ export function BackendDashboardView({
           </button>
         </div>
       </div>
+
+      {/* Shop Setup Tutorial */}
+      {setupProgress && (
+        <ShopSetupTutorial shopId={shopId} setupProgress={setupProgress} />
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

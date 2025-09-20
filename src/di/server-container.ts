@@ -25,6 +25,7 @@ import { QueueServiceBackendService } from "../application/services/shop/backend
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
+import { ShopSetupProgressServiceFactory } from "../application/services/shop/ShopSetupProgressService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
 import { createServerSupabaseClient } from "../infrastructure/config/supabase-server-client";
@@ -156,6 +157,10 @@ export async function createServerContainer(): Promise<Container> {
         shopBackendDashboardRepository,
         logger
       );
+    const shopSetupProgressService = ShopSetupProgressServiceFactory.create(
+      databaseDatasource,
+      logger
+    );
     const posterTemplateBackendService = new PosterTemplateBackendService(
       logger
     );
@@ -231,6 +236,10 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance(
       "ShopBackendDashboardService",
       shopBackendDashboardService
+    );
+    container.registerInstance(
+      "ShopSetupProgressService",
+      shopSetupProgressService
     );
     container.registerInstance(
       "ShopBackendShopsService",

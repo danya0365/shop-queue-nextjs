@@ -1,15 +1,22 @@
+import type {
+  RecentActivityDTO,
+  RevenueStatsDTO,
+} from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import {
   SubscriptionLimits,
   UsageStatsDto,
 } from "@/src/application/dtos/subscription-dto";
-import type { RecentActivityDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
-import type { RevenueStatsDTO } from "@/src/application/dtos/shop/backend/dashboard-stats-dto";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
+import {
+  ShopSetupProgress,
+  ShopSetupProgressService,
+} from "@/src/application/services/shop/ShopSetupProgressService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
+import { ActivityType } from "@/src/domain/entities/backend/backend-dashboard.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
@@ -30,11 +37,7 @@ export interface EmployeeStats {
 
 export interface RecentActivity {
   id: string;
-  type:
-    | "queue_created"
-    | "queue_served"
-    | "payment_completed"
-    | "employee_login";
+  type: RecentActivityDTO["type"];
   message: string;
   timestamp: string;
   icon: string;
@@ -48,6 +51,8 @@ export interface BackendDashboardViewModel {
   recentActivities: RecentActivity[];
   shopName: string;
   currentTime: string;
+  setupProgress: ShopSetupProgress;
+  isQueueReady: boolean;
   subscription: {
     limits: SubscriptionLimits;
     usage: UsageStatsDto;
@@ -60,6 +65,7 @@ export interface BackendDashboardViewModel {
 // Main Presenter class
 export class BackendDashboardPresenter extends BaseShopBackendPresenter {
   private readonly dashboardService: IShopBackendDashboardService;
+  private readonly setupProgressService: ShopSetupProgressService;
 
   constructor(
     logger: Logger,
@@ -67,7 +73,8 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    dashboardService: IShopBackendDashboardService
+    dashboardService: IShopBackendDashboardService,
+    setupProgressService: ShopSetupProgressService
   ) {
     super(
       logger,
@@ -77,6 +84,7 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
       subscriptionService
     );
     this.dashboardService = dashboardService;
+    this.setupProgressService = setupProgressService;
   }
 
   async getViewModel(shopId: string): Promise<BackendDashboardViewModel> {
@@ -103,15 +111,24 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
       const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
       const usage = await this.getUsageStats(profile.id);
 
-      // Get data from dashboard service
-      const [queueStats, revenueStats, employeeStats, shopName, recentActivities] =
-        await Promise.all([
-          this.dashboardService.getQueueStats(shopId),
-          this.dashboardService.getRevenueStats(shopId),
-          this.dashboardService.getEmployeeStats(shopId),
-          this.dashboardService.getShopName(shopId),
-          this.dashboardService.getRecentActivities(shopId),
-        ]);
+      // Get data from dashboard service and setup progress
+      const [
+        queueStats,
+        revenueStats,
+        employeeStats,
+        shopName,
+        recentActivities,
+        setupProgress,
+        isQueueReady,
+      ] = await Promise.all([
+        this.dashboardService.getQueueStats(shopId),
+        this.dashboardService.getRevenueStats(shopId),
+        this.dashboardService.getEmployeeStats(shopId),
+        this.dashboardService.getShopName(shopId),
+        this.dashboardService.getRecentActivities(shopId),
+        this.setupProgressService.getShopSetupProgress(shopId),
+        this.setupProgressService.isShopQueueReady(shopId),
+      ]);
 
       // Map DTOs to ViewModel format
       const mappedRecentActivities = this.mapRecentActivities(recentActivities);
@@ -123,6 +140,8 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
         recentActivities: mappedRecentActivities,
         shopName,
         currentTime: new Date().toLocaleString("th-TH"),
+        setupProgress,
+        isQueueReady,
         subscription: {
           limits,
           usage,
@@ -140,51 +159,30 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
     }
   }
 
-  private getRecentActivities(): RecentActivity[] {
-    return [
-      {
-        id: "1",
-        type: "queue_created",
-        message: "ลูกค้าใหม่เข้าคิว - คิวที่ A015",
-        timestamp: "2 นาทีที่แล้ว",
-        icon: "📝",
-      },
-      {
-        id: "2",
-        type: "payment_completed",
-        message: "ชำระเงินเรียบร้อย - คิวที่ A012 (฿350)",
-        timestamp: "5 นาทีที่แล้ว",
-        icon: "💳",
-      },
-      {
-        id: "3",
-        type: "queue_served",
-        message: "ให้บริการเสร็จสิ้น - คิวที่ A011",
-        timestamp: "8 นาทีที่แล้ว",
-        icon: "✅",
-      },
-      {
-        id: "4",
-        type: "employee_login",
-        message: "พนักงาน สมชาย เข้าสู่ระบบ",
-        timestamp: "15 นาทีที่แล้ว",
-        icon: "👤",
-      },
-    ];
-  }
-
-  private mapRecentActivities(activities: RecentActivityDTO[]): RecentActivity[] {
+  private mapRecentActivities(
+    activities: RecentActivityDTO[]
+  ): RecentActivity[] {
+    const mapActivityTypeToIcon = (type: ActivityType): string => {
+      switch (type) {
+        case ActivityType.QUEUE_CREATED:
+          return "📝";
+        case ActivityType.QUEUE_COMPLETED:
+          return "✅";
+        case ActivityType.PAYMENT_COMPLETED:
+          return "💳";
+        case ActivityType.EMPLOYEE_LOGIN:
+          return "👤";
+        case ActivityType.CUSTOMER_REGISTERED:
+          return "👥";
+        case ActivityType.SERVICE_ADDED:
+          return "🎯";
+        default:
+          return "📋";
+      }
+    };
     return activities.map((activity) => {
       // Map activity type to appropriate icon
-      const iconMap: Record<string, string> = {
-        queue_created: "📝",
-        queue_served: "✅",
-        payment_completed: "💳",
-        employee_login: "👤",
-        queue_cancelled: "❌",
-        customer_joined: "👥",
-        service_completed: "🎯",
-      };
+      const icon = mapActivityTypeToIcon(activity.type);
 
       // Format timestamp to Thai relative time
       const formatTimestamp = (createdAt: string): string => {
@@ -208,10 +206,10 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
 
       return {
         id: activity.id,
-        type: activity.type as RecentActivity["type"], // Cast to match the expected type
+        type: activity.type,
         message,
         timestamp: formatTimestamp(activity.createdAt),
-        icon: iconMap[activity.type] || "📋",
+        icon,
       };
     });
   }
@@ -246,13 +244,20 @@ export class BackendDashboardPresenterFactory {
       serverContainer.resolve<IShopBackendDashboardService>(
         "ShopBackendDashboardService"
       );
+
+    const setupProgressService =
+      serverContainer.resolve<ShopSetupProgressService>(
+        "ShopSetupProgressService"
+      );
+
     return new BackendDashboardPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      dashboardService
+      dashboardService,
+      setupProgressService
     );
   }
 }
@@ -274,13 +279,19 @@ export class ClientBackendDashboardPresenterFactory {
       clientContainer.resolve<IShopBackendDashboardService>(
         "ShopBackendDashboardService"
       );
+    const setupProgressService =
+      clientContainer.resolve<ShopSetupProgressService>(
+        "ShopSetupProgressService"
+      );
+
     return new BackendDashboardPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      dashboardService
+      dashboardService,
+      setupProgressService
     );
   }
 }

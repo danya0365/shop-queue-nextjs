@@ -27,6 +27,7 @@ import { QueueServiceBackendService } from "../application/services/shop/backend
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
+import { ShopSetupProgressServiceFactory } from "../application/services/shop/ShopSetupProgressService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
@@ -67,7 +68,7 @@ export function createClientContainer(): Container {
   if (staticContainer) {
     return staticContainer;
   }
-  
+
   const container = createContainer();
   const logger = new ConsoleLogger();
 
@@ -162,6 +163,10 @@ export function createClientContainer(): Container {
         shopBackendDashboardRepository,
         logger
       );
+    const shopSetupProgressService = ShopSetupProgressServiceFactory.create(
+      databaseDatasource,
+      logger
+    );
     const posterTemplateBackendService = new PosterTemplateBackendService(
       logger
     );
@@ -244,6 +249,10 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "ShopBackendDashboardService",
       shopBackendDashboardService
+    );
+    container.registerInstance(
+      "ShopSetupProgressService",
+      shopSetupProgressService
     );
     container.registerInstance(
       "ShopBackendShopsService",
@@ -332,7 +341,7 @@ export function createClientContainer(): Container {
 
   // Store the container as static instance
   staticContainer = container;
-  
+
   return container;
 }
 
