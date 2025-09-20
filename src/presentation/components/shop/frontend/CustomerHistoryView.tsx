@@ -1,19 +1,44 @@
 "use client";
 
+import { PaginationControls } from "@/src/presentation/components/common/PaginationControls";
 import type {
   CustomerHistoryViewModel,
   CustomerQueueHistory,
-  HistoryFilters,
   HistoryFilterType,
 } from "@/src/presentation/presenters/shop/frontend/CustomerHistoryPresenter";
+import { useCustomerHistoryPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerHistoryPresenter";
 import { useState } from "react";
 
 interface CustomerHistoryViewProps {
-  viewModel: CustomerHistoryViewModel;
+  shopId: string;
+  initialViewModel?: CustomerHistoryViewModel;
 }
 
-export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
-  const [filters, setFilters] = useState<HistoryFilters>(viewModel.filters);
+export function CustomerHistoryView({
+  shopId,
+  initialViewModel,
+}: CustomerHistoryViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    currentPage,
+    perPage,
+    filters,
+    pagination,
+    handlePageChange,
+    handleNextPage,
+    handlePrevPage,
+    handlePerPageChange,
+    handleStatusFilterChange,
+    handleDateRangeFilterChange,
+    handleShopFilterChange,
+    handleCustomDateRangeChange,
+    handleViewQueueDetails,
+    actionLoading,
+    refreshData,
+  } = useCustomerHistoryPresenter(shopId, initialViewModel);
+
   const [selectedQueue, setSelectedQueue] =
     useState<CustomerQueueHistory | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -21,6 +46,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
   const handleViewDetails = (queue: CustomerQueueHistory) => {
     setSelectedQueue(queue);
     setShowDetailsModal(true);
+    handleViewQueueDetails(queue);
   };
 
   const getStatusColor = (status: string) => {
@@ -90,16 +116,85 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
     ));
   };
 
-  const filteredHistory = viewModel.queueHistory.filter((queue) => {
-    if (
-      filters.status &&
-      filters.status !== "all" &&
-      queue.status !== filters.status
-    )
-      return false;
-    // Add more filter logic as needed
-    return true;
-  });
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ประวัติการใช้บริการ
+          </h1>
+          <p className="frontend-text-secondary">
+            ดูประวัติคิวและการใช้บริการของคุณ
+          </p>
+        </div>
+        <div className="frontend-card">
+          <div className="p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="frontend-text-secondary">กำลังโหลดข้อมูล...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ประวัติการใช้บริการ
+          </h1>
+          <p className="frontend-text-secondary">
+            ดูประวัติคิวและการใช้บริการของคุณ
+          </p>
+        </div>
+        <div className="frontend-card">
+          <div className="p-12 text-center">
+            <span className="text-6xl mb-4 block">❌</span>
+            <h4 className="text-xl font-semibold frontend-text-primary mb-2">
+              เกิดข้อผิดพลาด
+            </h4>
+            <p className="frontend-text-secondary mb-4">{error}</p>
+            <button
+              onClick={refreshData}
+              className="frontend-button-primary px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              ลองใหม่อีกครั้ง
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!viewModel) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ประวัติการใช้บริการ
+          </h1>
+          <p className="frontend-text-secondary">
+            ดูประวัติคิวและการใช้บริการของคุณ
+          </p>
+        </div>
+        <div className="frontend-card">
+          <div className="p-12 text-center">
+            <span className="text-6xl mb-4 block">📜</span>
+            <h4 className="text-xl font-semibold frontend-text-primary mb-2">
+              ไม่มีข้อมูล
+            </h4>
+            <p className="frontend-text-secondary">
+              เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -127,10 +222,9 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
               <select
                 value={filters.status || ""}
                 onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    status: (e.target.value || "all") as HistoryFilterType,
-                  })
+                  handleStatusFilterChange(
+                    (e.target.value || "all") as HistoryFilterType
+                  )
                 }
                 className="frontend-input w-full"
               >
@@ -148,10 +242,10 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
                 type="date"
                 value={filters.startDate || ""}
                 onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    startDate: e.target.value || undefined,
-                  })
+                  handleCustomDateRangeChange(
+                    e.target.value || undefined,
+                    filters.endDate
+                  )
                 }
                 className="frontend-input w-full"
               />
@@ -164,10 +258,10 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
                 type="date"
                 value={filters.endDate || ""}
                 onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    endDate: e.target.value || undefined,
-                  })
+                  handleCustomDateRangeChange(
+                    filters.startDate,
+                    e.target.value || undefined
+                  )
                 }
                 className="frontend-input w-full"
               />
@@ -184,7 +278,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
           </h3>
         </div>
         <div className="p-6">
-          {filteredHistory.length === 0 ? (
+          {viewModel.queueHistory.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-6xl mb-4 block">📜</span>
               <h4 className="text-xl font-semibold frontend-text-primary mb-2">
@@ -196,7 +290,7 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredHistory.map((queue) => (
+              {viewModel.queueHistory.map((queue) => (
                 <div key={queue.id}>
                   <div className="frontend-card frontend-card-hover p-4 rounded-lg">
                     <div className="flex items-center justify-between">
@@ -250,6 +344,24 @@ export function CustomerHistoryView({ viewModel }: CustomerHistoryViewProps) {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 0 && (
+          <div className="px-6 py-4 border-t frontend-card-border">
+            <PaginationControls
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              perPage={pagination.perPage}
+              totalItems={pagination.totalItems}
+              onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
+              onNextPage={handleNextPage}
+              onPrevPage={handlePrevPage}
+              hasNext={pagination.hasNext}
+              hasPrev={pagination.hasPrev}
+            />
+          </div>
+        )}
       </div>
 
       {/* Details Modal */}

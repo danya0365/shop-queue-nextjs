@@ -45,12 +45,11 @@ export default async function CustomerHistoryPage({
   const presenter = await CustomerHistoryPresenterFactory.create();
 
   try {
-    // Get view model from presenter
     const viewModel = await presenter.getViewModel(shopId);
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <CustomerHistoryView viewModel={viewModel} />
+        <CustomerHistoryView shopId={shopId} initialViewModel={viewModel} />
       </FrontendLayout>
     );
   } catch (error) {
