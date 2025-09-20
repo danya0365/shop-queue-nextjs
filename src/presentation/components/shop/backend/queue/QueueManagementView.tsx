@@ -20,6 +20,7 @@ import { CreateQueueModal } from "./modals/CreateQueueModal";
 import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
 import { QRCodeModal } from "./modals/QRCodeModal";
+import { QueueDetailsModal } from "./modals/QueueDetailsModal";
 
 interface QueueManagementViewProps {
   shopId: string;
@@ -59,6 +60,7 @@ export function QueueManagementView({
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [qrCodeModalOpen, setQrCodeModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<QueueItem | null>(null);
 
   // Show loading only on initial load or when explicitly loading
@@ -277,6 +279,11 @@ export function QueueManagementView({
   const handlePayment = (queue: QueueItem) => {
     setSelectedQueue(queue);
     setPaymentModalOpen(true);
+  };
+
+  const handleViewDetails = (queue: QueueItem) => {
+    setSelectedQueue(queue);
+    setDetailsModalOpen(true);
   };
 
   const handlePaymentSubmit = async (paymentData: CreatePaymentParams) => {
@@ -826,6 +833,12 @@ export function QueueManagementView({
                           </button>
                         )}
                         <button
+                          onClick={() => handleViewDetails(queue)}
+                          className="bg-indigo-500 dark:bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-600 dark:hover:bg-indigo-700 transition-colors"
+                        >
+                          ดูรายละเอียด
+                        </button>
+                        <button
                           onClick={() => handleEditQueue(queue)}
                           disabled={actionLoading.updateQueue}
                           className="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
@@ -1104,6 +1117,18 @@ export function QueueManagementView({
           onSubmit={handlePaymentSubmit}
           queue={selectedQueue}
           shopId={shopId}
+        />
+      )}
+
+      {/* Queue Details Modal */}
+      {selectedQueue && (
+        <QueueDetailsModal
+          isOpen={detailsModalOpen}
+          onClose={() => {
+            setDetailsModalOpen(false);
+            setSelectedQueue(null);
+          }}
+          queue={selectedQueue}
         />
       )}
     </div>
