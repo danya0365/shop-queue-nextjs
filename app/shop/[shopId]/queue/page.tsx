@@ -48,7 +48,7 @@ export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <QueueJoinView viewModel={viewModel} shopId={shopId} />
+        <QueueJoinView shopId={shopId} initialViewModel={viewModel} />
       </FrontendLayout>
     );
   } catch (error) {

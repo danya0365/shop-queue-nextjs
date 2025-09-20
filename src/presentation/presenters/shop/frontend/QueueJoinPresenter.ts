@@ -1,4 +1,5 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
@@ -32,6 +33,12 @@ export interface QueueJoinViewModel {
   shopName: string;
   isAcceptingQueues: boolean;
   maxQueueLength: number;
+  // State management properties
+  selectedServices: string[];
+  isSuccess: boolean;
+  queueNumber: string | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Main Presenter class
@@ -58,6 +65,12 @@ export class QueueJoinPresenter extends BaseShopPresenter {
         shopName: "ร้านกาแฟดีใจ",
         isAcceptingQueues: true,
         maxQueueLength: 50,
+        // State management properties with default values
+        selectedServices: [],
+        isSuccess: false,
+        queueNumber: null,
+        isLoading: false,
+        error: null,
       };
     } catch (error) {
       this.logger.error("QueueJoinPresenter: Error getting view model", error);
@@ -158,12 +171,22 @@ export class QueueJoinPresenter extends BaseShopPresenter {
   }
 }
 
-// Factory class
+// Factory class for server-side
 export class QueueJoinPresenterFactory {
   static async create(): Promise<QueueJoinPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
+    return new QueueJoinPresenter(logger, shopService);
+  }
+}
+
+// Factory class for client-side
+export class ClientQueueJoinPresenterFactory {
+  static async create(): Promise<QueueJoinPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const shopService = clientContainer.resolve<ShopService>("ShopService");
     return new QueueJoinPresenter(logger, shopService);
   }
 }

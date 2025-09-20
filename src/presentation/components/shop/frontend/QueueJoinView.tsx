@@ -1,16 +1,77 @@
 "use client";
 
-import { QueueJoinViewModel } from "@/src/presentation/presenters/shop/frontend/QueueJoinPresenter";
 import { useQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
 interface QueueJoinViewProps {
-  viewModel: QueueJoinViewModel;
   shopId: string;
+  initialViewModel?: import("@/src/presentation/presenters/shop/frontend/QueueJoinPresenter").QueueJoinViewModel;
 }
 
-export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
+export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    selectedCategory,
+    setSelectedCategory,
+    customerName,
+    setCustomerName,
+    customerPhone,
+    setCustomerPhone,
+    specialRequests,
+    setSpecialRequests,
+    priority,
+    setPriority,
+    handleServiceToggle,
+    handleSubmit,
+    reset,
+  } = useQueueJoinPresenter(shopId, initialViewModel);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted">กำลังโหลดข้อมูลการเข้าคิว...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">เกิดข้อผิดพลาด</h1>
+          <p className="text-muted mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            ลองใหม่อีกครั้ง
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!viewModel) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">ไม่มีข้อมูล</h1>
+          <p className="text-muted mb-4">ไม่พบข้อมูลร้านค้า</p>
+        </div>
+      </div>
+    );
+  }
+
   const {
     services,
     categories,
@@ -18,51 +79,19 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
     currentQueueLength,
     shopName,
     isAcceptingQueues,
+    selectedServices,
+    isSuccess,
+    queueNumber,
+    isLoading,
+    error: stateError,
   } = viewModel;
-  const [state, actions] = useQueueJoinPresenter({ shopId });
-  const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [specialRequests, setSpecialRequests] = useState("");
-  const [priority, setPriority] = useState<"normal" | "urgent">("normal");
 
   const filteredServices =
     selectedCategory === "ทั้งหมด"
       ? services
       : services.filter((service) => service.category === selectedCategory);
 
-  const handleServiceToggle = (serviceId: string, isDisabled: boolean) => {
-    if (isDisabled) {
-      return;
-    }
-    if (state.selectedServices.includes(serviceId)) {
-      actions.removeService(serviceId);
-    } else {
-      actions.addService(serviceId);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const success = await actions.joinQueue({
-      customerName,
-      customerPhone,
-      services: state.selectedServices,
-      specialRequests,
-      priority,
-    });
-
-    if (success) {
-      // Reset form
-      setCustomerName("");
-      setCustomerPhone("");
-      setSpecialRequests("");
-      setPriority("normal");
-    }
-  };
-
-  if (state.isSuccess && state.queueNumber) {
+  if (isSuccess && queueNumber) {
     return (
       <div className="flex flex-col gap-8">
         <div className="frontend-card overflow-hidden">
@@ -77,7 +106,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
           <div className="p-8">
             <div className="text-center mb-8">
               <div className="w-24 h-24 frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl font-bold">{state.queueNumber}</span>
+                <span className="text-3xl font-bold">{queueNumber}</span>
               </div>
               <h2 className="text-2xl font-semibold frontend-text-primary mb-2">
                 หมายเลขคิวของคุณ
@@ -91,7 +120,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
               </h3>
               <button
                 onClick={() =>
-                  (window.location.href = `/shop/${shopId}/status?queue=${state.queueNumber}`)
+                  (window.location.href = `/shop/${shopId}/status?queue=${queueNumber}`)
                 }
                 className="frontend-button-primary px-6 py-3 rounded-lg font-semibold mr-4"
               >
@@ -99,7 +128,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
               </button>
               <button
                 onClick={() => {
-                  actions.reset();
+                  reset();
                 }}
                 className="frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
               >
@@ -188,7 +217,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredServices.map((service) => {
-                  const isSelected = state.selectedServices.includes(
+                  const isSelected = selectedServices.includes(
                     service.id
                   );
                   const isDisabled = service.available === false;
@@ -196,7 +225,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                     <div
                       key={service.id}
                       onClick={() =>
-                        handleServiceToggle(service.id, isDisabled)
+                        !isDisabled && handleServiceToggle(service.id)
                       }
                       className={cn(
                         "p-4 transition-all",
@@ -245,7 +274,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
         {/* Order Summary & Form */}
         <div className="space-y-6">
           {/* Order Summary */}
-          {state.selectedServices.length > 0 && (
+          {selectedServices.length > 0 && (
             <div className="frontend-card">
               <div className="p-6 border-b frontend-card-border">
                 <h3 className="text-lg font-semibold frontend-text-primary">
@@ -254,7 +283,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  {state.selectedServices.map((serviceId) => {
+                  {selectedServices.map((serviceId) => {
                     const service = services.find((s) => s.id === serviceId);
                     if (!service) return null;
                     return (
@@ -284,7 +313,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                     </span>
                     <span className="font-bold text-lg frontend-service-price">
                       ฿
-                      {state.selectedServices.reduce((total, serviceId) => {
+                      {selectedServices.reduce((total, serviceId) => {
                         const service = services.find(
                           (s) => s.id === serviceId
                         );
@@ -294,7 +323,7 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                   </div>
                   <div className="text-sm frontend-text-secondary mt-1">
                     เวลาโดยประมาณ:{" "}
-                    {state.selectedServices.reduce((total, serviceId) => {
+                    {selectedServices.reduce((total, serviceId) => {
                       const service = services.find((s) => s.id === serviceId);
                       return total + (service?.estimatedTime || 0);
                     }, 0)}{" "}
@@ -312,7 +341,16 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                 ข้อมูลลูกค้า
               </h2>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit({
+                customerName,
+                customerPhone,
+                services: selectedServices,
+                specialRequests,
+                priority
+              });
+            }} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium frontend-text-primary mb-1">
                   ชื่อ-นามสกุล *
@@ -370,20 +408,20 @@ export function QueueJoinView({ viewModel, shopId }: QueueJoinViewProps) {
                 />
               </div>
 
-              {state.error && (
+              {stateError && (
                 <div className="frontend-status-cancelled rounded-lg p-3">
-                  <p className="frontend-text-danger text-sm">{state.error}</p>
+                  <p className="frontend-text-danger text-sm">{stateError}</p>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={
-                  state.isLoading || state.selectedServices.length === 0
+                  isLoading || selectedServices.length === 0
                 }
                 className="w-full frontend-button-join-queue px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {state.isLoading ? (
+                {isLoading ? (
                   <span className="flex items-center justify-center space-x-2">
                     <span className="animate-spin">⏳</span>
                     <span>กำลังเข้าคิว...</span>

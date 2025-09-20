@@ -1,169 +1,191 @@
-import { ShopDTO } from '@/src/application/dtos/shop/backend/shops-dto';
-import { ShopService } from '@/src/application/services/shop/ShopService';
-import { getClientService } from '@/src/di/client-container';
-import { Logger } from '@/src/domain/interfaces/logger';
-import { useEffect, useState } from 'react';
+"use client";
 
-// Define form/action data interfaces
-export interface QueueJoinData {
-  customerName: string;
-  customerPhone: string;
-  services: string[];
-  specialRequests?: string;
-  priority: 'normal' | 'urgent';
-}
+import { useCallback, useEffect, useState } from "react";
+import type {
+  QueueFormData,
+  QueueJoinViewModel,
+  ServiceOption,
+} from "./QueueJoinPresenter";
+import { ClientQueueJoinPresenterFactory } from "./QueueJoinPresenter";
 
-// Define state interface
-export interface QueueJoinPresenterState {
-  shopInfo: ShopDTO | null;
-  isLoading: boolean;
-  error: string | null;
-  selectedServices: string[];
-  totalPrice: number;
-  estimatedTime: number;
-  queueNumber: string | null;
-  isSuccess: boolean;
-}
+// Re-export types
+export type { QueueFormData, ServiceOption };
 
-// Define actions interface
-export interface QueueJoinPresenterActions {
-  joinQueue: (data: QueueJoinData) => Promise<boolean>;
-  addService: (serviceId: string) => void;
-  removeService: (serviceId: string) => void;
-  reset: () => void;
-  setError: (error: string | null) => void;
-}
-
-// Hook type
-export type QueueJoinPresenterHook = [
-  QueueJoinPresenterState,
-  QueueJoinPresenterActions
-];
-
-// Custom hook implementation
-export const useQueueJoinPresenter = ({ shopId }: { shopId: string }): QueueJoinPresenterHook => {
-  const [isLoading, setIsLoading] = useState(false);
+export function useQueueJoinPresenter(
+  shopId: string,
+  initialViewModel?: QueueJoinViewModel
+) {
+  const [viewModel, setViewModel] = useState<QueueJoinViewModel | null>(
+    initialViewModel || null
+  );
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState(0);
-  const [queueNumber, setQueueNumber] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const logger = getClientService<Logger>('Logger');
-  const [shopInfo, setShopInfo] = useState<ShopDTO | null>(null);
-  const shopService = getClientService<ShopService>('ShopService');
+  const [actionLoading, setActionLoading] = useState(false);
 
+  // State for form data
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [specialRequests, setSpecialRequests] = useState("");
+  const [priority, setPriority] = useState<"normal" | "urgent">("normal");
+  const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
+
+  // Initialize with initial view model if provided
   useEffect(() => {
-    const fetchShopInfo = async () => {
-      try {
-        const shopInfo = await shopService.getShopById(shopId);
-        setShopInfo(shopInfo);
-      } catch (error) {
-        logger.error('QueueJoinPresenter: Error fetching shop info', error);
-        setError('เกิดข้อผิดพลาดในการดึงข้อมูลร้านค้า');
-      }
-    };
-    fetchShopInfo();
+    if (initialViewModel) {
+      setViewModel(initialViewModel);
+      setLoading(false);
+    }
+  }, [initialViewModel]);
+
+  // Function to load data
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const presenter = await ClientQueueJoinPresenterFactory.create();
+      const newViewModel = await presenter.getViewModel(shopId);
+
+      setViewModel(newViewModel);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load queue data"
+      );
+      console.error("Error loading queue data:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [shopId]);
 
-  const joinQueue = async (data: QueueJoinData): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Validation logic
-      if (!data.customerName.trim()) {
-        throw new Error('กรุณากรอกชื่อ');
-      }
-
-      if (!data.customerPhone.trim()) {
-        throw new Error('กรุณากรอกเบอร์โทรศัพท์');
-      }
-
-      if (data.services.length === 0) {
-        throw new Error('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
-      }
-
-      // Phone validation
-      const phoneRegex = /^[0-9]{10}$/;
-      if (!phoneRegex.test(data.customerPhone.replace(/[-\s]/g, ''))) {
-        throw new Error('รูปแบบเบอร์โทรไม่ถูกต้อง');
-      }
-
-      // Mock API call - replace with actual service
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock success response
-      const mockQueueNumber = 'A' + String(Math.floor(Math.random() * 900) + 100);
-      setQueueNumber(mockQueueNumber);
-      setIsSuccess(true);
-
-      logger.info('QueueJoinPresenter: Queue joined successfully', {
-        queueNumber: mockQueueNumber,
-        services: data.services
-      });
-
-      return true;
-    } catch (error) {
-      logger.error('QueueJoinPresenter: Error joining queue', error);
-      const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการเข้าคิว';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
+  // Load data when dependencies change, but not if we have initial view model
+  useEffect(() => {
+    if (!initialViewModel) {
+      loadData();
     }
-  };
+  }, [loadData, initialViewModel]);
 
-  const addService = (serviceId: string) => {
-    if (!selectedServices.includes(serviceId)) {
-      const newServices = [...selectedServices, serviceId];
-      setSelectedServices(newServices);
+  // Action handlers
+  const handleServiceToggle = useCallback(
+    (serviceId: string) => {
+      if (!viewModel) return;
 
-      // Mock price calculation - replace with actual service
-      const mockPrice = Math.floor(Math.random() * 100) + 50;
-      const mockTime = Math.floor(Math.random() * 10) + 5;
-      setTotalPrice(prev => prev + mockPrice);
-      setEstimatedTime(prev => prev + mockTime);
+      const updatedViewModel = {
+        ...viewModel,
+        selectedServices: viewModel.selectedServices.includes(serviceId)
+          ? viewModel.selectedServices.filter((id) => id !== serviceId)
+          : [...viewModel.selectedServices, serviceId],
+      };
 
-      logger.info('QueueJoinPresenter: Service added', { serviceId });
-    }
-  };
-
-  const removeService = (serviceId: string) => {
-    const newServices = selectedServices.filter(id => id !== serviceId);
-    setSelectedServices(newServices);
-
-    // Mock price calculation - replace with actual service
-    const mockPrice = Math.floor(Math.random() * 100) + 50;
-    const mockTime = Math.floor(Math.random() * 10) + 5;
-    setTotalPrice(prev => Math.max(0, prev - mockPrice));
-    setEstimatedTime(prev => Math.max(0, prev - mockTime));
-
-    logger.info('QueueJoinPresenter: Service removed', { serviceId });
-  };
-
-  const reset = () => {
-    setIsLoading(false);
-    setError(null);
-    setSelectedServices([]);
-    setTotalPrice(0);
-    setEstimatedTime(0);
-    setQueueNumber(null);
-    setIsSuccess(false);
-    logger.info('QueueJoinPresenter: Reset');
-  };
-
-  return [
-    {
-      shopInfo,
-      isLoading,
-      error,
-      selectedServices,
-      totalPrice,
-      estimatedTime,
-      queueNumber,
-      isSuccess
+      setViewModel(updatedViewModel);
     },
-    { joinQueue, addService, removeService, reset, setError },
-  ];
-};
+    [viewModel]
+  );
+
+  const handleSubmit = useCallback(
+    async (formData: QueueFormData) => {
+      if (!viewModel) return false;
+
+      setActionLoading(true);
+      setError(null);
+
+      try {
+        // Validation logic
+        if (!formData.customerName.trim()) {
+          throw new Error("กรุณากรอกชื่อ");
+        }
+
+        if (!formData.customerPhone.trim()) {
+          throw new Error("กรุณากรอกเบอร์โทรศัพท์");
+        }
+
+        if (formData.services.length === 0) {
+          throw new Error("กรุณาเลือกบริการอย่างน้อย 1 รายการ");
+        }
+
+        // Phone validation
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(formData.customerPhone.replace(/[-\s]/g, ""))) {
+          throw new Error("รูปแบบเบอร์โทรไม่ถูกต้อง");
+        }
+
+        // Mock API call - replace with actual service
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Mock success response
+        const mockQueueNumber =
+          "A" + String(Math.floor(Math.random() * 900) + 100);
+
+        const updatedViewModel = {
+          ...viewModel,
+          queueNumber: mockQueueNumber,
+          isSuccess: true,
+        };
+
+        setViewModel(updatedViewModel);
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to join queue";
+        setError(errorMessage);
+
+        const updatedViewModel = {
+          ...viewModel,
+          error: errorMessage,
+        };
+
+        setViewModel(updatedViewModel);
+        return false;
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [viewModel]
+  );
+
+  const reset = useCallback(() => {
+    if (!viewModel) return;
+
+    const updatedViewModel = {
+      ...viewModel,
+      selectedServices: [],
+      isSuccess: false,
+      queueNumber: null,
+      error: null,
+    };
+
+    setViewModel(updatedViewModel);
+    setCustomerName("");
+    setCustomerPhone("");
+    setSpecialRequests("");
+    setPriority("normal");
+    setSelectedCategory("all");
+    setError(null);
+  }, [viewModel]);
+
+  const refreshData = useCallback(async () => {
+    await loadData();
+  }, [loadData]);
+
+  return {
+    viewModel,
+    loading,
+    error,
+    actionLoading,
+    // Form state
+    customerName,
+    setCustomerName,
+    customerPhone,
+    setCustomerPhone,
+    specialRequests,
+    setSpecialRequests,
+    priority,
+    setPriority,
+    selectedCategory,
+    setSelectedCategory,
+    // Actions
+    handleServiceToggle,
+    handleSubmit,
+    reset,
+    refreshData,
+  };
+}
