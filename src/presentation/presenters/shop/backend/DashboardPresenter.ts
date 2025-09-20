@@ -15,8 +15,8 @@ import {
   ShopSetupProgressService,
 } from "@/src/application/services/shop/ShopSetupProgressService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { IActivityIconService } from "@/src/application/services/ActivityIconService";
 import { getServerContainer } from "@/src/di/server-container";
-import { ActivityType } from "@/src/domain/entities/backend/backend-dashboard.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
@@ -66,6 +66,7 @@ export interface BackendDashboardViewModel {
 export class BackendDashboardPresenter extends BaseShopBackendPresenter {
   private readonly dashboardService: IShopBackendDashboardService;
   private readonly setupProgressService: ShopSetupProgressService;
+  private readonly activityIconService: IActivityIconService;
 
   constructor(
     logger: Logger,
@@ -74,7 +75,8 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
     dashboardService: IShopBackendDashboardService,
-    setupProgressService: ShopSetupProgressService
+    setupProgressService: ShopSetupProgressService,
+    activityIconService: IActivityIconService
   ) {
     super(
       logger,
@@ -85,6 +87,7 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
     );
     this.dashboardService = dashboardService;
     this.setupProgressService = setupProgressService;
+    this.activityIconService = activityIconService;
   }
 
   async getViewModel(shopId: string): Promise<BackendDashboardViewModel> {
@@ -162,115 +165,9 @@ export class BackendDashboardPresenter extends BaseShopBackendPresenter {
   private mapRecentActivities(
     activities: RecentActivityDTO[]
   ): RecentActivity[] {
-    const mapActivityTypeToIcon = (type: ActivityType): string => {
-      switch (type) {
-        // Queue activities
-        case ActivityType.QUEUE_CREATED:
-          return "📝";
-        case ActivityType.QUEUE_COMPLETED:
-          return "✅";
-          
-        // Customer activities
-        case ActivityType.CUSTOMER_REGISTERED:
-          return "👥";
-          
-        // Shop activities
-        case ActivityType.SHOP_CREATED:
-          return "🏪";
-        case ActivityType.SHOP_OPENED:
-          return "🔓";
-        case ActivityType.SHOP_CLOSED:
-          return "🔒";
-          
-        // Employee activities
-        case ActivityType.EMPLOYEE_ADDED:
-          return "👤";
-        case ActivityType.EMPLOYEE_UPDATED:
-          return "✏️";
-        case ActivityType.EMPLOYEE_REMOVED:
-          return "❌";
-        case ActivityType.EMPLOYEE_LOGIN:
-          return "🔑";
-        case ActivityType.EMPLOYEE_LOGOUT:
-          return "🚪";
-        case ActivityType.EMPLOYEE_DUTY_START:
-          return "⏰";
-        case ActivityType.EMPLOYEE_DUTY_END:
-          return "🏁";
-          
-        // Service activities
-        case ActivityType.SERVICE_ADDED:
-          return "🎯";
-        case ActivityType.SERVICE_UPDATED:
-          return "🔄";
-        case ActivityType.SERVICE_REMOVED:
-          return "🗑️";
-        case ActivityType.SERVICE_AVAILABILITY_CHANGED:
-          return "🔔";
-          
-        // Payment activities
-        case ActivityType.PAYMENT_CREATED:
-          return "💳";
-        case ActivityType.PAYMENT_COMPLETED:
-          return "✅";
-        case ActivityType.PAYMENT_FAILED:
-          return "❌";
-        case ActivityType.PAYMENT_REFUNDED:
-          return "💰";
-          
-        // Promotion activities
-        case ActivityType.PROMOTION_CREATED:
-          return "🏷️";
-        case ActivityType.PROMOTION_UPDATED:
-          return "✏️";
-        case ActivityType.PROMOTION_ACTIVATED:
-          return "✅";
-        case ActivityType.PROMOTION_DEACTIVATED:
-          return "⏸️";
-        case ActivityType.PROMOTION_USED:
-          return "🎁";
-          
-        // Points and rewards activities
-        case ActivityType.POINTS_EARNED:
-          return "⭐";
-        case ActivityType.POINTS_REDEEMED:
-          return "🎯";
-        case ActivityType.POINTS_EXPIRED:
-          return "⏰";
-        case ActivityType.REWARD_CLAIMED:
-          return "🎁";
-        case ActivityType.MEMBERSHIP_UPGRADED:
-          return "⬆️";
-          
-        // Department activities
-        case ActivityType.DEPARTMENT_CREATED:
-          return "🏢";
-        case ActivityType.DEPARTMENT_UPDATED:
-          return "✏️";
-        case ActivityType.DEPARTMENT_REMOVED:
-          return "🗑️";
-          
-        // System activities
-        case ActivityType.SYSTEM_BACKUP:
-          return "💾";
-        case ActivityType.SYSTEM_MAINTENANCE:
-          return "🔧";
-        case ActivityType.SYSTEM_ERROR:
-          return "⚠️";
-        case ActivityType.SYSTEM_ALERT:
-          return "📢";
-          
-        // Settings activities
-        case ActivityType.OPENING_HOURS_UPDATED:
-          return "🕐";
-          
-        default:
-          return "📋";
-      }
-    };
     return activities.map((activity) => {
       // Map activity type to appropriate icon
-      const icon = mapActivityTypeToIcon(activity.type);
+      const icon = this.activityIconService.getActivityIcon(activity.type);
 
       // Format timestamp to Thai relative time
       const formatTimestamp = (createdAt: string): string => {
@@ -338,6 +235,11 @@ export class BackendDashboardPresenterFactory {
         "ShopSetupProgressService"
       );
 
+    const activityIconService =
+      serverContainer.resolve<IActivityIconService>(
+        "ActivityIconService"
+      );
+
     return new BackendDashboardPresenter(
       logger,
       shopService,
@@ -345,7 +247,8 @@ export class BackendDashboardPresenterFactory {
       profileService,
       subscriptionService,
       dashboardService,
-      setupProgressService
+      setupProgressService,
+      activityIconService
     );
   }
 }
@@ -372,6 +275,11 @@ export class ClientBackendDashboardPresenterFactory {
         "ShopSetupProgressService"
       );
 
+    const activityIconService =
+      clientContainer.resolve<IActivityIconService>(
+        "ActivityIconService"
+      );
+
     return new BackendDashboardPresenter(
       logger,
       shopService,
@@ -379,7 +287,8 @@ export class ClientBackendDashboardPresenterFactory {
       profileService,
       subscriptionService,
       dashboardService,
-      setupProgressService
+      setupProgressService,
+      activityIconService
     );
   }
 }

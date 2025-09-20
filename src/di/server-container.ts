@@ -1,5 +1,6 @@
 "use server";
 
+import { ActivityIconService } from "../application/services/ActivityIconService";
 import { AuthServiceFactory } from "../application/services/auth-service";
 import { AuthorizationServiceFactory } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
@@ -315,6 +316,10 @@ export async function createServerContainer(): Promise<Container> {
       "RewardTransactionBackendService",
       rewardTransactionBackendService
     );
+
+    // Create and register utility services
+    const activityIconService = new ActivityIconService();
+    container.registerInstance("ActivityIconService", activityIconService);
 
     logger.info("Server container initialized successfully");
   } catch (error) {

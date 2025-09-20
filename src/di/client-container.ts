@@ -29,6 +29,7 @@ import { RewardsBackendService } from "../application/services/shop/backend/rewa
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { ShopSetupProgressServiceFactory } from "../application/services/shop/ShopSetupProgressService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
+import { ActivityIconService } from "../application/services/ActivityIconService";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -333,6 +334,10 @@ export function createClientContainer(): Container {
       "DateTimeFormattingService",
       dateTimeFormattingService
     );
+
+    // Create and register utility services
+    const activityIconService = new ActivityIconService();
+    container.registerInstance("ActivityIconService", activityIconService);
 
     logger.info("Client container initialized successfully");
   } catch (error) {
