@@ -25,8 +25,13 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
     priority,
     setPriority,
     handleServiceToggle,
+    updateServiceQuantity,
+    increaseServiceQuantity,
+    decreaseServiceQuantity,
     handleSubmit,
     reset,
+    getSelectedServicesAsQueueServices,
+    serviceQuantities,
   } = useQueueJoinPresenter(shopId, initialViewModel);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
 
@@ -221,6 +226,8 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                     service.id
                   );
                   const isDisabled = service.available === false;
+                  const quantity = serviceQuantities[service.id] || 1;
+                  
                   return (
                     <div
                       key={service.id}
@@ -247,7 +254,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                         <p className="text-sm frontend-text-secondary mb-2">
                           {service.description}
                         </p>
-                        <div className="flex justify-between items-center text-sm">
+                        <div className="flex justify-between items-center text-sm mb-3">
                           <span className="font-bold frontend-service-price">
                             ฿{service.price}
                           </span>
@@ -255,6 +262,34 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                             ~{service.estimatedTime} นาที
                           </span>
                         </div>
+                        
+                        {/* Quantity controls - only show for selected services */}
+                        {isSelected && (
+                          <div className="flex items-center justify-center space-x-2 mb-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                decreaseServiceQuantity(service.id);
+                              }}
+                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold transition-colors"
+                            >
+                              -
+                            </button>
+                            <span className="w-12 text-center font-semibold">
+                              {quantity}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                increaseServiceQuantity(service.id);
+                              }}
+                              className="w-8 h-8 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold transition-colors"
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
+                        
                         {isSelected && (
                           <div className="absolute inset-0 border-2 border-green-500 rounded-lg pointer-events-none">
                             <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
@@ -285,22 +320,43 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                 <div className="space-y-3">
                   {selectedServices.map((serviceId) => {
                     const service = services.find((s) => s.id === serviceId);
+                    const quantity = serviceQuantities[serviceId] || 1;
                     if (!service) return null;
+                    
                     return (
                       <div
                         key={serviceId}
                         className="flex justify-between items-center"
                       >
-                        <div>
-                          <span className="frontend-text-primary font-medium">
-                            {service.name}
-                          </span>
-                          <span className="frontend-text-muted text-sm ml-2">
-                            ~{service.estimatedTime} นาที
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3">
+                            <span className="frontend-text-primary font-medium">
+                              {service.name}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => decreaseServiceQuantity(serviceId)}
+                                className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
+                              >
+                                -
+                              </button>
+                              <span className="w-8 text-center font-semibold text-sm">
+                                {quantity}
+                              </span>
+                              <button
+                                onClick={() => increaseServiceQuantity(serviceId)}
+                                className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                          <span className="frontend-text-muted text-sm ml-12">
+                            ~{service.estimatedTime} นาที/ชิ้น
                           </span>
                         </div>
                         <span className="frontend-service-price font-bold">
-                          ฿{service.price}
+                          ฿{service.price * quantity}
                         </span>
                       </div>
                     );
@@ -317,15 +373,17 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                         const service = services.find(
                           (s) => s.id === serviceId
                         );
-                        return total + (service?.price || 0);
+                        const quantity = serviceQuantities[serviceId] || 1;
+                        return total + (service?.price || 0) * quantity;
                       }, 0)}
                     </span>
                   </div>
                   <div className="text-sm frontend-text-secondary mt-1">
-                    เวลาโดยประมาณ:{" "}
+                    เวลาโดยประมาณ: 
                     {selectedServices.reduce((total, serviceId) => {
                       const service = services.find((s) => s.id === serviceId);
-                      return total + (service?.estimatedTime || 0);
+                      const quantity = serviceQuantities[serviceId] || 1;
+                      return total + (service?.estimatedTime || 0) * quantity;
                     }, 0)}{" "}
                     นาที
                   </div>
@@ -346,7 +404,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
               handleSubmit({
                 customerName,
                 customerPhone,
-                services: selectedServices,
+                services: getSelectedServicesAsQueueServices(),
                 specialRequests,
                 priority
               });

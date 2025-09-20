@@ -16,10 +16,18 @@ export interface ServiceOption {
   icon: string;
 }
 
+export interface QueueService {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  estimatedTime: number;
+}
+
 export interface QueueFormData {
   customerName: string;
   customerPhone: string;
-  services: string[];
+  services: QueueService[];
   specialRequests?: string;
   priority: "normal" | "urgent";
 }
