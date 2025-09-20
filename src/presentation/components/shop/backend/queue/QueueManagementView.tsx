@@ -14,6 +14,8 @@ import {
   useQueueManagementPresenter,
 } from "@/src/presentation/presenters/shop/backend/useQueueManagementPresenter";
 import { useState } from "react";
+import { DateTimeFormatType } from "../../../../../domain/entities/datetime/DateTimeEntities";
+import { DateTimeDisplay } from "../../../ui/DateTimeDisplay";
 import { PaymentModal } from "../payment/modals/PaymentModal";
 import { QueueLimitsWarning } from "./components/QueueLimitsWarning";
 import { CreateQueueModal } from "./modals/CreateQueueModal";
@@ -21,8 +23,6 @@ import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
 import { QRCodeModal } from "./modals/QRCodeModal";
 import { QueueDetailsModal } from "./modals/QueueDetailsModal";
-import { DateTimeDisplay } from "../../../ui/DateTimeDisplay";
-import { DateTimeFormatType } from "../../../../../domain/entities/datetime/DateTimeEntities";
 
 interface QueueManagementViewProps {
   shopId: string;
@@ -288,7 +288,6 @@ export function QueueManagementView({
     setDetailsModalOpen(true);
   };
 
-
   const handlePaymentSubmit = async (paymentData: CreatePaymentParams) => {
     try {
       await createQueuePayment({
@@ -430,15 +429,6 @@ export function QueueManagementView({
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             ติดตามและจัดการคิวลูกค้าทั้งหมด
           </p>
-        </div>
-        <div className="text-right">
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-            เวลาปัจจุบัน
-          </div>
-          <DateTimeDisplay 
-            className="text-lg font-semibold text-gray-700 dark:text-gray-300"
-            includeSeconds={true}
-          />
         </div>
         <div className="flex space-x-4">
           <button
@@ -764,26 +754,29 @@ export function QueueManagementView({
                           เวลา
                         </p>
                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          <DateTimeDisplay 
+                          <DateTimeDisplay
                             date={queue.createdAt}
                             formatType={DateTimeFormatType.TIME}
                             includeSeconds={false}
                             className="text-sm"
                           />
                         </div>
-                        {queue.updatedAt && queue.updatedAt !== queue.createdAt && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            อัปเดต: <DateTimeDisplay 
-                              date={queue.updatedAt}
-                              formatType={DateTimeFormatType.TIME}
-                              includeSeconds={false}
-                              className="text-xs"
-                            />
-                          </p>
-                        )}
+                        {queue.updatedAt &&
+                          queue.updatedAt !== queue.createdAt && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              อัปเดต:{" "}
+                              <DateTimeDisplay
+                                date={queue.updatedAt}
+                                formatType={DateTimeFormatType.TIME}
+                                includeSeconds={false}
+                                className="text-xs"
+                              />
+                            </p>
+                          )}
                         {queue.calledAt && (
                           <p className="text-xs text-green-600 dark:text-green-400">
-                            เรียก: <DateTimeDisplay 
+                            เรียก:{" "}
+                            <DateTimeDisplay
                               date={queue.calledAt}
                               formatType={DateTimeFormatType.TIME}
                               includeSeconds={false}
@@ -793,7 +786,8 @@ export function QueueManagementView({
                         )}
                         {queue.completedAt && (
                           <p className="text-xs text-blue-600 dark:text-blue-400">
-                            เสร็จ: <DateTimeDisplay 
+                            เสร็จ:{" "}
+                            <DateTimeDisplay
                               date={queue.completedAt}
                               formatType={DateTimeFormatType.TIME}
                               includeSeconds={false}
