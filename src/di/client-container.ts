@@ -1,5 +1,6 @@
 "use client";
 
+import { ActivityIconService } from "../application/services/ActivityIconService";
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
@@ -26,10 +27,12 @@ import { PosterTemplateBackendService } from "../application/services/shop/backe
 import { QueueServiceBackendService } from "../application/services/shop/backend/queue-services-backend-service";
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
+import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
+import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
+import { ShopCustomerRewardServiceFactory } from "../application/services/shop/customer/ShopCustomerRewardService";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { ShopSetupProgressServiceFactory } from "../application/services/shop/ShopSetupProgressService";
 import { SubscriptionServiceFactory } from "../application/services/subscription/SubscriptionService";
-import { ActivityIconService } from "../application/services/ActivityIconService";
 import { Logger } from "../domain/interfaces/logger";
 import { supabase } from "../infrastructure/config/supabase-browser-client";
 import { SupabaseAuthDataSource } from "../infrastructure/datasources/supabase-auth-datasource";
@@ -53,8 +56,7 @@ import { SupabaseShopBackendShopRepository } from "../infrastructure/repositorie
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
 import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
 import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
-import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
-import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
+import { SupabaseCustomerRewardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-reward-repository";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
 import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
@@ -117,10 +119,18 @@ export function createClientContainer(): Container {
       new SupabaseBackendOpeningHoursRepository(databaseDatasource, logger);
     const shopBackendShopSettingsRepository =
       new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
-    const customerDashboardRepository =
-      new SupabaseCustomerDashboardRepository(databaseDatasource, logger);
-    const customerHistoryRepository =
-      new SupabaseCustomerHistoryRepository(databaseDatasource, logger);
+    const customerDashboardRepository = new SupabaseCustomerDashboardRepository(
+      databaseDatasource,
+      logger
+    );
+    const customerHistoryRepository = new SupabaseCustomerHistoryRepository(
+      databaseDatasource,
+      logger
+    );
+    const customerRewardRepository = new SupabaseCustomerRewardRepository(
+      databaseDatasource,
+      logger
+    );
     const shopBackendCustomerRepository =
       new SupabaseShopBackendCustomerRepository(databaseDatasource, logger);
     const shopBackendEmployeeRepository =
@@ -239,16 +249,23 @@ export function createClientContainer(): Container {
         shopBackendDepartmentRepository,
         logger
       );
-    
+
     // Create customer dashboard service
-    const shopCustomerDashboardService = ShopCustomerDashboardServiceFactory.create(
-      customerDashboardRepository,
-      logger
-    );
+    const shopCustomerDashboardService =
+      ShopCustomerDashboardServiceFactory.create(
+        customerDashboardRepository,
+        logger
+      );
 
     // Create customer history service
     const shopCustomerHistoryService = ShopCustomerHistoryServiceFactory.create(
       customerHistoryRepository,
+      logger
+    );
+
+    // Create customer reward service
+    const shopCustomerRewardService = ShopCustomerRewardServiceFactory.create(
+      customerRewardRepository,
       logger
     );
 
@@ -323,6 +340,10 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "ShopCustomerHistoryService",
       shopCustomerHistoryService
+    );
+    container.registerInstance(
+      "ShopCustomerRewardService",
+      shopCustomerRewardService
     );
     container.registerInstance(
       "PosterTemplateBackendService",

@@ -1,9 +1,17 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
-import { getClientContainer } from "@/src/di/client-container";
+import { ShopCustomerRewardService } from "@/src/application/services/shop/customer/ShopCustomerRewardService";
 import { getServerContainer } from "@/src/di/server-container";
+import { getClientContainer } from "@/src/di/client-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import type {
+  AvailableRewardDTO,
+  CustomerRewardDTO,
+  RewardTransactionDTO,
+  AvailableRewardsFiltersDTO,
+  RedeemedRewardsFiltersDTO,
+  RewardTransactionsFiltersDTO,
+} from "@/src/application/dtos/shop/customer/customer-reward-dto";
 
 // Define interfaces for data structures
 export interface CustomerReward {
@@ -107,273 +115,158 @@ export interface CustomerRewardsViewModel {
 
 // Main Presenter class
 export class CustomerRewardsPresenter extends BaseShopPresenter {
-  constructor(logger: Logger, shopService: ShopService) {
+  constructor(
+    logger: Logger, 
+    shopService: ShopService,
+    private readonly customerRewardService: ShopCustomerRewardService
+  ) {
     super(logger, shopService);
   }
 
   async getViewModel(
     shopId: string,
-    currentPage: number = 1,
-    perPage: number = getPaginationConfig().REWARDS_PER_PAGE || 10,
-    filters: RewardsFilters = {
-      type: "all",
-      category: "all",
-      status: "all",
-      dateRange: "all",
-    }
+    currentPage: number,
+    perPage: number,
+    filters: RewardsFilters
   ): Promise<CustomerRewardsViewModel> {
     try {
-      // Mock data - replace with actual service calls
-      const customerPoints = this.getCustomerPoints();
-      const allAvailableRewards = this.getAvailableRewards();
-      const allRedeemedRewards = this.getRedeemedRewards();
-      const allRewardTransactions = this.getRewardTransactions();
+      this.logger.info("CustomerRewardsPresenter: Getting view model", {
+        shopId,
+        currentPage,
+        perPage,
+        filters,
+      });
 
-      // Apply filters
-      const filteredAvailableRewards = this.applyFilters(
-        allAvailableRewards,
-        filters
-      ) as AvailableReward[];
-      const filteredRedeemedRewards = this.applyFilters(
-        allRedeemedRewards,
-        filters
-      ) as CustomerReward[];
-      const filteredRewardTransactions = this.applyTransactionFilters(
-        allRewardTransactions,
-        filters
+      // Convert filters to DTO format
+      const availableRewardsFilters: AvailableRewardsFiltersDTO = {
+        type: filters.type !== "all" ? filters.type : undefined,
+        category: filters.category !== "all" ? filters.category : undefined,
+        isAvailable: filters.status === "available" ? true : filters.status === "unavailable" ? false : undefined,
+      };
+
+      const redeemedRewardsFilters: RedeemedRewardsFiltersDTO = {
+        type: filters.type !== "all" ? filters.type : undefined,
+        dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      };
+
+      const rewardTransactionsFilters: RewardTransactionsFiltersDTO = {
+        type: filters.type !== "all" ? filters.type as "earned" | "redeemed" | "expired" : undefined,
+        dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      };
+
+      // Get customer rewards data from service
+      const customerRewardsData = await this.customerRewardService.getCustomerRewardsData(
+        shopId,
+        "customer-id", // customerId - will be determined from auth context
+        currentPage,
+        perPage,
+        availableRewardsFilters,
+        redeemedRewardsFilters,
+        rewardTransactionsFilters
       );
 
-      // Apply pagination for each data type separately
-      const availableRewardsData = this.applyPagination(
-        filteredAvailableRewards,
-        currentPage,
-        perPage
-      ) as AvailableReward[];
-      const redeemedRewardsData = this.applyPagination(
-        filteredRedeemedRewards,
-        currentPage,
-        perPage
-      ) as CustomerReward[];
-      const rewardTransactionsData = this.applyPagination(
-        filteredRewardTransactions,
-        currentPage,
-        perPage
-      );
+      // Convert DTOs to ViewModel format
+      const customerPoints: CustomerPoints = {
+        currentPoints: customerRewardsData.customerPoints.currentPoints,
+        totalEarned: customerRewardsData.customerPoints.totalEarned,
+        totalRedeemed: customerRewardsData.customerPoints.totalRedeemed,
+        pointsExpiring: customerRewardsData.customerPoints.pointsExpiring,
+        expiryDate: customerRewardsData.customerPoints.expiryDate,
+        tier: customerRewardsData.customerPoints.tier,
+        nextTierPoints: customerRewardsData.customerPoints.nextTierPoints,
+        tierBenefits: customerRewardsData.customerPoints.tierBenefits,
+      };
 
-      // Calculate pagination info for each data type
-      const availableRewardsPagination = this.calculatePagination(
-        filteredAvailableRewards.length,
-        currentPage,
-        perPage
-      );
-      const redeemedRewardsPagination = this.calculatePagination(
-        filteredRedeemedRewards.length,
-        currentPage,
-        perPage
-      );
-      const rewardTransactionsPagination = this.calculatePagination(
-        filteredRewardTransactions.length,
-        currentPage,
-        perPage
-      );
+      const availableRewards = customerRewardsData.availableRewards.data.map((reward: AvailableRewardDTO) => ({
+        id: reward.id,
+        name: reward.name,
+        description: reward.description,
+        type: "discount", // Default type for available rewards
+        value: 0, // Default value for available rewards
+        pointsCost: reward.pointsCost,
+        category: reward.category,
+        imageUrl: reward.imageUrl,
+        termsAndConditions: [], // Default empty array
+        isAvailable: reward.isAvailable,
+        expiryDate: undefined, // Not available in AvailableRewardDTO
+      }));
+
+      const redeemedRewards = customerRewardsData.redeemedRewards.data.map((reward: CustomerRewardDTO) => ({
+        id: reward.id,
+        name: reward.name,
+        description: reward.description,
+        type: reward.type,
+        value: reward.value,
+        pointsCost: reward.pointsCost,
+        category: reward.category,
+        imageUrl: reward.imageUrl,
+        termsAndConditions: reward.termsAndConditions,
+        isAvailable: reward.isAvailable,
+        isRedeemed: reward.isRedeemed,
+        redeemedAt: reward.redeemedAt,
+        expiryDate: reward.expiryDate,
+      }));
+
+      const rewardTransactions = customerRewardsData.rewardTransactions.data.map((transaction: RewardTransactionDTO) => ({
+        id: transaction.id,
+        type: transaction.type,
+        points: transaction.points,
+        description: transaction.description,
+        date: transaction.date,
+        relatedOrderId: transaction.relatedOrderId,
+      }));
+
+      const availableRewardsPagination: Pagination = {
+        currentPage: customerRewardsData.availableRewards.pagination.currentPage,
+        perPage: customerRewardsData.availableRewards.pagination.perPage,
+        totalItems: customerRewardsData.availableRewards.pagination.totalItems,
+        totalPages: customerRewardsData.availableRewards.pagination.totalPages,
+        hasNext: customerRewardsData.availableRewards.pagination.hasNext,
+        hasPrev: customerRewardsData.availableRewards.pagination.hasPrev,
+      };
+
+      const redeemedRewardsPagination: Pagination = {
+        currentPage: customerRewardsData.redeemedRewards.pagination.currentPage,
+        perPage: customerRewardsData.redeemedRewards.pagination.perPage,
+        totalItems: customerRewardsData.redeemedRewards.pagination.totalItems,
+        totalPages: customerRewardsData.redeemedRewards.pagination.totalPages,
+        hasNext: customerRewardsData.redeemedRewards.pagination.hasNext,
+        hasPrev: customerRewardsData.redeemedRewards.pagination.hasPrev,
+      };
+
+      const rewardTransactionsPagination: Pagination = {
+        currentPage: customerRewardsData.rewardTransactions.pagination.currentPage,
+        perPage: customerRewardsData.rewardTransactions.pagination.perPage,
+        totalItems: customerRewardsData.rewardTransactions.pagination.totalItems,
+        totalPages: customerRewardsData.rewardTransactions.pagination.totalPages,
+        hasNext: customerRewardsData.rewardTransactions.pagination.hasNext,
+        hasPrev: customerRewardsData.rewardTransactions.pagination.hasPrev,
+      };
 
       return {
         customerPoints,
-        customerName: "สมชาย ลูกค้าดี",
+        customerName: customerRewardsData.customerInfo.customerName,
         availableRewards: {
-          data: availableRewardsData,
+          data: availableRewards,
           pagination: availableRewardsPagination,
         },
         redeemedRewards: {
-          data: redeemedRewardsData,
+          data: redeemedRewards,
           pagination: redeemedRewardsPagination,
         },
         rewardTransactions: {
-          data: rewardTransactionsData,
+          data: rewardTransactions,
           pagination: rewardTransactionsPagination,
         },
       };
     } catch (error) {
-      this.logger.error(
-        "CustomerRewardsPresenter: Error getting view model",
-        error
-      );
+      this.logger.error("CustomerRewardsPresenter: Error getting view model", error);
       throw error;
     }
-  }
-
-  // Private methods for data preparation
-  private getCustomerPoints(): CustomerPoints {
-    return {
-      currentPoints: 1250,
-      totalEarned: 3450,
-      totalRedeemed: 2200,
-      pointsExpiring: 150,
-      expiryDate: "2024-03-15",
-      tier: "Silver",
-      nextTierPoints: 750,
-      tierBenefits: [
-        "ส่วนลด 5% ทุกการซื้อ",
-        "แต้มสะสมเพิ่ม 1.5 เท่า",
-        "ของรางวัลพิเศษ",
-        "ข้ามคิวได้ 2 ครั้งต่อเดือน",
-      ],
-    };
-  }
-
-  private getAvailableRewards(): AvailableReward[] {
-    return [
-      {
-        id: "1",
-        name: "กาแฟฟรี 1 แก้ว",
-        description: "กาแฟขนาดปกติ 1 แก้ว (ยกเว้นเมนูพิเศษ)",
-        pointsCost: 500,
-        category: "เครื่องดื่ม",
-        imageUrl: "☕",
-        isAvailable: true,
-        stock: 50,
-      },
-      {
-        id: "2",
-        name: "ส่วนลด 10%",
-        description: "ส่วนลด 10% สำหรับการซื้อครั้งถัดไป (สูงสุด 100 บาท)",
-        pointsCost: 300,
-        category: "ส่วนลด",
-        imageUrl: "🎫",
-        isAvailable: true,
-      },
-      {
-        id: "3",
-        name: "เค้กชิ้นโปรด",
-        description: "เค้กชิ้นโปรด 1 ชิ้น (ยกเว้นเค้กพิเศษ)",
-        pointsCost: 800,
-        category: "ขนม",
-        imageUrl: "🍰",
-        isAvailable: true,
-        stock: 20,
-      },
-      {
-        id: "4",
-        name: "ข้ามคิวพิเศษ",
-        description: "สิทธิ์ข้ามคิว 1 ครั้ง (ใช้ได้ภายใน 30 วัน)",
-        pointsCost: 200,
-        category: "สิทธิพิเศษ",
-        imageUrl: "⚡",
-        isAvailable: true,
-      },
-      {
-        id: "5",
-        name: "เซ็ตอาหารเช้า",
-        description: "เซ็ตอาหารเช้าพิเศษ (แซนด์วิช + กาแฟ)",
-        pointsCost: 1200,
-        category: "อาหาร",
-        imageUrl: "🥪",
-        isAvailable: false,
-        stock: 0,
-      },
-      {
-        id: "6",
-        name: "คืนเงิน 50 บาท",
-        description: "รับเงินคืน 50 บาท เข้าบัญชี",
-        pointsCost: 1000,
-        category: "เงินคืน",
-        imageUrl: "💰",
-        isAvailable: true,
-      },
-    ];
-  }
-
-  private getRedeemedRewards(): CustomerReward[] {
-    return [
-      {
-        id: "1",
-        name: "กาแฟฟรี 1 แก้ว",
-        description: "กาแฟขนาดปกติ 1 แก้ว",
-        type: "free_item",
-        value: 65,
-        pointsCost: 500,
-        category: "เครื่องดื่ม",
-        imageUrl: "☕",
-        termsAndConditions: [
-          "ใช้ได้ภายใน 30 วัน",
-          "ไม่สามารถแลกเปลี่ยนเป็นเงินสดได้",
-          "ใช้ได้เฉพาะสาขาที่แลก",
-        ],
-        isAvailable: true,
-        isRedeemed: true,
-        redeemedAt: "2024-01-10",
-        expiryDate: "2024-02-10",
-      },
-      {
-        id: "2",
-        name: "ส่วนลด 10%",
-        description: "ส่วนลด 10% สำหรับการซื้อครั้งถัดไป",
-        type: "discount",
-        value: 10,
-        pointsCost: 300,
-        category: "ส่วนลด",
-        imageUrl: "🎫",
-        termsAndConditions: [
-          "ใช้ได้ภายใน 15 วัน",
-          "ส่วนลดสูงสุด 100 บาท",
-          "ใช้ได้ครั้งเดียว",
-        ],
-        isAvailable: false,
-        isRedeemed: true,
-        redeemedAt: "2024-01-05",
-        expiryDate: "2024-01-20",
-      },
-    ];
-  }
-
-  private getRewardTransactions(): RewardTransaction[] {
-    return [
-      {
-        id: "1",
-        type: "earned",
-        points: 85,
-        description: "ซื้อกาแฟลาเต้ + เค้กช็อกโกแลต",
-        date: "2024-01-15",
-        relatedOrderId: "ORD-001",
-      },
-      {
-        id: "2",
-        type: "redeemed",
-        points: -500,
-        description: "แลกกาแฟฟรี 1 แก้ว",
-        date: "2024-01-10",
-      },
-      {
-        id: "3",
-        type: "earned",
-        points: 65,
-        description: "ซื้อกาแฟอเมริกาโน่ 2 แก้ว",
-        date: "2024-01-12",
-        relatedOrderId: "ORD-002",
-      },
-      {
-        id: "4",
-        type: "redeemed",
-        points: -300,
-        description: "แลกส่วนลด 10%",
-        date: "2024-01-05",
-      },
-      {
-        id: "5",
-        type: "earned",
-        points: 120,
-        description: "ซื้อเซ็ตอาหารเช้า + กาแฟคาปูชิโน่",
-        date: "2024-01-08",
-        relatedOrderId: "ORD-003",
-      },
-      {
-        id: "6",
-        type: "expired",
-        points: -50,
-        description: "แต้มหมดอายุ",
-        date: "2024-01-01",
-      },
-    ];
   }
 
   // Action methods
@@ -384,16 +277,12 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         rewardId,
       });
 
-      // Mock implementation - replace with actual service call
-      // This would typically call a service to process the reward redemption
-      console.log(`Redeeming reward ${rewardId} for shop ${shopId}`);
-
-      // In a real implementation, this would:
-      // 1. Validate the reward can be redeemed
-      // 2. Check if user has enough points
-      // 3. Process the redemption
-      // 4. Update user's points balance
-      // 5. Create a redemption record
+      // Call service to redeem reward
+      await this.customerRewardService.redeemReward(
+        shopId,
+        "customer-id", // customerId - will be determined from auth context
+        rewardId
+      );
     } catch (error) {
       this.logger.error(
         "CustomerRewardsPresenter: Error redeeming reward",
@@ -413,18 +302,47 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         rewardId,
       });
 
-      // Mock implementation - replace with actual service call
-      const allRewards = [
-        ...this.getAvailableRewards(),
-        ...this.getRedeemedRewards(),
-      ];
-      const reward = allRewards.find((r) => r.id === rewardId);
+      // Call service to get reward details
+      const rewardData = await this.customerRewardService.getRewardDetails(
+        shopId,
+        rewardId,
+        "customer-id" // customerId - will be determined from auth context
+      );
 
-      if (!reward) {
-        throw new Error("Reward not found");
+      // Convert DTO to ViewModel format
+      if ('isRedeemed' in rewardData) {
+        const customerReward = rewardData as CustomerRewardDTO;
+        return {
+          id: customerReward.id,
+          name: customerReward.name,
+          description: customerReward.description,
+          type: customerReward.type,
+          value: customerReward.value,
+          pointsCost: customerReward.pointsCost,
+          category: customerReward.category,
+          imageUrl: customerReward.imageUrl,
+          termsAndConditions: customerReward.termsAndConditions,
+          isAvailable: customerReward.isAvailable,
+          isRedeemed: customerReward.isRedeemed,
+          redeemedAt: customerReward.redeemedAt,
+          expiryDate: customerReward.expiryDate,
+        };
+      } else {
+        const availableReward = rewardData as AvailableRewardDTO;
+        return {
+          id: availableReward.id,
+          name: availableReward.name,
+          description: availableReward.description,
+          type: "discount", // Default type for available rewards
+          value: 0, // Default value for available rewards
+          pointsCost: availableReward.pointsCost,
+          category: availableReward.category,
+          imageUrl: availableReward.imageUrl,
+          termsAndConditions: [], // Default empty array
+          isAvailable: availableReward.isAvailable,
+          expiryDate: undefined, // Not available in AvailableRewardDTO
+        };
       }
-
-      return reward;
     } catch (error) {
       this.logger.error(
         "CustomerRewardsPresenter: Error getting reward details",
@@ -560,7 +478,8 @@ export class CustomerRewardsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    return new CustomerRewardsPresenter(logger, shopService);
+    const customerRewardService = serverContainer.resolve<ShopCustomerRewardService>("ShopCustomerRewardService");
+    return new CustomerRewardsPresenter(logger, shopService, customerRewardService);
   }
 }
 
@@ -570,6 +489,7 @@ export class ClientCustomerRewardsPresenterFactory {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    return new CustomerRewardsPresenter(logger, shopService);
+    const customerRewardService = clientContainer.resolve<ShopCustomerRewardService>("ShopCustomerRewardService");
+    return new CustomerRewardsPresenter(logger, shopService, customerRewardService);
   }
 }

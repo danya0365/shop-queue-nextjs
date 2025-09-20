@@ -50,7 +50,11 @@ import { SupabaseShopBackendServiceRepository } from "../infrastructure/reposito
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
 import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
+import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
+import { SupabaseCustomerRewardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-reward-repository";
 import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
+import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
+import { ShopCustomerRewardServiceFactory } from "../application/services/shop/customer/ShopCustomerRewardService";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
 import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
@@ -111,6 +115,10 @@ export async function createServerContainer(): Promise<Container> {
       new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
     const customerDashboardRepository =
       new SupabaseCustomerDashboardRepository(databaseDatasource, logger);
+    const customerHistoryRepository =
+      new SupabaseCustomerHistoryRepository(databaseDatasource, logger);
+    const customerRewardRepository =
+      new SupabaseCustomerRewardRepository(databaseDatasource, logger);
     const shopBackendCustomerRepository =
       new SupabaseShopBackendCustomerRepository(databaseDatasource, logger);
     const shopBackendEmployeeRepository =
@@ -235,6 +243,18 @@ export async function createServerContainer(): Promise<Container> {
       customerDashboardRepository,
       logger
     );
+
+    // Create customer history service
+    const shopCustomerHistoryService = ShopCustomerHistoryServiceFactory.create(
+      customerHistoryRepository,
+      logger
+    );
+
+    // Create customer reward service
+    const shopCustomerRewardService = ShopCustomerRewardServiceFactory.create(
+      customerRewardRepository,
+      logger
+    );
     // Register all services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
@@ -295,6 +315,14 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance(
       "ShopCustomerDashboardService",
       shopCustomerDashboardService
+    );
+    container.registerInstance(
+      "ShopCustomerHistoryService",
+      shopCustomerHistoryService
+    );
+    container.registerInstance(
+      "ShopCustomerRewardService",
+      shopCustomerRewardService
     );
     container.registerInstance(
       "PosterTemplateBackendService",
