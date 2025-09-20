@@ -680,4 +680,73 @@ export class SupabaseShopBackendShopRepository
       );
     }
   }
+
+  async isShopOwner(shopId: string): Promise<boolean> {
+    try {
+      const data = await this.dataSource.callRpc<boolean>("is_shop_owner", {
+        shop_id_param: shopId,
+      });
+
+      return data || false;
+    } catch (error) {
+      if (error instanceof ShopBackendShopError) {
+        throw error;
+      }
+
+      this.logger.error("Error in isShopOwner", { error, shopId });
+      throw new ShopBackendShopError(
+        ShopBackendShopErrorType.UNKNOWN,
+        "An unexpected error occurred while checking shop owner status",
+        "isShopOwner",
+        { shopId },
+        error
+      );
+    }
+  }
+
+  async isShopManager(shopId: string): Promise<boolean> {
+    try {
+      const data = await this.dataSource.callRpc<boolean>("is_shop_manager", {
+        shop_id_param: shopId,
+      });
+
+      return data || false;
+    } catch (error) {
+      if (error instanceof ShopBackendShopError) {
+        throw error;
+      }
+
+      this.logger.error("Error in isShopManager", { error, shopId });
+      throw new ShopBackendShopError(
+        ShopBackendShopErrorType.UNKNOWN,
+        "An unexpected error occurred while checking shop manager status",
+        "isShopManager",
+        { shopId },
+        error
+      );
+    }
+  }
+
+  async isShopEmployee(shopId: string): Promise<boolean> {
+    try {
+      const data = await this.dataSource.callRpc<boolean>("is_shop_employee", {
+        shop_id_param: shopId,
+      });
+
+      return data || false;
+    } catch (error) {
+      if (error instanceof ShopBackendShopError) {
+        throw error;
+      }
+
+      this.logger.error("Error in isShopEmployee", { error, shopId });
+      throw new ShopBackendShopError(
+        ShopBackendShopErrorType.UNKNOWN,
+        "An unexpected error occurred while checking shop employee status",
+        "isShopEmployee",
+        { shopId },
+        error
+      );
+    }
+  }
 }

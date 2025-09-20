@@ -90,4 +90,28 @@ export interface ShopBackendShopRepository {
    * @throws ShopBackendShopError if the operation fails
    */
   deleteShop(id: string): Promise<boolean>;
+
+  /**
+   * Check if current user is shop owner
+   * @param shopId Shop ID
+   * @returns true if user is shop owner, false otherwise
+   * @throws ShopBackendShopError if the operation fails
+   */
+  isShopOwner(shopId: string): Promise<boolean>;
+
+  /**
+   * Check if current user is shop manager
+   * @param shopId Shop ID
+   * @returns true if user is shop manager, false otherwise
+   * @throws ShopBackendShopError if the operation fails
+   */
+  isShopManager(shopId: string): Promise<boolean>;
+
+  /**
+   * Check if current user is shop employee
+   * @param shopId Shop ID
+   * @returns true if user is shop employee, false otherwise
+   * @throws ShopBackendShopError if the operation fails
+   */
+  isShopEmployee(shopId: string): Promise<boolean>;
 }
