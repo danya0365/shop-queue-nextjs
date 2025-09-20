@@ -670,6 +670,12 @@ export class SupabaseShopBackendQueueRepository
       if (queue.estimatedWaitTime !== undefined)
         queueSchema.estimated_duration = queue.estimatedWaitTime;
       if (queue.notes !== undefined) queueSchema.note = queue.notes || null;
+      
+      // Handle timestamp fields for queue status tracking
+      if (queue.calledAt !== undefined) queueSchema.served_at = queue.calledAt;
+      if (queue.completedAt !== undefined) queueSchema.completed_at = queue.completedAt;
+      if (queue.actualWaitTime !== undefined) queueSchema.actual_wait_time = queue.actualWaitTime;
+      if (queue.servedByEmployeeId !== undefined) queueSchema.served_by_employee_id = queue.servedByEmployeeId;
 
       // Update queue in database
       await this.dataSource.update<QueueSchemaRecord>(

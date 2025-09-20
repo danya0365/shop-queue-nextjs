@@ -44,7 +44,7 @@ export class SupabaseShopBackendQueueMapper {
       status: schema.status as QueueStatus,
       priority: schema.priority as QueuePriority,
       estimatedWaitTime: schema.estimated_duration,
-      actualWaitTime: schema.actual_wait_time,
+      actualWaitTime: schema.actual_wait_time || undefined,
       notes: schema.note || undefined,
       createdAt: schema.created_at,
       updatedAt: schema.updated_at,
@@ -121,7 +121,7 @@ export class SupabaseShopBackendQueueMapper {
       updated_at: entity.updatedAt,
       served_at: entity.calledAt || null,
       completed_at: entity.completedAt || null,
-      actual_wait_time: entity.actualWaitTime,
+      actual_wait_time: entity.actualWaitTime || null,
     };
   }
 

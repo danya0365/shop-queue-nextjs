@@ -1,5 +1,6 @@
 // UI Components exports
 export { DateTimeDisplay } from "./DateTimeDisplay";
+export { TimeAgoDisplay } from "./TimeAgoDisplay";
 
 // Keep existing exports
 export { ThemeToggle } from "./ThemeToggle";

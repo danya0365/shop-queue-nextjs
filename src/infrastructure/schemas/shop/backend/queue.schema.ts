@@ -16,6 +16,7 @@ export interface QueueSchema {
   estimated_duration: number;
   estimated_call_time: string | null;
   served_by_employee_id: string | null;
+  actual_wait_time: number | null;
   note: string | null;
   feedback: string | null;
   rating: number | null;
@@ -28,7 +29,6 @@ export interface QueueSchema {
   customer_phone?: string;
   shop_name?: string;
   // Calculated fields
-  actual_wait_time?: number;
   queue_services?: QueueServiceSchema[];
 }
 

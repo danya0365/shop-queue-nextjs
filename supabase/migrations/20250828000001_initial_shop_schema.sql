@@ -182,6 +182,7 @@ CREATE TABLE queues (
     estimated_duration INTEGER DEFAULT 15, -- minutes
     estimated_call_time TIMESTAMP WITH TIME ZONE,
     served_by_employee_id UUID REFERENCES employees(id) ON DELETE RESTRICT,
+    actual_wait_time INTEGER, -- in minutes, calculated actual wait time
     note TEXT,
     feedback TEXT,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
