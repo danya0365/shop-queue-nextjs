@@ -51,6 +51,8 @@ import { SupabaseShopBackendQueueRepository } from "../infrastructure/repositori
 import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
+import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
+import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
 import { SupabaseSubscriptionPlanRepository } from "../infrastructure/repositories/supabase-subscription-plan-repository";
@@ -113,6 +115,8 @@ export function createClientContainer(): Container {
       new SupabaseBackendOpeningHoursRepository(databaseDatasource, logger);
     const shopBackendShopSettingsRepository =
       new SupabaseShopBackendShopSettingsRepository(databaseDatasource, logger);
+    const customerDashboardRepository =
+      new SupabaseCustomerDashboardRepository(databaseDatasource, logger);
     const shopBackendCustomerRepository =
       new SupabaseShopBackendCustomerRepository(databaseDatasource, logger);
     const shopBackendEmployeeRepository =
@@ -231,6 +235,12 @@ export function createClientContainer(): Container {
         shopBackendDepartmentRepository,
         logger
       );
+    
+    // Create customer dashboard service
+    const shopCustomerDashboardService = ShopCustomerDashboardServiceFactory.create(
+      customerDashboardRepository,
+      logger
+    );
 
     // Initialize datetime services
     const dateTimeConfigService = new DateTimeConfigService();
@@ -295,6 +305,10 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "ShopBackendDepartmentsService",
       shopBackendDepartmentsService
+    );
+    container.registerInstance(
+      "ShopCustomerDashboardService",
+      shopCustomerDashboardService
     );
     container.registerInstance(
       "PosterTemplateBackendService",
