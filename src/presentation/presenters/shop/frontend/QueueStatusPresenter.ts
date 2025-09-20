@@ -1,4 +1,5 @@
 import { ShopService } from '@/src/application/services/shop/ShopService';
+import { getClientContainer } from '@/src/di/client-container';
 import { getServerContainer } from '@/src/di/server-container';
 import type { Logger } from '@/src/domain/interfaces/logger';
 import { BaseShopPresenter } from '@/src/presentation/presenters/shop/BaseShopPresenter';
@@ -103,12 +104,22 @@ export class QueueStatusPresenter extends BaseShopPresenter {
   }
 }
 
-// Factory class
+// Factory class for server-side
 export class QueueStatusPresenterFactory {
   static async create(): Promise<QueueStatusPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>('Logger');
     const shopService = serverContainer.resolve<ShopService>('ShopService');
+    return new QueueStatusPresenter(logger, shopService);
+  }
+}
+
+// Factory class for client-side
+export class ClientQueueStatusPresenterFactory {
+  static async create(): Promise<QueueStatusPresenter> {
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>('Logger');
+    const shopService = clientContainer.resolve<ShopService>('ShopService');
     return new QueueStatusPresenter(logger, shopService);
   }
 }

@@ -1,82 +1,102 @@
 "use client";
 
-import { QueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/QueueStatusPresenter";
-import { useState } from "react";
+import { useQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useQueueStatusPresenter";
+import type { QueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/QueueStatusPresenter";
 
 interface QueueStatusViewProps {
-  viewModel: QueueStatusViewModel;
   shopId: string;
+  initialViewModel?: QueueStatusViewModel;
 }
 
-export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
-  const { customerQueue, queueProgress, shopName, isFound, canCancel } =
-    viewModel;
-  const [queueNumber, setQueueNumber] = useState("");
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+export function QueueStatusView({ shopId, initialViewModel }: QueueStatusViewProps) {
+  const {
+    viewModel,
+    loading,
+    error,
+    actionLoading,
+    queueNumber,
+    setQueueNumber,
+    showCancelConfirm,
+    setShowCancelConfirm,
+    handleSearch,
+    handleCancel,
+    refreshData,
+    getStatusColor,
+    getStatusText,
+    getStatusIcon,
+  } = useQueueStatusPresenter(shopId, initialViewModel);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "waiting":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "confirmed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "serving":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "completed":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  // Handle loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ติดตามสถานะคิว
+          </h1>
+        </div>
+        <div className="frontend-card">
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="frontend-text-secondary">กำลังโหลดข้อมูล...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "waiting":
-        return "รอการยืนยัน";
-      case "confirmed":
-        return "ยืนยันแล้ว";
-      case "serving":
-        return "กำลังให้บริการ";
-      case "completed":
-        return "เสร็จสิ้น";
-      case "cancelled":
-        return "ยกเลิกแล้ว";
-      default:
-        return status;
-    }
-  };
+  // Handle error state
+  if (error) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ติดตามสถานะคิว
+          </h1>
+        </div>
+        <div className="frontend-card">
+          <div className="p-6 text-center">
+            <div className="text-6xl mb-4">❌</div>
+            <p className="frontend-text-secondary mb-4">เกิดข้อผิดพลาด</p>
+            <p className="frontend-text-primary mb-4">{error}</p>
+            <button
+              onClick={refreshData}
+              className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
+            >
+              ลองใหม่อีกครั้ง
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "waiting":
-        return "⏳";
-      case "confirmed":
-        return "✅";
-      case "serving":
-        return "🛎️";
-      case "completed":
-        return "🎉";
-      case "cancelled":
-        return "❌";
-      default:
-        return "❓";
-    }
-  };
+  // Handle no data state
+  if (!viewModel) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+            ติดตามสถานะคิว
+          </h1>
+        </div>
+        <div className="frontend-card">
+          <div className="p-6 text-center">
+            <div className="text-6xl mb-4">📋</div>
+            <p className="frontend-text-secondary mb-4">ไม่พบข้อมูลคิว</p>
+            <button
+              onClick={refreshData}
+              className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
+            >
+              ลองใหม่อีกครั้ง
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSearch = () => {
-    if (queueNumber.trim()) {
-      window.location.href = `/shop/${shopId}/status?queue=${queueNumber.trim()}`;
-    }
-  };
-
-  const handleCancel = () => {
-    // Mock cancel logic
-    setShowCancelConfirm(false);
-    alert("คิวของคุณถูกยกเลิกแล้ว");
-    window.location.href = `/shop/${shopId}`;
-  };
+  const { customerQueue, queueProgress, shopName, isFound, canCancel } = viewModel;
 
   if (!isFound) {
     return (
@@ -162,17 +182,9 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
                   คิวหมายเลข {customerQueue.queueNumber}
                 </h2>
                 <div
-                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border ${
-                    customerQueue.status === "waiting"
-                      ? "frontend-badge-warning"
-                      : customerQueue.status === "confirmed"
-                      ? "frontend-badge-info"
-                      : customerQueue.status === "serving"
-                      ? "frontend-badge-success"
-                      : customerQueue.status === "completed"
-                      ? "frontend-badge-success"
-                      : "frontend-status-cancelled"
-                  }`}
+                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border ${getStatusColor(
+                    customerQueue.status
+                  )}`}
                 >
                   {getStatusText(customerQueue.status)}
                 </div>
@@ -260,7 +272,7 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
-              onClick={() => window.location.reload()}
+              onClick={refreshData}
               className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
             >
               🔄 รีเฟรช
@@ -277,6 +289,7 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
               <button
                 onClick={() => setShowCancelConfirm(true)}
                 className="frontend-button-danger px-6 py-3 rounded-lg font-semibold"
+                disabled={actionLoading}
               >
                 ❌ ยกเลิกคิว
               </button>
@@ -308,8 +321,9 @@ export function QueueStatusView({ viewModel, shopId }: QueueStatusViewProps) {
               <button
                 onClick={handleCancel}
                 className="flex-1 frontend-button-danger px-4 py-2 rounded-lg font-medium transition-colors"
+                disabled={actionLoading}
               >
-                ยืนยันยกเลิก
+                {actionLoading ? "กำลังยกเลิก..." : "ยืนยันยกเลิก"}
               </button>
             </div>
           </div>

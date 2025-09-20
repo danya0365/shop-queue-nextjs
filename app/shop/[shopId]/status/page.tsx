@@ -53,7 +53,7 @@ export default async function QueueStatusPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <QueueStatusView viewModel={viewModel} shopId={shopId} />
+        <QueueStatusView initialViewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
   } catch (error) {
