@@ -51,10 +51,11 @@ export interface ShopBackendDepartmentRepository {
 
   /**
    * Get department statistics
+   * @param shopId Shop ID to filter statistics
    * @returns Department statistics data
    * @throws ShopBackendDepartmentError if the operation fails
    */
-  getDepartmentStats(): Promise<DepartmentStatsEntity>;
+  getDepartmentStats(shopId: string): Promise<DepartmentStatsEntity>;
 
   /**
    * Get department by ID

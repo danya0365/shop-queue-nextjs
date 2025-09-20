@@ -208,13 +208,21 @@ export class SupabaseShopBackendDepartmentRepository
 
   /**
    * Get department statistics from database
+   * @param shopId Shop ID to filter statistics
    * @returns Department statistics
    */
-  async getDepartmentStats(): Promise<DepartmentStatsEntity> {
+  async getDepartmentStats(shopId: string): Promise<DepartmentStatsEntity> {
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
         select: ["*"],
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: shopId,
+          },
+        ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
@@ -223,7 +231,7 @@ export class SupabaseShopBackendDepartmentRepository
       // Use extended type that satisfies Record<string, unknown> constraint
       const statsData =
         await this.dataSource.getAdvanced<DepartmentStatsSchemaRecord>(
-          "department_stats_summary_view",
+          "department_stats_by_shop_view",
           queryOptions
         );
 
@@ -245,12 +253,12 @@ export class SupabaseShopBackendDepartmentRepository
         throw error;
       }
 
-      this.logger.error("Error in getDepartmentStats", { error });
+      this.logger.error("Error in getDepartmentStats", { error, shopId });
       throw new ShopBackendDepartmentError(
         ShopBackendDepartmentErrorType.UNKNOWN,
         "An unexpected error occurred while fetching department statistics",
         "getDepartmentStats",
-        {},
+        { shopId },
         error
       );
     }

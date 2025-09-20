@@ -87,11 +87,11 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
 
       // Get departments data with pagination and filters
       const departmentsData = await this.departmentsBackendService.getDepartmentsData(
+        shopId,
         page,
         perPage,
         {
           searchQuery: filters?.searchQuery,
-          shopFilter: shopId,
           minEmployeeCount: filters?.minEmployeeCount,
           maxEmployeeCount: filters?.maxEmployeeCount,
         }
@@ -172,11 +172,11 @@ export class DepartmentsPresenter extends BaseShopBackendPresenter {
       }
 
       const departmentsData = await this.departmentsBackendService.getDepartmentsData(
+        shopId,
         page,
         perPage,
         {
           searchQuery: filters?.searchQuery,
-          shopFilter: shopId,
           minEmployeeCount: filters?.minEmployeeCount,
           maxEmployeeCount: filters?.maxEmployeeCount,
         }

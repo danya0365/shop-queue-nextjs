@@ -49,9 +49,14 @@ export class DepartmentSelectionPresenter extends BaseShopBackendPresenter {
     try {
       // Get departments data with filters
       const departmentsData = await this.departmentsService.getDepartmentsData(
+        shopId,
         page,
         perPage,
-        filters
+        {
+          searchQuery: filters?.searchQuery,
+          minEmployeeCount: filters?.minEmployeeCount,
+          maxEmployeeCount: filters?.maxEmployeeCount,
+        }
       );
 
       const totalCount = departmentsData.totalCount;

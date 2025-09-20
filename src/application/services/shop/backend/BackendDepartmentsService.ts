@@ -6,16 +6,16 @@ import { ShopBackendDepartmentRepository } from '@/src/domain/repositories/shop/
 
 export interface IShopBackendDepartmentsService {
   getDepartmentsData(
+    shopId: string,
     page?: number,
     perPage?: number,
     filters?: {
       searchQuery?: string;
-      shopFilter?: string;
       minEmployeeCount?: number;
       maxEmployeeCount?: number;
     }
   ): Promise<DepartmentsDataDTO>;
-  getDepartmentStats(): Promise<DepartmentStatsDTO>;
+  getDepartmentStats(shopId: string): Promise<DepartmentStatsDTO>;
   getDepartmentById(id: string): Promise<DepartmentDTO>;
   createDepartment(params: CreateDepartmentDTO): Promise<DepartmentDTO>;
   updateDepartment(id: string, params: UpdateDepartmentDTO): Promise<DepartmentDTO>;
@@ -25,7 +25,7 @@ export interface IShopBackendDepartmentsService {
 export class ShopBackendDepartmentsService implements IShopBackendDepartmentsService {
   constructor(
     private readonly getDepartmentsPaginatedUseCase: IUseCase<GetDepartmentsPaginatedInput, PaginatedDepartmentsDTO>,
-    private readonly getDepartmentStatsUseCase: IUseCase<void, DepartmentStatsDTO>,
+    private readonly getDepartmentStatsUseCase: IUseCase<string, DepartmentStatsDTO>,
     private readonly getDepartmentByIdUseCase: IUseCase<string, DepartmentDTO>,
     private readonly createDepartmentUseCase: IUseCase<CreateDepartmentDTO, DepartmentDTO>,
     private readonly updateDepartmentUseCase: IUseCase<UpdateDepartmentDTO, DepartmentDTO>,
@@ -35,27 +35,34 @@ export class ShopBackendDepartmentsService implements IShopBackendDepartmentsSer
 
   /**
    * Get departments data including paginated departments and statistics
+   * @param shopId Shop ID
    * @param page Page number (default: 1)
    * @param perPage Items per page (default: 10)
    * @returns Departments data DTO
    */
   async getDepartmentsData(
+    shopId: string,
     page: number = 1,
     perPage: number = 10,
     filters?: {
       searchQuery?: string;
-      shopFilter?: string;
       minEmployeeCount?: number;
       maxEmployeeCount?: number;
     }
   ): Promise<DepartmentsDataDTO> {
     try {
-      this.logger.info('Getting departments data', { page, perPage, filters });
+      this.logger.info('Getting departments data', { shopId, page, perPage, filters });
+
+      // Add shopId to filters for the use case
+      const filtersWithShop = {
+        ...filters,
+        shopFilter: shopId
+      };
 
       // Get departments and stats in parallel
       const [departmentsResult, stats] = await Promise.all([
-        this.getDepartmentsPaginatedUseCase.execute({ page, limit: perPage, filters }),
-        this.getDepartmentStatsUseCase.execute()
+        this.getDepartmentsPaginatedUseCase.execute({ page, limit: perPage, filters: filtersWithShop }),
+        this.getDepartmentStatsUseCase.execute(shopId)
       ]);
 
       return {
@@ -64,23 +71,24 @@ export class ShopBackendDepartmentsService implements IShopBackendDepartmentsSer
         totalCount: departmentsResult.pagination.totalItems
       };
     } catch (error) {
-      this.logger.error('Error getting departments data', { error, page, perPage });
+      this.logger.error('Error getting departments data', { error, shopId, page, perPage });
       throw error;
     }
   }
 
   /**
    * Get department statistics
+   * @param shopId Shop ID to filter statistics
    * @returns Department stats DTO
    */
-  async getDepartmentStats(): Promise<DepartmentStatsDTO> {
+  async getDepartmentStats(shopId: string): Promise<DepartmentStatsDTO> {
     try {
-      this.logger.info('Getting department stats');
+      this.logger.info('Getting department stats', { shopId });
 
-      const stats = await this.getDepartmentStatsUseCase.execute();
+      const stats = await this.getDepartmentStatsUseCase.execute(shopId);
       return stats;
     } catch (error) {
-      this.logger.error('Error getting department stats', { error });
+      this.logger.error('Error getting department stats', { error, shopId });
       throw error;
     }
   }

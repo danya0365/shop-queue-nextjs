@@ -4,15 +4,15 @@ import { DepartmentMapper } from '@/src/application/mappers/shop/backend/departm
 import type { ShopBackendDepartmentRepository } from '@/src/domain/repositories/shop/backend/backend-department-repository';
 import { ShopBackendDepartmentError, ShopBackendDepartmentErrorType } from '@/src/domain/repositories/shop/backend/backend-department-repository';
 
-export class GetDepartmentStatsUseCase implements IUseCase<void, DepartmentStatsDTO> {
+export class GetDepartmentStatsUseCase implements IUseCase<string, DepartmentStatsDTO> {
   constructor(
     private readonly departmentRepository: ShopBackendDepartmentRepository
   ) { }
 
-  async execute(): Promise<DepartmentStatsDTO> {
+  async execute(shopId: string): Promise<DepartmentStatsDTO> {
     try {
       // Get department stats from repository
-      const stats = await this.departmentRepository.getDepartmentStats();
+      const stats = await this.departmentRepository.getDepartmentStats(shopId);
 
       // Use mapper to convert entity to DTO
       return DepartmentMapper.statsToDTO(stats);
