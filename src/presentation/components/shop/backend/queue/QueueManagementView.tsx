@@ -21,6 +21,8 @@ import { DeleteConfirmationModal } from "./modals/DeleteConfirmationModal";
 import { EditQueueModal } from "./modals/EditQueueModal";
 import { QRCodeModal } from "./modals/QRCodeModal";
 import { QueueDetailsModal } from "./modals/QueueDetailsModal";
+import { DateTimeDisplay } from "../../../ui/DateTimeDisplay";
+import { DateTimeFormatType } from "../../../../../domain/entities/datetime/DateTimeEntities";
 
 interface QueueManagementViewProps {
   shopId: string;
@@ -286,15 +288,6 @@ export function QueueManagementView({
     setDetailsModalOpen(true);
   };
 
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("th-TH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const handlePaymentSubmit = async (paymentData: CreatePaymentParams) => {
     try {
@@ -437,6 +430,15 @@ export function QueueManagementView({
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             ติดตามและจัดการคิวลูกค้าทั้งหมด
           </p>
+        </div>
+        <div className="text-right">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            เวลาปัจจุบัน
+          </div>
+          <DateTimeDisplay 
+            className="text-lg font-semibold text-gray-700 dark:text-gray-300"
+            includeSeconds={true}
+          />
         </div>
         <div className="flex space-x-4">
           <button
@@ -761,9 +763,44 @@ export function QueueManagementView({
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           เวลา
                         </p>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {formatDateTime(queue.createdAt)}
-                        </p>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <DateTimeDisplay 
+                            date={queue.createdAt}
+                            formatType={DateTimeFormatType.TIME}
+                            includeSeconds={false}
+                            className="text-sm"
+                          />
+                        </div>
+                        {queue.updatedAt && queue.updatedAt !== queue.createdAt && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            อัปเดต: <DateTimeDisplay 
+                              date={queue.updatedAt}
+                              formatType={DateTimeFormatType.TIME}
+                              includeSeconds={false}
+                              className="text-xs"
+                            />
+                          </p>
+                        )}
+                        {queue.calledAt && (
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            เรียก: <DateTimeDisplay 
+                              date={queue.calledAt}
+                              formatType={DateTimeFormatType.TIME}
+                              includeSeconds={false}
+                              className="text-xs"
+                            />
+                          </p>
+                        )}
+                        {queue.completedAt && (
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            เสร็จ: <DateTimeDisplay 
+                              date={queue.completedAt}
+                              formatType={DateTimeFormatType.TIME}
+                              includeSeconds={false}
+                              className="text-xs"
+                            />
+                          </p>
+                        )}
                         {queue.estimatedWaitTime > 0 && (
                           <p className="text-xs text-orange-600 dark:text-orange-400">
                             รอ ~{queue.estimatedWaitTime} นาที
