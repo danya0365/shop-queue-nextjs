@@ -16,6 +16,9 @@ import { GetShopStatsUseCase } from "@/src/application/usecases/shop/backend/sho
 import { GetShopsByOwnerIdUseCase } from "@/src/application/usecases/shop/backend/shops/GetShopsByOwnerIdUseCase";
 import { GetShopsPaginatedUseCase } from "@/src/application/usecases/shop/backend/shops/GetShopsPaginatedUseCase";
 import { UpdateShopUseCase } from "@/src/application/usecases/shop/backend/shops/UpdateShopUseCase";
+import { IsShopOwnerUseCase } from "@/src/application/usecases/shop/backend/shops/IsShopOwnerUseCase";
+import { IsShopManagerUseCase } from "@/src/application/usecases/shop/backend/shops/IsShopManagerUseCase";
+import { IsShopEmployeeUseCase } from "@/src/application/usecases/shop/backend/shops/IsShopEmployeeUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { ShopBackendShopRepository } from "@/src/domain/repositories/shop/backend/backend-shop-repository";
 
@@ -32,6 +35,9 @@ export interface IShopService {
   updateShop(params: UpdateShopInputDTO): Promise<ShopDTO>;
   updateShopStatus(params: UpdateShopStatusInputDTO): Promise<ShopDTO>;
   deleteShop(id: string): Promise<boolean>;
+  isShopOwner(shopId: string): Promise<boolean>;
+  isShopManager(shopId: string): Promise<boolean>;
+  isShopEmployee(shopId: string): Promise<boolean>;
 }
 
 export class ShopService implements IShopService {
@@ -46,6 +52,9 @@ export class ShopService implements IShopService {
     private readonly createShopUseCase: IUseCase<CreateShopInputDTO, ShopDTO>,
     private readonly updateShopUseCase: IUseCase<UpdateShopInputDTO, ShopDTO>,
     private readonly deleteShopUseCase: IUseCase<string, boolean>,
+    private readonly isShopOwnerUseCase: IUseCase<string, boolean>,
+    private readonly isShopManagerUseCase: IUseCase<string, boolean>,
+    private readonly isShopEmployeeUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
   ) {}
 
@@ -204,6 +213,42 @@ export class ShopService implements IShopService {
       throw error;
     }
   }
+
+  async isShopOwner(shopId: string): Promise<boolean> {
+    try {
+      this.logger.info("Checking shop owner status", { shopId });
+
+      const result = await this.isShopOwnerUseCase.execute(shopId);
+      return result;
+    } catch (error) {
+      this.logger.error("Error checking shop owner status", { error, shopId });
+      throw error;
+    }
+  }
+
+  async isShopManager(shopId: string): Promise<boolean> {
+    try {
+      this.logger.info("Checking shop manager status", { shopId });
+
+      const result = await this.isShopManagerUseCase.execute(shopId);
+      return result;
+    } catch (error) {
+      this.logger.error("Error checking shop manager status", { error, shopId });
+      throw error;
+    }
+  }
+
+  async isShopEmployee(shopId: string): Promise<boolean> {
+    try {
+      this.logger.info("Checking shop employee status", { shopId });
+
+      const result = await this.isShopEmployeeUseCase.execute(shopId);
+      return result;
+    } catch (error) {
+      this.logger.error("Error checking shop employee status", { error, shopId });
+      throw error;
+    }
+  }
 }
 
 export class ShopServiceFactory {
@@ -218,6 +263,10 @@ export class ShopServiceFactory {
     const createShopUseCase = new CreateShopUseCase(repository);
     const updateShopUseCase = new UpdateShopUseCase(repository);
     const deleteShopUseCase = new DeleteShopUseCase(repository);
+    const isShopOwnerUseCase = new IsShopOwnerUseCase(repository);
+    const isShopManagerUseCase = new IsShopManagerUseCase(repository);
+    const isShopEmployeeUseCase = new IsShopEmployeeUseCase(repository);
+    
     return new ShopService(
       getShopsPaginatedUseCase,
       getShopStatsUseCase,
@@ -226,6 +275,9 @@ export class ShopServiceFactory {
       createShopUseCase,
       updateShopUseCase,
       deleteShopUseCase,
+      isShopOwnerUseCase,
+      isShopManagerUseCase,
+      isShopEmployeeUseCase,
       logger
     );
   }
