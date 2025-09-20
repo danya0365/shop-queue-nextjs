@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface SetupStep {
   id: string;
@@ -29,7 +29,10 @@ interface ShopSetupTutorialProps {
   };
 }
 
-export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialProps) {
+export function ShopSetupTutorial({
+  shopId,
+  setupProgress,
+}: ShopSetupTutorialProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Calculate setup steps based on current progress
@@ -42,7 +45,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasBasicInfo ? "completed" : "pending",
       link: `/shop/${shopId}/backend/settings`,
       priority: "high",
-      estimatedTime: "5 นาที"
+      estimatedTime: "5 นาที",
     },
     {
       id: "shop-settings",
@@ -52,7 +55,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasSettings ? "completed" : "pending",
       link: `/shop/${shopId}/backend/settings`,
       priority: "high",
-      estimatedTime: "10 นาที"
+      estimatedTime: "10 นาที",
     },
     {
       id: "opening-hours",
@@ -62,7 +65,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasOpeningHours ? "completed" : "pending",
       link: `/shop/${shopId}/backend/opening-hours`,
       priority: "high",
-      estimatedTime: "5 นาที"
+      estimatedTime: "5 นาที",
     },
     {
       id: "services",
@@ -72,7 +75,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasServices ? "completed" : "pending",
       link: `/shop/${shopId}/backend/services`,
       priority: "high",
-      estimatedTime: "15 นาที"
+      estimatedTime: "15 นาที",
     },
     {
       id: "employees",
@@ -82,7 +85,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasEmployees ? "completed" : "pending",
       link: `/shop/${shopId}/backend/employees`,
       priority: "high",
-      estimatedTime: "10 นาที"
+      estimatedTime: "10 นาที",
     },
     {
       id: "departments",
@@ -92,20 +95,26 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
       status: setupProgress.hasDepartments ? "completed" : "optional",
       link: `/shop/${shopId}/backend/departments`,
       priority: "low",
-      estimatedTime: "5 นาที"
-    }
+      estimatedTime: "5 นาที",
+    },
   ];
 
   // Calculate completion percentage
-  const requiredSteps = setupSteps.filter(step => step.priority === "high");
-  const completedRequiredSteps = requiredSteps.filter(step => step.status === "completed");
-  const completionPercentage = Math.round((completedRequiredSteps.length / requiredSteps.length) * 100);
-  
+  const requiredSteps = setupSteps.filter((step) => step.priority === "high");
+  const completedRequiredSteps = requiredSteps.filter(
+    (step) => step.status === "completed"
+  );
+  const completionPercentage = Math.round(
+    (completedRequiredSteps.length / requiredSteps.length) * 100
+  );
+
   // Check if shop is ready for queues
   const isQueueReady = completedRequiredSteps.length === requiredSteps.length;
 
   // Get next step to complete
-  const nextStep = setupSteps.find(step => step.status === "pending" && step.priority === "high");
+  const nextStep = setupSteps.find(
+    (step) => step.status === "pending" && step.priority === "high"
+  );
 
   if (!isExpanded) {
     return (
@@ -115,11 +124,15 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
             <div className="flex-shrink-0">
               {isQueueReady ? (
                 <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 dark:text-green-400 text-xl">✅</span>
+                  <span className="text-green-600 dark:text-green-400 text-xl">
+                    ✅
+                  </span>
                 </div>
               ) : (
                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 dark:text-blue-400 text-xl">🚀</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-xl">
+                    🚀
+                  </span>
                 </div>
               )}
             </div>
@@ -128,10 +141,9 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
                 {isQueueReady ? "ร้านพร้อมรับคิวแล้ว!" : "การตั้งค่าร้าน"}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {isQueueReady 
-                  ? "ร้านของคุณพร้อมให้บริการลูกค้าแล้ว" 
-                  : `เสร็จสิ้น ${completionPercentage}% (${completedRequiredSteps.length}/${requiredSteps.length} ขั้นตอน)`
-                }
+                {isQueueReady
+                  ? "ร้านของคุณพร้อมให้บริการลูกค้าแล้ว"
+                  : `เสร็จสิ้น ${completionPercentage}% (${completedRequiredSteps.length}/${requiredSteps.length} ขั้นตอน)`}
               </p>
             </div>
           </div>
@@ -155,23 +167,28 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
             <div className="flex-shrink-0">
               {isQueueReady ? (
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 dark:text-green-400 text-2xl">✅</span>
+                  <span className="text-green-600 dark:text-green-400 text-2xl">
+                    ✅
+                  </span>
                 </div>
               ) : (
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 dark:text-blue-400 text-2xl">🚀</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-2xl">
+                    🚀
+                  </span>
                 </div>
               )}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {isQueueReady ? "🎉 ร้านพร้อมรับคิวแล้ว!" : "การตั้งค่าร้านเพื่อรับคิว"}
+                {isQueueReady
+                  ? "🎉 ร้านพร้อมรับคิวแล้ว!"
+                  : "การตั้งค่าร้านเพื่อรับคิว"}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {isQueueReady 
-                  ? "ร้านของคุณพร้อมให้บริการลูกค้าแล้ว คุณสามารถเริ่มรับคิวได้เลย!" 
-                  : "ทำตามขั้นตอนเหล่านี้เพื่อให้ร้านพร้อมรับคิวจากลูกค้า"
-                }
+                {isQueueReady
+                  ? "ร้านของคุณพร้อมให้บริการลูกค้าแล้ว คุณสามารถเริ่มรับคิวได้เลย!"
+                  : "ทำตามขั้นตอนเหล่านี้เพื่อให้ร้านพร้อมรับคิวจากลูกค้า"}
               </p>
             </div>
           </div>
@@ -179,8 +196,18 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
             onClick={() => setIsExpanded(false)}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -193,7 +220,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
               <span>{completionPercentage}%</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completionPercentage}%` }}
               ></div>
@@ -222,7 +249,7 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
                 🎯 เริ่มรับคิว
               </Link>
               <Link
-                href={`/shop/${shopId}/backend/queue-management`}
+                href={`/shop/${shopId}/backend/queue`}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 📋 จัดการคิว
@@ -270,13 +297,15 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
                 >
                   {/* Step Number & Icon */}
                   <div className="flex-shrink-0 flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      step.status === "completed"
-                        ? "bg-green-500 text-white"
-                        : step.status === "pending"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
-                    }`}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        step.status === "completed"
+                          ? "bg-green-500 text-white"
+                          : step.status === "pending"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
+                      }`}
+                    >
                       {step.status === "completed" ? "✓" : index + 1}
                     </div>
                     <span className="text-2xl">{step.icon}</span>
@@ -305,7 +334,9 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
                     <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                       <span>⏱️ {step.estimatedTime}</span>
                       {step.status === "completed" && (
-                        <span className="text-green-600 dark:text-green-400">✅ เสร็จสิ้น</span>
+                        <span className="text-green-600 dark:text-green-400">
+                          ✅ เสร็จสิ้น
+                        </span>
                       )}
                     </div>
                   </div>
@@ -345,7 +376,8 @@ export function ShopSetupTutorial({ shopId, setupProgress }: ShopSetupTutorialPr
                     ต้องการความช่วยเหลือ?
                   </h4>
                   <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                    หากคุณต้องการความช่วยเหลือในการตั้งค่าร้าน สามารถติดต่อทีมสนับสนุนได้
+                    หากคุณต้องการความช่วยเหลือในการตั้งค่าร้าน
+                    สามารถติดต่อทีมสนับสนุนได้
                   </p>
                   <div className="flex space-x-3">
                     <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm">
