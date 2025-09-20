@@ -286,6 +286,16 @@ export function QueueManagementView({
     setDetailsModalOpen(true);
   };
 
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handlePaymentSubmit = async (paymentData: CreatePaymentParams) => {
     try {
       await createQueuePayment({
@@ -752,7 +762,7 @@ export function QueueManagementView({
                           เวลา
                         </p>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {queue.createdAt}
+                          {formatDateTime(queue.createdAt)}
                         </p>
                         {queue.estimatedWaitTime > 0 && (
                           <p className="text-xs text-orange-600 dark:text-orange-400">

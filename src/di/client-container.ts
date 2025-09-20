@@ -3,6 +3,8 @@
 import { AuthService } from "../application/services/auth-service";
 import { AuthorizationService } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
+import { DateTimeConfigService } from "../application/services/DateTimeConfigService";
+import { DateTimeFormattingService } from "../application/services/DateTimeFormattingService";
 import { ProfileService } from "../application/services/profile-service";
 import { ShopBackendCustomersServiceFactory } from "../application/services/shop/backend/BackendCustomersService";
 import { ShopBackendDashboardServiceFactory } from "../application/services/shop/backend/BackendDashboardService";
@@ -216,6 +218,12 @@ export function createClientContainer(): Container {
         logger
       );
 
+    // Initialize datetime services
+    const dateTimeConfigService = new DateTimeConfigService();
+    const dateTimeFormattingService = new DateTimeFormattingService(
+      dateTimeConfigService
+    );
+
     // Register services in the container
     container.registerInstance("AuthService", authService);
     container.registerInstance("ProfileService", profileService);
@@ -302,6 +310,11 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "RewardTransactionBackendService",
       rewardTransactionBackendService
+    );
+    container.registerInstance("DateTimeConfigService", dateTimeConfigService);
+    container.registerInstance(
+      "DateTimeFormattingService",
+      dateTimeFormattingService
     );
 
     logger.info("Client container initialized successfully");
