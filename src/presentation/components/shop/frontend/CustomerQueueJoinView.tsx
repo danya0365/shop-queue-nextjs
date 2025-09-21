@@ -1,15 +1,18 @@
 "use client";
 
-import { useQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useQueueJoinPresenter";
+import { useCustomerQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
-interface QueueJoinViewProps {
+interface CustomerQueueJoinViewProps {
   shopId: string;
-  initialViewModel?: import("@/src/presentation/presenters/shop/frontend/QueueJoinPresenter").QueueJoinViewModel;
+  initialViewModel?: import("@/src/presentation/presenters/shop/frontend/CustomerQueueJoinPresenter").CustomerQueueJoinViewModel;
 }
 
-export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) {
+export function CustomerQueueJoinView({
+  shopId,
+  initialViewModel,
+}: CustomerQueueJoinViewProps) {
   const {
     viewModel,
     loading,
@@ -32,7 +35,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
     reset,
     getSelectedServicesAsQueueServices,
     serviceQuantities,
-  } = useQueueJoinPresenter(shopId, initialViewModel);
+  } = useCustomerQueueJoinPresenter(shopId, initialViewModel);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
 
   // Loading state
@@ -52,9 +55,11 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">เกิดข้อผิดพลาด</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            เกิดข้อผิดพลาด
+          </h1>
           <p className="text-muted mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
           >
@@ -70,7 +75,9 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">ไม่มีข้อมูล</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            ไม่มีข้อมูล
+          </h1>
           <p className="text-muted mb-4">ไม่พบข้อมูลร้านค้า</p>
         </div>
       </div>
@@ -222,12 +229,10 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredServices.map((service) => {
-                  const isSelected = selectedServices.includes(
-                    service.id
-                  );
+                  const isSelected = selectedServices.includes(service.id);
                   const isDisabled = service.available === false;
                   const quantity = serviceQuantities[service.id] || 1;
-                  
+
                   return (
                     <div
                       key={service.id}
@@ -262,7 +267,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                             ~{service.estimatedTime} นาที
                           </span>
                         </div>
-                        
+
                         {/* Quantity controls - only show for selected services */}
                         {isSelected && (
                           <div className="flex items-center justify-center space-x-2 mb-2">
@@ -289,7 +294,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                             </button>
                           </div>
                         )}
-                        
+
                         {isSelected && (
                           <div className="absolute inset-0 border-2 border-green-500 rounded-lg pointer-events-none">
                             <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
@@ -322,7 +327,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                     const service = services.find((s) => s.id === serviceId);
                     const quantity = serviceQuantities[serviceId] || 1;
                     if (!service) return null;
-                    
+
                     return (
                       <div
                         key={serviceId}
@@ -335,7 +340,9 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                             </span>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => decreaseServiceQuantity(serviceId)}
+                                onClick={() =>
+                                  decreaseServiceQuantity(serviceId)
+                                }
                                 className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
                               >
                                 -
@@ -344,7 +351,9 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                                 {quantity}
                               </span>
                               <button
-                                onClick={() => increaseServiceQuantity(serviceId)}
+                                onClick={() =>
+                                  increaseServiceQuantity(serviceId)
+                                }
                                 className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
                               >
                                 +
@@ -379,7 +388,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                     </span>
                   </div>
                   <div className="text-sm frontend-text-secondary mt-1">
-                    เวลาโดยประมาณ: 
+                    เวลาโดยประมาณ:
                     {selectedServices.reduce((total, serviceId) => {
                       const service = services.find((s) => s.id === serviceId);
                       const quantity = serviceQuantities[serviceId] || 1;
@@ -399,16 +408,19 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
                 ข้อมูลลูกค้า
               </h2>
             </div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit({
-                customerName,
-                customerPhone,
-                services: getSelectedServicesAsQueueServices(),
-                specialRequests,
-                priority
-              });
-            }} className="p-6 space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit({
+                  customerName,
+                  customerPhone,
+                  services: getSelectedServicesAsQueueServices(),
+                  specialRequests,
+                  priority,
+                });
+              }}
+              className="p-6 space-y-4"
+            >
               <div>
                 <label className="block text-sm font-medium frontend-text-primary mb-1">
                   ชื่อ-นามสกุล *
@@ -474,9 +486,7 @@ export function QueueJoinView({ shopId, initialViewModel }: QueueJoinViewProps) 
 
               <button
                 type="submit"
-                disabled={
-                  isLoading || selectedServices.length === 0
-                }
+                disabled={isLoading || selectedServices.length === 0}
                 className="w-full frontend-button-join-queue px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (

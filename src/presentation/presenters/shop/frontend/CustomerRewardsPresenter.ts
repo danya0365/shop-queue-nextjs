@@ -1,17 +1,17 @@
-import { ShopService } from "@/src/application/services/shop/ShopService";
-import { ShopCustomerRewardService } from "@/src/application/services/shop/customer/ShopCustomerRewardService";
-import { getServerContainer } from "@/src/di/server-container";
-import { getClientContainer } from "@/src/di/client-container";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 import type {
   AvailableRewardDTO,
-  CustomerRewardDTO,
-  RewardTransactionDTO,
   AvailableRewardsFiltersDTO,
+  CustomerRewardDTO,
   RedeemedRewardsFiltersDTO,
+  RewardTransactionDTO,
   RewardTransactionsFiltersDTO,
 } from "@/src/application/dtos/shop/customer/customer-reward-dto";
+import { ShopService } from "@/src/application/services/shop/ShopService";
+import { ShopCustomerRewardService } from "@/src/application/services/shop/customer/ShopCustomerRewardService";
+import { getClientContainer } from "@/src/di/client-container";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
 // Define interfaces for data structures
 export interface CustomerReward {
@@ -116,7 +116,7 @@ export interface CustomerRewardsViewModel {
 // Main Presenter class
 export class CustomerRewardsPresenter extends BaseShopPresenter {
   constructor(
-    logger: Logger, 
+    logger: Logger,
     shopService: ShopService,
     private readonly customerRewardService: ShopCustomerRewardService
   ) {
@@ -125,9 +125,9 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
   async getViewModel(
     shopId: string,
-    currentPage: number,
-    perPage: number,
-    filters: RewardsFilters
+    currentPage: number = 1,
+    perPage: number = 10,
+    filters?: RewardsFilters
   ): Promise<CustomerRewardsViewModel> {
     try {
       this.logger.info("CustomerRewardsPresenter: Getting view model", {
@@ -139,35 +139,46 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
       // Convert filters to DTO format
       const availableRewardsFilters: AvailableRewardsFiltersDTO = {
-        type: filters.type !== "all" ? filters.type : undefined,
-        category: filters.category !== "all" ? filters.category : undefined,
-        isAvailable: filters.status === "available" ? true : filters.status === "unavailable" ? false : undefined,
+        type: filters?.type !== "all" ? filters?.type : undefined,
+        category: filters?.category !== "all" ? filters?.category : undefined,
+        isAvailable:
+          filters?.status === "available"
+            ? true
+            : filters?.status === "unavailable"
+            ? false
+            : undefined,
       };
 
       const redeemedRewardsFilters: RedeemedRewardsFiltersDTO = {
-        type: filters.type !== "all" ? filters.type : undefined,
-        dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+        type: filters?.type !== "all" ? filters?.type : undefined,
+        dateRange:
+          filters?.dateRange !== "all" ? filters?.dateRange : undefined,
+        startDate: filters?.startDate,
+        endDate: filters?.endDate,
       };
 
       const rewardTransactionsFilters: RewardTransactionsFiltersDTO = {
-        type: filters.type !== "all" ? filters.type as "earned" | "redeemed" | "expired" : undefined,
-        dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+        type:
+          filters?.type !== "all"
+            ? (filters?.type as "earned" | "redeemed" | "expired")
+            : undefined,
+        dateRange:
+          filters?.dateRange !== "all" ? filters?.dateRange : undefined,
+        startDate: filters?.startDate,
+        endDate: filters?.endDate,
       };
 
       // Get customer rewards data from service
-      const customerRewardsData = await this.customerRewardService.getCustomerRewardsData(
-        shopId,
-        "customer-id", // customerId - will be determined from auth context
-        currentPage,
-        perPage,
-        availableRewardsFilters,
-        redeemedRewardsFilters,
-        rewardTransactionsFilters
-      );
+      const customerRewardsData =
+        await this.customerRewardService.getCustomerRewardsData(
+          shopId,
+          "customer-id", // customerId - will be determined from auth context
+          currentPage,
+          perPage,
+          availableRewardsFilters,
+          redeemedRewardsFilters,
+          rewardTransactionsFilters
+        );
 
       // Convert DTOs to ViewModel format
       const customerPoints: CustomerPoints = {
@@ -181,47 +192,55 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         tierBenefits: customerRewardsData.customerPoints.tierBenefits,
       };
 
-      const availableRewards = customerRewardsData.availableRewards.data.map((reward: AvailableRewardDTO) => ({
-        id: reward.id,
-        name: reward.name,
-        description: reward.description,
-        type: "discount", // Default type for available rewards
-        value: 0, // Default value for available rewards
-        pointsCost: reward.pointsCost,
-        category: reward.category,
-        imageUrl: reward.imageUrl,
-        termsAndConditions: [], // Default empty array
-        isAvailable: reward.isAvailable,
-        expiryDate: undefined, // Not available in AvailableRewardDTO
-      }));
+      const availableRewards = customerRewardsData.availableRewards.data.map(
+        (reward: AvailableRewardDTO) => ({
+          id: reward.id,
+          name: reward.name,
+          description: reward.description,
+          type: "discount", // Default type for available rewards
+          value: 0, // Default value for available rewards
+          pointsCost: reward.pointsCost,
+          category: reward.category,
+          imageUrl: reward.imageUrl,
+          termsAndConditions: [], // Default empty array
+          isAvailable: reward.isAvailable,
+          expiryDate: undefined, // Not available in AvailableRewardDTO
+        })
+      );
 
-      const redeemedRewards = customerRewardsData.redeemedRewards.data.map((reward: CustomerRewardDTO) => ({
-        id: reward.id,
-        name: reward.name,
-        description: reward.description,
-        type: reward.type,
-        value: reward.value,
-        pointsCost: reward.pointsCost,
-        category: reward.category,
-        imageUrl: reward.imageUrl,
-        termsAndConditions: reward.termsAndConditions,
-        isAvailable: reward.isAvailable,
-        isRedeemed: reward.isRedeemed,
-        redeemedAt: reward.redeemedAt,
-        expiryDate: reward.expiryDate,
-      }));
+      const redeemedRewards = customerRewardsData.redeemedRewards.data.map(
+        (reward: CustomerRewardDTO) => ({
+          id: reward.id,
+          name: reward.name,
+          description: reward.description,
+          type: reward.type,
+          value: reward.value,
+          pointsCost: reward.pointsCost,
+          category: reward.category,
+          imageUrl: reward.imageUrl,
+          termsAndConditions: reward.termsAndConditions,
+          isAvailable: reward.isAvailable,
+          isRedeemed: reward.isRedeemed,
+          redeemedAt: reward.redeemedAt,
+          expiryDate: reward.expiryDate,
+        })
+      );
 
-      const rewardTransactions = customerRewardsData.rewardTransactions.data.map((transaction: RewardTransactionDTO) => ({
-        id: transaction.id,
-        type: transaction.type,
-        points: transaction.points,
-        description: transaction.description,
-        date: transaction.date,
-        relatedOrderId: transaction.relatedOrderId,
-      }));
+      const rewardTransactions =
+        customerRewardsData.rewardTransactions.data.map(
+          (transaction: RewardTransactionDTO) => ({
+            id: transaction.id,
+            type: transaction.type,
+            points: transaction.points,
+            description: transaction.description,
+            date: transaction.date,
+            relatedOrderId: transaction.relatedOrderId,
+          })
+        );
 
       const availableRewardsPagination: Pagination = {
-        currentPage: customerRewardsData.availableRewards.pagination.currentPage,
+        currentPage:
+          customerRewardsData.availableRewards.pagination.currentPage,
         perPage: customerRewardsData.availableRewards.pagination.perPage,
         totalItems: customerRewardsData.availableRewards.pagination.totalItems,
         totalPages: customerRewardsData.availableRewards.pagination.totalPages,
@@ -239,10 +258,13 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       };
 
       const rewardTransactionsPagination: Pagination = {
-        currentPage: customerRewardsData.rewardTransactions.pagination.currentPage,
+        currentPage:
+          customerRewardsData.rewardTransactions.pagination.currentPage,
         perPage: customerRewardsData.rewardTransactions.pagination.perPage,
-        totalItems: customerRewardsData.rewardTransactions.pagination.totalItems,
-        totalPages: customerRewardsData.rewardTransactions.pagination.totalPages,
+        totalItems:
+          customerRewardsData.rewardTransactions.pagination.totalItems,
+        totalPages:
+          customerRewardsData.rewardTransactions.pagination.totalPages,
         hasNext: customerRewardsData.rewardTransactions.pagination.hasNext,
         hasPrev: customerRewardsData.rewardTransactions.pagination.hasPrev,
       };
@@ -264,7 +286,10 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         },
       };
     } catch (error) {
-      this.logger.error("CustomerRewardsPresenter: Error getting view model", error);
+      this.logger.error(
+        "CustomerRewardsPresenter: Error getting view model",
+        error
+      );
       throw error;
     }
   }
@@ -310,7 +335,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       );
 
       // Convert DTO to ViewModel format
-      if ('isRedeemed' in rewardData) {
+      if ("isRedeemed" in rewardData) {
         const customerReward = rewardData as CustomerRewardDTO;
         return {
           id: customerReward.id,
@@ -478,8 +503,15 @@ export class CustomerRewardsPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    const customerRewardService = serverContainer.resolve<ShopCustomerRewardService>("ShopCustomerRewardService");
-    return new CustomerRewardsPresenter(logger, shopService, customerRewardService);
+    const customerRewardService =
+      serverContainer.resolve<ShopCustomerRewardService>(
+        "ShopCustomerRewardService"
+      );
+    return new CustomerRewardsPresenter(
+      logger,
+      shopService,
+      customerRewardService
+    );
   }
 }
 
@@ -489,7 +521,14 @@ export class ClientCustomerRewardsPresenterFactory {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    const customerRewardService = clientContainer.resolve<ShopCustomerRewardService>("ShopCustomerRewardService");
-    return new CustomerRewardsPresenter(logger, shopService, customerRewardService);
+    const customerRewardService =
+      clientContainer.resolve<ShopCustomerRewardService>(
+        "ShopCustomerRewardService"
+      );
+    return new CustomerRewardsPresenter(
+      logger,
+      shopService,
+      customerRewardService
+    );
   }
 }

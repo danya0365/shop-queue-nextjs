@@ -1,6 +1,6 @@
 import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
-import { QueueJoinView } from "@/src/presentation/components/shop/frontend/QueueJoinView";
-import { QueueJoinPresenterFactory } from "@/src/presentation/presenters/shop/frontend/QueueJoinPresenter";
+import { CustomerQueueJoinView } from "@/src/presentation/components/shop/frontend/CustomerQueueJoinView";
+import { CustomerQueueJoinPresenterFactory } from "@/src/presentation/presenters/shop/frontend/CustomerQueueJoinPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params,
 }: QueueJoinPageProps): Promise<Metadata> {
   const { shopId } = await params;
-  const presenter = await QueueJoinPresenterFactory.create();
+  const presenter = await CustomerQueueJoinPresenterFactory.create();
 
   try {
     return presenter.generateMetadata(shopId);
@@ -38,9 +38,11 @@ export async function generateMetadata({
  * Queue Join page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
+export default async function CustomerQueueJoinPage({
+  params,
+}: QueueJoinPageProps) {
   const { shopId } = await params;
-  const presenter = await QueueJoinPresenterFactory.create();
+  const presenter = await CustomerQueueJoinPresenterFactory.create();
 
   try {
     // Get view model from presenter
@@ -48,7 +50,7 @@ export default async function QueueJoinPage({ params }: QueueJoinPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <QueueJoinView shopId={shopId} initialViewModel={viewModel} />
+        <CustomerQueueJoinView shopId={shopId} initialViewModel={viewModel} />
       </FrontendLayout>
     );
   } catch (error) {

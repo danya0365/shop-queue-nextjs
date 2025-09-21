@@ -1,22 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type {
-  QueueFormData,
-  QueueJoinViewModel,
-  ServiceOption,
-  QueueService,
-} from "./QueueJoinPresenter";
-import { ClientQueueJoinPresenterFactory } from "./QueueJoinPresenter";
+import {
+  ClientCustomerQueueJoinPresenterFactory,
+  type CustomerQueueJoinViewModel,
+  type QueueFormData,
+  type QueueService,
+  type ServiceOption,
+} from "./CustomerQueueJoinPresenter";
 
 // Re-export types
 export type { QueueFormData, ServiceOption };
 
-export function useQueueJoinPresenter(
+export function useCustomerQueueJoinPresenter(
   shopId: string,
-  initialViewModel?: QueueJoinViewModel
+  initialViewModel?: CustomerQueueJoinViewModel
 ) {
-  const [viewModel, setViewModel] = useState<QueueJoinViewModel | null>(
+  const [viewModel, setViewModel] = useState<CustomerQueueJoinViewModel | null>(
     initialViewModel || null
   );
   const [loading, setLoading] = useState(true);
@@ -29,9 +29,11 @@ export function useQueueJoinPresenter(
   const [specialRequests, setSpecialRequests] = useState("");
   const [priority, setPriority] = useState<"normal" | "urgent">("normal");
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
-  
+
   // State for managing service quantities
-  const [serviceQuantities, setServiceQuantities] = useState<Record<string, number>>({});
+  const [serviceQuantities, setServiceQuantities] = useState<
+    Record<string, number>
+  >({});
 
   // Initialize with initial view model if provided
   useEffect(() => {
@@ -47,7 +49,7 @@ export function useQueueJoinPresenter(
       setLoading(true);
       setError(null);
 
-      const presenter = await ClientQueueJoinPresenterFactory.create();
+      const presenter = await ClientCustomerQueueJoinPresenterFactory.create();
       const newViewModel = await presenter.getViewModel(shopId);
 
       setViewModel(newViewModel);
@@ -71,89 +73,99 @@ export function useQueueJoinPresenter(
   // Helper function to convert selected service IDs to QueueService[]
   const getSelectedServicesAsQueueServices = useCallback(() => {
     if (!viewModel) return [];
-    
+
     return viewModel.selectedServices
-      .map(serviceId => {
-        const service = viewModel.services.find(s => s.id === serviceId);
+      .map((serviceId) => {
+        const service = viewModel.services.find((s) => s.id === serviceId);
         if (!service) return null;
-        
+
         return {
           id: service.id,
           name: service.name,
           price: service.price,
           quantity: serviceQuantities[serviceId] || 1,
-          estimatedTime: service.estimatedTime
+          estimatedTime: service.estimatedTime,
         };
       })
       .filter((service): service is QueueService => service !== null);
   }, [viewModel, serviceQuantities]);
 
   // Function to update service quantity
-  const updateServiceQuantity = useCallback((serviceId: string, quantity: number) => {
-    if (quantity < 0) quantity = 0; // Minimum quantity is 0
-    if (quantity > 99) quantity = 99; // Maximum quantity is 99
-    
-    // If quantity becomes 0, remove from selected services
-    if (quantity === 0 && viewModel) {
-      const updatedViewModel = {
-        ...viewModel,
-        selectedServices: viewModel.selectedServices.filter((id) => id !== serviceId),
-      };
-      setViewModel(updatedViewModel);
-      
-      // Remove quantity from state
-      setServiceQuantities(prev => {
-        const newQuantities = { ...prev };
-        delete newQuantities[serviceId];
-        return newQuantities;
-      });
-    } else {
-      // Update quantity normally
-      setServiceQuantities(prev => ({
-        ...prev,
-        [serviceId]: quantity
-      }));
-    }
-  }, [viewModel]);
+  const updateServiceQuantity = useCallback(
+    (serviceId: string, quantity: number) => {
+      if (quantity < 0) quantity = 0; // Minimum quantity is 0
+      if (quantity > 99) quantity = 99; // Maximum quantity is 99
+
+      // If quantity becomes 0, remove from selected services
+      if (quantity === 0 && viewModel) {
+        const updatedViewModel = {
+          ...viewModel,
+          selectedServices: viewModel.selectedServices.filter(
+            (id) => id !== serviceId
+          ),
+        };
+        setViewModel(updatedViewModel);
+
+        // Remove quantity from state
+        setServiceQuantities((prev) => {
+          const newQuantities = { ...prev };
+          delete newQuantities[serviceId];
+          return newQuantities;
+        });
+      } else {
+        // Update quantity normally
+        setServiceQuantities((prev) => ({
+          ...prev,
+          [serviceId]: quantity,
+        }));
+      }
+    },
+    [viewModel]
+  );
 
   // Function to increase service quantity
   const increaseServiceQuantity = useCallback((serviceId: string) => {
-    setServiceQuantities(prev => {
+    setServiceQuantities((prev) => {
       const currentQuantity = prev[serviceId] || 1;
       const newQuantity = Math.min(currentQuantity + 1, 99);
       return {
         ...prev,
-        [serviceId]: newQuantity
+        [serviceId]: newQuantity,
       };
     });
   }, []);
 
   // Function to decrease service quantity
-  const decreaseServiceQuantity = useCallback((serviceId: string) => {
-    setServiceQuantities(prev => {
-      const currentQuantity = prev[serviceId] || 1;
-      const newQuantity = Math.max(currentQuantity - 1, 0);
-      
-      // If quantity becomes 0, remove from selected services
-      if (newQuantity === 0 && viewModel) {
-        const updatedViewModel = {
-          ...viewModel,
-          selectedServices: viewModel.selectedServices.filter((id) => id !== serviceId),
+  const decreaseServiceQuantity = useCallback(
+    (serviceId: string) => {
+      setServiceQuantities((prev) => {
+        const currentQuantity = prev[serviceId] || 1;
+        const newQuantity = Math.max(currentQuantity - 1, 0);
+
+        // If quantity becomes 0, remove from selected services
+        if (newQuantity === 0 && viewModel) {
+          const updatedViewModel = {
+            ...viewModel,
+            selectedServices: viewModel.selectedServices.filter(
+              (id) => id !== serviceId
+            ),
+          };
+          setViewModel(updatedViewModel);
+
+          // Remove quantity from state
+          const newQuantities = { ...prev };
+          delete newQuantities[serviceId];
+          return newQuantities;
+        }
+
+        return {
+          ...prev,
+          [serviceId]: newQuantity,
         };
-        setViewModel(updatedViewModel);
-        
-        // Remove quantity from state
-        const newQuantities = { ...prev };
-        delete newQuantities[serviceId];
-        return newQuantities;
-      }
-      
-      return {
-        ...prev,
-        [serviceId]: newQuantity
-      };
-    });
-  }, [viewModel]);
+      });
+    },
+    [viewModel]
+  );
 
   // Reset quantities when services are deselected
   const handleServiceToggle = useCallback(
@@ -161,7 +173,7 @@ export function useQueueJoinPresenter(
       if (!viewModel) return;
 
       const isSelected = viewModel.selectedServices.includes(serviceId);
-      
+
       const updatedViewModel = {
         ...viewModel,
         selectedServices: isSelected
@@ -170,10 +182,10 @@ export function useQueueJoinPresenter(
       };
 
       setViewModel(updatedViewModel);
-      
+
       // Remove quantity when service is deselected
       if (isSelected) {
-        setServiceQuantities(prev => {
+        setServiceQuantities((prev) => {
           const newQuantities = { ...prev };
           delete newQuantities[serviceId];
           return newQuantities;
@@ -273,7 +285,7 @@ export function useQueueJoinPresenter(
     loading,
     error,
     actionLoading,
-    
+
     // Form state
     customerName,
     setCustomerName,
@@ -285,10 +297,10 @@ export function useQueueJoinPresenter(
     setPriority,
     selectedCategory,
     setSelectedCategory,
-    
+
     // Service quantities state
     serviceQuantities,
-    
+
     // Actions
     handleServiceToggle,
     updateServiceQuantity,
@@ -297,7 +309,7 @@ export function useQueueJoinPresenter(
     handleSubmit,
     reset,
     loadData,
-    
+
     // Helper function to get selected services as QueueService[]
     getSelectedServicesAsQueueServices,
   };

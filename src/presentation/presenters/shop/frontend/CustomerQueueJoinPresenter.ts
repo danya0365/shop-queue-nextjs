@@ -33,7 +33,7 @@ export interface QueueFormData {
 }
 
 // Define ViewModel interface
-export interface QueueJoinViewModel {
+export interface CustomerQueueJoinViewModel {
   services: ServiceOption[];
   categories: string[];
   estimatedWaitTime: number;
@@ -50,12 +50,12 @@ export interface QueueJoinViewModel {
 }
 
 // Main Presenter class
-export class QueueJoinPresenter extends BaseShopPresenter {
+export class CustomerQueueJoinPresenter extends BaseShopPresenter {
   constructor(logger: Logger, shopService: ShopService) {
     super(logger, shopService);
   }
 
-  async getViewModel(shopId: string): Promise<QueueJoinViewModel> {
+  async getViewModel(shopId: string): Promise<CustomerQueueJoinViewModel> {
     try {
       this.logger.info("QueueJoinPresenter: Getting view model for shop", {
         shopId,
@@ -180,21 +180,21 @@ export class QueueJoinPresenter extends BaseShopPresenter {
 }
 
 // Factory class for server-side
-export class QueueJoinPresenterFactory {
-  static async create(): Promise<QueueJoinPresenter> {
+export class CustomerQueueJoinPresenterFactory {
+  static async create(): Promise<CustomerQueueJoinPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    return new QueueJoinPresenter(logger, shopService);
+    return new CustomerQueueJoinPresenter(logger, shopService);
   }
 }
 
 // Factory class for client-side
-export class ClientQueueJoinPresenterFactory {
-  static async create(): Promise<QueueJoinPresenter> {
+export class ClientCustomerQueueJoinPresenterFactory {
+  static async create(): Promise<CustomerQueueJoinPresenter> {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    return new QueueJoinPresenter(logger, shopService);
+    return new CustomerQueueJoinPresenter(logger, shopService);
   }
 }
