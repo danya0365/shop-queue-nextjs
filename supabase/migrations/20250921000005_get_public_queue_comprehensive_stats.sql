@@ -14,13 +14,13 @@ RETURNS TABLE(
     total_queues integer,
     
     -- Time Statistics
-    average_wait_time_minutes integer,
-    average_service_time_minutes integer,
-    average_total_time_minutes integer,
-    current_wait_time_estimate integer,
-    shortest_wait_time_minutes integer,
-    longest_wait_time_minutes integer,
-    longest_waiting_queue_minutes integer,
+    average_wait_time_minutes numeric,
+    average_service_time_minutes numeric,
+    average_total_time_minutes numeric,
+    current_wait_time_estimate numeric,
+    shortest_wait_time_minutes numeric,
+    longest_wait_time_minutes numeric,
+    longest_waiting_queue_minutes numeric,
     
     -- Performance Metrics
     cancellation_rate_percentage numeric,
@@ -55,7 +55,7 @@ RETURNS TABLE(
     shop_id uuid,
     shop_name text,
     shop_slug text,
-    shop_status text,
+    shop_status shop_status,
     timezone text,
     
     -- Metadata
@@ -78,13 +78,13 @@ BEGIN
         COALESCE(qcs.total_queues, 0)::integer as total_queues,
         
         -- Time Statistics
-        COALESCE(qcs.average_wait_time_minutes, 0)::integer as average_wait_time_minutes,
-        COALESCE(qcs.average_service_time_minutes, 0)::integer as average_service_time_minutes,
-        COALESCE(qcs.average_total_time_minutes, 0)::integer as average_total_time_minutes,
-        COALESCE(qcs.current_wait_time_estimate, 0)::integer as current_wait_time_estimate,
-        COALESCE(qcs.shortest_wait_time_minutes, 0)::integer as shortest_wait_time_minutes,
-        COALESCE(qcs.longest_wait_time_minutes, 0)::integer as longest_wait_time_minutes,
-        COALESCE(qcs.longest_waiting_queue_minutes, 0)::integer as longest_waiting_queue_minutes,
+        COALESCE(qcs.average_wait_time_minutes, 0)::numeric as average_wait_time_minutes,
+        COALESCE(qcs.average_service_time_minutes, 0)::numeric as average_service_time_minutes,
+        COALESCE(qcs.average_total_time_minutes, 0)::numeric as average_total_time_minutes,
+        COALESCE(qcs.current_wait_time_estimate, 0)::numeric as current_wait_time_estimate,
+        COALESCE(qcs.shortest_wait_time_minutes, 0)::numeric as shortest_wait_time_minutes,
+        COALESCE(qcs.longest_wait_time_minutes, 0)::numeric as longest_wait_time_minutes,
+        COALESCE(qcs.longest_waiting_queue_minutes, 0)::numeric as longest_waiting_queue_minutes,
         
         -- Performance Metrics
         COALESCE(qcs.cancellation_rate_percentage, 0)::numeric as cancellation_rate_percentage,
@@ -128,3 +128,9 @@ BEGIN
     WHERE qcs.shop_id = p_shop_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission for anonymous customer role
+GRANT EXECUTE ON FUNCTION get_public_queue_comprehensive_stats(UUID) TO anon;
+
+-- Create comment for documentation
+COMMENT ON FUNCTION get_public_queue_comprehensive_stats(UUID) IS 'Get comprehensive queue statistics for a specific shop including queue counts, time statistics, performance metrics, growth statistics, and popular data for anonymous customer access';
