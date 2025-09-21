@@ -1321,6 +1321,7 @@ export type Database = {
       }
       queues: {
         Row: {
+          actual_wait_time: number | null
           cancelled_at: string | null
           cancelled_note: string | null
           cancelled_reason: string | null
@@ -1342,6 +1343,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          actual_wait_time?: number | null
           cancelled_at?: string | null
           cancelled_note?: string | null
           cancelled_reason?: string | null
@@ -1363,6 +1365,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          actual_wait_time?: number | null
           cancelled_at?: string | null
           cancelled_note?: string | null
           cancelled_reason?: string | null
@@ -4199,6 +4202,50 @@ export type Database = {
       }
       is_shop_owner: {
         Args: { shop_id_param: string }
+        Returns: boolean
+      }
+      is_valid_customer_access: {
+        Args: { shop_id: string }
+        Returns: boolean
+      }
+      is_valid_department_access: {
+        Args: { shop_id: string }
+        Returns: boolean
+      }
+      is_valid_employee_access: {
+        Args: { shop_id: string }
+        Returns: boolean
+      }
+      is_valid_payment_access: {
+        Args: { queue_id: string }
+        Returns: boolean
+      }
+      is_valid_payment_item_access: {
+        Args: { payment_id: string }
+        Returns: boolean
+      }
+      is_valid_promotion_access: {
+        Args: { shop_id: string }
+        Returns: boolean
+      }
+      is_valid_promotion_service_access: {
+        Args: { promotion_id: string }
+        Returns: boolean
+      }
+      is_valid_promotion_usage_log_access: {
+        Args: { promotion_id: string }
+        Returns: boolean
+      }
+      is_valid_queue_access: {
+        Args: { shop_id: string }
+        Returns: boolean
+      }
+      is_valid_queue_service_access: {
+        Args: { queue_id: string }
+        Returns: boolean
+      }
+      is_valid_service_access: {
+        Args: { shop_id: string }
         Returns: boolean
       }
       link_customer_to_profile: {
