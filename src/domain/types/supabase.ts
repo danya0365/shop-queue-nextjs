@@ -4172,9 +4172,43 @@ export type Database = {
         Args: { shop_id_param: string; customer_id_param: string }
         Returns: Json
       }
+      get_customer_popular_services: {
+        Args: { p_shop_id: string; p_limit?: number; p_category?: string }
+        Returns: {
+          id: string
+          name: string
+          shop_id: string
+          queue_count: number
+          revenue: number
+          category: string
+        }[]
+      }
+      get_customer_popular_services_by_category: {
+        Args: { p_shop_id: string; p_category: string; p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          shop_id: string
+          queue_count: number
+          revenue: number
+          category: string
+          rank_in_category: number
+        }[]
+      }
       get_customer_stats: {
         Args: { shop_id_param: string }
         Returns: Json
+      }
+      get_customer_top_popular_services: {
+        Args: { p_shop_id: string; p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          shop_id: string
+          queue_count: number
+          revenue: number
+          category: string
+        }[]
       }
       get_employee_by_id: {
         Args: { p_employee_id: string }
