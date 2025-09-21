@@ -4372,9 +4372,67 @@ export type Database = {
           shop_id: string
           shop_name: string
           shop_slug: string
-          shop_status: string
+          shop_status: Database["public"]["Enums"]["shop_status"]
           timezone: string
           stats_generated_at: string
+        }[]
+      }
+      get_public_queue_info_by_customer_id: {
+        Args: {
+          p_customer_id: string
+          p_page?: number
+          p_limit?: number
+          p_status?: Database["public"]["Enums"]["queue_status"]
+        }
+        Returns: {
+          id: string
+          shop_id: string
+          queue_number: string
+          status: Database["public"]["Enums"]["queue_status"]
+          priority: Database["public"]["Enums"]["queue_priority"]
+          estimated_duration: number
+          estimated_call_time: string
+          served_by_employee_id: string
+          actual_wait_time: number
+          note: string
+          feedback: string
+          rating: number
+          created_at: string
+          updated_at: string
+          served_at: string
+          completed_at: string
+          cancelled_at: string
+          cancelled_reason: string
+          cancelled_note: string
+          customer_name: string
+          services: Json
+          total_count: number
+        }[]
+      }
+      get_public_queue_info_by_id: {
+        Args: { p_queue_id: string }
+        Returns: {
+          id: string
+          shop_id: string
+          queue_number: string
+          status: Database["public"]["Enums"]["queue_status"]
+          priority: Database["public"]["Enums"]["queue_priority"]
+          estimated_duration: number
+          estimated_call_time: string
+          served_by_employee_id: string
+          actual_wait_time: number
+          note: string
+          feedback: string
+          rating: number
+          created_at: string
+          updated_at: string
+          served_at: string
+          completed_at: string
+          cancelled_at: string
+          cancelled_reason: string
+          cancelled_note: string
+          customer_name: string
+          services: Json
         }[]
       }
       get_public_shop_info: {
