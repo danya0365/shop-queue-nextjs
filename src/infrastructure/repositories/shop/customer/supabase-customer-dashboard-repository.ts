@@ -19,15 +19,14 @@ import {
 import { SupabaseCustomerDashboardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-dashboard-mapper";
 import {
   QueueSchema,
-  ServiceSchema,
   PromotionSchema,
   ShopSchema,
+  PopularServiceViewRecord,
 } from "@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for database records
 type QueueSchemaRecord = Record<string, unknown> & QueueSchema;
-type ServiceSchemaRecord = Record<string, unknown> & ServiceSchema;
 type PromotionSchemaRecord = Record<string, unknown> & PromotionSchema;
 type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
 
@@ -152,15 +151,14 @@ export class SupabaseCustomerDashboardRepository
             operator: FilterOperator.EQ,
             value: shopId,
           },
-          {
-            field: "is_available",
-            operator: FilterOperator.EQ,
-            value: true,
-          },
         ],
         sort: [
           {
-            field: "popularity_score",
+            field: "queue_count",
+            direction: SortDirection.DESC,
+          },
+          {
+            field: "revenue",
             direction: SortDirection.DESC,
           },
         ],
@@ -170,7 +168,7 @@ export class SupabaseCustomerDashboardRepository
       };
 
       const servicesResult = await this.dataSource.getAdvanced(
-        "services",
+        "popular_services_view",
         serviceQueryOptions
       );
 
@@ -183,10 +181,10 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const servicesData = servicesResult as Array<ServiceSchemaRecord>;
+      const servicesData = servicesResult as unknown as Array<PopularServiceViewRecord>;
 
       // Transform the data using the mapper
-      const popularServices = SupabaseCustomerDashboardMapper.toPopularServiceEntities(servicesData);
+      const popularServices = SupabaseCustomerDashboardMapper.toPopularServiceEntitiesFromView(servicesData);
 
       this.logger.info("Popular services retrieved successfully", {
         shopId,

@@ -9,7 +9,7 @@ SELECT
     
     -- Queue statistics
     (SELECT COUNT(*) FROM public.queues) AS total_queues,
-    (SELECT COUNT(*) FROM public.queues WHERE status IN ('waiting','confirmed','serving')) AS active_queues,
+    (SELECT COUNT(*) FROM public.queues WHERE status IN ('confirmed','serving')) AS active_queues,
     (SELECT COUNT(*) FROM public.queues WHERE status = 'waiting') AS waiting_queues,
     (SELECT COUNT(*) FROM public.queues WHERE status = 'confirmed') AS confirmed_queues,
     (SELECT COUNT(*) FROM public.queues WHERE status = 'serving') AS serving_queues,
@@ -117,6 +117,7 @@ SELECT
     COALESCE(queue_stats.active_queues, 0) AS active_queues,
     COALESCE(queue_stats.completed_queues_today, 0) AS completed_queues_today,
     COALESCE(queue_stats.waiting_queues, 0) AS waiting_queues,
+    COALESCE(queue_stats.confirmed_queues, 0) AS confirmed_queues,
     COALESCE(queue_stats.serving_queues, 0) AS serving_queues,
     
     -- Customer statistics
@@ -165,9 +166,10 @@ LEFT JOIN (
     SELECT 
         shop_id,
         COUNT(*) AS total_queues,
-        COUNT(*) FILTER (WHERE status IN ('waiting','confirmed','serving')) AS active_queues,
+        COUNT(*) FILTER (WHERE status IN ('confirmed','serving')) AS active_queues,
         COUNT(*) FILTER (WHERE status = 'completed' AND completed_at::date = CURRENT_DATE) AS completed_queues_today,
         COUNT(*) FILTER (WHERE status = 'waiting') AS waiting_queues,
+        COUNT(*) FILTER (WHERE status = 'confirmed') AS confirmed_queues,
         COUNT(*) FILTER (WHERE status = 'serving') AS serving_queues
     FROM public.queues
     GROUP BY shop_id
@@ -398,7 +400,7 @@ BEGIN
         COUNT(CASE WHEN q.status = 'completed' THEN 1 END) as completed,
         COUNT(CASE WHEN q.status = 'cancelled' THEN 1 END) as cancelled,
         COUNT(CASE 
-            WHEN q.status = 'waiting' 
+            WHEN q.status = 'confirmed' 
             AND q.estimated_call_time IS NOT NULL 
             AND q.estimated_call_time < NOW() - INTERVAL '30 minutes'
             THEN 1 
@@ -413,11 +415,12 @@ END;
 $$;
 
 
--- สร้าง View สำหรับ Popular Services
+-- สร้าง View สำหรับ Popular Services (เพิ่ม shop_id)
 CREATE OR REPLACE VIEW popular_services_view AS
 SELECT 
     s.id,
     s.name,
+    s.shop_id,  -- เพิ่ม shop_id
     COALESCE(queue_stats.queue_count, 0) AS queue_count,
     COALESCE(revenue_stats.revenue, 0) AS revenue,
     s.category
@@ -433,7 +436,7 @@ LEFT JOIN (
     INNER JOIN 
         queues q ON qs.queue_id = q.id
     WHERE 
-        q.status IN ('waiting', 'serving', 'completed') -- กรองเฉพาะสถานะที่นับได้
+        q.status IN ('confirmed', 'serving', 'completed') -- กรองเฉพาะสถานะที่นับได้
     GROUP BY 
         qs.service_id
 ) queue_stats ON s.id = queue_stats.service_id
@@ -457,16 +460,17 @@ ORDER BY
     COALESCE(queue_stats.queue_count, 0) DESC, -- เรียงตามจำนวนคิว
     COALESCE(revenue_stats.revenue, 0) DESC;   -- แล้วตามรายได้
 
--- สร้าง View แบบ filtered สำหรับ Popular Services (Top 10)
+-- สร้าง View แบบ filtered สำหรับ Popular Services (Top 10) - เพิ่ม shop_id
 CREATE OR REPLACE VIEW top_popular_services_view AS
 SELECT * FROM popular_services_view
 LIMIT 10;
 
--- สร้าง View สำหรับ Popular Services ตาม category
+-- สร้าง View สำหรับ Popular Services ตาม category - เพิ่ม shop_id
 CREATE OR REPLACE VIEW popular_services_by_category_view AS
 SELECT 
     s.id,
     s.name,
+    s.shop_id,  -- เพิ่ม shop_id
     COALESCE(queue_stats.queue_count, 0) AS queue_count,
     COALESCE(revenue_stats.revenue, 0) AS revenue,
     s.category,
@@ -482,7 +486,7 @@ LEFT JOIN (
     INNER JOIN 
         queues q ON qs.queue_id = q.id
     WHERE 
-        q.status IN ('waiting', 'serving', 'completed')
+        q.status IN ('confirmed', 'serving', 'completed')
     GROUP BY 
         qs.service_id
 ) queue_stats ON s.id = queue_stats.service_id

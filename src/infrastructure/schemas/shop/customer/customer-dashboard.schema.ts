@@ -38,6 +38,17 @@ export interface ServiceSchema {
 }
 
 /**
+ * Schema for popular services view data from the database
+ */
+export interface PopularServiceViewRecord {
+  id: string | null;
+  name: string | null;
+  category: string | null;
+  queue_count: number | null;
+  revenue: number | null;
+}
+
+/**
  * Schema for promotion data from the database
  */
 export interface PromotionSchema {

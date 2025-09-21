@@ -7,6 +7,7 @@ import {
   QueueSchema,
   ServiceSchema,
   PromotionSchema,
+  PopularServiceViewRecord,
 } from "@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema";
 
 /**
@@ -68,6 +69,31 @@ export class SupabaseCustomerDashboardMapper {
     return data
       .filter((service) => (service.queue_count || 0) > 0)
       .map((service) => this.toPopularServiceEntity(service));
+  }
+
+  /**
+   * Convert Supabase popular services view data to domain entity
+   */
+  static toPopularServiceEntityFromView(data: PopularServiceViewRecord): PopularServiceEntity {
+    return {
+      id: String(data.id || ""),
+      name: String(data.name || ""),
+      price: 0, // View doesn't have price info
+      description: String(data.category || ""),
+      estimatedTime: 5, // Default time
+      icon: String(""), // No icon in view
+    };
+  }
+
+  /**
+   * Convert Supabase popular services view array to domain entities
+   */
+  static toPopularServiceEntitiesFromView(
+    data: PopularServiceViewRecord[]
+  ): PopularServiceEntity[] {
+    return data
+      .filter((service) => service.id && service.name && (service.queue_count || 0) > 0)
+      .map((service) => this.toPopularServiceEntityFromView(service));
   }
 
   /**
