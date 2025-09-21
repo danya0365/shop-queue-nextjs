@@ -27,9 +27,9 @@ export class SupabaseQueueJoinMapper {
       name: String(data.name || ""),
       description: String(data.description || ""),
       price: Number(data.price || 0),
-      estimatedTime: Number(data.estimated_time || 0),
+      estimatedTime: Number(data.estimated_duration || 0),
       category: String(data.category || ""),
-      available: Boolean(data.available),
+      available: Boolean(data.is_available),
       icon: String(data.icon || ""),
     };
   }
@@ -54,10 +54,10 @@ export class SupabaseQueueJoinMapper {
     return {
       id: data.id ? String(data.id) : undefined,
       shopId: String(data.shop_id || ""),
-      customerName: String(data.customer_name || ""),
-      customerPhone: String(data.customer_phone || ""),
+      customerName: String(data.customer_id || ""), // Using customer_id as customerName for now
+      customerPhone: "", // Not available in queues table
       services: [], // Services will be joined separately
-      specialRequests: data.special_requests ? String(data.special_requests) : undefined,
+      specialRequests: data.note ? String(data.note) : undefined,
       priority: (data.priority as "normal" | "urgent") || "normal",
       status: (data.status as "waiting" | "serving" | "completed" | "cancelled") || "waiting",
       queueNumber: data.queue_number ? String(data.queue_number) : undefined,
@@ -72,10 +72,10 @@ export class SupabaseQueueJoinMapper {
   static toQueueServiceEntity(data: QueueServiceSchema): QueueServiceEntity {
     return {
       id: String(data.id || ""),
-      name: String(data.service_name || ""),
+      name: String(data.service_id || ""), // Using service_id as name for now
       price: Number(data.price || 0),
       quantity: Number(data.quantity || 1),
-      estimatedTime: Number(data.estimated_time || 0),
+      estimatedTime: 0, // Not available in queue_services table
     };
   }
 
@@ -98,10 +98,10 @@ export class SupabaseQueueJoinMapper {
   static fromQueueJoinEntityToCreateSchema(entity: Omit<QueueJoinEntity, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Omit<QueueJoinSchema, 'id' | 'status' | 'created_at' | 'updated_at'> {
     return {
       shop_id: entity.shopId,
-      customer_name: entity.customerName,
-      customer_phone: entity.customerPhone,
+      customer_id: entity.customerName, // Using customerName as customer_id
       priority: entity.priority,
-      special_requests: entity.specialRequests,
+      queue_number: entity.queueNumber || "",
+      note: entity.specialRequests,
     };
   }
 
@@ -112,10 +112,9 @@ export class SupabaseQueueJoinMapper {
     return {
       queue_id: queueId,
       service_id: entity.id,
-      service_name: entity.name,
       price: entity.price,
       quantity: entity.quantity,
-      estimated_time: entity.estimatedTime,
+      created_at: new Date().toISOString(), // Add required created_at field
     };
   }
 

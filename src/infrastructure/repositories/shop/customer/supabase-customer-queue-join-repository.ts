@@ -23,6 +23,8 @@ import {
   QueueServiceSchema,
   ServiceOptionSchema,
   ShopQueueInfoSchema,
+  ShopSchema,
+  ShopSettingsSchema,
 } from "@/src/infrastructure/schemas/shop/customer/queue-join.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
@@ -101,7 +103,7 @@ export class SupabaseCustomerQueueJoinRepository
       };
 
       const shopResult = await this.dataSource.getAdvanced<
-        Record<string, unknown>
+        ShopSchema
       >("shops", shopQueryOptions);
 
       if (
@@ -116,6 +118,21 @@ export class SupabaseCustomerQueueJoinRepository
           { shopId }
         );
       }
+
+      // Get shop settings for queue configuration
+      const shopSettingsQueryOptions: QueryOptions = {
+        filters: [
+          {
+            field: "shop_id",
+            operator: FilterOperator.EQ,
+            value: shopId,
+          },
+        ],
+      };
+
+      const shopSettingsResult = await this.dataSource.getAdvanced<
+        ShopSettingsSchema
+      >("shop_settings", shopSettingsQueryOptions);
 
       // Get current queue statistics
       const queueQueryOptions: QueryOptions = {
@@ -142,11 +159,13 @@ export class SupabaseCustomerQueueJoinRepository
       const estimatedWaitTime = currentQueueLength * 5; // 5 minutes per person
 
       const shopData = shopResult[0];
+      const shopSettingsData = shopSettingsResult && shopSettingsResult.length > 0 ? shopSettingsResult[0] : null;
+      
       const queueInfoData: ShopQueueInfoSchema = {
         shop_id: String(shopData.id || ""),
         shop_name: String(shopData.name || ""),
-        is_accepting_queues: Boolean(shopData.is_accepting_queues),
-        max_queue_length: Number(shopData.max_queue_length || 50),
+        is_accepting_queues: Boolean(shopSettingsData?.allow_walk_in ?? true),
+        max_queue_length: Number(shopSettingsData?.max_queue_size ?? 50),
         current_queue_length: currentQueueLength,
         estimated_wait_time: estimatedWaitTime,
       };
