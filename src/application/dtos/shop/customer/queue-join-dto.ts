@@ -1,4 +1,7 @@
-// Queue Join DTOs following Clean Architecture principles
+// DTOs for customer queue join functionality
+// Following Clean Architecture principles
+
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 export interface ServiceOptionDTO {
   id: string;
@@ -24,7 +27,7 @@ export interface QueueFormDataDTO {
   customerPhone: string;
   services: QueueServiceDTO[];
   specialRequests?: string;
-  priority: "normal" | "urgent";
+  priority: QueuePriority;
 }
 
 export interface ShopQueueInfoDTO {
@@ -65,5 +68,5 @@ export interface JoinQueueInputDTO {
   customerId?: string;
   services: QueueServiceDTO[];
   specialRequests?: string;
-  priority: "normal" | "urgent";
+  priority: QueuePriority;
 }

@@ -3,6 +3,8 @@
  * Following Clean Architecture principles
  */
 
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+
 /**
  * Input DTO for bulk updating queues
  */
@@ -10,7 +12,7 @@ export interface BulkUpdateQueuesInput {
   queueIds: string[];
   updates: {
     status?: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
-    priority?: 'normal' | 'high' | 'urgent';
+    priority?: QueuePriority;
     estimatedWaitTime?: number;
     notes?: string;
     calledAt?: string | null;

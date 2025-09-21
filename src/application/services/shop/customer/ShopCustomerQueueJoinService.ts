@@ -11,6 +11,7 @@ import { GetShopQueueInfoUseCase } from "@/src/application/usecases/shop/custome
 import { JoinQueueUseCase } from "@/src/application/usecases/shop/customer/queue-join/JoinQueueUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { ShopCustomerQueueJoinRepository } from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 export interface IShopCustomerQueueJoinService {
   /**
@@ -66,7 +67,7 @@ export class ShopCustomerQueueJoinService implements IShopCustomerQueueJoinServi
           estimatedTime: number;
         }[];
         specialRequests?: string;
-        priority: "normal" | "urgent";
+        priority: QueuePriority;
       },
       JoinQueueResultDTO
     >,

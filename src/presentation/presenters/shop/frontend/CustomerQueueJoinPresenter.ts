@@ -4,6 +4,7 @@ import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 // Define interfaces for data structures
 export interface ServiceOption {
@@ -30,7 +31,7 @@ export interface QueueFormData {
   customerPhone: string;
   services: QueueService[];
   specialRequests?: string;
-  priority: "normal" | "urgent";
+  priority: QueuePriority;
 }
 
 // Define ViewModel interface

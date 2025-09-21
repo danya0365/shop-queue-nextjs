@@ -3,6 +3,7 @@
 import { useCustomerQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 interface CustomerQueueJoinViewProps {
   shopId: string;
@@ -37,6 +38,13 @@ export function CustomerQueueJoinView({
     serviceQuantities,
   } = useCustomerQueueJoinPresenter(shopId, initialViewModel);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
+
+  // Priority options configuration
+  const priorityOptions = [
+    { value: QueuePriority.NORMAL, label: "ปกติ", price: 0 },
+    { value: QueuePriority.HIGH, label: "สูง", price: 10 },
+    { value: QueuePriority.URGENT, label: "เร่งด่วน", price: 20 },
+  ];
 
   // Loading state
   if (loading) {
@@ -456,12 +464,16 @@ export function CustomerQueueJoinView({
                 <select
                   value={priority}
                   onChange={(e) =>
-                    setPriority(e.target.value as "normal" | "urgent")
+                    setPriority(e.target.value as QueuePriority)
                   }
                   className="w-full frontend-input"
                 >
-                  <option value="normal">ปกติ</option>
-                  <option value="urgent">เร่งด่วน (+฿20)</option>
+                  {priorityOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                      {option.price > 0 && ` (+฿${option.price})`}
+                    </option>
+                  ))}
                 </select>
               </div>
 

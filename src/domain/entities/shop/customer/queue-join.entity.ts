@@ -1,4 +1,5 @@
 // Queue Join Domain Entities following Clean Architecture principles
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 export interface ServiceOptionEntity {
   id: string;
@@ -35,7 +36,7 @@ export interface QueueJoinEntity {
   customerId?: string;
   services: QueueServiceEntity[];
   specialRequests?: string;
-  priority: "normal" | "urgent";
+  priority: QueuePriority;
   queueNumber?: string;
   status: "waiting" | "serving" | "completed" | "cancelled";
   createdAt?: string;

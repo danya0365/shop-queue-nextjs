@@ -11,6 +11,7 @@ import type {
   QueueJoinEntity,
   JoinQueueResultEntity,
 } from "@/src/domain/entities/shop/customer/queue-join.entity";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 /**
  * Mapper for converting between queue join domain entities and DTOs
@@ -75,7 +76,7 @@ export class QueueJoinMapper {
       estimatedTime: number;
     }[];
     specialRequests?: string;
-    priority: "normal" | "urgent";
+    priority: QueuePriority;
   }): Omit<QueueJoinEntity, 'id' | 'status' | 'createdAt' | 'updatedAt'> {
     return {
       shopId: input.shopId,

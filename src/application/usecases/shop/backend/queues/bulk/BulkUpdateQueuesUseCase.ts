@@ -3,7 +3,7 @@ import {
   BulkUpdateQueuesResult,
 } from "@/src/application/dtos/shop/backend/queue-bulk-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
-import { QueueEntity } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { QueueEntity, QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import {
   ShopBackendQueueError,
@@ -127,7 +127,7 @@ export class BulkUpdateQueuesUseCase
     queueId: string;
     updateData: Partial<{
       status: "waiting" | "in_progress" | "completed" | "cancelled" | "no_show";
-      priority: "normal" | "high" | "urgent";
+      priority: QueuePriority;
       estimatedWaitTime: number;
       notes: string;
       calledAt: string | null;
@@ -145,7 +145,7 @@ export class BulkUpdateQueuesUseCase
           | "completed"
           | "cancelled"
           | "no_show";
-        priority: "normal" | "high" | "urgent";
+        priority: QueuePriority;
         estimatedWaitTime: number;
         notes: string;
         calledAt: string | null;

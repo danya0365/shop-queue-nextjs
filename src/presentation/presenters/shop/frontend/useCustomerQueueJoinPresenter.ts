@@ -8,6 +8,7 @@ import {
   type QueueService,
   type ServiceOption,
 } from "./CustomerQueueJoinPresenter";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 // Re-export types
 export type { QueueFormData, ServiceOption };
@@ -27,7 +28,7 @@ export function useCustomerQueueJoinPresenter(
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
-  const [priority, setPriority] = useState<"normal" | "urgent">("normal");
+  const [priority, setPriority] = useState<QueuePriority>(QueuePriority.NORMAL);
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
 
   // State for managing service quantities
@@ -271,7 +272,7 @@ export function useCustomerQueueJoinPresenter(
     setCustomerName("");
     setCustomerPhone("");
     setSpecialRequests("");
-    setPriority("normal");
+    setPriority(QueuePriority.NORMAL);
     setSelectedCategory("all");
     setError(null);
   }, [viewModel]);

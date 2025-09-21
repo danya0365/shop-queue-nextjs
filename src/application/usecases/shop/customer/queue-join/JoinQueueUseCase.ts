@@ -6,6 +6,7 @@ import {
   ShopCustomerQueueJoinErrorType,
 } from "@/src/domain/repositories/shop/customer/queue-join-repository";
 import type { JoinQueueResultDTO } from "@/src/application/dtos/shop/customer/queue-join-dto";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 export class JoinQueueUseCase implements IUseCase<{
   shopId: string;
@@ -20,7 +21,7 @@ export class JoinQueueUseCase implements IUseCase<{
     estimatedTime: number;
   }[];
   specialRequests?: string;
-  priority: "normal" | "urgent";
+  priority: QueuePriority;
 }, JoinQueueResultDTO> {
   constructor(
     private readonly customerQueueJoinRepository: ShopCustomerQueueJoinRepository
@@ -39,7 +40,7 @@ export class JoinQueueUseCase implements IUseCase<{
       estimatedTime: number;
     }[];
     specialRequests?: string;
-    priority: "normal" | "urgent";
+    priority: QueuePriority;
   }): Promise<JoinQueueResultDTO> {
     try {
       const { shopId, customerName, customerPhone, customerId, services, specialRequests, priority } = input;

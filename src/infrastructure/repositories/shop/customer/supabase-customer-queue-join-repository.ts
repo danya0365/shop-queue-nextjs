@@ -12,6 +12,7 @@ import {
   ShopCustomerQueueJoinErrorType,
   ShopCustomerQueueJoinRepository,
 } from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { SupabaseQueueJoinMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-queue-join-mapper";
 import type {
   JoinQueueResultSchema,
@@ -345,7 +346,7 @@ export class SupabaseCustomerQueueJoinRepository
           customerId: customerId,
           services,
           specialRequests: queueData.note || undefined,
-          priority: queueData.priority,
+          priority: this.mapPriorityToEnum(queueData.priority),
           status: queueData.status,
           queueNumber: queueData.queue_number,
           createdAt: queueData.created_at,
@@ -464,7 +465,7 @@ export class SupabaseCustomerQueueJoinRepository
         customerId: "", // Not available in public RPC
         services,
         specialRequests: result.note || undefined,
-        priority: result.priority,
+        priority: this.mapPriorityToEnum(result.priority),
         status: result.status,
         queueNumber: result.queue_number,
         createdAt: result.created_at,
@@ -487,6 +488,24 @@ export class SupabaseCustomerQueueJoinRepository
         },
         error
       );
+    }
+  }
+
+  /**
+   * Map priority string to QueuePriority enum
+   * @param priority Priority string from database
+   * @returns QueuePriority enum value
+   */
+  private mapPriorityToEnum(priority: string): QueuePriority {
+    switch (priority.toLowerCase()) {
+      case "normal":
+        return QueuePriority.NORMAL;
+      case "high":
+        return QueuePriority.HIGH;
+      case "urgent":
+        return QueuePriority.URGENT;
+      default:
+        return QueuePriority.NORMAL; // Default to normal if unknown
     }
   }
 }

@@ -40,7 +40,7 @@ export interface CreateQueueEntity {
     | "completed"
     | "cancelled"
     | "no_show";
-  priority: "normal" | "high" | "urgent";
+  priority: QueuePriority;
   estimatedWaitTime: number;
   notes?: string;
   queueServices: {
@@ -62,7 +62,7 @@ export interface UpdateQueueEntity {
     | "completed"
     | "cancelled"
     | "no_show";
-  priority?: "normal" | "high" | "urgent";
+  priority?: QueuePriority;
   estimatedWaitTime?: number;
   actualWaitTime?: number;
   notes?: string;

@@ -12,6 +12,7 @@ import type {
   QueueServiceSchema,
   JoinQueueResultSchema,
 } from "@/src/infrastructure/schemas/shop/customer/queue-join.schema";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 /**
  * Mapper for converting between Supabase data and domain entities
@@ -59,7 +60,7 @@ export class SupabaseQueueJoinMapper {
       customerId: data.customer_id ? String(data.customer_id) : undefined,
       services: [], // Services will be joined separately
       specialRequests: data.note ? String(data.note) : undefined,
-      priority: (data.priority as "normal" | "urgent") || "normal",
+      priority: (data.priority as QueuePriority) || QueuePriority.NORMAL,
       status: (data.status as "waiting" | "serving" | "completed" | "cancelled") || "waiting",
       queueNumber: data.queue_number ? String(data.queue_number) : undefined,
       createdAt: data.created_at ? String(data.created_at) : undefined,
