@@ -3,8 +3,13 @@ import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import type { ShopCustomerQueueStatusService } from "@/src/application/services/shop/customer/ShopCustomerQueueStatusService";
+import type {
+  CustomerQueueStatusDTO,
+  QueueProgressDTO,
+} from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
 
-// Define interfaces for data structures
+// Define interfaces for data structures (maintaining backward compatibility)
 export interface CustomerQueue {
   id: string;
   queueNumber: string;
@@ -38,7 +43,11 @@ export interface CustomerQueueStatusViewModel {
 
 // Main Presenter class
 export class CustomerQueueStatusPresenter extends BaseShopPresenter {
-  constructor(logger: Logger, shopService: ShopService) {
+  constructor(
+    logger: Logger,
+    shopService: ShopService,
+    private readonly shopCustomerQueueStatusService: ShopCustomerQueueStatusService
+  ) {
     super(logger, shopService);
   }
 
@@ -52,20 +61,25 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
         queueNumber,
       });
 
-      // Mock data - replace with actual service calls
-      const customerQueue = queueNumber
-        ? this.getCustomerQueue(queueNumber)
+      // Get data from service
+      const viewModelDTO = await this.shopCustomerQueueStatusService.getCustomerQueueStatusViewModel(
+        shopId,
+        queueNumber
+      );
+
+      // Convert DTO to ViewModel format
+      const customerQueue = viewModelDTO.customerQueue
+        ? this.mapCustomerQueueDTOToCustomerQueue(viewModelDTO.customerQueue)
         : null;
-      const queueProgress = this.getQueueProgress();
+      
+      const queueProgress = this.mapQueueProgressDTOToQueueProgress(viewModelDTO.queueProgress);
 
       return {
         customerQueue,
         queueProgress,
-        shopName: "ร้านกาแฟดีใจ",
-        isFound: !!customerQueue,
-        canCancel:
-          customerQueue?.status === "waiting" ||
-          customerQueue?.status === "confirmed",
+        shopName: viewModelDTO.shopName,
+        isFound: viewModelDTO.isFound,
+        canCancel: viewModelDTO.canCancel,
       };
     } catch (error) {
       this.logger.error(
@@ -76,35 +90,40 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
     }
   }
 
-  // Private methods for data preparation
-  private getCustomerQueue(queueNumber: string): CustomerQueue | null {
-    // Mock data - replace with actual service call
-    if (queueNumber === "A016") {
-      return {
-        id: "1",
-        queueNumber: "A016",
-        status: "confirmed",
-        customerName: "สมชาย ใจดี",
-        customerPhone: "081-234-5678",
-        services: ["กาแฟลาเต้", "เค้กช็อกโกแลต"],
-        totalPrice: 205,
-        estimatedWaitTime: 15,
-        position: 3,
-        specialRequests: "ไม่ใส่น้ำตาล",
-        createdAt: "10:35",
-        updatedAt: "10:37",
-      };
-    }
-    return null;
+  // Private methods for data mapping
+  private mapCustomerQueueDTOToCustomerQueue(dto: CustomerQueueStatusDTO): CustomerQueue {
+    return {
+      id: dto.id,
+      queueNumber: dto.queueNumber,
+      status: dto.status,
+      customerName: dto.customerName,
+      customerPhone: dto.customerPhone,
+      services: dto.services,
+      totalPrice: dto.totalPrice,
+      estimatedWaitTime: dto.estimatedWaitTime,
+      position: dto.position,
+      specialRequests: dto.specialRequests,
+      createdAt: this.formatQueueTimeString(dto.createdAt),
+      updatedAt: this.formatQueueTimeString(dto.updatedAt),
+    };
   }
 
-  private getQueueProgress(): QueueProgress {
+  private mapQueueProgressDTOToQueueProgress(dto: QueueProgressDTO): QueueProgress {
     return {
-      currentNumber: "A014",
-      totalAhead: 2,
-      averageServiceTime: 8,
-      estimatedCallTime: "11:05",
+      currentNumber: dto.currentNumber,
+      totalAhead: dto.totalAhead,
+      averageServiceTime: dto.averageServiceTime,
+      estimatedCallTime: this.formatQueueTimeString(dto.estimatedCallTime),
     };
+  }
+
+  private formatQueueTimeString(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dateString;
+    }
   }
 
   // Metadata generation
@@ -123,7 +142,8 @@ export class CustomerQueueStatusPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    return new CustomerQueueStatusPresenter(logger, shopService);
+    const shopCustomerQueueStatusService = serverContainer.resolve<ShopCustomerQueueStatusService>("ShopCustomerQueueStatusService");
+    return new CustomerQueueStatusPresenter(logger, shopService, shopCustomerQueueStatusService);
   }
 }
 
@@ -133,6 +153,7 @@ export class ClientQueueStatusPresenterFactory {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    return new CustomerQueueStatusPresenter(logger, shopService);
+    const shopCustomerQueueStatusService = clientContainer.resolve<ShopCustomerQueueStatusService>("ShopCustomerQueueStatusService");
+    return new CustomerQueueStatusPresenter(logger, shopService, shopCustomerQueueStatusService);
   }
 }
