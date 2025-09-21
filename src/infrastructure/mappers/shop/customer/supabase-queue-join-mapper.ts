@@ -56,6 +56,7 @@ export class SupabaseQueueJoinMapper {
       shopId: String(data.shop_id || ""),
       customerName: String(data.customer_id || ""), // Using customer_id as customerName for now
       customerPhone: "", // Not available in queues table
+      customerId: data.customer_id ? String(data.customer_id) : undefined,
       services: [], // Services will be joined separately
       specialRequests: data.note ? String(data.note) : undefined,
       priority: (data.priority as "normal" | "urgent") || "normal",
@@ -98,7 +99,7 @@ export class SupabaseQueueJoinMapper {
   static fromQueueJoinEntityToCreateSchema(entity: Omit<QueueJoinEntity, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Omit<QueueJoinSchema, 'id' | 'status' | 'created_at' | 'updated_at'> {
     return {
       shop_id: entity.shopId,
-      customer_id: entity.customerName, // Using customerName as customer_id
+      customer_id: entity.customerId || entity.customerName, // Use customerId if available, otherwise fallback to customerName
       priority: entity.priority,
       queue_number: entity.queueNumber || "",
       note: entity.specialRequests,

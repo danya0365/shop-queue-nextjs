@@ -62,6 +62,7 @@ export interface JoinQueueInputDTO {
   shopId: string;
   customerName: string;
   customerPhone: string;
+  customerId?: string;
   services: QueueServiceDTO[];
   specialRequests?: string;
   priority: "normal" | "urgent";

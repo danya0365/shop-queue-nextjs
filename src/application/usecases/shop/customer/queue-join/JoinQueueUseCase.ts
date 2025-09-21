@@ -11,6 +11,7 @@ export class JoinQueueUseCase implements IUseCase<{
   shopId: string;
   customerName: string;
   customerPhone: string;
+  customerId?: string;
   services: {
     id: string;
     name: string;
@@ -29,6 +30,7 @@ export class JoinQueueUseCase implements IUseCase<{
     shopId: string;
     customerName: string;
     customerPhone: string;
+    customerId?: string;
     services: {
       id: string;
       name: string;
@@ -40,7 +42,7 @@ export class JoinQueueUseCase implements IUseCase<{
     priority: "normal" | "urgent";
   }): Promise<JoinQueueResultDTO> {
     try {
-      const { shopId, customerName, customerPhone, services, specialRequests, priority } = input;
+      const { shopId, customerName, customerPhone, customerId, services, specialRequests, priority } = input;
 
       // Validate required fields
       if (!shopId) {

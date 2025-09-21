@@ -66,6 +66,7 @@ export class QueueJoinMapper {
     shopId: string;
     customerName: string;
     customerPhone: string;
+    customerId?: string;
     services: {
       id: string;
       name: string;
@@ -80,6 +81,7 @@ export class QueueJoinMapper {
       shopId: input.shopId,
       customerName: input.customerName,
       customerPhone: input.customerPhone,
+      customerId: input.customerId,
       services: input.services.map(service => ({
         id: service.id,
         name: service.name,

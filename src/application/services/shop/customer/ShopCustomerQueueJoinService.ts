@@ -57,6 +57,7 @@ export class ShopCustomerQueueJoinService implements IShopCustomerQueueJoinServi
         shopId: string;
         customerName: string;
         customerPhone: string;
+        customerId?: string;
         services: {
           id: string;
           name: string;
@@ -132,6 +133,7 @@ export class ShopCustomerQueueJoinService implements IShopCustomerQueueJoinServi
         shopId: input.shopId,
         customerName: input.customerName,
         customerPhone: input.customerPhone,
+        customerId: input.customerId,
         services: input.services,
         specialRequests: input.specialRequests,
         priority: input.priority,

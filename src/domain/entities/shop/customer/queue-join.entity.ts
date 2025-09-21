@@ -32,6 +32,7 @@ export interface QueueJoinEntity {
   shopId: string;
   customerName: string;
   customerPhone: string;
+  customerId?: string;
   services: QueueServiceEntity[];
   specialRequests?: string;
   priority: "normal" | "urgent";

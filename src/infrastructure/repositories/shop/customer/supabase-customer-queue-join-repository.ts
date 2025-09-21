@@ -1,14 +1,21 @@
-import type { JoinQueueResultEntity, QueueJoinEntity, ServiceOptionEntity, ShopQueueInfoEntity } from "@/src/domain/entities/shop/customer/queue-join.entity";
+import type {
+  JoinQueueResultEntity,
+  QueueJoinEntity,
+  ServiceOptionEntity,
+  ShopQueueInfoEntity,
+} from "@/src/domain/entities/shop/customer/queue-join.entity";
 import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import { ShopCustomerQueueJoinError, ShopCustomerQueueJoinErrorType, ShopCustomerQueueJoinRepository } from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import {
+  ShopCustomerQueueJoinError,
+  ShopCustomerQueueJoinErrorType,
+  ShopCustomerQueueJoinRepository,
+} from "@/src/domain/repositories/shop/customer/queue-join-repository";
 import { SupabaseQueueJoinMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-queue-join-mapper";
 import type {
   JoinQueueResultSchema,
   PublicShopInfoSchema,
   QueueComprehensiveStatsRpcSchema,
-  QueueJoinSchema,
-  QueueServiceSchema,
   ServiceOptionSchema,
   ShopQueueInfoSchema,
 } from "@/src/infrastructure/schemas/shop/customer/queue-join.schema";
@@ -16,9 +23,8 @@ import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for database records
 type ServiceOptionSchemaRecord = Record<string, unknown> & ServiceOptionSchema;
-type QueueJoinSchemaRecord = Record<string, unknown> & QueueJoinSchema;
-type QueueServiceSchemaRecord = Record<string, unknown> & QueueServiceSchema;
-type QueueComprehensiveStatsRpcSchemaRecord = Partial<QueueComprehensiveStatsRpcSchema>;
+type QueueComprehensiveStatsRpcSchemaRecord =
+  Partial<QueueComprehensiveStatsRpcSchema>;
 
 /**
  * Supabase implementation of the customer queue join repository
@@ -79,12 +85,17 @@ export class SupabaseCustomerQueueJoinRepository
       this.logger.info("Getting shop queue info", { shopId });
 
       // Use RPC call to get public shop info with shops and shop_settings left join
-      const shopInfoResult = await this.dataSource.callRpc<PublicShopInfoSchema>(
-        "get_public_shop_info",
-        { p_shop_id: shopId }
-      );
+      const shopInfoResult =
+        await this.dataSource.callRpc<PublicShopInfoSchema>(
+          "get_public_shop_info",
+          { p_shop_id: shopId }
+        );
 
-      if (!shopInfoResult || !Array.isArray(shopInfoResult) || shopInfoResult.length === 0) {
+      if (
+        !shopInfoResult ||
+        !Array.isArray(shopInfoResult) ||
+        shopInfoResult.length === 0
+      ) {
         throw new ShopCustomerQueueJoinError(
           ShopCustomerQueueJoinErrorType.UNKNOWN,
           "Shop not found",
@@ -96,25 +107,35 @@ export class SupabaseCustomerQueueJoinRepository
       const shopInfoData = shopInfoResult[0];
 
       // Get current queue statistics using RPC call
-      const queueStatsResult = await this.dataSource.callRpc<QueueComprehensiveStatsRpcSchemaRecord>(
-        "get_public_queue_comprehensive_stats",
-        { p_shop_id: shopId }
-      );
+      const queueStatsResult =
+        await this.dataSource.callRpc<QueueComprehensiveStatsRpcSchemaRecord>(
+          "get_public_queue_comprehensive_stats",
+          { p_shop_id: shopId }
+        );
 
       // Calculate queue statistics from RPC result
-      const queueStats = queueStatsResult && Array.isArray(queueStatsResult) && queueStatsResult.length > 0
-        ? queueStatsResult[0]
-        : null;
+      const queueStats =
+        queueStatsResult &&
+        Array.isArray(queueStatsResult) &&
+        queueStatsResult.length > 0
+          ? queueStatsResult[0]
+          : null;
 
-      const currentQueueLength = (queueStats?.confirmed_queues || 0) + (queueStats?.serving_queues || 0);
-      const estimatedWaitTime = queueStats?.current_wait_time_estimate || queueStats?.average_wait_time_minutes || currentQueueLength * 5;
+      const currentQueueLength =
+        (queueStats?.confirmed_queues || 0) + (queueStats?.serving_queues || 0);
+      const estimatedWaitTime =
+        queueStats?.current_wait_time_estimate ||
+        queueStats?.average_wait_time_minutes ||
+        currentQueueLength * 5;
 
       // Create queue info data from RPC result
       const queueInfoData: ShopQueueInfoSchema = {
         shop_id: String(shopInfoData.shop_id || ""),
         shop_name: String(shopInfoData.shop_name || ""),
         is_accepting_queues: Boolean(shopInfoData.settings_is_accepting_queues),
-        max_queue_length: Number(shopInfoData.settings_max_queue_per_service ?? 50),
+        max_queue_length: Number(
+          shopInfoData.settings_max_queue_per_service ?? 50
+        ),
         current_queue_length: currentQueueLength,
         estimated_wait_time: estimatedWaitTime,
       };
@@ -156,92 +177,41 @@ export class SupabaseCustomerQueueJoinRepository
         serviceCount: queueJoinData.services.length,
       });
 
-      // Check if shop is accepting queues
-      const shopInfo = await this.getShopQueueInfo(queueJoinData.shopId);
-
-      if (!shopInfo.isAcceptingQueues) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.UNKNOWN,
-          "Shop is not accepting queues at the moment",
-          "SupabaseCustomerQueueJoinRepository.joinQueue",
-          { shopId: queueJoinData.shopId }
-        );
-      }
-
-      // Check if queue is full
-      if (shopInfo.currentQueueLength >= shopInfo.maxQueueLength) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.UNKNOWN,
-          "Queue is full",
-          "SupabaseCustomerQueueJoinRepository.joinQueue",
-          {
-            shopId: queueJoinData.shopId,
-            currentLength: shopInfo.currentQueueLength,
-            maxLength: shopInfo.maxQueueLength,
-          }
-        );
-      }
-
-      // Generate queue number
-      const queueNumber = this.generateQueueNumber(
-        queueJoinData.shopId,
-        shopInfo.currentQueueLength
-      );
-
-      // Create queue record
-      const queueCreateData =
-        SupabaseQueueJoinMapper.fromQueueJoinEntityToCreateSchema(
-          queueJoinData
-        );
-      const queueRecord: QueueJoinSchemaRecord = {
-        ...queueCreateData,
-        status: "waiting",
-        queue_number: queueNumber,
-      };
-
-      const createdQueue = await this.dataSource.insert<QueueJoinSchemaRecord>(
-        "queues",
-        queueRecord
-      );
-
-      if (!createdQueue) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.UNKNOWN,
-          "Failed to create queue record",
-          "SupabaseCustomerQueueJoinRepository.joinQueue",
-          {}
-        );
-      }
-
-      const queueId = String(createdQueue.id || "");
-
-      // Create queue services
-      for (const service of queueJoinData.services) {
-        const queueServiceData =
-          SupabaseQueueJoinMapper.fromQueueServiceEntityToSchema(
-            service,
-            queueId
-          );
-
-        const serviceResult =
-          await this.dataSource.insert<QueueServiceSchemaRecord>(
-            "queue_services",
-            queueServiceData
-          );
-
-        if (!serviceResult) {
-          this.logger.error("Failed to create queue service", {
-            queueId,
-            serviceId: service.id,
-          });
+      // Create queue using RPC function
+      const createdQueueId = await this.dataSource.callRpc<string>(
+        "create_queue",
+        {
+          p_shop_id: queueJoinData.shopId,
+          p_customer_name: queueJoinData.customerName,
+          p_customer_phone: queueJoinData.customerPhone,
+          p_customer_email: null,
+          p_customer_id: queueJoinData.customerId || null,
+          p_priority: queueJoinData.priority,
+          p_note: queueJoinData.specialRequests || null,
+          p_services: queueJoinData.services.map((service) => {
+            return {
+              service_id: service.id,
+              quantity: service.quantity,
+              price: service.price,
+            };
+          }),
         }
+      );
+
+      if (!createdQueueId) {
+        throw new ShopCustomerQueueJoinError(
+          ShopCustomerQueueJoinErrorType.UNKNOWN,
+          "Failed to create queue",
+          "SupabaseCustomerQueueJoinRepository.joinQueue",
+          { queueJoinData }
+        );
       }
 
       // Return success result
       const resultData: JoinQueueResultSchema = {
         success: true,
-        queue_number: queueNumber,
-        estimated_wait_time: shopInfo.estimatedWaitTime,
+        queue_number: "",
+        estimated_wait_time: 0,
         message: "Successfully joined the queue",
       };
 
