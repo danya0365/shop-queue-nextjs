@@ -44,6 +44,7 @@ export class ShopSettingsMapper {
       defaultCloseTime: '17:00',
 
       // Queue Settings
+      isAcceptingQueues: entity.isAcceptingQueues,
       maxQueuePerService: entity.maxQueuePerService,
       queueTimeoutMinutes: entity.queueTimeoutMinutes,
       allowWalkIn: entity.allowWalkIn,

@@ -22,6 +22,7 @@ export interface ShopSettingsDTO {
   defaultCloseTime: string;
 
   // Queue Settings
+  isAcceptingQueues: boolean;
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
   allowWalkIn: boolean;
@@ -84,6 +85,7 @@ export interface ShopSettingsDTO {
  */
 export interface CreateShopSettingsInputDTO {
   shopId: string;
+  isAcceptingQueues?: boolean;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
   allowWalkIn?: boolean;
@@ -132,6 +134,7 @@ export interface CreateShopSettingsInputDTO {
  */
 export interface UpdateShopSettingsInputDTO {
   shopId: string;
+  isAcceptingQueues?: boolean;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
   allowWalkIn?: boolean;

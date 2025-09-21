@@ -31,6 +31,7 @@ export interface ShopSettings {
   shopLogo?: string;
 
   // Queue Settings
+  isAcceptingQueues: boolean;
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
   allowWalkIn: boolean;
@@ -154,6 +155,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -229,6 +231,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -354,6 +357,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -471,6 +475,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,
@@ -586,6 +591,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
         allowWalkIn: result.allowWalkIn,

@@ -9,6 +9,7 @@
 export interface ShopSettingsSchema {
   id: string;
   shop_id: string;
+  is_accepting_queues: boolean;
   accept_bank_transfer: boolean;
   accept_cash: boolean;
   accept_credit_card: boolean;

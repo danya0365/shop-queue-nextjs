@@ -18,6 +18,7 @@ export interface ShopSettingsEntity {
   dataRetentionDays: number;
   
   // Queue Settings
+  isAcceptingQueues: boolean;
   autoConfirmQueues: boolean;
   maxQueueSize: number;
   maxQueuePerService: number;
@@ -99,6 +100,7 @@ export interface CreateShopSettingsEntity {
   dataRetentionDays?: number;
   
   // Queue Settings
+  isAcceptingQueues?: boolean;
   autoConfirmQueues?: boolean;
   maxQueueSize?: number;
   maxQueuePerService?: number;
@@ -156,7 +158,7 @@ export interface CreateShopSettingsEntity {
 }
 
 export interface UpdateShopSettingsEntity {
-  // Basic Settings
+  isAcceptingQueues?: boolean;
   estimatedServiceTime?: number;
   maintenanceMode?: boolean;
   allowRegistration?: boolean;

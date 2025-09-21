@@ -30,6 +30,7 @@ export class SupabaseShopBackendShopSettingsMapper {
       dataRetentionDays: schema.data_retention_days ?? 365,
       
       // Queue Settings
+      isAcceptingQueues: schema.is_accepting_queues ?? true,
       autoConfirmQueues: schema.auto_confirm_queues ?? true,
       maxQueueSize: schema.max_queue_size ?? 50,
       maxQueuePerService: schema.max_queue_per_service,
@@ -119,6 +120,7 @@ export class SupabaseShopBackendShopSettingsMapper {
       data_retention_days: entity.dataRetentionDays,
       
       // Queue Settings
+      is_accepting_queues: entity.isAcceptingQueues,
       auto_confirm_queues: entity.autoConfirmQueues,
       max_queue_size: entity.maxQueueSize,
       max_queue_per_service: entity.maxQueuePerService,

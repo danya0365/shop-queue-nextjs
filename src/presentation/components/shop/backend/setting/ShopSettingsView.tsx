@@ -226,6 +226,25 @@ export function ShopSettingsView({
 
   const renderQueueSettings = () => (
     <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="isAcceptingQueues"
+            checked={currentSettings.isAcceptingQueues || false}
+            onChange={(e) => handleInputChange("isAcceptingQueues", e.target.checked)}
+            disabled={!isEditing}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
+          />
+          <label
+            htmlFor="isAcceptingQueues"
+            className="ml-2 block text-sm text-gray-900 dark:text-white"
+          >
+            รับคิวลูกค้า
+          </label>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
