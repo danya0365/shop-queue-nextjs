@@ -234,19 +234,4 @@ export class SupabaseCustomerQueueJoinRepository
       );
     }
   }
-
-  /**
-   * Generate a queue number
-   * @param shopId The shop ID
-   * @param currentQueueLength Current queue length
-   * @returns Generated queue number
-   */
-  private generateQueueNumber(
-    shopId: string,
-    currentQueueLength: number
-  ): string {
-    const shopPrefix = shopId.slice(0, 3).toUpperCase();
-    const sequenceNumber = String(currentQueueLength + 1).padStart(3, "0");
-    return `${shopPrefix}-${sequenceNumber}`;
-  }
 }
