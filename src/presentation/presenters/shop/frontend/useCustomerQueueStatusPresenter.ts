@@ -3,21 +3,20 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   CustomerQueue,
+  CustomerQueueStatusViewModel,
   QueueProgress,
-  QueueStatusViewModel,
-} from "./QueueStatusPresenter";
-import { ClientQueueStatusPresenterFactory } from "./QueueStatusPresenter";
+} from "./CustomerQueueStatusPresenter";
+import { ClientQueueStatusPresenterFactory } from "./CustomerQueueStatusPresenter";
 
 // Re-export types
 export type { CustomerQueue, QueueProgress };
 
-export function useQueueStatusPresenter(
+export function useCustomerQueueStatusPresenter(
   shopId: string,
-  initialViewModel?: QueueStatusViewModel
+  initialViewModel?: CustomerQueueStatusViewModel
 ) {
-  const [viewModel, setViewModel] = useState<QueueStatusViewModel | null>(
-    initialViewModel || null
-  );
+  const [viewModel, setViewModel] =
+    useState<CustomerQueueStatusViewModel | null>(initialViewModel || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -35,24 +34,30 @@ export function useQueueStatusPresenter(
   }, [initialViewModel]);
 
   // Function to load data
-  const loadData = useCallback(async (searchQueueNumber?: string) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const loadData = useCallback(
+    async (searchQueueNumber?: string) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const presenter = await ClientQueueStatusPresenterFactory.create();
-      const newViewModel = await presenter.getViewModel(shopId, searchQueueNumber);
+        const presenter = await ClientQueueStatusPresenterFactory.create();
+        const newViewModel = await presenter.getViewModel(
+          shopId,
+          searchQueueNumber
+        );
 
-      setViewModel(newViewModel);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load queue status"
-      );
-      console.error("Error loading queue status:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [shopId]);
+        setViewModel(newViewModel);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load queue status"
+        );
+        console.error("Error loading queue status:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [shopId]
+  );
 
   // Load data when dependencies change, but not if we have initial view model
   useEffect(() => {
@@ -81,7 +86,7 @@ export function useQueueStatusPresenter(
 
       // Mock success response
       setShowCancelConfirm(false);
-      
+
       // Redirect to shop page after successful cancellation
       window.location.href = `/shop/${shopId}`;
     } catch (err) {
@@ -159,19 +164,19 @@ export function useQueueStatusPresenter(
     loading,
     error,
     actionLoading,
-    
+
     // Form state
     queueNumber,
     setQueueNumber,
     showCancelConfirm,
     setShowCancelConfirm,
-    
+
     // Actions
     handleSearch,
     handleCancel,
     refreshData,
     loadData,
-    
+
     // Helper functions
     getStatusColor,
     getStatusText,

@@ -1,14 +1,17 @@
 "use client";
 
-import { useQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useQueueStatusPresenter";
-import type { QueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/QueueStatusPresenter";
+import type { CustomerQueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
+import { useCustomerQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueStatusPresenter";
 
 interface QueueStatusViewProps {
   shopId: string;
-  initialViewModel?: QueueStatusViewModel;
+  initialViewModel?: CustomerQueueStatusViewModel;
 }
 
-export function QueueStatusView({ shopId, initialViewModel }: QueueStatusViewProps) {
+export function CustomerQueueStatusView({
+  shopId,
+  initialViewModel,
+}: QueueStatusViewProps) {
   const {
     viewModel,
     loading,
@@ -24,7 +27,7 @@ export function QueueStatusView({ shopId, initialViewModel }: QueueStatusViewPro
     getStatusColor,
     getStatusText,
     getStatusIcon,
-  } = useQueueStatusPresenter(shopId, initialViewModel);
+  } = useCustomerQueueStatusPresenter(shopId, initialViewModel);
 
   // Handle loading state
   if (loading) {
@@ -96,7 +99,8 @@ export function QueueStatusView({ shopId, initialViewModel }: QueueStatusViewPro
     );
   }
 
-  const { customerQueue, queueProgress, shopName, isFound, canCancel } = viewModel;
+  const { customerQueue, queueProgress, shopName, isFound, canCancel } =
+    viewModel;
 
   if (!isFound) {
     return (

@@ -1,6 +1,6 @@
 import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
-import { QueueStatusView } from "@/src/presentation/components/shop/frontend/QueueStatusView";
-import { QueueStatusPresenterFactory } from "@/src/presentation/presenters/shop/frontend/QueueStatusPresenter";
+import { CustomerQueueStatusView } from "@/src/presentation/components/shop/frontend/CustomerQueueStatusView";
+import { CustomerQueueStatusPresenterFactory } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ export async function generateMetadata({
   params,
 }: QueueStatusPageProps): Promise<Metadata> {
   const { shopId } = await params;
-  const presenter = await QueueStatusPresenterFactory.create();
+  const presenter = await CustomerQueueStatusPresenterFactory.create();
 
   try {
     return presenter.generateMetadata(shopId);
@@ -39,13 +39,13 @@ export async function generateMetadata({
  * Queue Status page - Server Component for SEO optimization
  * Uses presenter pattern following Clean Architecture
  */
-export default async function QueueStatusPage({
+export default async function CustomerQueueStatusPage({
   params,
   searchParams,
 }: QueueStatusPageProps) {
   const { shopId } = await params;
   const { queue } = await searchParams;
-  const presenter = await QueueStatusPresenterFactory.create();
+  const presenter = await CustomerQueueStatusPresenterFactory.create();
 
   try {
     // Get view model from presenter
@@ -53,7 +53,7 @@ export default async function QueueStatusPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>
-        <QueueStatusView initialViewModel={viewModel} shopId={shopId} />
+        <CustomerQueueStatusView initialViewModel={viewModel} shopId={shopId} />
       </FrontendLayout>
     );
   } catch (error) {
