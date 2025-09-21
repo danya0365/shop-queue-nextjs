@@ -9,7 +9,6 @@ import {
   DatabaseDataSource,
   FilterOperator,
   QueryOptions,
-  SortDirection,
 } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import {
@@ -51,46 +50,15 @@ export class SupabaseCustomerQueueJoinRepository
    */
   async getAvailableServices(shopId: string): Promise<ServiceOptionEntity[]> {
     try {
-      this.logger.info("Getting available services", { shopId });
-
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "available",
-            operator: FilterOperator.EQ,
-            value: true,
-          },
-        ],
-        sort: [
-          {
-            field: "category",
-            direction: SortDirection.ASC,
-          },
-          {
-            field: "name",
-            direction: SortDirection.ASC,
-          },
-        ],
-      };
-
-      const result =
-        await this.dataSource.getAdvanced<ServiceOptionSchemaRecord>(
-          "services",
-          queryOptions
-        );
+      // Use RPC call instead of direct table query for security
+      const result = await this.dataSource.callRpc<ServiceOptionSchemaRecord>(
+        "get_available_services",
+        { p_shop_id: shopId }
+      );
 
       if (!result || !Array.isArray(result) || result.length === 0) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.UNKNOWN,
-          "Failed to retrieve available services",
-          "SupabaseCustomerQueueJoinRepository.getAvailableServices",
-          { shopId }
-        );
+        // Return empty array instead of throwing error when no services found
+        return [];
       }
 
       return SupabaseQueueJoinMapper.toServiceOptionEntities(result);
