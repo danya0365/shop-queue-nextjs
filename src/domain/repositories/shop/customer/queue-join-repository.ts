@@ -1,6 +1,5 @@
 import type {
   ServiceOptionEntity,
-  QueueServiceEntity,
   ShopQueueInfoEntity,
   QueueJoinEntity,
   JoinQueueResultEntity,
@@ -64,4 +63,34 @@ export interface ShopCustomerQueueJoinRepository {
    * @throws ShopCustomerQueueJoinError if the operation fails
    */
   joinQueue(queueData: Omit<QueueJoinEntity, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<JoinQueueResultEntity>;
+
+  /**
+   * Get customer queues with pagination and status filter
+   * @param customerId Customer ID
+   * @param page Page number (default: 1)
+   * @param limit Items per page (default: 10)
+   * @param status Optional status filter (default: all statuses)
+   * @returns Paginated customer queues data
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  getCustomerQueues(
+    customerId: string,
+    page?: number,
+    limit?: number,
+    status?: "waiting" | "serving" | "completed" | "cancelled"
+  ): Promise<{
+    queues: QueueJoinEntity[];
+    totalCount: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>;
+
+  /**
+   * Get queue by ID
+   * @param queueId Queue ID
+   * @returns Queue data
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  getQueueById(queueId: string): Promise<QueueJoinEntity>;
 }

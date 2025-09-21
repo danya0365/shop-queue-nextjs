@@ -2,6 +2,7 @@ import type {
   JoinQueueResultEntity,
   QueueJoinEntity,
   ServiceOptionEntity,
+  QueueServiceEntity,
   ShopQueueInfoEntity,
 } from "@/src/domain/entities/shop/customer/queue-join.entity";
 import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
@@ -207,11 +208,14 @@ export class SupabaseCustomerQueueJoinRepository
         );
       }
 
-      // Return success result
+      // Get the complete queue data using the created queue ID
+      const queueData = await this.getQueueById(createdQueueId);
+
+      // Return success result with queue data
       const resultData: JoinQueueResultSchema = {
         success: true,
-        queue_number: "",
-        estimated_wait_time: 0,
+        queue_number: queueData.queueNumber || "",
+        estimated_wait_time: 0, // This could be calculated from queue position and shop settings
         message: "Successfully joined the queue",
       };
 
@@ -228,6 +232,257 @@ export class SupabaseCustomerQueueJoinRepository
         {
           shopId: queueJoinData.shopId,
           customerName: queueJoinData.customerName,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        error
+      );
+    }
+  }
+
+  /**
+   * Get customer queues with pagination and status filter
+   * @param customerId Customer ID
+   * @param page Page number (default: 1)
+   * @param limit Items per page (default: 10)
+   * @param status Optional status filter (default: all statuses)
+   * @returns Paginated customer queues data
+   */
+  async getCustomerQueues(
+    customerId: string,
+    page: number = 1,
+    limit: number = 10,
+    status?: "waiting" | "serving" | "completed" | "cancelled"
+  ): Promise<{
+    queues: QueueJoinEntity[];
+    totalCount: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    try {
+      this.logger.info("Getting customer queues", {
+        customerId,
+        page,
+        limit,
+        status,
+      });
+
+      // Validate parameters
+      if (!customerId) {
+        throw new ShopCustomerQueueJoinError(
+          ShopCustomerQueueJoinErrorType.VALIDATION_ERROR,
+          "Customer ID is required",
+          "SupabaseCustomerQueueJoinRepository.getCustomerQueues"
+        );
+      }
+
+      if (page < 1) page = 1;
+      if (limit < 1 || limit > 100) limit = 10;
+
+      // Call RPC function to get public queue info by customer ID
+      const result = await this.dataSource.callRpc<{
+        id: string;
+        shop_id: string;
+        queue_number: string;
+        status: "waiting" | "serving" | "completed" | "cancelled";
+        priority: "normal" | "urgent";
+        estimated_duration: number;
+        estimated_call_time: string;
+        served_by_employee_id: string;
+        actual_wait_time: number;
+        note: string;
+        feedback: string;
+        rating: number;
+        created_at: string;
+        updated_at: string;
+        served_at: string;
+        completed_at: string;
+        cancelled_at: string;
+        cancelled_reason: string;
+        cancelled_note: string;
+        customer_name: string;
+        services: {
+          service_id: string;
+          service_name: string;
+          quantity: number;
+          price: number;
+        }[];
+        total_count: number;
+      }[]>("get_public_queue_info_by_customer_id", {
+        p_customer_id: customerId,
+        p_page: page,
+        p_limit: limit,
+        p_status: status,
+      });
+
+      if (!result || !Array.isArray(result)) {
+        throw new ShopCustomerQueueJoinError(
+          ShopCustomerQueueJoinErrorType.NOT_FOUND,
+          "No queues found for customer",
+          "SupabaseCustomerQueueJoinRepository.getCustomerQueues",
+          { customerId }
+        );
+      }
+
+      // Transform RPC result to domain entities
+      const queues: QueueJoinEntity[] = result.map((queueData) => {
+        // Map services from RPC result
+        const services: QueueServiceEntity[] = queueData.services.map(
+          (service) => ({
+            id: service.service_id,
+            name: service.service_name,
+            price: service.price,
+            quantity: service.quantity,
+            estimatedTime: 0, // Not available in RPC result
+          })
+        );
+
+        return {
+          id: queueData.id,
+          shopId: queueData.shop_id,
+          customerName: queueData.customer_name,
+          customerPhone: "", // Not available in public RPC
+          customerId: customerId,
+          services,
+          specialRequests: queueData.note || undefined,
+          priority: queueData.priority,
+          status: queueData.status,
+          queueNumber: queueData.queue_number,
+          createdAt: queueData.created_at,
+          updatedAt: queueData.updated_at,
+        };
+      });
+
+      // Calculate pagination info
+      const totalCount = result.length > 0 ? result[0].total_count : 0;
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return {
+        queues,
+        totalCount,
+        page,
+        limit,
+        totalPages,
+      };
+    } catch (error) {
+      if (error instanceof ShopCustomerQueueJoinError) {
+        throw error;
+      }
+
+      throw new ShopCustomerQueueJoinError(
+        ShopCustomerQueueJoinErrorType.UNKNOWN,
+        "Failed to get customer queues",
+        "SupabaseCustomerQueueJoinRepository.getCustomerQueues",
+        {
+          customerId,
+          page,
+          limit,
+          status,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        error
+      );
+    }
+  }
+
+  /**
+   * Get queue by ID
+   * @param queueId Queue ID
+   * @returns Queue data
+   */
+  async getQueueById(queueId: string): Promise<QueueJoinEntity> {
+    try {
+      this.logger.info("Getting queue by ID", { queueId });
+
+      // Validate parameters
+      if (!queueId) {
+        throw new ShopCustomerQueueJoinError(
+          ShopCustomerQueueJoinErrorType.VALIDATION_ERROR,
+          "Queue ID is required",
+          "SupabaseCustomerQueueJoinRepository.getQueueById"
+        );
+      }
+
+      // Call RPC function to get public queue info by ID
+      const result = await this.dataSource.callRpc<{
+        id: string;
+        shop_id: string;
+        queue_number: string;
+        status: "waiting" | "serving" | "completed" | "cancelled";
+        priority: "normal" | "urgent";
+        estimated_duration: number;
+        estimated_call_time: string;
+        served_by_employee_id: string;
+        actual_wait_time: number;
+        note: string;
+        feedback: string;
+        rating: number;
+        created_at: string;
+        updated_at: string;
+        served_at: string;
+        completed_at: string;
+        cancelled_at: string;
+        cancelled_reason: string;
+        cancelled_note: string;
+        customer_name: string;
+        services: {
+          service_id: string;
+          service_name: string;
+          quantity: number;
+          price: number;
+        }[];
+      } | null>("get_public_queue_info_by_id", {
+        p_queue_id: queueId,
+      });
+
+      if (!result) {
+        throw new ShopCustomerQueueJoinError(
+          ShopCustomerQueueJoinErrorType.NOT_FOUND,
+          "Queue not found",
+          "SupabaseCustomerQueueJoinRepository.getQueueById",
+          { queueId }
+        );
+      }
+
+      // Map services from RPC result
+      const services: QueueServiceEntity[] = result.services.map(
+        (service) => ({
+          id: service.service_id,
+          name: service.service_name,
+          price: service.price,
+          quantity: service.quantity,
+          estimatedTime: 0, // Not available in RPC result
+        })
+      );
+
+      // Transform RPC result to domain entity
+      const queue: QueueJoinEntity = {
+        id: result.id,
+        shopId: result.shop_id,
+        customerName: result.customer_name,
+        customerPhone: "", // Not available in public RPC
+        customerId: "", // Not available in public RPC
+        services,
+        specialRequests: result.note || undefined,
+        priority: result.priority,
+        status: result.status,
+        queueNumber: result.queue_number,
+        createdAt: result.created_at,
+        updatedAt: result.updated_at,
+      };
+
+      return queue;
+    } catch (error) {
+      if (error instanceof ShopCustomerQueueJoinError) {
+        throw error;
+      }
+
+      throw new ShopCustomerQueueJoinError(
+        ShopCustomerQueueJoinErrorType.UNKNOWN,
+        "Failed to get queue by ID",
+        "SupabaseCustomerQueueJoinRepository.getQueueById",
+        {
+          queueId,
           error: error instanceof Error ? error.message : String(error),
         },
         error
