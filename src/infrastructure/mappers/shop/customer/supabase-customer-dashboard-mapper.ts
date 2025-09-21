@@ -76,11 +76,11 @@ export class SupabaseCustomerDashboardMapper {
   static toPromotionEntity(data: PromotionSchema): PromotionEntity {
     return {
       id: String(data.id),
-      title: String(data.title),
-      description: String(data.description),
-      discount: Number(data.discount_value || 0),
-      validUntil: String(data.valid_until || ""),
-      icon: String(data.icon || ""),
+      title: String(data.name),
+      description: String(data.description || ""),
+      discount: Number(data.value || 0),
+      validUntil: String(data.end_at || ""),
+      icon: String(""), // No icon field in promotion schema
     };
   }
 
@@ -92,10 +92,10 @@ export class SupabaseCustomerDashboardMapper {
     
     return data
       .filter((promotion) => {
-        const startDate = new Date(promotion.start_date || now);
-        const endDate = new Date(promotion.end_date || now);
+        const startDate = new Date(promotion.start_at || now);
+        const endDate = new Date(promotion.end_at || now);
         return (
-          promotion.is_active !== false &&
+          promotion.status === "active" &&
           startDate <= now &&
           endDate >= now
         );
@@ -118,11 +118,11 @@ export class SupabaseCustomerDashboardMapper {
 
   static fromPromotionEntity(entity: PromotionEntity): Partial<PromotionSchema> {
     return {
-      title: entity.title,
+      name: entity.title,
       description: entity.description,
-      discount_value: entity.discount,
-      valid_until: entity.validUntil,
-      icon: entity.icon,
+      value: entity.discount,
+      // Note: end_at maps to validUntil
+      // No icon field in PromotionSchema
     };
   }
 }

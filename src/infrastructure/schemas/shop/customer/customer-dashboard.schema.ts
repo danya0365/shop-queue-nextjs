@@ -2,6 +2,7 @@
  * Database schema types for customer dashboard
  * These types represent the structure of data from the database
  */
+import type { Json } from "../../../../domain/types/supabase";
 
 /**
  * Schema for queue data from the database
@@ -29,7 +30,7 @@ export interface ServiceSchema {
   price?: number;
   estimated_time?: number;
   icon?: string;
-  is_active: boolean;
+  is_available: boolean;
   popularity_score?: number;
   queue_count?: number;
   created_at: string;
@@ -42,16 +43,17 @@ export interface ServiceSchema {
 export interface PromotionSchema {
   id: string;
   shop_id: string;
-  title: string;
-  description: string;
-  discount_value?: number;
-  valid_until?: string;
-  icon?: string;
-  is_active?: boolean;
-  start_date?: string;
-  end_date?: string;
-  created_at: string;
-  updated_at: string;
+  name: string;
+  description: string | null;
+  value: number;
+  type: string;
+  status: string | null;
+  start_at: string;
+  end_at: string;
+  usage_limit: number | null;
+  conditions: Json | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 /**

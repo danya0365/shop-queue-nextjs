@@ -153,7 +153,7 @@ export class SupabaseCustomerDashboardRepository
             value: shopId,
           },
           {
-            field: "is_active",
+            field: "is_available",
             operator: FilterOperator.EQ,
             value: true,
           },
