@@ -4329,6 +4329,54 @@ export type Database = {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
       }
+      get_public_queue_comprehensive_stats: {
+        Args: { p_shop_id: string }
+        Returns: {
+          active_queues: number
+          confirmed_queues: number
+          serving_queues: number
+          waiting_queues: number
+          cancelled_queues: number
+          completed_queues: number
+          no_show_queues: number
+          high_priority_queues: number
+          normal_priority_queues: number
+          urgent_priority_queues: number
+          total_queues: number
+          average_wait_time_minutes: number
+          average_service_time_minutes: number
+          average_total_time_minutes: number
+          current_wait_time_estimate: number
+          shortest_wait_time_minutes: number
+          longest_wait_time_minutes: number
+          longest_waiting_queue_minutes: number
+          cancellation_rate_percentage: number
+          completion_rate_percentage: number
+          no_show_rate_percentage: number
+          daily_growth_percentage: number
+          weekly_growth_percentage: number
+          monthly_growth_percentage: number
+          queues_created_today: number
+          queues_completed_today: number
+          queues_cancelled_today: number
+          queues_created_yesterday: number
+          queues_completed_yesterday: number
+          most_popular_service_id: string
+          most_popular_service_name: string
+          most_popular_service_queue_count: number
+          most_active_employee_id: string
+          most_active_employee_name: string
+          most_active_employee_queue_count: number
+          peak_hour: number
+          peak_hour_queue_count: number
+          shop_id: string
+          shop_name: string
+          shop_slug: string
+          shop_status: string
+          timezone: string
+          stats_generated_at: string
+        }[]
+      }
       get_public_shop_info: {
         Args: { p_shop_id: string }
         Returns: {

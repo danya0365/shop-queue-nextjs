@@ -1,25 +1,12 @@
-import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
-import type {
-  JoinQueueResultEntity,
-  QueueJoinEntity,
-  ServiceOptionEntity,
-  ShopQueueInfoEntity,
-} from "@/src/domain/entities/shop/customer/queue-join.entity";
-import {
-  DatabaseDataSource,
-  FilterOperator,
-  QueryOptions,
-} from "@/src/domain/interfaces/datasources/database-datasource";
+import type { JoinQueueResultEntity, QueueJoinEntity, ServiceOptionEntity, ShopQueueInfoEntity } from "@/src/domain/entities/shop/customer/queue-join.entity";
+import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import {
-  ShopCustomerQueueJoinError,
-  ShopCustomerQueueJoinErrorType,
-  ShopCustomerQueueJoinRepository,
-} from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import { ShopCustomerQueueJoinError, ShopCustomerQueueJoinErrorType, ShopCustomerQueueJoinRepository } from "@/src/domain/repositories/shop/customer/queue-join-repository";
 import { SupabaseQueueJoinMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-queue-join-mapper";
-import {
+import type {
   JoinQueueResultSchema,
   PublicShopInfoSchema,
+  QueueComprehensiveStatsRpcSchema,
   QueueJoinSchema,
   QueueServiceSchema,
   ServiceOptionSchema,
@@ -31,6 +18,7 @@ import { StandardRepository } from "../../base/standard-repository";
 type ServiceOptionSchemaRecord = Record<string, unknown> & ServiceOptionSchema;
 type QueueJoinSchemaRecord = Record<string, unknown> & QueueJoinSchema;
 type QueueServiceSchemaRecord = Record<string, unknown> & QueueServiceSchema;
+type QueueComprehensiveStatsRpcSchemaRecord = Partial<QueueComprehensiveStatsRpcSchema>;
 
 /**
  * Supabase implementation of the customer queue join repository
@@ -107,29 +95,19 @@ export class SupabaseCustomerQueueJoinRepository
 
       const shopInfoData = shopInfoResult[0];
 
-      // Get current queue statistics
-      const queueQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "status",
-            operator: FilterOperator.IN,
-            value: [QueueStatus.CONFIRMED, QueueStatus.SERVING],
-          },
-        ],
-      };
+      // Get current queue statistics using RPC call
+      const queueStatsResult = await this.dataSource.callRpc<QueueComprehensiveStatsRpcSchemaRecord>(
+        "get_public_queue_comprehensive_stats",
+        { p_shop_id: shopId }
+      );
 
-      const queueResult = await this.dataSource.getAdvanced<
-        Record<string, unknown>
-      >("queues", queueQueryOptions);
+      // Calculate queue statistics from RPC result
+      const queueStats = queueStatsResult && Array.isArray(queueStatsResult) && queueStatsResult.length > 0
+        ? queueStatsResult[0]
+        : null;
 
-      const currentQueueLength =
-        queueResult && Array.isArray(queueResult) ? queueResult.length : 0;
-      const estimatedWaitTime = currentQueueLength * 5; // 5 minutes per person
+      const currentQueueLength = (queueStats?.confirmed_queues || 0) + (queueStats?.serving_queues || 0);
+      const estimatedWaitTime = queueStats?.current_wait_time_estimate || queueStats?.average_wait_time_minutes || currentQueueLength * 5;
 
       // Create queue info data from RPC result
       const queueInfoData: ShopQueueInfoSchema = {
