@@ -1,34 +1,18 @@
-import {
-  DatabaseDataSource,
-  FilterOperator,
-  QueryOptions,
-  SortDirection,
-} from "@/src/domain/interfaces/datasources/database-datasource";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import {
+import type {
   CustomerDashboardEntity,
   PopularServiceEntity,
   PromotionEntity,
   QueueStatusStatsEntity,
 } from "@/src/domain/entities/shop/customer/customer-dashboard.entity";
+import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import {
   ShopCustomerDashboardError,
   ShopCustomerDashboardErrorType,
   ShopCustomerDashboardRepository,
 } from "@/src/domain/repositories/shop/customer/customer-dashboard-repository";
 import { SupabaseCustomerDashboardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-dashboard-mapper";
-import {
-  QueueSchema,
-  PromotionSchema,
-  ShopSchema,
-  PopularServiceViewRecord,
-} from "@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema";
-import { StandardRepository } from "../../base/standard-repository";
-
-// Extended types for database records
-type QueueSchemaRecord = Record<string, unknown> & QueueSchema;
-type PromotionSchemaRecord = Record<string, unknown> & PromotionSchema;
-type ShopSchemaRecord = Record<string, unknown> & ShopSchema;
+import { StandardRepository } from "@/src/infrastructure/repositories/base/standard-repository";
 
 /**
  * Supabase implementation of the customer dashboard repository
@@ -60,50 +44,47 @@ export class SupabaseCustomerDashboardRepository
 
       this.logger.info("Getting queue status", { shopId });
 
-      const queueQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "status",
-            operator: FilterOperator.IN,
-            value: ["waiting", "serving"],
-          },
-        ],
-        sort: [
-          {
-            field: "created_at",
-            direction: SortDirection.ASC,
-          },
-        ],
-      };
+      // Use RPC call to get comprehensive queue status data for anonymous access
+      const queueStatusResult = await this.dataSource.callRpc<{
+        waiting_queues: number;
+        serving_queues: number;
+        average_wait_time_minutes: number;
+        average_service_time_minutes: number;
+      }>("get_queue_comprehensive_stats", {
+        p_shop_id: shopId,
+      });
 
-      const queuesResult = await this.dataSource.getAdvanced(
-        "queues",
-        queueQueryOptions
-      );
-
-      if (!queuesResult || !Array.isArray(queuesResult)) {
+      if (
+        !queueStatusResult ||
+        !Array.isArray(queueStatusResult) ||
+        queueStatusResult.length === 0
+      ) {
         throw new ShopCustomerDashboardError(
           ShopCustomerDashboardErrorType.DATABASE_ERROR,
-          "Failed to fetch queues data",
+          "Failed to fetch queue status data",
           "SupabaseCustomerDashboardRepository.getQueueStatus",
           { shopId }
         );
       }
 
-      const queuesData = queuesResult as Array<QueueSchemaRecord>;
+      const queueStatusData = queueStatusResult[0];
 
-      // Transform the data using the mapper
-      const queueStatus = SupabaseCustomerDashboardMapper.toQueueStatusStatsEntity(queuesData);
+      // Transform the RPC response to match the expected entity format
+      const queueStatus: QueueStatusStatsEntity = {
+        currentNumber: String(
+          (queueStatusData.waiting_queues || 0) + (queueStatusData.serving_queues || 0)
+        ),
+        totalWaiting: queueStatusData.waiting_queues || 0,
+        estimatedWaitTime: queueStatusData.average_wait_time_minutes || 0,
+        averageServiceTime: queueStatusData.average_service_time_minutes || 0,
+      };
 
       this.logger.info("Queue status retrieved successfully", {
         shopId,
         totalWaiting: queueStatus.totalWaiting,
         currentNumber: queueStatus.currentNumber,
+        estimatedWaitTime: queueStatus.estimatedWaitTime,
+        averageServiceTime: queueStatus.averageServiceTime,
       });
 
       return queueStatus;
@@ -144,32 +125,13 @@ export class SupabaseCustomerDashboardRepository
 
       this.logger.info("Getting popular services", { shopId, limit });
 
-      const serviceQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
-        sort: [
-          {
-            field: "queue_count",
-            direction: SortDirection.DESC,
-          },
-          {
-            field: "revenue",
-            direction: SortDirection.DESC,
-          },
-        ],
-        pagination: {
-          limit: limit || 10,
-        },
-      };
-
-      const servicesResult = await this.dataSource.getAdvanced(
-        "popular_services_view",
-        serviceQueryOptions
+      // Use RPC call instead of direct view query for RLS compliance
+      const servicesResult = await this.dataSource.callRpc(
+        "get_customer_popular_services",
+        {
+          p_shop_id: shopId,
+          p_limit: limit || 10,
+        }
       );
 
       if (!servicesResult || !Array.isArray(servicesResult)) {
@@ -181,10 +143,26 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const servicesData = servicesResult as unknown as Array<PopularServiceViewRecord>;
+      const servicesData = servicesResult as Array<{
+        id: string;
+        name: string;
+        shop_id: string;
+        queue_count: number;
+        revenue: number;
+        category: string;
+      }>;
 
-      // Transform the data using the mapper
-      const popularServices = SupabaseCustomerDashboardMapper.toPopularServiceEntitiesFromView(servicesData);
+      // Transform the RPC response to match PopularServiceEntity format
+      const popularServices: PopularServiceEntity[] = servicesData.map(
+        (service) => ({
+          id: service.id,
+          name: service.name,
+          price: service.revenue, // Using revenue as price since RPC doesn't provide price directly
+          description: service.category || "", // Using category as description
+          estimatedTime: 0, // RPC doesn't provide this
+          icon: "", // RPC doesn't provide this
+        })
+      );
 
       this.logger.info("Popular services retrieved successfully", {
         shopId,
@@ -210,9 +188,13 @@ export class SupabaseCustomerDashboardRepository
   /**
    * Get active promotions for a shop
    * @param shopId The shop ID
+   * @param limit Maximum number of promotions to return
    * @returns Active promotions
    */
-  async getPromotions(shopId: string): Promise<PromotionEntity[]> {
+  async getPromotions(
+    shopId: string,
+    limit?: number
+  ): Promise<PromotionEntity[]> {
     try {
       if (!shopId) {
         throw new ShopCustomerDashboardError(
@@ -223,47 +205,29 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      this.logger.info("Getting promotions", { shopId });
+      this.logger.info("Getting promotions", { shopId, limit });
 
-      const promotionQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "status",
-            operator: FilterOperator.EQ,
-            value: "active",
-          },
-        ],
-        sort: [
-          {
-            field: "created_at",
-            direction: SortDirection.DESC,
-          },
-        ],
-      };
+      // Use RPC call to get promotions data
+      const promotionsData = await this.dataSource.callRpc<
+        Array<Record<string, unknown>>
+      >("get_customer_promotions", {
+        p_shop_id: shopId,
+        p_limit: limit || 10,
+      });
 
-      const promotionsResult = await this.dataSource.getAdvanced(
-        "promotions",
-        promotionQueryOptions
-      );
-
-      if (!promotionsResult || !Array.isArray(promotionsResult)) {
+      if (!promotionsData || !Array.isArray(promotionsData)) {
         throw new ShopCustomerDashboardError(
           ShopCustomerDashboardErrorType.DATABASE_ERROR,
-          "Failed to fetch promotions data",
+          "Invalid promotions data response",
           "SupabaseCustomerDashboardRepository.getPromotions",
           { shopId }
         );
       }
 
-      const promotionsData = promotionsResult as Array<PromotionSchemaRecord>;
-
       // Transform the data using the mapper
-      const promotions = SupabaseCustomerDashboardMapper.toPromotionEntities(promotionsData);
+      const promotions = SupabaseCustomerDashboardMapper.toPromotionEntities(
+        promotionsData as any[]
+      );
 
       this.logger.info("Promotions retrieved successfully", {
         shopId,
@@ -291,9 +255,7 @@ export class SupabaseCustomerDashboardRepository
    * @param shopId The shop ID
    * @returns Complete customer dashboard data
    */
-  async getCustomerDashboard(
-    shopId: string
-  ): Promise<CustomerDashboardEntity> {
+  async getCustomerDashboard(shopId: string): Promise<CustomerDashboardEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerDashboardError(
@@ -325,7 +287,7 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const shop = shopResult as ShopSchemaRecord;
+      const shop = shopResult as any;
 
       const canJoinQueue =
         shop?.status === "active" && queueStatus.totalWaiting < 50;

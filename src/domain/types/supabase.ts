@@ -4290,6 +4290,15 @@ export type Database = {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
       }
+      get_queue_comprehensive_stats: {
+        Args: { p_shop_id: string }
+        Returns: {
+          waiting_queues: number
+          serving_queues: number
+          average_wait_time_minutes: number
+          average_service_time_minutes: number
+        }[]
+      }
       get_queue_position: {
         Args: { p_queue_id: string }
         Returns: {
