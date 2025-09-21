@@ -1,4 +1,5 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
+import type { IShopCustomerQueueJoinService } from "@/src/application/services/shop/customer/ShopCustomerQueueJoinService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
@@ -51,7 +52,11 @@ export interface CustomerQueueJoinViewModel {
 
 // Main Presenter class
 export class CustomerQueueJoinPresenter extends BaseShopPresenter {
-  constructor(logger: Logger, shopService: ShopService) {
+  constructor(
+    logger: Logger, 
+    shopService: ShopService,
+    private readonly shopCustomerQueueJoinService: IShopCustomerQueueJoinService
+  ) {
     super(logger, shopService);
   }
 
@@ -61,18 +66,17 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
         shopId,
       });
 
-      // Mock data - replace with actual service calls
-      const services = this.getAvailableServices();
-      const categories = this.getServiceCategories(services);
+      // Get queue join data from service
+      const queueJoinData = await this.shopCustomerQueueJoinService.getQueueJoinData(shopId);
 
       return {
-        services,
-        categories,
-        estimatedWaitTime: 25,
-        currentQueueLength: 12,
-        shopName: "ร้านกาแฟดีใจ",
-        isAcceptingQueues: true,
-        maxQueueLength: 50,
+        services: queueJoinData.services,
+        categories: queueJoinData.categories,
+        estimatedWaitTime: queueJoinData.shopQueueInfo.estimatedWaitTime,
+        currentQueueLength: queueJoinData.shopQueueInfo.currentQueueLength,
+        shopName: queueJoinData.shopQueueInfo.shopName,
+        isAcceptingQueues: queueJoinData.shopQueueInfo.isAcceptingQueues,
+        maxQueueLength: queueJoinData.shopQueueInfo.maxQueueLength,
         // State management properties with default values
         selectedServices: [],
         isSuccess: false,
@@ -86,87 +90,43 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
     }
   }
 
-  // Private methods for data preparation
-  private getAvailableServices(): ServiceOption[] {
-    return [
-      {
-        id: "1",
-        name: "กาแฟอเมริกาโน่",
-        description: "กาแฟอเมริกาโน่",
-        price: 65,
-        estimatedTime: 5,
-        category: "เครื่องดื่มร้อน",
-        available: true,
-        icon: "☕",
-      },
-      {
-        id: "2",
-        name: "กาแฟลาเต้",
-        description: "กาแฟลาเต้",
-        price: 85,
-        estimatedTime: 7,
-        category: "เครื่องดื่มร้อน",
-        available: true,
-        icon: "🥛",
-      },
-      {
-        id: "3",
-        name: "กาแฟเย็น",
-        description: "กาแฟเย็น",
-        price: 75,
-        estimatedTime: 6,
-        category: "เครื่องดื่มเย็น",
-        available: true,
-        icon: "🧊",
-      },
-      {
-        id: "4",
-        name: "ชาเขียวเย็น",
-        description: "ชาเขียวเย็น",
-        price: 60,
-        estimatedTime: 4,
-        category: "เครื่องดื่มเย็น",
-        available: true,
-        icon: "🍃",
-      },
-      {
-        id: "5",
-        name: "เค้กช็อกโกแลต",
-        description: "เค้กช็อกโกแลต",
-        price: 120,
-        estimatedTime: 3,
-        category: "ขนมหวาน",
-        available: true,
-        icon: "🍰",
-      },
-      {
-        id: "6",
-        name: "แซนด์วิชแฮม",
-        description: "แซนด์วิชแฮม",
-        price: 95,
-        estimatedTime: 10,
-        category: "อาหาร",
-        available: true,
-        icon: "🥪",
-      },
-      {
-        id: "7",
-        name: "สลัดผลไม้",
-        description: "สลัดผลไม้",
-        price: 80,
-        estimatedTime: 8,
-        category: "อาหาร",
-        available: false,
-        icon: "🥗",
-      },
-    ];
-  }
+  async joinQueue(formData: QueueFormData, shopId: string): Promise<{
+    success: boolean;
+    queueNumber?: string;
+    message?: string;
+    error?: string;
+  }> {
+    try {
+      this.logger.info("QueueJoinPresenter: Joining queue", {
+        shopId,
+        customerName: formData.customerName,
+        serviceCount: formData.services.length,
+      });
 
-  private getServiceCategories(services: ServiceOption[]): string[] {
-    const categories = [
-      ...new Set(services.map((service) => service.category)),
-    ];
-    return categories;
+      const joinQueueInput = {
+        shopId,
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        services: formData.services,
+        specialRequests: formData.specialRequests,
+        priority: formData.priority,
+      };
+
+      const result = await this.shopCustomerQueueJoinService.joinQueue(joinQueueInput);
+
+      return {
+        success: result.success,
+        queueNumber: result.queueNumber,
+        message: result.message,
+        error: result.error,
+      };
+    } catch (error) {
+      this.logger.error("QueueJoinPresenter: Error joining queue", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   // Metadata generation
@@ -185,7 +145,8 @@ export class CustomerQueueJoinPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    return new CustomerQueueJoinPresenter(logger, shopService);
+    const shopCustomerQueueJoinService = serverContainer.resolve<IShopCustomerQueueJoinService>("ShopCustomerQueueJoinService");
+    return new CustomerQueueJoinPresenter(logger, shopService, shopCustomerQueueJoinService);
   }
 }
 
@@ -195,6 +156,7 @@ export class ClientCustomerQueueJoinPresenterFactory {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    return new CustomerQueueJoinPresenter(logger, shopService);
+    const shopCustomerQueueJoinService = clientContainer.resolve<IShopCustomerQueueJoinService>("ShopCustomerQueueJoinService");
+    return new CustomerQueueJoinPresenter(logger, shopService, shopCustomerQueueJoinService);
   }
 }
