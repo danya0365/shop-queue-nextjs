@@ -375,6 +375,7 @@ CREATE TABLE shop_settings (
     data_retention_days INTEGER DEFAULT 365,
     
     -- Queue Settings
+    is_accepting_queues BOOLEAN NOT NULL DEFAULT true,
     auto_confirm_queues BOOLEAN DEFAULT true,
     max_queue_size INTEGER DEFAULT 50,
     max_queue_per_service INTEGER NOT NULL DEFAULT 10,

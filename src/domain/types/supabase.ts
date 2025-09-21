@@ -1978,6 +1978,7 @@ export type Database = {
           enable_webhooks: boolean
           estimated_service_time: number | null
           id: string
+          is_accepting_queues: boolean
           line_notify_enabled: boolean
           log_level: string | null
           maintenance_mode: boolean | null
@@ -2029,6 +2030,7 @@ export type Database = {
           enable_webhooks?: boolean
           estimated_service_time?: number | null
           id?: string
+          is_accepting_queues?: boolean
           line_notify_enabled?: boolean
           log_level?: string | null
           maintenance_mode?: boolean | null
@@ -2080,6 +2082,7 @@ export type Database = {
           enable_webhooks?: boolean
           estimated_service_time?: number | null
           id?: string
+          is_accepting_queues?: boolean
           line_notify_enabled?: boolean
           log_level?: string | null
           maintenance_mode?: boolean | null
@@ -4158,6 +4161,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_available_services: {
+        Args: { p_shop_id: string }
+        Returns: {
+          id: string
+          shop_id: string
+          name: string
+          slug: string
+          description: string
+          category: string
+          price: number
+          estimated_duration: number
+          icon: string
+          is_available: boolean
+          popularity_rank: number
+          created_at: string
+          updated_at: string
+        }[]
+      }
       get_current_usage: {
         Args: { p_profile_id: string; p_shop_id?: string }
         Returns: {
@@ -4173,7 +4194,7 @@ export type Database = {
         Returns: Json
       }
       get_customer_popular_services: {
-        Args: { p_shop_id: string; p_limit?: number; p_category?: string }
+        Args: { p_shop_id: string; p_limit?: number }
         Returns: {
           id: string
           name: string
@@ -4193,6 +4214,24 @@ export type Database = {
           revenue: number
           category: string
           rank_in_category: number
+        }[]
+      }
+      get_customer_promotions: {
+        Args: { p_shop_id: string; p_limit?: number }
+        Returns: {
+          id: string
+          shop_id: string
+          name: string
+          description: string
+          value: number
+          type: Database["public"]["Enums"]["promotion_type"]
+          status: Database["public"]["Enums"]["promotion_status"]
+          start_at: string
+          end_at: string
+          usage_limit: number
+          conditions: Json
+          created_at: string
+          updated_at: string
         }[]
       }
       get_customer_stats: {
@@ -4289,6 +4328,76 @@ export type Database = {
       get_profile_role: {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
+      }
+      get_public_shop_info: {
+        Args: { p_shop_id: string }
+        Returns: {
+          shop_id: string
+          shop_name: string
+          shop_description: string
+          shop_address: string
+          shop_phone: string
+          shop_email: string
+          shop_website: string
+          shop_logo: string
+          shop_qr_code_url: string
+          shop_currency: string
+          shop_language: string
+          shop_timezone: string
+          shop_status: string
+          shop_created_at: string
+          shop_updated_at: string
+          settings_id: string
+          settings_shop_id: string
+          settings_estimated_service_time: number
+          settings_maintenance_mode: boolean
+          settings_allow_registration: boolean
+          settings_session_timeout: number
+          settings_backup_frequency: string
+          settings_log_level: string
+          settings_data_retention_days: number
+          settings_is_accepting_queues: boolean
+          settings_auto_confirm_queues: boolean
+          settings_max_queue_size: number
+          settings_max_queue_per_service: number
+          settings_queue_timeout_minutes: number
+          settings_allow_walk_in: boolean
+          settings_allow_advance_booking: boolean
+          settings_max_advance_booking_days: number
+          settings_booking_window_hours: number
+          settings_cancellation_deadline: number
+          settings_points_enabled: boolean
+          settings_points_per_baht: number
+          settings_points_expiry_months: number
+          settings_minimum_points_to_redeem: number
+          settings_sms_enabled: boolean
+          settings_email_enabled: boolean
+          settings_line_notify_enabled: boolean
+          settings_notify_before_minutes: number
+          settings_accept_cash: boolean
+          settings_accept_credit_card: boolean
+          settings_accept_bank_transfer: boolean
+          settings_accept_promptpay: boolean
+          settings_promptpay_id: string
+          settings_theme: string
+          settings_date_format: string
+          settings_time_format: string
+          settings_auto_confirm_booking: boolean
+          settings_require_customer_phone: boolean
+          settings_allow_guest_booking: boolean
+          settings_show_prices_public: boolean
+          settings_enable_reviews: boolean
+          settings_enable_two_factor: boolean
+          settings_require_email_verification: boolean
+          settings_enable_session_timeout: boolean
+          settings_enable_analytics: boolean
+          settings_enable_data_backup: boolean
+          settings_allow_data_export: boolean
+          settings_api_key: string
+          settings_enable_webhooks: boolean
+          settings_created_at: string
+          settings_updated_at: string
+        }[]
       }
       get_queue_comprehensive_stats: {
         Args: { p_shop_id: string }

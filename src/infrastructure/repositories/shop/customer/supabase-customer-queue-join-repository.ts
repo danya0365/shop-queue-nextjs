@@ -19,12 +19,11 @@ import {
 import { SupabaseQueueJoinMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-queue-join-mapper";
 import {
   JoinQueueResultSchema,
+  PublicShopInfoSchema,
   QueueJoinSchema,
   QueueServiceSchema,
   ServiceOptionSchema,
   ShopQueueInfoSchema,
-  ShopSchema,
-  ShopSettingsSchema,
 } from "@/src/infrastructure/schemas/shop/customer/queue-join.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
@@ -91,26 +90,13 @@ export class SupabaseCustomerQueueJoinRepository
     try {
       this.logger.info("Getting shop queue info", { shopId });
 
-      // Get shop information
-      const shopQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
-      };
+      // Use RPC call to get public shop info with shops and shop_settings left join
+      const shopInfoResult = await this.dataSource.callRpc<PublicShopInfoSchema>(
+        "get_public_shop_info",
+        { p_shop_id: shopId }
+      );
 
-      const shopResult = await this.dataSource.getAdvanced<
-        ShopSchema
-      >("shops", shopQueryOptions);
-
-      if (
-        !shopResult ||
-        !Array.isArray(shopResult) ||
-        shopResult.length === 0
-      ) {
+      if (!shopInfoResult || !Array.isArray(shopInfoResult) || shopInfoResult.length === 0) {
         throw new ShopCustomerQueueJoinError(
           ShopCustomerQueueJoinErrorType.UNKNOWN,
           "Shop not found",
@@ -119,20 +105,7 @@ export class SupabaseCustomerQueueJoinRepository
         );
       }
 
-      // Get shop settings for queue configuration
-      const shopSettingsQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
-      };
-
-      const shopSettingsResult = await this.dataSource.getAdvanced<
-        ShopSettingsSchema
-      >("shop_settings", shopSettingsQueryOptions);
+      const shopInfoData = shopInfoResult[0];
 
       // Get current queue statistics
       const queueQueryOptions: QueryOptions = {
@@ -158,14 +131,12 @@ export class SupabaseCustomerQueueJoinRepository
         queueResult && Array.isArray(queueResult) ? queueResult.length : 0;
       const estimatedWaitTime = currentQueueLength * 5; // 5 minutes per person
 
-      const shopData = shopResult[0];
-      const shopSettingsData = shopSettingsResult && shopSettingsResult.length > 0 ? shopSettingsResult[0] : null;
-      
+      // Create queue info data from RPC result
       const queueInfoData: ShopQueueInfoSchema = {
-        shop_id: String(shopData.id || ""),
-        shop_name: String(shopData.name || ""),
-        is_accepting_queues: Boolean(shopSettingsData?.allow_walk_in ?? true),
-        max_queue_length: Number(shopSettingsData?.max_queue_size ?? 50),
+        shop_id: String(shopInfoData.shop_id || ""),
+        shop_name: String(shopInfoData.shop_name || ""),
+        is_accepting_queues: Boolean(shopInfoData.settings_is_accepting_queues),
+        max_queue_length: Number(shopInfoData.settings_max_queue_per_service ?? 50),
         current_queue_length: currentQueueLength,
         estimated_wait_time: estimatedWaitTime,
       };
