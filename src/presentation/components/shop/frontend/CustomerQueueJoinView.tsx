@@ -1,9 +1,10 @@
 "use client";
 
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { useCustomerQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
-import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import StickyBox from "react-sticky-box";
 
 interface CustomerQueueJoinViewProps {
   shopId: string;
@@ -205,9 +206,9 @@ export function CustomerQueueJoinView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="flex flex-row items-start gap-8">
         {/* Service Selection */}
-        <div className="lg:col-span-2">
+        <div className="flex flex-col flex-1">
           <div className="frontend-card">
             <div className="p-6 border-b frontend-card-border">
               <h2 className="text-xl font-semibold frontend-text-primary">
@@ -320,199 +321,203 @@ export function CustomerQueueJoinView({
         </div>
 
         {/* Order Summary & Form */}
-        <div className="space-y-6">
-          {/* Order Summary */}
-          {selectedServices.length > 0 && (
-            <div className="frontend-card">
-              <div className="p-6 border-b frontend-card-border">
-                <h3 className="text-lg font-semibold frontend-text-primary">
-                  สรุปการสั่ง
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-3">
-                  {selectedServices.map((serviceId) => {
-                    const service = services.find((s) => s.id === serviceId);
-                    const quantity = serviceQuantities[serviceId] || 1;
-                    if (!service) return null;
+        <StickyBox className="w-92 flex-none hidden lg:block">
+          <div className="flex flex-col gap-6">
+            {/* Order Summary */}
+            {selectedServices.length > 0 && (
+              <div className="frontend-card">
+                <div className="p-6 border-b frontend-card-border">
+                  <h3 className="text-lg font-semibold frontend-text-primary">
+                    สรุปการสั่ง
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-3">
+                    {selectedServices.map((serviceId) => {
+                      const service = services.find((s) => s.id === serviceId);
+                      const quantity = serviceQuantities[serviceId] || 1;
+                      if (!service) return null;
 
-                    return (
-                      <div
-                        key={serviceId}
-                        className="flex justify-between items-center"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <span className="frontend-text-primary font-medium">
-                              {service.name}
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() =>
-                                  decreaseServiceQuantity(serviceId)
-                                }
-                                className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
-                              >
-                                -
-                              </button>
-                              <span className="w-8 text-center font-semibold text-sm">
-                                {quantity}
+                      return (
+                        <div
+                          key={serviceId}
+                          className="flex justify-between items-center"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3">
+                              <span className="frontend-text-primary font-medium">
+                                {service.name}
                               </span>
-                              <button
-                                onClick={() =>
-                                  increaseServiceQuantity(serviceId)
-                                }
-                                className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
-                              >
-                                +
-                              </button>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() =>
+                                    decreaseServiceQuantity(serviceId)
+                                  }
+                                  className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
+                                >
+                                  -
+                                </button>
+                                <span className="w-8 text-center font-semibold text-sm">
+                                  {quantity}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    increaseServiceQuantity(serviceId)
+                                  }
+                                  className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
                             </div>
+                            <span className="frontend-text-muted text-sm ml-12">
+                              ~{service.estimatedTime} นาที/ชิ้น
+                            </span>
                           </div>
-                          <span className="frontend-text-muted text-sm ml-12">
-                            ~{service.estimatedTime} นาที/ชิ้น
+                          <span className="frontend-service-price font-bold">
+                            ฿{service.price * quantity}
                           </span>
                         </div>
-                        <span className="frontend-service-price font-bold">
-                          ฿{service.price * quantity}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="border-t frontend-card-border mt-4 pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold frontend-text-primary">
-                      รวมทั้งหมด
-                    </span>
-                    <span className="font-bold text-lg frontend-service-price">
-                      ฿
+                      );
+                    })}
+                  </div>
+                  <div className="border-t frontend-card-border mt-4 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold frontend-text-primary">
+                        รวมทั้งหมด
+                      </span>
+                      <span className="font-bold text-lg frontend-service-price">
+                        ฿
+                        {selectedServices.reduce((total, serviceId) => {
+                          const service = services.find(
+                            (s) => s.id === serviceId
+                          );
+                          const quantity = serviceQuantities[serviceId] || 1;
+                          return total + (service?.price || 0) * quantity;
+                        }, 0)}
+                      </span>
+                    </div>
+                    <div className="text-sm frontend-text-secondary mt-1">
+                      เวลาโดยประมาณ:
                       {selectedServices.reduce((total, serviceId) => {
                         const service = services.find(
                           (s) => s.id === serviceId
                         );
                         const quantity = serviceQuantities[serviceId] || 1;
-                        return total + (service?.price || 0) * quantity;
-                      }, 0)}
-                    </span>
-                  </div>
-                  <div className="text-sm frontend-text-secondary mt-1">
-                    เวลาโดยประมาณ:
-                    {selectedServices.reduce((total, serviceId) => {
-                      const service = services.find((s) => s.id === serviceId);
-                      const quantity = serviceQuantities[serviceId] || 1;
-                      return total + (service?.estimatedTime || 0) * quantity;
-                    }, 0)}{" "}
-                    นาที
+                        return total + (service?.estimatedTime || 0) * quantity;
+                      }, 0)}{" "}
+                      นาที
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Customer Form */}
-          <div className="frontend-card">
-            <div className="p-6 border-b frontend-card-border">
-              <h2 className="text-xl font-semibold frontend-text-primary">
-                ข้อมูลลูกค้า
-              </h2>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit({
-                  customerName,
-                  customerPhone,
-                  services: getSelectedServicesAsQueueServices(),
-                  specialRequests,
-                  priority,
-                });
-              }}
-              className="p-6 space-y-4"
-            >
-              <div>
-                <label className="block text-sm font-medium frontend-text-primary mb-1">
-                  ชื่อ-นามสกุล *
-                </label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full frontend-input"
-                  placeholder="กรอกชื่อ-นามสกุล"
-                  required
-                />
+            {/* Customer Form */}
+            <div className="frontend-card">
+              <div className="p-6 border-b frontend-card-border">
+                <h2 className="text-xl font-semibold frontend-text-primary">
+                  ข้อมูลลูกค้า
+                </h2>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium frontend-text-primary mb-1">
-                  เบอร์โทรศัพท์ *
-                </label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full frontend-input"
-                  placeholder="08x-xxx-xxxx"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium frontend-text-primary mb-1">
-                  ความเร่งด่วน
-                </label>
-                <select
-                  value={priority}
-                  onChange={(e) =>
-                    setPriority(e.target.value as QueuePriority)
-                  }
-                  className="w-full frontend-input"
-                >
-                  {priorityOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                      {option.price > 0 && ` (+฿${option.price})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium frontend-text-primary mb-1">
-                  คำขอพิเศษ (ถ้ามี)
-                </label>
-                <textarea
-                  value={specialRequests}
-                  onChange={(e) => setSpecialRequests(e.target.value)}
-                  className="w-full frontend-input"
-                  rows={3}
-                  placeholder="เช่น ไม่ใส่น้ำตาล, เพิ่มน้ำแข็ง"
-                />
-              </div>
-
-              {stateError && (
-                <div className="frontend-status-cancelled rounded-lg p-3">
-                  <p className="frontend-text-danger text-sm">{stateError}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading || selectedServices.length === 0}
-                className="w-full frontend-button-join-queue px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit({
+                    customerName,
+                    customerPhone,
+                    services: getSelectedServicesAsQueueServices(),
+                    specialRequests,
+                    priority,
+                  });
+                }}
+                className="p-6 space-y-4"
               >
-                {isLoading ? (
-                  <span className="flex items-center justify-center space-x-2">
-                    <span className="animate-spin">⏳</span>
-                    <span>กำลังเข้าคิว...</span>
-                  </span>
-                ) : (
-                  "🎫 ยืนยันเข้าคิว"
+                <div>
+                  <label className="block text-sm font-medium frontend-text-primary mb-1">
+                    ชื่อ-นามสกุล *
+                  </label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full frontend-input"
+                    placeholder="กรอกชื่อ-นามสกุล"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium frontend-text-primary mb-1">
+                    เบอร์โทรศัพท์ *
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    className="w-full frontend-input"
+                    placeholder="08x-xxx-xxxx"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium frontend-text-primary mb-1">
+                    ความเร่งด่วน
+                  </label>
+                  <select
+                    value={priority}
+                    onChange={(e) =>
+                      setPriority(e.target.value as QueuePriority)
+                    }
+                    className="w-full frontend-input"
+                  >
+                    {priorityOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                        {option.price > 0 && ` (+฿${option.price})`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium frontend-text-primary mb-1">
+                    คำขอพิเศษ (ถ้ามี)
+                  </label>
+                  <textarea
+                    value={specialRequests}
+                    onChange={(e) => setSpecialRequests(e.target.value)}
+                    className="w-full frontend-input"
+                    rows={3}
+                    placeholder="เช่น ไม่ใส่น้ำตาล, เพิ่มน้ำแข็ง"
+                  />
+                </div>
+
+                {stateError && (
+                  <div className="frontend-status-cancelled rounded-lg p-3">
+                    <p className="frontend-text-danger text-sm">{stateError}</p>
+                  </div>
                 )}
-              </button>
-            </form>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || selectedServices.length === 0}
+                  className="w-full frontend-button-join-queue px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center space-x-2">
+                      <span className="animate-spin">⏳</span>
+                      <span>กำลังเข้าคิว...</span>
+                    </span>
+                  ) : (
+                    "🎫 ยืนยันเข้าคิว"
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
+        </StickyBox>
       </div>
     </div>
   );
