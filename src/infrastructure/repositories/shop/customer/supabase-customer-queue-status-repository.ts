@@ -40,23 +40,85 @@ export class SupabaseCustomerQueueStatusRepository
   }
 
   /**
-   * Get customer queue status by queue number
+   * Get queue ID by queue number (helper method for backward compatibility)
    * @param shopId The shop ID
    * @param queueNumber The queue number
-   * @returns Customer queue status entity or null if not found
+   * @returns Queue ID or null if not found
    */
-  async getCustomerQueueStatus(
+  async getQueueIdByNumber(
     shopId: string,
     queueNumber: string,
-  ): Promise<CustomerQueueStatusEntity | null> {
+  ): Promise<string | null> {
     try {
-      this.logger.info("Getting customer queue status", { shopId, queueNumber });
+      this.logger.info("Getting queue ID by number", { shopId, queueNumber });
 
-      // Query for customer queue status
       const queueQueryOptions: QueryOptions = {
         filters: [
           { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
           { field: "queue_number", operator: FilterOperator.EQ, value: queueNumber },
+          { field: "status", operator: FilterOperator.IN, value: ["waiting", "confirmed", "serving"] },
+        ],
+        pagination: {
+          limit: 1,
+        },
+      };
+
+      const queueResult = await this.dataSource.getAdvanced(
+        "queues",
+        queueQueryOptions,
+      );
+
+      if (!queueResult || queueResult.length === 0) {
+        return null;
+      }
+
+      const queueData = queueResult[0] as CustomerQueueStatusSchemaRecord;
+      return queueData.id;
+    } catch (error) {
+      this.logger.error("Error getting queue ID by number", {
+        error,
+        shopId,
+        queueNumber,
+      });
+
+      throw new CustomerQueueStatusError(
+        CustomerQueueStatusErrorType.OPERATION_FAILED,
+        "Failed to get queue ID by number",
+        "getQueueIdByNumber",
+        { shopId, queueNumber },
+        error
+      );
+    }
+  }
+
+  /**
+   * Get customer queue status by queue ID
+   * @param shopId The shop ID
+   * @param queueId The queue ID
+   * @returns Customer queue status entity or null if not found
+   */
+  async getCustomerQueueStatus(
+    shopId: string,
+    queueId: string,
+  ): Promise<CustomerQueueStatusEntity | null> {
+    try {
+      // Validate parameters
+      if (!queueId) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.VALIDATION_ERROR,
+          "Queue ID is required",
+          "getCustomerQueueStatus",
+          { shopId, queueId }
+        );
+      }
+
+      this.logger.info("Getting customer queue status", { shopId, queueId });
+
+      // Query for customer queue status using queue ID
+      const queueQueryOptions: QueryOptions = {
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+          { field: "id", operator: FilterOperator.EQ, value: queueId },
           { field: "status", operator: FilterOperator.IN, value: ["waiting", "confirmed", "serving"] },
         ],
         pagination: {
@@ -97,17 +159,21 @@ export class SupabaseCustomerQueueStatusRepository
 
       return SupabaseCustomerQueueStatusMapper.toCustomerQueueStatusEntity(completeQueueData);
     } catch (error) {
+      if (error instanceof CustomerQueueStatusError) {
+        throw error;
+      }
+
       this.logger.error("Error getting customer queue status", {
         error,
         shopId,
-        queueNumber,
+        queueId,
       });
 
       throw new CustomerQueueStatusError(
         CustomerQueueStatusErrorType.OPERATION_FAILED,
         "Failed to get customer queue status",
         "getCustomerQueueStatus",
-        { shopId, queueNumber },
+        { shopId, queueId },
         error
       );
     }
@@ -202,8 +268,36 @@ export class SupabaseCustomerQueueStatusRepository
     try {
       this.logger.info("Cancelling customer queue", { shopId, queueNumber });
 
-      // First, get the queue to check if it can be cancelled
-      const queue = await this.getCustomerQueueStatus(shopId, queueNumber);
+      // First, find the queue by queue number to get the queue ID
+      const queueQueryOptions: QueryOptions = {
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+          { field: "queue_number", operator: FilterOperator.EQ, value: queueNumber },
+          { field: "status", operator: FilterOperator.IN, value: ["waiting", "confirmed", "serving"] },
+        ],
+        pagination: {
+          limit: 1,
+        },
+      };
+
+      const queueResult = await this.dataSource.getAdvanced(
+        "queues",
+        queueQueryOptions,
+      );
+
+      if (!queueResult || queueResult.length === 0) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.NOT_FOUND,
+          "Queue not found",
+          "cancelCustomerQueue",
+          { shopId, queueNumber }
+        );
+      }
+
+      const queueData = queueResult[0] as CustomerQueueStatusSchemaRecord;
+      
+      // Get the complete queue data using the queue ID
+      const queue = await this.getCustomerQueueStatus(shopId, queueData.id);
 
       if (!queue) {
         throw new CustomerQueueStatusError(

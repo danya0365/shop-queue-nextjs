@@ -15,23 +15,23 @@ export interface IShopCustomerQueueStatusService {
   /**
    * Get customer queue status view model
    * @param shopId The shop ID
-   * @param queueNumber The queue number (optional)
+   * @param queueIdentifier The queue ID or queue number (optional)
    * @returns Customer queue status view model
    */
   getCustomerQueueStatusViewModel(
     shopId: string,
-    queueNumber?: string
+    queueIdentifier?: string
   ): Promise<CustomerQueueStatusViewModelDTO>;
 
   /**
    * Get customer queue status
    * @param shopId The shop ID
-   * @param queueNumber The queue number
+   * @param queueIdentifier The queue ID or queue number
    * @returns Customer queue status DTO or null if not found
    */
   getCustomerQueueStatus(
     shopId: string,
-    queueNumber: string
+    queueIdentifier: string
   ): Promise<CustomerQueueStatusDTO | null>;
 
   /**
@@ -56,9 +56,10 @@ export interface IShopCustomerQueueStatusService {
 export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusService {
   constructor(
     private readonly getCustomerQueueStatusUseCase: IUseCase<
-      { shopId: string; queueNumber?: string },
+      { shopId: string; queueId?: string },
       CustomerQueueStatusDTO | null
     >,
+    private readonly customerQueueStatusRepository: CustomerQueueStatusRepository,
     private readonly getQueueProgressUseCase: IUseCase<
       { shopId: string },
       QueueProgressDTO
@@ -73,17 +74,28 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
 
   async getCustomerQueueStatusViewModel(
     shopId: string,
-    queueNumber?: string
+    queueIdentifier?: string
   ): Promise<CustomerQueueStatusViewModelDTO> {
     try {
       this.logger.info("Getting customer queue status view model", {
         shopId,
-        queueNumber,
+        queueIdentifier,
       });
 
-      const customerQueue = queueNumber
-        ? await this.getCustomerQueueStatusUseCase.execute({ shopId, queueNumber })
-        : null;
+      let customerQueue = null;
+      if (queueIdentifier) {
+        // Try to get queue status by treating the identifier as queue ID first
+        try {
+          customerQueue = await this.getCustomerQueueStatusUseCase.execute({ shopId, queueId: queueIdentifier });
+        } catch {
+          // If that fails, try to convert queue number to queue ID
+          this.logger.info("Attempting to convert queue number to queue ID", { queueIdentifier });
+          const queueId = await this.customerQueueStatusRepository.getQueueIdByNumber(shopId, queueIdentifier);
+          if (queueId) {
+            customerQueue = await this.getCustomerQueueStatusUseCase.execute({ shopId, queueId });
+          }
+        }
+      }
       
       const queueProgress = await this.getQueueProgressUseCase.execute({ shopId });
       
@@ -102,7 +114,7 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
       this.logger.error("Error getting customer queue status view model", {
         error,
         shopId,
-        queueNumber,
+        queueIdentifier,
       });
       throw error;
     }
@@ -110,21 +122,36 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
 
   async getCustomerQueueStatus(
     shopId: string,
-    queueNumber: string
+    queueIdentifier: string
   ): Promise<CustomerQueueStatusDTO | null> {
     try {
-      this.logger.info("Getting customer queue status", { shopId, queueNumber });
+      this.logger.info("Getting customer queue status", { shopId, queueIdentifier });
 
-      const result = await this.getCustomerQueueStatusUseCase.execute({
-        shopId,
-        queueNumber,
-      });
-      return result;
+      // Try to get queue status by treating the identifier as queue ID first
+      try {
+        const result = await this.getCustomerQueueStatusUseCase.execute({
+          shopId,
+          queueId: queueIdentifier,
+        });
+        return result;
+      } catch (originalError) {
+        // If that fails, try to convert queue number to queue ID
+        this.logger.info("Attempting to convert queue number to queue ID", { queueIdentifier });
+        const queueId = await this.customerQueueStatusRepository.getQueueIdByNumber(shopId, queueIdentifier);
+        if (queueId) {
+          const result = await this.getCustomerQueueStatusUseCase.execute({
+            shopId,
+            queueId,
+          });
+          return result;
+        }
+        throw originalError;
+      }
     } catch (error) {
       this.logger.error("Error getting customer queue status", {
         error,
         shopId,
-        queueNumber,
+        queueIdentifier,
       });
       throw error;
     }
@@ -177,6 +204,7 @@ export class ShopCustomerQueueStatusServiceFactory {
 
     return new ShopCustomerQueueStatusService(
       getCustomerQueueStatusUseCase,
+      repository,
       getQueueProgressUseCase,
       cancelCustomerQueueUseCase,
       shopService,

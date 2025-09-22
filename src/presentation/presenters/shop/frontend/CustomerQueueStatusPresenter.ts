@@ -54,18 +54,18 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
 
   async getViewModel(
     shopId: string,
-    queueNumber?: string
+    queueIdentifier?: string
   ): Promise<CustomerQueueStatusViewModel> {
     try {
       this.logger.info("QueueStatusPresenter: Getting view model for shop", {
         shopId,
-        queueNumber,
+        queueIdentifier,
       });
 
       // Get data from service
       const viewModelDTO = await this.shopCustomerQueueStatusService.getCustomerQueueStatusViewModel(
         shopId,
-        queueNumber
+        queueIdentifier
       );
 
       // Convert DTO to ViewModel format

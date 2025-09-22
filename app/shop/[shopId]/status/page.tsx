@@ -48,7 +48,8 @@ export default async function CustomerQueueStatusPage({
   const presenter = await CustomerQueueStatusPresenterFactory.create();
 
   try {
-    // Get view model from presenter
+    // Note: The 'queue' parameter from URL is still the queue number for user-friendly URLs
+    // The presenter will handle converting queue number to queue ID internally if needed
     const viewModel = await presenter.getViewModel(shopId, queue);
     const shopInfo = await presenter.getShopInfo(shopId);
     return (

@@ -37,15 +37,27 @@ export class CustomerQueueStatusError extends Error {
  */
 export interface CustomerQueueStatusRepository {
   /**
-   * Get customer queue status by queue number
+   * Get queue ID by queue number (helper method for backward compatibility)
    * @param shopId The shop ID
    * @param queueNumber The queue number
+   * @returns Queue ID or null if not found
+   * @throws CustomerQueueStatusError if the operation fails
+   */
+  getQueueIdByNumber(
+    shopId: string,
+    queueNumber: string,
+  ): Promise<string | null>;
+
+  /**
+   * Get customer queue status by queue ID
+   * @param shopId The shop ID
+   * @param queueId The queue ID
    * @returns Customer queue status entity or null if not found
    * @throws CustomerQueueStatusError if the operation fails
    */
   getCustomerQueueStatus(
     shopId: string,
-    queueNumber: string,
+    queueId: string,
   ): Promise<CustomerQueueStatusEntity | null>;
 
   /**

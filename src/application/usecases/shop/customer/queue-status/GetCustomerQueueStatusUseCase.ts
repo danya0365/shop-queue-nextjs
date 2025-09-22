@@ -7,7 +7,7 @@ import type { CustomerQueueStatusDTO } from "../../../../dtos/shop/customer/cust
 export class GetCustomerQueueStatusUseCase implements IUseCase<
   {
     shopId: string;
-    queueNumber?: string;
+    queueId?: string;
   },
   CustomerQueueStatusDTO | null
 > {
@@ -17,7 +17,7 @@ export class GetCustomerQueueStatusUseCase implements IUseCase<
 
   async execute(input: {
     shopId: string;
-    queueNumber?: string;
+    queueId?: string;
   }): Promise<CustomerQueueStatusDTO | null> {
     try {
       if (!input.shopId) {
@@ -29,13 +29,13 @@ export class GetCustomerQueueStatusUseCase implements IUseCase<
         );
       }
 
-      if (!input.queueNumber) {
+      if (!input.queueId) {
         return null;
       }
 
       const customerQueueStatus = await this.customerQueueStatusRepository.getCustomerQueueStatus(
         input.shopId,
-        input.queueNumber
+        input.queueId
       );
 
       if (!customerQueueStatus) {
@@ -52,7 +52,7 @@ export class GetCustomerQueueStatusUseCase implements IUseCase<
         CustomerQueueStatusErrorType.OPERATION_FAILED,
         "Failed to get customer queue status",
         "GetCustomerQueueStatusUseCase.execute",
-        { shopId: input.shopId, queueNumber: input.queueNumber },
+        { shopId: input.shopId, queueId: input.queueId },
         error instanceof Error ? error : undefined
       );
     }
