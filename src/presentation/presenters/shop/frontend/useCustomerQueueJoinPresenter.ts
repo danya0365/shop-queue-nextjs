@@ -223,21 +223,25 @@ export function useCustomerQueueJoinPresenter(
           throw new Error("รูปแบบเบอร์โทรไม่ถูกต้อง");
         }
 
-        // Mock API call - replace with actual service
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Call real API service
+        const { ClientCustomerQueueJoinPresenterFactory } = await import(
+          "./CustomerQueueJoinPresenter"
+        );
+        const presenter = await ClientCustomerQueueJoinPresenterFactory.create();
+        const result = await presenter.joinQueue(formData, shopId);
 
-        // Mock success response
-        const mockQueueNumber =
-          "A" + String(Math.floor(Math.random() * 900) + 100);
+        if (result.success) {
+          const updatedViewModel = {
+            ...viewModel,
+            queueNumber: result.queueNumber || null,
+            isSuccess: true,
+          };
 
-        const updatedViewModel = {
-          ...viewModel,
-          queueNumber: mockQueueNumber,
-          isSuccess: true,
-        };
-
-        setViewModel(updatedViewModel);
-        return true;
+          setViewModel(updatedViewModel);
+          return true;
+        } else {
+          throw new Error(result.error || "Failed to join queue");
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to join queue";
@@ -254,7 +258,7 @@ export function useCustomerQueueJoinPresenter(
         setActionLoading(false);
       }
     },
-    [viewModel]
+    [viewModel, shopId]
   );
 
   const reset = useCallback(() => {
