@@ -41,7 +41,7 @@ export function OrderSummary({
         </h3>
       </div>
       <div className="p-6">
-        <div className="space-y-3">
+        <div className="space-y-4">
           {selectedServices.map((serviceId) => {
             const service = services.find((s) => s.id === serviceId);
             const quantity = serviceQuantities[serviceId] || 1;
@@ -50,42 +50,47 @@ export function OrderSummary({
             return (
               <div
                 key={serviceId}
-                className="flex justify-between items-center"
+                className="flex flex-col space-y-2"
               >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <span className="frontend-text-primary font-medium">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <span className="frontend-text-primary font-medium block truncate">
                       {service.name}
                     </span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          decreaseServiceQuantity(serviceId)
-                        }
-                        className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center font-semibold text-sm">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() =>
-                          increaseServiceQuantity(serviceId)
-                        }
-                        className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
+                    <span className="frontend-text-muted text-sm block">
+                      ~{service.estimatedTime} นาที/ชิ้น
+                    </span>
                   </div>
-                  <span className="frontend-text-muted text-sm ml-12">
-                    ~{service.estimatedTime} นาที/ชิ้น
+                  <span className="frontend-service-price font-bold ml-4 flex-shrink-0">
+                    ฿{service.price * quantity}
                   </span>
                 </div>
-                <span className="frontend-service-price font-bold">
-                  ฿{service.price * quantity}
-                </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() =>
+                        decreaseServiceQuantity(serviceId)
+                      }
+                      className="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-medium text-xs transition-colors border border-gray-300"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center font-semibold text-sm">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        increaseServiceQuantity(serviceId)
+                      }
+                      className="w-7 h-7 rounded-md bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-medium text-xs transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="frontend-text-muted text-xs">
+                    ฿{service.price}/ชิ้น
+                  </span>
+                </div>
               </div>
             );
           })}
