@@ -36,7 +36,7 @@ BEGIN
     -- Validate queue exists
     IF NOT EXISTS (
         SELECT 1 FROM public.queues 
-        WHERE id = p_queue_id
+        WHERE queues.id = p_queue_id
     ) THEN
         RAISE EXCEPTION 'queue_not_found: Queue with ID % not found', p_queue_id;
     END IF;
@@ -80,7 +80,10 @@ BEGIN
     LEFT JOIN public.queue_services qs ON q.id = qs.queue_id
     LEFT JOIN public.services s ON qs.service_id = s.id
     WHERE q.id = p_queue_id
-    GROUP BY q.id, c.name;
+    GROUP BY q.id, q.shop_id, q.queue_number, q.status, q.priority, q.estimated_duration, 
+             q.estimated_call_time, q.served_by_employee_id, q.actual_wait_time, q.note, 
+             q.feedback, q.rating, q.created_at, q.updated_at, q.served_at, q.completed_at, 
+             q.cancelled_at, q.cancelled_reason, q.cancelled_note, c.name;
 END;
 $$;
 
