@@ -18,6 +18,7 @@ import type {
   JoinQueueResultSchema,
   PublicQueueInfoSchema,
   PublicShopInfoSchema,
+  PublicQueueInfoByCustomerIdSchema,
   QueueComprehensiveStatsRpcSchema,
   ServiceOptionSchema,
   ShopQueueInfoSchema,
@@ -26,8 +27,6 @@ import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for database records
 type ServiceOptionSchemaRecord = Record<string, unknown> & ServiceOptionSchema;
-type QueueComprehensiveStatsRpcSchemaRecord =
-  Partial<QueueComprehensiveStatsRpcSchema>;
 
 /**
  * Supabase implementation of the customer queue join repository
@@ -85,8 +84,6 @@ export class SupabaseCustomerQueueJoinRepository
    */
   async getShopQueueInfo(shopId: string): Promise<ShopQueueInfoEntity> {
     try {
-      this.logger.info("Getting shop queue info", { shopId });
-
       // Use RPC call to get public shop info with shops and shop_settings left join
       const shopInfoResult =
         await this.dataSource.callRpc<PublicShopInfoSchema>(
@@ -110,19 +107,12 @@ export class SupabaseCustomerQueueJoinRepository
       const shopInfoData = shopInfoResult[0];
 
       // Get current queue statistics using RPC call
-      const queueStatsResult =
-        await this.dataSource.callRpc<QueueComprehensiveStatsRpcSchemaRecord>(
-          "get_public_queue_comprehensive_stats",
-          { p_shop_id: shopId }
-        );
+      const queueStatsResult = await this.dataSource.callRpc<
+        QueueComprehensiveStatsRpcSchema[]
+      >("get_public_queue_comprehensive_stats", { p_shop_id: shopId });
 
       // Calculate queue statistics from RPC result
-      const queueStats =
-        queueStatsResult &&
-        Array.isArray(queueStatsResult) &&
-        queueStatsResult.length > 0
-          ? queueStatsResult[0]
-          : null;
+      const queueStats = queueStatsResult[0];
 
       const currentQueueLength =
         (queueStats?.confirmed_queues || 0) + (queueStats?.serving_queues || 0);
@@ -283,35 +273,7 @@ export class SupabaseCustomerQueueJoinRepository
 
       // Call RPC function to get public queue info by customer ID
       const result = await this.dataSource.callRpc<
-        {
-          id: string;
-          shop_id: string;
-          queue_number: string;
-          status: "waiting" | "serving" | "completed" | "cancelled";
-          priority: "normal" | "urgent";
-          estimated_duration: number;
-          estimated_call_time: string;
-          served_by_employee_id: string;
-          actual_wait_time: number;
-          note: string;
-          feedback: string;
-          rating: number;
-          created_at: string;
-          updated_at: string;
-          served_at: string;
-          completed_at: string;
-          cancelled_at: string;
-          cancelled_reason: string;
-          cancelled_note: string;
-          customer_name: string;
-          services: {
-            service_id: string;
-            service_name: string;
-            quantity: number;
-            price: number;
-          }[];
-          total_count: number;
-        }[]
+        PublicQueueInfoByCustomerIdSchema[]
       >("get_public_queue_info_by_customer_id", {
         p_customer_id: customerId,
         p_page: page,
@@ -330,8 +292,15 @@ export class SupabaseCustomerQueueJoinRepository
 
       // Transform RPC result to domain entities
       const queues: QueueJoinEntity[] = result.map((queueData) => {
-        // Map services from RPC result
-        const services: QueueServiceEntity[] = queueData.services.map(
+        // Map services from RPC result (services is Json type, need to cast to array)
+        const servicesData = (queueData.services as Array<{
+          service_id: string;
+          service_name: string;
+          quantity: number;
+          price: number;
+        }>) || [];
+        
+        const services: QueueServiceEntity[] = servicesData.map(
           (service) => ({
             id: service.service_id,
             name: service.service_name,
@@ -350,7 +319,7 @@ export class SupabaseCustomerQueueJoinRepository
           services,
           specialRequests: queueData.note || undefined,
           priority: this.mapPriorityToEnum(queueData.priority),
-          status: queueData.status,
+          status: this.mapStatusToEnum(queueData.status),
           queueNumber: queueData.queue_number,
           createdAt: queueData.created_at,
           updatedAt: queueData.updated_at,
@@ -396,8 +365,6 @@ export class SupabaseCustomerQueueJoinRepository
    */
   async getQueueById(queueId: string): Promise<QueueJoinEntity> {
     try {
-      this.logger.info("Getting queue by ID", { queueId });
-
       // Validate parameters
       if (!queueId) {
         throw new ShopCustomerQueueJoinError(
@@ -425,8 +392,6 @@ export class SupabaseCustomerQueueJoinRepository
       }
 
       const queueData = result[0];
-
-      this.logger.info("Queue info", { queueData });
 
       // Map services from RPC result (services is Json type, need to cast to array)
       const servicesData =

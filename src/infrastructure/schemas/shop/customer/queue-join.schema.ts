@@ -129,6 +129,11 @@ export type QueueComprehensiveStatsRpcSchema = Database["public"]["Functions"]["
 export type PublicQueueInfoSchema = Database["public"]["Functions"]["get_public_queue_info_by_id"]["Returns"][0];
 
 /**
+ * Public queue info by customer ID database schema (from get_public_queue_info_by_customer_id RPC function)
+ */
+export type PublicQueueInfoByCustomerIdSchema = Database["public"]["Functions"]["get_public_queue_info_by_customer_id"]["Returns"][0];
+
+/**
  * Join queue result database schema
  */
 export interface JoinQueueResultSchema {
