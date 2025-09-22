@@ -110,6 +110,12 @@
   .frontend-button-join-queue {
     @apply bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 transition-all transform hover:scale-105;
   }
+  .frontend-button-secondary {
+    @apply bg-gradient-to-r from-pink-400 to-rose-400 text-white hover:from-pink-500 hover:to-rose-500 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl ring-2 ring-white/20;
+  }
+  .frontend-button-cancel {
+    @apply bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-500 hover:to-red-600 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl ring-2 ring-white/20;
+  }
   .frontend-button-disabled {
     @apply bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400;
   }

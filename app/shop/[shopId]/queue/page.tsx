@@ -1,5 +1,5 @@
 import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
-import { CustomerQueueJoinView } from "@/src/presentation/components/shop/frontend/CustomerQueueJoinView";
+import { CustomerQueueJoinView } from "@/src/presentation/components/shop/frontend/queue-join/CustomerQueueJoinView";
 import { CustomerQueueJoinPresenterFactory } from "@/src/presentation/presenters/shop/frontend/CustomerQueueJoinPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";

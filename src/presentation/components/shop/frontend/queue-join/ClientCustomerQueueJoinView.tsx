@@ -1,17 +1,20 @@
 "use client";
 
 import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import useGetDevice from "@/src/presentation/hooks/get-device";
 import { useCustomerQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 import StickyBox from "react-sticky-box";
+import { CustomerForm } from "./components/CustomerForm";
+import { OrderSummary } from "./components/OrderSummary";
 
 interface CustomerQueueJoinViewProps {
   shopId: string;
   initialViewModel?: import("@/src/presentation/presenters/shop/frontend/CustomerQueueJoinPresenter").CustomerQueueJoinViewModel;
 }
 
-export function CustomerQueueJoinView({
+export function ClientCustomerQueueJoinView({
   shopId,
   initialViewModel,
 }: CustomerQueueJoinViewProps) {
@@ -38,7 +41,8 @@ export function CustomerQueueJoinView({
     getSelectedServicesAsQueueServices,
     serviceQuantities,
   } = useCustomerQueueJoinPresenter(shopId, initialViewModel);
-  const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const device = useGetDevice();
+  const [isShowFinalOrderSummary, setIsShowFinalOrderSummary] = useState(false);
 
   // Priority options configuration
   const priorityOptions = [
@@ -184,6 +188,51 @@ export function CustomerQueueJoinView({
     );
   }
 
+  if (isShowFinalOrderSummary) {
+    return (
+      <div className="flex flex-col gap-8">
+        {/* Back Button */}
+        <div className="flex justify-start">
+          <button
+            onClick={() => setIsShowFinalOrderSummary(false)}
+            className="frontend-button-secondary px-4 py-2 rounded-lg font-medium flex items-center gap-2"
+          >
+            ← ย้อนกลับ
+          </button>
+        </div>
+        <div className="flex flex-col gap-6">
+          <OrderSummary
+            selectedServices={selectedServices}
+            services={services}
+            serviceQuantities={serviceQuantities}
+            decreaseServiceQuantity={decreaseServiceQuantity}
+            increaseServiceQuantity={increaseServiceQuantity}
+          />
+          <CustomerForm
+            customerName={customerName}
+            customerPhone={customerPhone}
+            priority={priority}
+            specialRequests={specialRequests}
+            isLoading={isLoading}
+            selectedServicesLength={selectedServices.length}
+            stateError={stateError}
+            priorityOptions={priorityOptions}
+            setCustomerName={setCustomerName}
+            setCustomerPhone={setCustomerPhone}
+            setPriority={setPriority}
+            setSpecialRequests={setSpecialRequests}
+            handleSubmit={handleSubmit}
+            isShowBackButton={true}
+            onBackPressed={() => setIsShowFinalOrderSummary(false)}
+            getSelectedServicesAsQueueServices={
+              getSelectedServicesAsQueueServices
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       {/* Shop Header */}
@@ -321,203 +370,61 @@ export function CustomerQueueJoinView({
         </div>
 
         {/* Order Summary & Form */}
-        <StickyBox className="w-92 flex-none hidden lg:block">
-          <div className="flex flex-col gap-6">
-            {/* Order Summary */}
-            {selectedServices.length > 0 && (
-              <div className="frontend-card">
-                <div className="p-6 border-b frontend-card-border">
-                  <h3 className="text-lg font-semibold frontend-text-primary">
-                    สรุปการสั่ง
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-3">
-                    {selectedServices.map((serviceId) => {
-                      const service = services.find((s) => s.id === serviceId);
-                      const quantity = serviceQuantities[serviceId] || 1;
-                      if (!service) return null;
-
-                      return (
-                        <div
-                          key={serviceId}
-                          className="flex justify-between items-center"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3">
-                              <span className="frontend-text-primary font-medium">
-                                {service.name}
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <button
-                                  onClick={() =>
-                                    decreaseServiceQuantity(serviceId)
-                                  }
-                                  className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-sm transition-colors"
-                                >
-                                  -
-                                </button>
-                                <span className="w-8 text-center font-semibold text-sm">
-                                  {quantity}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    increaseServiceQuantity(serviceId)
-                                  }
-                                  className="w-6 h-6 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold text-sm transition-colors"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </div>
-                            <span className="frontend-text-muted text-sm ml-12">
-                              ~{service.estimatedTime} นาที/ชิ้น
-                            </span>
-                          </div>
-                          <span className="frontend-service-price font-bold">
-                            ฿{service.price * quantity}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="border-t frontend-card-border mt-4 pt-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold frontend-text-primary">
-                        รวมทั้งหมด
-                      </span>
-                      <span className="font-bold text-lg frontend-service-price">
-                        ฿
-                        {selectedServices.reduce((total, serviceId) => {
-                          const service = services.find(
-                            (s) => s.id === serviceId
-                          );
-                          const quantity = serviceQuantities[serviceId] || 1;
-                          return total + (service?.price || 0) * quantity;
-                        }, 0)}
-                      </span>
-                    </div>
-                    <div className="text-sm frontend-text-secondary mt-1">
-                      เวลาโดยประมาณ:
-                      {selectedServices.reduce((total, serviceId) => {
-                        const service = services.find(
-                          (s) => s.id === serviceId
-                        );
-                        const quantity = serviceQuantities[serviceId] || 1;
-                        return total + (service?.estimatedTime || 0) * quantity;
-                      }, 0)}{" "}
-                      นาที
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Customer Form */}
-            <div className="frontend-card">
-              <div className="p-6 border-b frontend-card-border">
-                <h2 className="text-xl font-semibold frontend-text-primary">
-                  ข้อมูลลูกค้า
-                </h2>
-              </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmit({
-                    customerName,
-                    customerPhone,
-                    services: getSelectedServicesAsQueueServices(),
-                    specialRequests,
-                    priority,
-                  });
-                }}
-                className="p-6 space-y-4"
-              >
-                <div>
-                  <label className="block text-sm font-medium frontend-text-primary mb-1">
-                    ชื่อ-นามสกุล *
-                  </label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full frontend-input"
-                    placeholder="กรอกชื่อ-นามสกุล"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium frontend-text-primary mb-1">
-                    เบอร์โทรศัพท์ *
-                  </label>
-                  <input
-                    type="tel"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full frontend-input"
-                    placeholder="08x-xxx-xxxx"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium frontend-text-primary mb-1">
-                    ความเร่งด่วน
-                  </label>
-                  <select
-                    value={priority}
-                    onChange={(e) =>
-                      setPriority(e.target.value as QueuePriority)
-                    }
-                    className="w-full frontend-input"
-                  >
-                    {priorityOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                        {option.price > 0 && ` (+฿${option.price})`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium frontend-text-primary mb-1">
-                    คำขอพิเศษ (ถ้ามี)
-                  </label>
-                  <textarea
-                    value={specialRequests}
-                    onChange={(e) => setSpecialRequests(e.target.value)}
-                    className="w-full frontend-input"
-                    rows={3}
-                    placeholder="เช่น ไม่ใส่น้ำตาล, เพิ่มน้ำแข็ง"
-                  />
-                </div>
-
-                {stateError && (
-                  <div className="frontend-status-cancelled rounded-lg p-3">
-                    <p className="frontend-text-danger text-sm">{stateError}</p>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading || selectedServices.length === 0}
-                  className="w-full frontend-button-join-queue px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <span className="animate-spin">⏳</span>
-                      <span>กำลังเข้าคิว...</span>
-                    </span>
-                  ) : (
-                    "🎫 ยืนยันเข้าคิว"
-                  )}
-                </button>
-              </form>
+        {device === "desktop" ? (
+          <StickyBox className="w-92 flex-none">
+            <div className="flex flex-col gap-6">
+              <OrderSummary
+                selectedServices={selectedServices}
+                services={services}
+                serviceQuantities={serviceQuantities}
+                decreaseServiceQuantity={decreaseServiceQuantity}
+                increaseServiceQuantity={increaseServiceQuantity}
+              />
+              <CustomerForm
+                customerName={customerName}
+                customerPhone={customerPhone}
+                priority={priority}
+                specialRequests={specialRequests}
+                isLoading={isLoading}
+                selectedServicesLength={selectedServices.length}
+                stateError={stateError}
+                priorityOptions={priorityOptions}
+                setCustomerName={setCustomerName}
+                setCustomerPhone={setCustomerPhone}
+                setPriority={setPriority}
+                setSpecialRequests={setSpecialRequests}
+                handleSubmit={handleSubmit}
+                getSelectedServicesAsQueueServices={
+                  getSelectedServicesAsQueueServices
+                }
+              />
             </div>
-          </div>
-        </StickyBox>
+          </StickyBox>
+        ) : (
+          <>
+            <button
+              onClick={() => setIsShowFinalOrderSummary(true)}
+              className={cn(
+                "fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center gap-2",
+                selectedServices.length === 0 && "hidden"
+              )}
+            >
+              <span>เข้าคิว</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
