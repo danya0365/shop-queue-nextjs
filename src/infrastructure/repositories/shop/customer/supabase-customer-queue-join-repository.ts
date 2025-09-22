@@ -1,8 +1,9 @@
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
   JoinQueueResultEntity,
   QueueJoinEntity,
-  ServiceOptionEntity,
   QueueServiceEntity,
+  ServiceOptionEntity,
   ShopQueueInfoEntity,
 } from "@/src/domain/entities/shop/customer/queue-join.entity";
 import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
@@ -12,10 +13,10 @@ import {
   ShopCustomerQueueJoinErrorType,
   ShopCustomerQueueJoinRepository,
 } from "@/src/domain/repositories/shop/customer/queue-join-repository";
-import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { SupabaseQueueJoinMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-queue-join-mapper";
 import type {
   JoinQueueResultSchema,
+  PublicQueueInfoSchema,
   PublicShopInfoSchema,
   QueueComprehensiveStatsRpcSchema,
   ServiceOptionSchema,
@@ -281,35 +282,37 @@ export class SupabaseCustomerQueueJoinRepository
       if (limit < 1 || limit > 100) limit = 10;
 
       // Call RPC function to get public queue info by customer ID
-      const result = await this.dataSource.callRpc<{
-        id: string;
-        shop_id: string;
-        queue_number: string;
-        status: "waiting" | "serving" | "completed" | "cancelled";
-        priority: "normal" | "urgent";
-        estimated_duration: number;
-        estimated_call_time: string;
-        served_by_employee_id: string;
-        actual_wait_time: number;
-        note: string;
-        feedback: string;
-        rating: number;
-        created_at: string;
-        updated_at: string;
-        served_at: string;
-        completed_at: string;
-        cancelled_at: string;
-        cancelled_reason: string;
-        cancelled_note: string;
-        customer_name: string;
-        services: {
-          service_id: string;
-          service_name: string;
-          quantity: number;
-          price: number;
-        }[];
-        total_count: number;
-      }[]>("get_public_queue_info_by_customer_id", {
+      const result = await this.dataSource.callRpc<
+        {
+          id: string;
+          shop_id: string;
+          queue_number: string;
+          status: "waiting" | "serving" | "completed" | "cancelled";
+          priority: "normal" | "urgent";
+          estimated_duration: number;
+          estimated_call_time: string;
+          served_by_employee_id: string;
+          actual_wait_time: number;
+          note: string;
+          feedback: string;
+          rating: number;
+          created_at: string;
+          updated_at: string;
+          served_at: string;
+          completed_at: string;
+          cancelled_at: string;
+          cancelled_reason: string;
+          cancelled_note: string;
+          customer_name: string;
+          services: {
+            service_id: string;
+            service_name: string;
+            quantity: number;
+            price: number;
+          }[];
+          total_count: number;
+        }[]
+      >("get_public_queue_info_by_customer_id", {
         p_customer_id: customerId,
         p_page: page,
         p_limit: limit,
@@ -405,38 +408,14 @@ export class SupabaseCustomerQueueJoinRepository
       }
 
       // Call RPC function to get public queue info by ID
-      const result = await this.dataSource.callRpc<{
-        id: string;
-        shop_id: string;
-        queue_number: string;
-        status: "waiting" | "serving" | "completed" | "cancelled";
-        priority: "normal" | "urgent";
-        estimated_duration: number;
-        estimated_call_time: string;
-        served_by_employee_id: string;
-        actual_wait_time: number;
-        note: string;
-        feedback: string;
-        rating: number;
-        created_at: string;
-        updated_at: string;
-        served_at: string;
-        completed_at: string;
-        cancelled_at: string;
-        cancelled_reason: string;
-        cancelled_note: string;
-        customer_name: string;
-        services: {
-          service_id: string;
-          service_name: string;
-          quantity: number;
-          price: number;
-        }[];
-      } | null>("get_public_queue_info_by_id", {
-        p_queue_id: queueId,
-      });
+      const result = await this.dataSource.callRpc<PublicQueueInfoSchema[]>(
+        "get_public_queue_info_by_id",
+        {
+          p_queue_id: queueId,
+        }
+      );
 
-      if (!result) {
+      if (!result || result.length === 0) {
         throw new ShopCustomerQueueJoinError(
           ShopCustomerQueueJoinErrorType.NOT_FOUND,
           "Queue not found",
@@ -445,31 +424,41 @@ export class SupabaseCustomerQueueJoinRepository
         );
       }
 
-      // Map services from RPC result
-      const services: QueueServiceEntity[] = result.services.map(
-        (service) => ({
-          id: service.service_id,
-          name: service.service_name,
-          price: service.price,
-          quantity: service.quantity,
-          estimatedTime: 0, // Not available in RPC result
-        })
-      );
+      const queueData = result[0];
+
+      this.logger.info("Queue info", { queueData });
+
+      // Map services from RPC result (services is Json type, need to cast to array)
+      const servicesData =
+        (queueData.services as Array<{
+          service_id: string;
+          service_name: string;
+          quantity: number;
+          price: number;
+        }>) || [];
+
+      const services: QueueServiceEntity[] = servicesData.map((service) => ({
+        id: service.service_id,
+        name: service.service_name,
+        price: service.price,
+        quantity: service.quantity,
+        estimatedTime: 0, // Not available in RPC result
+      }));
 
       // Transform RPC result to domain entity
       const queue: QueueJoinEntity = {
-        id: result.id,
-        shopId: result.shop_id,
-        customerName: result.customer_name,
+        id: queueData.id,
+        shopId: queueData.shop_id,
+        customerName: queueData.customer_name,
         customerPhone: "", // Not available in public RPC
         customerId: "", // Not available in public RPC
         services,
-        specialRequests: result.note || undefined,
-        priority: this.mapPriorityToEnum(result.priority),
-        status: result.status,
-        queueNumber: result.queue_number,
-        createdAt: result.created_at,
-        updatedAt: result.updated_at,
+        specialRequests: queueData.note || undefined,
+        priority: this.mapPriorityToEnum(queueData.priority),
+        status: this.mapStatusToEnum(queueData.status),
+        queueNumber: queueData.queue_number,
+        createdAt: queueData.created_at,
+        updatedAt: queueData.updated_at,
       };
 
       return queue;
@@ -506,6 +495,32 @@ export class SupabaseCustomerQueueJoinRepository
         return QueuePriority.URGENT;
       default:
         return QueuePriority.NORMAL; // Default to normal if unknown
+    }
+  }
+
+  /**
+   * Map status string to QueueJoinEntity status type
+   * @param status Status string from database
+   * @returns Status value compatible with QueueJoinEntity
+   */
+  private mapStatusToEnum(
+    status: string
+  ): "waiting" | "serving" | "completed" | "cancelled" {
+    switch (status.toLowerCase()) {
+      case "waiting":
+        return "waiting";
+      case "serving":
+        return "serving";
+      case "completed":
+        return "completed";
+      case "cancelled":
+        return "cancelled";
+      case "confirmed":
+        return "waiting"; // Map confirmed to waiting for customer view
+      case "no_show":
+        return "cancelled"; // Map no_show to cancelled for customer view
+      default:
+        return "waiting"; // Default to waiting if unknown
     }
   }
 }
