@@ -25,7 +25,7 @@ INSERT INTO
     ) VALUES 
     -- Restaurant owner user
     (
-        '91000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
         '91000000-0000-0000-0000-000000000001',
         'authenticated',
         'authenticated',
@@ -99,7 +99,7 @@ INSERT INTO
     ) VALUES 
     -- Restaurant employee user
     (
-        '91000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
         '91000000-0000-0000-0000-000000000002',
         'authenticated',
         'authenticated',
@@ -173,7 +173,7 @@ INSERT INTO
     ) VALUES 
     -- Restaurant employee user
     (
-        '91000000-0000-0000-0000-000000000000',
+        '00000000-0000-0000-0000-000000000000',
         '91000000-0000-0000-0000-000000000003',
         'authenticated',
         'authenticated',
