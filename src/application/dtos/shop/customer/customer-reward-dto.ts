@@ -3,6 +3,9 @@
  * Following Clean Architecture principles with proper data transfer objects
  */
 
+import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
+
 /**
  * Customer reward DTO representing a reward that a customer has redeemed
  */
@@ -10,7 +13,7 @@ export interface CustomerRewardDTO {
   id: string;
   name: string;
   description: string;
-  type: "discount" | "free_item" | "cashback" | "points";
+  type: RewardType;
   value: number;
   pointsCost: number;
   category: string;
@@ -31,7 +34,7 @@ export interface CustomerPointsDTO {
   totalRedeemed: number;
   pointsExpiring: number;
   expiryDate?: string;
-  tier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  tier: MembershipTier;
   nextTierPoints: number;
   tierBenefits: string[];
 }
@@ -122,7 +125,7 @@ export interface CustomerRewardsDataDTO {
  */
 export interface AvailableRewardsFiltersDTO {
   category?: string;
-  type?: "discount" | "free_item" | "cashback" | "points";
+  type?: RewardType;
   isAvailable?: boolean;
   minPointsCost?: number;
   maxPointsCost?: number;
@@ -130,7 +133,7 @@ export interface AvailableRewardsFiltersDTO {
 
 export interface RedeemedRewardsFiltersDTO {
   category?: string;
-  type?: "discount" | "free_item" | "cashback" | "points";
+  type?: RewardType;
   dateRange?: "all" | "month" | "quarter" | "year" | "custom";
   startDate?: string;
   endDate?: string;

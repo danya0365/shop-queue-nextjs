@@ -5,6 +5,8 @@ import type {
   AvailableRewardEntity,
   CustomerRewardStatsEntity,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
+import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import type {
   CustomerPointsSchema,
   CustomerRewardSchema,
@@ -38,7 +40,7 @@ export class SupabaseCustomerRewardMapper {
       totalRedeemed: Number(data.total_redeemed || 0),
       pointsExpiring: Number(data.points_expiring || 0),
       expiryDate: data.expiry_date || undefined,
-      tier: data.tier || "Bronze",
+      tier: this.mapTierToEnum(data.tier) || MembershipTier.BRONZE,
       nextTierPoints: Number(data.next_tier_points || 0),
       tierBenefits: data.tier_benefits || [],
       lastUpdated: data.updated_at || new Date().toISOString(),
@@ -53,7 +55,7 @@ export class SupabaseCustomerRewardMapper {
       id: String(data.id || ""),
       name: data.name || "",
       description: data.description || "",
-      type: data.type || "discount",
+      type: this.mapRewardTypeToEnum(data.type) || RewardType.DISCOUNT,
       value: Number(data.value || 0),
       pointsCost: Number(data.points_cost || 0),
       category: data.category || "",
@@ -103,7 +105,7 @@ export class SupabaseCustomerRewardMapper {
       imageUrl: data.image_url || undefined,
       isAvailable: Boolean(data.is_available),
       stock: data.stock !== undefined ? Number(data.stock) : undefined,
-      type: data.type || "discount",
+      type: this.mapRewardTypeToEnum(data.type) || RewardType.DISCOUNT,
       value: data.value !== undefined ? Number(data.value) : undefined,
       expiryDate: data.expiry_date || undefined,
       termsAndConditions: data.terms_and_conditions,
@@ -277,5 +279,47 @@ export class SupabaseCustomerRewardMapper {
       last_redemption_date: entity.lastRedemptionDate,
       last_earn_date: entity.lastEarnDate,
     };
+  }
+
+  /**
+   * Map membership tier string to enum
+   */
+  private static mapTierToEnum(tier: string | undefined): MembershipTier | undefined {
+    if (!tier) return undefined;
+    
+    const tierLower = tier.toLowerCase();
+    switch (tierLower) {
+      case 'bronze':
+        return MembershipTier.BRONZE;
+      case 'silver':
+        return MembershipTier.SILVER;
+      case 'gold':
+        return MembershipTier.GOLD;
+      case 'platinum':
+        return MembershipTier.PLATINUM;
+      default:
+        return MembershipTier.BRONZE;
+    }
+  }
+
+  /**
+   * Map reward type string to enum
+   */
+  private static mapRewardTypeToEnum(type: string | undefined): RewardType | undefined {
+    if (!type) return undefined;
+    
+    const typeLower = type.toLowerCase();
+    switch (typeLower) {
+      case 'discount':
+        return RewardType.DISCOUNT;
+      case 'free_item':
+        return RewardType.FREE_ITEM;
+      case 'cashback':
+        return RewardType.CASHBACK;
+      case 'special_privilege':
+        return RewardType.SPECIAL_PRIVILEGE;
+      default:
+        return RewardType.DISCOUNT;
+    }
   }
 }

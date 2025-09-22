@@ -4,6 +4,8 @@ import type {
   CustomerStatsEntity,
   CustomerInfoEntity,
 } from "@/src/domain/entities/shop/customer/customer-history.entity";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { PaymentMethod } from "@/src/application/dtos/shop/backend/payments-dto";
 import type {
   CustomerQueueHistorySchema,
   CustomerQueueServiceSchema,
@@ -26,7 +28,7 @@ export class SupabaseCustomerHistoryMapper {
       shopName: String(data.shop_name || ""),
       services: this.toQueueServiceEntities(data.services || []),
       totalAmount: Number(data.total_amount || 0),
-      status: (data.status as "completed" | "cancelled" | "no_show") || "completed",
+      status: this.mapStatusToEnum(data.status) || QueueStatus.COMPLETED,
       queueDate: String(data.queue_date || ""),
       queueTime: String(data.queue_time || ""),
       completedAt: data.completed_at ? String(data.completed_at) : undefined,
@@ -35,7 +37,7 @@ export class SupabaseCustomerHistoryMapper {
       rating: data.rating ? Number(data.rating) : undefined,
       feedback: data.feedback ? String(data.feedback) : undefined,
       employeeName: data.employee_name ? String(data.employee_name) : undefined,
-      paymentMethod: data.payment_method as "cash" | "card" | "qr" | "transfer" || undefined,
+      paymentMethod: this.mapPaymentMethodToEnum(data.payment_method || undefined),
     };
   }
 
@@ -128,5 +130,47 @@ export class SupabaseCustomerHistoryMapper {
       customer_name: entity.customerName,
       member_since: entity.memberSince,
     };
+  }
+
+  /**
+   * Map status string to QueueStatus enum
+   * @param status Status string from database
+   * @returns QueueStatus enum value
+   */
+  private static mapStatusToEnum(status: string | undefined): QueueStatus | undefined {
+    if (!status) return undefined;
+    
+    switch (status.toLowerCase()) {
+      case "completed":
+        return QueueStatus.COMPLETED;
+      case "cancelled":
+        return QueueStatus.CANCELLED;
+      case "no_show":
+        return QueueStatus.CANCELLED; // Map no_show to cancelled for history view
+      default:
+        return QueueStatus.COMPLETED; // Default to completed if unknown
+    }
+  }
+
+  /**
+   * Map payment method string to PaymentMethod enum
+   * @param method Payment method string from database
+   * @returns PaymentMethod enum value or undefined
+   */
+  private static mapPaymentMethodToEnum(method: string | undefined): PaymentMethod | undefined {
+    if (!method) return undefined;
+    
+    switch (method.toLowerCase()) {
+      case "cash":
+        return PaymentMethod.CASH;
+      case "card":
+        return PaymentMethod.CARD;
+      case "qr":
+        return PaymentMethod.QR;
+      case "transfer":
+        return PaymentMethod.TRANSFER;
+      default:
+        return undefined; // Return undefined for unknown methods
+    }
   }
 }

@@ -6,6 +6,7 @@ import {
 } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import type {
   CustomerRewardEntity,
   CustomerPointsEntity,
@@ -264,7 +265,7 @@ export class SupabaseCustomerRewardRepository
     customerId: string;
     filters?: {
       category?: string;
-      type?: "discount" | "free_item" | "cashback" | "points";
+      type?: RewardType;
       dateRange?: "all" | "month" | "quarter" | "year" | "custom";
       startDate?: string;
       endDate?: string;

@@ -8,6 +8,7 @@ import type {
   CustomerQueueStatusDTO,
   QueueProgressDTO,
 } from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 // Define interfaces for data structures (maintaining backward compatibility)
 export interface CustomerQueue {
@@ -95,7 +96,7 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
     return {
       id: dto.id,
       queueNumber: dto.queueNumber,
-      status: dto.status,
+      status: this.mapQueueStatusToString(dto.status),
       customerName: dto.customerName,
       customerPhone: dto.customerPhone,
       services: dto.services,
@@ -133,6 +134,24 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
       "ติดตามสถานะคิว",
       "ติดตามสถานะคิวของคุณและรับการแจ้งเตือนเมื่อใกล้ถึงคิว"
     );
+  }
+
+  /**
+   * Map QueueStatus enum to string literals for customer queue status view
+   */
+  private mapQueueStatusToString(status: QueueStatus): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" {
+    switch (status) {
+      case QueueStatus.WAITING:
+        return "waiting";
+      case QueueStatus.SERVING:
+        return "serving";
+      case QueueStatus.COMPLETED:
+        return "completed";
+      case QueueStatus.CANCELLED:
+        return "cancelled";
+      default:
+        return "waiting";
+    }
   }
 }
 

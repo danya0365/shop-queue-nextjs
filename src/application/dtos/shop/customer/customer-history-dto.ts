@@ -1,12 +1,15 @@
 // Customer History DTOs following Clean Architecture principles
 
+import { PaymentMethod } from "@/src/domain/entities/backend/backend-payment.entity";
+import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
+
 export interface CustomerQueueHistoryDTO {
   id: string;
   queueNumber: string;
   shopName: string;
   services: HistoryServiceDTO[];
   totalAmount: number;
-  status: "completed" | "cancelled" | "no_show";
+  status: QueueStatus;
   queueDate: string;
   queueTime: string;
   completedAt?: string;
@@ -15,7 +18,7 @@ export interface CustomerQueueHistoryDTO {
   rating?: number;
   feedback?: string;
   employeeName?: string;
-  paymentMethod?: "cash" | "card" | "qr" | "transfer";
+  paymentMethod?: PaymentMethod;
 }
 
 export interface HistoryServiceDTO {

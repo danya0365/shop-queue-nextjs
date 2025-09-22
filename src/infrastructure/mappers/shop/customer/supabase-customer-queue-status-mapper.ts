@@ -3,6 +3,7 @@ import type {
   QueueProgressEntity,
   QueueServiceEntity,
 } from "@/src/domain/entities/shop/customer/customer-queue-status.entity";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
   CustomerQueueStatusSchema,
   QueueProgressSchema,
@@ -21,7 +22,7 @@ export class SupabaseCustomerQueueStatusMapper {
     return {
       id: String(data.id || ""),
       queueNumber: String(data.queue_number || ""),
-      status: (data.status as "waiting" | "confirmed" | "serving" | "completed" | "cancelled") || "waiting",
+      status: this.mapStatusToEnum(data.status) || QueueStatus.WAITING,
       customerName: String(data.customer_name || ""),
       customerPhone: String(data.customer_phone || ""),
       services: this.toQueueServiceNames(data.services || []),
@@ -82,7 +83,7 @@ export class SupabaseCustomerQueueStatusMapper {
       shop_id: "", // This should be set by the repository
       customer_id: "", // This should be set by the repository
       queue_number: entity.queueNumber,
-      status: entity.status,
+      status: this.mapStatusToString(entity.status),
       customer_name: entity.customerName,
       customer_phone: entity.customerPhone,
       estimated_wait_time: entity.estimatedWaitTime,
@@ -105,5 +106,53 @@ export class SupabaseCustomerQueueStatusMapper {
       average_service_time: entity.averageServiceTime,
       estimated_call_time: entity.estimatedCallTime.toISOString(),
     };
+  }
+
+  /**
+   * Map status string to QueueStatus enum
+   * @param status Status string from database
+   * @returns QueueStatus enum value or undefined
+   */
+  private static mapStatusToEnum(status: string | undefined): QueueStatus | undefined {
+    if (!status) return undefined;
+    
+    switch (status.toLowerCase()) {
+      case "waiting":
+        return QueueStatus.WAITING;
+      case "confirmed":
+        return QueueStatus.WAITING; // Map confirmed to waiting for customer view
+      case "serving":
+        return QueueStatus.SERVING;
+      case "completed":
+        return QueueStatus.COMPLETED;
+      case "cancelled":
+        return QueueStatus.CANCELLED;
+      case "no_show":
+        return QueueStatus.CANCELLED; // Map no_show to cancelled for customer view
+      default:
+        return QueueStatus.WAITING; // Default to waiting if unknown
+    }
+  }
+
+  /**
+   * Map QueueStatus enum to status string
+   * @param status QueueStatus enum value
+   * @returns Status string for database
+   */
+  private static mapStatusToString(status: QueueStatus | undefined): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" | undefined {
+    if (!status) return undefined;
+    
+    switch (status) {
+      case QueueStatus.WAITING:
+        return "waiting";
+      case QueueStatus.SERVING:
+        return "serving";
+      case QueueStatus.COMPLETED:
+        return "completed";
+      case QueueStatus.CANCELLED:
+        return "cancelled";
+      default:
+        return "waiting"; // Default to waiting if unknown
+    }
   }
 }

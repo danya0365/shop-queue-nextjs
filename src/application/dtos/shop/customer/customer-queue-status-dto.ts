@@ -3,13 +3,15 @@
  * Following Clean Architecture principles
  */
 
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+
 /**
  * Customer queue DTO for data transfer between layers
  */
 export interface CustomerQueueStatusDTO {
   id: string;
   queueNumber: string;
-  status: "waiting" | "confirmed" | "serving" | "completed" | "cancelled";
+  status: QueueStatus;
   customerName: string;
   customerPhone: string;
   services: string[];

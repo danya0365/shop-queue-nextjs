@@ -3,13 +3,15 @@
  * Following Clean Architecture principles
  */
 
+import { QueueStatus } from "../backend/backend-queue.entity";
+
 /**
  * Customer queue entity representing a customer's queue status
  */
 export interface CustomerQueueStatusEntity {
   id: string;
   queueNumber: string;
-  status: "waiting" | "confirmed" | "serving" | "completed" | "cancelled";
+  status: QueueStatus;
   customerName: string;
   customerPhone: string;
   services: string[];

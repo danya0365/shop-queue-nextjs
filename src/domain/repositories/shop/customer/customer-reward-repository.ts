@@ -1,9 +1,10 @@
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import type {
-  CustomerRewardEntity,
-  CustomerPointsEntity,
-  RewardTransactionEntity,
   AvailableRewardEntity,
+  CustomerPointsEntity,
+  CustomerRewardEntity,
   CustomerRewardStatsEntity,
+  RewardTransactionEntity,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 
@@ -31,7 +32,7 @@ export class ShopCustomerRewardError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
     this.name = "ShopCustomerRewardError";
@@ -50,7 +51,10 @@ export interface ShopCustomerRewardRepository {
    * @returns Customer points entity
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getCustomerPoints(shopId: string, customerId: string): Promise<CustomerPointsEntity>;
+  getCustomerPoints(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPointsEntity>;
 
   /**
    * Get available rewards with pagination and filters
@@ -58,17 +62,19 @@ export interface ShopCustomerRewardRepository {
    * @returns Paginated available rewards
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getAvailableRewards(params: PaginationParams & {
-    shopId: string;
-    customerId?: string;
-    filters?: {
-      category?: string;
-      type?: "discount" | "free_item" | "cashback" | "points";
-      isAvailable?: boolean;
-      minPointsCost?: number;
-      maxPointsCost?: number;
-    };
-  }): Promise<{
+  getAvailableRewards(
+    params: PaginationParams & {
+      shopId: string;
+      customerId?: string;
+      filters?: {
+        category?: string;
+        type?: RewardType;
+        isAvailable?: boolean;
+        minPointsCost?: number;
+        maxPointsCost?: number;
+      };
+    }
+  ): Promise<{
     data: AvailableRewardEntity[];
     pagination: {
       currentPage: number;
@@ -86,17 +92,19 @@ export interface ShopCustomerRewardRepository {
    * @returns Paginated redeemed rewards
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getRedeemedRewards(params: PaginationParams & {
-    shopId: string;
-    customerId: string;
-    filters?: {
-      category?: string;
-      type?: "discount" | "free_item" | "cashback" | "points";
-      dateRange?: "all" | "month" | "quarter" | "year" | "custom";
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
+  getRedeemedRewards(
+    params: PaginationParams & {
+      shopId: string;
+      customerId: string;
+      filters?: {
+        category?: string;
+        type?: RewardType;
+        dateRange?: "all" | "month" | "quarter" | "year" | "custom";
+        startDate?: string;
+        endDate?: string;
+      };
+    }
+  ): Promise<{
     data: CustomerRewardEntity[];
     pagination: {
       currentPage: number;
@@ -114,16 +122,18 @@ export interface ShopCustomerRewardRepository {
    * @returns Paginated reward transactions
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getRewardTransactions(params: PaginationParams & {
-    shopId: string;
-    customerId: string;
-    filters?: {
-      type?: "earned" | "redeemed" | "expired";
-      dateRange?: "all" | "month" | "quarter" | "year" | "custom";
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
+  getRewardTransactions(
+    params: PaginationParams & {
+      shopId: string;
+      customerId: string;
+      filters?: {
+        type?: "earned" | "redeemed" | "expired";
+        dateRange?: "all" | "month" | "quarter" | "year" | "custom";
+        startDate?: string;
+        endDate?: string;
+      };
+    }
+  ): Promise<{
     data: RewardTransactionEntity[];
     pagination: {
       currentPage: number;
@@ -143,7 +153,11 @@ export interface ShopCustomerRewardRepository {
    * @returns Reward details
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getRewardById(shopId: string, rewardId: string, customerId?: string): Promise<AvailableRewardEntity | CustomerRewardEntity>;
+  getRewardById(
+    shopId: string,
+    rewardId: string,
+    customerId?: string
+  ): Promise<AvailableRewardEntity | CustomerRewardEntity>;
 
   /**
    * Redeem a reward for a customer
@@ -153,7 +167,11 @@ export interface ShopCustomerRewardRepository {
    * @returns Redeemed reward entity
    * @throws ShopCustomerRewardError if the operation fails
    */
-  redeemReward(shopId: string, customerId: string, rewardId: string): Promise<CustomerRewardEntity>;
+  redeemReward(
+    shopId: string,
+    customerId: string,
+    rewardId: string
+  ): Promise<CustomerRewardEntity>;
 
   /**
    * Get customer reward statistics
@@ -162,7 +180,10 @@ export interface ShopCustomerRewardRepository {
    * @returns Customer reward statistics
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getCustomerRewardStats(shopId: string, customerId: string): Promise<CustomerRewardStatsEntity>;
+  getCustomerRewardStats(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerRewardStatsEntity>;
 
   /**
    * Get customer information for rewards
@@ -171,7 +192,10 @@ export interface ShopCustomerRewardRepository {
    * @returns Customer information
    * @throws ShopCustomerRewardError if the operation fails
    */
-  getCustomerInfo(shopId: string, customerId: string): Promise<{
+  getCustomerInfo(
+    shopId: string,
+    customerId: string
+  ): Promise<{
     customerName: string;
     memberSince: string;
   }>;

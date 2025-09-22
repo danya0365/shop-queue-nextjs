@@ -1,3 +1,4 @@
+import { PaymentMethod } from "@/src/application/dtos/backend/payments-dto";
 import type {
   CustomerHistoryDataDTO,
   CustomerQueueHistoryDTO,
@@ -5,10 +6,11 @@ import type {
   HistoryFiltersDTO,
   PaginationDTO,
 } from "@/src/application/dtos/shop/customer/customer-history-dto";
+import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import type {
+  CustomerInfoEntity,
   CustomerQueueHistoryEntity,
   CustomerStatsEntity,
-  CustomerInfoEntity,
 } from "@/src/domain/entities/shop/customer/customer-history.entity";
 
 /**
@@ -39,28 +41,30 @@ export class CustomerHistoryMapper {
       hasPrev: boolean;
     };
   }): CustomerHistoryDataDTO {
-    const queueHistory: CustomerQueueHistoryDTO[] = data.queueHistory.map(queue => ({
-      id: queue.id,
-      queueNumber: queue.queueNumber,
-      shopName: queue.shopName,
-      services: queue.services.map(service => ({
-        id: service.id,
-        name: service.name,
-        price: service.price,
-        quantity: service.quantity,
-      })),
-      totalAmount: queue.totalAmount,
-      status: queue.status,
-      queueDate: queue.queueDate,
-      queueTime: queue.queueTime,
-      completedAt: queue.completedAt,
-      waitTime: queue.waitTime,
-      serviceTime: queue.serviceTime,
-      rating: queue.rating,
-      feedback: queue.feedback,
-      employeeName: queue.employeeName,
-      paymentMethod: queue.paymentMethod,
-    }));
+    const queueHistory: CustomerQueueHistoryDTO[] = data.queueHistory.map(
+      (queue) => ({
+        id: queue.id,
+        queueNumber: queue.queueNumber,
+        shopName: queue.shopName,
+        services: queue.services.map((service) => ({
+          id: service.id,
+          name: service.name,
+          price: service.price,
+          quantity: service.quantity,
+        })),
+        totalAmount: queue.totalAmount,
+        status: queue.status as QueueStatus,
+        queueDate: queue.queueDate,
+        queueTime: queue.queueTime,
+        completedAt: queue.completedAt,
+        waitTime: queue.waitTime,
+        serviceTime: queue.serviceTime,
+        rating: queue.rating,
+        feedback: queue.feedback,
+        employeeName: queue.employeeName,
+        paymentMethod: queue.paymentMethod as PaymentMethod,
+      })
+    );
 
     const customerStats: CustomerStatsDTO = {
       totalQueues: data.customerStats.totalQueues,
@@ -80,14 +84,16 @@ export class CustomerHistoryMapper {
       endDate: data.filters.endDate,
     };
 
-    const pagination: PaginationDTO | undefined = data.pagination ? {
-      currentPage: data.pagination.currentPage,
-      perPage: data.pagination.perPage,
-      totalItems: data.pagination.totalItems,
-      totalPages: data.pagination.totalPages,
-      hasNext: data.pagination.hasNext,
-      hasPrev: data.pagination.hasPrev,
-    } : undefined;
+    const pagination: PaginationDTO | undefined = data.pagination
+      ? {
+          currentPage: data.pagination.currentPage,
+          perPage: data.pagination.perPage,
+          totalItems: data.pagination.totalItems,
+          totalPages: data.pagination.totalPages,
+          hasNext: data.pagination.hasNext,
+          hasPrev: data.pagination.hasPrev,
+        }
+      : undefined;
 
     return {
       queueHistory,
@@ -104,6 +110,8 @@ export class CustomerHistoryMapper {
   static toDomain(dto: CustomerHistoryDataDTO) {
     // This method can be implemented if needed for create/update operations
     // For now, we primarily need toDomain for reading data
-    throw new Error("toDomain not implemented for CustomerHistoryMapper - not needed for read operations");
+    throw new Error(
+      "toDomain not implemented for CustomerHistoryMapper - not needed for read operations"
+    );
   }
 }

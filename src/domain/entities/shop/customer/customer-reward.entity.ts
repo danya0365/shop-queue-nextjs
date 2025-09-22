@@ -3,6 +3,9 @@
  * Following Clean Architecture principles with proper separation of concerns
  */
 
+import { MembershipTier } from "../backend/backend-customer.entity";
+import { RewardType } from "../backend/backend-reward.entity";
+
 /**
  * Customer reward entity representing a reward that a customer can redeem
  */
@@ -10,7 +13,7 @@ export interface CustomerRewardEntity {
   id: string;
   name: string;
   description: string;
-  type: "discount" | "free_item" | "cashback" | "points";
+  type: RewardType;
   value: number;
   pointsCost: number;
   category: string;
@@ -38,7 +41,7 @@ export interface CustomerPointsEntity {
   totalRedeemed: number;
   pointsExpiring: number;
   expiryDate?: string;
-  tier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  tier: MembershipTier;
   nextTierPoints: number;
   tierBenefits: string[];
   lastUpdated: string;
@@ -75,7 +78,7 @@ export interface AvailableRewardEntity {
   isAvailable: boolean;
   stock?: number;
   shopId: string;
-  type: "discount" | "free_item" | "cashback" | "points";
+  type: RewardType;
   value?: number;
   termsAndConditions?: string[];
   expiryDate?: string;

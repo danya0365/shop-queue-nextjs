@@ -1,21 +1,22 @@
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
+  JoinQueueResultEntity,
+  QueueJoinEntity,
   ServiceOptionEntity,
   ShopQueueInfoEntity,
-  QueueJoinEntity,
-  JoinQueueResultEntity,
 } from "@/src/domain/entities/shop/customer/queue-join.entity";
 
 /**
  * Queue join repository error types
  */
 export enum ShopCustomerQueueJoinErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  SHOP_NOT_ACCEPTING_QUEUES = 'shop_not_accepting_queues',
-  SERVICE_NOT_AVAILABLE = 'service_not_available',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  SHOP_NOT_ACCEPTING_QUEUES = "shop_not_accepting_queues",
+  SERVICE_NOT_AVAILABLE = "service_not_available",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -28,10 +29,10 @@ export class ShopCustomerQueueJoinError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopCustomerQueueJoinError';
+    this.name = "ShopCustomerQueueJoinError";
   }
 }
 
@@ -62,7 +63,12 @@ export interface ShopCustomerQueueJoinRepository {
    * @returns Result of the queue join operation
    * @throws ShopCustomerQueueJoinError if the operation fails
    */
-  joinQueue(queueData: Omit<QueueJoinEntity, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<JoinQueueResultEntity>;
+  joinQueue(
+    queueData: Omit<
+      QueueJoinEntity,
+      "id" | "status" | "createdAt" | "updatedAt"
+    >
+  ): Promise<JoinQueueResultEntity>;
 
   /**
    * Get customer queues with pagination and status filter
@@ -77,7 +83,7 @@ export interface ShopCustomerQueueJoinRepository {
     customerId: string,
     page?: number,
     limit?: number,
-    status?: "waiting" | "serving" | "completed" | "cancelled"
+    status?: QueueStatus
   ): Promise<{
     queues: QueueJoinEntity[];
     totalCount: number;

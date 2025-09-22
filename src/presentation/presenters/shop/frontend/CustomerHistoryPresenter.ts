@@ -6,6 +6,7 @@ import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import type { HistoryFiltersDTO } from "@/src/application/dtos/shop/customer/customer-history-dto";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 // Define interfaces for data structures
 export interface CustomerQueueHistory {
@@ -129,7 +130,7 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
           quantity: service.quantity,
         })),
         totalAmount: queue.totalAmount,
-        status: queue.status,
+        status: this.mapStatusToString(queue.status),
         queueDate: queue.queueDate,
         queueTime: queue.queueTime,
         completedAt: queue.completedAt,
@@ -184,6 +185,26 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
       "ประวัติการใช้บริการ - ลูกค้า",
       "ดูประวัติการจองคิวและการใช้บริการของคุณ"
     );
+  }
+
+  /**
+   * Map QueueStatus enum to string literals for customer history view
+   */
+  private mapStatusToString(status: QueueStatus): "completed" | "cancelled" | "no_show" {
+    switch (status) {
+      case QueueStatus.COMPLETED:
+        return "completed";
+      case QueueStatus.CANCELLED:
+        return "cancelled";
+      case QueueStatus.WAITING:
+      case QueueStatus.SERVING:
+        // For customer history, waiting and serving are not shown as final states
+        // They should be mapped to cancelled or completed based on business logic
+        // For now, we'll map them to cancelled as they represent incomplete transactions
+        return "cancelled";
+      default:
+        return "cancelled";
+    }
   }
 }
 

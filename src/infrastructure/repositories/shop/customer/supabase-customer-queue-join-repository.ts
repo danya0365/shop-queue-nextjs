@@ -1,4 +1,4 @@
-import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { QueuePriority, QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
   JoinQueueResultEntity,
   QueueJoinEntity,
@@ -243,7 +243,7 @@ export class SupabaseCustomerQueueJoinRepository
     customerId: string,
     page: number = 1,
     limit: number = 10,
-    status?: "waiting" | "serving" | "completed" | "cancelled"
+    status?: QueueStatus
   ): Promise<{
     queues: QueueJoinEntity[];
     totalCount: number;
@@ -470,22 +470,22 @@ export class SupabaseCustomerQueueJoinRepository
    */
   private mapStatusToEnum(
     status: string
-  ): "waiting" | "serving" | "completed" | "cancelled" {
+  ): QueueStatus {
     switch (status.toLowerCase()) {
       case "waiting":
-        return "waiting";
+        return QueueStatus.WAITING;
       case "serving":
-        return "serving";
+        return QueueStatus.SERVING;
       case "completed":
-        return "completed";
+        return QueueStatus.COMPLETED;
       case "cancelled":
-        return "cancelled";
+        return QueueStatus.CANCELLED;
       case "confirmed":
-        return "waiting"; // Map confirmed to waiting for customer view
+        return QueueStatus.WAITING; // Map confirmed to waiting for customer view
       case "no_show":
-        return "cancelled"; // Map no_show to cancelled for customer view
+        return QueueStatus.CANCELLED; // Map no_show to cancelled for customer view
       default:
-        return "waiting"; // Default to waiting if unknown
+        return QueueStatus.WAITING; // Default to waiting if unknown
     }
   }
 }

@@ -12,6 +12,8 @@ import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
+import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 
 // Define interfaces for data structures
 export interface CustomerReward {
@@ -139,7 +141,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
       // Convert filters to DTO format
       const availableRewardsFilters: AvailableRewardsFiltersDTO = {
-        type: filters?.type !== "all" ? filters?.type : undefined,
+        type: filters?.type !== "all" ? this.mapStringToRewardType(filters?.type) : undefined,
         category: filters?.category !== "all" ? filters?.category : undefined,
         isAvailable:
           filters?.status === "available"
@@ -150,7 +152,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       };
 
       const redeemedRewardsFilters: RedeemedRewardsFiltersDTO = {
-        type: filters?.type !== "all" ? filters?.type : undefined,
+        type: filters?.type !== "all" ? this.mapStringToRewardType(filters?.type) : undefined,
         dateRange:
           filters?.dateRange !== "all" ? filters?.dateRange : undefined,
         startDate: filters?.startDate,
@@ -187,7 +189,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         totalRedeemed: customerRewardsData.customerPoints.totalRedeemed,
         pointsExpiring: customerRewardsData.customerPoints.pointsExpiring,
         expiryDate: customerRewardsData.customerPoints.expiryDate,
-        tier: customerRewardsData.customerPoints.tier,
+        tier: this.mapMembershipTierToString(customerRewardsData.customerPoints.tier),
         nextTierPoints: customerRewardsData.customerPoints.nextTierPoints,
         tierBenefits: customerRewardsData.customerPoints.tierBenefits,
       };
@@ -213,7 +215,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
           id: reward.id,
           name: reward.name,
           description: reward.description,
-          type: reward.type,
+          type: this.mapRewardTypeToString(reward.type),
           value: reward.value,
           pointsCost: reward.pointsCost,
           category: reward.category,
@@ -341,7 +343,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
           id: customerReward.id,
           name: customerReward.name,
           description: customerReward.description,
-          type: customerReward.type,
+          type: this.mapRewardTypeToString(customerReward.type),
           value: customerReward.value,
           pointsCost: customerReward.pointsCost,
           category: customerReward.category,
@@ -494,6 +496,62 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       "รางวัลและแต้มสะสม - ลูกค้า",
       "ดูแต้มสะสม แลกของรางวัล และติดตามสิทธิประโยชน์ต่างๆ"
     );
+  }
+
+  /**
+   * Map string literals to RewardType enum
+   */
+  private mapStringToRewardType(type?: string): RewardType | undefined {
+    if (!type) return undefined;
+    switch (type) {
+      case "discount":
+        return RewardType.DISCOUNT;
+      case "free_item":
+        return RewardType.FREE_ITEM;
+      case "cashback":
+        return RewardType.CASHBACK;
+      case "points":
+        // Map "points" to SPECIAL_PRIVILEGE as it's the closest match
+        return RewardType.SPECIAL_PRIVILEGE;
+      default:
+        return RewardType.DISCOUNT;
+    }
+  }
+
+  /**
+   * Map RewardType enum to string literals
+   */
+  private mapRewardTypeToString(type: RewardType): "discount" | "free_item" | "cashback" | "points" {
+    switch (type) {
+      case RewardType.DISCOUNT:
+        return "discount";
+      case RewardType.FREE_ITEM:
+        return "free_item";
+      case RewardType.CASHBACK:
+        return "cashback";
+      case RewardType.SPECIAL_PRIVILEGE:
+        return "points";
+      default:
+        return "discount";
+    }
+  }
+
+  /**
+   * Map MembershipTier enum to string literals
+   */
+  private mapMembershipTierToString(tier: MembershipTier): "Bronze" | "Silver" | "Gold" | "Platinum" {
+    switch (tier) {
+      case MembershipTier.BRONZE:
+        return "Bronze";
+      case MembershipTier.SILVER:
+        return "Silver";
+      case MembershipTier.GOLD:
+        return "Gold";
+      case MembershipTier.PLATINUM:
+        return "Platinum";
+      default:
+        return "Bronze";
+    }
   }
 }
 

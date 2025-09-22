@@ -1,10 +1,13 @@
+import { PaymentMethod } from "../backend/backend-payment.entity";
+import { QueueStatus } from "../backend/backend-queue.entity";
+
 export interface CustomerQueueHistoryEntity {
   id: string;
   queueNumber: string;
   shopName: string;
   services: CustomerQueueServiceEntity[];
   totalAmount: number;
-  status: "completed" | "cancelled" | "no_show";
+  status: QueueStatus;
   queueDate: string;
   queueTime: string;
   completedAt?: string;
@@ -13,7 +16,7 @@ export interface CustomerQueueHistoryEntity {
   rating?: number;
   feedback?: string;
   employeeName?: string;
-  paymentMethod?: "cash" | "card" | "qr" | "transfer";
+  paymentMethod?: PaymentMethod;
 }
 
 export interface CustomerQueueServiceEntity {

@@ -12,7 +12,7 @@ import type {
   QueueServiceSchema,
   JoinQueueResultSchema,
 } from "@/src/infrastructure/schemas/shop/customer/queue-join.schema";
-import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { QueuePriority, QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 /**
  * Mapper for converting between Supabase data and domain entities
@@ -61,7 +61,7 @@ export class SupabaseQueueJoinMapper {
       services: [], // Services will be joined separately
       specialRequests: data.note ? String(data.note) : undefined,
       priority: (data.priority as QueuePriority) || QueuePriority.NORMAL,
-      status: (data.status as "waiting" | "serving" | "completed" | "cancelled") || "waiting",
+      status: this.mapStatusToEnum(data.status) || QueueStatus.WAITING,
       queueNumber: data.queue_number ? String(data.queue_number) : undefined,
       createdAt: data.created_at ? String(data.created_at) : undefined,
       updatedAt: data.updated_at ? String(data.updated_at) : undefined,
@@ -132,5 +132,30 @@ export class SupabaseQueueJoinMapper {
    */
   static toQueueServiceEntities(data: QueueServiceSchema[]): QueueServiceEntity[] {
     return data.map(item => this.toQueueServiceEntity(item));
+  }
+
+  /**
+   * Map status string to QueueStatus enum
+   */
+  private static mapStatusToEnum(status: string | null | undefined): QueueStatus | undefined {
+    if (!status) return undefined;
+    
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case 'waiting':
+        return QueueStatus.WAITING;
+      case 'serving':
+        return QueueStatus.SERVING;
+      case 'completed':
+        return QueueStatus.COMPLETED;
+      case 'cancelled':
+        return QueueStatus.CANCELLED;
+      case 'confirmed':
+        return QueueStatus.WAITING; // Map confirmed to waiting for compatibility
+      case 'no_show':
+        return QueueStatus.CANCELLED; // Map no_show to cancelled for compatibility
+      default:
+        return QueueStatus.WAITING;
+    }
   }
 }
