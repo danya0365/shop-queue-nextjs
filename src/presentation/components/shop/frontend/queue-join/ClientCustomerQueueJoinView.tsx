@@ -237,9 +237,7 @@ export function ClientCustomerQueueJoinView({
     <div className="flex flex-col gap-8">
       {/* Shop Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold frontend-text-primary mb-2">
-          {shopName}
-        </h1>
+        <h1 className="text-3xl font-bold frontend-text-primary">{shopName}</h1>
         <div className="flex flex-row items-center gap-4 text-sm frontend-text-secondary">
           <span>⏰ เวลารอโดยประมาณ: {estimatedWaitTime} นาที</span>
           <span>👥 คิวข้างหน้า: {currentQueueLength} คิว</span>
@@ -258,15 +256,15 @@ export function ClientCustomerQueueJoinView({
       <div className="flex flex-row items-start gap-8">
         {/* Service Selection */}
         <div className="flex flex-col flex-1">
-          <div className="frontend-card">
-            <div className="p-6 border-b frontend-card-border">
+          <div className="frontend-card p-6 gap-6 flex flex-col">
+            <div className="border-b frontend-card-border">
               <h2 className="text-xl font-semibold frontend-text-primary">
                 เลือกบริการ
               </h2>
             </div>
-            <div className="p-6">
+            <div className="">
               {/* Category Filter */}
-              <div className="flex flex-wrap gap-3 mb-6">
+              <div className="flex flex-wrap gap-3">
                 {["ทั้งหมด", ...categories].map((category) => (
                   <button
                     key={category}
@@ -284,7 +282,7 @@ export function ClientCustomerQueueJoinView({
             </div>
 
             {/* Services Grid */}
-            <div className="p-6">
+            <div className="">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredServices.map((service) => {
                   const isSelected = selectedServices.includes(service.id);
