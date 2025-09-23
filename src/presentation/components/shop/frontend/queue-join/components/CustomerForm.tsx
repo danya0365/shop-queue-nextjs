@@ -100,23 +100,55 @@ export function CustomerForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium frontend-text-primary mb-2">
+          <label className="block text-sm font-medium frontend-text-primary mb-3">
             ความเร่งด่วน
           </label>
-          <select
-            value={priority}
-            onChange={(e) =>
-              setPriority(e.target.value as QueuePriority)
-            }
-            className="w-full frontend-input min-h-[44px] px-4 py-3 text-base"
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {priorityOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-                {option.price > 0 && ` (+฿${option.price})`}
-              </option>
+              <label
+                key={option.value}
+                className={`relative flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  priority === option.value
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="priority"
+                  value={option.value}
+                  checked={priority === option.value}
+                  onChange={(e) =>
+                    setPriority(e.target.value as QueuePriority)
+                  }
+                  className="sr-only"
+                />
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mb-2 ${
+                    priority === option.value
+                      ? 'border-primary bg-primary'
+                      : 'border-gray-300'
+                  }`}
+                >
+                  {priority === option.value && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </div>
+                <span className="font-medium text-sm text-center mb-1">
+                  {option.label}
+                </span>
+                {option.price > 0 ? (
+                  <span className="text-xs text-primary font-semibold">
+                    +฿{option.price}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-500">
+                    ฟรี
+                  </span>
+                )}
+              </label>
             ))}
-          </select>
+          </div>
         </div>
 
         <div>
