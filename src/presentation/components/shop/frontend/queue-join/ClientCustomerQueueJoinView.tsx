@@ -236,9 +236,9 @@ export function ClientCustomerQueueJoinView({
   return (
     <div className="flex flex-col gap-8">
       {/* Shop Header */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold frontend-text-primary">{shopName}</h1>
-        <div className="flex flex-row items-center gap-4 text-sm frontend-text-secondary">
+      <div className="flex flex-col gap-2 sm:gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold frontend-text-primary">{shopName}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm frontend-text-secondary">
           <span>⏰ เวลารอโดยประมาณ: {estimatedWaitTime} นาที</span>
           <span>👥 คิวข้างหน้า: {currentQueueLength} คิว</span>
           <span
@@ -253,23 +253,23 @@ export function ClientCustomerQueueJoinView({
         </div>
       </div>
 
-      <div className="flex flex-row items-start gap-8">
+      <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
         {/* Service Selection */}
-        <div className="flex flex-col flex-1">
-          <div className="frontend-card p-6 gap-6 flex flex-col">
-            <div className="border-b frontend-card-border">
-              <h2 className="text-xl font-semibold frontend-text-primary">
+        <div className="flex flex-col flex-1 w-full">
+          <div className="frontend-card p-4 sm:p-6 gap-4 sm:gap-6 flex flex-col">
+            <div className="border-b frontend-card-border pb-4">
+              <h2 className="text-lg sm:text-xl font-semibold frontend-text-primary">
                 เลือกบริการ
               </h2>
             </div>
-            <div className="">
+            <div className="mb-6">
               {/* Category Filter */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {["ทั้งหมด", ...categories].map((category) => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`frontend-category-filter ${
+                    className={`frontend-category-filter px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base ${
                       selectedCategory === category
                         ? "frontend-category-filter-active"
                         : "frontend-category-filter-inactive"
@@ -283,7 +283,7 @@ export function ClientCustomerQueueJoinView({
 
             {/* Services Grid */}
             <div className="">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredServices.map((service) => {
                   const isSelected = selectedServices.includes(service.id);
                   const isDisabled = service.available === false;
@@ -296,60 +296,65 @@ export function ClientCustomerQueueJoinView({
                         !isDisabled && handleServiceToggle(service.id)
                       }
                       className={cn(
-                        "p-4 transition-all",
+                        "p-3 sm:p-4 transition-all relative min-h-[200px] sm:min-h-[220px]",
                         isSelected
                           ? "frontend-item-card-selected"
                           : "frontend-item-card",
                         isDisabled
                           ? "frontend-item-card-disabled cursor-not-allowed"
-                          : "cursor-pointer"
+                          : "cursor-pointer hover:scale-[1.02]"
                       )}
                     >
-                      <div className="text-center">
-                        <span className="text-3xl mb-2 block">
-                          {service.icon}
-                        </span>
-                        <h3 className="font-semibold frontend-text-primary mb-1">
-                          {service.name}
-                        </h3>
-                        <p className="text-sm frontend-text-secondary mb-2">
-                          {service.description}
-                        </p>
-                        <div className="flex justify-between items-center text-sm mb-3">
-                          <span className="font-bold frontend-service-price">
-                            ฿{service.price}
+                      <div className="text-center h-full flex flex-col justify-between">
+                        <div>
+                          <span className="text-2xl sm:text-3xl mb-2 block">
+                            {service.icon}
                           </span>
-                          <span className="frontend-text-muted">
-                            ~{service.estimatedTime} นาที
-                          </span>
+                          <h3 className="font-semibold frontend-text-primary mb-1 text-sm sm:text-base">
+                            {service.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm frontend-text-secondary mb-2 line-clamp-2">
+                            {service.description}
+                          </p>
                         </div>
-
-                        {/* Quantity controls - only show for selected services */}
-                        {isSelected && (
-                          <div className="flex items-center justify-center space-x-2 mb-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                decreaseServiceQuantity(service.id);
-                              }}
-                              className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold transition-colors"
-                            >
-                              -
-                            </button>
-                            <span className="w-12 text-center font-semibold">
-                              {quantity}
+                        
+                        <div>
+                          <div className="flex justify-between items-center text-sm mb-3">
+                            <span className="font-bold frontend-service-price text-sm sm:text-base">
+                              ฿{service.price}
                             </span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                increaseServiceQuantity(service.id);
-                              }}
-                              className="w-8 h-8 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold transition-colors"
-                            >
-                              +
-                            </button>
+                            <span className="frontend-text-muted text-xs sm:text-sm">
+                              ~{service.estimatedTime} นาที
+                            </span>
                           </div>
-                        )}
+
+                          {/* Quantity controls - only show for selected services */}
+                          {isSelected && (
+                            <div className="flex items-center justify-center space-x-2 mb-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  decreaseServiceQuantity(service.id);
+                                }}
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 font-bold transition-colors active:scale-95"
+                              >
+                                -
+                              </button>
+                              <span className="w-12 text-center font-semibold text-sm sm:text-base">
+                                {quantity}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  increaseServiceQuantity(service.id);
+                                }}
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white font-bold transition-colors active:scale-95"
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </div>
 
                         {isSelected && (
                           <div className="absolute inset-0 border-2 border-green-500 rounded-lg pointer-events-none">
@@ -369,7 +374,7 @@ export function ClientCustomerQueueJoinView({
 
         {/* Order Summary & Form */}
         {device === "desktop" ? (
-          <StickyBox className="w-92 flex-none">
+          <StickyBox className="w-80 sm:w-92 flex-none">
             <div className="flex flex-col gap-6">
               <OrderSummary
                 selectedServices={selectedServices}
@@ -403,14 +408,14 @@ export function ClientCustomerQueueJoinView({
             <button
               onClick={() => setIsShowFinalOrderSummary(true)}
               className={cn(
-                "fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center gap-2",
+                "fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center gap-2 text-sm sm:text-base",
                 selectedServices.length === 0 && "hidden"
               )}
             >
               <span>เข้าคิว</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
