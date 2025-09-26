@@ -1,13 +1,16 @@
 import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
+import {
+  LocationDTO,
+  MarketplaceCategoryDTO,
+} from "@/src/application/dtos/shop/marketplace-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
-import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { IShopMarketplaceService } from "@/src/application/services/shop/ShopMarketplaceService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseSubscriptionPresenter } from "@/src/presentation/presenters/base/BaseSubscriptionPresenter";
-import { MarketplaceCategoryDTO, LocationDTO } from "@/src/application/dtos/shop/marketplace-dto";
 
 export interface ShopMarketplaceViewModel {
   // Statistics for marketplace
@@ -55,12 +58,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
 
   async getViewModel(): Promise<ShopMarketplaceViewModel> {
     try {
-      // Check if user is authenticated
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       // Get shops data with pagination
       const shopsResult = await this.marketplaceService.getAllShops({
         page: 1,
@@ -173,8 +170,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         priceRange: filters?.priceRange || null,
         ratingFilter: filters?.rating || null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
-        popularCategories:
-          await this.marketplaceService.getPopularCategories(),
+        popularCategories: await this.marketplaceService.getPopularCategories(),
         popularLocations: await this.marketplaceService.getPopularLocations(),
       };
     } catch (error) {
@@ -221,8 +217,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         priceRange: null,
         ratingFilter: null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
-        popularCategories:
-          await this.marketplaceService.getPopularCategories(),
+        popularCategories: await this.marketplaceService.getPopularCategories(),
         popularLocations: await this.marketplaceService.getPopularLocations(),
       };
     } catch (error) {
@@ -269,8 +264,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         priceRange: null,
         ratingFilter: null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
-        popularCategories:
-          await this.marketplaceService.getPopularCategories(),
+        popularCategories: await this.marketplaceService.getPopularCategories(),
         popularLocations: await this.marketplaceService.getPopularLocations(),
       };
     } catch (error) {
