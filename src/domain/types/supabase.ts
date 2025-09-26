@@ -4286,6 +4286,123 @@ export type Database = {
           other_count: number
         }[]
       }
+      get_marketplace_popular_categories: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          color: string
+          icon: string
+          slug: string
+          is_active: boolean
+          sort_order: number
+          shop_count: number
+        }[]
+      }
+      get_marketplace_popular_locations: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          address: string
+          phone: string
+          email: string
+          website: string
+          is_active: boolean
+          shop_count: number
+        }[]
+      }
+      get_marketplace_shops: {
+        Args: {
+          p_page?: number
+          p_limit?: number
+          p_search?: string
+          p_status?: string
+          p_is_featured?: boolean
+          p_category_id?: string
+          p_sort_field?: string
+          p_sort_direction?: string
+        }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          address: string
+          phone: string
+          email: string
+          website: string
+          logo: string
+          qr_code_url: string
+          currency: string
+          language: string
+          timezone: string
+          status: string
+          created_at: string
+          updated_at: string
+          is_featured: boolean
+          rating: number
+          total_reviews: number
+          total_queues: number
+        }[]
+      }
+      get_marketplace_shops_by_category: {
+        Args: { p_category_id: string; p_page?: number; p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          address: string
+          phone: string
+          email: string
+          website: string
+          logo: string
+          qr_code_url: string
+          currency: string
+          language: string
+          timezone: string
+          status: string
+          created_at: string
+          updated_at: string
+          is_featured: boolean
+          rating: number
+          total_reviews: number
+          total_queues: number
+        }[]
+      }
+      get_marketplace_shops_by_location: {
+        Args: { p_location_name: string; p_page?: number; p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          address: string
+          phone: string
+          email: string
+          website: string
+          logo: string
+          qr_code_url: string
+          currency: string
+          language: string
+          timezone: string
+          status: string
+          created_at: string
+          updated_at: string
+          is_featured: boolean
+          rating: number
+          total_reviews: number
+          total_queues: number
+        }[]
+      }
+      get_marketplace_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_shops: number
+          active_shops: number
+          featured_shops: number
+          new_shops_this_month: number
+        }[]
+      }
       get_paginated_customers: {
         Args: {
           shop_id_param: string
@@ -4541,6 +4658,30 @@ export type Database = {
           cashback: Json
           special_privilege: Json
           total_rewards: number
+        }[]
+      }
+      get_shop_by_id: {
+        Args: { p_shop_id: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          address: string
+          phone: string
+          email: string
+          website: string
+          logo: string
+          qr_code_url: string
+          currency: string
+          language: string
+          timezone: string
+          status: string
+          created_at: string
+          updated_at: string
+          is_featured: boolean
+          rating: number
+          total_reviews: number
+          total_queues: number
         }[]
       }
       get_user_profiles: {
