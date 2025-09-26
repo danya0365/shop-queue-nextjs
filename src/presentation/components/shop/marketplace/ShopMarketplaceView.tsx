@@ -8,7 +8,6 @@ import { useState } from "react";
 import {
   CheckCircle,
   Clock,
-  Eye,
   Filter,
   MapPin,
   Phone,
@@ -228,9 +227,10 @@ export function ShopMarketplaceView({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {featuredShops.map((shop: ShopDTO) => (
-                <div
+                <Link
                   key={shop.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+                  href={`/shop/${shop.id}`}
+                  className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
                 >
                   <div className="relative">
                     {shop.logo ? (
@@ -264,15 +264,12 @@ export function ShopMarketplaceView({
                           {shop.rating}
                         </span>
                       </div>
-                      <button
-                        onClick={() => actions.openShopDetail(shop.id)}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
+                      <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                         ดูรายละเอียด
-                      </button>
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </section>
@@ -389,9 +386,10 @@ export function ShopMarketplaceView({
               }
             >
               {shopsData.shops.map((shop: ShopDTO) => (
-                <div
+                <Link
                   key={shop.id}
-                  className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+                  href={`/shop/${shop.id}`}
+                  className={`block bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow ${
                     viewMode === "grid" ? "overflow-hidden" : "flex items-center p-4"
                   }`}
                 >
@@ -457,12 +455,9 @@ export function ShopMarketplaceView({
                               {shop.totalServices}
                             </span>
                           </div>
-                          <button
-                            onClick={() => actions.openShopDetail(shop.id)}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                          >
+                          <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                             ดูรายละเอียด
-                          </button>
+                          </span>
                         </div>
                       </div>
                     </>
@@ -515,16 +510,13 @@ export function ShopMarketplaceView({
                         <button className="text-gray-400 hover:text-blue-500">
                           <Share2 className="h-5 w-5" />
                         </button>
-                        <button
-                          onClick={() => actions.openShopDetail(shop.id)}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
-                        >
+                        <span className="text-blue-600 hover:text-blue-700 font-medium">
                           ดูรายละเอียด
-                        </button>
+                        </span>
                       </div>
                     </>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}
