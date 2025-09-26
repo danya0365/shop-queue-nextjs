@@ -19,7 +19,7 @@ This template follows the established Clean Architecture pattern with:
 
 ```typescript
 import { [PageName]View } from "@/src/presentation/components/[page-name]/[PageName]View";
-import { [PageName]PresenterFactory } from "@/src/presentation/presenters/[PageName]Presenter";
+import { [PageName]PresenterFactory } from "@/src/presentation/presenters/[page-name]/[PageName]Presenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -65,7 +65,7 @@ export default async function [PageName]Page({ params }: [PageName]PageProps) {
   try {
     // Get view model from presenter
     const viewModel = await presenter.getViewModel(resolvedParams.[paramName]);
-    
+
     return (
       <[PageName]View [paramName]={resolvedParams.[paramName]} initialViewModel={viewModel} />
     );
@@ -107,16 +107,12 @@ export default async function [PageName]Page({ params }: [PageName]PageProps) {
 ## 2. Pattern: `src/presentation/presenters/[PageName]Presenter.ts`
 
 ```typescript
-import { Logger } from "winston";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import { IAuthService } from "@/src/application/services/auth/IAuthService";
 import { ISubscriptionService } from "@/src/application/services/subscription/ISubscriptionService";
 import { BasePresenter } from "@/src/presentation/presenters/BasePresenter";
-import { getServerContainer, getClientContainer } from "@/src/di/container";
-import type { [PageItem] } from "../types/[page-name].types";
-import type { [PageStats] } from "../types/[page-name].types";
-import type { Create[PageItem]Data } from "../types/[page-name].types";
-import type { Update[PageItem]Data } from "../types/[page-name].types";
-import type { [PageName]ViewModel } from "../types/[page-name].types";
+import { getServerContainer } from "@/src/di/server-container";
+import { getClientContainer } from "@/src/di/client-container";
 import { I[PageName]Service } from "@/src/application/services/[page-name]/I[PageName]Service";
 
 // Define your interfaces and types here
@@ -175,7 +171,7 @@ export class [PageName]Presenter extends BasePresenter {
   async getViewModel([paramName]: string): Promise<[PageName]ViewModel> {
     try {
       this.logger.info("[PageName]Presenter: Getting view model", { [paramName] });
-      
+
       // Get user for authentication
       const user = await this.getUser();
       if (!user) {
@@ -207,7 +203,7 @@ export class [PageName]Presenter extends BasePresenter {
   async generateMetadata([paramName]: string) {
     try {
       this.logger.info("[PageName]Presenter: Generating metadata", { [paramName] });
-      
+
       return {
         title: "จัดการ[PageThaiName] | Shop Queue",
         description: "ระบบจัดการ[PageThaiDescription]",
@@ -386,7 +382,6 @@ import { useCallback, useEffect, useState } from "react";
 import { [PageName]ViewModel } from "./[PageName]Presenter";
 
 import { useState, useCallback } from "react";
-import { Logger } from "winston";
 import { [PageName]Presenter } from "./[PageName]Presenter";
 import { Client[PageName]PresenterFactory } from "./[PageName]Presenter";
 import type { [PageItem] } from "../types/[page-name].types";
@@ -394,18 +389,20 @@ import type { Create[PageItem]Data } from "../types/[page-name].types";
 import type { Update[PageItem]Data } from "../types/[page-name].types";
 import type { [PageName]ViewModel } from "../types/[page-name].types";
 
+const presenter = await Client[PageName]PresenterFactory.create();
+
 export interface [PageName]PresenterHook {
   // State
   viewModel: [PageName]ViewModel | null;
   loading: boolean;
   error: string | null;
-  
+
   // Modal states
   isCreateModalOpen: boolean;
   isEditModalOpen: boolean;
   isDeleteModalOpen: boolean;
   selectedItemId: string | null;
-  
+
   // Actions
   loadData: () => Promise<void>;
   create[PageItem]: (data: Create[PageItem]Data) => Promise<void>;
@@ -413,7 +410,7 @@ export interface [PageName]PresenterHook {
   delete[PageItem]: (id: string) => Promise<void>;
   get[PageItem]ById: (id: string) => Promise<[PageItem]>;
   getPaginated[PageItems]: (page: number, perPage: number) => Promise<void>;
-  
+
   // Modal actions
   openCreateModal: () => void;
   closeCreateModal: () => void;
@@ -436,7 +433,7 @@ export function use[PageName]Presenter(
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -451,7 +448,6 @@ export function use[PageName]Presenter(
     setError(null);
 
     try {
-      const presenter = await Client[PageName]PresenterFactory.create();
       const newViewModel = await presenter.getViewModel([paramName]);
       setViewModel(newViewModel);
     } catch (err) {
@@ -471,10 +467,8 @@ export function use[PageName]Presenter(
     setError(null);
 
     try {
-      const presenter = await Client[PageName]PresenterFactory.create();
-
       await presenter.create[PageItem](data);
-      
+
       logger.info("[PageName]Presenter: Item created successfully", { data });
       setIsCreateModalOpen(false);
       await loadData(); // Refresh data after creation
@@ -496,10 +490,8 @@ export function use[PageName]Presenter(
     setError(null);
 
     try {
-      const presenter = await Client[PageName]PresenterFactory.create();
-
       await presenter.update[PageItem](data.id, data);
-      
+
       logger.info("[PageName]Presenter: Item updated successfully", { data });
       setIsEditModalOpen(false);
       setSelectedItemId(null);
@@ -522,10 +514,8 @@ export function use[PageName]Presenter(
     setError(null);
 
     try {
-      const presenter = await Client[PageName]PresenterFactory.create();
-
       await presenter.delete[PageItem](id);
-      
+
       logger.info("[PageName]Presenter: Item deleted successfully", { id });
       setIsDeleteModalOpen(false);
       setSelectedItemId(null);
@@ -1018,37 +1008,15 @@ Replace all placeholders in the templates:
 Create the following files in their respective directories:
 
 ```
+
 app/[page-path]/page.tsx
 src/presentation/presenters/[page-name]/[PageName]Presenter.ts
 src/presentation/presenters/[page-name]/use[PageName]Presenter.ts
 src/presentation/components/[page-name]/[PageName]View.tsx
-```
 
-### 3. Update Dependencies
+````
 
-Make sure to update the dependency injection containers:
-
-```typescript
-// src/di/server-container.ts
-import { [PageName]PresenterFactory } from "@/src/presentation/presenters/[page-name]/[PageName]Presenter";
-
-// Add to container registration
-container.register<[PageName]Presenter>("[PageName]Presenter", {
-  useFactory: () => [PageName]PresenterFactory.create(),
-});
-```
-
-```typescript
-// src/di/client-container.ts
-import { Client[PageName]PresenterFactory } from "@/src/presentation/presenters/[page-name]/[PageName]Presenter";
-
-// Add to container registration
-container.register<[PageName]Presenter>("[PageName]Presenter", {
-  useFactory: () => Client[PageName]PresenterFactory.create(),
-});
-```
-
-### 4. Create Service Layer
+### 3. Create Service Layer
 
 Create the corresponding service layer files following the established patterns:
 
@@ -1058,7 +1026,7 @@ Create the corresponding service layer files following the established patterns:
 // src/application/dtos/[page-name]-dto.ts
 ```
 
-### 5. Create Infrastructure Layer
+### 4. Create Infrastructure Layer
 
 Create the repository and infrastructure files:
 
@@ -1134,3 +1102,4 @@ Ensure comprehensive testing:
 ---
 
 This pattern ensures consistency across all backend pages while maintaining Clean Architecture principles and providing excellent user experience.
+````
