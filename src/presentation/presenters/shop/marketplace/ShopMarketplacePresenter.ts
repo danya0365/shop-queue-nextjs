@@ -138,11 +138,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
     }
   ): Promise<ShopMarketplaceViewModel> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       const searchResult = await this.marketplaceService.searchShops(query, {
         ...filters,
         page: filters?.page || 1,
@@ -184,11 +179,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
     page: number = 1
   ): Promise<ShopMarketplaceViewModel> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       const result = await this.marketplaceService.getShopsByCategory(
         categoryId,
         {
@@ -231,11 +221,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
     page: number = 1
   ): Promise<ShopMarketplaceViewModel> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       const result = await this.marketplaceService.getShopsByLocation(
         locationId,
         {
@@ -279,11 +264,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
    */
   async createShop(shopData: unknown): Promise<void> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       // Placeholder implementation
       // In a real marketplace, this might not be available
       // or would redirect to a shop registration flow
@@ -307,11 +287,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
    */
   async updateShop(id: string, shopData: unknown): Promise<void> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       // Placeholder implementation
       // In a real marketplace, this might not be available
       // or would redirect to shop owner dashboard
@@ -336,11 +311,6 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
    */
   async deleteShop(id: string): Promise<void> {
     try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       // Placeholder implementation
       // In a real marketplace, this would not be available
       // or would require admin privileges
