@@ -80,14 +80,14 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
 
   async getFeaturedShops(limit: number): Promise<ShopDTO[]> {
     try {
+      // Get shops with highest queue counts as featured shops
       const featuredShops = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
         "get_marketplace_shops",
         {
           p_page: 1,
           p_limit: limit,
           p_status: "active",
-          p_is_featured: true,
-          p_sort_field: "rating",
+          p_sort_field: "totalQueues",
           p_sort_direction: "DESC"
         }
       );
@@ -133,7 +133,7 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
           p_search: query,
           p_status: "active",
           p_category_id: filters?.category || null,
-          p_sort_field: "rating",
+          p_sort_field: "totalQueues",
           p_sort_direction: "DESC"
         }
       );
@@ -233,7 +233,6 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
       const statsResult = await this.databaseDataSource.callRpc<{
         total_shops: number;
         active_shops: number;
-        featured_shops: number;
         new_shops_this_month: number;
       }[]>("get_marketplace_stats");
 
@@ -246,7 +245,7 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
       return {
         totalShops: stats.total_shops,
         activeShops: stats.active_shops,
-        featuredShops: stats.featured_shops,
+        featuredShops: 0, // Since we don't have featured field, set to 0
         newShopsThisMonth: stats.new_shops_this_month,
       };
     } catch (error) {

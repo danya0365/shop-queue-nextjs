@@ -4319,7 +4319,6 @@ export type Database = {
           p_limit?: number
           p_search?: string
           p_status?: string
-          p_is_featured?: boolean
           p_category_id?: string
           p_sort_field?: string
           p_sort_direction?: string
@@ -4340,9 +4339,6 @@ export type Database = {
           status: string
           created_at: string
           updated_at: string
-          is_featured: boolean
-          rating: number
-          total_reviews: number
           total_queues: number
         }[]
       }
@@ -4364,9 +4360,6 @@ export type Database = {
           status: string
           created_at: string
           updated_at: string
-          is_featured: boolean
-          rating: number
-          total_reviews: number
           total_queues: number
         }[]
       }
@@ -4388,9 +4381,6 @@ export type Database = {
           status: string
           created_at: string
           updated_at: string
-          is_featured: boolean
-          rating: number
-          total_reviews: number
           total_queues: number
         }[]
       }
@@ -4399,7 +4389,6 @@ export type Database = {
         Returns: {
           total_shops: number
           active_shops: number
-          featured_shops: number
           new_shops_this_month: number
         }[]
       }
@@ -4678,9 +4667,6 @@ export type Database = {
           status: string
           created_at: string
           updated_at: string
-          is_featured: boolean
-          rating: number
-          total_reviews: number
           total_queues: number
         }[]
       }

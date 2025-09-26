@@ -8,7 +8,6 @@ CREATE OR REPLACE FUNCTION public.get_marketplace_shops(
     p_limit INTEGER DEFAULT 10,
     p_search TEXT DEFAULT NULL,
     p_status TEXT DEFAULT 'active',
-    p_is_featured BOOLEAN DEFAULT NULL,
     p_category_id UUID DEFAULT NULL,
     p_sort_field TEXT DEFAULT 'createdAt',
     p_sort_direction TEXT DEFAULT 'DESC'
@@ -29,10 +28,7 @@ CREATE OR REPLACE FUNCTION public.get_marketplace_shops(
     status TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
-    is_featured BOOLEAN,
-    rating DECIMAL(3,2),
-    total_reviews INTEGER,
-    total_queues INTEGER
+    total_queues BIGINT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -69,14 +65,11 @@ BEGIN
         s.status::TEXT,
         s.created_at,
         s.updated_at,
-        COALESCE(s.is_featured, false) as is_featured,
-        COALESCE(s.rating, 0.0) as rating,
-        COALESCE(s.total_reviews, 0) as total_reviews,
-        COALESCE(s.total_queues, 0) as total_queues
+        COALESCE(ssv.total_queues, 0) as total_queues
     FROM shops s
+    LEFT JOIN shop_stats_by_shop_view ssv ON s.id = ssv.shop_id
     WHERE 
         (p_status IS NULL OR s.status = p_status::shop_status) AND
-        (p_is_featured IS NULL OR s.is_featured = p_is_featured) AND
         (p_search IS NULL OR 
             LOWER(s.name) LIKE LOWER('%' || p_search || '%') OR
             LOWER(s.description) LIKE LOWER('%' || p_search || '%') OR
@@ -91,9 +84,8 @@ BEGIN
             WHEN v_sort_direction = 'ASC' THEN
                 CASE p_sort_field
                     WHEN 'name' THEN s.name
-                    WHEN 'rating' THEN s.rating::TEXT
+                    WHEN 'totalQueues' THEN COALESCE(ssv.total_queues, 0)::TEXT
                     WHEN 'createdAt' THEN s.created_at::TEXT
-                    WHEN 'totalReviews' THEN s.total_reviews::TEXT
                     ELSE s.created_at::TEXT
                 END
         END ASC,
@@ -101,9 +93,8 @@ BEGIN
             WHEN v_sort_direction = 'DESC' THEN
                 CASE p_sort_field
                     WHEN 'name' THEN s.name
-                    WHEN 'rating' THEN s.rating::TEXT
+                    WHEN 'totalQueues' THEN COALESCE(ssv.total_queues, 0)::TEXT
                     WHEN 'createdAt' THEN s.created_at::TEXT
-                    WHEN 'totalReviews' THEN s.total_reviews::TEXT
                     ELSE s.created_at::TEXT
                 END
         END DESC
@@ -112,17 +103,16 @@ END;
 $$;
 
 -- Grant execute permission for anonymous customer role
-GRANT EXECUTE ON FUNCTION get_marketplace_shops(INTEGER, INTEGER, TEXT, TEXT, BOOLEAN, UUID, TEXT, TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION get_marketplace_shops(INTEGER, INTEGER, TEXT, TEXT, UUID, TEXT, TEXT) TO anon;
 
 -- Create comment for documentation
-COMMENT ON FUNCTION get_marketplace_shops(INTEGER, INTEGER, TEXT, TEXT, BOOLEAN, UUID, TEXT, TEXT) IS 'Get shops with filters and pagination for marketplace browsing';
+COMMENT ON FUNCTION get_marketplace_shops(INTEGER, INTEGER, TEXT, TEXT, UUID, TEXT, TEXT) IS 'Get shops with filters and pagination for marketplace browsing';
 
 -- Create function to get marketplace statistics
 CREATE OR REPLACE FUNCTION public.get_marketplace_stats()
 RETURNS TABLE(
     total_shops BIGINT,
     active_shops BIGINT,
-    featured_shops BIGINT,
     new_shops_this_month BIGINT
 )
 LANGUAGE plpgsql
@@ -134,7 +124,6 @@ BEGIN
     SELECT 
         (SELECT COUNT(*) FROM shops) as total_shops,
         (SELECT COUNT(*) FROM shops WHERE status = 'active') as active_shops,
-        (SELECT COUNT(*) FROM shops WHERE status = 'active' AND is_featured = true) as featured_shops,
         (SELECT COUNT(*) FROM shops 
          WHERE EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM CURRENT_DATE)
          AND EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)) as new_shops_this_month;
@@ -212,7 +201,7 @@ AS $$
 BEGIN
     -- Since there's no separate locations table, we'll extract unique locations from shops
     RETURN QUERY
-    WITH location_stats AS (
+    WITH location_groups AS (
         SELECT 
             -- Create a location key based on address parts
             CASE 
@@ -220,11 +209,25 @@ BEGIN
                     SUBSTRING(s.address FROM 1 FOR LEAST(100, LENGTH(s.address)))
                 ELSE 'Unknown Location'
             END as location_key,
-            COUNT(*) as shop_count,
-            MIN(s.id) as representative_shop_id
+            s.id as shop_id,
+            s.created_at
         FROM shops s
         WHERE s.status = 'active' AND s.address IS NOT NULL AND s.address != ''
-        GROUP BY location_key
+    ),
+    location_ranked AS (
+        SELECT 
+            location_key,
+            shop_id,
+            ROW_NUMBER() OVER (PARTITION BY location_key ORDER BY created_at) as rn
+        FROM location_groups
+    ),
+    location_stats AS (
+        SELECT 
+            location_key,
+            COUNT(*) OVER (PARTITION BY location_key) as shop_count,
+            shop_id as representative_shop_id
+        FROM location_ranked
+        WHERE rn = 1
         ORDER BY shop_count DESC
         LIMIT p_limit
     )
@@ -269,10 +272,7 @@ CREATE OR REPLACE FUNCTION public.get_marketplace_shops_by_category(
     status TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
-    is_featured BOOLEAN,
-    rating DECIMAL(3,2),
-    total_reviews INTEGER,
-    total_queues INTEGER
+    total_queues BIGINT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -302,16 +302,14 @@ BEGIN
         s.status::TEXT,
         s.created_at,
         s.updated_at,
-        COALESCE(s.is_featured, false) as is_featured,
-        COALESCE(s.rating, 0.0) as rating,
-        COALESCE(s.total_reviews, 0) as total_reviews,
-        COALESCE(s.total_queues, 0) as total_queues
+        COALESCE(ssv.total_queues, 0) as total_queues
     FROM shops s
     INNER JOIN category_shops cs ON s.id = cs.shop_id
+    LEFT JOIN shop_stats_by_shop_view ssv ON s.id = ssv.shop_id
     WHERE 
         s.status = 'active' AND
         cs.category_id = p_category_id
-    ORDER BY s.rating DESC, s.created_at DESC
+    ORDER BY COALESCE(ssv.total_queues, 0) DESC, s.created_at DESC
     LIMIT p_limit OFFSET v_offset;
 END;
 $$;
@@ -344,10 +342,7 @@ CREATE OR REPLACE FUNCTION public.get_marketplace_shops_by_location(
     status TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
-    is_featured BOOLEAN,
-    rating DECIMAL(3,2),
-    total_reviews INTEGER,
-    total_queues INTEGER
+    total_queues BIGINT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -377,15 +372,13 @@ BEGIN
         s.status::TEXT,
         s.created_at,
         s.updated_at,
-        COALESCE(s.is_featured, false) as is_featured,
-        COALESCE(s.rating, 0.0) as rating,
-        COALESCE(s.total_reviews, 0) as total_reviews,
-        COALESCE(s.total_queues, 0) as total_queues
+        COALESCE(ssv.total_queues, 0) as total_queues
     FROM shops s
+    LEFT JOIN shop_stats_by_shop_view ssv ON s.id = ssv.shop_id
     WHERE 
         s.status = 'active' AND
         (s.address ILIKE '%' || p_location_name || '%')
-    ORDER BY s.rating DESC, s.created_at DESC
+    ORDER BY COALESCE(ssv.total_queues, 0) DESC, s.created_at DESC
     LIMIT p_limit OFFSET v_offset;
 END;
 $$;
@@ -416,10 +409,7 @@ CREATE OR REPLACE FUNCTION public.get_shop_by_id(
     status TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
-    is_featured BOOLEAN,
-    rating DECIMAL(3,2),
-    total_reviews INTEGER,
-    total_queues INTEGER
+    total_queues BIGINT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -444,11 +434,9 @@ BEGIN
         s.status::TEXT,
         s.created_at,
         s.updated_at,
-        COALESCE(s.is_featured, false) as is_featured,
-        COALESCE(s.rating, 0.0) as rating,
-        COALESCE(s.total_reviews, 0) as total_reviews,
-        COALESCE(s.total_queues, 0) as total_queues
+        COALESCE(ssv.total_queues, 0) as total_queues
     FROM shops s
+    LEFT JOIN shop_stats_by_shop_view ssv ON s.id = ssv.shop_id
     WHERE s.id = p_shop_id;
 END;
 $$;
