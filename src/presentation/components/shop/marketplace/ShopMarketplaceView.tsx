@@ -4,6 +4,7 @@ import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
 import { ShopMarketplaceViewModel } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
 import { useShopMarketplacePresenter } from "@/src/presentation/presenters/shop/marketplace/useShopMarketplacePresenter";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import {
   CheckCircle,
@@ -24,6 +25,84 @@ import {
 
 interface ShopMarketplaceViewProps {
   initialViewModel?: ShopMarketplaceViewModel | null;
+}
+
+// Component to handle image loading with beautiful fallback
+function ShopImageFallback({ 
+  shop, 
+  className, 
+  isCircular = false 
+}: { 
+  shop: ShopDTO; 
+  className: string; 
+  isCircular?: boolean; 
+}) {
+  const [imageError, setImageError] = useState(false);
+  
+  // Generate gradient colors based on shop name
+  const getGradientColors = (name: string) => {
+    const colors = [
+      'from-blue-400 to-blue-600',
+      'from-purple-400 to-purple-600', 
+      'from-green-400 to-green-600',
+      'from-red-400 to-red-600',
+      'from-yellow-400 to-yellow-600',
+      'from-indigo-400 to-indigo-600',
+      'from-pink-400 to-pink-600',
+      'from-teal-400 to-teal-600'
+    ];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+  
+  // Get 2 characters from shop name
+  const getDisplayText = (name: string) => {
+    // Split by spaces and get first character of first two words
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+      // Get first character of first two words
+      return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    } else if (name.length >= 2) {
+      // If single word but has at least 2 characters, get first two characters
+      return name.substring(0, 2).toUpperCase();
+    } else {
+      // Fallback to first character if name is too short
+      return name.charAt(0).toUpperCase();
+    }
+  };
+  
+  const displayText = getDisplayText(shop.name);
+  const gradientClass = getGradientColors(shop.name);
+  
+  if (!shop.logo || imageError) {
+    return (
+      <div 
+        className={`${className} bg-gradient-to-br ${gradientClass} flex items-center justify-center ${
+          isCircular ? 'rounded-full' : ''
+        }`}
+      >
+        <span className="text-white font-bold text-2xl md:text-3xl">
+          {displayText}
+        </span>
+      </div>
+    );
+  }
+  
+  return (
+    <Image
+      src={shop.logo}
+      alt={shop.name}
+      className={className}
+      onError={() => setImageError(true)}
+      width={isCircular ? 64 : 400}
+      height={isCircular ? 64 : 192}
+      style={{
+        objectFit: 'cover',
+        width: isCircular ? '100%' : '100%',
+        height: isCircular ? '100%' : '100%'
+      }}
+    />
+  );
 }
 
 export function ShopMarketplaceView({
@@ -233,17 +312,10 @@ export function ShopMarketplaceView({
                   className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
                 >
                   <div className="relative">
-                    {shop.logo ? (
-                      <img
-                        src={shop.logo}
-                        alt={shop.name}
-                        className="w-full h-48 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <Store className="h-16 w-16 text-gray-400" />
-                      </div>
-                    )}
+                    <ShopImageFallback 
+                      shop={shop} 
+                      className="w-full h-48" 
+                    />
                     <div className="absolute top-2 right-2">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(shop.status)}`}>
                         {getStatusText(shop.status)}
@@ -396,17 +468,10 @@ export function ShopMarketplaceView({
                   {viewMode === "grid" ? (
                     <>
                       <div className="relative">
-                        {shop.logo ? (
-                          <img
-                            src={shop.logo}
-                            alt={shop.name}
-                            className="w-full h-48 object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            <Store className="h-16 w-16 text-gray-400" />
-                          </div>
-                        )}
+                        <ShopImageFallback 
+                          shop={shop} 
+                          className="w-full h-48" 
+                        />
                         <div className="absolute top-2 right-2">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(shop.status)}`}>
                             {getStatusText(shop.status)}
@@ -464,17 +529,11 @@ export function ShopMarketplaceView({
                   ) : (
                     <>
                       <div className="flex-shrink-0 h-16 w-16">
-                        {shop.logo ? (
-                          <img
-                            src={shop.logo}
-                            alt={shop.name}
-                            className="h-16 w-16 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            <Store className="h-8 w-8 text-gray-400" />
-                          </div>
-                        )}
+                        <ShopImageFallback 
+                          shop={shop} 
+                          className="h-16 w-16" 
+                          isCircular={true}
+                        />
                       </div>
                       <div className="ml-4 flex-1">
                         <div className="flex items-center justify-between">
