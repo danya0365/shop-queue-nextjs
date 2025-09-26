@@ -39,8 +39,6 @@ import { SupabaseBackendShopRepository } from "../infrastructure/repositories/ba
 import { SupabaseBackendShopSettingsRepository } from "../infrastructure/repositories/backend/supabase-backend-shop-settings-repository";
 import { SupabaseBackendSubscriptionPlanRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-plan-repository";
 import { SupabaseBackendSubscriptionUsageRepository } from "../infrastructure/repositories/backend/supabase-backend-subscription-usage-repository";
-import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
-import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
 import { Container, createContainer } from "./container";
 
 /**
@@ -121,10 +119,6 @@ export async function createBackendContainer(): Promise<Container> {
       databaseDatasource,
       logger
     );
-    const customerHistoryRepository = new SupabaseCustomerHistoryRepository(
-      databaseDatasource,
-      logger
-    );
 
     // Create subscription repository instances
     const subscriptionPlanRepository =
@@ -198,11 +192,6 @@ export async function createBackendContainer(): Promise<Container> {
       logger
     );
 
-    // Create customer history service
-    const shopCustomerHistoryService = ShopCustomerHistoryServiceFactory.create(
-      customerHistoryRepository,
-      logger
-    );
 
     // Create subscription service instance
     const backendSubscriptionService =
@@ -224,10 +213,6 @@ export async function createBackendContainer(): Promise<Container> {
     container.registerInstance(
       "BackendCustomersService",
       backendCustomersService
-    );
-    container.registerInstance(
-      "ShopCustomerHistoryService",
-      shopCustomerHistoryService
     );
     container.registerInstance(
       "BackendDepartmentsService",
