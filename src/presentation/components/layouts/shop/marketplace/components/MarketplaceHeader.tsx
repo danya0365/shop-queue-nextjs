@@ -55,7 +55,6 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   };
 
   const navigationLinks = [
-    { href: "/", label: "หน้าแรก" },
     { href: "/shop", label: "ตลาดร้านค้า" },
     { href: "/shop/categories", label: "หมวดหมู่" },
     { href: "/shop/about", label: "เกี่ยวกับเรา" },
