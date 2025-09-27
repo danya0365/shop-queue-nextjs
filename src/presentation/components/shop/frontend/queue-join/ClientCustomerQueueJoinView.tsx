@@ -119,35 +119,37 @@ export function ClientCustomerQueueJoinView({
   if (isSuccess && queueNumber) {
     return (
       <div className="flex flex-col gap-8">
-        <div className="frontend-card overflow-hidden">
-          <div className="frontend-shop-header p-8 text-center">
+        <div className="shop-frontend-card overflow-hidden">
+          <div className="shop-frontend-shop-header p-8 text-center">
             <span className="text-6xl mb-4 block">🎉</span>
             <h1 className="text-3xl font-bold mb-2">เข้าคิวสำเร็จ!</h1>
-            <p className="frontend-shop-header-text-light">
+            <p className="shop-frontend-shop-header-text-light">
               คุณได้รับหมายเลขคิวแล้ว
             </p>
           </div>
 
           <div className="p-8">
             <div className="text-center mb-8">
-              <div className="w-24 h-24 frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-24 h-24 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl font-bold">{queueNumber}</span>
               </div>
-              <h2 className="text-2xl font-semibold frontend-text-primary mb-2">
+              <h2 className="text-2xl font-semibold shop-frontend-text-primary mb-2">
                 หมายเลขคิวของคุณ
               </h2>
-              <p className="frontend-text-secondary">กรุณาจำหมายเลขนี้ไว้</p>
+              <p className="shop-frontend-text-secondary">
+                กรุณาจำหมายเลขนี้ไว้
+              </p>
             </div>
 
-            <div className="frontend-qr-section rounded-lg p-6 mb-6">
-              <h3 className="font-semibold frontend-text-primary mb-4">
+            <div className="shop-frontend-qr-section rounded-lg p-6 mb-6">
+              <h3 className="font-semibold shop-frontend-text-primary mb-4">
                 รายละเอียดคิว
               </h3>
               <button
                 onClick={() =>
                   (window.location.href = `/shop/${shopId}/status?queue=${queueNumber}`)
                 }
-                className="frontend-button-primary px-6 py-3 rounded-lg font-semibold mr-4"
+                className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold mr-4"
               >
                 ติดตามสถานะคิว
               </button>
@@ -155,7 +157,7 @@ export function ClientCustomerQueueJoinView({
                 onClick={() => {
                   reset();
                 }}
-                className="frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
+                className="shop-frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
               >
                 เข้าคิวใหม่
               </button>
@@ -169,17 +171,17 @@ export function ClientCustomerQueueJoinView({
   if (!isAcceptingQueues) {
     return (
       <div className="flex flex-col gap-8">
-        <div className="frontend-card p-8 text-center">
+        <div className="shop-frontend-card p-8 text-center">
           <span className="text-6xl mb-4 block">😔</span>
-          <h1 className="text-2xl font-bold frontend-text-primary mb-2">
+          <h1 className="text-2xl font-bold shop-frontend-text-primary mb-2">
             ขณะนี้ไม่รับคิวเพิ่ม
           </h1>
-          <p className="frontend-text-secondary mb-6">
+          <p className="shop-frontend-text-secondary mb-6">
             ร้านอาจปิดแล้วหรือคิวเต็ม กรุณาลองใหม่ภายหลัง
           </p>
           <button
             onClick={() => (window.location.href = `/shop/${shopId}`)}
-            className="frontend-button-primary px-6 py-3 rounded-lg font-semibold"
+            className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold"
           >
             กลับหน้าหลัก
           </button>
@@ -195,7 +197,7 @@ export function ClientCustomerQueueJoinView({
         <div className="flex justify-start">
           <button
             onClick={() => setIsShowFinalOrderSummary(false)}
-            className="frontend-button-secondary px-4 py-2 rounded-lg font-medium flex items-center gap-2"
+            className="shop-frontend-button-secondary px-4 py-2 rounded-lg font-medium flex items-center gap-2"
           >
             ← ย้อนกลับ
           </button>
@@ -237,15 +239,17 @@ export function ClientCustomerQueueJoinView({
     <div className="flex flex-col gap-8">
       {/* Shop Header */}
       <div className="flex flex-col gap-2 sm:gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold frontend-text-primary">{shopName}</h1>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm frontend-text-secondary">
+        <h1 className="text-2xl sm:text-3xl font-bold shop-frontend-text-primary">
+          {shopName}
+        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm shop-frontend-text-secondary">
           <span>⏰ เวลารอโดยประมาณ: {estimatedWaitTime} นาที</span>
           <span>👥 คิวข้างหน้า: {currentQueueLength} คิว</span>
           <span
             className={
               isAcceptingQueues
-                ? "frontend-text-success"
-                : "frontend-text-danger"
+                ? "shop-frontend-text-success"
+                : "shop-frontend-text-danger"
             }
           >
             {isAcceptingQueues ? "✅ รับคิวอยู่" : "❌ ไม่รับคิว"}
@@ -256,9 +260,9 @@ export function ClientCustomerQueueJoinView({
       <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
         {/* Service Selection */}
         <div className="flex flex-col flex-1 w-full">
-          <div className="frontend-card p-4 sm:p-6 gap-4 sm:gap-6 flex flex-col">
-            <div className="border-b frontend-card-border pb-4">
-              <h2 className="text-lg sm:text-xl font-semibold frontend-text-primary">
+          <div className="shop-frontend-card p-4 sm:p-6 gap-4 sm:gap-6 flex flex-col">
+            <div className="border-b shop-frontend-card-border pb-4">
+              <h2 className="text-lg sm:text-xl font-semibold shop-frontend-text-primary">
                 เลือกบริการ
               </h2>
             </div>
@@ -269,10 +273,10 @@ export function ClientCustomerQueueJoinView({
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`frontend-category-filter px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base ${
+                    className={`shop-frontend-category-filter px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base ${
                       selectedCategory === category
-                        ? "frontend-category-filter-active"
-                        : "frontend-category-filter-inactive"
+                        ? "shop-frontend-category-filter-active"
+                        : "shop-frontend-category-filter-inactive"
                     }`}
                   >
                     {category}
@@ -298,10 +302,10 @@ export function ClientCustomerQueueJoinView({
                       className={cn(
                         "p-3 sm:p-4 transition-all relative min-h-[200px] sm:min-h-[220px]",
                         isSelected
-                          ? "frontend-item-card-selected"
-                          : "frontend-item-card",
+                          ? "shop-frontend-item-card-selected"
+                          : "shop-frontend-item-card",
                         isDisabled
-                          ? "frontend-item-card-disabled cursor-not-allowed"
+                          ? "shop-frontend-item-card-disabled cursor-not-allowed"
                           : "cursor-pointer hover:scale-[1.02]"
                       )}
                     >
@@ -310,20 +314,20 @@ export function ClientCustomerQueueJoinView({
                           <span className="text-2xl sm:text-3xl mb-2 block">
                             {service.icon}
                           </span>
-                          <h3 className="font-semibold frontend-text-primary mb-1 text-sm sm:text-base">
+                          <h3 className="font-semibold shop-frontend-text-primary mb-1 text-sm sm:text-base">
                             {service.name}
                           </h3>
-                          <p className="text-xs sm:text-sm frontend-text-secondary mb-2 line-clamp-2">
+                          <p className="text-xs sm:text-sm shop-frontend-text-secondary mb-2 line-clamp-2">
                             {service.description}
                           </p>
                         </div>
-                        
+
                         <div>
                           <div className="flex justify-between items-center text-sm mb-3">
-                            <span className="font-bold frontend-service-price text-sm sm:text-base">
+                            <span className="font-bold shop-frontend-service-price text-sm sm:text-base">
                               ฿{service.price}
                             </span>
-                            <span className="frontend-text-muted text-xs sm:text-sm">
+                            <span className="shop-frontend-text-muted text-xs sm:text-sm">
                               ~{service.estimatedTime} นาที
                             </span>
                           </div>

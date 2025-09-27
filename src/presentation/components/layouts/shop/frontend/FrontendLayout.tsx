@@ -20,7 +20,7 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({ children, shop }) => {
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col h-screen frontend-bg">
+      <div className="flex flex-col h-screen shop-frontend-bg">
         <FrontendHeader
           shop={shop}
           sidebarOpen={sidebarOpen}
@@ -44,15 +44,15 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({ children, shop }) => {
                 {children}
               </div>
             </div>
-            
+
             {/* Footer */}
-            <footer className="frontend-footer-bg border-t frontend-footer-border mt-auto">
+            <footer className="shop-frontend-footer-bg border-t shop-frontend-footer-border mt-auto">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                 <div className="text-center">
-                  <p className="mb-1 text-sm frontend-footer-text">
+                  <p className="mb-1 text-sm shop-frontend-footer-text">
                     © 2024 Shop Queue - ระบบจัดการคิวอัจฉริยะ
                   </p>
-                  <p className="text-xs frontend-text-muted">
+                  <p className="text-xs shop-frontend-text-muted">
                     พัฒนาด้วย ❤️ เพื่อประสบการณ์ที่ดีขึ้น
                   </p>
                 </div>

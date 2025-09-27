@@ -21,7 +21,10 @@ interface CustomerRewardsViewProps {
   initialViewModel?: CustomerRewardsViewModel;
 }
 
-export function CustomerRewardsView({ shopId, initialViewModel }: CustomerRewardsViewProps) {
+export function CustomerRewardsView({
+  shopId,
+  initialViewModel,
+}: CustomerRewardsViewProps) {
   const {
     viewModel,
     loading,
@@ -58,9 +61,11 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">เกิดข้อผิดพลาด</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            เกิดข้อผิดพลาด
+          </h1>
           <p className="text-muted mb-4">{error}</p>
-          <button 
+          <button
             onClick={refreshData}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
           >
@@ -76,7 +81,9 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">ไม่มีข้อมูล</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            ไม่มีข้อมูล
+          </h1>
           <p className="text-muted mb-4">ไม่พบข้อมูลรางวัล</p>
         </div>
       </div>
@@ -136,44 +143,44 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+        <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
           แต้มสะสมและสิทธิพิเศษ
         </h1>
-        <p className="frontend-text-secondary">
+        <p className="shop-frontend-text-secondary">
           ดูแต้มสะสมและแลกของรางวัลของคุณ
         </p>
       </div>
 
       {/* Points Summary */}
-      <div className="frontend-card">
-        <div className="p-6 border-b frontend-card-border">
-          <h2 className="text-xl font-semibold frontend-text-primary">
+      <div className="shop-frontend-card">
+        <div className="p-6 border-b shop-frontend-card-border">
+          <h2 className="text-xl font-semibold shop-frontend-text-primary">
             สรุปแต้ม
           </h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold frontend-text-primary mb-2">
+              <div className="text-3xl font-bold shop-frontend-text-primary mb-2">
                 {viewModel.customerPoints.currentPoints}
               </div>
-              <div className="text-sm frontend-text-secondary">
+              <div className="text-sm shop-frontend-text-secondary">
                 แต้มปัจจุบัน
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold frontend-text-success mb-2">
+              <div className="text-3xl font-bold shop-frontend-text-success mb-2">
                 {viewModel.customerPoints.totalEarned}
               </div>
-              <div className="text-sm frontend-text-secondary">
+              <div className="text-sm shop-frontend-text-secondary">
                 แต้มที่ได้รับ
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold frontend-text-muted mb-2">
+              <div className="text-3xl font-bold shop-frontend-text-muted mb-2">
                 {viewModel.customerPoints.totalRedeemed}
               </div>
-              <div className="text-sm frontend-text-secondary">
+              <div className="text-sm shop-frontend-text-secondary">
                 แต้มที่ใช้แล้ว
               </div>
             </div>
@@ -182,23 +189,23 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
       </div>
 
       {/* Tier Benefits */}
-      <div className="frontend-card p-6 mb-6">
-        <h3 className="text-lg font-medium frontend-text-primary mb-4">
+      <div className="shop-frontend-card p-6 mb-6">
+        <h3 className="text-lg font-medium shop-frontend-text-primary mb-4">
           สิทธิประโยชน์สมาชิก {viewModel.customerPoints.tier}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viewModel.customerPoints.tierBenefits.map((benefit, index) => (
             <div key={index} className="flex items-center">
-              <span className="frontend-text-success mr-2">✓</span>
-              <span className="frontend-text-primary">{benefit}</span>
+              <span className="shop-frontend-text-success mr-2">✓</span>
+              <span className="shop-frontend-text-primary">{benefit}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="frontend-card">
-        <div className="border-b frontend-card-border">
+      <div className="shop-frontend-card">
+        <div className="border-b shop-frontend-card-border">
           <nav className="flex space-x-8 px-6">
             {[
               { id: TabType.REWARDS, name: "แลกของรางวัล", icon: "🎁" },
@@ -210,8 +217,8 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? "border-blue-500 frontend-text-primary"
-                    : "border-transparent frontend-text-secondary hover:frontend-text-primary hover:border-gray-300"
+                    ? "border-blue-500 shop-frontend-text-primary"
+                    : "border-transparent shop-frontend-text-secondary hover:shop-frontend-text-primary hover:border-gray-300"
                 }`}
               >
                 <span>{tab.icon}</span>
@@ -225,68 +232,71 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
         {activeTab === TabType.REWARDS && (
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {viewModel.availableRewards.data.map((reward: AvailableReward) => (
-                <div
-                  key={reward.id}
-                  className={cn(
-                    `rounded-lg p-4 ${
+              {viewModel.availableRewards.data.map(
+                (reward: AvailableReward) => (
+                  <div
+                    key={reward.id}
+                    className={cn(
+                      `rounded-lg p-4 ${
+                        reward.isAvailable
+                          ? "shop-frontend-card shop-frontend-card-hover"
+                          : "shop-frontend-card-disabled"
+                      } transition-shadow`,
                       reward.isAvailable
-                        ? "frontend-card frontend-card-hover"
-                        : "frontend-card-disabled"
-                    } transition-shadow`,
-                    reward.isAvailable
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed opacity-50"
-                  )}
-                >
-                  <div className="text-center mb-4">
-                    <div className="text-4xl mb-2">{reward.imageUrl}</div>
-                    <h3 className="font-medium frontend-text-primary">
-                      {reward.name}
-                    </h3>
-                    <p className="text-sm frontend-text-secondary mt-1">
-                      {reward.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="frontend-badge-info text-xs px-2 py-1 rounded-full">
-                      {reward.category}
-                    </span>
-                    <span className="text-lg font-bold frontend-service-price">
-                      {reward.pointsCost} แต้ม
-                    </span>
-                  </div>
-
-                  {reward.stock !== undefined && (
-                    <div className="text-xs frontend-text-muted mb-3">
-                      เหลือ {reward.stock} ชิ้น
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => handleRedeemReward(reward)}
-                    disabled={
-                      !reward.isAvailable ||
-                      viewModel.customerPoints.currentPoints < reward.pointsCost
-                    }
-                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                      reward.isAvailable &&
-                      viewModel.customerPoints.currentPoints >=
-                        reward.pointsCost
-                        ? "frontend-button-primary"
-                        : "frontend-button-disabled cursor-not-allowed"
-                    }`}
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed opacity-50"
+                    )}
                   >
-                    {!reward.isAvailable
-                      ? "ไม่พร้อมใช้งาน"
-                      : viewModel.customerPoints.currentPoints <
-                        reward.pointsCost
-                      ? "แต้มไม่เพียงพอ"
-                      : "แลกเลย"}
-                  </button>
-                </div>
-              ))}
+                    <div className="text-center mb-4">
+                      <div className="text-4xl mb-2">{reward.imageUrl}</div>
+                      <h3 className="font-medium shop-frontend-text-primary">
+                        {reward.name}
+                      </h3>
+                      <p className="text-sm shop-frontend-text-secondary mt-1">
+                        {reward.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="shop-frontend-badge-info text-xs px-2 py-1 rounded-full">
+                        {reward.category}
+                      </span>
+                      <span className="text-lg font-bold shop-frontend-service-price">
+                        {reward.pointsCost} แต้ม
+                      </span>
+                    </div>
+
+                    {reward.stock !== undefined && (
+                      <div className="text-xs shop-frontend-text-muted mb-3">
+                        เหลือ {reward.stock} ชิ้น
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => handleRedeemReward(reward)}
+                      disabled={
+                        !reward.isAvailable ||
+                        viewModel.customerPoints.currentPoints <
+                          reward.pointsCost
+                      }
+                      className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                        reward.isAvailable &&
+                        viewModel.customerPoints.currentPoints >=
+                          reward.pointsCost
+                          ? "shop-frontend-button-primary"
+                          : "shop-frontend-button-disabled cursor-not-allowed"
+                      }`}
+                    >
+                      {!reward.isAvailable
+                        ? "ไม่พร้อมใช้งาน"
+                        : viewModel.customerPoints.currentPoints <
+                          reward.pointsCost
+                        ? "แต้มไม่เพียงพอ"
+                        : "แลกเลย"}
+                    </button>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}
@@ -296,66 +306,68 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
           <div className="p-6">
             {viewModel.redeemedRewards.data.length === 0 ? (
               <div className="text-center py-8">
-                <div className="frontend-text-muted text-6xl mb-4">📦</div>
-                <h3 className="text-lg font-medium frontend-text-primary mb-2">
+                <div className="shop-frontend-text-muted text-6xl mb-4">📦</div>
+                <h3 className="text-lg font-medium shop-frontend-text-primary mb-2">
                   ยังไม่มีของรางวัลที่แลก
                 </h3>
-                <p className="frontend-text-secondary">
+                <p className="shop-frontend-text-secondary">
                   เมื่อคุณแลกของรางวัล จะแสดงที่นี่
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {viewModel.redeemedRewards.data.map((reward: CustomerReward) => (
-                  <div
-                    key={reward.id}
-                    className="frontend-card frontend-card-hover p-4 rounded-lg"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center">
-                        <div className="text-3xl mr-4">{reward.imageUrl}</div>
-                        <div>
-                          <h3 className="font-medium frontend-text-primary">
-                            {reward.name}
-                          </h3>
-                          <p className="text-sm frontend-text-secondary">
-                            {reward.description}
-                          </p>
-                          <div className="flex items-center gap-4 mt-2 text-xs frontend-text-muted">
-                            <span>
-                              แลกเมื่อ:{" "}
-                              {new Date(reward.redeemedAt!).toLocaleDateString(
-                                "th-TH"
-                              )}
-                            </span>
-                            {reward.expiryDate && (
+                {viewModel.redeemedRewards.data.map(
+                  (reward: CustomerReward) => (
+                    <div
+                      key={reward.id}
+                      className="shop-frontend-card shop-frontend-card-hover p-4 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center">
+                          <div className="text-3xl mr-4">{reward.imageUrl}</div>
+                          <div>
+                            <h3 className="font-medium shop-frontend-text-primary">
+                              {reward.name}
+                            </h3>
+                            <p className="text-sm shop-frontend-text-secondary">
+                              {reward.description}
+                            </p>
+                            <div className="flex items-center gap-4 mt-2 text-xs shop-frontend-text-muted">
                               <span>
-                                หมดอายุ:{" "}
-                                {new Date(reward.expiryDate).toLocaleDateString(
-                                  "th-TH"
-                                )}
+                                แลกเมื่อ:{" "}
+                                {new Date(
+                                  reward.redeemedAt!
+                                ).toLocaleDateString("th-TH")}
                               </span>
-                            )}
+                              {reward.expiryDate && (
+                                <span>
+                                  หมดอายุ:{" "}
+                                  {new Date(
+                                    reward.expiryDate
+                                  ).toLocaleDateString("th-TH")}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium shop-frontend-service-price">
+                            {reward.pointsCost} แต้ม
+                          </div>
+                          <div
+                            className={`text-xs px-2 py-1 rounded-full mt-1 ${
+                              reward.isAvailable
+                                ? "shop-frontend-badge-success"
+                                : "shop-frontend-status-cancelled"
+                            }`}
+                          >
+                            {reward.isAvailable ? "ใช้ได้" : "ใช้แล้ว/หมดอายุ"}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium frontend-service-price">
-                          {reward.pointsCost} แต้ม
-                        </div>
-                        <div
-                          className={`text-xs px-2 py-1 rounded-full mt-1 ${
-                            reward.isAvailable
-                              ? "frontend-badge-success"
-                              : "frontend-status-cancelled"
-                          }`}
-                        >
-                          {reward.isAvailable ? "ใช้ได้" : "ใช้แล้ว/หมดอายุ"}
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             )}
           </div>
@@ -365,34 +377,38 @@ export function CustomerRewardsView({ shopId, initialViewModel }: CustomerReward
         {activeTab === TabType.HISTORY && (
           <div className="p-6">
             <div className="space-y-4">
-              {viewModel.rewardTransactions.data.map((transaction: RewardTransaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between py-3 border-b border-gray-100"
-                >
-                  <div className="flex items-center">
-                    <div className="text-2xl mr-3">
-                      {getTransactionIcon(transaction.type)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {transaction.description}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(transaction.date).toLocaleDateString("th-TH")}
-                      </p>
-                    </div>
-                  </div>
+              {viewModel.rewardTransactions.data.map(
+                (transaction: RewardTransaction) => (
                   <div
-                    className={`text-lg font-bold ${getTransactionColor(
-                      transaction.type
-                    )}`}
+                    key={transaction.id}
+                    className="flex items-center justify-between py-3 border-b border-gray-100"
                   >
-                    {transaction.points > 0 ? "+" : ""}
-                    {transaction.points} แต้ม
+                    <div className="flex items-center">
+                      <div className="text-2xl mr-3">
+                        {getTransactionIcon(transaction.type)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {transaction.description}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(transaction.date).toLocaleDateString(
+                            "th-TH"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className={`text-lg font-bold ${getTransactionColor(
+                        transaction.type
+                      )}`}
+                    >
+                      {transaction.points > 0 ? "+" : ""}
+                      {transaction.points} แต้ม
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
         )}

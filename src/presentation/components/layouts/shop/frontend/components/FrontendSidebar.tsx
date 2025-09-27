@@ -38,7 +38,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 frontend-overlay z-30"
+          className="lg:hidden fixed inset-0 shop-frontend-overlay z-30"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -47,7 +47,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
       <aside
         className={`
         fixed lg:static inset-y-0 left-0 z-40
-        w-64 frontend-sidebar-bg shadow-sm h-full overflow-y-auto
+        w-64 shop-frontend-sidebar-bg shadow-sm h-full overflow-y-auto
         flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -57,7 +57,7 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
         <div className="lg:hidden flex justify-end p-4 flex-none">
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-lg frontend-sidebar-text-muted frontend-sidebar-hover transition-colors"
+            className="p-2 rounded-lg shop-frontend-sidebar-text-muted shop-frontend-sidebar-hover transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -84,8 +84,8 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
                 href={item.href}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive(item.href)
-                    ? "frontend-sidebar-active"
-                    : "frontend-sidebar-text frontend-sidebar-hover"
+                    ? "shop-frontend-sidebar-active"
+                    : "shop-frontend-sidebar-text shop-frontend-sidebar-hover"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -96,8 +96,8 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
         </nav>
 
         {/* Shop Info in Sidebar */}
-        <div className="p-4 border-t frontend-sidebar-border flex-none">
-          <div className="text-sm frontend-sidebar-text-muted">
+        <div className="p-4 border-t shop-frontend-sidebar-border flex-none">
+          <div className="text-sm shop-frontend-sidebar-text-muted">
             <div className="font-medium mb-1">ร้านกาแฟดีใจ</div>
             <div className="text-xs opacity-75">เปิดทุกวัน 08:00 - 20:00</div>
           </div>

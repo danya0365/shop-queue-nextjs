@@ -121,17 +121,17 @@ export function CustomerHistoryView({
     return (
       <div className="flex flex-col gap-8">
         <div>
-          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+          <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
             ประวัติการใช้บริการ
           </h1>
-          <p className="frontend-text-secondary">
+          <p className="shop-frontend-text-secondary">
             ดูประวัติคิวและการใช้บริการของคุณ
           </p>
         </div>
-        <div className="frontend-card">
+        <div className="shop-frontend-card">
           <div className="p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="frontend-text-secondary">กำลังโหลดข้อมูล...</p>
+            <p className="shop-frontend-text-secondary">กำลังโหลดข้อมูล...</p>
           </div>
         </div>
       </div>
@@ -143,23 +143,23 @@ export function CustomerHistoryView({
     return (
       <div className="flex flex-col gap-8">
         <div>
-          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+          <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
             ประวัติการใช้บริการ
           </h1>
-          <p className="frontend-text-secondary">
+          <p className="shop-frontend-text-secondary">
             ดูประวัติคิวและการใช้บริการของคุณ
           </p>
         </div>
-        <div className="frontend-card">
+        <div className="shop-frontend-card">
           <div className="p-12 text-center">
             <span className="text-6xl mb-4 block">❌</span>
-            <h4 className="text-xl font-semibold frontend-text-primary mb-2">
+            <h4 className="text-xl font-semibold shop-frontend-text-primary mb-2">
               เกิดข้อผิดพลาด
             </h4>
-            <p className="frontend-text-secondary mb-4">{error}</p>
+            <p className="shop-frontend-text-secondary mb-4">{error}</p>
             <button
               onClick={refreshData}
-              className="frontend-button-primary px-4 py-2 rounded-lg text-sm font-medium"
+              className="shop-frontend-button-primary px-4 py-2 rounded-lg text-sm font-medium"
             >
               ลองใหม่อีกครั้ง
             </button>
@@ -174,20 +174,20 @@ export function CustomerHistoryView({
     return (
       <div className="flex flex-col gap-8">
         <div>
-          <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+          <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
             ประวัติการใช้บริการ
           </h1>
-          <p className="frontend-text-secondary">
+          <p className="shop-frontend-text-secondary">
             ดูประวัติคิวและการใช้บริการของคุณ
           </p>
         </div>
-        <div className="frontend-card">
+        <div className="shop-frontend-card">
           <div className="p-12 text-center">
             <span className="text-6xl mb-4 block">📜</span>
-            <h4 className="text-xl font-semibold frontend-text-primary mb-2">
+            <h4 className="text-xl font-semibold shop-frontend-text-primary mb-2">
               ไม่มีข้อมูล
             </h4>
-            <p className="frontend-text-secondary">
+            <p className="shop-frontend-text-secondary">
               เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่
             </p>
           </div>
@@ -200,23 +200,25 @@ export function CustomerHistoryView({
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold frontend-text-primary mb-2">
+        <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
           ประวัติการใช้บริการ
         </h1>
-        <p className="frontend-text-secondary">
+        <p className="shop-frontend-text-secondary">
           ดูประวัติคิวและการใช้บริการของคุณ
         </p>
       </div>
 
       {/* Filters */}
-      <div className="frontend-card">
-        <div className="p-6 border-b frontend-card-border">
-          <h3 className="text-lg font-medium frontend-text-primary">ตัวกรอง</h3>
+      <div className="shop-frontend-card">
+        <div className="p-6 border-b shop-frontend-card-border">
+          <h3 className="text-lg font-medium shop-frontend-text-primary">
+            ตัวกรอง
+          </h3>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium frontend-text-primary mb-1">
+              <label className="block text-sm font-medium shop-frontend-text-primary mb-1">
                 สถานะ
               </label>
               <select
@@ -226,7 +228,7 @@ export function CustomerHistoryView({
                     (e.target.value || "all") as HistoryFilterType
                   )
                 }
-                className="frontend-input w-full"
+                className="shop-frontend-input w-full"
               >
                 <option value="">ทั้งหมด</option>
                 <option value="completed">เสร็จสิ้น</option>
@@ -235,7 +237,7 @@ export function CustomerHistoryView({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium frontend-text-primary mb-1">
+              <label className="block text-sm font-medium shop-frontend-text-primary mb-1">
                 วันที่เริ่มต้น
               </label>
               <input
@@ -247,11 +249,11 @@ export function CustomerHistoryView({
                     filters.endDate
                   )
                 }
-                className="frontend-input w-full"
+                className="shop-frontend-input w-full"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium frontend-text-primary mb-1">
+              <label className="block text-sm font-medium shop-frontend-text-primary mb-1">
                 วันที่สิ้นสุด
               </label>
               <input
@@ -263,7 +265,7 @@ export function CustomerHistoryView({
                     e.target.value || undefined
                   )
                 }
-                className="frontend-input w-full"
+                className="shop-frontend-input w-full"
               />
             </div>
           </div>
@@ -271,9 +273,9 @@ export function CustomerHistoryView({
       </div>
 
       {/* History List */}
-      <div className="frontend-card">
-        <div className="p-6 border-b frontend-card-border">
-          <h3 className="text-lg font-medium frontend-text-primary">
+      <div className="shop-frontend-card">
+        <div className="p-6 border-b shop-frontend-card-border">
+          <h3 className="text-lg font-medium shop-frontend-text-primary">
             ประวัติการใช้บริการ
           </h3>
         </div>
@@ -281,10 +283,10 @@ export function CustomerHistoryView({
           {viewModel.queueHistory.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-6xl mb-4 block">📜</span>
-              <h4 className="text-xl font-semibold frontend-text-primary mb-2">
+              <h4 className="text-xl font-semibold shop-frontend-text-primary mb-2">
                 ไม่มีประวัติการใช้บริการ
               </h4>
-              <p className="frontend-text-secondary">
+              <p className="shop-frontend-text-secondary">
                 เมื่อคุณใช้บริการ ประวัติจะแสดงที่นี่
               </p>
             </div>
@@ -292,17 +294,17 @@ export function CustomerHistoryView({
             <div className="space-y-4">
               {viewModel.queueHistory.map((queue) => (
                 <div key={queue.id}>
-                  <div className="frontend-card frontend-card-hover p-4 rounded-lg">
+                  <div className="shop-frontend-card shop-frontend-card-hover p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="frontend-badge-info px-3 py-1 rounded-full text-sm font-medium">
+                        <div className="shop-frontend-badge-info px-3 py-1 rounded-full text-sm font-medium">
                           #{queue.queueNumber}
                         </div>
                         <div>
-                          <h4 className="font-medium frontend-text-primary">
+                          <h4 className="font-medium shop-frontend-text-primary">
                             {queue.shopName}
                           </h4>
-                          <p className="text-sm frontend-text-secondary">
+                          <p className="text-sm shop-frontend-text-secondary">
                             {queue.queueDate} เวลา {queue.queueTime}
                           </p>
                         </div>
@@ -310,10 +312,10 @@ export function CustomerHistoryView({
 
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
-                          <p className="font-bold frontend-service-price">
+                          <p className="font-bold shop-frontend-service-price">
                             ฿{queue.totalAmount}
                           </p>
-                          <p className="text-sm frontend-text-secondary">
+                          <p className="text-sm shop-frontend-text-secondary">
                             {queue.services.length} รายการ
                           </p>
                         </div>
@@ -321,10 +323,10 @@ export function CustomerHistoryView({
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium ${
                             queue.status === "completed"
-                              ? "frontend-badge-success"
+                              ? "shop-frontend-badge-success"
                               : queue.status === "cancelled"
-                              ? "frontend-status-cancelled"
-                              : "frontend-badge-warning"
+                              ? "shop-frontend-status-cancelled"
+                              : "shop-frontend-badge-warning"
                           }`}
                         >
                           {getStatusText(queue.status)}
@@ -332,7 +334,7 @@ export function CustomerHistoryView({
 
                         <button
                           onClick={() => handleViewDetails(queue)}
-                          className="frontend-button-secondary px-4 py-2 rounded-lg text-sm font-medium"
+                          className="shop-frontend-button-secondary px-4 py-2 rounded-lg text-sm font-medium"
                         >
                           ดูรายละเอียด
                         </button>
@@ -347,7 +349,7 @@ export function CustomerHistoryView({
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 0 && (
-          <div className="px-6 py-4 border-t frontend-card-border">
+          <div className="px-6 py-4 border-t shop-frontend-card-border">
             <PaginationControls
               currentPage={pagination.currentPage}
               totalPages={pagination.totalPages}
