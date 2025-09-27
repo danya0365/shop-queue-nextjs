@@ -155,4 +155,36 @@
   .shop-employee-divide {
     @apply divide-emerald-200/30 dark:divide-slate-600/30;
   }
+
+  /* Status Badge utility classes */
+  .shop-employee-status-on-duty {
+    @apply bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200;
+  }
+  .shop-employee-status-off-duty {
+    @apply bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200;
+  }
+
+  /* Tab utility classes */
+  .shop-employee-tab-active {
+    @apply border-emerald-500;
+  }
+  .shop-employee-tab-inactive {
+    @apply border-transparent hover:border-emerald-300 dark:hover:border-emerald-600;
+  }
+
+  /* Queue Card utility classes */
+  .shop-employee-my-queue-bg {
+    @apply bg-emerald-50 dark:bg-emerald-900/20;
+  }
+  .shop-employee-my-queue-border {
+    @apply border-emerald-200 dark:border-emerald-700;
+  }
+  .shop-employee-my-queue-number {
+    @apply bg-emerald-500;
+  }
+
+  /* Amber Button utility classes */
+  .shop-employee-button-amber {
+    @apply bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700;
+  }
 }

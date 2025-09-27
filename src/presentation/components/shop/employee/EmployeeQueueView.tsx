@@ -15,26 +15,26 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "waiting":
-        return "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200";
+        return "shop-employee-warning";
       case "confirmed":
-        return "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200";
+        return "shop-employee-secondary";
       case "serving":
-        return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200";
+        return "shop-employee-success";
       case "completed":
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
+        return "shop-employee-text-muted";
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
+        return "shop-employee-text-muted";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200";
+        return "shop-employee-warning";
       case "vip":
-        return "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200";
+        return "shop-employee-danger";
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
+        return "shop-employee-text-muted";
     }
   };
 
@@ -71,10 +71,10 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-bold shop-employee-header-text">
             จัดการคิว
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="shop-employee-header-text-muted mt-1">
             พนักงาน: {employeeName} • คิวทั้งหมด: {totalQueues}
           </p>
         </div>
@@ -82,35 +82,35 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
           <div
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
               isOnDuty
-                ? "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200"
-                : "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200"
+                ? "shop-employee-status-on-duty"
+                : "shop-employee-status-off-duty"
             }`}
           >
             <div
               className={`w-3 h-3 rounded-full ${
-                isOnDuty ? "bg-green-500" : "bg-red-500"
+                isOnDuty ? "shop-employee-status-online" : "shop-employee-status-offline-bg"
               }`}
             ></div>
             <span className="font-medium">
               {isOnDuty ? "ปฏิบัติงาน" : "พักงาน"}
             </span>
           </div>
-          <button className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+          <button className="shop-employee-button-blue text-white px-4 py-2 rounded-lg transition-colors">
             📞 เรียกคิวถัดไป
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="shop-employee-card rounded-xl shadow-sm">
+        <div className="border-b shop-employee-sidebar-border">
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setSelectedTab("my")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 selectedTab === "my"
-                  ? "border-green-500 text-green-600 dark:text-green-400"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                  ? "shop-employee-tab-active shop-employee-primary"
+                  : "shop-employee-tab-inactive shop-employee-text-muted shop-employee-primary-hover"
               }`}
             >
               คิวของฉัน ({myQueues.length})
@@ -119,8 +119,8 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
               onClick={() => setSelectedTab("waiting")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 selectedTab === "waiting"
-                  ? "border-green-500 text-green-600 dark:text-green-400"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                  ? "shop-employee-tab-active shop-employee-primary"
+                  : "shop-employee-tab-inactive shop-employee-text-muted shop-employee-primary-hover"
               }`}
             >
               คิวรอ ({waitingQueues.length})
@@ -135,10 +135,10 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
               {myQueues.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="text-6xl mb-4 block">😴</span>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 className="text-lg font-medium shop-employee-text mb-2">
                     ไม่มีคิวที่กำลังให้บริการ
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="shop-employee-text-muted">
                     คลิก &quot;เรียกคิวถัดไป&quot; เพื่อรับคิวใหม่
                   </p>
                 </div>
@@ -146,11 +146,11 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                 myQueues.map((queue) => (
                   <div
                     key={queue.id}
-                    className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6"
+                    className="shop-employee-my-queue-bg shop-employee-my-queue-border border rounded-lg p-6"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 shop-employee-my-queue-number rounded-full flex items-center justify-center">
                           <span className="text-white font-bold text-lg">
                             {queue.queueNumber}
                           </span>
@@ -158,7 +158,7 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
 
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                            <h3 className="text-xl font-semibold shop-employee-text">
                               {queue.customerName}
                             </h3>
                             <span
@@ -178,17 +178,17 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                               </span>
                             )}
                           </div>
-                          <p className="text-gray-600 dark:text-gray-400 mb-1">
+                          <p className="shop-employee-text-muted mb-1">
                             {queue.customerPhone}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm shop-employee-text-muted">
                             บริการ: {queue.services.join(", ")}
                           </p>
-                          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                          <p className="text-sm font-medium shop-employee-primary">
                             ฿{queue.totalPrice} • ~{queue.estimatedTime} นาที
                           </p>
                           {queue.notes && (
-                            <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                            <p className="text-sm shop-employee-secondary mt-1">
                               หมายเหตุ: {queue.notes}
                             </p>
                           )}
@@ -196,13 +196,13 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                       </div>
 
                       <div className="flex flex-col space-y-2">
-                        <button className="bg-green-500 dark:bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
+                        <button className="shop-employee-button-primary text-white px-4 py-2 rounded-lg transition-colors">
                           ✅ เสร็จสิ้น
                         </button>
-                        <button className="bg-orange-500 dark:bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors">
+                        <button className="shop-employee-button-amber text-white px-4 py-2 rounded-lg transition-colors">
                           ⏸️ พัก
                         </button>
-                        <button className="bg-gray-500 dark:bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 transition-colors">
+                        <button className="shop-employee-button-secondary px-4 py-2 rounded-lg transition-colors">
                           📝 หมายเหตุ
                         </button>
                       </div>
@@ -218,10 +218,10 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
               {waitingQueues.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="text-6xl mb-4 block">🎉</span>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 className="text-lg font-medium shop-employee-text mb-2">
                     ไม่มีคิวรอ
                   </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="shop-employee-text-muted">
                     คิวทั้งหมดได้รับการดำเนินการแล้ว
                   </p>
                 </div>
@@ -229,17 +229,17 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                 waitingQueues.map((queue, index) => (
                   <div
                     key={queue.id}
-                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="shop-employee-card rounded-lg p-6 shop-employee-card-hover transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div
                           className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
                             index === 0
-                              ? "bg-blue-500"
+                              ? "shop-employee-queue-number-first"
                               : index === 1
-                              ? "bg-orange-500"
-                              : "bg-gray-400"
+                              ? "shop-employee-queue-number-second"
+                              : "shop-employee-queue-number-other"
                           }`}
                         >
                           {queue.queueNumber}
@@ -247,7 +247,7 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
 
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <h3 className="text-lg font-semibold shop-employee-text">
                               {queue.customerName}
                             </h3>
                             <span
@@ -267,18 +267,18 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                          <p className="text-sm shop-employee-text-muted mb-1">
                             {queue.customerPhone}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm shop-employee-text-muted">
                             บริการ: {queue.services.join(", ")}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm shop-employee-text-muted">
                             ฿{queue.totalPrice} • ~{queue.estimatedTime} นาที •{" "}
                             {queue.createdAt}
                           </p>
                           {queue.notes && (
-                            <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                            <p className="text-sm shop-employee-secondary mt-1">
                               หมายเหตุ: {queue.notes}
                             </p>
                           )}
@@ -287,15 +287,15 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
 
                       <div className="flex flex-col space-y-2">
                         {index === 0 && (
-                          <button className="bg-green-500 dark:bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
+                          <button className="shop-employee-button-primary text-white px-4 py-2 rounded-lg transition-colors">
                             📞 รับคิว
                           </button>
                         )}
-                        <button className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+                        <button className="shop-employee-button-blue text-white px-4 py-2 rounded-lg transition-colors">
                           👁️ ดูรายละเอียด
                         </button>
                         {queue.status === "waiting" && (
-                          <button className="bg-orange-500 dark:bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors">
+                          <button className="shop-employee-button-amber text-white px-4 py-2 rounded-lg transition-colors">
                             ✅ ยืนยัน
                           </button>
                         )}
@@ -311,71 +311,71 @@ export function EmployeeQueueView({ viewModel }: EmployeeQueueViewProps) {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold shop-employee-text mb-4">
             การดำเนินการด่วน
           </h3>
           <div className="space-y-3">
-            <button className="w-full bg-green-500 dark:bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
+            <button className="w-full shop-employee-button-primary text-white px-4 py-3 rounded-lg transition-colors">
               📞 เรียกคิวถัดไป
             </button>
-            <button className="w-full bg-blue-500 dark:bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+            <button className="w-full shop-employee-button-blue text-white px-4 py-3 rounded-lg transition-colors">
               🔄 รีเฟรชคิว
             </button>
-            <button className="w-full bg-orange-500 dark:bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors">
+            <button className="w-full shop-employee-button-amber text-white px-4 py-3 rounded-lg transition-colors">
               ⏸️ พักการให้บริการ
             </button>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold shop-employee-text mb-4">
             สถิติวันนี้
           </h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="shop-employee-text-muted">
                 คิวที่ให้บริการ:
               </span>
-              <span className="font-semibold text-gray-900 dark:text-gray-100">
+              <span className="font-semibold shop-employee-text">
                 15
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="shop-employee-text-muted">
                 เวลาเฉลี่ย:
               </span>
-              <span className="font-semibold text-gray-900 dark:text-gray-100">
+              <span className="font-semibold shop-employee-text">
                 8 นาที
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="shop-employee-text-muted">
                 คะแนนความพึงพอใจ:
               </span>
-              <span className="font-semibold text-yellow-600">4.8/5</span>
+              <span className="font-semibold shop-employee-warning">4.8/5</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
+          <h3 className="text-lg font-semibold shop-employee-text mb-4">
             ข้อความแนะนำ
           </h3>
           <div className="space-y-2 text-sm">
-            <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
-              <p className="font-medium text-gray-900 dark:text-gray-100">
+            <div className="p-2 shop-employee-info-bg rounded">
+              <p className="font-medium shop-employee-info-text">
                 เรียกคิว:
               </p>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="shop-employee-info-text-muted">
                 &quot;เรียกคิว {myQueues[0]?.queueNumber || "A000"} ครับ&quot;
               </p>
             </div>
-            <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
-              <p className="font-medium text-gray-900 dark:text-gray-100">
+            <div className="p-2 shop-employee-info-bg rounded">
+              <p className="font-medium shop-employee-info-text">
                 เสร็จสิ้น:
               </p>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="shop-employee-info-text-muted">
                 &quot;ขอบคุณครับ เรียบร้อยแล้ว&quot;
               </p>
             </div>
