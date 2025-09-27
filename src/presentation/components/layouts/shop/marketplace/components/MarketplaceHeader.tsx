@@ -2,20 +2,18 @@
 
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
+import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
 import {
   Bell,
   Heart,
   LogIn,
   Menu,
-  Moon,
   Search,
   ShoppingBag,
-  Sun,
   User,
   UserPlus,
   X,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -34,7 +32,6 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   const [searchValue, setSearchValue] = useState(searchQuery);
   const { authAccount, signOut } = useAuthStore();
   const { activeProfile } = useProfileStore();
-  const { theme, setTheme } = useTheme();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,10 +45,6 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
     setIsMenuOpen(false);
     router.push("/");
     router.refresh();
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const navigationLinks = [
@@ -112,16 +105,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
               {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 marketplace-header-hover rounded-lg transition-colors"
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-5 h-5 marketplace-text-secondary" />
-                ) : (
-                  <Moon className="w-5 h-5 marketplace-text-secondary" />
-                )}
-              </button>
+              <MarketplaceThemeToggle />
 
               {/* User Actions - Desktop */}
               <div className="hidden md:flex items-center space-x-3">
@@ -366,16 +350,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
               <span className="text-sm marketplace-text-muted">
                 เปลี่ยนธีม
               </span>
-              <button
-                onClick={toggleTheme}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-5 h-5 marketplace-text-secondary" />
-                ) : (
-                  <Moon className="w-5 h-5 marketplace-text-secondary" />
-                )}
-              </button>
+              <MarketplaceThemeToggle />
             </div>
           </div>
         </div>
