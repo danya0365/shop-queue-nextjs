@@ -78,4 +78,81 @@
   .shop-employee-status-busy {
     @apply bg-amber-500 animate-pulse;
   }
+
+  /* Dashboard specific utility classes */
+  .shop-employee-header-text {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+  .shop-employee-header-text-muted {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+  .shop-employee-current-queue-bg {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700;
+  }
+  .shop-employee-current-queue-button {
+    @apply bg-white dark:bg-slate-100 text-emerald-600 dark:text-emerald-700 hover:bg-slate-100 dark:hover:bg-slate-200;
+  }
+  .shop-employee-empty-queue-bg {
+    @apply bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600;
+  }
+  .shop-employee-empty-queue-text {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+  .shop-employee-empty-queue-text-muted {
+    @apply text-slate-500 dark:text-slate-500;
+  }
+  .shop-employee-stats-served {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+  .shop-employee-stats-time {
+    @apply text-teal-600 dark:text-teal-400;
+  }
+  .shop-employee-stats-satisfaction {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+  .shop-employee-stats-revenue {
+    @apply text-emerald-700 dark:text-emerald-300;
+  }
+  .shop-employee-queue-item-hover {
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700;
+  }
+  .shop-employee-queue-number-first {
+    @apply bg-emerald-500;
+  }
+  .shop-employee-queue-number-second {
+    @apply bg-teal-500;
+  }
+  .shop-employee-queue-number-other {
+    @apply bg-slate-400;
+  }
+  .shop-employee-wait-time-text {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+  .shop-employee-info-bg {
+    @apply bg-slate-50 dark:bg-slate-700;
+  }
+  .shop-employee-info-text {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+  .shop-employee-info-text-muted {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+  .shop-employee-target-text {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+  .shop-employee-status-offline-bg {
+    @apply bg-rose-500;
+  }
+  .shop-employee-button-stop {
+    @apply bg-rose-500 dark:bg-rose-600 hover:bg-rose-600 dark:hover:bg-rose-700;
+  }
+  .shop-employee-button-blue {
+    @apply bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700;
+  }
+  .shop-employee-button-purple {
+    @apply bg-purple-500 dark:bg-purple-600 hover:bg-purple-600 dark:hover:bg-purple-700;
+  }
+  .shop-employee-divide {
+    @apply divide-emerald-200/30 dark:divide-slate-600/30;
+  }
 }
