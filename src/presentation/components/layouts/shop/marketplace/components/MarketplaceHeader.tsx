@@ -1,8 +1,8 @@
 "use client";
 
+import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
-import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
 import {
   Bell,
   Heart,
@@ -109,7 +109,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
 
               {/* User Actions - Desktop */}
               <div className="hidden md:flex items-center space-x-3">
-                {activeProfile ? (
+                {authAccount && activeProfile ? (
                   <>
                     {/* Notifications */}
                     <button className="p-2 marketplace-header-hover rounded-lg transition-colors relative">
@@ -233,7 +233,9 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
               <div className="text-xl font-bold marketplace-text-primary">
                 Shop Queue
               </div>
-              <span className="text-sm marketplace-text-muted">ตลาดร้านค้า</span>
+              <span className="text-sm marketplace-text-muted">
+                ตลาดร้านค้า
+              </span>
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -270,7 +272,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                     <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
                       บัญชีผู้ใช้
                     </div>
-                    
+
                     {/* User Profile Card */}
                     <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
@@ -320,7 +322,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                     <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
                       เข้าสู่ระบบ
                     </div>
-                    
+
                     <Link
                       href="/auth/login"
                       className="flex items-center justify-center space-x-2 marketplace-button-secondary w-full px-4 py-3 rounded-lg transition-colors font-medium"
@@ -329,7 +331,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       <LogIn className="w-5 h-5" />
                       <span>เข้าสู่ระบบ</span>
                     </Link>
-                    
+
                     <Link
                       href="/auth/register"
                       className="flex items-center justify-center space-x-2 marketplace-button-primary w-full px-4 py-3 rounded-lg transition-colors font-medium"
@@ -347,9 +349,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
           {/* Menu Footer */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm marketplace-text-muted">
-                เปลี่ยนธีม
-              </span>
+              <span className="text-sm marketplace-text-muted">เปลี่ยนธีม</span>
               <MarketplaceThemeToggle />
             </div>
           </div>
