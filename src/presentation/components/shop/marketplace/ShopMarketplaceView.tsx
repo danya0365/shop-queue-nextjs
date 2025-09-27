@@ -3,6 +3,7 @@
 import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
 import { ShopMarketplaceViewModel } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
 import { useShopMarketplacePresenter } from "@/src/presentation/presenters/shop/marketplace/useShopMarketplacePresenter";
+import { ShopMarketplaceFilterModal, ShopMarketplaceFilters } from "./modals";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -112,6 +113,7 @@ export function ShopMarketplaceView({
   const { viewModel, loading, error } = state;
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -154,6 +156,18 @@ export function ShopMarketplaceView({
 
   const handleLocationClick = async (locationId: string) => {
     await actions.filterByLocation(locationId);
+  };
+
+  const handleOpenFilterModal = () => {
+    setIsFilterModalOpen(true);
+  };
+
+  const handleCloseFilterModal = () => {
+    setIsFilterModalOpen(false);
+  };
+
+  const handleApplyFilters = async (filters: ShopMarketplaceFilters) => {
+    await actions.applyFilters(filters);
   };
 
   if (loading && !viewModel) {
@@ -429,7 +443,7 @@ export function ShopMarketplaceView({
                 </button>
               </div>
               <button
-                onClick={actions.openFilterModal}
+                onClick={handleOpenFilterModal}
                 className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <Filter className="h-5 w-5" />
@@ -632,6 +646,15 @@ export function ShopMarketplaceView({
           )}
         </section>
       </div>
+
+      {/* Filter Modal */}
+      <ShopMarketplaceFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={handleCloseFilterModal}
+        onApplyFilters={handleApplyFilters}
+        categories={popularCategories}
+        locations={popularLocations}
+      />
     </div>
   );
 }

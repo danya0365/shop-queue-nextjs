@@ -60,6 +60,20 @@ export interface ShopMarketplacePresenterActions {
   closeShopDetail: () => void;
   openFilterModal: () => void;
   closeFilterModal: () => void;
+  applyFilters: (filters: {
+    searchQuery?: string;
+    categoryId?: string;
+    locationId?: string;
+    minRating?: number;
+    maxRating?: number;
+    status?: "active" | "inactive" | "all";
+    sortBy?: "name" | "rating" | "queueCount" | "totalServices" | "createdAt";
+    sortOrder?: "asc" | "desc";
+    minQueueCount?: number;
+    maxQueueCount?: number;
+    minServiceCount?: number;
+    maxServiceCount?: number;
+  }) => Promise<void>;
 }
 
 // Define view props interface
@@ -430,6 +444,61 @@ export function useShopMarketplacePresenter(
     console.log("ShopMarketplacePresenter: Filter modal closed");
   }, []);
 
+  // Apply filters from modal
+  const applyFilters = useCallback(async (modalFilters: {
+    searchQuery?: string;
+    categoryId?: string;
+    locationId?: string;
+    minRating?: number;
+    maxRating?: number;
+    status?: "active" | "inactive" | "all";
+    sortBy?: "name" | "rating" | "queueCount" | "totalServices" | "createdAt";
+    sortOrder?: "asc" | "desc";
+    minQueueCount?: number;
+    maxQueueCount?: number;
+    minServiceCount?: number;
+    maxServiceCount?: number;
+  }) => {
+    if (!presenter) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Convert modal filters to presenter filters format
+      const presenterFilters: ShopMarketplaceFilters = {
+        search: modalFilters.searchQuery,
+        category: modalFilters.categoryId,
+        location: modalFilters.locationId,
+        rating: modalFilters.minRating, // Use min rating as the rating filter
+      };
+
+      // Update internal filters state
+      setFilters(presenterFilters);
+      setCurrentPage(1); // Reset to first page
+
+      // Search shops with the new filters
+      const result = await presenter.searchShops(
+        modalFilters.searchQuery || "",
+        {
+          category: modalFilters.categoryId,
+          location: modalFilters.locationId,
+          rating: modalFilters.minRating,
+        }
+      );
+      
+      setViewModel(result);
+      console.log("ShopMarketplacePresenter: Filters applied successfully", { filters: modalFilters });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to apply filters";
+      setError(errorMessage);
+      console.error("Error applying filters:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [presenter]);
+
   // State object following the pattern
   const state: ShopMarketplacePresenterState = {
     viewModel,
@@ -471,6 +540,7 @@ export function useShopMarketplacePresenter(
     closeShopDetail,
     openFilterModal,
     closeFilterModal,
+    applyFilters,
   };
 
   return [state, actions];
