@@ -228,75 +228,115 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <>
-          <div
-            className="marketplace-mobile-menu-overlay"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          <div className="marketplace-mobile-menu">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Side Menu */}
+      <div
+        className={`fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Menu Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="text-xl font-bold marketplace-text-primary">
+                Shop Queue
+              </div>
+              <span className="text-sm marketplace-text-muted">ตลาดร้านค้า</span>
+            </div>
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 marketplace-text-secondary" />
+            </button>
+          </div>
+
+          {/* Menu Content */}
+          <div className="flex-1 overflow-y-auto">
             <div className="p-4">
               {/* Mobile Navigation */}
-              <nav className="space-y-2 mb-6">
+              <nav className="space-y-1 mb-6">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                  เมนูหลัก
+                </div>
                 {navigationLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="block px-4 py-3 marketplace-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    className="flex items-center px-3 py-3 marketplace-text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {link.label}
+                    <span className="font-medium">{link.label}</span>
                   </Link>
                 ))}
               </nav>
 
               {/* Mobile User Actions */}
-              <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 {activeProfile ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-3 p-4 marketplace-card rounded-lg">
+                  <div className="space-y-3">
+                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                      บัญชีผู้ใช้
+                    </div>
+                    
+                    {/* User Profile Card */}
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
                         {activeProfile.name.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <p className="font-medium marketplace-text-primary">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium marketplace-text-primary truncate">
                           {activeProfile.name}
                         </p>
-                        <p className="text-sm marketplace-text-muted">
+                        <p className="text-sm marketplace-text-muted truncate">
                           @{activeProfile.username}
                         </p>
                       </div>
                     </div>
 
-                    <Link
-                      href="/account"
-                      className="flex items-center px-4 py-3 marketplace-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <User className="w-5 h-5 mr-3" />
-                      จัดการโปรไฟล์
-                    </Link>
+                    {/* User Menu Items */}
+                    <div className="space-y-1">
+                      <Link
+                        href="/account"
+                        className="flex items-center px-3 py-3 marketplace-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <User className="w-5 h-5 mr-3" />
+                        <span>จัดการโปรไฟล์</span>
+                      </Link>
 
-                    <Link
-                      href="/orders"
-                      className="flex items-center px-4 py-3 marketplace-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <ShoppingBag className="w-5 h-5 mr-3" />
-                      ประวัติการใช้งาน
-                    </Link>
+                      <Link
+                        href="/orders"
+                        className="flex items-center px-3 py-3 marketplace-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <ShoppingBag className="w-5 h-5 mr-3" />
+                        <span>ประวัติการใช้งาน</span>
+                      </Link>
 
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <X className="w-5 h-5 mr-3" />
-                      ออกจากระบบ
-                    </button>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-3 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5 mr-3" />
+                        <span>ออกจากระบบ</span>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
+                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                      เข้าสู่ระบบ
+                    </div>
+                    
                     <Link
                       href="/auth/login"
                       className="flex items-center justify-center space-x-2 marketplace-button-secondary w-full px-4 py-3 rounded-lg transition-colors font-medium"
@@ -305,6 +345,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       <LogIn className="w-5 h-5" />
                       <span>เข้าสู่ระบบ</span>
                     </Link>
+                    
                     <Link
                       href="/auth/register"
                       className="flex items-center justify-center space-x-2 marketplace-button-primary w-full px-4 py-3 rounded-lg transition-colors font-medium"
@@ -318,8 +359,27 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
               </div>
             </div>
           </div>
-        </>
-      )}
+
+          {/* Menu Footer */}
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm marketplace-text-muted">
+                เปลี่ยนธีม
+              </span>
+              <button
+                onClick={toggleTheme}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5 marketplace-text-secondary" />
+                ) : (
+                  <Moon className="w-5 h-5 marketplace-text-secondary" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
