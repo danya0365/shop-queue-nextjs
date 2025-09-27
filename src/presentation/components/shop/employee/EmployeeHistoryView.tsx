@@ -26,13 +26,13 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200";
+        return "shop-employee-history-completed";
       case "cancelled":
-        return "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200";
+        return "shop-employee-history-cancelled";
       case "no_show":
-        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200";
+        return "shop-employee-history-no-show";
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
+        return "shop-employee-history-default";
     }
   };
 
@@ -85,8 +85,8 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
         key={i}
         className={
           i < rating
-            ? "text-yellow-400 dark:text-yellow-300"
-            : "text-gray-300 dark:text-gray-600"
+            ? "shop-employee-history-star-filled"
+            : "shop-employee-history-star-empty"
         }
       >
         ⭐
@@ -99,23 +99,23 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-bold shop-employee-header-text">
             ประวัติการให้บริการ
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="shop-employee-header-text-muted mt-1">
             ดูประวัติและสถิติการทำงานของคุณ • พนักงาน: {viewModel.employeeName}
           </p>
         </div>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium shop-employee-text-muted">
                 คิวทั้งหมดวันนี้
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-2xl font-bold shop-employee-text">
                 {viewModel.currentStats.totalQueues}
               </p>
             </div>
@@ -123,13 +123,13 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium shop-employee-text-muted">
                 เสร็จสิ้น
               </p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold shop-employee-history-stats-completed">
                 {viewModel.currentStats.completedQueues}
               </p>
             </div>
@@ -137,13 +137,13 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium shop-employee-text-muted">
                 ยอดขายวันนี้
               </p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold shop-employee-history-stats-revenue">
                 ฿{viewModel.currentStats.totalRevenue.toLocaleString()}
               </p>
             </div>
@@ -151,13 +151,13 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="shop-employee-card rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium shop-employee-text-muted">
                 คะแนนเฉลี่ย
               </p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-2xl font-bold shop-employee-history-stats-rating">
                 {viewModel.currentStats.averageRating.toFixed(1)}
               </p>
             </div>
@@ -167,16 +167,16 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <div className="shop-employee-card rounded-xl shadow-sm">
+        <div className="p-6 border-b shop-employee-sidebar-border">
+          <h3 className="text-lg font-semibold shop-employee-text">
             ตัวกรอง
           </h3>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium shop-employee-text mb-2">
                 ช่วงเวลา
               </label>
               <select
@@ -187,7 +187,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                     dateRange: e.target.value as FilterOptions["dateRange"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border rounded-lg shop-employee-history-filter-input shop-employee-text focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               >
                 <option value="today">วันนี้</option>
                 <option value="week">สัปดาห์นี้</option>
@@ -197,7 +197,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium shop-employee-text mb-2">
                 สถานะ
               </label>
               <select
@@ -208,7 +208,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                     status: e.target.value as FilterOptions["status"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border rounded-lg shop-employee-history-filter-input shop-employee-text focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               >
                 <option value="all">ทั้งหมด</option>
                 <option value="completed">เสร็จสิ้น</option>
@@ -218,7 +218,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
             </div>
 
             <div className="flex items-end">
-              <button className="w-full bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+              <button className="w-full shop-employee-history-filter-button text-white px-4 py-2 rounded-lg transition-colors">
                 ค้นหา
               </button>
             </div>
@@ -227,21 +227,21 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
       </div>
 
       {/* History List */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+      <div className="shop-employee-card rounded-xl shadow-sm">
+        <div className="p-6 border-b shop-employee-sidebar-border">
+          <h2 className="text-xl font-semibold shop-employee-text">
             ประวัติการให้บริการ ({viewModel.historyQueues.length})
           </h2>
         </div>
 
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y shop-employee-divide">
           {viewModel.historyQueues.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-8xl mb-6 block">📋</span>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              <h3 className="text-2xl font-bold shop-employee-text mb-4">
                 ไม่มีประวัติการให้บริการ
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="shop-employee-text-muted">
                 ประวัติการให้บริการจะแสดงที่นี่
               </p>
             </div>
@@ -249,12 +249,12 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
             viewModel.historyQueues.map((queue) => (
               <div
                 key={queue.id}
-                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="p-6 shop-employee-history-item-hover transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 text-sm font-medium px-2.5 py-0.5 rounded">
+                      <span className="shop-employee-history-queue-number text-sm font-medium px-2.5 py-0.5 rounded">
                         คิว {queue.queueNumber}
                       </span>
                       <span
@@ -264,22 +264,22 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                       >
                         {getStatusText(queue.status)}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs shop-employee-text-muted">
                         {queue.servedAt} - {queue.completedAt}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs shop-employee-text-muted">
                         ({queue.duration} นาที)
                       </span>
                     </div>
 
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    <h3 className="font-medium shop-employee-text mb-1">
                       {queue.customerName}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    <p className="text-sm shop-employee-text-muted mb-2">
                       {queue.customerPhone}
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    <div className="flex items-center gap-4 text-sm shop-employee-text-muted mb-2">
                       <span>฿{queue.total.toLocaleString()}</span>
                       <span className="flex items-center gap-1">
                         {getPaymentMethodIcon(queue.paymentMethod)}
@@ -293,7 +293,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                       )}
                     </div>
 
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-sm shop-employee-text-muted">
                       {queue.services.map((service, index) => (
                         <span key={service.id}>
                           {service.name} x{service.quantity}
@@ -303,7 +303,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                     </div>
 
                     {queue.feedback && (
-                      <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm text-gray-600 dark:text-gray-400">
+                      <div className="mt-2 p-2 shop-employee-history-feedback-bg rounded text-sm shop-employee-history-feedback-text">
                         💬 {queue.feedback}
                       </div>
                     )}
@@ -312,7 +312,7 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
                   <div className="ml-4">
                     <button
                       onClick={() => handleViewDetails(queue)}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
+                      className="shop-employee-history-details-button text-sm"
                     >
                       ดูรายละเอียด
                     </button>
@@ -327,14 +327,14 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
       {/* Details Modal */}
       {showDetailsModal && selectedQueue && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="shop-employee-card rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-xl font-semibold shop-employee-text">
                 รายละเอียดคิว {selectedQueue.queueNumber}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="shop-employee-history-modal-close"
               >
                 ✕
               </button>
@@ -342,43 +342,43 @@ export function EmployeeHistoryView({ viewModel }: EmployeeHistoryViewProps) {
 
             <div className="space-y-4">
               {/* Customer Info */}
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <div className="shop-employee-history-modal-info-bg rounded-lg p-4">
+                <h4 className="font-medium shop-employee-text mb-2">
                   ข้อมูลลูกค้า
                 </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm shop-employee-text-muted">
                   ชื่อ: {selectedQueue.customerName}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm shop-employee-text-muted">
                   เบอร์โทร: {selectedQueue.customerPhone}
                 </p>
               </div>
 
               {/* Services */}
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                <h4 className="font-medium shop-employee-text mb-2">
                   บริการ
                 </h4>
                 <div className="space-y-2">
                   {selectedQueue.services.map((service) => (
                     <div
                       key={service.id}
-                      className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600"
+                      className="flex justify-between items-center py-2 border-b shop-employee-history-modal-border"
                     >
                       <div>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                        <span className="font-medium shop-employee-text">
                           {service.name}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">
+                        <span className="shop-employee-text-muted ml-2">
                           x{service.quantity}
                         </span>
                       </div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                      <span className="font-medium shop-employee-text">
                         ฿{(service.price * service.quantity).toLocaleString()}
                       </span>
                     </div>
                   ))}
-                  <div className="flex justify-between items-center py-2 font-bold text-lg text-gray-900 dark:text-gray-100">
+                  <div className="flex justify-between items-center py-2 font-bold text-lg shop-employee-text">
                     <span>รวมทั้งสิ้น</span>
                     <span>฿{selectedQueue.total.toLocaleString()}</span>
                   </div>

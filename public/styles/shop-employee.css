@@ -322,4 +322,77 @@
   .shop-employee-payment-print-button-hover {
     @apply hover:text-teal-800 dark:hover:text-teal-300;
   }
+
+  /* History Status utility classes */
+  .shop-employee-history-completed {
+    @apply bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200;
+  }
+  .shop-employee-history-cancelled {
+    @apply bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200;
+  }
+  .shop-employee-history-no-show {
+    @apply bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200;
+  }
+  .shop-employee-history-default {
+    @apply bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200;
+  }
+
+  /* History Stats utility classes */
+  .shop-employee-history-stats-completed {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+  .shop-employee-history-stats-revenue {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+  .shop-employee-history-stats-rating {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  /* History Queue Number utility classes */
+  .shop-employee-history-queue-number {
+    @apply bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200;
+  }
+
+  /* History Stars utility classes */
+  .shop-employee-history-star-filled {
+    @apply text-amber-400 dark:text-amber-300;
+  }
+  .shop-employee-history-star-empty {
+    @apply text-slate-300 dark:text-slate-600;
+  }
+
+  /* History Feedback utility classes */
+  .shop-employee-history-feedback-bg {
+    @apply bg-slate-50 dark:bg-slate-700;
+  }
+  .shop-employee-history-feedback-text {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+
+  /* History Filter utility classes */
+  .shop-employee-history-filter-input {
+    @apply border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700;
+  }
+  .shop-employee-history-filter-button {
+    @apply bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700;
+  }
+
+  /* History Item utility classes */
+  .shop-employee-history-item-hover {
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700;
+  }
+  .shop-employee-history-details-button {
+    @apply text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300;
+  }
+
+  /* History Modal utility classes */
+  .shop-employee-history-modal-close {
+    @apply text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400;
+  }
+  .shop-employee-history-modal-info-bg {
+    @apply bg-slate-50 dark:bg-slate-700;
+  }
+  .shop-employee-history-modal-border {
+    @apply border-slate-200 dark:border-slate-600;
+  }
 }
