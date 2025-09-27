@@ -3,59 +3,58 @@
 import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
 import { ShopMarketplaceViewModel } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
 import { useShopMarketplacePresenter } from "@/src/presentation/presenters/shop/marketplace/useShopMarketplacePresenter";
-import { ShopMarketplaceFilterModal, ShopMarketplaceFilters } from "./modals";
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
 import {
   CheckCircle,
   Clock,
   Filter,
+  Grid,
+  Heart,
+  List,
   MapPin,
   Phone,
-  Search,
+  Share2,
   Star,
   Store,
   TrendingUp,
   Users,
-  Grid,
-  List,
-  Heart,
-  Share2,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { ShopMarketplaceFilterModal, ShopMarketplaceFilters } from "./modals";
 
 interface ShopMarketplaceViewProps {
   initialViewModel?: ShopMarketplaceViewModel | null;
 }
 
 // Component to handle image loading with beautiful fallback
-function ShopImageFallback({ 
-  shop, 
-  className, 
-  isCircular = false 
-}: { 
-  shop: ShopDTO; 
-  className: string; 
-  isCircular?: boolean; 
+function ShopImageFallback({
+  shop,
+  className,
+  isCircular = false,
+}: {
+  shop: ShopDTO;
+  className: string;
+  isCircular?: boolean;
 }) {
   const [imageError, setImageError] = useState(false);
-  
+
   // Generate gradient colors based on shop name
   const getGradientColors = (name: string) => {
     const colors = [
-      'from-blue-400 to-blue-600',
-      'from-purple-400 to-purple-600', 
-      'from-green-400 to-green-600',
-      'from-red-400 to-red-600',
-      'from-yellow-400 to-yellow-600',
-      'from-indigo-400 to-indigo-600',
-      'from-pink-400 to-pink-600',
-      'from-teal-400 to-teal-600'
+      "from-blue-400 to-blue-600",
+      "from-purple-400 to-purple-600",
+      "from-green-400 to-green-600",
+      "from-red-400 to-red-600",
+      "from-yellow-400 to-yellow-600",
+      "from-indigo-400 to-indigo-600",
+      "from-pink-400 to-pink-600",
+      "from-teal-400 to-teal-600",
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
   };
-  
+
   // Get 2 characters from shop name
   const getDisplayText = (name: string) => {
     // Split by spaces and get first character of first two words
@@ -71,15 +70,15 @@ function ShopImageFallback({
       return name.charAt(0).toUpperCase();
     }
   };
-  
+
   const displayText = getDisplayText(shop.name);
   const gradientClass = getGradientColors(shop.name);
-  
+
   if (!shop.logo || imageError) {
     return (
-      <div 
+      <div
         className={`${className} bg-gradient-to-br ${gradientClass} flex items-center justify-center ${
-          isCircular ? 'rounded-full' : ''
+          isCircular ? "rounded-full" : ""
         }`}
       >
         <span className="text-white font-bold text-2xl md:text-3xl">
@@ -88,7 +87,7 @@ function ShopImageFallback({
       </div>
     );
   }
-  
+
   return (
     <Image
       src={shop.logo}
@@ -98,9 +97,9 @@ function ShopImageFallback({
       width={isCircular ? 64 : 400}
       height={isCircular ? 64 : 192}
       style={{
-        objectFit: 'cover',
-        width: isCircular ? '100%' : '100%',
-        height: isCircular ? '100%' : '100%'
+        objectFit: "cover",
+        width: isCircular ? "100%" : "100%",
+        height: isCircular ? "100%" : "100%",
       }}
     />
   );
@@ -175,7 +174,9 @@ export function ShopMarketplaceView({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">กำลังโหลดข้อมูลร้านค้า...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            กำลังโหลดข้อมูลร้านค้า...
+          </p>
         </div>
       </div>
     );
@@ -185,7 +186,9 @@ export function ShopMarketplaceView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">เกิดข้อผิดพลาด</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            เกิดข้อผิดพลาด
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
@@ -202,450 +205,442 @@ export function ShopMarketplaceView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">ไม่พบข้อมูล</h1>
-          <p className="text-gray-600 dark:text-gray-400">ไม่สามารถโหลดข้อมูลร้านค้าได้</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            ไม่พบข้อมูล
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            ไม่สามารถโหลดข้อมูลร้านค้าได้
+          </p>
         </div>
       </div>
     );
   }
 
-  const { shopsData, featuredShops, popularCategories, popularLocations } = viewModel;
+  const { shopsData, featuredShops, popularCategories, popularLocations } =
+    viewModel;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              ตลาดร้านค้า
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-              ค้นพบร้านค้าที่น่าสนใจและบริการที่คุณต้องการ
-            </p>
+    <div className="space-y-8">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="marketplace-stat-card">
+          <div className="flex items-center">
+            <div className="marketplace-stat-icon marketplace-stat-icon-blue">
+              <Store className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium marketplace-text-secondary">
+                ร้านค้าทั้งหมด
+              </p>
+              <p className="text-2xl font-bold marketplace-text-primary">
+                {viewModel.totalShops}
+              </p>
+            </div>
           </div>
+        </div>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="ค้นหาร้านค้า, บริการ, หรือสถานที่..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 pl-12 pr-4 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
-              <button
-                type="submit"
-                className="absolute right-2 top-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                ค้นหา
-              </button>
+        <div className="marketplace-stat-card">
+          <div className="flex items-center">
+            <div className="marketplace-stat-icon marketplace-stat-icon-green">
+              <CheckCircle className="h-6 w-6" />
             </div>
-          </form>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
-              <div className="flex items-center">
-                <Store className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                    ร้านค้าทั้งหมด
-                  </p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                    {viewModel.totalShops}
-                  </p>
-                </div>
-              </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium marketplace-text-secondary">
+                ร้านเปิดทำการ
+              </p>
+              <p className="text-2xl font-bold marketplace-text-primary">
+                {viewModel.activeShops}
+              </p>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
-              <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                    ร้านเปิดทำการ
-                  </p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {viewModel.activeShops}
-                  </p>
-                </div>
-              </div>
+        <div className="marketplace-stat-card">
+          <div className="flex items-center">
+            <div className="marketplace-stat-icon marketplace-stat-icon-purple">
+              <Star className="h-6 w-6" />
             </div>
-
-            <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-lg">
-              <div className="flex items-center">
-                <Star className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                    ร้านแนะนำ
-                  </p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                    {viewModel.featuredShopsCount}
-                  </p>
-                </div>
-              </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium marketplace-text-secondary">
+                ร้านแนะนำ
+              </p>
+              <p className="text-2xl font-bold marketplace-text-primary">
+                {viewModel.featuredShopsCount}
+              </p>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-lg">
-              <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                    ร้านใหม่เดือนนี้
-                  </p>
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {viewModel.newShopsThisMonth}
-                  </p>
-                </div>
-              </div>
+        <div className="marketplace-stat-card">
+          <div className="flex items-center">
+            <div className="marketplace-stat-icon marketplace-stat-icon-orange">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium marketplace-text-secondary">
+                ร้านใหม่เดือนนี้
+              </p>
+              <p className="text-2xl font-bold marketplace-text-primary">
+                {viewModel.newShopsThisMonth}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Featured Shops */}
-        {featuredShops.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                ร้านแนะนำ
-              </h2>
-              <button className="text-blue-600 hover:text-blue-700 font-medium">
-                ดูทั้งหมด
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featuredShops.map((shop: ShopDTO) => (
-                <Link
-                  key={shop.id}
-                  href={`/shop/${shop.id}`}
-                  className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
-                >
-                  <div className="relative">
-                    <ShopImageFallback 
-                      shop={shop} 
-                      className="w-full h-48" 
-                    />
-                    <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(shop.status)}`}>
-                        {getStatusText(shop.status)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      {shop.name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                      {shop.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {shop.rating}
-                        </span>
-                      </div>
-                      <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                        ดูรายละเอียด
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Popular Categories */}
+      {/* Featured Shops */}
+      {featuredShops.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-            หมวดหมู่ยอดนิยม
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {popularCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category.id)}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
-              >
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {category.shopCount} ร้าน
-                </p>
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold marketplace-text-primary">
+              ร้านแนะนำ
+            </h2>
+            <button className="text-blue-600 hover:text-blue-700 font-medium">
+              ดูทั้งหมด
+            </button>
           </div>
-        </section>
-
-        {/* Popular Locations */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-            สถานที่ยอดนิยม
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {popularLocations.map((location) => (
-              <button
-                key={location.id}
-                onClick={() => handleLocationClick(location.id)}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow text-left"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredShops.map((shop: ShopDTO) => (
+              <Link
+                key={shop.id}
+                href={`/shop/${shop.id}`}
+                className="marketplace-shop-card"
               >
-                <div className="flex items-center">
-                  <MapPin className="h-5 w-5 text-blue-600 mr-3" />
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                      {location.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {location.shopCount} ร้าน
-                    </p>
+                <div className="relative">
+                  <ShopImageFallback shop={shop} className="w-full h-48" />
+                  <div className="absolute top-2 right-2">
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                        shop.status
+                      )}`}
+                    >
+                      {getStatusText(shop.status)}
+                    </span>
                   </div>
                 </div>
-              </button>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    {shop.name}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                    {shop.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {shop.rating}
+                      </span>
+                    </div>
+                    <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      ดูรายละเอียด
+                    </span>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </section>
+      )}
 
-        {/* All Shops */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              ร้านค้าทั้งหมด
-            </h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-md ${
-                    viewMode === "grid"
-                      ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
-                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-                >
-                  <Grid className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-md ${
-                    viewMode === "list"
-                      ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
-                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  }`}
-                >
-                  <List className="h-5 w-5" />
-                </button>
+      {/* Popular Categories */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold marketplace-text-primary mb-6">
+          หมวดหมู่ยอดนิยม
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {popularCategories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategoryClick(category.id)}
+              className="marketplace-card marketplace-card-hover p-4 text-center"
+            >
+              <div className="text-2xl mb-2">{category.icon}</div>
+              <h3 className="font-medium marketplace-text-primary mb-1">
+                {category.name}
+              </h3>
+              <p className="text-sm marketplace-text-secondary">
+                {category.shopCount} ร้าน
+              </p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Popular Locations */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold marketplace-text-primary mb-6">
+          สถานที่ยอดนิยม
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {popularLocations.map((location) => (
+            <button
+              key={location.id}
+              onClick={() => handleLocationClick(location.id)}
+              className="marketplace-card marketplace-card-hover p-4 text-left"
+            >
+              <div className="flex items-center">
+                <MapPin className="h-5 w-5 text-blue-600 mr-3" />
+                <div>
+                  <h3 className="font-medium marketplace-text-primary">
+                    {location.name}
+                  </h3>
+                  <p className="text-sm marketplace-text-secondary">
+                    {location.shopCount} ร้าน
+                  </p>
+                </div>
               </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* All Shops */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold marketplace-text-primary">
+            ร้านค้าทั้งหมด
+          </h2>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <button
-                onClick={handleOpenFilterModal}
-                className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-md ${
+                  viewMode === "grid"
+                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                }`}
               >
-                <Filter className="h-5 w-5" />
-                <span>กรอง</span>
+                <Grid className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-md ${
+                  viewMode === "list"
+                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                }`}
+              >
+                <List className="h-5 w-5" />
               </button>
             </div>
-          </div>
-
-          {/* Shops Grid/List */}
-          {shopsData.shops.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
-              <div className="text-6xl mb-4">🏪</div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                ยังไม่มีข้อมูลร้านค้า
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                ข้อมูลร้านค้าจะแสดงที่นี่เมื่อมีการสร้างร้านค้า
-              </p>
-            </div>
-          ) : (
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                  : "space-y-4"
-              }
+            <button
+              onClick={handleOpenFilterModal}
+              className="flex items-center space-x-2 marketplace-button-secondary px-4 py-2 rounded-lg transition-colors"
             >
-              {shopsData.shops.map((shop: ShopDTO) => (
-                <Link
-                  key={shop.id}
-                  href={`/shop/${shop.id}`}
-                  className={`block bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow ${
-                    viewMode === "grid" ? "overflow-hidden" : "flex items-center p-4"
-                  }`}
-                >
-                  {viewMode === "grid" ? (
-                    <>
-                      <div className="relative">
-                        <ShopImageFallback 
-                          shop={shop} 
-                          className="w-full h-48" 
-                        />
-                        <div className="absolute top-2 right-2">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(shop.status)}`}>
-                            {getStatusText(shop.status)}
+              <Filter className="h-5 w-5" />
+              <span>กรอง</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Shops Grid/List */}
+        {shopsData.shops.length === 0 ? (
+          <div className="marketplace-card p-8 text-center">
+            <div className="text-6xl mb-4">🏪</div>
+            <h3 className="text-lg font-medium marketplace-text-primary mb-2">
+              ยังไม่มีข้อมูลร้านค้า
+            </h3>
+            <p className="marketplace-text-secondary">
+              ข้อมูลร้านค้าจะแสดงที่นี่เมื่อมีการสร้างร้านค้า
+            </p>
+          </div>
+        ) : (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-4"
+            }
+          >
+            {shopsData.shops.map((shop: ShopDTO) => (
+              <Link
+                key={shop.id}
+                href={`/shop/${shop.id}`}
+                className={`marketplace-shop-card ${
+                  viewMode === "grid"
+                    ? "overflow-hidden"
+                    : "flex items-center p-4"
+                }`}
+              >
+                {viewMode === "grid" ? (
+                  <>
+                    <div className="relative">
+                      <ShopImageFallback shop={shop} className="w-full h-48" />
+                      <div className="absolute top-2 right-2">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            shop.status
+                          )}`}
+                        >
+                          {getStatusText(shop.status)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        {shop.name}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                        {shop.description}
+                      </p>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {shop.rating}
                           </span>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <button className="text-gray-400 hover:text-red-500">
+                            <Heart className="h-4 w-4" />
+                          </button>
+                          <button className="text-gray-400 hover:text-blue-500">
+                            <Share2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                          {shop.name}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                          {shop.description}
-                        </p>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {shop.rating}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <button className="text-gray-400 hover:text-red-500">
-                              <Heart className="h-4 w-4" />
-                            </button>
-                            <button className="text-gray-400 hover:text-blue-500">
-                              <Share2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span>{shop.address}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          <Phone className="h-4 w-4 mr-1" />
-                          <span>{shop.phone}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 text-sm">
-                            <span className="flex items-center">
-                              <Users className="h-4 w-4 mr-1" />
-                              {shop.queueCount}
-                            </span>
-                            <span className="flex items-center">
-                              <Clock className="h-4 w-4 mr-1" />
-                              {shop.totalServices}
-                            </span>
-                          </div>
-                          <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                            ดูรายละเอียด
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span>{shop.address}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <Phone className="h-4 w-4 mr-1" />
+                        <span>{shop.phone}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm">
+                          <span className="flex items-center">
+                            <Users className="h-4 w-4 mr-1" />
+                            {shop.queueCount}
+                          </span>
+                          <span className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {shop.totalServices}
                           </span>
                         </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex-shrink-0 h-16 w-16">
-                        <ShopImageFallback 
-                          shop={shop} 
-                          className="h-16 w-16" 
-                          isCircular={true}
-                        />
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                            {shop.name}
-                          </h3>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(shop.status)}`}>
-                            {getStatusText(shop.status)}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                          {shop.description}
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                            <span>{shop.rating}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>{shop.address}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone className="h-4 w-4 mr-1" />
-                            <span>{shop.phone}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="ml-4 flex items-center space-x-2">
-                        <button className="text-gray-400 hover:text-red-500">
-                          <Heart className="h-5 w-5" />
-                        </button>
-                        <button className="text-gray-400 hover:text-blue-500">
-                          <Share2 className="h-5 w-5" />
-                        </button>
-                        <span className="text-blue-600 hover:text-blue-700 font-medium">
+                        <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
-                    </>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex-shrink-0 h-16 w-16">
+                      <ShopImageFallback
+                        shop={shop}
+                        className="h-16 w-16"
+                        isCircular={true}
+                      />
+                    </div>
+                    <div className="ml-4 flex-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          {shop.name}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            shop.status
+                          )}`}
+                        >
+                          {getStatusText(shop.status)}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                        {shop.description}
+                      </p>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          <span>{shop.rating}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>{shop.address}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Phone className="h-4 w-4 mr-1" />
+                          <span>{shop.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="ml-4 flex items-center space-x-2">
+                      <button className="text-gray-400 hover:text-red-500">
+                        <Heart className="h-5 w-5" />
+                      </button>
+                      <button className="text-gray-400 hover:text-blue-500">
+                        <Share2 className="h-5 w-5" />
+                      </button>
+                      <span className="text-blue-600 hover:text-blue-700 font-medium">
+                        ดูรายละเอียด
+                      </span>
+                    </div>
+                  </>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
 
-          {/* Pagination */}
-          {shopsData.totalCount > shopsData.perPage && (
-            <div className="mt-8 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => actions.goToPage(shopsData.currentPage - 1)}
-                  disabled={shopsData.currentPage === 1}
-                  className={`px-3 py-2 rounded-md ${
-                    shopsData.currentPage === 1
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  ก่อนหน้า
-                </button>
-                <div className="flex items-center space-x-1">
-                  {Array.from(
-                    { length: Math.ceil(shopsData.totalCount / shopsData.perPage) },
-                    (_, i) => i + 1
-                  ).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => actions.goToPage(page)}
-                      className={`px-3 py-2 rounded-md ${
-                        page === shopsData.currentPage
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => actions.goToPage(shopsData.currentPage + 1)}
-                  disabled={shopsData.currentPage === Math.ceil(shopsData.totalCount / shopsData.perPage)}
-                  className={`px-3 py-2 rounded-md ${
-                    shopsData.currentPage === Math.ceil(shopsData.totalCount / shopsData.perPage)
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  ถัดไป
-                </button>
+        {/* Pagination */}
+        {shopsData.totalCount > shopsData.perPage && (
+          <div className="mt-8 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => actions.goToPage(shopsData.currentPage - 1)}
+                disabled={shopsData.currentPage === 1}
+                className={`px-3 py-2 rounded-md ${
+                  shopsData.currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                }`}
+              >
+                ก่อนหน้า
+              </button>
+              <div className="flex items-center space-x-1">
+                {Array.from(
+                  {
+                    length: Math.ceil(shopsData.totalCount / shopsData.perPage),
+                  },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => actions.goToPage(page)}
+                    className={`px-3 py-2 rounded-md ${
+                      page === shopsData.currentPage
+                        ? "bg-blue-600 text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                หน้า {shopsData.currentPage} จาก {Math.ceil(shopsData.totalCount / shopsData.perPage)}
-              </div>
+              <button
+                onClick={() => actions.goToPage(shopsData.currentPage + 1)}
+                disabled={
+                  shopsData.currentPage ===
+                  Math.ceil(shopsData.totalCount / shopsData.perPage)
+                }
+                className={`px-3 py-2 rounded-md ${
+                  shopsData.currentPage ===
+                  Math.ceil(shopsData.totalCount / shopsData.perPage)
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                }`}
+              >
+                ถัดไป
+              </button>
             </div>
-          )}
-        </section>
-      </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              หน้า {shopsData.currentPage} จาก{" "}
+              {Math.ceil(shopsData.totalCount / shopsData.perPage)}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Filter Modal */}
       <ShopMarketplaceFilterModal

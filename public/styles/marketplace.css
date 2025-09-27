@@ -1,0 +1,199 @@
+@layer base {
+  /* Marketplace Layout Utilities */
+  .marketplace-bg {
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900;
+  }
+  
+  .marketplace-header-bg {
+    @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700;
+  }
+  
+  .marketplace-header-text {
+    @apply text-slate-800 dark:text-slate-200;
+  }
+  
+  .marketplace-header-text-muted {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+  
+  .marketplace-header-hover {
+    @apply hover:bg-slate-100 dark:hover:bg-slate-800;
+  }
+  
+  .marketplace-search-bg {
+    @apply bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600;
+  }
+  
+  .marketplace-search-focus {
+    @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400;
+  }
+  
+  .marketplace-button-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  }
+  
+  .marketplace-button-secondary {
+    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
+  }
+  
+  .marketplace-card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700;
+  }
+  
+  .marketplace-card-hover {
+    @apply hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300;
+  }
+  
+  .marketplace-text-primary {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+  
+  .marketplace-text-secondary {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+  
+  .marketplace-text-muted {
+    @apply text-slate-500 dark:text-slate-500;
+  }
+  
+  .marketplace-footer-bg {
+    @apply bg-slate-900 dark:bg-slate-950;
+  }
+  
+  .marketplace-footer-text {
+    @apply text-slate-300 dark:text-slate-400;
+  }
+  
+  .marketplace-footer-text-muted {
+    @apply text-slate-400 dark:text-slate-500;
+  }
+  
+  .marketplace-footer-link {
+    @apply text-slate-300 hover:text-white dark:text-slate-400 dark:hover:text-slate-200 transition-colors;
+  }
+  
+  /* Hero Section */
+  .marketplace-hero-bg {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600;
+  }
+  
+  .marketplace-hero-text {
+    @apply text-white;
+  }
+  
+  .marketplace-hero-text-muted {
+    @apply text-blue-100;
+  }
+  
+  /* Category Pills */
+  .marketplace-category-pill {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+  }
+  
+  .marketplace-category-pill-active {
+    @apply bg-blue-600 text-white shadow-md;
+  }
+  
+  .marketplace-category-pill-inactive {
+    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
+  }
+  
+  /* Shop Cards */
+  .marketplace-shop-card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300 dark:bg-slate-800 dark:border-slate-700 dark:hover:border-blue-600;
+  }
+  
+  .marketplace-shop-image {
+    @apply w-full h-48 object-cover rounded-t-xl;
+  }
+  
+  .marketplace-shop-badge {
+    @apply absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .marketplace-shop-badge-featured {
+    @apply bg-yellow-500 text-white;
+  }
+  
+  .marketplace-shop-badge-new {
+    @apply bg-green-500 text-white;
+  }
+  
+  .marketplace-shop-rating {
+    @apply flex items-center space-x-1 text-yellow-500;
+  }
+  
+  .marketplace-shop-status-open {
+    @apply text-green-600 dark:text-green-400;
+  }
+  
+  .marketplace-shop-status-closed {
+    @apply text-red-600 dark:text-red-400;
+  }
+  
+  /* Statistics Cards */
+  .marketplace-stat-card {
+    @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700;
+  }
+  
+  .marketplace-stat-icon {
+    @apply w-12 h-12 rounded-lg flex items-center justify-center;
+  }
+  
+  .marketplace-stat-icon-blue {
+    @apply bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+  
+  .marketplace-stat-icon-green {
+    @apply bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400;
+  }
+  
+  .marketplace-stat-icon-purple {
+    @apply bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400;
+  }
+  
+  .marketplace-stat-icon-orange {
+    @apply bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400;
+  }
+  
+  /* Loading States */
+  .marketplace-skeleton {
+    @apply animate-pulse bg-slate-200 dark:bg-slate-700 rounded;
+  }
+  
+  /* Responsive Grid */
+  .marketplace-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+  
+  .marketplace-grid-large {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+  }
+  
+  /* Navigation */
+  .marketplace-nav-link {
+    @apply text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 px-3 py-2 rounded-md text-sm font-medium transition-colors;
+  }
+  
+  .marketplace-nav-link-active {
+    @apply text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30;
+  }
+  
+  /* Mobile Menu */
+  .marketplace-mobile-menu {
+    @apply fixed inset-0 z-50 bg-white dark:bg-slate-900;
+  }
+  
+  .marketplace-mobile-menu-overlay {
+    @apply fixed inset-0 bg-black/50 z-40;
+  }
+  
+  /* Search Suggestions */
+  .marketplace-search-dropdown {
+    @apply absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg z-50;
+  }
+  
+  .marketplace-search-suggestion {
+    @apply px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-200 dark:border-slate-700 last:border-b-0;
+  }
+}

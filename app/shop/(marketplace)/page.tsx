@@ -1,4 +1,4 @@
-import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
+import { ShopMarketplaceLayout } from "@/src/presentation/components/layouts/shop/marketplace";
 import { ShopMarketplaceView } from "@/src/presentation/components/shop/marketplace/ShopMarketplaceView";
 import { ShopMarketplacePresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
 
@@ -12,34 +12,34 @@ export default async function ShopMarketplacePage() {
     const viewModel = await presenter.getViewModel();
 
     return (
-      <FrontendLayout>
+      <ShopMarketplaceLayout showHero={true}>
         <ShopMarketplaceView initialViewModel={viewModel} />
-      </FrontendLayout>
+      </ShopMarketplaceLayout>
     );
   } catch (error) {
     console.error("Error fetching shops marketplace data:", error);
 
     return (
-      <FrontendLayout>
+      <ShopMarketplaceLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 className="text-2xl font-bold marketplace-text-primary mb-2">
               เกิดข้อผิดพลาด
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="marketplace-text-secondary mb-4">
               ไม่สามารถโหลดข้อมูลร้านค้าได้
             </p>
             <form action="">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="marketplace-button-primary px-4 py-2 rounded-lg transition-colors"
               >
                 ลองใหม่อีกครั้ง
               </button>
             </form>
           </div>
         </div>
-      </FrontendLayout>
+      </ShopMarketplaceLayout>
     );
   }
 }

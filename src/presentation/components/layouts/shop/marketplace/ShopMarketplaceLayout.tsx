@@ -1,0 +1,115 @@
+"use client";
+
+import React, { ReactNode } from "react";
+import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
+import MarketplaceHeader from "./components/MarketplaceHeader";
+import MarketplaceFooter from "./components/MarketplaceFooter";
+
+interface ShopMarketplaceLayoutProps {
+  children: ReactNode;
+  onSearch?: (query: string) => void;
+  searchQuery?: string;
+  showHero?: boolean;
+  heroTitle?: string;
+  heroDescription?: string;
+}
+
+const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({ 
+  children, 
+  onSearch,
+  searchQuery,
+  showHero = false,
+  heroTitle = "ค้นพบร้านค้าที่ดีที่สุด",
+  heroDescription = "เลือกจากร้านค้าหลากหลายประเภท พร้อมระบบจัดการคิวที่ทันสมัย"
+}) => {
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col marketplace-bg">
+        {/* Header */}
+        <MarketplaceHeader 
+          onSearch={onSearch}
+          searchQuery={searchQuery}
+        />
+
+        {/* Hero Section (Optional) */}
+        {showHero && (
+          <section className="marketplace-hero-bg py-16 sm:py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold marketplace-hero-text mb-6">
+                {heroTitle}
+              </h1>
+              <p className="text-xl sm:text-2xl marketplace-hero-text-muted max-w-3xl mx-auto mb-8">
+                {heroDescription}
+              </p>
+              
+              {/* Hero Search Bar */}
+              <div className="max-w-2xl mx-auto">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const query = formData.get('search') as string;
+                    if (onSearch && query) {
+                      onSearch(query);
+                    }
+                  }}
+                  className="relative"
+                >
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="search"
+                      defaultValue={searchQuery}
+                      placeholder="ค้นหาร้านค้า, บริการ, หรือสถานที่ที่คุณต้องการ..."
+                      className="w-full px-6 py-4 text-lg bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg focus:ring-4 focus:ring-white/30 focus:outline-none placeholder-slate-500"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
+                    >
+                      ค้นหา
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Popular Categories */}
+              <div className="mt-8">
+                <p className="marketplace-hero-text-muted mb-4">หมวดหมู่ยอดนิยม:</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {[
+                    "ร้านอาหาร",
+                    "ร้านตัดผม",
+                    "คลินิกความงาม",
+                    "ร้านซ่อมรถ",
+                    "โรงพยาบาล",
+                    "ธนาคาร"
+                  ].map((category) => (
+                    <button
+                      key={category}
+                      className="px-4 py-2 bg-white/20 hover:bg-white/30 marketplace-hero-text rounded-full text-sm font-medium transition-colors backdrop-blur-sm"
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </div>
+        </main>
+
+        {/* Footer */}
+        <MarketplaceFooter />
+      </div>
+    </ThemeProvider>
+  );
+};
+
+export default ShopMarketplaceLayout;
