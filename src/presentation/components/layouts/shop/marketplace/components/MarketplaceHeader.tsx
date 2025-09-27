@@ -1,24 +1,24 @@
 "use client";
 
+import { useAuthStore } from "@/src/presentation/stores/auth-store";
+import { useProfileStore } from "@/src/presentation/stores/profile-store";
+import {
+  Bell,
+  Heart,
+  LogIn,
+  Menu,
+  Moon,
+  Search,
+  ShoppingBag,
+  Sun,
+  User,
+  UserPlus,
+  X,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { 
-  Search, 
-  Menu, 
-  X, 
-  User, 
-  ShoppingBag, 
-  Heart, 
-  Bell,
-  Sun,
-  Moon,
-  LogIn,
-  UserPlus
-} from "lucide-react";
-import { useAuthStore } from "@/src/presentation/stores/auth-store";
-import { useProfileStore } from "@/src/presentation/stores/profile-store";
-import { useTheme } from "next-themes";
 
 interface MarketplaceHeaderProps {
   onSearch?: (query: string) => void;
@@ -27,7 +27,7 @@ interface MarketplaceHeaderProps {
 
 const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   onSearch,
-  searchQuery = ""
+  searchQuery = "",
 }) => {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,15 +51,15 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const navigationLinks = [
     { href: "/", label: "หน้าแรก" },
-    { href: "/shop/(marketplace)", label: "ตลาดร้านค้า" },
-    { href: "/categories", label: "หมวดหมู่" },
-    { href: "/about", label: "เกี่ยวกับเรา" },
-    { href: "/contact", label: "ติดต่อเรา" },
+    { href: "/shop", label: "ตลาดร้านค้า" },
+    { href: "/shop/categories", label: "หมวดหมู่" },
+    { href: "/shop/about", label: "เกี่ยวกับเรา" },
+    { href: "/shop/contact", label: "ติดต่อเรา" },
   ];
 
   return (
@@ -117,7 +117,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                 onClick={toggleTheme}
                 className="p-2 marketplace-header-hover rounded-lg transition-colors"
               >
-                {theme === 'dark' ? (
+                {theme === "dark" ? (
                   <Sun className="w-5 h-5 marketplace-text-secondary" />
                 ) : (
                   <Moon className="w-5 h-5 marketplace-text-secondary" />
@@ -232,7 +232,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
       {/* Mobile Menu */}
       {isMenuOpen && (
         <>
-          <div 
+          <div
             className="marketplace-mobile-menu-overlay"
             onClick={() => setIsMenuOpen(false)}
           />
@@ -261,11 +261,15 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                         {activeProfile.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium marketplace-text-primary">{activeProfile.name}</p>
-                        <p className="text-sm marketplace-text-muted">@{activeProfile.username}</p>
+                        <p className="font-medium marketplace-text-primary">
+                          {activeProfile.name}
+                        </p>
+                        <p className="text-sm marketplace-text-muted">
+                          @{activeProfile.username}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <Link
                       href="/account"
                       className="flex items-center px-4 py-3 marketplace-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
@@ -274,7 +278,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       <User className="w-5 h-5 mr-3" />
                       จัดการโปรไฟล์
                     </Link>
-                    
+
                     <Link
                       href="/orders"
                       className="flex items-center px-4 py-3 marketplace-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
@@ -283,7 +287,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       <ShoppingBag className="w-5 h-5 mr-3" />
                       ประวัติการใช้งาน
                     </Link>
-                    
+
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
