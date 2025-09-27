@@ -29,18 +29,18 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   };
 
   return (
-    <header className="employee-header-bg border-b employee-header-border shadow-sm z-10">
+    <header className="shop-employee-header-bg border-b shop-employee-header-border shadow-sm z-10">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
-            className="p-2 mr-2 rounded-md employee-sidebar-hover lg:hidden"
+            className="p-2 mr-2 rounded-md shop-employee-sidebar-hover lg:hidden"
             aria-label="Toggle sidebar"
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <Link href="/" className="flex items-center">
-            <span className="text-xl font-bold employee-primary">
+            <span className="text-xl font-bold shop-employee-primary">
               ShopQueue - {shop?.name}
             </span>
             <span className="ml-2 text-sm font-medium px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 rounded">
@@ -50,23 +50,25 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
         </div>
         <div className="flex items-center space-x-4">
           <div className="hidden sm:flex items-center space-x-2">
-            <div className="w-3 h-3 employee-status-online rounded-full"></div>
-            <span className="text-sm employee-text-muted">ออนไลน์</span>
+            <div className="w-3 h-3 shop-employee-status-online rounded-full"></div>
+            <span className="text-sm shop-employee-text-muted">ออนไลน์</span>
           </div>
-          <div className="hidden md:block text-sm employee-text-muted">
+          <div className="hidden md:block text-sm shop-employee-text-muted">
             พนักงาน:{" "}
-            <span className="font-medium employee-primary">สมชาย ใจดี</span>
+            <span className="font-medium shop-employee-primary">
+              สมชาย ใจดี
+            </span>
           </div>
           <EmployeeThemeToggle />
           <Link
             href="/"
-            className="flex items-center text-sm employee-text-muted employee-primary-hover"
+            className="flex items-center text-sm shop-employee-text-muted shop-employee-primary-hover"
           >
             <span>กลับไปยังเว็บไซต์</span>
           </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center text-sm employee-text-muted employee-danger-hover cursor-pointer"
+            className="flex items-center text-sm shop-employee-text-muted shop-employee-danger-hover cursor-pointer"
           >
             <LogOut size={18} className="mr-1" />
             <span>ออกจากระบบ</span>

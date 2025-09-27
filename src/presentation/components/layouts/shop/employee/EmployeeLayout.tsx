@@ -20,7 +20,7 @@ const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children, shop }) => {
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col h-screen employee-bg">
+      <div className="flex flex-col h-screen shop-employee-bg">
         <EmployeeHeader
           shop={shop}
           sidebarOpen={sidebarOpen}
@@ -31,7 +31,7 @@ const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children, shop }) => {
           {shop && <EmployeeSidebar shop={shop} sidebarOpen={sidebarOpen} />}
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto p-6 transition-all duration-300 employee-text">
+          <main className="flex-1 overflow-y-auto p-6 transition-all duration-300 shop-employee-text">
             {children}
           </main>
         </div>
