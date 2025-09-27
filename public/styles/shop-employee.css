@@ -257,4 +257,69 @@
   .shop-employee-progress-bar-fill {
     @apply bg-gradient-to-r from-emerald-500 to-teal-500;
   }
+
+  /* Payment Status utility classes */
+  .shop-employee-payment-queue-number {
+    @apply bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200;
+  }
+  .shop-employee-payment-unpaid {
+    @apply bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200;
+  }
+  .shop-employee-payment-partial {
+    @apply bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200;
+  }
+  .shop-employee-payment-completed {
+    @apply bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200;
+  }
+  .shop-employee-payment-completed-queue {
+    @apply bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200;
+  }
+
+  /* Payment Card utility classes */
+  .shop-employee-payment-card {
+    @apply border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800;
+  }
+  .shop-employee-payment-card-hover {
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700;
+  }
+  .shop-employee-payment-card-border {
+    @apply border-slate-200 dark:border-slate-600;
+  }
+
+  /* Payment Modal utility classes */
+  .shop-employee-payment-modal-bg {
+    @apply bg-slate-50 dark:bg-slate-700;
+  }
+  .shop-employee-payment-method-selected {
+    @apply border-teal-500 bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-200;
+  }
+  .shop-employee-payment-method-available {
+    @apply border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700;
+  }
+  .shop-employee-payment-method-available-hover {
+    @apply hover:border-slate-400 dark:hover:border-slate-500;
+  }
+  .shop-employee-payment-method-disabled {
+    @apply border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500;
+  }
+  .shop-employee-payment-input {
+    @apply border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700;
+  }
+  .shop-employee-payment-change-text {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+
+  /* Payment Total utility classes */
+  .shop-employee-payment-total {
+    @apply text-teal-600 dark:text-teal-400;
+  }
+  .shop-employee-payment-discount {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+  .shop-employee-payment-print-button {
+    @apply text-teal-600 dark:text-teal-400;
+  }
+  .shop-employee-payment-print-button-hover {
+    @apply hover:text-teal-800 dark:hover:text-teal-300;
+  }
 }
