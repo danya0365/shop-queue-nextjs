@@ -90,7 +90,7 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
                     />
                     <button
                       type="submit"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 marketplace-button-primary px-6 py-2 rounded-xl font-medium"
                     >
                       ค้นหา
                     </button>
@@ -108,7 +108,7 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
                     <button
                       key={category.id}
                       onClick={() => onCategoryClick?.(category.id)}
-                      className="px-4 py-2 bg-white/20 hover:bg-white/30 marketplace-hero-text rounded-full text-sm font-medium transition-colors backdrop-blur-sm"
+                      className="px-4 py-2 marketplace-hero-category-bg marketplace-hero-text rounded-full text-sm font-medium transition-colors backdrop-blur-sm"
                     >
                       {category.name}
                     </button>
