@@ -29,21 +29,21 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
       const params = new URLSearchParams(searchParams.toString());
       params.delete("q");
       params.delete("page"); // Reset to first page
-      router.push(`/shop?${params.toString()}`);
+      router.push(`/shop/search?${params.toString()}`);
       return;
     }
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("q", query.trim());
     params.delete("page"); // Reset to first page when searching
-    router.push(`/shop?${params.toString()}`);
+    router.push(`/shop/search?${params.toString()}`);
   };
 
   const onCategoryClick = (category: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", category);
     params.delete("page"); // Reset to first page when filtering by category
-    router.push(`/shop?${params.toString()}`);
+    router.push(`/shop/search?${params.toString()}`);
   };
 
   return (

@@ -1,0 +1,539 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  ClientShopSearchPresenterFactory,
+  ShopSearchViewModel,
+} from "./ShopSearchPresenter";
+
+const searchPresenter = ClientShopSearchPresenterFactory.create();
+
+// Define state interface following the pattern
+export interface ShopSearchPresenterState {
+  viewModel: ShopSearchViewModel | null;
+  loading: boolean;
+  error: string | null;
+  isCreateModalOpen: boolean;
+  isEditModalOpen: boolean;
+  isDeleteModalOpen: boolean;
+  selectedItemId: string | null;
+  currentPage: number;
+}
+
+// Define actions interface following the pattern
+export interface ShopSearchPresenterActions {
+  refreshData: () => Promise<void>;
+  createShop: (shopData: unknown) => Promise<void>;
+  updateShop: (id: string, shopData: unknown) => Promise<void>;
+  deleteShop: (id: string) => Promise<void>;
+  openCreateModal: () => void;
+  closeCreateModal: () => void;
+  openEditModal: (itemId: string) => void;
+  closeEditModal: () => void;
+  openDeleteModal: (itemId: string) => void;
+  closeDeleteModal: () => void;
+  setCurrentPage: (page: number) => void;
+  reset: () => void;
+  setError: (error: string | null) => void;
+  // Additional search-specific actions
+  loadData: () => Promise<void>;
+  searchShops: (
+    query: string,
+    filters?: {
+      category?: string;
+      location?: string;
+      priceRange?: [number, number];
+      rating?: number;
+    }
+  ) => Promise<void>;
+  filterByCategory: (categoryId: string) => Promise<void>;
+  filterByLocation: (locationId: string) => Promise<void>;
+  goToPage: (page: number) => Promise<void>;
+  clearFilters: () => Promise<void>;
+  // Legacy modal actions for backward compatibility
+  openShopDetail: (shopId: string) => void;
+  closeShopDetail: () => void;
+  openFilterModal: () => void;
+  closeFilterModal: () => void;
+  applyFilters: (filters: {
+    searchQuery?: string;
+    categoryId?: string;
+    locationId?: string;
+    minRating?: number;
+    maxRating?: number;
+    status?: "active" | "inactive" | "all";
+    sortBy?: "name" | "rating" | "queueCount" | "totalServices" | "createdAt";
+    sortOrder?: "asc" | "desc";
+    minQueueCount?: number;
+    maxQueueCount?: number;
+    minServiceCount?: number;
+    maxServiceCount?: number;
+  }) => Promise<void>;
+}
+
+// Define view props interface
+export interface ShopSearchViewProps {
+  initialViewModel?: ShopSearchViewModel | null;
+}
+
+/**
+ * Custom hook for Shop Search presenter
+ * Provides state management and actions for Shop Search operations
+ */
+export function useShopSearchPresenter(
+  initialViewModel: ShopSearchViewModel | null = null
+): [ShopSearchPresenterState, ShopSearchPresenterActions] {
+  const [viewModel, setViewModel] = useState<ShopSearchViewModel | null>(
+    initialViewModel || null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Standard modal states following the pattern
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  // Pagination state with default values from URL
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    searchQuery: initialViewModel?.searchQuery || "",
+    category: initialViewModel?.selectedCategory || "",
+    location: initialViewModel?.selectedLocation || "",
+    page: initialViewModel?.currentPage || 1,
+  });
+
+  useEffect(() => {
+    if (initialViewModel) {
+      setViewModel(initialViewModel);
+      setFilters({
+        searchQuery: initialViewModel.searchQuery || "",
+        category: initialViewModel.selectedCategory || "",
+        location: initialViewModel.selectedLocation || "",
+        page: initialViewModel.currentPage || 1,
+      });
+    }
+  }, [initialViewModel]);
+
+  // Load data
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await searchPresenter.getViewModel({
+        searchQuery: filters.searchQuery,
+        category: filters.category,
+        location: filters.location,
+        page: currentPage,
+      });
+      setViewModel(data);
+      console.log("ShopSearchPresenter: Data loaded successfully");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load data";
+      setError(errorMessage);
+      console.error("Error loading ShopSearch data:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, filters]);
+
+  // Refresh data
+  const refreshData = useCallback(async () => {
+    await loadData();
+  }, [loadData]);
+
+  /**
+   * Create a shop (placeholder for search functionality)
+   */
+  const createShop = useCallback(
+    async (shopData: unknown) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Placeholder - search typically doesn't create shops
+        console.log("ShopSearchPresenter: Shop creation attempted", {
+          shopData,
+        });
+        setIsCreateModalOpen(false);
+        await loadData(); // Refresh data after creation
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        setError(errorMessage);
+        console.error("Error creating shop:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadData]
+  );
+
+  /**
+   * Update a shop (placeholder for search functionality)
+   */
+  const updateShop = useCallback(
+    async (id: string, shopData: unknown) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Placeholder - search typically doesn't update shops
+        console.log("ShopSearchPresenter: Shop update attempted", {
+          id,
+          shopData,
+        });
+        setIsEditModalOpen(false);
+        setSelectedItemId(null);
+        await loadData(); // Refresh data after update
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        setError(errorMessage);
+        console.error("Error updating shop:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadData]
+  );
+
+  /**
+   * Delete a shop (placeholder for search functionality)
+   */
+  const deleteShop = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Placeholder - search typically doesn't delete shops
+        console.log("ShopSearchPresenter: Shop deletion attempted", {
+          id,
+        });
+        setIsDeleteModalOpen(false);
+        setSelectedItemId(null);
+        await loadData(); // Refresh data after deletion
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        setError(errorMessage);
+        console.error("Error deleting shop:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadData]
+  );
+
+  // Search shops
+  const searchShops = useCallback(
+    async (
+      query: string,
+      searchFilters?: {
+        category?: string;
+        location?: string;
+        priceRange?: [number, number];
+        rating?: number;
+      }
+    ) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await searchPresenter.searchShops(
+          query,
+          searchFilters
+        );
+        setViewModel(result);
+        console.log("ShopSearchPresenter: Shops searched successfully", {
+          query,
+          filters: searchFilters,
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to search shops";
+        setError(errorMessage);
+        console.error("Error searching shops:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  // Filter by category
+  const filterByCategory = useCallback(async (categoryId: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await searchPresenter.getShopsByCategory(categoryId);
+      setViewModel(result);
+      console.log(
+        "ShopSearchPresenter: Shops filtered by category successfully",
+        { categoryId }
+      );
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to filter by category";
+      setError(errorMessage);
+      console.error("Error filtering by category:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Filter by location
+  const filterByLocation = useCallback(async (locationId: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await searchPresenter.getShopsByLocation(locationId);
+      setViewModel(result);
+      console.log(
+        "ShopSearchPresenter: Shops filtered by location successfully",
+        { locationId }
+      );
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to filter by location";
+      setError(errorMessage);
+      console.error("Error filtering by location:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Go to page
+  const goToPage = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await searchPresenter.getViewModel({
+          searchQuery: filters.searchQuery,
+          category: filters.category,
+          location: filters.location,
+          page,
+        });
+        setViewModel(result);
+        setCurrentPage(page);
+        console.log("ShopSearchPresenter: Page changed successfully", {
+          page,
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load page";
+        setError(errorMessage);
+        console.error("Error loading page:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters]
+  );
+
+  // Clear filters
+  const clearFilters = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await searchPresenter.getViewModel({
+        page: 1,
+      });
+      setViewModel(result);
+      setCurrentPage(1);
+      setFilters({
+        searchQuery: "",
+        category: "",
+        location: "",
+        page: 1,
+      });
+      console.log("ShopSearchPresenter: Filters cleared successfully");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to clear filters";
+      setError(errorMessage);
+      console.error("Error clearing filters:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Modal handlers
+  const openCreateModal = useCallback(() => {
+    setIsCreateModalOpen(true);
+  }, []);
+
+  const closeCreateModal = useCallback(() => {
+    setIsCreateModalOpen(false);
+  }, []);
+
+  const openEditModal = useCallback((itemId: string) => {
+    setSelectedItemId(itemId);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const closeEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setSelectedItemId(null);
+  }, []);
+
+  const openDeleteModal = useCallback((itemId: string) => {
+    setSelectedItemId(itemId);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
+    setSelectedItemId(null);
+  }, []);
+
+  // Pagination handler
+  const handleSetCurrentPage = useCallback((page: number) => {
+    setCurrentPage(page);
+    console.log("ShopSearchPresenter: Page changed", { page });
+  }, []);
+
+  // Reset function
+  const reset = useCallback(() => {
+    setViewModel(null);
+    setError(null);
+    setIsCreateModalOpen(false);
+    setIsEditModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setSelectedItemId(null);
+    setCurrentPage(1);
+  }, []);
+
+  // Legacy modal actions for backward compatibility
+  const openShopDetail = useCallback((shopId: string) => {
+    console.log("ShopSearchPresenter: Opening shop detail", { shopId });
+    // Placeholder implementation
+  }, []);
+
+  const closeShopDetail = useCallback(() => {
+    console.log("ShopSearchPresenter: Closing shop detail");
+    // Placeholder implementation
+  }, []);
+
+  const openFilterModal = useCallback(() => {
+    console.log("ShopSearchPresenter: Opening filter modal");
+    // Placeholder implementation
+  }, []);
+
+  const closeFilterModal = useCallback(() => {
+    console.log("ShopSearchPresenter: Closing filter modal");
+    // Placeholder implementation
+  }, []);
+
+  // Apply filters function
+  const applyFilters = useCallback(
+    async (newFilters: {
+      searchQuery?: string;
+      categoryId?: string;
+      locationId?: string;
+      minRating?: number;
+      maxRating?: number;
+      status?: "active" | "inactive" | "all";
+      sortBy?: "name" | "rating" | "queueCount" | "totalServices" | "createdAt";
+      sortOrder?: "asc" | "desc";
+      minQueueCount?: number;
+      maxQueueCount?: number;
+      minServiceCount?: number;
+      maxServiceCount?: number;
+    }) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await searchPresenter.getViewModel({
+          searchQuery: newFilters.searchQuery || "",
+          category: newFilters.categoryId || "",
+          location: newFilters.locationId || "",
+          page: 1,
+        });
+        setViewModel(result);
+        setCurrentPage(1);
+        setFilters({
+          searchQuery: newFilters.searchQuery || "",
+          category: newFilters.categoryId || "",
+          location: newFilters.locationId || "",
+          page: 1,
+        });
+        console.log("ShopSearchPresenter: Filters applied successfully", {
+          filters,
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to apply filters";
+        setError(errorMessage);
+        console.error("Error applying filters:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filters]
+  );
+
+  // State object following the pattern
+  const state: ShopSearchPresenterState = {
+    viewModel,
+    loading,
+    error,
+    isCreateModalOpen,
+    isEditModalOpen,
+    isDeleteModalOpen,
+    selectedItemId,
+    currentPage,
+  };
+
+  // Actions object following the pattern
+  const actions: ShopSearchPresenterActions = {
+    refreshData,
+    createShop,
+    updateShop,
+    deleteShop,
+    openCreateModal,
+    closeCreateModal,
+    openEditModal,
+    closeEditModal,
+    openDeleteModal,
+    closeDeleteModal,
+    setCurrentPage: handleSetCurrentPage,
+    reset,
+    setError,
+    // Additional search-specific actions
+    loadData,
+    searchShops,
+    filterByCategory,
+    filterByLocation,
+    goToPage,
+    clearFilters,
+    // Legacy modal actions for backward compatibility
+    openShopDetail,
+    closeShopDetail,
+    openFilterModal,
+    closeFilterModal,
+    applyFilters,
+  };
+
+  return [state, actions];
+}

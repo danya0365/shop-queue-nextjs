@@ -1,7 +1,7 @@
 import { ShopMarketplaceLayout } from "@/src/presentation/components/layouts/shop/marketplace";
-import { ShopMarketplaceView } from "@/src/presentation/components/shop/marketplace/ShopMarketplaceView";
+import { ShopSearchView } from "@/src/presentation/components/shop/search/ShopSearchView";
 import { ShopMarketplaceLayoutPresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
-import { ShopMarketplacePresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
+import { ShopSearchPresenterFactory } from "@/src/presentation/presenters/shop/search/ShopSearchPresenter";
 import type { Metadata } from "next";
 
 // Tell Next.js this is a dynamic page
@@ -9,10 +9,10 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 /**
- * Shop Marketplace page - Server Component for SEO optimization
- * Landing page for customers to browse and discover shops
+ * Shop Search page - Server Component for SEO optimization
+ * Dedicated search page for customers to search and filter shops
  */
-interface ShopMarketplacePageProps {
+interface ShopSearchPageProps {
   searchParams: Promise<{
     q?: string;
     category?: string;
@@ -22,32 +22,32 @@ interface ShopMarketplacePageProps {
 }
 
 /**
- * Generate metadata for the marketplace page
+ * Generate metadata for the search page
  */
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "ตลาดร้านค้า | Shop Queue",
+    title: "ค้นหาร้านค้า | Shop Queue",
     description:
-      "ค้นหาและสำรวจร้านค้ามากมายทั่วไทย - จองคิวออนไลน์ รับบริการได้ทันที ไม่ต้องรอนาน",
+      "ค้นหาร้านค้าที่คุณต้องการ - กรองตามหมวดหมู่ สถานที่ คะแนน และอื่นๆ จองคิวออนไลน์ได้ทันที",
     keywords:
-      "ตลาดร้านค้า, จองคิว, ร้านอาหาร, ร้านเสื้อผ้า, ร้านเครื่องสำอาง, ช้อปปิ้ง, บริการออนไลน์",
+      "ค้นหาร้านค้า, กรองร้านค้า, จองคิว, ร้านอาหาร, ร้านเสื้อผ้า, ร้านเครื่องสำอาง, ช้อปปิ้ง, บริการออนไลน์",
     openGraph: {
-      title: "ตลาดร้านค้า | Shop Queue",
-      description: "ค้นหาและสำรวจร้านค้ามากมายทั่วไทย",
+      title: "ค้นหาร้านค้า | Shop Queue",
+      description: "ค้นหาร้านค้าที่คุณต้องการ - กรองและจองคิวได้ทันที",
       type: "website",
     },
   };
 }
 
-export default async function ShopMarketplacePage({
+export default async function ShopSearchPage({
   searchParams,
-}: ShopMarketplacePageProps) {
+}: ShopSearchPageProps) {
   const params = await searchParams;
 
   try {
     const [layoutPresenter, presenter] = await Promise.all([
       ShopMarketplaceLayoutPresenterFactory.create(),
-      ShopMarketplacePresenterFactory.create(),
+      ShopSearchPresenterFactory.create(),
     ]);
 
     const [layoutData, viewModel] = await Promise.all([
@@ -63,14 +63,14 @@ export default async function ShopMarketplacePage({
     return (
       <ShopMarketplaceLayout
         layoutData={layoutData}
-        showHero={true}
+        showHero={false}
         searchQuery={params.q}
       >
-        <ShopMarketplaceView initialViewModel={viewModel} />
+        <ShopSearchView initialViewModel={viewModel} />
       </ShopMarketplaceLayout>
     );
   } catch (error) {
-    console.error("Error fetching shops marketplace data:", error);
+    console.error("Error fetching shop search data:", error);
 
     // Fallback layout data for error state
     const fallbackLayoutData = {
@@ -94,7 +94,7 @@ export default async function ShopMarketplacePage({
               เกิดข้อผิดพลาด
             </h1>
             <p className="marketplace-text-secondary mb-4">
-              ไม่สามารถโหลดข้อมูลร้านค้าได้
+              ไม่สามารถโหลดข้อมูลการค้นหาได้
             </p>
             <form action="">
               <button
