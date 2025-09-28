@@ -2,7 +2,8 @@
 
 import { Input } from "@/src/presentation/components/ui/input";
 import { Label } from "@/src/presentation/components/ui/label";
-import { useRegisterPresenter } from "@/src/presentation/presenters/auth/RegisterPresenter";
+import { useLoginRedirect } from "@/src/presentation/hooks/login-redirect";
+import { useRegisterPresenter } from "@/src/presentation/presenters/auth/useRegisterPresenter";
 import {
   RegisterFormData,
   registerSchema,
@@ -27,6 +28,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { saveAndRedirect } = useLoginRedirect();
+  const pathname = ""; // Register form doesn't need to save current path
 
   const {
     register,
@@ -169,8 +172,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
           <Label
             htmlFor="acceptTerms"
-            className={`text-sm font-medium leading-none ${errors.acceptTerms ? "text-error" : ""
-              }`}
+            className={`text-sm font-medium leading-none ${
+              errors.acceptTerms ? "text-error" : ""
+            }`}
           >
             ฉันยอมรับ{" "}
             <Link href="/terms" className="text-primary hover:underline">
@@ -192,9 +196,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
         <div className="text-center text-sm">
           มีบัญชีอยู่แล้ว?{" "}
-          <Link href="/auth/login" className="text-primary hover:underline">
+          <button
+            onClick={() => saveAndRedirect(pathname)}
+            className="text-primary hover:underline"
+          >
             เข้าสู่ระบบ
-          </Link>
+          </button>
         </div>
       </form>
     </div>

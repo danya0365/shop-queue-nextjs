@@ -1,3 +1,4 @@
+import { LoginRedirectHandler } from "@/src/presentation/components/auth/LoginRedirectHandler";
 import LoginView from "@/src/presentation/components/auth/LoginView";
 import FrontendLayout from "@/src/presentation/components/layouts/front-end/FrontendLayout";
 import { Metadata } from "next";
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <FrontendLayout>
-      <LoginView redirectPath="/account" />
+      <LoginView />
+      <LoginRedirectHandler />
     </FrontendLayout>
   );
 }

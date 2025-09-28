@@ -59,9 +59,6 @@ export const useRegisterPresenter = (
         return false;
       }
 
-      // Registration successful
-      logger.info("User registered successfully");
-
       // Redirect to the specified path
       router.push(redirectPath);
       return true;

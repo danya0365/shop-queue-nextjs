@@ -2,10 +2,12 @@
 
 import { ThemeToggle } from "@/src/presentation/components/ui/ThemeToggle";
 import { useAuthorization } from "@/src/presentation/hooks/authorization";
+import { useLoginRedirect } from "@/src/presentation/hooks/login-redirect";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ProfileMenu } from "./ProfileMenu";
 
@@ -14,6 +16,8 @@ export function FrontendHeader() {
   const { authAccount, signOut } = useAuthStore();
   const { activeProfile } = useProfileStore();
   const { hasBackendAccess } = useAuthorization();
+  const { saveAndRedirect } = useLoginRedirect();
+  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -70,9 +74,12 @@ export function FrontendHeader() {
               <ProfileMenu profile={activeProfile} onLogout={handleLogout} />
             ) : (
               <>
-                <Link href="/auth/login" className="btn-ghost-modern">
+                <button
+                  onClick={() => saveAndRedirect(pathname)}
+                  className="btn-ghost-modern"
+                >
                   เข้าสู่ระบบ
-                </Link>
+                </button>
                 <Link href="/auth/register" className="btn-primary-modern">
                   สมัครใช้งาน
                 </Link>
@@ -299,13 +306,15 @@ export function FrontendHeader() {
             ) : (
               <>
                 <div className="flex items-center px-3">
-                  <Link
-                    href="/auth/login"
+                  <button
+                    onClick={() => {
+                      saveAndRedirect(pathname);
+                      setIsMenuOpen(false);
+                    }}
                     className="block w-full px-4 py-2 text-center btn-ghost-modern mb-2"
-                    onClick={() => setIsMenuOpen(false)}
                   >
                     เข้าสู่ระบบ
-                  </Link>
+                  </button>
                 </div>
                 <div className="flex items-center px-3">
                   <Link

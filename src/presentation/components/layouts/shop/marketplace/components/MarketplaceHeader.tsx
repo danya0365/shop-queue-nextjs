@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
+import { useLoginRedirect } from "@/src/presentation/hooks/login-redirect";
 import { NavigationLink } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
@@ -16,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 interface MarketplaceHeaderProps {
@@ -35,6 +36,8 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
   const [searchValue, setSearchValue] = useState(searchQuery);
   const { authAccount, signOut } = useAuthStore();
   const { activeProfile } = useProfileStore();
+  const { saveAndRedirect } = useLoginRedirect();
+  const pathname = usePathname();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,13 +163,13 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                   </>
                 ) : (
                   <>
-                    <Link
-                      href="/auth/login"
+                    <button
+                      onClick={() => saveAndRedirect(pathname)}
                       className="flex items-center space-x-2 marketplace-button-secondary px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
                       <LogIn className="w-4 h-4" />
                       <span>เข้าสู่ระบบ</span>
-                    </Link>
+                    </button>
                     <Link
                       href="/auth/register"
                       className="flex items-center space-x-2 marketplace-button-primary px-4 py-2 rounded-lg transition-colors text-sm font-medium"

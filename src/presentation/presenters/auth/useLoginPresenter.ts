@@ -2,7 +2,6 @@ import { getClientService } from "@/src/di/client-container";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { LoginFormData } from "@/src/presentation/schemas/auth-schemas";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export interface LoginPresenterState {
@@ -15,15 +14,9 @@ export interface LoginPresenterActions {
   setError: (error: string | null) => void;
 }
 
-export type LoginPresenterHook = [
-  LoginPresenterState,
-  LoginPresenterActions
-];
+export type LoginPresenterHook = [LoginPresenterState, LoginPresenterActions];
 
-export const useLoginPresenter = (
-  redirectPath: string = "/dashboard"
-): LoginPresenterHook => {
-  const router = useRouter();
+export const useLoginPresenter = (): LoginPresenterHook => {
   const { signIn } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +43,6 @@ export const useLoginPresenter = (
         setIsLoading(false);
         return false;
       }
-
-      // Login successful
-      logger.info("User logged in successfully");
-
-      // Redirect to the specified path
-      router.push(redirectPath);
       return true;
     } catch (error) {
       logger.error("Unexpected login error:", error);

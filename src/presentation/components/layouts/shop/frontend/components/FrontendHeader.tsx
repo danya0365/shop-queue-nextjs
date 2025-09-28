@@ -1,11 +1,12 @@
 "use client";
 
+import { useLoginRedirect } from "@/src/presentation/hooks/login-redirect";
 import { ShopInfo } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FrontendProfileMenu } from "./FrontendProfileMenu";
 import { FrontendThemeToggle } from "./FrontendThemeToggle";
@@ -25,6 +26,8 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { authAccount, signOut } = useAuthStore();
   const { activeProfile } = useProfileStore();
+  const { saveAndRedirect } = useLoginRedirect();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await signOut();
@@ -78,12 +81,12 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
                   />
                 ) : (
                   <>
-                    <Link
-                      href="/auth/login"
+                    <button
+                      onClick={() => saveAndRedirect(pathname)}
                       className="shop-frontend-button-primary px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
                       เข้าสู่ระบบ
-                    </Link>
+                    </button>
                     <Link
                       href="/auth/register"
                       className="shop-frontend-button-primary px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm font-medium"
@@ -173,13 +176,15 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
               </>
             ) : (
               <>
-                <Link
-                  href="/auth/login"
+                <button
+                  onClick={() => {
+                    saveAndRedirect(pathname);
+                    setIsMenuOpen(false);
+                  }}
                   className="block w-full px-4 py-2 text-center shop-frontend-button-primary rounded-lg transition-colors text-sm font-medium"
-                  onClick={() => setIsMenuOpen(false)}
                 >
                   เข้าสู่ระบบ
-                </Link>
+                </button>
                 <Link
                   href="/auth/register"
                   className="block w-full px-4 py-2 text-center shop-frontend-button-primary rounded-lg transition-colors text-sm font-medium"

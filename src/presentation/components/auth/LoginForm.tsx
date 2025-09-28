@@ -2,7 +2,7 @@
 
 import { Input } from "@/src/presentation/components/ui/input";
 import { Label } from "@/src/presentation/components/ui/label";
-import { useLoginPresenter } from "@/src/presentation/presenters/auth/LoginPresenter";
+import { useLoginPresenter } from "@/src/presentation/presenters/auth/useLoginPresenter";
 import {
   LoginFormData,
   loginSchema,
@@ -14,15 +14,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface LoginFormProps {
-  redirectPath?: string;
   onSuccess?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({
-  redirectPath = "/dashboard",
-  onSuccess,
-}) => {
-  const [{ isLoading, error }, { login }] = useLoginPresenter(redirectPath);
+export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+  const [{ isLoading, error }, { login }] = useLoginPresenter();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
