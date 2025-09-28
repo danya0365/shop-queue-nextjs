@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
+import { NavigationLink } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import {
@@ -19,11 +20,13 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 interface MarketplaceHeaderProps {
+  navigationLinks: NavigationLink[];
   onSearch?: (query: string) => void;
   searchQuery?: string;
 }
 
 const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
+  navigationLinks,
   onSearch,
   searchQuery = "",
 }) => {
@@ -46,13 +49,6 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
     router.push("/");
     router.refresh();
   };
-
-  const navigationLinks = [
-    { href: "/shop", label: "ตลาดร้านค้า" },
-    { href: "/shop/categories", label: "หมวดหมู่" },
-    { href: "/shop/about", label: "เกี่ยวกับเรา" },
-    { href: "/shop/contact", label: "ติดต่อเรา" },
-  ];
 
   return (
     <>
@@ -215,7 +211,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
           onClick={() => setIsMenuOpen(false)}
         />
       )}

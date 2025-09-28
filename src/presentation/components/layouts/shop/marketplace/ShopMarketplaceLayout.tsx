@@ -1,32 +1,34 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import { ShopMarketplaceLayoutViewModel } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
-import MarketplaceHeader from "./components/MarketplaceHeader";
+import React, { ReactNode } from "react";
 import MarketplaceFooter from "./components/MarketplaceFooter";
+import MarketplaceHeader from "./components/MarketplaceHeader";
 
 interface ShopMarketplaceLayoutProps {
   children: ReactNode;
+  layoutData: ShopMarketplaceLayoutViewModel;
   onSearch?: (query: string) => void;
   searchQuery?: string;
   showHero?: boolean;
-  heroTitle?: string;
-  heroDescription?: string;
+  onCategoryClick?: (category: string) => void;
 }
 
-const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({ 
-  children, 
+const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
+  children,
+  layoutData,
   onSearch,
   searchQuery,
   showHero = false,
-  heroTitle = "ค้นพบร้านค้าที่ดีที่สุด",
-  heroDescription = "เลือกจากร้านค้าหลากหลายประเภท พร้อมระบบจัดการคิวที่ทันสมัย"
+  onCategoryClick,
 }) => {
   return (
     <ThemeProvider>
       <div className="min-h-screen flex flex-col marketplace-bg">
         {/* Header */}
-        <MarketplaceHeader 
+        <MarketplaceHeader
+          navigationLinks={layoutData.navigationLinks}
           onSearch={onSearch}
           searchQuery={searchQuery}
         />
@@ -36,19 +38,19 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
           <section className="marketplace-hero-bg py-16 sm:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold marketplace-hero-text mb-6">
-                {heroTitle}
+                {layoutData.heroTitle}
               </h1>
               <p className="text-xl sm:text-2xl marketplace-hero-text-muted max-w-3xl mx-auto mb-8">
-                {heroDescription}
+                {layoutData.heroDescription}
               </p>
-              
+
               {/* Hero Search Bar */}
               <div className="max-w-2xl mx-auto">
-                <form 
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     const formData = new FormData(e.currentTarget);
-                    const query = formData.get('search') as string;
+                    const query = formData.get("search") as string;
                     if (onSearch && query) {
                       onSearch(query);
                     }
@@ -60,7 +62,7 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
                       type="text"
                       name="search"
                       defaultValue={searchQuery}
-                      placeholder="ค้นหาร้านค้า, บริการ, หรือสถานที่ที่คุณต้องการ..."
+                      placeholder={layoutData.searchPlaceholder}
                       className="w-full px-6 py-4 text-lg bg-white/95 backdrop-blur-sm border-0 rounded-2xl shadow-lg focus:ring-4 focus:ring-white/30 focus:outline-none placeholder-slate-500"
                     />
                     <button
@@ -75,21 +77,17 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
 
               {/* Popular Categories */}
               <div className="mt-8">
-                <p className="marketplace-hero-text-muted mb-4">หมวดหมู่ยอดนิยม:</p>
+                <p className="marketplace-hero-text-muted mb-4">
+                  หมวดหมู่ยอดนิยม:
+                </p>
                 <div className="flex flex-wrap justify-center gap-3">
-                  {[
-                    "ร้านอาหาร",
-                    "ร้านตัดผม",
-                    "คลินิกความงาม",
-                    "ร้านซ่อมรถ",
-                    "โรงพยาบาล",
-                    "ธนาคาร"
-                  ].map((category) => (
+                  {layoutData.categories.map((category) => (
                     <button
-                      key={category}
+                      key={category.id}
+                      onClick={() => onCategoryClick?.(category.name)}
                       className="px-4 py-2 bg-white/20 hover:bg-white/30 marketplace-hero-text rounded-full text-sm font-medium transition-colors backdrop-blur-sm"
                     >
-                      {category}
+                      {category.name}
                     </button>
                   ))}
                 </div>

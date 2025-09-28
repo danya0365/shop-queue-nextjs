@@ -304,7 +304,7 @@ export function ShopMarketplaceView({
               <Link
                 key={shop.id}
                 href={`/shop/${shop.id}`}
-                className="marketplace-shop-card"
+                className="marketplace-shop-card overflow-hidden"
               >
                 <div className="relative">
                   <ShopImageFallback shop={shop} className="w-full h-48" />
