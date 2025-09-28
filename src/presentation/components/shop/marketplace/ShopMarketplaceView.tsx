@@ -289,7 +289,7 @@ export function ShopMarketplaceView({
             <h2 className="text-2xl font-bold marketplace-text-primary">
               ร้านแนะนำ
             </h2>
-            <button className="text-orange-600 hover:text-orange-700 font-medium">
+            <button className="marketplace-detail-link font-medium">
               ดูทั้งหมด
             </button>
           </div>
@@ -313,16 +313,16 @@ export function ShopMarketplaceView({
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 className="text-lg font-semibold marketplace-text-primary mb-2">
                     {shop.name}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  <p className="marketplace-text-secondary text-sm mb-3">
                     {shop.description}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Star className="h-4 w-4 marketplace-star-rating mr-1" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-sm marketplace-text-secondary">
                         {shop.rating}
                       </span>
                     </div>
@@ -472,18 +472,18 @@ export function ShopMarketplaceView({
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      <h3 className="text-lg font-semibold marketplace-text-primary mb-2">
                         {shop.name}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                      <p className="marketplace-text-secondary text-sm mb-3">
                         {shop.description}
                       </p>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 marketplace-star-rating mr-1" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {shop.rating}
-                          </span>
+                          <span className="text-sm marketplace-text-secondary">
+                          {shop.rating}
+                        </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <button className="marketplace-action-icon-heart">
@@ -494,16 +494,16 @@ export function ShopMarketplaceView({
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <div className="flex items-center text-sm marketplace-text-secondary mb-2">
                         <MapPin className="h-4 w-4 mr-1" />
                         <span>{shop.address}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      <div className="flex items-center text-sm marketplace-text-secondary mb-3">
                         <Phone className="h-4 w-4 mr-1" />
                         <span>{shop.phone}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center space-x-4 text-sm marketplace-text-secondary">
                           <span className="flex items-center">
                             <Users className="h-4 w-4 mr-1" />
                             {shop.queueCount}
@@ -513,7 +513,7 @@ export function ShopMarketplaceView({
                             {shop.totalServices}
                           </span>
                         </div>
-                        <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                        <span className="marketplace-detail-link text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -530,7 +530,7 @@ export function ShopMarketplaceView({
                     </div>
                     <div className="ml-4 flex-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <h3 className="text-lg font-semibold marketplace-text-primary">
                           {shop.name}
                         </h3>
                         <span
@@ -541,10 +541,10 @@ export function ShopMarketplaceView({
                           {getStatusText(shop.status)}
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                      <p className="marketplace-text-secondary text-sm mb-2">
                         {shop.description}
                       </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center space-x-4 text-sm marketplace-text-secondary">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 marketplace-star-rating mr-1" />
                           <span>{shop.rating}</span>
@@ -586,8 +586,8 @@ export function ShopMarketplaceView({
                 disabled={shopsData.currentPage === 1}
                 className={`px-3 py-2 rounded-md ${
                   shopsData.currentPage === 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    ? "marketplace-pagination-disabled"
+                    : "marketplace-pagination-enabled"
                 }`}
               >
                 ก่อนหน้า
@@ -604,8 +604,8 @@ export function ShopMarketplaceView({
                     onClick={() => actions.goToPage(page)}
                     className={`px-3 py-2 rounded-md ${
                       page === shopsData.currentPage
-                        ? "bg-orange-600 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        ? "marketplace-pagination-current"
+                        : "marketplace-pagination-enabled"
                     }`}
                   >
                     {page}
@@ -621,14 +621,14 @@ export function ShopMarketplaceView({
                 className={`px-3 py-2 rounded-md ${
                   shopsData.currentPage ===
                   Math.ceil(shopsData.totalCount / shopsData.perPage)
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    ? "marketplace-pagination-disabled"
+                    : "marketplace-pagination-enabled"
                 }`}
               >
                 ถัดไป
               </button>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm marketplace-text-secondary">
               หน้า {shopsData.currentPage} จาก{" "}
               {Math.ceil(shopsData.totalCount / shopsData.perPage)}
             </div>
