@@ -1,27 +1,27 @@
 @layer base {
   /* Marketplace Layout Utilities */
   .marketplace-bg {
-    @apply bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 dark:from-slate-900 dark:via-orange-900 dark:to-amber-900;
+    @apply bg-gradient-to-br from-gray-50 via-orange-50 to-amber-50 dark:from-black dark:via-gray-900 dark:to-gray-900;
   }
 
   .marketplace-header-bg {
-    @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700;
+    @apply bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800;
   }
 
   .marketplace-header-text {
-    @apply text-slate-800 dark:text-slate-200;
+    @apply text-gray-800 dark:text-white;
   }
 
   .marketplace-header-text-muted {
-    @apply text-slate-600 dark:text-slate-400;
+    @apply text-gray-600 dark:text-gray-300;
   }
 
   .marketplace-header-hover {
-    @apply hover:bg-slate-100 dark:hover:bg-slate-800;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800;
   }
 
   .marketplace-search-bg {
-    @apply bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600;
+    @apply bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700;
   }
 
   .marketplace-search-focus {
@@ -33,11 +33,11 @@
   }
 
   .marketplace-button-secondary {
-    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800;
   }
 
   .marketplace-card {
-    @apply bg-white rounded-xl shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700;
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-800;
   }
 
   .marketplace-card-hover {
@@ -45,15 +45,15 @@
   }
 
   .marketplace-text-primary {
-    @apply text-slate-900 dark:text-slate-100;
+    @apply text-gray-900 dark:text-white;
   }
 
   .marketplace-text-secondary {
-    @apply text-slate-600 dark:text-slate-400;
+    @apply text-gray-600 dark:text-gray-300;
   }
 
   .marketplace-text-muted {
-    @apply text-slate-500 dark:text-slate-500;
+    @apply text-gray-500 dark:text-gray-400;
   }
 
   .marketplace-footer-bg {
@@ -103,7 +103,7 @@
   }
 
   .marketplace-category-pill-inactive {
-    @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800;
   }
 
   .marketplace-hero-category-bg {
@@ -112,7 +112,7 @@
 
   /* Shop Cards */
   .marketplace-shop-card {
-    @apply bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-orange-300 transition-all duration-300 dark:bg-slate-800 dark:border-slate-700 dark:hover:border-orange-600;
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all duration-300 dark:bg-gray-900 dark:border-gray-800 dark:hover:border-orange-500;
   }
 
   .marketplace-shop-image {
@@ -145,7 +145,7 @@
 
   /* Statistics Cards */
   .marketplace-stat-card {
-    @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 dark:bg-slate-800 dark:border-slate-700;
+    @apply bg-white rounded-xl p-6 shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-800;
   }
 
   .marketplace-stat-icon {
@@ -170,7 +170,7 @@
 
   /* Loading States */
   .marketplace-skeleton {
-    @apply animate-pulse bg-slate-200 dark:bg-slate-700 rounded;
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
   }
 
   /* Responsive Grid */
@@ -184,7 +184,7 @@
 
   /* Navigation */
   .marketplace-nav-link {
-    @apply text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 px-3 py-2 rounded-md text-sm font-medium transition-colors;
+    @apply text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors;
   }
 
   .marketplace-nav-link-active {
@@ -193,7 +193,7 @@
 
   /* Mobile Menu */
   .marketplace-mobile-menu {
-    @apply fixed inset-0 z-50 bg-white dark:bg-slate-900;
+    @apply fixed inset-0 z-50 bg-white dark:bg-black;
   }
 
   .marketplace-mobile-menu-overlay {
@@ -202,11 +202,11 @@
 
   /* Search Suggestions */
   .marketplace-search-dropdown {
-    @apply absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg z-50;
+    @apply absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50;
   }
 
   .marketplace-search-suggestion {
-    @apply px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-200 dark:border-slate-700 last:border-b-0;
+    @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-200 dark:border-gray-800 last:border-b-0;
   }
 
   /* Status Colors */
@@ -378,7 +378,7 @@
   }
 
   .marketplace-pagination-enabled {
-    @apply bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700;
+    @apply bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800;
   }
 
   .marketplace-pagination-current {
@@ -387,7 +387,7 @@
 
   /* Suggested Search Colors */
   .marketplace-suggested-search-bg {
-    @apply bg-orange-50 hover:bg-orange-100 dark:bg-orange-900 dark:hover:bg-orange-800;
+    @apply bg-orange-100 hover:bg-orange-200 dark:bg-orange-900 dark:hover:bg-orange-800;
   }
 
   .marketplace-suggested-search-text {
