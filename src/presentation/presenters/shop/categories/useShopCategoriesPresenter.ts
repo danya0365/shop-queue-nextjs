@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { 
-  ShopCategoriesPresenter, 
+import { useCallback, useEffect, useState } from "react";
+import {
   ClientShopCategoriesPresenterFactory,
+  ShopCategoriesViewModel,
   ShopCategory,
-  ShopCategoriesViewModel 
 } from "./ShopCategoriesPresenter";
+
+const presenterInstance = ClientShopCategoriesPresenterFactory.create();
 
 export interface ShopCategoriesPresenterActions {
   refreshData: () => Promise<void>;
@@ -39,22 +40,6 @@ export function useShopCategoriesPresenter(
   const [filteredCategories, setFilteredCategories] = useState<ShopCategory[]>(
     initialViewModel?.categories || []
   );
-  const [presenter, setPresenter] = useState<ShopCategoriesPresenter | null>(null);
-
-  // Initialize presenter
-  useEffect(() => {
-    const initPresenter = async () => {
-      try {
-        const presenterInstance = await ClientShopCategoriesPresenterFactory.create();
-        setPresenter(presenterInstance);
-      } catch (err) {
-        console.error("Error initializing presenter:", err);
-        setError("ไม่สามารถเริ่มต้นระบบได้");
-      }
-    };
-
-    initPresenter();
-  }, []);
 
   // Update filtered categories when viewModel or searchQuery changes
   useEffect(() => {
@@ -62,9 +47,12 @@ export function useShopCategoriesPresenter(
       if (!searchQuery.trim()) {
         setFilteredCategories(viewModel.categories);
       } else {
-        const filtered = viewModel.categories.filter(category =>
-          category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          category.description.toLowerCase().includes(searchQuery.toLowerCase())
+        const filtered = viewModel.categories.filter(
+          (category) =>
+            category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            category.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
         );
         setFilteredCategories(filtered);
       }
@@ -73,75 +61,80 @@ export function useShopCategoriesPresenter(
 
   // Load initial data if not provided
   useEffect(() => {
-    if (!initialViewModel && presenter) {
+    if (!initialViewModel) {
       refreshData();
     }
-  }, [presenter, initialViewModel]);
+  }, [initialViewModel]);
 
   /**
    * Refresh data from presenter
    */
   const refreshData = useCallback(async () => {
-    if (!presenter) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      const newViewModel = await presenter.getViewModel();
+      const newViewModel = await presenterInstance.getViewModel();
       setViewModel(newViewModel);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
       setError(errorMessage);
       console.error("Error loading categories data:", err);
     } finally {
       setLoading(false);
     }
-  }, [presenter]);
+  }, []);
 
   /**
    * Search categories
    */
-  const searchCategories = useCallback(async (query: string) => {
-    if (!presenter) return;
+  const searchCategories = useCallback(
+    async (query: string) => {
+      setSearchQuery(query);
+      setError(null);
 
-    setSearchQuery(query);
-    setError(null);
-
-    try {
-      if (!query.trim()) {
-        // Reset to all categories
-        if (viewModel) {
-          setFilteredCategories(viewModel.categories);
+      try {
+        if (!query.trim()) {
+          // Reset to all categories
+          if (viewModel) {
+            setFilteredCategories(viewModel.categories);
+          }
+          return;
         }
-        return;
-      }
 
-      const searchResults = await presenter.searchCategories(query);
-      setFilteredCategories(searchResults);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการค้นหา";
-      setError(errorMessage);
-      console.error("Error searching categories:", err);
-    }
-  }, [presenter, viewModel]);
+        const searchResults = await presenterInstance.searchCategories(query);
+        setFilteredCategories(searchResults);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการค้นหา";
+        setError(errorMessage);
+        console.error("Error searching categories:", err);
+      }
+    },
+    [viewModel]
+  );
 
   /**
    * Get category by ID
    */
-  const getCategoryById = useCallback(async (id: string): Promise<ShopCategory | null> => {
-    if (!presenter) return null;
-
-    try {
-      const category = await presenter.getCategoryById(id);
-      return category;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการดึงข้อมูลหมวดหมู่";
-      setError(errorMessage);
-      console.error("Error getting category by id:", err);
-      return null;
-    }
-  }, [presenter]);
+  const getCategoryById = useCallback(
+    async (id: string): Promise<ShopCategory | null> => {
+      try {
+        const category = await presenterInstance.getCategoryById(id);
+        return category;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "เกิดข้อผิดพลาดในการดึงข้อมูลหมวดหมู่";
+        setError(errorMessage);
+        console.error("Error getting category by id:", err);
+        return null;
+      }
+    },
+    []
+  );
 
   /**
    * Set error state
@@ -155,14 +148,14 @@ export function useShopCategoriesPresenter(
     loading,
     error,
     searchQuery,
-    filteredCategories
+    filteredCategories,
   };
 
   const actions: ShopCategoriesPresenterActions = {
     refreshData,
     searchCategories,
     getCategoryById,
-    setError: handleSetError
+    setError: handleSetError,
   };
 
   return [state, actions];

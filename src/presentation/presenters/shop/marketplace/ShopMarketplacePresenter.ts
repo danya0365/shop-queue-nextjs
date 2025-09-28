@@ -2,6 +2,8 @@ import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
 import {
   LocationDTO,
   MarketplaceCategoryDTO,
+  ShopFiltersDTO,
+  ShopListResultDTO,
 } from "@/src/application/dtos/shop/marketplace-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
@@ -11,6 +13,13 @@ import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseSubscriptionPresenter } from "@/src/presentation/presenters/base/BaseSubscriptionPresenter";
+
+export interface ShopMarketplaceViewParams {
+  searchQuery?: string;
+  category?: string | null;
+  location?: string | null;
+  page?: number;
+}
 
 export interface ShopMarketplaceViewModel {
   // Statistics for marketplace
@@ -56,15 +65,37 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
     super(logger, authService, profileService, subscriptionService);
   }
 
-  async getViewModel(): Promise<ShopMarketplaceViewModel> {
+  async getViewModel(
+    params?: ShopMarketplaceViewParams
+  ): Promise<ShopMarketplaceViewModel> {
     try {
-      // Get shops data with pagination
-      const shopsResult = await this.marketplaceService.getAllShops({
-        page: 1,
-        limit: 12,
-        search: "",
-        status: "active",
-      });
+      const searchQuery = params?.searchQuery || "";
+      const category = params?.category || null;
+      const location = params?.location || null;
+      const page = params?.page || 1;
+
+      // Get shops data with pagination and search
+      let shopsResult: ShopListResultDTO;
+
+      if (category || location) {
+        // Use searchShops for category/location filtering
+        const filters: ShopFiltersDTO = {};
+        if (category) filters.category = category;
+        if (location) filters.location = location;
+
+        shopsResult = await this.marketplaceService.searchShops(
+          searchQuery,
+          filters
+        );
+      } else {
+        // Use getAllShops for basic search
+        shopsResult = await this.marketplaceService.getAllShops({
+          page,
+          limit: 12,
+          search: searchQuery,
+          status: "active",
+        });
+      }
 
       // Get featured shops
       const featuredShops = await this.marketplaceService.getFeaturedShops(6);
@@ -92,9 +123,9 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
           currentPage: shopsResult.currentPage,
           totalPages: shopsResult.totalPages,
         },
-        searchQuery: "",
-        selectedCategory: null,
-        selectedLocation: null,
+        searchQuery: searchQuery,
+        selectedCategory: category,
+        selectedLocation: location,
         priceRange: null,
         ratingFilter: null,
         featuredShops: featuredShops,
@@ -356,8 +387,8 @@ export class ShopMarketplacePresenterFactory {
 
 // Client-side factory class
 export class ClientShopMarketplacePresenterFactory {
-  static async create(): Promise<ShopMarketplacePresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): ShopMarketplacePresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const authService = clientContainer.resolve<IAuthService>("AuthService");
     const profileService =

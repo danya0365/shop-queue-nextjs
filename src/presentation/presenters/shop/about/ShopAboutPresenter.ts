@@ -1,10 +1,10 @@
-import type { Logger } from "@/src/domain/interfaces/logger";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
-import { BaseSubscriptionPresenter } from "@/src/presentation/presenters/base/BaseSubscriptionPresenter";
-import { getServerContainer } from "@/src/di/server-container";
 import { getClientContainer } from "@/src/di/client-container";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseSubscriptionPresenter } from "@/src/presentation/presenters/base/BaseSubscriptionPresenter";
 
 // Define interfaces and types for about page
 export interface CompanyInfo {
@@ -82,13 +82,16 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
       // Use mock data for demonstration
       const companyInfo: CompanyInfo = {
         name: "Shop Queue",
-        description: "แพลตฟอร์มจัดการคิวร้านค้าที่ทันสมัย ช่วยให้ธุรกิจของคุณเติบโตและลูกค้าได้รับประสบการณ์ที่ดีที่สุด",
-        mission: "เราตั้งใจที่จะปฏิวัติวิธีการจัดการคิวในร้านค้า ด้วยเทคโนโลยีที่ใช้งานง่ายและมีประสิทธิภาพ",
-        vision: "เป็นแพลตฟอร์มจัดการคิวอันดับ 1 ในประเทศไทย ที่ช่วยให้ธุรกิจทุกขนาดสามารถให้บริการลูกค้าได้อย่างมีประสิทธิภาพ",
+        description:
+          "แพลตฟอร์มจัดการคิวร้านค้าที่ทันสมัย ช่วยให้ธุรกิจของคุณเติบโตและลูกค้าได้รับประสบการณ์ที่ดีที่สุด",
+        mission:
+          "เราตั้งใจที่จะปฏิวัติวิธีการจัดการคิวในร้านค้า ด้วยเทคโนโลยีที่ใช้งานง่ายและมีประสิทธิภาพ",
+        vision:
+          "เป็นแพลตฟอร์มจัดการคิวอันดับ 1 ในประเทศไทย ที่ช่วยให้ธุรกิจทุกขนาดสามารถให้บริการลูกค้าได้อย่างมีประสิทธิภาพ",
         founded: "2024",
         location: "กรุงเทพมหานคร, ประเทศไทย",
         employees: "50+",
-        website: "https://shopqueue.co.th"
+        website: "https://shopqueue.co.th",
       };
 
       const teamMembers: TeamMember[] = [
@@ -96,34 +99,37 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
           id: "1",
           name: "นายสมชาย ใจดี",
           position: "Chief Executive Officer",
-          description: "ผู้นำทีมที่มีประสบการณ์กว่า 15 ปีในด้านเทคโนโลジีและธุรกิจ",
+          description:
+            "ผู้นำทีมที่มีประสบการณ์กว่า 15 ปีในด้านเทคโนโลジีและธุรกิจ",
           image: "/images/team/ceo.jpg",
           social: {
             linkedin: "https://linkedin.com/in/somchai",
-            twitter: "https://twitter.com/somchai"
-          }
+            twitter: "https://twitter.com/somchai",
+          },
         },
         {
           id: "2",
           name: "นางสาวสุดา เก่งมาก",
           position: "Chief Technology Officer",
-          description: "ผู้เชี่ยวชาญด้านเทคโนโลยีที่มีประสบการณ์ในการพัฒนาระบบขนาดใหญ่",
+          description:
+            "ผู้เชี่ยวชาญด้านเทคโนโลยีที่มีประสบการณ์ในการพัฒนาระบบขนาดใหญ่",
           image: "/images/team/cto.jpg",
           social: {
             linkedin: "https://linkedin.com/in/suda",
-            github: "https://github.com/suda"
-          }
+            github: "https://github.com/suda",
+          },
         },
         {
           id: "3",
           name: "นายวิชัย นักคิด",
           position: "Head of Product",
-          description: "ผู้เชี่ยวชาญด้าน UX/UI ที่มุ่งมั่นสร้างประสบการณ์ที่ดีที่สุดให้ผู้ใช้",
+          description:
+            "ผู้เชี่ยวชาญด้าน UX/UI ที่มุ่งมั่นสร้างประสบการณ์ที่ดีที่สุดให้ผู้ใช้",
           image: "/images/team/product.jpg",
           social: {
-            linkedin: "https://linkedin.com/in/wichai"
-          }
-        }
+            linkedin: "https://linkedin.com/in/wichai",
+          },
+        },
       ];
 
       const companyValues: CompanyValue[] = [
@@ -131,63 +137,65 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
           id: "1",
           title: "ใช้งานง่าย",
           description: "เราออกแบบระบบให้ใช้งานง่าย เข้าใจได้ทันที ไม่ซับซ้อน",
-          icon: "🎯"
+          icon: "🎯",
         },
         {
           id: "2",
           title: "เชื่อถือได้",
           description: "ระบบมีความเสถียรสูง พร้อมให้บริการ 24/7 ตลอดเวลา",
-          icon: "🛡️"
+          icon: "🛡️",
         },
         {
           id: "3",
           title: "นวัตกรรม",
-          description: "เราพัฒนาเทคโนโลยีใหม่ๆ อย่างต่อเนื่องเพื่อตอบโจทย์ธุรกิจ",
-          icon: "💡"
+          description:
+            "เราพัฒนาเทคโนโลยีใหม่ๆ อย่างต่อเนื่องเพื่อตอบโจทย์ธุรกิจ",
+          icon: "💡",
         },
         {
           id: "4",
           title: "ใส่ใจลูกค้า",
           description: "เราให้ความสำคัญกับความต้องการของลูกค้าเป็นอันดับแรก",
-          icon: "❤️"
-        }
+          icon: "❤️",
+        },
       ];
 
       const stats: CompanyStats = {
         totalShops: 1250,
         totalCustomers: 45000,
         totalQueues: 125000,
-        yearsOfService: 1
+        yearsOfService: 1,
       };
 
       const achievements = [
         "รางวัลสตาร์ทอัพยอดเยี่ยมแห่งปี 2024",
         "รางวัลนวัตกรรมเทคโนโลยีดีเด่น",
         "ได้รับการลงทุนจากกองทุน Venture Capital ชั้นนำ",
-        "มีผู้ใช้งานกว่า 45,000 คนทั่วประเทศ"
+        "มีผู้ใช้งานกว่า 45,000 คนทั่วประเทศ",
       ];
 
       const timeline = [
         {
           year: "2024",
           title: "ก่อตั้งบริษัท",
-          description: "เริ่มต้นด้วยทีมเล็กๆ และความฝันใหญ่ในการปฏิวัติระบบจัดการคิว"
+          description:
+            "เริ่มต้นด้วยทีมเล็กๆ และความฝันใหญ่ในการปฏิวัติระบบจัดการคิว",
         },
         {
           year: "2024 Q2",
           title: "เปิดตัว MVP",
-          description: "เปิดตัวเวอร์ชันแรกของแพลตฟอร์ม Shop Queue"
+          description: "เปิดตัวเวอร์ชันแรกของแพลตฟอร์ม Shop Queue",
         },
         {
           year: "2024 Q3",
           title: "ขยายทีม",
-          description: "เพิ่มทีมพัฒนาและทีมขายเพื่อรองรับการเติบโต"
+          description: "เพิ่มทีมพัฒนาและทีมขายเพื่อรองรับการเติบโต",
         },
         {
           year: "2024 Q4",
           title: "ขยายฟีเจอร์",
-          description: "เพิ่มฟีเจอร์ใหม่ๆ ตามความต้องการของลูกค้า"
-        }
+          description: "เพิ่มฟีเจอร์ใหม่ๆ ตามความต้องการของลูกค้า",
+        },
       ];
 
       return {
@@ -196,11 +204,13 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
         companyValues,
         stats,
         achievements,
-        timeline
+        timeline,
       };
     } catch (error: any) {
-      this.logger.error("ShopAboutPresenter: Error getting view model", { error });
-      
+      this.logger.error("ShopAboutPresenter: Error getting view model", {
+        error,
+      });
+
       // Return minimal data on error
       return {
         companyInfo: {
@@ -211,7 +221,7 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
           founded: "2024",
           location: "กรุงเทพมหานคร",
           employees: "50+",
-          website: "https://shopqueue.co.th"
+          website: "https://shopqueue.co.th",
         },
         teamMembers: [],
         companyValues: [],
@@ -219,10 +229,10 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
           totalShops: 0,
           totalCustomers: 0,
           totalQueues: 0,
-          yearsOfService: 1
+          yearsOfService: 1,
         },
         achievements: [],
-        timeline: []
+        timeline: [],
       };
     }
   }
@@ -239,15 +249,17 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
         totalShops: 1250,
         totalCustomers: 45000,
         totalQueues: 125000,
-        yearsOfService: 1
+        yearsOfService: 1,
       };
     } catch (error: any) {
-      this.logger.error("ShopAboutPresenter: Error getting company stats", { error });
+      this.logger.error("ShopAboutPresenter: Error getting company stats", {
+        error,
+      });
       return {
         totalShops: 0,
         totalCustomers: 0,
         totalQueues: 0,
-        yearsOfService: 1
+        yearsOfService: 1,
       };
     }
   }
@@ -262,7 +274,9 @@ export class ShopAboutPresenter extends BaseSubscriptionPresenter {
       const viewModel = await this.getViewModel();
       return viewModel.teamMembers;
     } catch (error: any) {
-      this.logger.error("ShopAboutPresenter: Error getting team members", { error });
+      this.logger.error("ShopAboutPresenter: Error getting team members", {
+        error,
+      });
       return [];
     }
   }
@@ -279,7 +293,8 @@ export class ShopAboutPresenterFactory {
       "SubscriptionService"
     );
     const authService = serverContainer.resolve<IAuthService>("AuthService");
-    const profileService = serverContainer.resolve<IProfileService>("ProfileService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
 
     return new ShopAboutPresenter(
       logger,
@@ -294,14 +309,15 @@ export class ShopAboutPresenterFactory {
  * Factory for creating client-side ShopAboutPresenter instances
  */
 export class ClientShopAboutPresenterFactory {
-  static async create(): Promise<ShopAboutPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): ShopAboutPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
     const authService = clientContainer.resolve<IAuthService>("AuthService");
-    const profileService = clientContainer.resolve<IProfileService>("ProfileService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
 
     return new ShopAboutPresenter(
       logger,

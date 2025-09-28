@@ -1,8 +1,9 @@
 import { ShopMarketplaceLayout } from "@/src/presentation/components/layouts/shop/marketplace";
 import { ShopMarketplaceView } from "@/src/presentation/components/shop/marketplace/ShopMarketplaceView";
 import { ShopMarketplaceLayoutPresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
-import { ShopMarketplacePresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
+import { ShopMarketplacePresenterFactory, type ShopMarketplaceViewParams } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplacePresenter";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 // Tell Next.js this is a dynamic page
 export const dynamic = "force-dynamic";
@@ -30,7 +31,16 @@ export async function generateMetadata(): Promise<Metadata> {
  * Shop Marketplace page - Server Component for SEO optimization
  * Landing page for customers to browse and discover shops
  */
-export default async function ShopMarketplacePage() {
+interface ShopMarketplacePageProps {
+  searchParams: {
+    q?: string;
+    category?: string;
+    location?: string;
+    page?: string;
+  };
+}
+
+export default async function ShopMarketplacePage({ searchParams }: ShopMarketplacePageProps) {
   try {
     const [layoutPresenter, presenter] = await Promise.all([
       ShopMarketplaceLayoutPresenterFactory.create(),
@@ -39,11 +49,32 @@ export default async function ShopMarketplacePage() {
 
     const [layoutData, viewModel] = await Promise.all([
       layoutPresenter.getLayoutViewModel(),
-      presenter.getViewModel(),
+      presenter.getViewModel({
+        searchQuery: searchParams.q || "",
+        category: searchParams.category || null,
+        location: searchParams.location || null,
+        page: searchParams.page ? parseInt(searchParams.page) : 1,
+      } as ShopMarketplaceViewParams),
     ]);
 
     return (
-      <ShopMarketplaceLayout layoutData={layoutData} showHero={true}>
+      <ShopMarketplaceLayout 
+        layoutData={layoutData} 
+        showHero={true}
+        searchQuery={searchParams.q}
+        onSearch={(query) => {
+          // Handle search by redirecting with search params
+          const params = new URLSearchParams();
+          if (query) params.set('q', query);
+          redirect(`/shop?${params.toString()}`);
+        }}
+        onCategoryClick={(category) => {
+          // Handle category click by redirecting with category param
+          const params = new URLSearchParams(searchParams);
+          params.set('category', category);
+          redirect(`/shop?${params.toString()}`);
+        }}
+      >
         <ShopMarketplaceView initialViewModel={viewModel} />
       </ShopMarketplaceLayout>
     );

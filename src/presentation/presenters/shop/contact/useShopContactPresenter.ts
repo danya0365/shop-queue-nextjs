@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { 
-  ShopContactPresenter, 
+import { useCallback, useEffect, useState } from "react";
+import {
   ClientShopContactPresenterFactory,
-  ShopContactViewModel,
   ContactFormData,
-  FAQ
+  FAQ,
+  ShopContactViewModel,
 } from "./ShopContactPresenter";
+
+const presenterInstance = ClientShopContactPresenterFactory.create();
 
 export interface ShopContactPresenterActions {
   refreshData: () => Promise<void>;
-  submitContactForm: (formData: ContactFormData) => Promise<{ success: boolean; message: string }>;
+  submitContactForm: (
+    formData: ContactFormData
+  ) => Promise<{ success: boolean; message: string }>;
   getFAQsByCategory: (category?: string) => Promise<FAQ[]>;
   setError: (error: string | null) => void;
 }
@@ -37,102 +40,91 @@ export function useShopContactPresenter(
   const [loading, setLoading] = useState(!initialViewModel);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [presenter, setPresenter] = useState<ShopContactPresenter | null>(null);
-
-  // Initialize presenter
-  useEffect(() => {
-    const initPresenter = async () => {
-      try {
-        const presenterInstance = await ClientShopContactPresenterFactory.create();
-        setPresenter(presenterInstance);
-      } catch (err) {
-        console.error("Error initializing presenter:", err);
-        setError("ไม่สามารถเริ่มต้นระบบได้");
-      }
-    };
-
-    initPresenter();
-  }, []);
+  const [submitResult, setSubmitResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   // Load initial data if not provided
   useEffect(() => {
-    if (!initialViewModel && presenter) {
+    if (!initialViewModel) {
       refreshData();
     }
-  }, [presenter, initialViewModel]);
+  }, [initialViewModel]);
 
   /**
    * Refresh data from presenter
    */
   const refreshData = useCallback(async () => {
-    if (!presenter) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      const newViewModel = await presenter.getViewModel();
+      const newViewModel = await presenterInstance.getViewModel();
       setViewModel(newViewModel);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
       setError(errorMessage);
       console.error("Error loading contact data:", err);
     } finally {
       setLoading(false);
     }
-  }, [presenter]);
+  }, []);
 
   /**
    * Submit contact form
    */
-  const submitContactForm = useCallback(async (formData: ContactFormData): Promise<{ success: boolean; message: string }> => {
-    if (!presenter) {
-      return {
-        success: false,
-        message: "ระบบยังไม่พร้อม กรุณาลองใหม่อีกครั้ง"
-      };
-    }
+  const submitContactForm = useCallback(
+    async (
+      formData: ContactFormData
+    ): Promise<{ success: boolean; message: string }> => {
+      setSubmitting(true);
+      setError(null);
+      setSubmitResult(null);
 
-    setSubmitting(true);
-    setError(null);
-    setSubmitResult(null);
-
-    try {
-      const result = await presenter.submitContactForm(formData);
-      setSubmitResult(result);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการส่งข้อความ";
-      setError(errorMessage);
-      const failResult = {
-        success: false,
-        message: errorMessage
-      };
-      setSubmitResult(failResult);
-      console.error("Error submitting contact form:", err);
-      return failResult;
-    } finally {
-      setSubmitting(false);
-    }
-  }, [presenter]);
+      try {
+        const result = await presenterInstance.submitContactForm(formData);
+        setSubmitResult(result);
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการส่งข้อความ";
+        setError(errorMessage);
+        const failResult = {
+          success: false,
+          message: errorMessage,
+        };
+        setSubmitResult(failResult);
+        console.error("Error submitting contact form:", err);
+        return failResult;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    []
+  );
 
   /**
    * Get FAQs by category
    */
-  const getFAQsByCategory = useCallback(async (category?: string): Promise<FAQ[]> => {
-    if (!presenter) return [];
-
-    try {
-      const faqs = await presenter.getFAQsByCategory(category);
-      return faqs;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการดึงข้อมูล FAQ";
-      setError(errorMessage);
-      console.error("Error getting FAQs by category:", err);
-      return [];
-    }
-  }, [presenter]);
+  const getFAQsByCategory = useCallback(
+    async (category?: string): Promise<FAQ[]> => {
+      try {
+        const faqs = await presenterInstance.getFAQsByCategory(category);
+        return faqs;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "เกิดข้อผิดพลาดในการดึงข้อมูล FAQ";
+        setError(errorMessage);
+        console.error("Error getting FAQs by category:", err);
+        return [];
+      }
+    },
+    []
+  );
 
   /**
    * Set error state
@@ -146,14 +138,14 @@ export function useShopContactPresenter(
     loading,
     error,
     submitting,
-    submitResult
+    submitResult,
   };
 
   const actions: ShopContactPresenterActions = {
     refreshData,
     submitContactForm,
     getFAQsByCategory,
-    setError: handleSetError
+    setError: handleSetError,
   };
 
   return [state, actions];
