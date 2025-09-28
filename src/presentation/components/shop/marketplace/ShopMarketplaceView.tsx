@@ -113,9 +113,6 @@ export function ShopMarketplaceView({
   const searchParams = useSearchParams();
   const [state, actions] = useShopMarketplacePresenter(initialViewModel);
   const { viewModel, loading, error } = state;
-  const [searchTerm, setSearchTerm] = useState(
-    searchParams.get("q") || initialViewModel?.searchQuery || ""
-  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -147,26 +144,6 @@ export function ShopMarketplaceView({
       default:
         return status;
     }
-  };
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Update URL with search query
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchTerm.trim()) {
-      params.set("q", searchTerm.trim());
-    } else {
-      params.delete("q");
-    }
-
-    // Reset to page 1 when searching
-    params.delete("page");
-
-    router.push(`/shop?${params.toString()}`);
-
-    // Also trigger the search action
-    await actions.searchShops(searchTerm);
   };
 
   const handleCategoryClick = async (categoryId: string) => {
