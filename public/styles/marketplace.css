@@ -459,4 +459,60 @@
   .marketplace-about-achievement-icon {
     @apply text-yellow-600;
   }
+
+  /* Group Hover Effects for Shop Cards */
+  .marketplace-shop-title-hover {
+    @apply group-hover:text-orange-600 transition-colors duration-300;
+  }
+
+  .marketplace-shop-description-hover {
+    @apply group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors duration-300;
+  }
+
+  .marketplace-shop-detail-link-hover {
+    @apply group-hover:text-orange-700 group-hover:font-semibold transition-all duration-300;
+  }
+
+  .marketplace-shop-icon-hover {
+    @apply group-hover:text-orange-600 transition-colors duration-300;
+  }
+
+  .marketplace-shop-image-hover {
+    @apply group-hover:scale-105 transition-transform duration-300;
+  }
+
+  /* Group Hover Effects for Category Cards */
+  .marketplace-category-title-hover {
+    @apply group-hover:text-orange-600 transition-colors duration-300;
+  }
+
+  .marketplace-category-count-hover {
+    @apply group-hover:text-orange-500 transition-colors duration-300;
+  }
+
+  .marketplace-category-icon-hover {
+    @apply group-hover:scale-110 transition-transform duration-300;
+  }
+
+  /* Group Hover Effects for Location Cards */
+  .marketplace-location-title-hover {
+    @apply group-hover:text-orange-600 transition-colors duration-300;
+  }
+
+  .marketplace-location-count-hover {
+    @apply group-hover:text-orange-500 transition-colors duration-300;
+  }
+
+  .marketplace-location-icon-hover {
+    @apply group-hover:text-orange-600 group-hover:scale-110 transition-all duration-300;
+  }
+
+  /* Action Button Hover Effects */
+  .marketplace-action-heart-hover {
+    @apply group-hover:text-red-500 group-hover:scale-110 transition-all duration-300;
+  }
+
+  .marketplace-action-share-hover {
+    @apply group-hover:text-orange-500 group-hover:scale-110 transition-all duration-300;
+  }
 }

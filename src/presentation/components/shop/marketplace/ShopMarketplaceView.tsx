@@ -298,10 +298,10 @@ export function ShopMarketplaceView({
               <Link
                 key={shop.id}
                 href={`/shop/${shop.id}`}
-                className="marketplace-shop-card overflow-hidden"
+                className="marketplace-shop-card group overflow-hidden"
               >
-                <div className="relative">
-                  <ShopImageFallback shop={shop} className="w-full h-48" />
+                <div className="relative overflow-hidden">
+                  <ShopImageFallback shop={shop} className="w-full h-48 marketplace-shop-image-hover" />
                   <div className="absolute top-2 right-2">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
@@ -313,20 +313,20 @@ export function ShopMarketplaceView({
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold marketplace-text-primary mb-2">
+                  <h3 className="text-lg font-semibold marketplace-text-primary marketplace-shop-title-hover mb-2">
                     {shop.name}
                   </h3>
-                  <p className="marketplace-text-secondary text-sm mb-3">
+                  <p className="marketplace-text-secondary marketplace-shop-description-hover text-sm mb-3">
                     {shop.description}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 marketplace-star-rating mr-1" />
+                      <Star className="h-4 w-4 marketplace-star-rating marketplace-shop-icon-hover mr-1" />
                       <span className="text-sm marketplace-text-secondary">
                         {shop.rating}
                       </span>
                     </div>
-                    <span className="marketplace-detail-link text-sm font-medium">
+                    <span className="marketplace-detail-link marketplace-shop-detail-link-hover text-sm font-medium">
                       ดูรายละเอียด
                     </span>
                   </div>
@@ -347,13 +347,13 @@ export function ShopMarketplaceView({
             <button
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="marketplace-card marketplace-card-hover p-4 text-center"
+              className="marketplace-card marketplace-card-hover group p-4 text-center"
             >
-              <div className="text-2xl mb-2">{category.icon}</div>
-              <h3 className="font-medium marketplace-text-primary mb-1">
+              <div className="text-2xl mb-2 marketplace-category-icon-hover">{category.icon}</div>
+              <h3 className="font-medium marketplace-text-primary marketplace-category-title-hover mb-1">
                 {category.name}
               </h3>
-              <p className="text-sm marketplace-text-secondary">
+              <p className="text-sm marketplace-text-secondary marketplace-category-count-hover">
                 {category.shopCount} ร้าน
               </p>
             </button>
@@ -371,15 +371,15 @@ export function ShopMarketplaceView({
             <button
               key={location.id}
               onClick={() => handleLocationClick(location.id)}
-              className="marketplace-card marketplace-card-hover p-4 text-left"
+              className="marketplace-card marketplace-card-hover group p-4 text-left"
             >
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 marketplace-location-icon mr-3" />
+                <MapPin className="h-5 w-5 marketplace-location-icon marketplace-location-icon-hover mr-3" />
                 <div>
-                  <h3 className="font-medium marketplace-text-primary">
+                  <h3 className="font-medium marketplace-text-primary marketplace-location-title-hover">
                     {location.name}
                   </h3>
-                  <p className="text-sm marketplace-text-secondary">
+                  <p className="text-sm marketplace-text-secondary marketplace-location-count-hover">
                     {location.shopCount} ร้าน
                   </p>
                 </div>
@@ -451,7 +451,7 @@ export function ShopMarketplaceView({
               <Link
                 key={shop.id}
                 href={`/shop/${shop.id}`}
-                className={`marketplace-shop-card ${
+                className={`marketplace-shop-card group ${
                   viewMode === "grid"
                     ? "overflow-hidden"
                     : "flex items-center p-4"
@@ -459,8 +459,8 @@ export function ShopMarketplaceView({
               >
                 {viewMode === "grid" ? (
                   <>
-                    <div className="relative">
-                      <ShopImageFallback shop={shop} className="w-full h-48" />
+                    <div className="relative overflow-hidden">
+                      <ShopImageFallback shop={shop} className="w-full h-48 marketplace-shop-image-hover" />
                       <div className="absolute top-2 right-2">
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
@@ -472,48 +472,48 @@ export function ShopMarketplaceView({
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold marketplace-text-primary mb-2">
+                      <h3 className="text-lg font-semibold marketplace-text-primary marketplace-shop-title-hover mb-2">
                         {shop.name}
                       </h3>
-                      <p className="marketplace-text-secondary text-sm mb-3">
+                      <p className="marketplace-text-secondary marketplace-shop-description-hover text-sm mb-3">
                         {shop.description}
                       </p>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
+                          <Star className="h-4 w-4 marketplace-star-rating marketplace-shop-icon-hover mr-1" />
                           <span className="text-sm marketplace-text-secondary">
                           {shop.rating}
                         </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <button className="marketplace-action-icon-heart">
+                          <button className="marketplace-action-icon-heart marketplace-action-heart-hover">
                             <Heart className="h-4 w-4" />
                           </button>
-                          <button className="marketplace-action-icon-share">
+                          <button className="marketplace-action-icon-share marketplace-action-share-hover">
                             <Share2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
                       <div className="flex items-center text-sm marketplace-text-secondary mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
+                        <MapPin className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                         <span>{shop.address}</span>
                       </div>
                       <div className="flex items-center text-sm marketplace-text-secondary mb-3">
-                        <Phone className="h-4 w-4 mr-1" />
+                        <Phone className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                         <span>{shop.phone}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 text-sm marketplace-text-secondary">
                           <span className="flex items-center">
-                            <Users className="h-4 w-4 mr-1" />
+                            <Users className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                             {shop.queueCount}
                           </span>
                           <span className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1" />
+                            <Clock className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                             {shop.totalServices}
                           </span>
                         </div>
-                        <span className="marketplace-detail-link text-sm font-medium">
+                        <span className="marketplace-detail-link marketplace-shop-detail-link-hover text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -530,7 +530,7 @@ export function ShopMarketplaceView({
                     </div>
                     <div className="ml-4 flex-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold marketplace-text-primary">
+                        <h3 className="text-lg font-semibold marketplace-text-primary marketplace-shop-title-hover">
                           {shop.name}
                         </h3>
                         <span
@@ -541,32 +541,32 @@ export function ShopMarketplaceView({
                           {getStatusText(shop.status)}
                         </span>
                       </div>
-                      <p className="marketplace-text-secondary text-sm mb-2">
+                      <p className="marketplace-text-secondary marketplace-shop-description-hover text-sm mb-2">
                         {shop.description}
                       </p>
                       <div className="flex items-center space-x-4 text-sm marketplace-text-secondary">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
+                          <Star className="h-4 w-4 marketplace-star-rating marketplace-shop-icon-hover mr-1" />
                           <span>{shop.rating}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
+                          <MapPin className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                           <span>{shop.address}</span>
                         </div>
                         <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-1" />
+                          <Phone className="h-4 w-4 marketplace-shop-icon-hover mr-1" />
                           <span>{shop.phone}</span>
                         </div>
                       </div>
                     </div>
                     <div className="ml-4 flex items-center space-x-2">
-                      <button className="marketplace-action-icon-heart">
+                      <button className="marketplace-action-icon-heart marketplace-action-heart-hover">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="marketplace-action-icon-share">
+                      <button className="marketplace-action-icon-share marketplace-action-share-hover">
                         <Share2 className="h-5 w-5" />
                       </button>
-                      <span className="marketplace-detail-link font-medium">
+                      <span className="marketplace-detail-link marketplace-shop-detail-link-hover font-medium">
                         ดูรายละเอียด
                       </span>
                     </div>
