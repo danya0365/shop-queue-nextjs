@@ -35,8 +35,8 @@ export function ShopCategoriesView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 marketplace-loading-spinner mx-auto mb-4"></div>
+          <p className="marketplace-text-secondary">
             กำลังโหลดข้อมูลหมวดหมู่...
           </p>
         </div>
@@ -49,10 +49,10 @@ export function ShopCategoriesView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-text-primary mb-2">
             เกิดข้อผิดพลาด
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="marketplace-text-secondary mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
             className="marketplace-button-primary px-4 py-2 rounded-lg transition-colors"
@@ -69,10 +69,10 @@ export function ShopCategoriesView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-text-primary mb-2">
             ไม่พบข้อมูล
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="marketplace-text-secondary">
             ไม่สามารถโหลดข้อมูลหมวดหมู่ร้านค้าได้
           </p>
         </div>
@@ -95,13 +95,13 @@ export function ShopCategoriesView({
       {/* Search Bar */}
       <div className="max-w-md mx-auto">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 marketplace-input-icon h-5 w-5" />
           <input
             type="text"
             placeholder="ค้นหาหมวดหมู่..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+            className="w-full pl-10 pr-4 py-3 marketplace-search-bg marketplace-search-focus rounded-lg marketplace-input"
           />
         </div>
       </div>
@@ -109,8 +109,8 @@ export function ShopCategoriesView({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="marketplace-card p-6 text-center">
-          <div className="marketplace-stat-icon-bg bg-orange-100 dark:bg-orange-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Store className="h-6 w-6 text-orange-600 dark:text-orange-300" />
+          <div className="marketplace-stat-icon-orange w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Store className="h-6 w-6" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {viewModel.stats.totalCategories}
@@ -119,8 +119,8 @@ export function ShopCategoriesView({
         </div>
 
         <div className="marketplace-card p-6 text-center">
-          <div className="marketplace-stat-icon-bg bg-green-100 dark:bg-green-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-300" />
+          <div className="marketplace-stat-icon-green w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+            <TrendingUp className="h-6 w-6" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {viewModel.stats.activeCategories}
@@ -131,8 +131,8 @@ export function ShopCategoriesView({
         </div>
 
         <div className="marketplace-card p-6 text-center">
-          <div className="marketplace-stat-icon-bg bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Users className="h-6 w-6 text-purple-600 dark:text-purple-300" />
+          <div className="marketplace-stat-icon-purple w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Users className="h-6 w-6" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {viewModel.stats.totalShopsInCategories}
@@ -141,8 +141,8 @@ export function ShopCategoriesView({
         </div>
 
         <div className="marketplace-card p-6 text-center">
-          <div className="marketplace-stat-icon-bg bg-orange-100 dark:bg-orange-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Store className="h-6 w-6 text-orange-600 dark:text-orange-300" />
+          <div className="marketplace-stat-icon-orange w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Store className="h-6 w-6" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {Math.round(
@@ -187,7 +187,7 @@ export function ShopCategoriesView({
               className="marketplace-card marketplace-card-hover p-6 text-center group transition-all duration-200 hover:scale-105"
             >
               <div className="text-4xl mb-4">{category.icon}</div>
-              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-orange-600 transition-colors">
+              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 marketplace-category-hover transition-colors">
                 {category.name}
               </h3>
               <p className="marketplace-text-secondary text-sm mb-4 line-clamp-2">
@@ -198,7 +198,7 @@ export function ShopCategoriesView({
                   <Store className="h-4 w-4 mr-1" />
                   <span>{category.shopCount} ร้าน</span>
                 </div>
-                <ArrowRight className="h-4 w-4 marketplace-text-muted group-hover:text-orange-600 transition-colors" />
+                <ArrowRight className="h-4 w-4 marketplace-text-muted marketplace-category-hover transition-colors" />
               </div>
             </button>
           ))}
@@ -229,14 +229,14 @@ export function ShopCategoriesView({
                 >
                   <div className="text-3xl">{category.icon}</div>
                   <div className="flex-1">
-                    <h3 className="font-semibold marketplace-text-primary group-hover:text-orange-600 transition-colors">
+                    <h3 className="font-semibold marketplace-text-primary marketplace-category-hover transition-colors">
                       {category.name}
                     </h3>
                     <p className="text-sm marketplace-text-secondary">
                       {category.shopCount} ร้านค้า
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 marketplace-text-muted group-hover:text-orange-600 transition-colors" />
+                  <ArrowRight className="h-5 w-5 marketplace-text-muted marketplace-category-hover transition-colors" />
                 </Link>
               ))}
           </div>
@@ -244,7 +244,7 @@ export function ShopCategoriesView({
       )}
 
       {/* Call to Action */}
-      <div className="marketplace-card p-8 text-center bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20">
+      <div className="marketplace-card p-8 text-center marketplace-cta-bg">
         <h2 className="text-2xl font-bold marketplace-text-primary mb-4">
           ไม่พบหมวดหมู่ที่ต้องการ?
         </h2>

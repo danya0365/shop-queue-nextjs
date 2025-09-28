@@ -261,6 +261,16 @@
     @apply text-orange-600 hover:text-orange-700;
   }
 
+  /* Category hover states */
+  .marketplace-category-hover {
+    @apply group-hover:text-orange-600;
+  }
+
+  /* CTA Section */
+  .marketplace-cta-bg {
+    @apply bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20;
+  }
+
   /* Pagination */
   .marketplace-pagination-disabled {
     @apply bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700;
