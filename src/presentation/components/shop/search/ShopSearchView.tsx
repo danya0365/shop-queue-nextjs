@@ -173,10 +173,6 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
     await actions.filterByCategory(categoryId);
   };
 
-  const handleLocationClick = async (locationId: string) => {
-    await actions.filterByLocation(locationId);
-  };
-
   const handleOpenFilterModal = () => {
     setIsFilterModalOpen(true);
   };

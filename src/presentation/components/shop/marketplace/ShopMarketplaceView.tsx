@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ShopMarketplaceFilterModal, ShopMarketplaceFilters } from "./modals";
 
@@ -109,8 +108,6 @@ function ShopImageFallback({
 export function ShopMarketplaceView({
   initialViewModel,
 }: ShopMarketplaceViewProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [state, actions] = useShopMarketplacePresenter(initialViewModel);
   const { viewModel, loading, error } = state;
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
