@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   ClientShopMarketplacePresenterFactory,
@@ -84,7 +83,6 @@ export interface ShopMarketplaceViewProps {
 export function useShopMarketplacePresenter(
   initialViewModel: ShopMarketplaceViewModel | null = null
 ): [ShopMarketplacePresenterState, ShopMarketplacePresenterActions] {
-  const searchParams = useSearchParams();
   const [viewModel, setViewModel] = useState<ShopMarketplaceViewModel | null>(
     initialViewModel || null
   );
@@ -98,42 +96,25 @@ export function useShopMarketplacePresenter(
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   // Pagination state with default values from URL
-  const [currentPage, setCurrentPage] = useState(() => {
-    const pageFromUrl = searchParams.get("page")
-      ? parseInt(searchParams.get("page")!)
-      : 1;
-    return pageFromUrl;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    searchQuery: initialViewModel?.searchQuery || "",
+    category: initialViewModel?.selectedCategory || "",
+    location: initialViewModel?.selectedLocation || "",
+    page: initialViewModel?.currentPage || 1,
   });
 
-  // Initialize presenter
   useEffect(() => {
-    const initializePresenter = async () => {
-      try {
-        setLoading(true);
-
-        if (!initialViewModel) {
-          const initialData = await marketplacePresenter.getViewModel({
-            searchQuery: searchParams.get("q") || undefined,
-            category: searchParams.get("category") || undefined,
-            location: searchParams.get("location") || undefined,
-            page: searchParams.get("page")
-              ? parseInt(searchParams.get("page")!)
-              : 1,
-          });
-          setViewModel(initialData);
-        }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to initialize presenter";
-        setError(errorMessage);
-        console.error("Error initializing ShopMarketplacePresenter:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializePresenter();
-  }, [initialViewModel, searchParams]);
+    if (initialViewModel) {
+      setViewModel(initialViewModel);
+      setFilters({
+        searchQuery: initialViewModel.searchQuery || "",
+        category: initialViewModel.selectedCategory || "",
+        location: initialViewModel.selectedLocation || "",
+        page: initialViewModel.currentPage || 1,
+      });
+    }
+  }, [initialViewModel]);
 
   // Load data
   const loadData = useCallback(async () => {
@@ -142,9 +123,9 @@ export function useShopMarketplacePresenter(
 
     try {
       const data = await marketplacePresenter.getViewModel({
-        searchQuery: searchParams.get("q") || undefined,
-        category: searchParams.get("category") || undefined,
-        location: searchParams.get("location") || undefined,
+        searchQuery: filters.searchQuery,
+        category: filters.category,
+        location: filters.location,
         page: currentPage,
       });
       setViewModel(data);
@@ -152,12 +133,13 @@ export function useShopMarketplacePresenter(
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load data";
+      setError(errorMessage);
       console.error("Error loading ShopMarketplace data:", err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [searchParams, currentPage]);
+  }, [currentPage, filters]);
 
   // Refresh data
   const refreshData = useCallback(async () => {
@@ -345,9 +327,9 @@ export function useShopMarketplacePresenter(
 
       try {
         const result = await marketplacePresenter.getViewModel({
-          searchQuery: searchParams.get("q") || undefined,
-          category: searchParams.get("category") || undefined,
-          location: searchParams.get("location") || undefined,
+          searchQuery: filters.searchQuery,
+          category: filters.category,
+          location: filters.location,
           page,
         });
         setViewModel(result);
@@ -365,7 +347,7 @@ export function useShopMarketplacePresenter(
         setLoading(false);
       }
     },
-    [searchParams]
+    [filters]
   );
 
   // Clear filters
@@ -379,6 +361,12 @@ export function useShopMarketplacePresenter(
       });
       setViewModel(result);
       setCurrentPage(1);
+      setFilters({
+        searchQuery: "",
+        category: "",
+        location: "",
+        page: 1,
+      });
       console.log("ShopMarketplacePresenter: Filters cleared successfully");
     } catch (err) {
       const errorMessage =
@@ -460,7 +448,7 @@ export function useShopMarketplacePresenter(
 
   // Apply filters function
   const applyFilters = useCallback(
-    async (filters: {
+    async (newFilters: {
       searchQuery?: string;
       categoryId?: string;
       locationId?: string;
@@ -479,13 +467,19 @@ export function useShopMarketplacePresenter(
 
       try {
         const result = await marketplacePresenter.getViewModel({
-          searchQuery: filters.searchQuery,
-          category: filters.categoryId,
-          location: filters.locationId,
+          searchQuery: newFilters.searchQuery || "",
+          category: newFilters.categoryId || "",
+          location: newFilters.locationId || "",
           page: 1,
         });
         setViewModel(result);
         setCurrentPage(1);
+        setFilters({
+          searchQuery: newFilters.searchQuery || "",
+          category: newFilters.categoryId || "",
+          location: newFilters.locationId || "",
+          page: 1,
+        });
         console.log("ShopMarketplacePresenter: Filters applied successfully", {
           filters,
         });
@@ -499,7 +493,7 @@ export function useShopMarketplacePresenter(
         setLoading(false);
       }
     },
-    []
+    [filters]
   );
 
   // State object following the pattern

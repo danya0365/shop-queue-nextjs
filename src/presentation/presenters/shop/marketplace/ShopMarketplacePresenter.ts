@@ -41,6 +41,7 @@ export interface ShopMarketplaceViewModel {
   searchQuery: string;
   selectedCategory: string | null;
   selectedLocation: string | null;
+  currentPage: number;
   priceRange: [number, number] | null;
   ratingFilter: number | null;
 
@@ -126,6 +127,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         searchQuery: searchQuery,
         selectedCategory: category,
         selectedLocation: location,
+        currentPage: page,
         priceRange: null,
         ratingFilter: null,
         featuredShops: featuredShops,
@@ -193,6 +195,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         searchQuery: query,
         selectedCategory: filters?.category || null,
         selectedLocation: filters?.location || null,
+        currentPage: filters?.page || 1,
         priceRange: filters?.priceRange || null,
         ratingFilter: filters?.rating || null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
@@ -235,6 +238,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         searchQuery: "",
         selectedCategory: categoryId,
         selectedLocation: null,
+        currentPage: page,
         priceRange: null,
         ratingFilter: null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
@@ -277,6 +281,7 @@ export class ShopMarketplacePresenter extends BaseSubscriptionPresenter {
         searchQuery: "",
         selectedCategory: null,
         selectedLocation: locationId,
+        currentPage: page,
         priceRange: null,
         ratingFilter: null,
         featuredShops: await this.marketplaceService.getFeaturedShops(6),
