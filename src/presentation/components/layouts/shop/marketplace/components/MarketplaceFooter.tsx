@@ -51,7 +51,7 @@ const MarketplaceFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="marketplace-footer-bg">
+    <footer className="bg-primary-gradient">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="py-12">
@@ -90,7 +90,7 @@ const MarketplaceFooter: React.FC = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition-colors"
+                    className="w-10 h-10 marketplace-footer-social-bg rounded-lg flex items-center justify-center transition-colors"
                     aria-label={social.label}
                   >
                     <social.icon className="w-5 h-5 marketplace-footer-text" />
@@ -153,7 +153,7 @@ const MarketplaceFooter: React.FC = () => {
         </div>
 
         {/* Bottom Footer */}
-        <div className="border-t border-slate-800 py-6">
+        <div className="border-t marketplace-footer-border py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2">
