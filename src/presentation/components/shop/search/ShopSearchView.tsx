@@ -122,15 +122,15 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        return "marketplace-status-active";
       case "inactive":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+        return "marketplace-status-inactive";
       case "suspended":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+        return "marketplace-status-suspended";
       case "draft":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "marketplace-status-draft";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "marketplace-status-draft";
     }
   };
 
@@ -189,8 +189,8 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 marketplace-loading-spinner mx-auto mb-4"></div>
+          <p className="marketplace-text-secondary">
             กำลังค้นหาร้านค้า...
           </p>
         </div>
@@ -202,13 +202,13 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-text-primary mb-2">
             เกิดข้อผิดพลาด
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="marketplace-text-secondary mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+            className="marketplace-retry-button px-4 py-2 rounded-lg"
           >
             ลองใหม่อีกครั้ง
           </button>
@@ -221,10 +221,10 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-text-primary mb-2">
             ไม่พบข้อมูล
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="marketplace-text-secondary">
             ไม่สามารถโหลดข้อมูลการค้นหาได้
           </p>
         </div>
@@ -264,11 +264,11 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="ค้นหาร้านค้า, บริการ, หรือสถานที่..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full pl-10 pr-4 py-3 marketplace-search-bg rounded-lg marketplace-search-focus dark:text-white"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-1.5 rounded-md transition-colors text-sm font-medium"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 marketplace-button-primary px-4 py-1.5 rounded-md text-sm font-medium"
                 >
                   ค้นหา
                 </button>
@@ -301,7 +301,7 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                   setSearchTerm(suggestion);
                   actions.searchShops(suggestion);
                 }}
-                className="px-4 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-full text-sm font-medium transition-colors dark:bg-orange-900 dark:text-orange-300 dark:hover:bg-orange-800"
+                className="px-4 py-2 marketplace-suggested-search-bg marketplace-suggested-search-text rounded-full text-sm font-medium transition-colors"
               >
                 <TrendingUp className="inline h-4 w-4 mr-1" />
                 {suggestion}
@@ -351,8 +351,8 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md ${
                   viewMode === "grid"
-                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    ? "marketplace-view-mode-active-bg marketplace-view-mode-active-text"
+                    : "marketplace-view-mode-inactive-text"
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -361,8 +361,8 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md ${
                   viewMode === "list"
-                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    ? "marketplace-view-mode-active-bg marketplace-view-mode-active-text"
+                    : "marketplace-view-mode-inactive-text"
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -437,33 +437,33 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      <h3 className="text-lg font-semibold marketplace-text-primary mb-2">
                         {shop.name}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                      <p className="marketplace-text-secondary text-sm mb-3">
                         {shop.description}
                       </p>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
+                          <span className="text-sm marketplace-text-secondary">
                             {shop.rating}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <button className="text-gray-400 hover:text-red-500">
+                          <button className="marketplace-action-icon-heart">
                             <Heart className="h-4 w-4" />
                           </button>
-                          <button className="text-gray-400 hover:text-orange-500">
+                          <button className="marketplace-action-icon-share">
                             <Share2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <div className="flex items-center text-sm marketplace-text-secondary mb-2">
                         <MapPin className="h-4 w-4 mr-1" />
                         <span>{shop.address}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      <div className="flex items-center text-sm marketplace-text-secondary mb-3">
                         <Phone className="h-4 w-4 mr-1" />
                         <span>{shop.phone}</span>
                       </div>
@@ -478,7 +478,7 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                             {shop.totalServices}
                           </span>
                         </div>
-                        <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                        <span className="marketplace-detail-link text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -495,7 +495,7 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                     </div>
                     <div className="ml-4 flex-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <h3 className="text-lg font-semibold marketplace-text-primary">
                           {shop.name}
                         </h3>
                         <span
@@ -506,12 +506,12 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                           {getStatusText(shop.status)}
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                      <p className="marketplace-text-secondary text-sm mb-2">
                         {shop.description}
                       </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center space-x-4 text-sm marketplace-text-secondary">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
                           <span>{shop.rating}</span>
                         </div>
                         <div className="flex items-center">
@@ -525,13 +525,13 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                       </div>
                     </div>
                     <div className="ml-4 flex items-center space-x-2">
-                      <button className="text-gray-400 hover:text-red-500">
+                      <button className="marketplace-action-icon-heart">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="text-gray-400 hover:text-orange-500">
+                      <button className="marketplace-action-icon-share">
                         <Share2 className="h-5 w-5" />
                       </button>
-                      <span className="text-orange-600 hover:text-orange-700 font-medium">
+                      <span className="marketplace-detail-link font-medium">
                         ดูรายละเอียด
                       </span>
                     </div>
@@ -551,8 +551,8 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                 disabled={searchResults.currentPage === 1}
                 className={`px-3 py-2 rounded-md ${
                   searchResults.currentPage === 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    ? "marketplace-pagination-disabled"
+                    : "marketplace-pagination-enabled"
                 }`}
               >
                 ก่อนหน้า
@@ -571,8 +571,8 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                     onClick={() => actions.goToPage(page)}
                     className={`px-3 py-2 rounded-md ${
                       page === searchResults.currentPage
-                        ? "bg-orange-600 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        ? "marketplace-pagination-current"
+                        : "marketplace-pagination-enabled"
                     }`}
                   >
                     {page}
@@ -588,14 +588,14 @@ export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
                 className={`px-3 py-2 rounded-md ${
                   searchResults.currentPage ===
                   Math.ceil(searchResults.totalCount / searchResults.perPage)
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700"
-                    : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    ? "marketplace-pagination-disabled"
+                    : "marketplace-pagination-enabled"
                 }`}
               >
                 ถัดไป
               </button>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm marketplace-text-secondary">
               หน้า {searchResults.currentPage} จาก{" "}
               {Math.ceil(searchResults.totalCount / searchResults.perPage)}
             </div>
