@@ -398,4 +398,57 @@
   .marketplace-view-mode-inactive-text {
     @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
   }
+
+  /* About Page Utilities */
+  .marketplace-about-stat-orange {
+    @apply bg-orange-100 dark:bg-orange-900;
+  }
+
+  .marketplace-about-stat-icon-orange {
+    @apply text-orange-600 dark:text-orange-300;
+  }
+
+  .marketplace-about-stat-green {
+    @apply bg-green-100 dark:bg-green-900;
+  }
+
+  .marketplace-about-stat-icon-green {
+    @apply text-green-600 dark:text-green-300;
+  }
+
+  .marketplace-about-stat-purple {
+    @apply bg-purple-100 dark:bg-purple-900;
+  }
+
+  .marketplace-about-stat-icon-purple {
+    @apply text-purple-600 dark:text-purple-300;
+  }
+
+  .marketplace-about-vision-icon {
+    @apply text-purple-600;
+  }
+
+  .marketplace-about-team-avatar {
+    @apply bg-gradient-to-br from-orange-100 to-purple-100 dark:from-orange-900 dark:to-purple-900;
+  }
+
+  .marketplace-about-team-icon {
+    @apply text-orange-600 dark:text-orange-300;
+  }
+
+  .marketplace-about-team-position {
+    @apply text-orange-600 dark:text-orange-400;
+  }
+
+  .marketplace-about-timeline-number {
+    @apply bg-orange-600 text-white;
+  }
+
+  .marketplace-about-timeline-year {
+    @apply text-orange-600;
+  }
+
+  .marketplace-about-achievement-icon {
+    @apply text-yellow-600;
+  }
 }

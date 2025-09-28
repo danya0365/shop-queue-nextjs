@@ -28,8 +28,8 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 marketplace-contact-loading-spinner mx-auto mb-4"></div>
+          <p className="marketplace-contact-loading-text">
             กำลังโหลดข้อมูลเกี่ยวกับเรา...
           </p>
         </div>
@@ -42,10 +42,10 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-contact-error-title mb-2">
             เกิดข้อผิดพลาด
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="marketplace-contact-error-message mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
             className="marketplace-button-primary px-4 py-2 rounded-lg transition-colors"
@@ -62,10 +62,10 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-contact-empty-title mb-2">
             ไม่พบข้อมูล
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="marketplace-contact-empty-message">
             ไม่สามารถโหลดข้อมูลเกี่ยวกับเราได้
           </p>
         </div>
@@ -86,7 +86,7 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20 rounded-2xl">
+      <section className="py-16 marketplace-cta-bg rounded-2xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold marketplace-text-primary mb-4">
             ตัวเลขที่น่าประทับใจ
@@ -98,8 +98,8 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="text-center">
-            <div className="marketplace-stat-icon-bg bg-orange-100 dark:bg-orange-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Building className="h-8 w-8 text-orange-600 dark:text-orange-300" />
+            <div className="marketplace-stat-icon-bg marketplace-about-stat-orange w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Building className="h-8 w-8 marketplace-about-stat-icon-orange" />
             </div>
             <p className="text-3xl font-bold marketplace-text-primary mb-2">
               {viewModel.stats.totalShops.toLocaleString()}+
@@ -108,8 +108,8 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
           </div>
 
           <div className="text-center">
-            <div className="marketplace-stat-icon-bg bg-green-100 dark:bg-green-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="h-8 w-8 text-green-600 dark:text-green-300" />
+            <div className="marketplace-stat-icon-bg marketplace-about-stat-green w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="h-8 w-8 marketplace-about-stat-icon-green" />
             </div>
             <p className="text-3xl font-bold marketplace-text-primary mb-2">
               {viewModel.stats.totalCustomers.toLocaleString()}+
@@ -118,8 +118,8 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
           </div>
 
           <div className="text-center">
-            <div className="marketplace-stat-icon-bg bg-purple-100 dark:bg-purple-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="h-8 w-8 text-purple-600 dark:text-purple-300" />
+            <div className="marketplace-stat-icon-bg marketplace-about-stat-purple w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="h-8 w-8 marketplace-about-stat-icon-purple" />
             </div>
             <p className="text-3xl font-bold marketplace-text-primary mb-2">
               {viewModel.stats.totalQueues.toLocaleString()}+
@@ -128,8 +128,8 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
           </div>
 
           <div className="text-center">
-            <div className="marketplace-stat-icon-bg bg-orange-100 dark:bg-orange-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-8 w-8 text-orange-600 dark:text-orange-300" />
+            <div className="marketplace-stat-icon-bg marketplace-about-stat-orange w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="h-8 w-8 marketplace-about-stat-icon-orange" />
             </div>
             <p className="text-3xl font-bold marketplace-text-primary mb-2">
               {viewModel.stats.yearsOfService}+
@@ -143,7 +143,7 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
       <section className="grid md:grid-cols-2 gap-12">
         <div className="marketplace-card p-8">
           <div className="flex items-center mb-6">
-            <Target className="h-8 w-8 text-orange-600 mr-3" />
+            <Target className="h-8 w-8 marketplace-contact-icon mr-3" />
             <h3 className="text-2xl font-bold marketplace-text-primary">
               พันธกิจ
             </h3>
@@ -155,7 +155,7 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
 
         <div className="marketplace-card p-8">
           <div className="flex items-center mb-6">
-            <Eye className="h-8 w-8 text-purple-600 mr-3" />
+            <Eye className="h-8 w-8 marketplace-about-vision-icon mr-3" />
             <h3 className="text-2xl font-bold marketplace-text-primary">
               วิสัยทัศน์
             </h3>
@@ -213,13 +213,13 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
                 key={member.id}
                 className="marketplace-card p-6 text-center marketplace-card-hover"
               >
-                <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-purple-100 dark:from-orange-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-12 w-12 text-orange-600 dark:text-orange-300" />
+                <div className="w-24 h-24 marketplace-about-team-avatar rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-12 w-12 marketplace-about-team-icon" />
                 </div>
                 <h3 className="text-lg font-semibold marketplace-text-primary mb-1">
                   {member.name}
                 </h3>
-                <p className="text-orange-600 dark:text-orange-400 font-medium mb-3">
+                <p className="marketplace-about-team-position font-medium mb-3">
                   {member.position}
                 </p>
                 <p className="marketplace-text-secondary text-sm leading-relaxed">
@@ -246,14 +246,14 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
           {viewModel.timeline.map((item, index) => (
             <div key={index} className="flex items-start space-x-6">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold">
+                <div className="w-12 h-12 marketplace-about-timeline-number rounded-full flex items-center justify-center font-bold">
                   {index + 1}
                 </div>
               </div>
               <div className="marketplace-card p-6 flex-1">
                 <div className="flex items-center mb-2">
-                  <Calendar className="h-5 w-5 text-orange-600 mr-2" />
-                  <span className="text-orange-600 font-semibold">
+                  <Calendar className="h-5 w-5 marketplace-contact-icon mr-2" />
+                  <span className="marketplace-about-timeline-year font-semibold">
                     {item.year}
                   </span>
                 </div>
@@ -285,7 +285,7 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
                 key={index}
                 className="marketplace-card p-6 flex items-center space-x-4"
               >
-                <Award className="h-8 w-8 text-yellow-600 flex-shrink-0" />
+                <Award className="h-8 w-8 marketplace-about-achievement-icon flex-shrink-0" />
                 <p className="marketplace-text-secondary">{achievement}</p>
               </div>
             ))}
@@ -302,14 +302,14 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <Calendar className="h-5 w-5 text-orange-600" />
+              <Calendar className="h-5 w-5 marketplace-contact-icon" />
               <span className="marketplace-text-secondary">
                 <strong>ก่อตั้งเมื่อ:</strong> {viewModel.companyInfo.founded}
               </span>
             </div>
 
             <div className="flex items-center space-x-3">
-              <MapPin className="h-5 w-5 text-orange-600" />
+              <MapPin className="h-5 w-5 marketplace-contact-icon" />
               <span className="marketplace-text-secondary">
                 <strong>ที่ตั้ง:</strong> {viewModel.companyInfo.location}
               </span>
@@ -318,21 +318,21 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <Users className="h-5 w-5 text-orange-600" />
+              <Users className="h-5 w-5 marketplace-contact-icon" />
               <span className="marketplace-text-secondary">
                 <strong>จำนวนพนักงาน:</strong> {viewModel.companyInfo.employees}
               </span>
             </div>
 
             <div className="flex items-center space-x-3">
-              <Globe className="h-5 w-5 text-orange-600" />
+              <Globe className="h-5 w-5 marketplace-contact-icon" />
               <span className="marketplace-text-secondary">
                 <strong>เว็บไซต์:</strong>
                 <a
                   href={viewModel.companyInfo.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-orange-600 hover:text-orange-700 ml-1"
+                  className="marketplace-contact-link-hover ml-1"
                 >
                   {viewModel.companyInfo.website}
                 </a>
@@ -343,7 +343,7 @@ export function ShopAboutView({ initialViewModel }: ShopAboutViewProps) {
       </section>
 
       {/* Call to Action */}
-      <section className="marketplace-card p-8 text-center bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20">
+      <section className="marketplace-card p-8 text-center marketplace-cta-bg">
         <h2 className="text-2xl font-bold marketplace-text-primary mb-4">
           พร้อมเริ่มต้นกับเราแล้วหรือยัง?
         </h2>
