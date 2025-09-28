@@ -200,4 +200,77 @@
   .marketplace-search-suggestion {
     @apply px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-200 dark:border-slate-700 last:border-b-0;
   }
+
+  /* Status Colors */
+  .marketplace-status-active {
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300;
+  }
+
+  .marketplace-status-inactive {
+    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300;
+  }
+
+  .marketplace-status-suspended {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300;
+  }
+
+  .marketplace-status-draft {
+    @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300;
+  }
+
+  /* Loading Spinner */
+  .marketplace-loading-spinner {
+    @apply border-orange-600;
+  }
+
+  /* Retry Button */
+  .marketplace-retry-button {
+    @apply bg-orange-600 text-white hover:bg-orange-700 transition-colors;
+  }
+
+  /* View Mode Toggle */
+  .marketplace-view-mode-active {
+    @apply bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300;
+  }
+
+  .marketplace-view-mode-inactive {
+    @apply text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+  }
+
+  /* Star Ratings */
+  .marketplace-star-rating {
+    @apply text-yellow-400;
+  }
+
+  /* Action Icons */
+  .marketplace-action-icon-heart {
+    @apply text-gray-400 hover:text-red-500;
+  }
+
+  .marketplace-action-icon-share {
+    @apply text-gray-400 hover:text-orange-500;
+  }
+
+  /* Location Icon */
+  .marketplace-location-icon {
+    @apply text-orange-600;
+  }
+
+  /* Detail Links */
+  .marketplace-detail-link {
+    @apply text-orange-600 hover:text-orange-700;
+  }
+
+  /* Pagination */
+  .marketplace-pagination-disabled {
+    @apply bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700;
+  }
+
+  .marketplace-pagination-enabled {
+    @apply bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700;
+  }
+
+  .marketplace-pagination-current {
+    @apply bg-orange-600 text-white;
+  }
 }

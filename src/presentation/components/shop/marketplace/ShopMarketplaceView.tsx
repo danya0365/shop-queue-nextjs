@@ -116,15 +116,15 @@ export function ShopMarketplaceView({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+        return "marketplace-status-active";
       case "inactive":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+        return "marketplace-status-inactive";
       case "suspended":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+        return "marketplace-status-suspended";
       case "draft":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "marketplace-status-draft";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+        return "marketplace-status-draft";
     }
   };
 
@@ -167,7 +167,7 @@ export function ShopMarketplaceView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 marketplace-loading-spinner mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             กำลังโหลดข้อมูลร้านค้า...
           </p>
@@ -186,7 +186,7 @@ export function ShopMarketplaceView({
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+            className="marketplace-retry-button px-4 py-2 rounded-lg"
           >
             ลองใหม่อีกครั้ง
           </button>
@@ -321,12 +321,12 @@ export function ShopMarketplaceView({
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <Star className="h-4 w-4 marketplace-star-rating mr-1" />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
                         {shop.rating}
                       </span>
                     </div>
-                    <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                    <span className="marketplace-detail-link text-sm font-medium">
                       ดูรายละเอียด
                     </span>
                   </div>
@@ -374,7 +374,7 @@ export function ShopMarketplaceView({
               className="marketplace-card marketplace-card-hover p-4 text-left"
             >
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-orange-600 mr-3" />
+                <MapPin className="h-5 w-5 marketplace-location-icon mr-3" />
                 <div>
                   <h3 className="font-medium marketplace-text-primary">
                     {location.name}
@@ -401,8 +401,8 @@ export function ShopMarketplaceView({
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md ${
                   viewMode === "grid"
-                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    ? "marketplace-view-mode-active"
+                    : "marketplace-view-mode-inactive"
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -411,8 +411,8 @@ export function ShopMarketplaceView({
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md ${
                   viewMode === "list"
-                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    ? "marketplace-view-mode-active"
+                    : "marketplace-view-mode-inactive"
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -480,16 +480,16 @@ export function ShopMarketplaceView({
                       </p>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {shop.rating}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <button className="text-gray-400 hover:text-red-500">
+                          <button className="marketplace-action-icon-heart">
                             <Heart className="h-4 w-4" />
                           </button>
-                          <button className="text-gray-400 hover:text-orange-500">
+                          <button className="marketplace-action-icon-share">
                             <Share2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -546,7 +546,7 @@ export function ShopMarketplaceView({
                       </p>
                       <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                          <Star className="h-4 w-4 marketplace-star-rating mr-1" />
                           <span>{shop.rating}</span>
                         </div>
                         <div className="flex items-center">
@@ -560,13 +560,13 @@ export function ShopMarketplaceView({
                       </div>
                     </div>
                     <div className="ml-4 flex items-center space-x-2">
-                      <button className="text-gray-400 hover:text-red-500">
+                      <button className="marketplace-action-icon-heart">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="text-gray-400 hover:text-orange-500">
+                      <button className="marketplace-action-icon-share">
                         <Share2 className="h-5 w-5" />
                       </button>
-                      <span className="text-orange-600 hover:text-orange-700 font-medium">
+                      <span className="marketplace-detail-link font-medium">
                         ดูรายละเอียด
                       </span>
                     </div>
