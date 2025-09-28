@@ -2,15 +2,17 @@
 
 import { ShopCategoriesViewModel } from "@/src/presentation/presenters/shop/categories/ShopCategoriesPresenter";
 import { useShopCategoriesPresenter } from "@/src/presentation/presenters/shop/categories/useShopCategoriesPresenter";
-import { useState } from "react";
+import { ArrowRight, Search, Store, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
-import { Search, TrendingUp, Users, Store, ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 interface ShopCategoriesViewProps {
   initialViewModel?: ShopCategoriesViewModel | null;
 }
 
-export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps) {
+export function ShopCategoriesView({
+  initialViewModel,
+}: ShopCategoriesViewProps) {
   const [state, actions] = useShopCategoriesPresenter(initialViewModel);
   const [searchTerm, setSearchTerm] = useState("");
   const { viewModel, loading, error, filteredCategories } = state;
@@ -33,7 +35,7 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             กำลังโหลดข้อมูลหมวดหมู่...
           </p>
@@ -99,7 +101,7 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
             placeholder="ค้นหาหมวดหมู่..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
           />
         </div>
       </div>
@@ -107,8 +109,8 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="marketplace-card p-6 text-center">
-          <div className="marketplace-stat-icon-bg bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Store className="h-6 w-6 text-blue-600 dark:text-blue-300" />
+          <div className="marketplace-stat-icon-bg bg-orange-100 dark:bg-orange-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Store className="h-6 w-6 text-orange-600 dark:text-orange-300" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {viewModel.stats.totalCategories}
@@ -123,7 +125,9 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
             {viewModel.stats.activeCategories}
           </p>
-          <p className="text-sm marketplace-text-secondary">หมวดหมู่ที่เปิดใช้งาน</p>
+          <p className="text-sm marketplace-text-secondary">
+            หมวดหมู่ที่เปิดใช้งาน
+          </p>
         </div>
 
         <div className="marketplace-card p-6 text-center">
@@ -141,9 +145,14 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
             <Store className="h-6 w-6 text-orange-600 dark:text-orange-300" />
           </div>
           <p className="text-2xl font-bold marketplace-text-primary mb-1">
-            {Math.round(viewModel.stats.totalShopsInCategories / viewModel.stats.activeCategories)}
+            {Math.round(
+              viewModel.stats.totalShopsInCategories /
+                viewModel.stats.activeCategories
+            )}
           </p>
-          <p className="text-sm marketplace-text-secondary">ร้านค้าเฉลี่ย/หมวดหมู่</p>
+          <p className="text-sm marketplace-text-secondary">
+            ร้านค้าเฉลี่ย/หมวดหมู่
+          </p>
         </div>
       </div>
 
@@ -178,7 +187,7 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
               className="marketplace-card marketplace-card-hover p-6 text-center group transition-all duration-200 hover:scale-105"
             >
               <div className="text-4xl mb-4">{category.icon}</div>
-              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-orange-600 transition-colors">
                 {category.name}
               </h3>
               <p className="marketplace-text-secondary text-sm mb-4 line-clamp-2">
@@ -189,7 +198,7 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
                   <Store className="h-4 w-4 mr-1" />
                   <span>{category.shopCount} ร้าน</span>
                 </div>
-                <ArrowRight className="h-4 w-4 marketplace-text-muted group-hover:text-blue-600 transition-colors" />
+                <ArrowRight className="h-4 w-4 marketplace-text-muted group-hover:text-orange-600 transition-colors" />
               </div>
             </button>
           ))}
@@ -220,14 +229,14 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
                 >
                   <div className="text-3xl">{category.icon}</div>
                   <div className="flex-1">
-                    <h3 className="font-semibold marketplace-text-primary group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold marketplace-text-primary group-hover:text-orange-600 transition-colors">
                       {category.name}
                     </h3>
                     <p className="text-sm marketplace-text-secondary">
                       {category.shopCount} ร้านค้า
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 marketplace-text-muted group-hover:text-blue-600 transition-colors" />
+                  <ArrowRight className="h-5 w-5 marketplace-text-muted group-hover:text-orange-600 transition-colors" />
                 </Link>
               ))}
           </div>
@@ -235,7 +244,7 @@ export function ShopCategoriesView({ initialViewModel }: ShopCategoriesViewProps
       )}
 
       {/* Call to Action */}
-      <div className="marketplace-card p-8 text-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+      <div className="marketplace-card p-8 text-center bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20">
         <h2 className="text-2xl font-bold marketplace-text-primary mb-4">
           ไม่พบหมวดหมู่ที่ต้องการ?
         </h2>

@@ -43,7 +43,7 @@ function ShopImageFallback({
   // Generate gradient colors based on shop name
   const getGradientColors = (name: string) => {
     const colors = [
-      "from-blue-400 to-blue-600",
+      "from-orange-400 to-orange-600",
       "from-purple-400 to-purple-600",
       "from-green-400 to-green-600",
       "from-red-400 to-red-600",
@@ -113,7 +113,9 @@ export function ShopMarketplaceView({
   const searchParams = useSearchParams();
   const [state, actions] = useShopMarketplacePresenter(initialViewModel);
   const { viewModel, loading, error } = state;
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || initialViewModel?.searchQuery || "");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("q") || initialViewModel?.searchQuery || ""
+  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -149,20 +151,20 @@ export function ShopMarketplaceView({
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Update URL with search query
     const params = new URLSearchParams(searchParams.toString());
     if (searchTerm.trim()) {
-      params.set('q', searchTerm.trim());
+      params.set("q", searchTerm.trim());
     } else {
-      params.delete('q');
+      params.delete("q");
     }
-    
+
     // Reset to page 1 when searching
-    params.delete('page');
-    
+    params.delete("page");
+
     router.push(`/shop?${params.toString()}`);
-    
+
     // Also trigger the search action
     await actions.searchShops(searchTerm);
   };
@@ -191,7 +193,7 @@ export function ShopMarketplaceView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             กำลังโหลดข้อมูลร้านค้า...
           </p>
@@ -210,7 +212,7 @@ export function ShopMarketplaceView({
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
           >
             ลองใหม่อีกครั้ง
           </button>
@@ -313,7 +315,7 @@ export function ShopMarketplaceView({
             <h2 className="text-2xl font-bold marketplace-text-primary">
               ร้านแนะนำ
             </h2>
-            <button className="text-blue-600 hover:text-blue-700 font-medium">
+            <button className="text-orange-600 hover:text-orange-700 font-medium">
               ดูทั้งหมด
             </button>
           </div>
@@ -350,7 +352,7 @@ export function ShopMarketplaceView({
                         {shop.rating}
                       </span>
                     </div>
-                    <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
                       ดูรายละเอียด
                     </span>
                   </div>
@@ -398,7 +400,7 @@ export function ShopMarketplaceView({
               className="marketplace-card marketplace-card-hover p-4 text-left"
             >
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-blue-600 mr-3" />
+                <MapPin className="h-5 w-5 text-orange-600 mr-3" />
                 <div>
                   <h3 className="font-medium marketplace-text-primary">
                     {location.name}
@@ -425,7 +427,7 @@ export function ShopMarketplaceView({
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md ${
                   viewMode === "grid"
-                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 }`}
               >
@@ -435,7 +437,7 @@ export function ShopMarketplaceView({
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md ${
                   viewMode === "list"
-                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 }`}
               >
@@ -513,7 +515,7 @@ export function ShopMarketplaceView({
                           <button className="text-gray-400 hover:text-red-500">
                             <Heart className="h-4 w-4" />
                           </button>
-                          <button className="text-gray-400 hover:text-blue-500">
+                          <button className="text-gray-400 hover:text-orange-500">
                             <Share2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -537,7 +539,7 @@ export function ShopMarketplaceView({
                             {shop.totalServices}
                           </span>
                         </div>
-                        <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -587,10 +589,10 @@ export function ShopMarketplaceView({
                       <button className="text-gray-400 hover:text-red-500">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="text-gray-400 hover:text-blue-500">
+                      <button className="text-gray-400 hover:text-orange-500">
                         <Share2 className="h-5 w-5" />
                       </button>
-                      <span className="text-blue-600 hover:text-blue-700 font-medium">
+                      <span className="text-orange-600 hover:text-orange-700 font-medium">
                         ดูรายละเอียด
                       </span>
                     </div>
@@ -628,7 +630,7 @@ export function ShopMarketplaceView({
                     onClick={() => actions.goToPage(page)}
                     className={`px-3 py-2 rounded-md ${
                       page === shopsData.currentPage
-                        ? "bg-blue-600 text-white"
+                        ? "bg-orange-600 text-white"
                         : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     }`}
                   >

@@ -21,7 +21,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ShopMarketplaceFilterModal, ShopMarketplaceFilters } from "../marketplace/modals";
+import {
+  ShopMarketplaceFilterModal,
+  ShopMarketplaceFilters,
+} from "../marketplace/modals";
 
 interface ShopSearchViewProps {
   initialViewModel?: ShopSearchViewModel | null;
@@ -42,7 +45,7 @@ function ShopImageFallback({
   // Generate gradient colors based on shop name
   const getGradientColors = (name: string) => {
     const colors = [
-      "from-blue-400 to-blue-600",
+      "from-orange-400 to-orange-600",
       "from-purple-400 to-purple-600",
       "from-green-400 to-green-600",
       "from-red-400 to-red-600",
@@ -105,14 +108,14 @@ function ShopImageFallback({
   );
 }
 
-export function ShopSearchView({
-  initialViewModel,
-}: ShopSearchViewProps) {
+export function ShopSearchView({ initialViewModel }: ShopSearchViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [state, actions] = useShopSearchPresenter(initialViewModel);
   const { viewModel, loading, error } = state;
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || initialViewModel?.searchQuery || "");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("q") || initialViewModel?.searchQuery || ""
+  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -148,20 +151,20 @@ export function ShopSearchView({
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Update URL with search query
     const params = new URLSearchParams(searchParams.toString());
     if (searchTerm.trim()) {
-      params.set('q', searchTerm.trim());
+      params.set("q", searchTerm.trim());
     } else {
-      params.delete('q');
+      params.delete("q");
     }
-    
+
     // Reset to page 1 when searching
-    params.delete('page');
-    
+    params.delete("page");
+
     router.push(`/shop/search?${params.toString()}`);
-    
+
     // Also trigger the search action
     await actions.searchShops(searchTerm);
   };
@@ -190,7 +193,7 @@ export function ShopSearchView({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             กำลังค้นหาร้านค้า...
           </p>
@@ -209,7 +212,7 @@ export function ShopSearchView({
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
           >
             ลองใหม่อีกครั้ง
           </button>
@@ -233,8 +236,13 @@ export function ShopSearchView({
     );
   }
 
-  const { searchResults, searchStats, popularCategories, popularLocations, suggestedSearches } =
-    viewModel;
+  const {
+    searchResults,
+    searchStats,
+    popularCategories,
+    popularLocations,
+    suggestedSearches,
+  } = viewModel;
 
   return (
     <div className="space-y-8">
@@ -249,7 +257,7 @@ export function ShopSearchView({
               ค้นหาและกรองร้านค้าที่คุณต้องการ
             </p>
           </div>
-          
+
           {/* Search Form */}
           <div className="flex-1 max-w-2xl">
             <form onSubmit={handleSearch} className="relative">
@@ -260,11 +268,11 @@ export function ShopSearchView({
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="ค้นหาร้านค้า, บริการ, หรือสถานที่..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md transition-colors text-sm font-medium"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-1.5 rounded-md transition-colors text-sm font-medium"
                 >
                   ค้นหา
                 </button>
@@ -276,13 +284,9 @@ export function ShopSearchView({
         {/* Search Stats */}
         {searchStats.hasResults && (
           <div className="mt-4 flex items-center gap-4 text-sm marketplace-text-secondary">
-            <span>
-              พบ {searchStats.totalResults.toLocaleString()} ร้านค้า
-            </span>
+            <span>พบ {searchStats.totalResults.toLocaleString()} ร้านค้า</span>
             <span>•</span>
-            <span>
-              ใช้เวลา {searchStats.searchTime} มิลลิวินาที
-            </span>
+            <span>ใช้เวลา {searchStats.searchTime} มิลลิวินาที</span>
           </div>
         )}
       </div>
@@ -301,7 +305,7 @@ export function ShopSearchView({
                   setSearchTerm(suggestion);
                   actions.searchShops(suggestion);
                 }}
-                className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-full text-sm font-medium transition-colors dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
+                className="px-4 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-full text-sm font-medium transition-colors dark:bg-orange-900 dark:text-orange-300 dark:hover:bg-orange-800"
               >
                 <TrendingUp className="inline h-4 w-4 mr-1" />
                 {suggestion}
@@ -341,7 +345,9 @@ export function ShopSearchView({
       <section>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold marketplace-text-primary">
-            {viewModel.searchQuery ? `ผลการค้นหา "${viewModel.searchQuery}"` : "ร้านค้าทั้งหมด"}
+            {viewModel.searchQuery
+              ? `ผลการค้นหา "${viewModel.searchQuery}"`
+              : "ร้านค้าทั้งหมด"}
           </h2>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
@@ -349,7 +355,7 @@ export function ShopSearchView({
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md ${
                   viewMode === "grid"
-                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 }`}
               >
@@ -359,7 +365,7 @@ export function ShopSearchView({
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md ${
                   viewMode === "list"
-                    ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                    ? "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300"
                     : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 }`}
               >
@@ -381,13 +387,14 @@ export function ShopSearchView({
           <div className="marketplace-card p-8 text-center">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-lg font-medium marketplace-text-primary mb-2">
-              {viewModel.searchQuery ? "ไม่พบผลการค้นหา" : "ยังไม่มีข้อมูลร้านค้า"}
+              {viewModel.searchQuery
+                ? "ไม่พบผลการค้นหา"
+                : "ยังไม่มีข้อมูลร้านค้า"}
             </h3>
             <p className="marketplace-text-secondary">
-              {viewModel.searchQuery 
+              {viewModel.searchQuery
                 ? `ไม่พบร้านค้าที่ตรงกับ "${viewModel.searchQuery}" ลองค้นหาด้วยคำอื่น`
-                : "ข้อมูลร้านค้าจะแสดงที่นี่เมื่อมีการสร้างร้านค้า"
-              }
+                : "ข้อมูลร้านค้าจะแสดงที่นี่เมื่อมีการสร้างร้านค้า"}
             </p>
             {viewModel.searchQuery && (
               <button
@@ -451,7 +458,7 @@ export function ShopSearchView({
                           <button className="text-gray-400 hover:text-red-500">
                             <Heart className="h-4 w-4" />
                           </button>
-                          <button className="text-gray-400 hover:text-blue-500">
+                          <button className="text-gray-400 hover:text-orange-500">
                             <Share2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -475,7 +482,7 @@ export function ShopSearchView({
                             {shop.totalServices}
                           </span>
                         </div>
-                        <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        <span className="text-orange-600 hover:text-orange-700 text-sm font-medium">
                           ดูรายละเอียด
                         </span>
                       </div>
@@ -525,10 +532,10 @@ export function ShopSearchView({
                       <button className="text-gray-400 hover:text-red-500">
                         <Heart className="h-5 w-5" />
                       </button>
-                      <button className="text-gray-400 hover:text-blue-500">
+                      <button className="text-gray-400 hover:text-orange-500">
                         <Share2 className="h-5 w-5" />
                       </button>
-                      <span className="text-blue-600 hover:text-blue-700 font-medium">
+                      <span className="text-orange-600 hover:text-orange-700 font-medium">
                         ดูรายละเอียด
                       </span>
                     </div>
@@ -557,7 +564,9 @@ export function ShopSearchView({
               <div className="flex items-center space-x-1">
                 {Array.from(
                   {
-                    length: Math.ceil(searchResults.totalCount / searchResults.perPage),
+                    length: Math.ceil(
+                      searchResults.totalCount / searchResults.perPage
+                    ),
                   },
                   (_, i) => i + 1
                 ).map((page) => (
@@ -566,7 +575,7 @@ export function ShopSearchView({
                     onClick={() => actions.goToPage(page)}
                     className={`px-3 py-2 rounded-md ${
                       page === searchResults.currentPage
-                        ? "bg-blue-600 text-white"
+                        ? "bg-orange-600 text-white"
                         : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     }`}
                   >

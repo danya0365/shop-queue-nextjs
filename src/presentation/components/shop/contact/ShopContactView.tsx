@@ -1,27 +1,29 @@
 "use client";
 
-import { ShopContactViewModel, ContactFormData } from "@/src/presentation/presenters/shop/contact/ShopContactPresenter";
+import {
+  ContactFormData,
+  ShopContactViewModel,
+} from "@/src/presentation/presenters/shop/contact/ShopContactPresenter";
 import { useShopContactPresenter } from "@/src/presentation/presenters/shop/contact/useShopContactPresenter";
-import { useState } from "react";
-import Link from "next/link";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  MessageCircle, 
-  Send,
-  CheckCircle,
+import {
   AlertCircle,
+  CheckCircle,
   ChevronDown,
   ChevronUp,
+  Clock,
+  ExternalLink,
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
+  Mail,
+  MapPin,
+  Phone,
+  Send,
+  Twitter,
   Youtube,
-  ExternalLink
 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 interface ShopContactViewProps {
   initialViewModel?: ShopContactViewModel | null;
@@ -38,7 +40,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
     phone: "",
     subject: "",
     message: "",
-    category: "general"
+    category: "general",
   });
 
   // FAQ state
@@ -46,26 +48,35 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
   const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>("all");
 
   // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.subject.trim() ||
+      !formData.message.trim()
+    ) {
       actions.setError("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
 
     await actions.submitContactForm(formData);
-    
+
     // Reset form on success
     if (submitResult?.success) {
       setFormData({
@@ -74,7 +85,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
         phone: "",
         subject: "",
         message: "",
-        category: "general"
+        category: "general",
       });
     }
   };
@@ -85,16 +96,18 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
   };
 
   // Filter FAQs by category
-  const filteredFAQs = viewModel?.faqs.filter(faq => 
-    selectedFAQCategory === "all" || faq.category === selectedFAQCategory
-  ) || [];
+  const filteredFAQs =
+    viewModel?.faqs.filter(
+      (faq) =>
+        selectedFAQCategory === "all" || faq.category === selectedFAQCategory
+    ) || [];
 
   // Show loading state
   if (loading && !viewModel) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">
             กำลังโหลดข้อมูลติดต่อ...
           </p>
@@ -147,7 +160,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
           ติดต่อเรา
         </h1>
         <p className="text-xl marketplace-text-secondary max-w-3xl mx-auto leading-relaxed">
-          เรายินดีรับฟังความคิดเห็น คำถาม และข้อเสนอแนะจากคุณ 
+          เรายินดีรับฟังความคิดเห็น คำถาม และข้อเสนอแนะจากคุณ
           ทีมงานของเราพร้อมให้บริการและช่วยเหลือคุณตลอด 24 ชั่วโมง
         </p>
       </section>
@@ -171,7 +184,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               className="marketplace-card p-6 text-center marketplace-card-hover group transition-all duration-200 hover:scale-105"
             >
               <div className="text-4xl mb-4">{method.icon}</div>
-              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-orange-600 transition-colors">
                 {method.title}
               </h3>
               <p className="marketplace-text-secondary text-sm">
@@ -199,11 +212,13 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
           </h3>
 
           {submitResult && (
-            <div className={`p-4 rounded-lg mb-6 flex items-center ${
-              submitResult.success 
-                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' 
-                : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-            }`}>
+            <div
+              className={`p-4 rounded-lg mb-6 flex items-center ${
+                submitResult.success
+                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                  : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+              }`}
+            >
               {submitResult.success ? (
                 <CheckCircle className="h-5 w-5 mr-2" />
               ) : (
@@ -216,7 +231,10 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium marketplace-text-primary mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium marketplace-text-primary mb-2"
+                >
                   ชื่อ-นามสกุล *
                 </label>
                 <input
@@ -226,13 +244,16 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
                   placeholder="กรอกชื่อ-นามสกุล"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium marketplace-text-primary mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium marketplace-text-primary mb-2"
+                >
                   อีเมล *
                 </label>
                 <input
@@ -242,14 +263,17 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
                   placeholder="กรอกอีเมล"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium marketplace-text-primary mb-2">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium marketplace-text-primary mb-2"
+              >
                 เบอร์โทรศัพท์
               </label>
               <input
@@ -258,13 +282,16 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
                 placeholder="กรอกเบอร์โทรศัพท์ (ไม่บังคับ)"
               />
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium marketplace-text-primary mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium marketplace-text-primary mb-2"
+              >
                 หมวดหมู่ *
               </label>
               <select
@@ -273,7 +300,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 value={formData.category}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
               >
                 {viewModel.categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -284,7 +311,10 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium marketplace-text-primary mb-2">
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium marketplace-text-primary mb-2"
+              >
                 หัวข้อ *
               </label>
               <input
@@ -294,13 +324,16 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 value={formData.subject}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
                 placeholder="กรอกหัวข้อ"
               />
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium marketplace-text-primary mb-2">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium marketplace-text-primary mb-2"
+              >
                 ข้อความ *
               </label>
               <textarea
@@ -310,7 +343,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 onChange={handleInputChange}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input resize-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input resize-none"
                 placeholder="กรอกข้อความที่ต้องการสอบถาม"
               />
             </div>
@@ -345,20 +378,26 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
 
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
-                <MapPin className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                <MapPin className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold marketplace-text-primary mb-1">ที่อยู่</h4>
-                  <p className="marketplace-text-secondary">{viewModel.contactInfo.address}</p>
+                  <h4 className="font-semibold marketplace-text-primary mb-1">
+                    ที่อยู่
+                  </h4>
+                  <p className="marketplace-text-secondary">
+                    {viewModel.contactInfo.address}
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-4">
-                <Phone className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                <Phone className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold marketplace-text-primary mb-1">โทรศัพท์</h4>
-                  <a 
+                  <h4 className="font-semibold marketplace-text-primary mb-1">
+                    โทรศัพท์
+                  </h4>
+                  <a
                     href={`tel:${viewModel.contactInfo.phone}`}
-                    className="marketplace-text-secondary hover:text-blue-600 transition-colors"
+                    className="marketplace-text-secondary hover:text-orange-600 transition-colors"
                   >
                     {viewModel.contactInfo.phone}
                   </a>
@@ -366,12 +405,14 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               </div>
 
               <div className="flex items-start space-x-4">
-                <Mail className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+                <Mail className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold marketplace-text-primary mb-1">อีเมล</h4>
-                  <a 
+                  <h4 className="font-semibold marketplace-text-primary mb-1">
+                    อีเมล
+                  </h4>
+                  <a
                     href={`mailto:${viewModel.contactInfo.email}`}
-                    className="marketplace-text-secondary hover:text-blue-600 transition-colors"
+                    className="marketplace-text-secondary hover:text-orange-600 transition-colors"
                   >
                     {viewModel.contactInfo.email}
                   </a>
@@ -389,16 +430,28 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
 
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="marketplace-text-secondary">จันทร์ - ศุกร์</span>
-                <span className="marketplace-text-primary font-medium">09:00 - 18:00 น.</span>
+                <span className="marketplace-text-secondary">
+                  จันทร์ - ศุกร์
+                </span>
+                <span className="marketplace-text-primary font-medium">
+                  09:00 - 18:00 น.
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="marketplace-text-secondary">เสาร์ - อาทิตย์</span>
-                <span className="marketplace-text-primary font-medium">10:00 - 16:00 น.</span>
+                <span className="marketplace-text-secondary">
+                  เสาร์ - อาทิตย์
+                </span>
+                <span className="marketplace-text-primary font-medium">
+                  10:00 - 16:00 น.
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="marketplace-text-secondary">วันหยุดนักขัตฤกษ์</span>
-                <span className="marketplace-text-primary font-medium">ปิดทำการ</span>
+                <span className="marketplace-text-secondary">
+                  วันหยุดนักขัตฤกษ์
+                </span>
+                <span className="marketplace-text-primary font-medium">
+                  ปิดทำการ
+                </span>
               </div>
             </div>
           </div>
@@ -416,7 +469,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+                    className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center hover:bg-orange-700 transition-colors"
                   >
                     <Facebook className="h-5 w-5" />
                   </a>
@@ -446,7 +499,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-blue-700 text-white rounded-full flex items-center justify-center hover:bg-blue-800 transition-colors"
+                    className="w-10 h-10 bg-orange-700 text-white rounded-full flex items-center justify-center hover:bg-orange-800 transition-colors"
                   >
                     <Linkedin className="h-5 w-5" />
                   </a>
@@ -485,25 +538,27 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               onClick={() => setSelectedFAQCategory("all")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedFAQCategory === "all"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "bg-gray-100 dark:bg-gray-800 marketplace-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
             >
               ทั้งหมด
             </button>
-            {Array.from(new Set(viewModel.faqs.map(faq => faq.category))).map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedFAQCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedFAQCategory === category
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 marketplace-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+            {Array.from(new Set(viewModel.faqs.map((faq) => faq.category))).map(
+              (category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedFAQCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedFAQCategory === category
+                      ? "bg-orange-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-800 marketplace-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {category}
+                </button>
+              )
+            )}
           </div>
 
           {/* FAQ List */}
@@ -523,7 +578,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
                   )}
                 </button>
-                
+
                 {expandedFAQ === faq.id && (
                   <div className="px-6 pb-6">
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
@@ -540,7 +595,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
       )}
 
       {/* Call to Action */}
-      <section className="marketplace-card p-8 text-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+      <section className="marketplace-card p-8 text-center bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20">
         <h2 className="text-2xl font-bold marketplace-text-primary mb-4">
           ยังไม่พบคำตอบที่ต้องการ?
         </h2>

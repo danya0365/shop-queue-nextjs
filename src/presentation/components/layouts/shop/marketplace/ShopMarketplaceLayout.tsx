@@ -90,7 +90,7 @@ const ShopMarketplaceLayout: React.FC<ShopMarketplaceLayoutProps> = ({
                     />
                     <button
                       type="submit"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
                     >
                       ค้นหา
                     </button>
