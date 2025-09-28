@@ -97,7 +97,7 @@
   .marketplace-category-pill-inactive {
     @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
   }
-  
+
   .marketplace-hero-category-bg {
     @apply bg-white/20 hover:bg-white/30;
   }
@@ -264,6 +264,99 @@
   /* Category hover states */
   .marketplace-category-hover {
     @apply group-hover:text-orange-600;
+  }
+
+  /* Contact Page Utilities */
+  .marketplace-contact-loading-spinner {
+    @apply border-orange-600;
+  }
+
+  .marketplace-contact-loading-text {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .marketplace-contact-error-title {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+
+  .marketplace-contact-error-message {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .marketplace-contact-empty-title {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+
+  .marketplace-contact-empty-message {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .marketplace-contact-method-hover {
+    @apply group-hover:text-orange-600;
+  }
+
+  .marketplace-contact-available {
+    @apply text-green-600;
+  }
+
+  .marketplace-contact-success-bg {
+    @apply bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300;
+  }
+
+  .marketplace-contact-error-bg {
+    @apply bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300;
+  }
+
+  .marketplace-contact-input {
+    @apply border-gray-300 dark:border-gray-600 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100;
+  }
+
+  .marketplace-contact-icon {
+    @apply text-orange-600;
+  }
+
+  .marketplace-contact-link-hover {
+    @apply hover:text-orange-600;
+  }
+
+  .marketplace-social-facebook {
+    @apply bg-orange-600 text-white hover:bg-orange-700;
+  }
+
+  .marketplace-social-twitter {
+    @apply bg-sky-500 text-white hover:bg-sky-600;
+  }
+
+  .marketplace-social-instagram {
+    @apply bg-pink-600 text-white hover:bg-pink-700;
+  }
+
+  .marketplace-social-linkedin {
+    @apply bg-orange-700 text-white hover:bg-orange-800;
+  }
+
+  .marketplace-social-youtube {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .marketplace-faq-category-active {
+    @apply bg-orange-600 text-white;
+  }
+
+  .marketplace-faq-category-inactive {
+    @apply bg-gray-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-gray-700;
+  }
+
+  .marketplace-faq-chevron {
+    @apply text-gray-400;
+  }
+
+  .marketplace-faq-border {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  .marketplace-faq-hover {
+    @apply hover:bg-gray-50 dark:hover:bg-gray-800/50;
   }
 
   /* CTA Section */

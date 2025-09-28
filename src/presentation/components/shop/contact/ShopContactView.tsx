@@ -1,29 +1,36 @@
 "use client";
 
 import {
-  ContactFormData,
   ShopContactViewModel,
 } from "@/src/presentation/presenters/shop/contact/ShopContactPresenter";
 import { useShopContactPresenter } from "@/src/presentation/presenters/shop/contact/useShopContactPresenter";
 import {
   AlertCircle,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  ExternalLink,
-  Facebook,
-  Instagram,
-  Linkedin,
+  Send,
+  Phone,
   Mail,
   MapPin,
-  Phone,
-  Send,
+  Clock,
+  Facebook,
   Twitter,
+  Instagram,
+  Linkedin,
   Youtube,
+  ChevronDown,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  category: string;
+}
 
 interface ShopContactViewProps {
   initialViewModel?: ShopContactViewModel | null;
@@ -107,8 +114,8 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 marketplace-contact-loading-spinner mx-auto mb-4"></div>
+          <p className="marketplace-contact-loading-text">
             กำลังโหลดข้อมูลติดต่อ...
           </p>
         </div>
@@ -121,10 +128,10 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-contact-error-title mb-2">
             เกิดข้อผิดพลาด
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="marketplace-contact-error-message mb-4">{error}</p>
           <button
             onClick={actions.refreshData}
             className="marketplace-button-primary px-4 py-2 rounded-lg transition-colors"
@@ -141,10 +148,10 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-2xl font-bold marketplace-contact-empty-title mb-2">
             ไม่พบข้อมูล
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="marketplace-contact-empty-message">
             ไม่สามารถโหลดข้อมูลติดต่อได้
           </p>
         </div>
@@ -184,7 +191,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               className="marketplace-card p-6 text-center marketplace-card-hover group transition-all duration-200 hover:scale-105"
             >
               <div className="text-4xl mb-4">{method.icon}</div>
-              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 group-hover:text-orange-600 transition-colors">
+              <h3 className="text-lg font-semibold marketplace-text-primary mb-2 marketplace-contact-method-hover transition-colors">
                 {method.title}
               </h3>
               <p className="marketplace-text-secondary text-sm">
@@ -192,7 +199,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               </p>
               {method.available && (
                 <div className="mt-4">
-                  <span className="inline-flex items-center text-green-600 text-sm">
+                  <span className="inline-flex items-center marketplace-contact-available text-sm">
                     <CheckCircle className="h-4 w-4 mr-1" />
                     พร้อมให้บริการ
                   </span>
@@ -215,8 +222,8 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
             <div
               className={`p-4 rounded-lg mb-6 flex items-center ${
                 submitResult.success
-                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                  : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                  ? "marketplace-contact-success-bg"
+                  : "marketplace-contact-error-bg"
               }`}
             >
               {submitResult.success ? (
@@ -244,7 +251,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                  className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input"
                   placeholder="กรอกชื่อ-นามสกุล"
                 />
               </div>
@@ -263,7 +270,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                  className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input"
                   placeholder="กรอกอีเมล"
                 />
               </div>
@@ -282,7 +289,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input"
                 placeholder="กรอกเบอร์โทรศัพท์ (ไม่บังคับ)"
               />
             </div>
@@ -300,7 +307,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 value={formData.category}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input"
               >
                 {viewModel.categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -324,7 +331,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 value={formData.subject}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input"
+                className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input"
                 placeholder="กรอกหัวข้อ"
               />
             </div>
@@ -343,7 +350,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                 onChange={handleInputChange}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-gray-100 marketplace-input resize-none"
+                className="w-full px-4 py-3 marketplace-contact-input rounded-lg marketplace-input resize-none"
                 placeholder="กรอกข้อความที่ต้องการสอบถาม"
               />
             </div>
@@ -378,7 +385,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
 
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
-                <MapPin className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
+                <MapPin className="h-6 w-6 marketplace-contact-icon mt-1 flex-shrink-0" />
                 <div>
                   <h4 className="font-semibold marketplace-text-primary mb-1">
                     ที่อยู่
@@ -390,14 +397,14 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               </div>
 
               <div className="flex items-start space-x-4">
-                <Phone className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
+                <Phone className="h-6 w-6 marketplace-contact-icon mt-1 flex-shrink-0" />
                 <div>
                   <h4 className="font-semibold marketplace-text-primary mb-1">
                     โทรศัพท์
                   </h4>
                   <a
                     href={`tel:${viewModel.contactInfo.phone}`}
-                    className="marketplace-text-secondary hover:text-orange-600 transition-colors"
+                    className="marketplace-text-secondary marketplace-contact-link-hover transition-colors"
                   >
                     {viewModel.contactInfo.phone}
                   </a>
@@ -405,14 +412,14 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               </div>
 
               <div className="flex items-start space-x-4">
-                <Mail className="h-6 w-6 text-orange-600 mt-1 flex-shrink-0" />
+                <Mail className="h-6 w-6 marketplace-contact-icon mt-1 flex-shrink-0" />
                 <div>
                   <h4 className="font-semibold marketplace-text-primary mb-1">
                     อีเมล
                   </h4>
                   <a
                     href={`mailto:${viewModel.contactInfo.email}`}
-                    className="marketplace-text-secondary hover:text-orange-600 transition-colors"
+                    className="marketplace-text-secondary marketplace-contact-link-hover transition-colors"
                   >
                     {viewModel.contactInfo.email}
                   </a>
@@ -469,7 +476,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center hover:bg-orange-700 transition-colors"
+                    className="w-10 h-10 marketplace-social-facebook rounded-full flex items-center justify-center transition-colors"
                   >
                     <Facebook className="h-5 w-5" />
                   </a>
@@ -479,7 +486,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center hover:bg-sky-600 transition-colors"
+                    className="w-10 h-10 marketplace-social-twitter rounded-full flex items-center justify-center transition-colors"
                   >
                     <Twitter className="h-5 w-5" />
                   </a>
@@ -489,7 +496,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-pink-600 text-white rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors"
+                    className="w-10 h-10 marketplace-social-instagram rounded-full flex items-center justify-center transition-colors"
                   >
                     <Instagram className="h-5 w-5" />
                   </a>
@@ -499,7 +506,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-orange-700 text-white rounded-full flex items-center justify-center hover:bg-orange-800 transition-colors"
+                    className="w-10 h-10 marketplace-social-linkedin rounded-full flex items-center justify-center transition-colors"
                   >
                     <Linkedin className="h-5 w-5" />
                   </a>
@@ -509,7 +516,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                     href={viewModel.contactInfo.socialMedia.youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                    className="w-10 h-10 marketplace-social-youtube rounded-full flex items-center justify-center transition-colors"
                   >
                     <Youtube className="h-5 w-5" />
                   </a>
@@ -538,8 +545,8 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               onClick={() => setSelectedFAQCategory("all")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedFAQCategory === "all"
-                  ? "bg-orange-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 marketplace-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700"
+                  ? "marketplace-faq-category-active"
+                  : "marketplace-faq-category-inactive"
               }`}
             >
               ทั้งหมด
@@ -551,8 +558,8 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
                   onClick={() => setSelectedFAQCategory(category)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     selectedFAQCategory === category
-                      ? "bg-orange-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 marketplace-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700"
+                      ? "marketplace-faq-category-active"
+                      : "marketplace-faq-category-inactive"
                   }`}
                 >
                   {category}
@@ -567,21 +574,20 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
               <div key={faq.id} className="marketplace-card">
                 <button
                   onClick={() => toggleFAQ(faq.id)}
-                  className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  className="w-full p-6 text-left flex items-center justify-between marketplace-faq-hover transition-colors"
                 >
                   <h3 className="font-semibold marketplace-text-primary pr-4">
                     {faq.question}
                   </h3>
                   {expandedFAQ === faq.id ? (
-                    <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <Clock className="h-6 w-6 marketplace-contact-icon mt-1 flex-shrink-0" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <ChevronDown className="h-5 w-5 marketplace-faq-chevron flex-shrink-0" />
                   )}
                 </button>
-
                 {expandedFAQ === faq.id && (
                   <div className="px-6 pb-6">
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="border-t marketplace-faq-border pt-4">
                       <p className="marketplace-text-secondary leading-relaxed">
                         {faq.answer}
                       </p>
@@ -595,7 +601,7 @@ export function ShopContactView({ initialViewModel }: ShopContactViewProps) {
       )}
 
       {/* Call to Action */}
-      <section className="marketplace-card p-8 text-center bg-gradient-to-r from-orange-50 to-indigo-50 dark:from-orange-900/20 dark:to-indigo-900/20">
+      <section className="marketplace-card p-8 text-center marketplace-cta-bg">
         <h2 className="text-2xl font-bold marketplace-text-primary mb-4">
           ยังไม่พบคำตอบที่ต้องการ?
         </h2>
