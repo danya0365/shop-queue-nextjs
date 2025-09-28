@@ -4286,6 +4286,21 @@ export type Database = {
           other_count: number
         }[]
       }
+      get_marketplace_categories_with_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          icon: string
+          color: string
+          description: string
+          created_at: string
+          updated_at: string
+          shop_count: number
+          is_active: boolean
+        }[]
+      }
       get_marketplace_popular_categories: {
         Args: { p_limit?: number }
         Returns: {
@@ -4819,6 +4834,15 @@ export type Database = {
           p_verification_code?: string
         }
         Returns: string
+      }
+      search_marketplace_categories: {
+        Args: { p_search_query?: string; p_limit?: number }
+        Returns: {
+          id: string
+          name: string
+          icon: string
+          shop_count: number
+        }[]
       }
       set_profile_active: {
         Args: { profile_id: string }

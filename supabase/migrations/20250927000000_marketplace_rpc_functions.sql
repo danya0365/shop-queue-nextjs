@@ -446,3 +446,91 @@ GRANT EXECUTE ON FUNCTION get_shop_by_id(UUID) TO anon;
 
 -- Create comment for documentation
 COMMENT ON FUNCTION get_shop_by_id(UUID) IS 'Get a single shop by ID for marketplace';
+
+-- Create function to get categories with stats for marketplace categories page
+CREATE OR REPLACE FUNCTION public.get_marketplace_categories_with_stats()
+RETURNS TABLE(
+    id UUID,
+    name TEXT,
+    slug TEXT,
+    icon TEXT,
+    color TEXT,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    shop_count BIGINT,
+    is_active BOOLEAN
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    -- Get categories with stats using existing view
+    RETURN QUERY
+    SELECT 
+        c.id,
+        c.name,
+        c.slug,
+        c.icon,
+        c.color,
+        c.description,
+        c.created_at,
+        c.updated_at,
+        COALESCE(c.shops_count, 0) as shop_count,
+        CASE 
+            WHEN COALESCE(c.shops_count, 0) > 0 THEN true
+            ELSE false
+        END as is_active
+    FROM category_info_stats_view c
+    ORDER BY c.shops_count DESC, c.name ASC;
+END;
+$$;
+
+-- Grant execute permission for anonymous customer role
+GRANT EXECUTE ON FUNCTION get_marketplace_categories_with_stats() TO anon;
+
+-- Create comment for documentation
+COMMENT ON FUNCTION get_marketplace_categories_with_stats() IS 'Get categories with shop counts for marketplace categories page';
+
+-- Create function to search categories for marketplace
+CREATE OR REPLACE FUNCTION public.search_marketplace_categories(
+    p_search_query TEXT DEFAULT NULL,
+    p_limit INTEGER DEFAULT 100
+) RETURNS TABLE(
+    id UUID,
+    name TEXT,
+    icon TEXT,
+    shop_count BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    -- Search categories with shop counts
+    RETURN QUERY
+    SELECT 
+        c.id,
+        c.name,
+        c.icon,
+        COUNT(cs.shop_id) as shop_count
+    FROM categories c
+    LEFT JOIN category_shops cs ON c.id = cs.category_id
+    WHERE 
+        c.is_active = true AND
+        (p_search_query IS NULL OR 
+            LOWER(c.name) LIKE LOWER('%' || p_search_query || '%') OR
+            LOWER(c.description) LIKE LOWER('%' || p_search_query || '%')
+        )
+    GROUP BY c.id, c.name, c.icon
+    ORDER BY shop_count DESC, c.name ASC
+    LIMIT p_limit;
+END;
+$$;
+
+-- Grant execute permission for anonymous customer role
+GRANT EXECUTE ON FUNCTION search_marketplace_categories(TEXT, INTEGER) TO anon;
+
+-- Create comment for documentation
+COMMENT ON FUNCTION search_marketplace_categories(TEXT, INTEGER) IS 'Search categories with shop counts for marketplace';

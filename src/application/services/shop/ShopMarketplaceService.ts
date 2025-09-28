@@ -1,38 +1,65 @@
+import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
 import {
-  DatabaseDataSource,
-} from "@/src/domain/interfaces/datasources/database-datasource";
-import { Logger } from "@/src/domain/interfaces/logger";
-import {
-  MarketplaceStatsDTO,
-  ShopListResultDTO,
-  ShopFiltersDTO,
-  MarketplaceCategoryDTO,
   GetAllShopsParams,
   GetShopsByCategoryParams,
-  GetShopsByLocationParams
-, LocationDTO
+  GetShopsByLocationParams,
+  LocationDTO,
+  MarketplaceCategoryDTO,
+  MarketplaceStatsDTO,
+  ShopFiltersDTO,
+  ShopListResultDTO,
 } from "@/src/application/dtos/shop/marketplace-dto";
-import { ShopDTO } from "@/src/application/dtos/backend/shops-dto";
-import { CategoryMarketplaceSchema, LocationMarketplaceSchema, ShopMarketplaceSchema } from "../../../infrastructure/schemas/shop/marketplace.schema";
+import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
+import { Logger } from "@/src/domain/interfaces/logger";
 import { MarketplaceMapper } from "@/src/infrastructure/mappers/shop/marketplace.mapper";
+import {
+  CategoryMarketplaceSchema,
+  LocationMarketplaceSchema,
+  ShopMarketplaceSchema,
+} from "../../../infrastructure/schemas/shop/marketplace.schema";
 
 export interface IShopMarketplaceService {
   // Public browsing
   getAllShops(params: GetAllShopsParams): Promise<ShopListResultDTO>;
-  
+
   getFeaturedShops(limit: number): Promise<ShopDTO[]>;
   getShopById(id: string): Promise<ShopDTO | null>;
-  
+
   // Search & Filter
-  searchShops(query: string, filters?: ShopFiltersDTO): Promise<ShopListResultDTO>;
-  getShopsByCategory(categoryId: string, params: GetShopsByCategoryParams): Promise<ShopListResultDTO>;
-  
-  getShopsByLocation(locationId: string, params: GetShopsByLocationParams): Promise<ShopListResultDTO>;
-  
+  searchShops(
+    query: string,
+    filters?: ShopFiltersDTO
+  ): Promise<ShopListResultDTO>;
+  getShopsByCategory(
+    categoryId: string,
+    params: GetShopsByCategoryParams
+  ): Promise<ShopListResultDTO>;
+
+  getShopsByLocation(
+    locationId: string,
+    params: GetShopsByLocationParams
+  ): Promise<ShopListResultDTO>;
+
   // Marketplace data
   getMarketplaceStats(): Promise<MarketplaceStatsDTO>;
   getPopularCategories(): Promise<MarketplaceCategoryDTO[]>;
   getPopularLocations(): Promise<LocationDTO[]>;
+
+  // Categories management
+  getCategories(): Promise<MarketplaceCategoryDTO[]>;
+  getCategoryById(id: string): Promise<MarketplaceCategoryDTO | null>;
+  searchCategories(query: string): Promise<MarketplaceCategoryDTO[]>;
+
+  // Categories with detailed stats for categories page
+  getCategoriesWithStats(): Promise<{
+    categories: MarketplaceCategoryDTO[];
+    stats: {
+      totalCategories: number;
+      activeCategories: number;
+      inactiveCategories: number;
+      totalShopsInCategories: number;
+    };
+  }>;
 }
 
 export class ShopMarketplaceService implements IShopMarketplaceService {
@@ -44,26 +71,30 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
   async getAllShops(params: GetAllShopsParams): Promise<ShopListResultDTO> {
     try {
       const { page, limit, search, status } = params;
-      
+
       // Call RPC function to get shops with pagination
-      const shopsResult = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_marketplace_shops",
-        {
-          p_page: page,
-          p_limit: limit,
-          p_search: search || null,
-          p_status: status || "active",
-          p_sort_field: "createdAt",
-          p_sort_direction: "DESC"
-        }
-      );
+      const shopsResult = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_marketplace_shops", {
+        p_page: page,
+        p_limit: limit,
+        p_search: search || null,
+        p_status: status || "active",
+        p_sort_field: "createdAt",
+        p_sort_direction: "DESC",
+      });
 
       // For total count, we need to call the RPC without pagination
       // Since RPC doesn't return count directly, we'll use a separate approach
       // For now, we'll estimate based on the result (this should be improved)
-      const totalCount = shopsResult.length >= limit ? (page * limit) + 1 : ((page - 1) * limit) + shopsResult.length;
+      const totalCount =
+        shopsResult.length >= limit
+          ? page * limit + 1
+          : (page - 1) * limit + shopsResult.length;
 
-      const shops = shopsResult.map((shop: ShopMarketplaceSchema) => MarketplaceMapper.toShopDTO(shop));
+      const shops = shopsResult.map((shop: ShopMarketplaceSchema) =>
+        MarketplaceMapper.toShopDTO(shop)
+      );
 
       return {
         shops,
@@ -81,18 +112,19 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
   async getFeaturedShops(limit: number): Promise<ShopDTO[]> {
     try {
       // Get shops with highest queue counts as featured shops
-      const featuredShops = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_marketplace_shops",
-        {
-          p_page: 1,
-          p_limit: limit,
-          p_status: "active",
-          p_sort_field: "totalQueues",
-          p_sort_direction: "DESC"
-        }
-      );
+      const featuredShops = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_marketplace_shops", {
+        p_page: 1,
+        p_limit: limit,
+        p_status: "active",
+        p_sort_field: "totalQueues",
+        p_sort_direction: "DESC",
+      });
 
-      return featuredShops.map((shop: ShopMarketplaceSchema) => MarketplaceMapper.toShopDTO(shop));
+      return featuredShops.map((shop: ShopMarketplaceSchema) =>
+        MarketplaceMapper.toShopDTO(shop)
+      );
     } catch (error) {
       this.logger.error("Error getting featured shops", { limit, error });
       throw error;
@@ -101,13 +133,12 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
 
   async getShopById(id: string): Promise<ShopDTO | null> {
     try {
-      const shopResult = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_shop_by_id",
-        {
-          p_shop_id: id
-        }
-      );
-      
+      const shopResult = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_shop_by_id", {
+        p_shop_id: id,
+      });
+
       if (!shopResult || shopResult.length === 0) {
         return null;
       }
@@ -119,31 +150,38 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
     }
   }
 
-  async searchShops(query: string, filters?: ShopFiltersDTO): Promise<ShopListResultDTO> {
+  async searchShops(
+    query: string,
+    filters?: ShopFiltersDTO
+  ): Promise<ShopListResultDTO> {
     try {
       const page = filters?.page || 1;
       const limit = filters?.limit || 12;
-      
+
       // Call RPC function to search shops
-      const searchResult = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_marketplace_shops",
-        {
-          p_page: page,
-          p_limit: limit,
-          p_search: query,
-          p_status: "active",
-          p_category_id: filters?.category || null,
-          p_sort_field: "totalQueues",
-          p_sort_direction: "DESC"
-        }
-      );
+      const searchResult = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_marketplace_shops", {
+        p_page: page,
+        p_limit: limit,
+        p_search: query,
+        p_status: "active",
+        p_category_id: filters?.category || null,
+        p_sort_field: "totalQueues",
+        p_sort_direction: "DESC",
+      });
 
       // Note: For location filtering, we would need to handle it differently
       // since the RPC doesn't support location filtering directly
       // For now, we'll estimate total count
-      const totalCount = searchResult.length >= limit ? (page * limit) + 1 : ((page - 1) * limit) + searchResult.length;
+      const totalCount =
+        searchResult.length >= limit
+          ? page * limit + 1
+          : (page - 1) * limit + searchResult.length;
 
-      const shops = searchResult.map((shop: ShopMarketplaceSchema) => MarketplaceMapper.toShopDTO(shop));
+      const shops = searchResult.map((shop: ShopMarketplaceSchema) =>
+        MarketplaceMapper.toShopDTO(shop)
+      );
 
       return {
         shops,
@@ -158,24 +196,31 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
     }
   }
 
-  async getShopsByCategory(categoryId: string, params: GetShopsByCategoryParams): Promise<ShopListResultDTO> {
+  async getShopsByCategory(
+    categoryId: string,
+    params: GetShopsByCategoryParams
+  ): Promise<ShopListResultDTO> {
     try {
       const { page, limit } = params;
 
       // Call RPC function to get shops by category
-      const result = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_marketplace_shops_by_category",
-        {
-          p_category_id: categoryId,
-          p_page: page,
-          p_limit: limit
-        }
-      );
+      const result = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_marketplace_shops_by_category", {
+        p_category_id: categoryId,
+        p_page: page,
+        p_limit: limit,
+      });
 
       // Estimate total count since RPC doesn't return count directly
-      const totalCount = result.length >= limit ? (page * limit) + 1 : ((page - 1) * limit) + result.length;
+      const totalCount =
+        result.length >= limit
+          ? page * limit + 1
+          : (page - 1) * limit + result.length;
 
-      const shops = result.map((shop: ShopMarketplaceSchema) => MarketplaceMapper.toShopDTO(shop));
+      const shops = result.map((shop: ShopMarketplaceSchema) =>
+        MarketplaceMapper.toShopDTO(shop)
+      );
 
       return {
         shops,
@@ -185,12 +230,19 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
         totalPages: Math.ceil(totalCount / limit),
       };
     } catch (error) {
-      this.logger.error("Error getting shops by category", { categoryId, params, error });
+      this.logger.error("Error getting shops by category", {
+        categoryId,
+        params,
+        error,
+      });
       throw error;
     }
   }
 
-  async getShopsByLocation(locationId: string, params: GetShopsByLocationParams): Promise<ShopListResultDTO> {
+  async getShopsByLocation(
+    locationId: string,
+    params: GetShopsByLocationParams
+  ): Promise<ShopListResultDTO> {
     try {
       const { page, limit } = params;
 
@@ -200,19 +252,23 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
       const locationName = locationId; // Assuming locationId is the location name
 
       // Call RPC function to get shops by location
-      const result = await this.databaseDataSource.callRpc<ShopMarketplaceSchema[]>(
-        "get_marketplace_shops_by_location",
-        {
-          p_location_name: locationName,
-          p_page: page,
-          p_limit: limit
-        }
-      );
+      const result = await this.databaseDataSource.callRpc<
+        ShopMarketplaceSchema[]
+      >("get_marketplace_shops_by_location", {
+        p_location_name: locationName,
+        p_page: page,
+        p_limit: limit,
+      });
 
       // Estimate total count since RPC doesn't return count directly
-      const totalCount = result.length >= limit ? (page * limit) + 1 : ((page - 1) * limit) + result.length;
+      const totalCount =
+        result.length >= limit
+          ? page * limit + 1
+          : (page - 1) * limit + result.length;
 
-      const shops = result.map((shop: ShopMarketplaceSchema) => MarketplaceMapper.toShopDTO(shop));
+      const shops = result.map((shop: ShopMarketplaceSchema) =>
+        MarketplaceMapper.toShopDTO(shop)
+      );
 
       return {
         shops,
@@ -222,7 +278,11 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
         totalPages: Math.ceil(totalCount / limit),
       };
     } catch (error) {
-      this.logger.error("Error getting shops by location", { locationId, params, error });
+      this.logger.error("Error getting shops by location", {
+        locationId,
+        params,
+        error,
+      });
       throw error;
     }
   }
@@ -230,11 +290,13 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
   async getMarketplaceStats(): Promise<MarketplaceStatsDTO> {
     try {
       // Call RPC function to get marketplace stats
-      const statsResult = await this.databaseDataSource.callRpc<{
-        total_shops: number;
-        active_shops: number;
-        new_shops_this_month: number;
-      }[]>("get_marketplace_stats");
+      const statsResult = await this.databaseDataSource.callRpc<
+        {
+          total_shops: number;
+          active_shops: number;
+          new_shops_this_month: number;
+        }[]
+      >("get_marketplace_stats");
 
       if (!statsResult || statsResult.length === 0) {
         throw new Error("Failed to get marketplace stats");
@@ -256,21 +318,23 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
 
   async getPopularCategories(): Promise<MarketplaceCategoryDTO[]> {
     try {
-      const popularCategories = await this.databaseDataSource.callRpc<{
-        id: string;
-        name: string;
-        description: string;
-        color: string;
-        icon: string;
-        slug: string;
-        is_active: boolean;
-        sort_order: number;
-        shop_count: number;
-      }[]>("get_marketplace_popular_categories", {
-        p_limit: 10
+      const popularCategories = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          description: string;
+          color: string;
+          icon: string;
+          slug: string;
+          is_active: boolean;
+          sort_order: number;
+          shop_count: number;
+        }[]
+      >("get_marketplace_popular_categories", {
+        p_limit: 10,
       });
 
-      return popularCategories.map((category) => 
+      return popularCategories.map((category) =>
         MarketplaceMapper.toMarketplaceCategoryDTO({
           id: category.id,
           name: category.name,
@@ -282,7 +346,7 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
           sort_order: category.sort_order,
           shops_count: category.shop_count,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         } as CategoryMarketplaceSchema)
       );
     } catch (error) {
@@ -293,18 +357,20 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
 
   async getPopularLocations(): Promise<LocationDTO[]> {
     try {
-      const popularLocations = await this.databaseDataSource.callRpc<{
-        id: string;
-        name: string;
-        province: string;
-        district: string;
-        is_active: boolean;
-        shops_count: number;
-      }[]>("get_marketplace_popular_locations", {
-        p_limit: 10
+      const popularLocations = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          province: string;
+          district: string;
+          is_active: boolean;
+          shops_count: number;
+        }[]
+      >("get_marketplace_popular_locations", {
+        p_limit: 10,
       });
 
-      return popularLocations.map((location) => 
+      return popularLocations.map((location) =>
         MarketplaceMapper.toLocationDTO({
           id: location.id,
           name: location.name,
@@ -313,7 +379,7 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
           is_active: location.is_active,
           shops_count: location.shops_count,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         } as LocationMarketplaceSchema)
       );
     } catch (error) {
@@ -322,6 +388,177 @@ export class ShopMarketplaceService implements IShopMarketplaceService {
     }
   }
 
+  // Categories management methods
+  async getCategories(): Promise<MarketplaceCategoryDTO[]> {
+    try {
+      const categories = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          icon: string;
+          shop_count: number;
+        }[]
+      >("get_marketplace_categories", {
+        p_limit: 100,
+      });
+
+      return categories.map((category) =>
+        MarketplaceMapper.toMarketplaceCategoryDTO({
+          id: category.id,
+          name: category.name,
+          slug: category.name.toLowerCase().replace(/\s+/g, "-"),
+          description: null,
+          is_active: true,
+          icon: category.icon,
+          color: null,
+          sort_order: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          shops_count: category.shop_count,
+        } as CategoryMarketplaceSchema)
+      );
+    } catch (error) {
+      this.logger.error("Error getting categories", { error });
+      throw error;
+    }
+  }
+
+  async getCategoryById(id: string): Promise<MarketplaceCategoryDTO | null> {
+    try {
+      const categories = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          icon: string;
+          shop_count: number;
+        }[]
+      >("get_marketplace_category_by_id", {
+        p_category_id: id,
+      });
+
+      if (!categories || categories.length === 0) {
+        return null;
+      }
+
+      const category = categories[0];
+      return MarketplaceMapper.toMarketplaceCategoryDTO({
+        id: category.id,
+        name: category.name,
+        slug: category.name.toLowerCase().replace(/\s+/g, "-"),
+        description: null,
+        is_active: true,
+        icon: category.icon,
+        color: null,
+        sort_order: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        shops_count: category.shop_count,
+      } as CategoryMarketplaceSchema);
+    } catch (error) {
+      this.logger.error("Error getting category by id", { id, error });
+      throw error;
+    }
+  }
+
+  async searchCategories(query: string): Promise<MarketplaceCategoryDTO[]> {
+    try {
+      const categories = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          icon: string;
+          shop_count: number;
+        }[]
+      >("search_marketplace_categories", {
+        p_search_query: query,
+        p_limit: 100,
+      });
+
+      return categories.map((category) =>
+        MarketplaceMapper.toMarketplaceCategoryDTO({
+          id: category.id,
+          name: category.name,
+          slug: category.name.toLowerCase().replace(/\s+/g, "-"),
+          description: null,
+          is_active: true,
+          icon: category.icon,
+          color: null,
+          sort_order: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          shops_count: category.shop_count,
+        } as CategoryMarketplaceSchema)
+      );
+    } catch (error) {
+      this.logger.error("Error searching categories", { query, error });
+      throw error;
+    }
+  }
+
+  async getCategoriesWithStats(): Promise<{
+    categories: MarketplaceCategoryDTO[];
+    stats: {
+      totalCategories: number;
+      activeCategories: number;
+      inactiveCategories: number;
+      totalShopsInCategories: number;
+    };
+  }> {
+    try {
+      this.logger.info("Getting categories with stats");
+
+      // Get all categories with shop counts
+      const categories = await this.databaseDataSource.callRpc<
+        {
+          id: string;
+          name: string;
+          icon: string;
+          shop_count: number;
+          is_active: boolean;
+        }[]
+      >("get_marketplace_categories_with_stats");
+
+      const categoryDTOs = categories.map((category) =>
+        MarketplaceMapper.toMarketplaceCategoryDTO({
+          id: category.id,
+          name: category.name,
+          slug: category.name.toLowerCase().replace(/\s+/g, "-"),
+          description: null,
+          is_active: category.is_active,
+          icon: category.icon,
+          color: null,
+          sort_order: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          shops_count: category.shop_count,
+        })
+      );
+
+      // Calculate stats
+      const totalCategories = categoryDTOs.length;
+      const activeCategories = categoryDTOs.filter(
+        (cat) => cat.shopCount > 0
+      ).length;
+      const inactiveCategories = totalCategories - activeCategories;
+      const totalShopsInCategories = categoryDTOs.reduce(
+        (sum, cat) => sum + cat.shopCount,
+        0
+      );
+
+      return {
+        categories: categoryDTOs,
+        stats: {
+          totalCategories,
+          activeCategories,
+          inactiveCategories,
+          totalShopsInCategories,
+        },
+      };
+    } catch (error) {
+      this.logger.error("Error getting categories with stats", { error });
+      throw error;
+    }
+  }
 }
 
 export class ShopMarketplaceServiceFactory {
