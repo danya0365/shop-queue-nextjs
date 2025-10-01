@@ -1072,6 +1072,41 @@ BEGIN
 END;
 $$;
 
+
+-- Function to get customer by ID (only for unauthenticated customers or authenticated user's own customer)
+-- Security: Only returns customer data if:
+-- 1. The customer is not linked to any profile (unauthenticated customer), OR
+-- 2. The customer is linked to the currently authenticated user's profile
+CREATE OR REPLACE FUNCTION public.get_customer_by_id(
+  p_customer_id UUID
+) RETURNS TABLE(
+  id UUID,
+  name TEXT,
+  phone TEXT,
+  shop_id UUID,
+  profile_id UUID
+) AS $$
+BEGIN
+  -- Security check: Only return customer data if:
+  -- 1. Customer is not linked to any profile (unauthenticated), OR
+  -- 2. Customer is linked to the currently authenticated user's profile
+  RETURN QUERY
+  SELECT 
+    c.id,
+    c.name,
+    c.phone,
+    c.shop_id,
+    c.profile_id
+  FROM public.customers c
+  WHERE c.id = p_customer_id
+    AND (
+      c.profile_id IS NULL -- Unauthenticated customer
+      OR 
+      c.profile_id = public.get_active_profile_id() -- Authenticated user's own customer
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- =============================================================================
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================
@@ -2906,7 +2941,6 @@ CREATE POLICY "Shop managers can update shop settings"
 CREATE POLICY "Shop managers can delete shop settings"
   ON public.shop_settings FOR DELETE
   USING (public.is_shop_manager(shop_id));
-
 -- =============================================================================
 -- NOTIFICATION SETTINGS TABLE RLS POLICIES
 -- =============================================================================

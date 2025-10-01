@@ -2,9 +2,9 @@ import { ShopService } from "@/src/application/services/shop/ShopService";
 import type { IShopCustomerQueueJoinService } from "@/src/application/services/shop/customer/ShopCustomerQueueJoinService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
+import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
-import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 
 // Define interfaces for data structures
 export interface ServiceOption {
@@ -27,6 +27,7 @@ export interface QueueService {
 }
 
 export interface QueueFormData {
+  customerId?: string;
   customerName: string;
   customerPhone: string;
   services: QueueService[];
@@ -54,7 +55,7 @@ export interface CustomerQueueJoinViewModel {
 // Main Presenter class
 export class CustomerQueueJoinPresenter extends BaseShopPresenter {
   constructor(
-    logger: Logger, 
+    logger: Logger,
     shopService: ShopService,
     private readonly shopCustomerQueueJoinService: IShopCustomerQueueJoinService
   ) {
@@ -68,7 +69,8 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
       });
 
       // Get queue join data from service
-      const queueJoinData = await this.shopCustomerQueueJoinService.getQueueJoinData(shopId);
+      const queueJoinData =
+        await this.shopCustomerQueueJoinService.getQueueJoinData(shopId);
 
       return {
         services: queueJoinData.services,
@@ -91,7 +93,10 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
     }
   }
 
-  async joinQueue(formData: QueueFormData, shopId: string): Promise<{
+  async joinQueue(
+    formData: QueueFormData,
+    shopId: string
+  ): Promise<{
     success: boolean;
     queueNumber?: string;
     message?: string;
@@ -106,6 +111,7 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
 
       const joinQueueInput = {
         shopId,
+        customerId: formData.customerId,
         customerName: formData.customerName,
         customerPhone: formData.customerPhone,
         services: formData.services,
@@ -113,7 +119,9 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
         priority: formData.priority,
       };
 
-      const result = await this.shopCustomerQueueJoinService.joinQueue(joinQueueInput);
+      const result = await this.shopCustomerQueueJoinService.joinQueue(
+        joinQueueInput
+      );
 
       return {
         success: result.success,
@@ -146,8 +154,15 @@ export class CustomerQueueJoinPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    const shopCustomerQueueJoinService = serverContainer.resolve<IShopCustomerQueueJoinService>("ShopCustomerQueueJoinService");
-    return new CustomerQueueJoinPresenter(logger, shopService, shopCustomerQueueJoinService);
+    const shopCustomerQueueJoinService =
+      serverContainer.resolve<IShopCustomerQueueJoinService>(
+        "ShopCustomerQueueJoinService"
+      );
+    return new CustomerQueueJoinPresenter(
+      logger,
+      shopService,
+      shopCustomerQueueJoinService
+    );
   }
 }
 
@@ -157,7 +172,14 @@ export class ClientCustomerQueueJoinPresenterFactory {
     const clientContainer = await getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    const shopCustomerQueueJoinService = clientContainer.resolve<IShopCustomerQueueJoinService>("ShopCustomerQueueJoinService");
-    return new CustomerQueueJoinPresenter(logger, shopService, shopCustomerQueueJoinService);
+    const shopCustomerQueueJoinService =
+      clientContainer.resolve<IShopCustomerQueueJoinService>(
+        "ShopCustomerQueueJoinService"
+      );
+    return new CustomerQueueJoinPresenter(
+      logger,
+      shopService,
+      shopCustomerQueueJoinService
+    );
   }
 }

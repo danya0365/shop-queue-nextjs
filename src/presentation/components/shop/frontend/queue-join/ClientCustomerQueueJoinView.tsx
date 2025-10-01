@@ -33,7 +33,6 @@ export function ClientCustomerQueueJoinView({
     priority,
     setPriority,
     handleServiceToggle,
-    updateServiceQuantity,
     increaseServiceQuantity,
     decreaseServiceQuantity,
     handleSubmit,
