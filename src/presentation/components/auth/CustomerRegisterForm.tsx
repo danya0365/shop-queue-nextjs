@@ -197,7 +197,7 @@ export const CustomerRegisterForm: React.FC<CustomerRegisterFormProps> = ({
         <div className="text-center text-sm">
           มีบัญชีอยู่แล้ว?{" "}
           <button
-            onClick={() => saveAndRedirect(pathname)}
+            onClick={() => saveAndRedirect(pathname, "/shop/login")}
             className="text-primary hover:underline"
           >
             เข้าสู่ระบบ

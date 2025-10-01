@@ -82,7 +82,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
                 ) : (
                   <>
                     <button
-                      onClick={() => saveAndRedirect(pathname)}
+                      onClick={() => saveAndRedirect(pathname, "/shop/login")}
                       className="shop-frontend-button-primary px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
                       เข้าสู่ระบบ
