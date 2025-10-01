@@ -1,5 +1,6 @@
-import { ShopMarketplaceLayout } from "@/src/presentation/components/layouts/shop/marketplace";
 import { CustomerLoginView } from "@/src/presentation/components/auth/CustomerLoginView";
+import { LoginRedirectHandler } from "@/src/presentation/components/auth/LoginRedirectHandler";
+import { ShopMarketplaceLayout } from "@/src/presentation/components/layouts/shop/marketplace";
 import { ShopMarketplaceLayoutPresenterFactory } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
 
 export default async function CustomerLoginPage() {
@@ -9,6 +10,7 @@ export default async function CustomerLoginPage() {
   return (
     <ShopMarketplaceLayout layoutData={layoutData}>
       <CustomerLoginView />
+      <LoginRedirectHandler />
     </ShopMarketplaceLayout>
   );
 }

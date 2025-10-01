@@ -12,9 +12,9 @@ export const useLoginRedirect = () => {
   const router = useRouter();
 
   const saveAndRedirect = useCallback(
-    (currentPath: string) => {
+    (currentPath: string, loginPath: string = "/auth/login") => {
       saveRedirectPath(currentPath);
-      router.push("/auth/login");
+      router.push(loginPath);
     },
     [router]
   );

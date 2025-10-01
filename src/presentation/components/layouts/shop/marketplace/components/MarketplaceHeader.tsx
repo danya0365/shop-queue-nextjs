@@ -164,14 +164,14 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                 ) : (
                   <>
                     <button
-                      onClick={() => saveAndRedirect(pathname)}
+                      onClick={() => saveAndRedirect(pathname, "/shop/login")}
                       className="flex items-center space-x-2 marketplace-button-secondary px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
                       <LogIn className="w-4 h-4" />
                       <span>เข้าสู่ระบบ</span>
                     </button>
                     <Link
-                      href="/auth/register"
+                      href="/shop/register"
                       className="flex items-center space-x-2 marketplace-button-primary px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                     >
                       <UserPlus className="w-4 h-4" />
@@ -322,17 +322,19 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       เข้าสู่ระบบ
                     </div>
 
-                    <Link
-                      href="/auth/login"
+                    <button
+                      onClick={() => {
+                        saveAndRedirect(pathname, "/shop/login");
+                        setIsMenuOpen(false);
+                      }}
                       className="flex items-center justify-center space-x-2 marketplace-button-secondary w-full px-4 py-3 rounded-lg transition-colors font-medium"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       <LogIn className="w-5 h-5" />
                       <span>เข้าสู่ระบบ</span>
-                    </Link>
+                    </button>
 
                     <Link
-                      href="/auth/register"
+                      href="/shop/register"
                       className="flex items-center justify-center space-x-2 marketplace-button-primary w-full px-4 py-3 rounded-lg transition-colors font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
