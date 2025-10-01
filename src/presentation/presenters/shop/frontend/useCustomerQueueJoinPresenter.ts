@@ -399,13 +399,20 @@ export function useCustomerQueueJoinPresenter(
     };
 
     setViewModel(updatedViewModel);
-    setCustomerName("");
-    setCustomerPhone("");
     setSpecialRequests("");
     setPriority(QueuePriority.NORMAL);
-    setSelectedCategory("all");
+    setSelectedCategory("ทั้งหมด");
     setError(null);
-  }, [viewModel]);
+
+    // Reload customer data from store if available
+    if (storedCustomer && storedCustomer.shopId === shopId) {
+      setCustomerName(storedCustomer.name);
+      setCustomerPhone(storedCustomer.phone);
+    } else {
+      setCustomerName("");
+      setCustomerPhone("");
+    }
+  }, [viewModel, storedCustomer, shopId]);
 
   return {
     viewModel,
