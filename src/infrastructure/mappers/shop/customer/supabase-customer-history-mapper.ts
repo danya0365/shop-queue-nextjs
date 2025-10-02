@@ -1,4 +1,3 @@
-import { PaymentMethod } from "@/src/application/dtos/shop/backend/payments-dto";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
   CustomerInfoEntity,
@@ -7,10 +6,6 @@ import type {
   CustomerStatsEntity,
 } from "@/src/domain/entities/shop/customer/customer-history.entity";
 import type {
-  CustomerInfoSchema,
-  CustomerQueueHistorySchema,
-  CustomerQueueServiceSchema,
-  CustomerStatsSchema,
   GetCustomerInfoByCustomerSchema,
   GetCustomerQueueHistoryByCustomerSchema,
   GetCustomerStatsByCustomerSchema,
@@ -42,6 +37,9 @@ export class SupabaseCustomerHistoryMapper {
       0
     );
 
+    const queueDate = data.created_at ? data.created_at.split(" ")[0] : "";
+    const queueTime = data.created_at ? data.created_at.split(" ")[1] : "";
+
     return {
       id: data.id || "",
       queueNumber: data.queue_number || "",
@@ -49,8 +47,8 @@ export class SupabaseCustomerHistoryMapper {
       services,
       totalAmount,
       status: data.status as QueueStatus,
-      queueDate: data.queue_date || "",
-      queueTime: "", // RPC doesn't provide time separately
+      queueDate,
+      queueTime,
       completedAt: data.completed_at || undefined,
       waitTime: data.actual_wait_time
         ? Number(data.actual_wait_time)
@@ -120,130 +118,6 @@ export class SupabaseCustomerHistoryMapper {
     return {
       customerName: data.customer_name || "",
       memberSince: data.member_since || "",
-    };
-  }
-
-  /**
-   * Convert Supabase queue history data to domain entity
-   */
-  static toQueueHistoryEntity(
-    data: CustomerQueueHistorySchema
-  ): CustomerQueueHistoryEntity {
-    return {
-      id: data.id || "",
-      queueNumber: data.queue_number || "",
-      shopName: data.shop_name || "",
-      services: this.toQueueServiceEntities(data.services || []),
-      totalAmount: Number(data.total_amount || 0),
-      status: data.status as QueueStatus,
-      queueDate: data.queue_date || "",
-      queueTime: data.queue_time || "",
-      completedAt: data.completed_at || undefined,
-      waitTime: data.wait_time || undefined,
-      serviceTime: data.service_time || undefined,
-      rating: data.rating || undefined,
-      feedback: data.feedback || undefined,
-      employeeName: data.employee_name || undefined,
-      paymentMethod: data.payment_method as PaymentMethod,
-    };
-  }
-
-  /**
-   * Convert Supabase service data to domain entity
-   */
-  static toQueueServiceEntity(
-    data: CustomerQueueServiceSchema
-  ): CustomerQueueServiceEntity {
-    return {
-      id: data.id || "",
-      name: data.name || "",
-      price: data.price || 0,
-      quantity: data.quantity || 1,
-    };
-  }
-
-  /**
-   * Convert Supabase services array to domain entities
-   */
-  static toQueueServiceEntities(
-    data: CustomerQueueServiceSchema[]
-  ): CustomerQueueServiceEntity[] {
-    return data.map((service) => this.toQueueServiceEntity(service));
-  }
-
-  /**
-   * Convert Supabase stats data to domain entity
-   */
-  static toStatsEntity(data: CustomerStatsSchema): CustomerStatsEntity {
-    return {
-      totalQueues: data.total_queues || 0,
-      completedQueues: data.completed_queues || 0,
-      cancelledQueues: data.cancelled_queues || 0,
-      totalSpent: data.total_spent || 0,
-      averageRating: data.average_rating || 0,
-      favoriteService: data.favorite_service || "",
-      memberSince: data.member_since || "",
-    };
-  }
-
-  /**
-   * Convert Supabase customer info data to domain entity
-   */
-  static toCustomerInfoEntity(data: CustomerInfoSchema): CustomerInfoEntity {
-    return {
-      customerName: data.customer_name || "",
-      memberSince: data.member_since || "",
-    };
-  }
-
-  /**
-   * Convert domain entities to Supabase data (if needed for create/update operations)
-   */
-  static fromQueueHistoryEntity(
-    entity: CustomerQueueHistoryEntity
-  ): Record<string, unknown> {
-    return {
-      id: entity.id,
-      queue_number: entity.queueNumber,
-      shop_name: entity.shopName,
-      services: entity.services.map((service) => ({
-        id: service.id,
-        name: service.name,
-        price: service.price,
-        quantity: service.quantity,
-      })),
-      total_amount: entity.totalAmount,
-      status: entity.status,
-      queue_date: entity.queueDate,
-      queue_time: entity.queueTime,
-      completed_at: entity.completedAt,
-      wait_time: entity.waitTime,
-      service_time: entity.serviceTime,
-      rating: entity.rating,
-      feedback: entity.feedback,
-      employee_name: entity.employeeName,
-      payment_method: entity.paymentMethod,
-    };
-  }
-
-  static fromStatsEntity(entity: CustomerStatsEntity): Record<string, unknown> {
-    return {
-      total_queues: entity.totalQueues,
-      completed_queues: entity.completedQueues,
-      cancelled_queues: entity.cancelledQueues,
-      total_spent: entity.totalSpent,
-      average_rating: entity.averageRating,
-      favorite_service: entity.favoriteService,
-      member_since: entity.memberSince,
-    };
-  }
-
-  static fromCustomerInfoEntity(
-    entity: CustomerInfoEntity
-  ): Record<string, unknown> {
-    return {
-      customer_name: entity.customerName,
-      member_since: entity.memberSince,
     };
   }
 }
