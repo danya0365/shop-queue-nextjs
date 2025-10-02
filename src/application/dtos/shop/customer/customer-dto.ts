@@ -1,0 +1,38 @@
+// DTOs for customer operations
+// Following Clean Architecture principles
+
+export interface CustomerDTO {
+  id: string;
+  name: string;
+  phone: string;
+  shopId: string;
+  profileId?: string | null;
+}
+
+export interface GetCustomerByIdInputDTO {
+  customerId: string;
+}
+
+export interface GetCustomerByProfileIdInputDTO {
+  profileId: string;
+  shopId: string;
+}
+
+export interface RegisterCustomerInputDTO {
+  shopId: string;
+  name: string;
+  phone: string;
+}
+
+export interface RegisterCustomerOutputDTO {
+  customerId: string;
+}
+
+export interface LinkCustomerToProfileInputDTO {
+  customerId: string;
+  phone: string;
+}
+
+export interface LinkCustomerToProfileOutputDTO {
+  success: boolean;
+}

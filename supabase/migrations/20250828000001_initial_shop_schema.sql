@@ -1029,7 +1029,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.link_customer_to_profile(
   p_customer_id UUID,
   p_phone TEXT
-) RETURNS VOID
+) RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
@@ -1040,7 +1040,7 @@ DECLARE
 BEGIN
   -- Must be authenticated
   IF auth.uid() IS NULL THEN
-    RAISE EXCEPTION 'authentication_required';
+    RETURN FALSE;
   END IF;
 
   -- Get current user's profile
@@ -1049,7 +1049,7 @@ BEGIN
   WHERE auth_id = auth.uid() AND is_active = true;
 
   IF v_profile_id IS NULL THEN
-    RAISE EXCEPTION 'profile_not_found';
+    RETURN FALSE;
   END IF;
 
   -- Verify customer exists and phone matches
@@ -1058,17 +1058,20 @@ BEGIN
   WHERE id = p_customer_id;
 
   IF v_customer_phone IS NULL THEN
-    RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+    RETURN FALSE;
   END IF;
 
   IF v_customer_phone != p_phone THEN
-    RAISE EXCEPTION 'phone_mismatch';
+    RETURN FALSE;
   END IF;
 
   -- Link customer to profile
   UPDATE public.customers
   SET profile_id = v_profile_id, updated_at = NOW()
   WHERE id = p_customer_id;
+
+  -- Return success
+  RETURN TRUE;
 END;
 $$;
 

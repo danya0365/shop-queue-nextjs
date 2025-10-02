@@ -1,4 +1,5 @@
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { CustomerEntity } from "@/src/domain/entities/shop/customer/customer.entity";
 import type {
   JoinQueueResultEntity,
   QueueJoinEntity,
@@ -99,4 +100,40 @@ export interface ShopCustomerQueueJoinRepository {
    * @throws ShopCustomerQueueJoinError if the operation fails
    */
   getQueueById(queueId: string): Promise<QueueJoinEntity>;
+
+  /**
+   * Get customer by ID
+   * @param customerId Customer ID
+   * @returns Customer entity
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  getCustomerById(customerId: string): Promise<CustomerEntity>;
+
+  /**
+   * Get customer by profile ID
+   * @param profileId Profile ID
+   * @param shopId Shop ID
+   * @returns Customer entity or null if not found
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  getCustomerByProfileId(profileId: string, shopId: string): Promise<CustomerEntity | null>;
+
+  /**
+   * Register a new customer
+   * @param shopId Shop ID
+   * @param name Customer name
+   * @param phone Customer phone
+   * @returns Customer registration result
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  registerCustomer(shopId: string, name: string, phone: string): Promise<{ customerId: string }>;
+
+  /**
+   * Link customer to profile
+   * @param customerId Customer ID
+   * @param phone Customer phone
+   * @returns Link operation result
+   * @throws ShopCustomerQueueJoinError if the operation fails
+   */
+  linkCustomerToProfile(customerId: string, phone: string): Promise<{ success: boolean }>;
 }

@@ -3987,19 +3987,6 @@ export type Database = {
         Args: { p_days_to_keep?: number }
         Returns: number
       }
-      create_customer: {
-        Args: {
-          shop_id_param: string
-          name_param: string
-          phone_param?: string
-          email_param?: string
-          date_of_birth_param?: string
-          gender_param?: string
-          address_param?: string
-          notes_param?: string
-        }
-        Returns: Json
-      }
       create_department: {
         Args: {
           p_shop_id: string
@@ -4103,10 +4090,6 @@ export type Database = {
         }
         Returns: string
       }
-      delete_customer: {
-        Args: { shop_id_param: string; customer_id_param: string }
-        Returns: boolean
-      }
       delete_employee: {
         Args: { p_employee_id: string }
         Returns: boolean
@@ -4190,8 +4173,24 @@ export type Database = {
         }[]
       }
       get_customer_by_id: {
-        Args: { shop_id_param: string; customer_id_param: string }
-        Returns: Json
+        Args: { p_customer_id: string }
+        Returns: {
+          id: string
+          name: string
+          phone: string
+          shop_id: string
+          profile_id: string
+        }[]
+      }
+      get_customer_by_profile_id: {
+        Args: { p_profile_id: string; p_shop_id: string }
+        Returns: {
+          id: string
+          name: string
+          phone: string
+          shop_id: string
+          profile_id: string
+        }[]
       }
       get_customer_popular_services: {
         Args: { p_shop_id: string; p_limit?: number }
@@ -4783,7 +4782,7 @@ export type Database = {
       }
       link_customer_to_profile: {
         Args: { p_customer_id: string; p_phone: string }
-        Returns: undefined
+        Returns: boolean
       }
       migrate_profile_roles: {
         Args: Record<PropertyKey, never>
@@ -4854,21 +4853,6 @@ export type Database = {
           new_role: Database["public"]["Enums"]["profile_role"]
         }
         Returns: boolean
-      }
-      update_customer: {
-        Args: {
-          shop_id_param: string
-          customer_id_param: string
-          name_param?: string
-          phone_param?: string
-          email_param?: string
-          date_of_birth_param?: string
-          gender_param?: string
-          address_param?: string
-          notes_param?: string
-          is_active_param?: boolean
-        }
-        Returns: Json
       }
       update_department: {
         Args: {
