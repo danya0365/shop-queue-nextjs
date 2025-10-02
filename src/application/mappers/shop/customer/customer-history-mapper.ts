@@ -97,6 +97,7 @@ export class CustomerHistoryMapper {
 
     return {
       queueHistory,
+      customerInfo: data.customerInfo,
       customerStats,
       filters,
       customerName: data.customerInfo.customerName,

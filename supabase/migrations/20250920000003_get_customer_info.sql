@@ -12,7 +12,7 @@ RETURNS TABLE (
     member_since DATE,
     profile_id UUID,
     is_linked_to_profile BOOLEAN,
-    total_visits INTEGER,
+    total_visits BIGINT,
     last_visit_date DATE
 )
 LANGUAGE plpgsql

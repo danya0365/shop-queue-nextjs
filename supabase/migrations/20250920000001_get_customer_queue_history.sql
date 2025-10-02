@@ -95,7 +95,7 @@ BEGIN
     v_has_next := p_page < v_total_pages;
     v_has_prev := p_page > 1;
     
-    -- Build the data array
+    -- Build the data array with proper joins
     SELECT COALESCE(JSONB_AGG(
         JSONB_BUILD_OBJECT(
             'id', q.id,
@@ -104,8 +104,20 @@ BEGIN
             'queue_number', q.queue_number,
             'status', q.status::TEXT,
             'priority', q.priority::TEXT,
-            'customer_name', q.customer_name,
-            'services', q.services,
+            'customer_name', c.name,
+            'services', (
+                SELECT COALESCE(JSONB_AGG(
+                    JSONB_BUILD_OBJECT(
+                        'id', svc.id,
+                        'name', svc.name,
+                        'price', qs.price,
+                        'quantity', qs.quantity
+                    )
+                ), '[]'::JSONB)
+                FROM queue_services qs
+                JOIN services svc ON qs.service_id = svc.id
+                WHERE qs.queue_id = q.id
+            ),
             'estimated_duration', q.estimated_duration,
             'estimated_call_time', q.estimated_call_time,
             'actual_wait_time', q.actual_wait_time,
@@ -122,11 +134,13 @@ BEGIN
     ), '[]'::JSONB) INTO v_result_data
     FROM queues q
     LEFT JOIN shops s ON q.shop_id = s.id
+    LEFT JOIN customers c ON q.customer_id = c.id
     WHERE q.customer_id = p_customer_id
     AND q.shop_id = p_shop_id
     AND (p_status = 'all' OR q.status::TEXT = p_status)
     AND (v_start_date IS NULL OR q.created_at::DATE >= v_start_date)
     AND (v_end_date IS NULL OR q.created_at::DATE <= v_end_date)
+    GROUP BY q.id, q.shop_id, q.queue_number, q.status, q.priority, q.estimated_duration, q.estimated_call_time, q.actual_wait_time, q.served_at, q.completed_at, q.cancelled_at, q.cancelled_reason, q.feedback, q.rating, q.created_at, q.updated_at, s.id, s.name, c.id, c.name
     ORDER BY q.created_at DESC
     LIMIT p_limit OFFSET v_offset;
     

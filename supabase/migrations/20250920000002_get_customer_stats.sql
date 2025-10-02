@@ -7,10 +7,10 @@ CREATE OR REPLACE FUNCTION get_customer_stats_by_customer(
 RETURNS TABLE (
     customer_id UUID,
     shop_id UUID,
-    total_queues INTEGER,
-    completed_queues INTEGER,
-    cancelled_queues INTEGER,
-    no_show_queues INTEGER,
+    total_queues BIGINT,
+    completed_queues BIGINT,
+    cancelled_queues BIGINT,
+    no_show_queues BIGINT,
     average_wait_time_minutes NUMERIC,
     average_service_time_minutes NUMERIC,
     average_rating NUMERIC,
@@ -65,15 +65,15 @@ BEGIN
             ROUND(AVG(CASE WHEN q.completed_at IS NOT NULL AND q.served_at IS NOT NULL 
                 THEN EXTRACT(EPOCH FROM (q.completed_at - q.served_at))/60 ELSE NULL END), 2) as average_service_time_minutes,
             ROUND(AVG(CASE WHEN q.rating IS NOT NULL THEN q.rating ELSE NULL END), 2) as average_rating,
-            COALESCE(SUM(p.amount), 0) as total_spent,
+            COALESCE(SUM(p.total_amount), 0) as total_spent,
             MIN(c.created_at)::DATE as member_since,
             MAX(CASE WHEN q.status = 'completed' THEN q.completed_at ELSE NULL END)::DATE as last_visit_date
         FROM customers c
         LEFT JOIN queues q ON c.id = q.customer_id AND q.shop_id = c.shop_id
-        LEFT JOIN payments p ON q.id = p.queue_id AND p.status = 'completed'
+        LEFT JOIN payments p ON q.id = p.queue_id AND p.payment_status = 'paid'
         WHERE c.id = p_customer_id
         AND c.shop_id = p_shop_id
-        GROUP BY c.id, c.shop_id
+        GROUP BY c.id, c.shop_id, c.created_at
     ),
     favorite_service AS (
         SELECT 
@@ -81,8 +81,8 @@ BEGIN
             s.name as service_name,
             COUNT(*) as usage_count
         FROM queues q
-        JOIN LATERAL jsonb_array_elements(q.services) AS qs(service_id, service_name, price, duration) ON true
-        LEFT JOIN services s ON qs.service_id::UUID = s.id
+        JOIN queue_services qs ON q.id = qs.queue_id
+        JOIN services s ON qs.service_id = s.id
         WHERE q.customer_id = p_customer_id
         AND q.shop_id = p_shop_id
         AND q.status = 'completed'
