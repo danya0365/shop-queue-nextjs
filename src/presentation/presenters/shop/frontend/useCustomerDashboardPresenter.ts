@@ -1,10 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { CustomerDashboardViewModel } from './CustomerDashboardPresenter';
+import { useCallback, useEffect, useState } from "react";
+import type { CustomerDashboardViewModel } from "./CustomerDashboardPresenter";
+import { ClientCustomerDashboardPresenterFactory } from "./CustomerDashboardPresenter";
 
-export function useCustomerDashboardPresenter(shopId: string, initialViewModel?: CustomerDashboardViewModel) {
-  const [viewModel, setViewModel] = useState<CustomerDashboardViewModel | null>(initialViewModel || null);
+const presenter = ClientCustomerDashboardPresenterFactory.create();
+
+export function useCustomerDashboardPresenter(
+  shopId: string,
+  initialViewModel?: CustomerDashboardViewModel
+) {
+  const [viewModel, setViewModel] = useState<CustomerDashboardViewModel | null>(
+    initialViewModel || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,16 +34,15 @@ export function useCustomerDashboardPresenter(shopId: string, initialViewModel?:
     try {
       setLoading(true);
       setError(null);
-      
-      const { ClientCustomerDashboardPresenterFactory } = await import('./CustomerDashboardPresenter');
-      const presenter = await ClientCustomerDashboardPresenterFactory.create();
-      
+
       const newViewModel = await presenter.getViewModel(shopId);
-      
+
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
-      console.error('Error loading dashboard data:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load dashboard data"
+      );
+      console.error("Error loading dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -51,10 +58,10 @@ export function useCustomerDashboardPresenter(shopId: string, initialViewModel?:
   // Refresh data function
   const refreshData = useCallback(async () => {
     try {
-      setActionLoading(prev => ({ ...prev, refresh: true }));
+      setActionLoading((prev) => ({ ...prev, refresh: true }));
       await loadData();
     } finally {
-      setActionLoading(prev => ({ ...prev, refresh: false }));
+      setActionLoading((prev) => ({ ...prev, refresh: false }));
     }
   }, [loadData]);
 

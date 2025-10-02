@@ -1,5 +1,6 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
 import type { IShopCustomerQueueJoinService } from "@/src/application/services/shop/customer/ShopCustomerQueueJoinService";
+import type { IShopCustomerService } from "@/src/application/services/shop/customer/ShopCustomerService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
@@ -57,7 +58,8 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
     shopService: ShopService,
-    private readonly shopCustomerQueueJoinService: IShopCustomerQueueJoinService
+    private readonly shopCustomerQueueJoinService: IShopCustomerQueueJoinService,
+    private readonly shopCustomerService: IShopCustomerService
   ) {
     super(logger, shopService);
   }
@@ -138,6 +140,76 @@ export class CustomerQueueJoinPresenter extends BaseShopPresenter {
     }
   }
 
+  // Customer-related methods
+  async getCustomerByProfileId(profileId: string, shopId: string) {
+    try {
+      this.logger.info("Getting customer by profile ID", { profileId, shopId });
+      const customer = await this.shopCustomerService.getCustomerByProfileId(
+        profileId,
+        shopId
+      );
+      return customer;
+    } catch (error) {
+      this.logger.error("Error getting customer by profile ID", {
+        error,
+        profileId,
+        shopId,
+      });
+      throw error;
+    }
+  }
+
+  async getCustomerById(customerId: string) {
+    try {
+      this.logger.info("Getting customer by ID", { customerId });
+      const customer = await this.shopCustomerService.getCustomerById(
+        customerId
+      );
+      return customer;
+    } catch (error) {
+      this.logger.error("Error getting customer by ID", { error, customerId });
+      throw error;
+    }
+  }
+
+  async registerCustomer(shopId: string, name: string, phone: string) {
+    try {
+      this.logger.info("Registering customer", { shopId, name, phone });
+      const result = await this.shopCustomerService.registerCustomer(
+        shopId,
+        name,
+        phone
+      );
+      return result;
+    } catch (error) {
+      this.logger.error("Error registering customer", {
+        error,
+        shopId,
+        name,
+        phone,
+      });
+      throw error;
+    }
+  }
+
+  async linkCustomerToProfile(customerId: string, phone: string) {
+    try {
+      this.logger.info("Linking customer to profile", { customerId, phone });
+      const result = await this.shopCustomerService.linkCustomerToProfile(
+        customerId,
+        phone
+      );
+      return result;
+    } catch (error) {
+      this.logger.error("Error linking customer to profile", {
+        error,
+        customerId,
+        phone,
+      });
+      throw error;
+    }
+  }
+
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
@@ -158,28 +230,36 @@ export class CustomerQueueJoinPresenterFactory {
       serverContainer.resolve<IShopCustomerQueueJoinService>(
         "ShopCustomerQueueJoinService"
       );
+    const shopCustomerService = serverContainer.resolve<IShopCustomerService>(
+      "ShopCustomerService"
+    );
     return new CustomerQueueJoinPresenter(
       logger,
       shopService,
-      shopCustomerQueueJoinService
+      shopCustomerQueueJoinService,
+      shopCustomerService
     );
   }
 }
 
 // Factory class for client-side
 export class ClientCustomerQueueJoinPresenterFactory {
-  static async create(): Promise<CustomerQueueJoinPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): CustomerQueueJoinPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
     const shopCustomerQueueJoinService =
       clientContainer.resolve<IShopCustomerQueueJoinService>(
         "ShopCustomerQueueJoinService"
       );
+    const shopCustomerService = clientContainer.resolve<IShopCustomerService>(
+      "ShopCustomerService"
+    );
     return new CustomerQueueJoinPresenter(
       logger,
       shopService,
-      shopCustomerQueueJoinService
+      shopCustomerQueueJoinService,
+      shopCustomerService
     );
   }
 }

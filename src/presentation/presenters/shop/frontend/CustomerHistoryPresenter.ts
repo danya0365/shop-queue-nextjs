@@ -1,12 +1,12 @@
+import type { HistoryFiltersDTO } from "@/src/application/dtos/shop/customer/customer-history-dto";
 import { ShopService } from "@/src/application/services/shop/ShopService";
 import { ShopCustomerHistoryService } from "@/src/application/services/shop/customer/ShopCustomerHistoryService";
-import { getServerContainer } from "@/src/di/server-container";
 import { getClientContainer } from "@/src/di/client-container";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
-import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
-import type { HistoryFiltersDTO } from "@/src/application/dtos/shop/customer/customer-history-dto";
+import { getServerContainer } from "@/src/di/server-container";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
 // Define interfaces for data structures
 export interface CustomerQueueHistory {
@@ -77,7 +77,7 @@ export interface CustomerHistoryViewModel {
 // Main Presenter class
 export class CustomerHistoryPresenter extends BaseShopPresenter {
   constructor(
-    logger: Logger, 
+    logger: Logger,
     shopService: ShopService,
     private readonly customerHistoryService: ShopCustomerHistoryService
   ) {
@@ -110,37 +110,39 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
       };
 
       // Get customer history data from service
-      const customerHistoryData = await this.customerHistoryService.getCustomerHistory(
-        shopId,
-        undefined, // customerId - will be determined from auth context
-        currentPage,
-        perPage,
-        filtersDTO
-      );
+      const customerHistoryData =
+        await this.customerHistoryService.getCustomerHistory(
+          shopId,
+          undefined, // customerId - will be determined from auth context
+          currentPage,
+          perPage,
+          filtersDTO
+        );
 
       // Convert DTOs to ViewModel format
-      const queueHistory: CustomerQueueHistory[] = customerHistoryData.queueHistory.map(queue => ({
-        id: queue.id,
-        queueNumber: queue.queueNumber,
-        shopName: queue.shopName,
-        services: queue.services.map(service => ({
-          id: service.id,
-          name: service.name,
-          price: service.price,
-          quantity: service.quantity,
-        })),
-        totalAmount: queue.totalAmount,
-        status: this.mapStatusToString(queue.status),
-        queueDate: queue.queueDate,
-        queueTime: queue.queueTime,
-        completedAt: queue.completedAt,
-        waitTime: queue.waitTime,
-        serviceTime: queue.serviceTime,
-        rating: queue.rating,
-        feedback: queue.feedback,
-        employeeName: queue.employeeName,
-        paymentMethod: queue.paymentMethod,
-      }));
+      const queueHistory: CustomerQueueHistory[] =
+        customerHistoryData.queueHistory.map((queue) => ({
+          id: queue.id,
+          queueNumber: queue.queueNumber,
+          shopName: queue.shopName,
+          services: queue.services.map((service) => ({
+            id: service.id,
+            name: service.name,
+            price: service.price,
+            quantity: service.quantity,
+          })),
+          totalAmount: queue.totalAmount,
+          status: this.mapStatusToString(queue.status),
+          queueDate: queue.queueDate,
+          queueTime: queue.queueTime,
+          completedAt: queue.completedAt,
+          waitTime: queue.waitTime,
+          serviceTime: queue.serviceTime,
+          rating: queue.rating,
+          feedback: queue.feedback,
+          employeeName: queue.employeeName,
+          paymentMethod: queue.paymentMethod,
+        }));
 
       const customerStats: CustomerStats = {
         totalQueues: customerHistoryData.customerStats.totalQueues,
@@ -152,14 +154,16 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
         memberSince: customerHistoryData.customerStats.memberSince,
       };
 
-      const pagination: Pagination | undefined = customerHistoryData.pagination ? {
-        currentPage: customerHistoryData.pagination.currentPage,
-        perPage: customerHistoryData.pagination.perPage,
-        totalItems: customerHistoryData.pagination.totalItems,
-        totalPages: customerHistoryData.pagination.totalPages,
-        hasNext: customerHistoryData.pagination.hasNext,
-        hasPrev: customerHistoryData.pagination.hasPrev,
-      } : undefined;
+      const pagination: Pagination | undefined = customerHistoryData.pagination
+        ? {
+            currentPage: customerHistoryData.pagination.currentPage,
+            perPage: customerHistoryData.pagination.perPage,
+            totalItems: customerHistoryData.pagination.totalItems,
+            totalPages: customerHistoryData.pagination.totalPages,
+            hasNext: customerHistoryData.pagination.hasNext,
+            hasPrev: customerHistoryData.pagination.hasPrev,
+          }
+        : undefined;
 
       return {
         queueHistory,
@@ -177,7 +181,6 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
     }
   }
 
-
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
@@ -190,7 +193,9 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
   /**
    * Map QueueStatus enum to string literals for customer history view
    */
-  private mapStatusToString(status: QueueStatus): "completed" | "cancelled" | "no_show" {
+  private mapStatusToString(
+    status: QueueStatus
+  ): "completed" | "cancelled" | "no_show" {
     switch (status) {
       case QueueStatus.COMPLETED:
         return "completed";
@@ -214,18 +219,32 @@ export class CustomerHistoryPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    const customerHistoryService = serverContainer.resolve<ShopCustomerHistoryService>("ShopCustomerHistoryService");
-    return new CustomerHistoryPresenter(logger, shopService, customerHistoryService);
+    const customerHistoryService =
+      serverContainer.resolve<ShopCustomerHistoryService>(
+        "ShopCustomerHistoryService"
+      );
+    return new CustomerHistoryPresenter(
+      logger,
+      shopService,
+      customerHistoryService
+    );
   }
 }
 
 // Factory class for client-side
 export class ClientCustomerHistoryPresenterFactory {
-  static async create(): Promise<CustomerHistoryPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): CustomerHistoryPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    const customerHistoryService = clientContainer.resolve<ShopCustomerHistoryService>("ShopCustomerHistoryService");
-    return new CustomerHistoryPresenter(logger, shopService, customerHistoryService);
+    const customerHistoryService =
+      clientContainer.resolve<ShopCustomerHistoryService>(
+        "ShopCustomerHistoryService"
+      );
+    return new CustomerHistoryPresenter(
+      logger,
+      shopService,
+      customerHistoryService
+    );
   }
 }

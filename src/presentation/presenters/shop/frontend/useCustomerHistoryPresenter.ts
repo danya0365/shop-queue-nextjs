@@ -8,12 +8,12 @@ import type {
   HistoryFilters,
   HistoryFilterType,
 } from "./CustomerHistoryPresenter";
+import { ClientCustomerHistoryPresenterFactory } from "./CustomerHistoryPresenter";
+
+const presenter = ClientCustomerHistoryPresenterFactory.create();
 
 // Define filter type
-export type {
-  HistoryFilterType,
-  HistoryFilters,
-};
+export type { HistoryFilters, HistoryFilterType };
 
 // Define pagination interface
 export interface Pagination {
@@ -65,11 +65,6 @@ export function useCustomerHistoryPresenter(
       setLoading(true);
       setError(null);
 
-      const { ClientCustomerHistoryPresenterFactory } = await import(
-        "./CustomerHistoryPresenter"
-      );
-      const presenter = await ClientCustomerHistoryPresenterFactory.create();
-
       const newViewModel = await presenter.getViewModel(
         shopId,
         currentPage,
@@ -80,7 +75,9 @@ export function useCustomerHistoryPresenter(
       setViewModel(newViewModel);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to load customer history data"
+        err instanceof Error
+          ? err.message
+          : "Failed to load customer history data"
       );
       console.error("Error loading customer history data:", err);
     } finally {

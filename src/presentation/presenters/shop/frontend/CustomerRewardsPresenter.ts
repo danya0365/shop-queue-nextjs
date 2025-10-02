@@ -10,10 +10,10 @@ import { ShopService } from "@/src/application/services/shop/ShopService";
 import { ShopCustomerRewardService } from "@/src/application/services/shop/customer/ShopCustomerRewardService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
+import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
-import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
-import { MembershipTier } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 
 // Define interfaces for data structures
 export interface CustomerReward {
@@ -141,7 +141,10 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
       // Convert filters to DTO format
       const availableRewardsFilters: AvailableRewardsFiltersDTO = {
-        type: filters?.type !== "all" ? this.mapStringToRewardType(filters?.type) : undefined,
+        type:
+          filters?.type !== "all"
+            ? this.mapStringToRewardType(filters?.type)
+            : undefined,
         category: filters?.category !== "all" ? filters?.category : undefined,
         isAvailable:
           filters?.status === "available"
@@ -152,7 +155,10 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       };
 
       const redeemedRewardsFilters: RedeemedRewardsFiltersDTO = {
-        type: filters?.type !== "all" ? this.mapStringToRewardType(filters?.type) : undefined,
+        type:
+          filters?.type !== "all"
+            ? this.mapStringToRewardType(filters?.type)
+            : undefined,
         dateRange:
           filters?.dateRange !== "all" ? filters?.dateRange : undefined,
         startDate: filters?.startDate,
@@ -189,7 +195,9 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         totalRedeemed: customerRewardsData.customerPoints.totalRedeemed,
         pointsExpiring: customerRewardsData.customerPoints.pointsExpiring,
         expiryDate: customerRewardsData.customerPoints.expiryDate,
-        tier: this.mapMembershipTierToString(customerRewardsData.customerPoints.tier),
+        tier: this.mapMembershipTierToString(
+          customerRewardsData.customerPoints.tier
+        ),
         nextTierPoints: customerRewardsData.customerPoints.nextTierPoints,
         tierBenefits: customerRewardsData.customerPoints.tierBenefits,
       };
@@ -521,7 +529,9 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
   /**
    * Map RewardType enum to string literals
    */
-  private mapRewardTypeToString(type: RewardType): "discount" | "free_item" | "cashback" | "points" {
+  private mapRewardTypeToString(
+    type: RewardType
+  ): "discount" | "free_item" | "cashback" | "points" {
     switch (type) {
       case RewardType.DISCOUNT:
         return "discount";
@@ -539,7 +549,9 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
   /**
    * Map MembershipTier enum to string literals
    */
-  private mapMembershipTierToString(tier: MembershipTier): "Bronze" | "Silver" | "Gold" | "Platinum" {
+  private mapMembershipTierToString(
+    tier: MembershipTier
+  ): "Bronze" | "Silver" | "Gold" | "Platinum" {
     switch (tier) {
       case MembershipTier.BRONZE:
         return "Bronze";
@@ -575,8 +587,8 @@ export class CustomerRewardsPresenterFactory {
 
 // Factory class for client-side
 export class ClientCustomerRewardsPresenterFactory {
-  static async create(): Promise<CustomerRewardsPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): CustomerRewardsPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
     const customerRewardService =

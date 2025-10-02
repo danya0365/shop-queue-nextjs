@@ -1,20 +1,19 @@
 "use client";
 
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
-import { useState, useEffect, useCallback } from 'react';
-import { ClientCustomerRewardsPresenterFactory } from './CustomerRewardsPresenter';
-import type { 
+import { useCallback, useEffect, useState } from "react";
+import type {
   CustomerRewardsViewModel,
-  RewardsFilters, 
-  RewardsFilterType, 
-  Pagination 
-} from './CustomerRewardsPresenter';
+  Pagination,
+  RewardsFilters,
+  RewardsFilterType,
+} from "./CustomerRewardsPresenter";
+import { ClientCustomerRewardsPresenterFactory } from "./CustomerRewardsPresenter";
+
+const presenter = ClientCustomerRewardsPresenterFactory.create();
 
 // Define filter type
-export type {
-  RewardsFilterType,
-  RewardsFilters,
-}
+export type { RewardsFilters, RewardsFilterType };
 
 // Re-export pagination interface
 export type { Pagination };
@@ -32,7 +31,9 @@ export function useCustomerRewardsPresenter(
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(getPaginationConfig().REWARDS_PER_PAGE || 10);
+  const [perPage, setPerPage] = useState(
+    getPaginationConfig().REWARDS_PER_PAGE || 10
+  );
   const [filters, setFilters] = useState<RewardsFilters>({
     type: "all",
     category: "all",
@@ -56,8 +57,6 @@ export function useCustomerRewardsPresenter(
       setLoading(true);
       setError(null);
 
-      const presenter = await ClientCustomerRewardsPresenterFactory.create();
-
       const newViewModel = await presenter.getViewModel(
         shopId,
         currentPage,
@@ -67,7 +66,9 @@ export function useCustomerRewardsPresenter(
 
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load rewards data');
+      setError(
+        err instanceof Error ? err.message : "Failed to load rewards data"
+      );
     } finally {
       setLoading(false);
     }
@@ -113,72 +114,87 @@ export function useCustomerRewardsPresenter(
 
   // Filter handlers
   const handleTypeFilterChange = useCallback((type: RewardsFilterType) => {
-    setFilters(prev => ({ ...prev, type }));
+    setFilters((prev) => ({ ...prev, type }));
   }, []);
 
   const handleCategoryFilterChange = useCallback((category: string) => {
-    setFilters(prev => ({ ...prev, category }));
+    setFilters((prev) => ({ ...prev, category }));
   }, []);
 
   const handleStatusFilterChange = useCallback((status: string) => {
-    setFilters(prev => ({ ...prev, status }));
+    setFilters((prev) => ({ ...prev, status }));
   }, []);
 
-  const handleDateRangeChange = useCallback((dateRange: 'all' | 'month' | 'quarter' | 'year' | 'custom') => {
-    setFilters(prev => ({
-      ...prev,
-      dateRange,
-      startDate: dateRange === 'custom' ? prev.startDate : undefined,
-      endDate: dateRange === 'custom' ? prev.endDate : undefined,
-    }));
-  }, []);
+  const handleDateRangeChange = useCallback(
+    (dateRange: "all" | "month" | "quarter" | "year" | "custom") => {
+      setFilters((prev) => ({
+        ...prev,
+        dateRange,
+        startDate: dateRange === "custom" ? prev.startDate : undefined,
+        endDate: dateRange === "custom" ? prev.endDate : undefined,
+      }));
+    },
+    []
+  );
 
-  const handleCustomDateRangeChange = useCallback((startDate: string, endDate: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      startDate, 
-      endDate,
-      dateRange: "custom"
-    }));
-  }, []);
+  const handleCustomDateRangeChange = useCallback(
+    (startDate: string, endDate: string) => {
+      setFilters((prev) => ({
+        ...prev,
+        startDate,
+        endDate,
+        dateRange: "custom",
+      }));
+    },
+    []
+  );
 
   // Action handlers
-  const handleRedeemReward = useCallback(async (rewardId: string) => {
-    if (!shopId) return;
-    
-    setActionLoading(true);
-    setError(null);
-    
-    try {
-      const presenter = await ClientCustomerRewardsPresenterFactory.create();
-      await presenter.redeemReward(shopId, rewardId);
-      // Refresh data after redemption
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to redeem reward');
-    } finally {
-      setActionLoading(false);
-    }
-  }, [shopId, loadData, setActionLoading]);
+  const handleRedeemReward = useCallback(
+    async (rewardId: string) => {
+      if (!shopId) return;
 
-  const handleViewRewardDetails = useCallback(async (rewardId: string) => {
-    if (!shopId) return null;
-    
-    try {
-      const presenter = await ClientCustomerRewardsPresenterFactory.create();
-      return await presenter.getRewardDetails(shopId, rewardId);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get reward details');
-      return null;
-    }
-  }, [shopId]);
+      setActionLoading(true);
+      setError(null);
+
+      try {
+        await presenter.redeemReward(shopId, rewardId);
+        // Refresh data after redemption
+        await loadData();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to redeem reward"
+        );
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [shopId, loadData, setActionLoading]
+  );
+
+  const handleViewRewardDetails = useCallback(
+    async (rewardId: string) => {
+      if (!shopId) return null;
+
+      try {
+        return await presenter.getRewardDetails(shopId, rewardId);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to get reward details"
+        );
+        return null;
+      }
+    },
+    [shopId]
+  );
 
   const refreshData = useCallback(async () => {
     await loadData();
   }, [loadData]);
 
   // Get pagination info from view model for each data type
-  const availableRewardsPagination = viewModel?.availableRewards?.pagination || {
+  const availableRewardsPagination = viewModel?.availableRewards
+    ?.pagination || {
     currentPage,
     perPage,
     totalCount: 0,
@@ -196,7 +212,8 @@ export function useCustomerRewardsPresenter(
     hasPrev: false,
   };
 
-  const rewardTransactionsPagination = viewModel?.rewardTransactions?.pagination || {
+  const rewardTransactionsPagination = viewModel?.rewardTransactions
+    ?.pagination || {
     currentPage,
     perPage,
     totalCount: 0,
@@ -214,7 +231,7 @@ export function useCustomerRewardsPresenter(
     loading,
     actionLoading,
     error,
-    
+
     // Pagination
     currentPage,
     perPage,
@@ -222,10 +239,10 @@ export function useCustomerRewardsPresenter(
     availableRewardsPagination,
     redeemedRewardsPagination,
     rewardTransactionsPagination,
-    
+
     // Filters
     filters,
-    
+
     // Actions
     handlePageChange,
     handlePerPageChange,

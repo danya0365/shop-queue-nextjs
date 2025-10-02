@@ -1,7 +1,6 @@
 "use client";
 
 import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
-import { supabase } from "@/src/infrastructure/config/supabase-browser-client";
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import { useCallback, useEffect, useState } from "react";
@@ -12,6 +11,8 @@ import {
   type QueueService,
   type ServiceOption,
 } from "./CustomerQueueJoinPresenter";
+
+const presenter = ClientCustomerQueueJoinPresenterFactory.create();
 
 // Re-export types
 export type { QueueFormData, ServiceOption };
@@ -62,15 +63,13 @@ export function useCustomerQueueJoinPresenter(
           console.log(
             "Loading customer data by profile ID for authenticated user"
           );
-          const { data: profileCustomerData, error: profileError } =
-            await supabase.rpc("get_customer_by_profile_id", {
-              p_profile_id: activeProfile.id,
-              p_shop_id: shopId,
-            });
 
-          if (profileCustomerData && profileCustomerData.length > 0) {
-            const profileCustomer = profileCustomerData[0];
+          const profileCustomer = await presenter.getCustomerByProfileId(
+            activeProfile.id,
+            shopId
+          );
 
+          if (profileCustomer) {
             // Pre-fill form with customer data from profile
             setCustomerName(profileCustomer.name);
             setCustomerPhone(profileCustomer.phone);
@@ -79,7 +78,7 @@ export function useCustomerQueueJoinPresenter(
               id: profileCustomer.id,
               name: profileCustomer.name,
               phone: profileCustomer.phone,
-              shopId: profileCustomer.shop_id,
+              shopId: profileCustomer.shopId,
             });
           } else {
             if (activeProfile) {
@@ -99,39 +98,22 @@ export function useCustomerQueueJoinPresenter(
       // Case 2: User has stored customer data (existing logic)
       if (storedCustomer && storedCustomer.shopId === shopId) {
         try {
-          // Call RPC to get customer details (security check will be applied)
-          const { data: customerData, error } = await supabase.rpc(
-            "get_customer_by_id",
-            {
-              p_customer_id: storedCustomer.id,
-            }
+          const currentCustomer = await presenter.getCustomerById(
+            storedCustomer.id
           );
 
-          if (error) {
-            console.error("Error loading customer data:", error);
-            // Clear stored customer if error occurs (might be linked to authenticated user)
-            setStoredCustomer(null);
-            return;
-          }
+          // Pre-fill form with customer data
+          setCustomerName(currentCustomer.name);
+          setCustomerPhone(currentCustomer.phone);
 
-          if (customerData && customerData.length > 0) {
-            const currentCustomer = customerData[0];
-            // Pre-fill form with customer data
-            setCustomerName(currentCustomer.name);
-            setCustomerPhone(currentCustomer.phone);
-
-            // TODO: check if profile id is null and user is authenticated
-            // if so, link customer to profile
-            if (currentCustomer.profile_id === null && activeProfile?.id) {
-              console.log("Customer is not linked to profile");
-              await supabase.rpc("link_customer_to_profile", {
-                p_customer_id: currentCustomer.id,
-                p_phone: currentCustomer.phone,
-              });
-            }
-          } else {
-            // No customer data returned, clear stored customer
-            setStoredCustomer(null);
+          // TODO: check if profile id is null and user is authenticated
+          // if so, link customer to profile
+          if (currentCustomer.profileId === null && activeProfile?.id) {
+            console.log("Customer is not linked to profile");
+            await presenter.linkCustomerToProfile(
+              currentCustomer.id,
+              currentCustomer.phone
+            );
           }
         } catch (error) {
           console.error("Error loading customer data:", error);
@@ -155,7 +137,6 @@ export function useCustomerQueueJoinPresenter(
       setLoading(true);
       setError(null);
 
-      const presenter = await ClientCustomerQueueJoinPresenterFactory.create();
       const newViewModel = await presenter.getViewModel(shopId);
 
       setViewModel(newViewModel);
@@ -333,100 +314,66 @@ export function useCustomerQueueJoinPresenter(
         // Check if we have a stored customer for this shop
         if (!storedCustomer || storedCustomer.shopId !== shopId) {
           // No stored customer or different shop, register new customer
-          const { data: customerId, error: registerError } = await supabase.rpc(
-            "register_customer_with_phone",
-            {
-              p_shop_id: shopId,
-              p_name: formData.customerName.trim(),
-              p_phone: formData.customerPhone.trim(),
-            }
+          const registerResult = await presenter.registerCustomer(
+            shopId,
+            formData.customerName.trim(),
+            formData.customerPhone.trim()
           );
 
-          if (registerError) {
-            throw new Error(
-              `Failed to register customer: ${registerError.message}`
+          // Store the customer ID in Zustand
+          setStoredCustomer({
+            id: registerResult.customerId,
+            name: formData.customerName.trim(),
+            phone: formData.customerPhone.trim(),
+            shopId: shopId,
+          });
+
+          finalFormData.customerId = registerResult.customerId;
+
+          if (activeProfile?.id) {
+            console.log("Customer is not linked to profile");
+            await presenter.linkCustomerToProfile(
+              registerResult.customerId,
+              formData.customerPhone.trim()
             );
-          }
-
-          if (customerId) {
-            // Store the customer ID in Zustand
-            setStoredCustomer({
-              id: customerId,
-              name: formData.customerName.trim(),
-              phone: formData.customerPhone.trim(),
-              shopId: shopId,
-            });
-
-            finalFormData.customerId = customerId;
-
-            if (activeProfile?.id) {
-              console.log("Customer is not linked to profile");
-              await supabase.rpc("link_customer_to_profile", {
-                p_customer_id: customerId,
-                p_phone: formData.customerPhone.trim(),
-              });
-            }
           }
         } else {
           finalFormData.customerId = storedCustomer.id;
           // We have a stored customer, update their information if needed
-          const { data: customerData, error: getError } = await supabase.rpc(
-            "get_customer_by_id",
-            { p_customer_id: storedCustomer.id }
+          const currentCustomer = await presenter.getCustomerById(
+            storedCustomer.id
           );
 
-          if (getError) {
-            throw new Error(`Failed to get customer data: ${getError.message}`);
+          if (activeProfile?.id && currentCustomer.profileId === null) {
+            console.log("Customer is not linked to profile");
+            await presenter.linkCustomerToProfile(
+              currentCustomer.id,
+              currentCustomer.phone
+            );
           }
 
-          if (customerData && customerData.length > 0) {
-            const currentCustomer = customerData[0];
+          // If name or phone has changed, update the customer
+          if (
+            currentCustomer.name !== formData.customerName.trim() ||
+            currentCustomer.phone !== formData.customerPhone.trim()
+          ) {
+            const updateResult = await presenter.registerCustomer(
+              shopId,
+              formData.customerName.trim(),
+              formData.customerPhone.trim()
+            );
 
-            if (activeProfile?.id && currentCustomer.profile_id === null) {
-              console.log("Customer is not linked to profile");
-              await supabase.rpc("link_customer_to_profile", {
-                p_customer_id: currentCustomer.id,
-                p_phone: currentCustomer.phone,
-              });
-            }
-
-            // If name or phone has changed, update the customer
-            if (
-              currentCustomer.name !== formData.customerName.trim() ||
-              currentCustomer.phone !== formData.customerPhone.trim()
-            ) {
-              const { data: updatedCustomerId, error: updateError } =
-                await supabase.rpc("register_customer_with_phone", {
-                  p_shop_id: shopId,
-                  p_name: formData.customerName.trim(),
-                  p_phone: formData.customerPhone.trim(),
-                });
-
-              if (updateError) {
-                throw new Error(
-                  `Failed to update customer: ${updateError.message}`
-                );
-              }
-
-              if (updatedCustomerId) {
-                // Update stored customer with new information
-                setStoredCustomer({
-                  id: updatedCustomerId,
-                  name: formData.customerName.trim(),
-                  phone: formData.customerPhone.trim(),
-                  shopId: shopId,
-                });
-              }
-            }
+            // Update stored customer with new information
+            setStoredCustomer({
+              id: updateResult.customerId,
+              name: formData.customerName.trim(),
+              phone: formData.customerPhone.trim(),
+              shopId: shopId,
+            });
           }
         }
 
         // Call real API service
-        const { ClientCustomerQueueJoinPresenterFactory } = await import(
-          "./CustomerQueueJoinPresenter"
-        );
-        const presenter =
-          await ClientCustomerQueueJoinPresenterFactory.create();
         const result = await presenter.joinQueue(finalFormData, shopId);
 
         if (result.success) {

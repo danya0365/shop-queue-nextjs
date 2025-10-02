@@ -8,6 +8,8 @@ import type {
 } from "./CustomerQueueStatusPresenter";
 import { ClientQueueStatusPresenterFactory } from "./CustomerQueueStatusPresenter";
 
+const presenter = ClientQueueStatusPresenterFactory.create();
+
 // Re-export types
 export type { CustomerQueue, QueueProgress };
 
@@ -40,7 +42,6 @@ export function useCustomerQueueStatusPresenter(
         setLoading(true);
         setError(null);
 
-        const presenter = await ClientQueueStatusPresenterFactory.create();
         const newViewModel = await presenter.getViewModel(
           shopId,
           searchQueueNumber

@@ -1,5 +1,6 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
 import { ShopCustomerDashboardService } from "@/src/application/services/shop/customer/ShopCustomerDashboardService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import {
@@ -77,7 +78,6 @@ export class CustomerDashboardPresenter extends BaseShopPresenter {
     }
   }
 
-
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
@@ -94,19 +94,32 @@ export class CustomerDashboardPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    const shopCustomerDashboardService = serverContainer.resolve<ShopCustomerDashboardService>("ShopCustomerDashboardService");
-    return new CustomerDashboardPresenter(logger, shopService, shopCustomerDashboardService);
+    const shopCustomerDashboardService =
+      serverContainer.resolve<ShopCustomerDashboardService>(
+        "ShopCustomerDashboardService"
+      );
+    return new CustomerDashboardPresenter(
+      logger,
+      shopService,
+      shopCustomerDashboardService
+    );
   }
 }
 
 // Client-side Factory class
 export class ClientCustomerDashboardPresenterFactory {
-  static async create(): Promise<CustomerDashboardPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): CustomerDashboardPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    const shopCustomerDashboardService = clientContainer.resolve<ShopCustomerDashboardService>("ShopCustomerDashboardService");
-    return new CustomerDashboardPresenter(logger, shopService, shopCustomerDashboardService);
+    const shopCustomerDashboardService =
+      clientContainer.resolve<ShopCustomerDashboardService>(
+        "ShopCustomerDashboardService"
+      );
+    return new CustomerDashboardPresenter(
+      logger,
+      shopService,
+      shopCustomerDashboardService
+    );
   }
 }

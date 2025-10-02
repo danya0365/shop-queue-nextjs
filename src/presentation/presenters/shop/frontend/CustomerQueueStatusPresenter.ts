@@ -1,14 +1,14 @@
-import { ShopService } from "@/src/application/services/shop/ShopService";
-import { getClientContainer } from "@/src/di/client-container";
-import { getServerContainer } from "@/src/di/server-container";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
-import type { ShopCustomerQueueStatusService } from "@/src/application/services/shop/customer/ShopCustomerQueueStatusService";
 import type {
   CustomerQueueStatusDTO,
   QueueProgressDTO,
 } from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
+import type { ShopCustomerQueueStatusService } from "@/src/application/services/shop/customer/ShopCustomerQueueStatusService";
+import { ShopService } from "@/src/application/services/shop/ShopService";
+import { getClientContainer } from "@/src/di/client-container";
+import { getServerContainer } from "@/src/di/server-container";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPresenter";
 
 // Define interfaces for data structures (maintaining backward compatibility)
 export interface CustomerQueue {
@@ -63,17 +63,20 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
       });
 
       // Get data from service
-      const viewModelDTO = await this.shopCustomerQueueStatusService.getCustomerQueueStatusViewModel(
-        shopId,
-        queueIdentifier
-      );
+      const viewModelDTO =
+        await this.shopCustomerQueueStatusService.getCustomerQueueStatusViewModel(
+          shopId,
+          queueIdentifier
+        );
 
       // Convert DTO to ViewModel format
       const customerQueue = viewModelDTO.customerQueue
         ? this.mapCustomerQueueDTOToCustomerQueue(viewModelDTO.customerQueue)
         : null;
-      
-      const queueProgress = this.mapQueueProgressDTOToQueueProgress(viewModelDTO.queueProgress);
+
+      const queueProgress = this.mapQueueProgressDTOToQueueProgress(
+        viewModelDTO.queueProgress
+      );
 
       return {
         customerQueue,
@@ -92,7 +95,9 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
   }
 
   // Private methods for data mapping
-  private mapCustomerQueueDTOToCustomerQueue(dto: CustomerQueueStatusDTO): CustomerQueue {
+  private mapCustomerQueueDTOToCustomerQueue(
+    dto: CustomerQueueStatusDTO
+  ): CustomerQueue {
     return {
       id: dto.id,
       queueNumber: dto.queueNumber,
@@ -109,7 +114,9 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
     };
   }
 
-  private mapQueueProgressDTOToQueueProgress(dto: QueueProgressDTO): QueueProgress {
+  private mapQueueProgressDTOToQueueProgress(
+    dto: QueueProgressDTO
+  ): QueueProgress {
     return {
       currentNumber: dto.currentNumber,
       totalAhead: dto.totalAhead,
@@ -121,7 +128,10 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
   private formatQueueTimeString(dateString: string): string {
     try {
       const date = new Date(dateString);
-      return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } catch {
       return dateString;
     }
@@ -139,7 +149,9 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
   /**
    * Map QueueStatus enum to string literals for customer queue status view
    */
-  private mapQueueStatusToString(status: QueueStatus): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" {
+  private mapQueueStatusToString(
+    status: QueueStatus
+  ): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" {
     switch (status) {
       case QueueStatus.WAITING:
         return "waiting";
@@ -161,18 +173,32 @@ export class CustomerQueueStatusPresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const shopService = serverContainer.resolve<ShopService>("ShopService");
-    const shopCustomerQueueStatusService = serverContainer.resolve<ShopCustomerQueueStatusService>("ShopCustomerQueueStatusService");
-    return new CustomerQueueStatusPresenter(logger, shopService, shopCustomerQueueStatusService);
+    const shopCustomerQueueStatusService =
+      serverContainer.resolve<ShopCustomerQueueStatusService>(
+        "ShopCustomerQueueStatusService"
+      );
+    return new CustomerQueueStatusPresenter(
+      logger,
+      shopService,
+      shopCustomerQueueStatusService
+    );
   }
 }
 
 // Factory class for client-side
 export class ClientQueueStatusPresenterFactory {
-  static async create(): Promise<CustomerQueueStatusPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): CustomerQueueStatusPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<ShopService>("ShopService");
-    const shopCustomerQueueStatusService = clientContainer.resolve<ShopCustomerQueueStatusService>("ShopCustomerQueueStatusService");
-    return new CustomerQueueStatusPresenter(logger, shopService, shopCustomerQueueStatusService);
+    const shopCustomerQueueStatusService =
+      clientContainer.resolve<ShopCustomerQueueStatusService>(
+        "ShopCustomerQueueStatusService"
+      );
+    return new CustomerQueueStatusPresenter(
+      logger,
+      shopService,
+      shopCustomerQueueStatusService
+    );
   }
 }
