@@ -59,49 +59,37 @@ export function useCustomerQueueJoinPresenter(
       // Case 1: User has active profile but no stored customer (first time in this shop)
       if (activeProfile?.id && !storedCustomer) {
         try {
-          console.log("Loading customer data by profile ID for authenticated user");
-          const { data: profileCustomerData, error: profileError } = await supabase.rpc(
-            "get_customer_by_profile_id",
-            {
+          console.log(
+            "Loading customer data by profile ID for authenticated user"
+          );
+          const { data: profileCustomerData, error: profileError } =
+            await supabase.rpc("get_customer_by_profile_id", {
               p_profile_id: activeProfile.id,
               p_shop_id: shopId,
-            }
-          );
-
-          if (profileError) {
-            console.error("Error loading customer by profile ID:", profileError);
-            // Fallback: Use active profile data to pre-fill form
-            if (activeProfile) {
-              console.log("Using active profile data as fallback");
-              setCustomerName(activeProfile.fullName || activeProfile.name || "");
-              // Note: ProfileDto doesn't have phone field, so phone field will be empty
-              setCustomerPhone("");
-            }
-            return;
-          }
+            });
 
           if (profileCustomerData && profileCustomerData.length > 0) {
             const profileCustomer = profileCustomerData[0];
-            // Check if this customer is for the current shop
-            if (profileCustomer.shop_id === shopId) {
-              // Pre-fill form with customer data from profile
-              setCustomerName(profileCustomer.name);
-              setCustomerPhone(profileCustomer.phone);
-              // Store customer data for future use
-              setStoredCustomer({
-                id: profileCustomer.id,
-                name: profileCustomer.name,
-                phone: profileCustomer.phone,
-                shopId: profileCustomer.shop_id,
-              });
-              console.log("Loaded customer data from profile");
-            } else {
-              // Customer exists but for different shop
-              console.log("Customer exists but for different shop - user needs to register for this shop");
-            }
+
+            // Pre-fill form with customer data from profile
+            setCustomerName(profileCustomer.name);
+            setCustomerPhone(profileCustomer.phone);
+            // Store customer data for future use
+            setStoredCustomer({
+              id: profileCustomer.id,
+              name: profileCustomer.name,
+              phone: profileCustomer.phone,
+              shopId: profileCustomer.shop_id,
+            });
           } else {
-            // No customer data found for this profile
-            console.log("No customer data found for profile - user needs to register");
+            if (activeProfile) {
+              console.log("Using active profile data as fallback");
+              setCustomerName(
+                activeProfile.fullName || activeProfile.name || ""
+              );
+              // Note: ProfileDto doesn't have phone field, so phone field will be empty
+              setCustomerPhone("");
+            }
           }
         } catch (error) {
           console.error("Error loading customer by profile ID:", error);
@@ -153,7 +141,13 @@ export function useCustomerQueueJoinPresenter(
     };
 
     loadCustomerData();
-  }, [storedCustomer, shopId, setStoredCustomer, activeProfile?.id, activeProfile]);
+  }, [
+    storedCustomer,
+    shopId,
+    setStoredCustomer,
+    activeProfile?.id,
+    activeProfile,
+  ]);
 
   // Function to load data
   const loadData = useCallback(async () => {
