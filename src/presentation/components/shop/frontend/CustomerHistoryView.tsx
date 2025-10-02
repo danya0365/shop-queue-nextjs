@@ -368,15 +368,15 @@ export function CustomerHistoryView({
 
       {/* Details Modal */}
       {showDetailsModal && selectedQueue && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 shop-frontend-overlay flex items-center justify-center z-50">
+          <div className="shop-frontend-card p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium shop-frontend-text-primary">
                 รายละเอียดคิว {selectedQueue.queueNumber}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="shop-frontend-text-muted hover:shop-frontend-text-primary"
               >
                 ✕
               </button>
@@ -384,26 +384,26 @@ export function CustomerHistoryView({
 
             <div className="space-y-4">
               {/* Queue Info */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">ข้อมูลคิว</h4>
+              <div className="shop-frontend-card shop-frontend-card-hover p-4 rounded-lg">
+                <h4 className="font-medium shop-frontend-text-primary mb-2">ข้อมูลคิว</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-600">
+                    <p className="shop-frontend-text-secondary">
                       ร้าน: {selectedQueue.shopName}
                     </p>
-                    <p className="text-gray-600">
-                      วันที่:{" "}
+                    <p className="shop-frontend-text-secondary">
+                      วันที่: {" "}
                       {new Date(selectedQueue.queueDate).toLocaleDateString(
                         "th-TH"
                       )}
                     </p>
-                    <p className="text-gray-600">
+                    <p className="shop-frontend-text-secondary">
                       เวลา: {selectedQueue.queueTime}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-600">
-                      สถานะ:{" "}
+                    <p className="shop-frontend-text-secondary">
+                      สถานะ: {" "}
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
                           selectedQueue.status
@@ -413,12 +413,12 @@ export function CustomerHistoryView({
                       </span>
                     </p>
                     {selectedQueue.completedAt && (
-                      <p className="text-gray-600">
+                      <p className="shop-frontend-text-secondary">
                         เสร็จสิ้น: {selectedQueue.completedAt}
                       </p>
                     )}
                     {selectedQueue.employeeName && (
-                      <p className="text-gray-600">
+                      <p className="shop-frontend-text-secondary">
                         พนักงาน: {selectedQueue.employeeName}
                       </p>
                     )}
@@ -428,27 +428,27 @@ export function CustomerHistoryView({
 
               {/* Services */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">บริการ</h4>
+                <h4 className="font-medium shop-frontend-text-primary mb-2">บริการ</h4>
                 <div className="space-y-2">
                   {selectedQueue.services.map((service) => (
                     <div
                       key={service.id}
-                      className="flex justify-between items-center py-2 border-b"
+                      className="flex justify-between items-center py-2 border-b shop-frontend-card-border"
                     >
                       <div>
-                        <span className="font-medium">{service.name}</span>
-                        <span className="text-gray-600 ml-2">
+                        <span className="font-medium shop-frontend-text-primary">{service.name}</span>
+                        <span className="shop-frontend-text-secondary ml-2">
                           x{service.quantity}
                         </span>
                       </div>
-                      <span className="font-medium">
+                      <span className="font-medium shop-frontend-service-price">
                         ฿{(service.price * service.quantity).toLocaleString()}
                       </span>
                     </div>
                   ))}
                   <div className="flex justify-between items-center py-2 font-bold text-lg">
-                    <span>รวมทั้งสิ้น</span>
-                    <span>฿{selectedQueue.totalAmount.toLocaleString()}</span>
+                    <span className="shop-frontend-text-primary">รวมทั้งสิ้น</span>
+                    <span className="shop-frontend-service-price">฿{selectedQueue.totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -456,27 +456,27 @@ export function CustomerHistoryView({
               {/* Payment & Timing */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">
+                  <h4 className="font-medium shop-frontend-text-primary mb-2">
                     การชำระเงิน
                   </h4>
                   {selectedQueue.paymentMethod ? (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm shop-frontend-text-secondary">
                       {getPaymentMethodIcon(selectedQueue.paymentMethod)}{" "}
                       {getPaymentMethodText(selectedQueue.paymentMethod)}
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-600">-</p>
+                    <p className="text-sm shop-frontend-text-secondary">-</p>
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">เวลา</h4>
+                  <h4 className="font-medium shop-frontend-text-primary mb-2">เวลา</h4>
                   {selectedQueue.waitTime && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm shop-frontend-text-secondary">
                       เวลารอ: {selectedQueue.waitTime} นาที
                     </p>
                   )}
                   {selectedQueue.serviceTime && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm shop-frontend-text-secondary">
                       เวลาให้บริการ: {selectedQueue.serviceTime} นาที
                     </p>
                   )}
@@ -486,18 +486,18 @@ export function CustomerHistoryView({
               {/* Rating & Feedback */}
               {selectedQueue.rating && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">
+                  <h4 className="font-medium shop-frontend-text-primary mb-2">
                     คะแนนและความคิดเห็น
                   </h4>
                   <div className="flex items-center gap-2 mb-2">
                     {renderStars(selectedQueue.rating)}
-                    <span className="font-medium">
+                    <span className="font-medium shop-frontend-text-primary">
                       ({selectedQueue.rating}/5)
                     </span>
                   </div>
                   {selectedQueue.feedback && (
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-sm text-gray-700">
+                    <div className="shop-frontend-card-secondary rounded-lg p-3">
+                      <p className="text-sm shop-frontend-text-secondary">
                         {selectedQueue.feedback}
                       </p>
                     </div>
@@ -509,7 +509,7 @@ export function CustomerHistoryView({
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="shop-frontend-button-secondary px-4 py-2 rounded-lg text-sm font-medium"
               >
                 ปิด
               </button>
