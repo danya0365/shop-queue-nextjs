@@ -27,17 +27,30 @@ export class SupabaseCustomerHistoryMapper {
   static toQueueHistoryEntityFromRPC(
     data: GetCustomerQueueHistoryByCustomerSchema
   ): CustomerQueueHistoryEntity {
+    const services = this.toQueueServiceEntitiesFromRPC(
+      (data.services as Array<{
+        id?: string;
+        name?: string;
+        price?: number;
+        quantity?: number;
+      }>) || []
+    );
+
+    // Calculate total amount from services
+    const totalAmount = services.reduce(
+      (sum, service) => sum + service.price * service.quantity,
+      0
+    );
+
     return {
       id: data.id || "",
       queueNumber: data.queue_number || "",
       shopName: data.shop_name || "",
-      services: this.toQueueServiceEntitiesFromRPC(
-        (data.services as any) || []
-      ),
-      totalAmount: 0, // RPC doesn't provide this directly
+      services,
+      totalAmount,
       status: data.status as QueueStatus,
       queueDate: data.queue_date || "",
-      queueTime: "", // RPC doesn't provide this directly
+      queueTime: "", // RPC doesn't provide time separately
       completedAt: data.completed_at || undefined,
       waitTime: data.actual_wait_time
         ? Number(data.actual_wait_time)

@@ -8,8 +8,29 @@ import type {
   CustomerQueueHistory,
   HistoryFilterType,
 } from "@/src/presentation/presenters/shop/frontend/CustomerHistoryPresenter";
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import { useCustomerHistoryPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerHistoryPresenter";
 import { useState } from "react";
+
+// Status mapping for Thai labels
+const STATUS_LABELS: Record<string, string> = {
+  [ALL_FILTER_VALUE]: "ทั้งหมด",
+  [QueueStatus.WAITING]: "รอการยืนยัน",
+  [QueueStatus.CONFIRMED]: "ยืนยันแล้ว",
+  [QueueStatus.SERVING]: "กำลังให้บริการ",
+  [QueueStatus.COMPLETED]: "เสร็จสิ้น",
+  [QueueStatus.CANCELLED]: "ยกเลิก",
+  [QueueStatus.NO_SHOW]: "ไม่มาตามนัด",
+};
+
+// Generate status options dynamically from QueueStatus enum
+const STATUS_OPTIONS = [
+  { value: ALL_FILTER_VALUE, label: STATUS_LABELS[ALL_FILTER_VALUE] },
+  ...Object.values(QueueStatus).map((status) => ({
+    value: status,
+    label: STATUS_LABELS[status],
+  })),
+];
 
 interface CustomerHistoryViewProps {
   shopId: string;
@@ -228,18 +249,19 @@ export function CustomerHistoryView({
                 สถานะ
               </label>
               <select
-                value={filters.status || ""}
+                value={filters.status || ALL_FILTER_VALUE}
                 onChange={(e) =>
                   handleStatusFilterChange(
-                    (e.target.value || "all") as HistoryFilterType
+                    e.target.value as HistoryFilterType
                   )
                 }
                 className="shop-frontend-input w-full"
               >
-                <option value="">ทั้งหมด</option>
-                <option value="completed">เสร็จสิ้น</option>
-                <option value="cancelled">ยกเลิก</option>
-                <option value="no_show">ไม่มาตามนัด</option>
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

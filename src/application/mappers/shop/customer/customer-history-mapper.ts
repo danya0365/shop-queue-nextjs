@@ -7,6 +7,7 @@ import type {
   PaginationDTO,
 } from "@/src/application/dtos/shop/customer/customer-history-dto";
 import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import type {
   CustomerInfoEntity,
   CustomerQueueHistoryEntity,
@@ -26,7 +27,7 @@ export class CustomerHistoryMapper {
     customerStats: CustomerStatsEntity;
     customerInfo: CustomerInfoEntity;
     filters: {
-      status: "all" | "completed" | "cancelled" | "no_show";
+      status: typeof ALL_FILTER_VALUE | QueueStatus;
       dateRange: "all" | "month" | "quarter" | "year";
       shop: string;
       startDate?: string;

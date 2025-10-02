@@ -55,7 +55,7 @@ export interface HistoryFilters {
 }
 
 // type filter
-export type HistoryFilterType = "all" | "completed" | "cancelled" | "no_show";
+export type HistoryFilterType = typeof import("@/src/domain/constants/filter.constants").ALL_FILTER_VALUE | QueueStatus;
 
 // Pagination interface
 export interface Pagination {

@@ -1,7 +1,8 @@
 // Customer History DTOs following Clean Architecture principles
 
 import { PaymentMethod } from "@/src/domain/entities/backend/backend-payment.entity";
-import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 
 export interface CustomerQueueHistoryDTO {
   id: string;
@@ -46,7 +47,7 @@ export interface HistoryFiltersDTO {
   endDate?: string;
 }
 
-export type HistoryFilterType = "all" | "completed" | "cancelled" | "no_show";
+export type HistoryFilterType = typeof ALL_FILTER_VALUE | QueueStatus;
 
 export interface PaginationDTO {
   currentPage: number;

@@ -1,5 +1,6 @@
 import { PaymentMethod } from "../backend/backend-payment.entity";
 import { QueueStatus } from "../backend/backend-queue.entity";
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 
 export interface CustomerQueueHistoryEntity {
   id: string;
@@ -43,7 +44,7 @@ export interface CustomerInfoEntity {
 
 // Domain types for customer history operations
 export interface CustomerHistoryFilters {
-  status?: "all" | "completed" | "cancelled" | "no_show";
+  status?: typeof ALL_FILTER_VALUE | QueueStatus;
   dateRange?: "all" | "month" | "quarter" | "year";
   shop?: string;
   startDate?: string;
