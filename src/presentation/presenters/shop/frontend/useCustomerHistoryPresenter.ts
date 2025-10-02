@@ -11,8 +11,10 @@ import type {
   HistoryFilterType,
 } from "./CustomerHistoryPresenter";
 import { ClientCustomerHistoryPresenterFactory } from "./CustomerHistoryPresenter";
+import { ClientCustomerPresenterFactory } from "./CustomerPresenter";
 
 const presenter = ClientCustomerHistoryPresenterFactory.create();
+const customerPresenter = ClientCustomerPresenterFactory.create();
 
 // Define filter type
 export type { HistoryFilters, HistoryFilterType };
@@ -53,11 +55,6 @@ export function useCustomerHistoryPresenter(
     endDate: undefined,
   });
 
-  // Action loading states
-  const [actionLoading, setActionLoading] = useState({
-    viewDetails: false,
-  });
-
   // Initialize with initial view model if provided
   useEffect(() => {
     if (initialViewModel) {
@@ -76,7 +73,7 @@ export function useCustomerHistoryPresenter(
             "Loading customer data by profile ID for authenticated user"
           );
 
-          const profileCustomer = await presenter.getCustomerByProfileId(
+          const profileCustomer = await customerPresenter.getCustomerByProfileId(
             activeProfile.id,
             shopId
           );
@@ -98,7 +95,7 @@ export function useCustomerHistoryPresenter(
       // Case 2: User has stored customer data (existing logic)
       if (storedCustomer && storedCustomer.shopId === shopId) {
         try {
-          const currentCustomer = await presenter.getCustomerById(
+          const currentCustomer = await customerPresenter.getCustomerById(
             storedCustomer.id
           );
 
@@ -106,7 +103,7 @@ export function useCustomerHistoryPresenter(
           // if so, link customer to profile
           if (currentCustomer.profileId === null && activeProfile?.id) {
             console.log("Customer is not linked to profile");
-            await presenter.linkCustomerToProfile(
+            await customerPresenter.linkCustomerToProfile(
               currentCustomer.id,
               currentCustomer.phone
             );
@@ -283,7 +280,6 @@ export function useCustomerHistoryPresenter(
 
     // Action handlers
     handleViewQueueDetails,
-    actionLoading,
 
     // Utility
     refreshData,

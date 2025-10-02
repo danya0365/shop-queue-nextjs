@@ -11,8 +11,10 @@ import {
   type QueueService,
   type ServiceOption,
 } from "./CustomerQueueJoinPresenter";
+import { ClientCustomerPresenterFactory } from "./CustomerPresenter";
 
 const presenter = ClientCustomerQueueJoinPresenterFactory.create();
+const customerPresenter = ClientCustomerPresenterFactory.create();
 
 // Re-export types
 export type { QueueFormData, ServiceOption };
@@ -64,7 +66,7 @@ export function useCustomerQueueJoinPresenter(
             "Loading customer data by profile ID for authenticated user"
           );
 
-          const profileCustomer = await presenter.getCustomerByProfileId(
+          const profileCustomer = await customerPresenter.getCustomerByProfileId(
             activeProfile.id,
             shopId
           );
@@ -98,7 +100,7 @@ export function useCustomerQueueJoinPresenter(
       // Case 2: User has stored customer data (existing logic)
       if (storedCustomer && storedCustomer.shopId === shopId) {
         try {
-          const currentCustomer = await presenter.getCustomerById(
+          const currentCustomer = await customerPresenter.getCustomerById(
             storedCustomer.id
           );
 
@@ -110,7 +112,7 @@ export function useCustomerQueueJoinPresenter(
           // if so, link customer to profile
           if (currentCustomer.profileId === null && activeProfile?.id) {
             console.log("Customer is not linked to profile");
-            await presenter.linkCustomerToProfile(
+            await customerPresenter.linkCustomerToProfile(
               currentCustomer.id,
               currentCustomer.phone
             );
@@ -314,7 +316,7 @@ export function useCustomerQueueJoinPresenter(
         // Check if we have a stored customer for this shop
         if (!storedCustomer || storedCustomer.shopId !== shopId) {
           // No stored customer or different shop, register new customer
-          const registerResult = await presenter.registerCustomer(
+          const registerResult = await customerPresenter.registerCustomer(
             shopId,
             formData.customerName.trim(),
             formData.customerPhone.trim()
@@ -332,7 +334,7 @@ export function useCustomerQueueJoinPresenter(
 
           if (activeProfile?.id) {
             console.log("Customer is not linked to profile");
-            await presenter.linkCustomerToProfile(
+            await customerPresenter.linkCustomerToProfile(
               registerResult.customerId,
               formData.customerPhone.trim()
             );
@@ -340,13 +342,13 @@ export function useCustomerQueueJoinPresenter(
         } else {
           finalFormData.customerId = storedCustomer.id;
           // We have a stored customer, update their information if needed
-          const currentCustomer = await presenter.getCustomerById(
+          const currentCustomer = await customerPresenter.getCustomerById(
             storedCustomer.id
           );
 
           if (activeProfile?.id && currentCustomer.profileId === null) {
             console.log("Customer is not linked to profile");
-            await presenter.linkCustomerToProfile(
+            await customerPresenter.linkCustomerToProfile(
               currentCustomer.id,
               currentCustomer.phone
             );
@@ -357,7 +359,7 @@ export function useCustomerQueueJoinPresenter(
             currentCustomer.name !== formData.customerName.trim() ||
             currentCustomer.phone !== formData.customerPhone.trim()
           ) {
-            const updateResult = await presenter.registerCustomer(
+            const updateResult = await customerPresenter.registerCustomer(
               shopId,
               formData.customerName.trim(),
               formData.customerPhone.trim()
@@ -404,7 +406,7 @@ export function useCustomerQueueJoinPresenter(
         setActionLoading(false);
       }
     },
-    [viewModel, shopId, storedCustomer, setStoredCustomer]
+  [viewModel, shopId, storedCustomer, setStoredCustomer, activeProfile?.id]
   );
 
   const reset = useCallback(() => {

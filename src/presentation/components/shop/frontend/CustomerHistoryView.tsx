@@ -58,7 +58,6 @@ export function CustomerHistoryView({
     handleShopFilterChange,
     handleCustomDateRangeChange,
     handleViewQueueDetails,
-    actionLoading,
     refreshData,
   } = useCustomerHistoryPresenter(shopId, initialViewModel);
 
