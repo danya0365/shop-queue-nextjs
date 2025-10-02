@@ -1108,6 +1108,39 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =============================================================================
+-- CUSTOMER PROFILE FUNCTIONS
+-- =============================================================================
+
+-- Get customer by profile ID and shop ID
+-- Returns customer data for the currently authenticated user's profile in a specific shop
+-- Security: Only returns customer data for the currently authenticated user
+CREATE OR REPLACE FUNCTION public.get_customer_by_profile_id(
+  p_profile_id UUID,
+  p_shop_id UUID
+) RETURNS TABLE(
+  id UUID,
+  name TEXT,
+  phone TEXT,
+  shop_id UUID,
+  profile_id UUID
+) AS $$
+BEGIN
+  -- Security check: Only return customer data for the currently authenticated user
+  RETURN QUERY
+  SELECT 
+    c.id,
+    c.name,
+    c.phone,
+    c.shop_id,
+    c.profile_id
+  FROM public.customers c
+  WHERE c.profile_id = p_profile_id
+    AND c.shop_id = p_shop_id
+    AND p_profile_id = public.get_active_profile_id(); -- Ensure it's the current user's profile
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================================================
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================
 
