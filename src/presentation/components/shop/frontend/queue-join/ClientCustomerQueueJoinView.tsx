@@ -4,7 +4,6 @@ import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.
 import useGetDevice from "@/src/presentation/hooks/get-device";
 import { useCustomerQueueJoinPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueJoinPresenter";
 import { cn } from "@/src/utils/cn";
-import { useState } from "react";
 import StickyBox from "react-sticky-box";
 import { CustomerForm } from "./components/CustomerForm";
 import { OrderSummary } from "./components/OrderSummary";
@@ -39,9 +38,10 @@ export function ClientCustomerQueueJoinView({
     reset,
     getSelectedServicesAsQueueServices,
     serviceQuantities,
+    isShowFinalOrderSummary,
+    setIsShowFinalOrderSummary,
   } = useCustomerQueueJoinPresenter(shopId, initialViewModel);
   const device = useGetDevice();
-  const [isShowFinalOrderSummary, setIsShowFinalOrderSummary] = useState(false);
 
   // Priority options configuration
   const priorityOptions = [

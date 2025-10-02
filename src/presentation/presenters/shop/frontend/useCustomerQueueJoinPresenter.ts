@@ -3,6 +3,7 @@
 import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { supabase } from "@/src/infrastructure/config/supabase-browser-client";
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
+import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import { useCallback, useEffect, useState } from "react";
 import {
   ClientCustomerQueueJoinPresenterFactory,
@@ -25,6 +26,7 @@ export function useCustomerQueueJoinPresenter(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const { activeProfile } = useProfileStore();
 
   // Customer store for persisting customer ID
   const { customer: storedCustomer, setCustomer: setStoredCustomer } =
@@ -36,6 +38,7 @@ export function useCustomerQueueJoinPresenter(
   const [specialRequests, setSpecialRequests] = useState("");
   const [priority, setPriority] = useState<QueuePriority>(QueuePriority.NORMAL);
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
+  const [isShowFinalOrderSummary, setIsShowFinalOrderSummary] = useState(false);
 
   // State for managing service quantities
   const [serviceQuantities, setServiceQuantities] = useState<
@@ -56,9 +59,12 @@ export function useCustomerQueueJoinPresenter(
       if (storedCustomer && storedCustomer.shopId === shopId) {
         try {
           // Call RPC to get customer details (security check will be applied)
-          const { data, error } = await supabase.rpc("get_customer_by_id", {
-            p_customer_id: storedCustomer.id,
-          });
+          const { data: customerData, error } = await supabase.rpc(
+            "get_customer_by_id",
+            {
+              p_customer_id: storedCustomer.id,
+            }
+          );
 
           if (error) {
             console.error("Error loading customer data:", error);
@@ -67,16 +73,20 @@ export function useCustomerQueueJoinPresenter(
             return;
           }
 
-          if (data && data.length > 0) {
-            const customerData = data[0];
+          if (customerData && customerData.length > 0) {
+            const currentCustomer = customerData[0];
             // Pre-fill form with customer data
-            setCustomerName(customerData.name);
-            setCustomerPhone(customerData.phone);
+            setCustomerName(currentCustomer.name);
+            setCustomerPhone(currentCustomer.phone);
 
             // TODO: check if profile id is null and user is authenticated
             // if so, link customer to profile
-            if (customerData.profile_id === null) {
+            if (currentCustomer.profile_id === null && activeProfile?.id) {
               console.log("Customer is not linked to profile");
+              await supabase.rpc("link_customer_to_profile", {
+                p_customer_id: currentCustomer.id,
+                p_phone: currentCustomer.phone,
+              });
             }
           } else {
             // No customer data returned, clear stored customer
@@ -90,7 +100,7 @@ export function useCustomerQueueJoinPresenter(
     };
 
     loadCustomerData();
-  }, [storedCustomer, shopId, setStoredCustomer]);
+  }, [storedCustomer, shopId, setStoredCustomer, activeProfile?.id]);
 
   // Function to load data
   const loadData = useCallback(async () => {
@@ -301,6 +311,14 @@ export function useCustomerQueueJoinPresenter(
             });
 
             finalFormData.customerId = customerId;
+
+            if (activeProfile?.id) {
+              console.log("Customer is not linked to profile");
+              await supabase.rpc("link_customer_to_profile", {
+                p_customer_id: customerId,
+                p_phone: formData.customerPhone.trim(),
+              });
+            }
           }
         } else {
           finalFormData.customerId = storedCustomer.id;
@@ -316,6 +334,14 @@ export function useCustomerQueueJoinPresenter(
 
           if (customerData && customerData.length > 0) {
             const currentCustomer = customerData[0];
+
+            if (activeProfile?.id && currentCustomer.profile_id === null) {
+              console.log("Customer is not linked to profile");
+              await supabase.rpc("link_customer_to_profile", {
+                p_customer_id: currentCustomer.id,
+                p_phone: currentCustomer.phone,
+              });
+            }
 
             // If name or phone has changed, update the customer
             if (
@@ -402,6 +428,7 @@ export function useCustomerQueueJoinPresenter(
     setSpecialRequests("");
     setPriority(QueuePriority.NORMAL);
     setSelectedCategory("ทั้งหมด");
+    setIsShowFinalOrderSummary(false);
     setError(null);
 
     // Reload customer data from store if available
@@ -431,6 +458,8 @@ export function useCustomerQueueJoinPresenter(
     setPriority,
     selectedCategory,
     setSelectedCategory,
+    isShowFinalOrderSummary,
+    setIsShowFinalOrderSummary,
 
     // Service quantities state
     serviceQuantities,
