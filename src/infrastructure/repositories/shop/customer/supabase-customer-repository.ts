@@ -38,8 +38,7 @@ export class SupabaseCustomerRepository
       const result = await this.dataSource.callRpc<GetCustomerByIdSchema[]>(
         "get_customer_by_id",
         {
-          shop_id_param: "", // This will be handled by the RPC function
-          customer_id_param: customerId,
+          p_customer_id: customerId,
         }
       );
 
@@ -83,8 +82,8 @@ export class SupabaseCustomerRepository
       const result = await this.dataSource.callRpc<
         GetCustomerByProfileIdSchema[]
       >("get_customer_by_profile_id", {
-        profile_id_param: profileId,
-        shop_id_param: shopId,
+        p_profile_id: profileId,
+        p_shop_id: shopId,
       });
 
       if (!result || result.length === 0) {
