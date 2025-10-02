@@ -1,5 +1,7 @@
 "use client";
 
+import { PaymentMethod } from "@/src/domain/entities/shop/backend/backend-payment.entity";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { PaginationControls } from "@/src/presentation/components/common/PaginationControls";
 import type {
   CustomerHistoryViewModel,
@@ -51,54 +53,58 @@ export function CustomerHistoryView({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
+      case QueueStatus.COMPLETED:
         return "bg-green-100 text-green-800";
-      case "cancelled":
+      case QueueStatus.CANCELLED:
         return "bg-red-100 text-red-800";
-      case "no_show":
+      case QueueStatus.NO_SHOW:
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: QueueStatus) => {
     switch (status) {
-      case "completed":
+      case QueueStatus.WAITING:
+        return "รอยืนยัน";
+      case QueueStatus.CONFIRMED:
+        return "กำลังดำเนินการ";
+      case QueueStatus.COMPLETED:
         return "เสร็จสิ้น";
-      case "cancelled":
+      case QueueStatus.CANCELLED:
         return "ยกเลิก";
-      case "no_show":
+      case QueueStatus.NO_SHOW:
         return "ไม่มาตามนัด";
       default:
         return status;
     }
   };
 
-  const getPaymentMethodText = (method?: string) => {
+  const getPaymentMethodText = (method: PaymentMethod) => {
     switch (method) {
-      case "cash":
+      case PaymentMethod.CASH:
         return "เงินสด";
-      case "card":
+      case PaymentMethod.CARD:
         return "บัตรเครดิต";
-      case "qr":
+      case PaymentMethod.QR:
         return "QR Code";
-      case "transfer":
+      case PaymentMethod.TRANSFER:
         return "โอนเงิน";
       default:
         return "-";
     }
   };
 
-  const getPaymentMethodIcon = (method?: string) => {
+  const getPaymentMethodIcon = (method: PaymentMethod) => {
     switch (method) {
-      case "cash":
+      case PaymentMethod.CASH:
         return "💵";
-      case "card":
+      case PaymentMethod.CARD:
         return "💳";
-      case "qr":
+      case PaymentMethod.QR:
         return "📱";
-      case "transfer":
+      case PaymentMethod.TRANSFER:
         return "🏦";
       default:
         return "";
@@ -322,9 +328,9 @@ export function CustomerHistoryView({
 
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            queue.status === "completed"
+                            queue.status === QueueStatus.COMPLETED
                               ? "shop-frontend-badge-success"
-                              : queue.status === "cancelled"
+                              : queue.status === QueueStatus.CANCELLED
                               ? "shop-frontend-status-cancelled"
                               : "shop-frontend-badge-warning"
                           }`}
@@ -385,14 +391,16 @@ export function CustomerHistoryView({
             <div className="space-y-4">
               {/* Queue Info */}
               <div className="shop-frontend-card shop-frontend-card-hover p-4 rounded-lg">
-                <h4 className="font-medium shop-frontend-text-primary mb-2">ข้อมูลคิว</h4>
+                <h4 className="font-medium shop-frontend-text-primary mb-2">
+                  ข้อมูลคิว
+                </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="shop-frontend-text-secondary">
                       ร้าน: {selectedQueue.shopName}
                     </p>
                     <p className="shop-frontend-text-secondary">
-                      วันที่: {" "}
+                      วันที่:{" "}
                       {new Date(selectedQueue.queueDate).toLocaleDateString(
                         "th-TH"
                       )}
@@ -403,7 +411,7 @@ export function CustomerHistoryView({
                   </div>
                   <div>
                     <p className="shop-frontend-text-secondary">
-                      สถานะ: {" "}
+                      สถานะ:{" "}
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
                           selectedQueue.status
@@ -428,7 +436,9 @@ export function CustomerHistoryView({
 
               {/* Services */}
               <div>
-                <h4 className="font-medium shop-frontend-text-primary mb-2">บริการ</h4>
+                <h4 className="font-medium shop-frontend-text-primary mb-2">
+                  บริการ
+                </h4>
                 <div className="space-y-2">
                   {selectedQueue.services.map((service) => (
                     <div
@@ -436,7 +446,9 @@ export function CustomerHistoryView({
                       className="flex justify-between items-center py-2 border-b shop-frontend-card-border"
                     >
                       <div>
-                        <span className="font-medium shop-frontend-text-primary">{service.name}</span>
+                        <span className="font-medium shop-frontend-text-primary">
+                          {service.name}
+                        </span>
                         <span className="shop-frontend-text-secondary ml-2">
                           x{service.quantity}
                         </span>
@@ -447,8 +459,12 @@ export function CustomerHistoryView({
                     </div>
                   ))}
                   <div className="flex justify-between items-center py-2 font-bold text-lg">
-                    <span className="shop-frontend-text-primary">รวมทั้งสิ้น</span>
-                    <span className="shop-frontend-service-price">฿{selectedQueue.totalAmount.toLocaleString()}</span>
+                    <span className="shop-frontend-text-primary">
+                      รวมทั้งสิ้น
+                    </span>
+                    <span className="shop-frontend-service-price">
+                      ฿{selectedQueue.totalAmount.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -469,7 +485,9 @@ export function CustomerHistoryView({
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium shop-frontend-text-primary mb-2">เวลา</h4>
+                  <h4 className="font-medium shop-frontend-text-primary mb-2">
+                    เวลา
+                  </h4>
                   {selectedQueue.waitTime && (
                     <p className="text-sm shop-frontend-text-secondary">
                       เวลารอ: {selectedQueue.waitTime} นาที
