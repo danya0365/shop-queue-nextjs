@@ -95,15 +95,29 @@ BEGIN
     v_has_next := p_page < v_total_pages;
     v_has_prev := p_page > 1;
     
-    -- Build the data array with proper joins
+    -- Build the data array with proper joins using subquery for pagination
+    WITH paginated_queues AS (
+        SELECT q.id, q.shop_id, q.queue_number, q.status, q.priority, 
+               q.estimated_duration, q.estimated_call_time, q.actual_wait_time,
+               q.served_at, q.completed_at, q.cancelled_at, q.cancelled_reason,
+               q.feedback, q.rating, q.created_at, q.updated_at
+        FROM queues q
+        WHERE q.customer_id = p_customer_id
+        AND q.shop_id = p_shop_id
+        AND (p_status = 'all' OR q.status::TEXT = p_status)
+        AND (v_start_date IS NULL OR q.created_at::DATE >= v_start_date)
+        AND (v_end_date IS NULL OR q.created_at::DATE <= v_end_date)
+        ORDER BY q.created_at DESC
+        LIMIT p_limit OFFSET v_offset
+    )
     SELECT COALESCE(JSONB_AGG(
         JSONB_BUILD_OBJECT(
-            'id', q.id,
-            'shop_id', q.shop_id,
+            'id', pq.id,
+            'shop_id', pq.shop_id,
             'shop_name', s.name,
-            'queue_number', q.queue_number,
-            'status', q.status::TEXT,
-            'priority', q.priority::TEXT,
+            'queue_number', pq.queue_number,
+            'status', pq.status::TEXT,
+            'priority', pq.priority::TEXT,
             'customer_name', c.name,
             'services', (
                 SELECT COALESCE(JSONB_AGG(
@@ -116,33 +130,25 @@ BEGIN
                 ), '[]'::JSONB)
                 FROM queue_services qs
                 JOIN services svc ON qs.service_id = svc.id
-                WHERE qs.queue_id = q.id
+                WHERE qs.queue_id = pq.id
             ),
-            'estimated_duration', q.estimated_duration,
-            'estimated_call_time', q.estimated_call_time,
-            'actual_wait_time', q.actual_wait_time,
-            'served_at', q.served_at,
-            'completed_at', q.completed_at,
-            'cancelled_at', q.cancelled_at,
-            'cancelled_reason', q.cancelled_reason,
-            'feedback', q.feedback,
-            'rating', q.rating,
-            'created_at', q.created_at,
-            'updated_at', q.updated_at,
-            'queue_date', q.created_at::DATE
-        )
+            'estimated_duration', pq.estimated_duration,
+            'estimated_call_time', pq.estimated_call_time,
+            'actual_wait_time', pq.actual_wait_time,
+            'served_at', pq.served_at,
+            'completed_at', pq.completed_at,
+            'cancelled_at', pq.cancelled_at,
+            'cancelled_reason', pq.cancelled_reason,
+            'feedback', pq.feedback,
+            'rating', pq.rating,
+            'created_at', pq.created_at,
+            'updated_at', pq.updated_at,
+            'queue_date', pq.created_at::DATE
+        ) ORDER BY pq.created_at DESC
     ), '[]'::JSONB) INTO v_result_data
-    FROM queues q
-    LEFT JOIN shops s ON q.shop_id = s.id
-    LEFT JOIN customers c ON q.customer_id = c.id
-    WHERE q.customer_id = p_customer_id
-    AND q.shop_id = p_shop_id
-    AND (p_status = 'all' OR q.status::TEXT = p_status)
-    AND (v_start_date IS NULL OR q.created_at::DATE >= v_start_date)
-    AND (v_end_date IS NULL OR q.created_at::DATE <= v_end_date)
-    GROUP BY q.id, q.shop_id, q.queue_number, q.status, q.priority, q.estimated_duration, q.estimated_call_time, q.actual_wait_time, q.served_at, q.completed_at, q.cancelled_at, q.cancelled_reason, q.feedback, q.rating, q.created_at, q.updated_at, s.id, s.name, c.id, c.name
-    ORDER BY q.created_at DESC
-    LIMIT p_limit OFFSET v_offset;
+    FROM paginated_queues pq
+    LEFT JOIN shops s ON pq.shop_id = s.id
+    LEFT JOIN customers c ON c.id = p_customer_id;
     
     -- Return the paginated result structure as JSONB
     RETURN JSONB_BUILD_OBJECT(
