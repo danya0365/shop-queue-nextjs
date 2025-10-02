@@ -668,6 +668,134 @@ export type Database = {
           },
         ]
       }
+      notification_credentials: {
+        Row: {
+          created_at: string | null
+          daily_summary_time: string | null
+          enable_quiet_hours: boolean | null
+          id: string
+          last_notification_sent_at: string | null
+          line_notify_enabled: boolean | null
+          line_notify_token: string | null
+          notification_count_today: number | null
+          notify_daily_summary: boolean | null
+          notify_new_queue: boolean | null
+          notify_queue_cancelled: boolean | null
+          notify_queue_completed: boolean | null
+          notify_queue_confirmed: boolean | null
+          notify_queue_no_show: boolean | null
+          notify_queue_serving: boolean | null
+          profile_id: string
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          shop_id: string
+          telegram_bot_token: string | null
+          telegram_chat_id: string | null
+          telegram_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          daily_summary_time?: string | null
+          enable_quiet_hours?: boolean | null
+          id?: string
+          last_notification_sent_at?: string | null
+          line_notify_enabled?: boolean | null
+          line_notify_token?: string | null
+          notification_count_today?: number | null
+          notify_daily_summary?: boolean | null
+          notify_new_queue?: boolean | null
+          notify_queue_cancelled?: boolean | null
+          notify_queue_completed?: boolean | null
+          notify_queue_confirmed?: boolean | null
+          notify_queue_no_show?: boolean | null
+          notify_queue_serving?: boolean | null
+          profile_id: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          shop_id: string
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          daily_summary_time?: string | null
+          enable_quiet_hours?: boolean | null
+          id?: string
+          last_notification_sent_at?: string | null
+          line_notify_enabled?: boolean | null
+          line_notify_token?: string | null
+          notification_count_today?: number | null
+          notify_daily_summary?: boolean | null
+          notify_new_queue?: boolean | null
+          notify_queue_cancelled?: boolean | null
+          notify_queue_completed?: boolean | null
+          notify_queue_confirmed?: boolean | null
+          notify_queue_no_show?: boolean | null
+          notify_queue_serving?: boolean | null
+          profile_id?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          shop_id?: string
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_credentials_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "notification_credentials_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string | null
@@ -3983,6 +4111,10 @@ export type Database = {
         Args: { p_profile_id: string; p_action: string; p_shop_id?: string }
         Returns: boolean
       }
+      cancel_customer_queue: {
+        Args: { p_shop_id: string; p_queue_number: string }
+        Returns: boolean
+      }
       cleanup_old_activities: {
         Args: { p_days_to_keep?: number }
         Returns: number
@@ -4247,6 +4379,34 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_customer_queue_by_number: {
+        Args: { p_shop_id: string; p_queue_number: string }
+        Returns: {
+          id: string
+          shop_id: string
+          customer_id: string
+          queue_number: string
+          status: Database["public"]["Enums"]["queue_status"]
+          priority: Database["public"]["Enums"]["queue_priority"]
+          estimated_duration: number
+          estimated_call_time: string
+          served_by_employee_id: string
+          actual_wait_time: number
+          note: string
+          feedback: string
+          rating: number
+          created_at: string
+          updated_at: string
+          served_at: string
+          completed_at: string
+          cancelled_at: string
+          cancelled_reason: string
+          cancelled_note: string
+          customer_name: string
+          customer_phone: string
+          services: Json
+        }[]
+      }
       get_customer_queue_history_by_customer: {
         Args: {
           p_customer_id: string
@@ -4259,6 +4419,16 @@ export type Database = {
           p_end_date?: string
         }
         Returns: Json
+      }
+      get_customer_queue_progress: {
+        Args: { p_shop_id: string }
+        Returns: {
+          shop_id: string
+          current_number: string
+          total_ahead: number
+          average_service_time: number
+          estimated_call_time: string
+        }[]
       }
       get_customer_stats: {
         Args: { shop_id_param: string }
@@ -4452,6 +4622,21 @@ export type Database = {
           total_shops: number
           active_shops: number
           new_shops_this_month: number
+        }[]
+      }
+      get_notification_recipients_for_shop: {
+        Args: { p_shop_id: string }
+        Returns: {
+          profile_id: string
+          line_notify_token: string
+          line_notify_enabled: boolean
+          telegram_bot_token: string
+          telegram_chat_id: string
+          telegram_enabled: boolean
+          notify_new_queue: boolean
+          enable_quiet_hours: boolean
+          quiet_hours_start: string
+          quiet_hours_end: string
         }[]
       }
       get_paginated_customers: {
@@ -4882,6 +5067,10 @@ export type Database = {
         }
         Returns: string
       }
+      reset_daily_notification_count: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       search_marketplace_categories: {
         Args: { p_search_query?: string; p_limit?: number }
         Returns: {
@@ -4900,6 +5089,10 @@ export type Database = {
           target_profile_id: string
           new_role: Database["public"]["Enums"]["profile_role"]
         }
+        Returns: boolean
+      }
+      should_send_notification: {
+        Args: { p_credential_id: string }
         Returns: boolean
       }
       update_department: {
@@ -4945,6 +5138,10 @@ export type Database = {
       }
       update_employee_duty: {
         Args: { p_employee_id: string; p_is_on_duty: boolean }
+        Returns: undefined
+      }
+      update_notification_sent: {
+        Args: { p_credential_id: string }
         Returns: undefined
       }
       update_promotion: {

@@ -1534,7 +1534,7 @@ BEGIN
     WHERE id = p_queue_id
   ),
   ahead_queues AS (
-    SELECT COALESCE(SUM(estimated_duration), 0) as total_wait
+    SELECT COALESCE(SUM(qs.estimated_duration), 0) as total_wait
     FROM queue_stats qs, current_queue cq
     WHERE qs.pos < cq.pos
   )
