@@ -40,3 +40,40 @@ export interface CustomerInfoEntity {
   customerName: string;
   memberSince: string;
 }
+
+// Domain types for customer history operations
+export interface CustomerHistoryFilters {
+  status?: "all" | "completed" | "cancelled" | "no_show";
+  dateRange?: "all" | "month" | "quarter" | "year";
+  shop?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface GetCustomerQueueHistoryParams {
+  shopId: string;
+  customerId: string;
+  filters?: CustomerHistoryFilters;
+}
+
+export interface GetCustomerQueueHistoryWithPaginationParams {
+  page: number;
+  limit: number;
+  shopId: string;
+  customerId: string;
+  filters?: CustomerHistoryFilters;
+}
+
+export interface CustomerHistoryPaginationMeta {
+  currentPage: number;
+  perPage: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface CustomerQueueHistoryResult {
+  data: CustomerQueueHistoryEntity[];
+  pagination: CustomerHistoryPaginationMeta;
+}

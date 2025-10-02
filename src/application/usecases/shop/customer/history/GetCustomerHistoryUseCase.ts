@@ -1,3 +1,7 @@
+import type {
+  CustomerHistoryDataDTO,
+  GetCustomerHistoryInputDTO,
+} from "@/src/application/dtos/shop/customer/customer-history-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { CustomerHistoryMapper } from "@/src/application/mappers/shop/customer/customer-history-mapper";
 import type { ShopCustomerHistoryRepository } from "@/src/domain/repositories/shop/customer/customer-history-repository";
@@ -5,40 +9,25 @@ import {
   ShopCustomerHistoryError,
   ShopCustomerHistoryErrorType,
 } from "@/src/domain/repositories/shop/customer/customer-history-repository";
-import type { CustomerHistoryDataDTO } from "@/src/application/dtos/shop/customer/customer-history-dto";
 
-export class GetCustomerHistoryUseCase implements IUseCase<{
-  shopId: string;
-  customerId?: string;
-  currentPage?: number;
-  perPage?: number;
-  filters?: {
-    status: "all" | "completed" | "cancelled" | "no_show";
-    dateRange: "all" | "month" | "quarter" | "year";
-    shop: string;
-    startDate?: string;
-    endDate?: string;
-  };
-}, CustomerHistoryDataDTO> {
+export class GetCustomerHistoryUseCase
+  implements IUseCase<GetCustomerHistoryInputDTO, CustomerHistoryDataDTO>
+{
   constructor(
     private readonly customerHistoryRepository: ShopCustomerHistoryRepository
   ) {}
 
-  async execute(input: {
-    shopId: string;
-    customerId?: string;
-    currentPage?: number;
-    perPage?: number;
-    filters?: {
-      status: "all" | "completed" | "cancelled" | "no_show";
-      dateRange: "all" | "month" | "quarter" | "year";
-      shop: string;
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<CustomerHistoryDataDTO> {
+  async execute(
+    input: GetCustomerHistoryInputDTO
+  ): Promise<CustomerHistoryDataDTO> {
     try {
-      const { shopId, customerId, currentPage = 1, perPage = 10, filters } = input;
+      const {
+        shopId,
+        customerId,
+        currentPage = 1,
+        perPage = 10,
+        filters,
+      } = input;
 
       if (!shopId) {
         throw new ShopCustomerHistoryError(
@@ -48,23 +37,26 @@ export class GetCustomerHistoryUseCase implements IUseCase<{
           { shopId }
         );
       }
-
-      const queueHistoryResult = await this.customerHistoryRepository.getCustomerQueueHistory({
-        shopId,
-        customerId,
-        page: currentPage,
-        limit: perPage,
-        filters: filters ? {
-          status: filters.status,
-          dateRange: filters.dateRange,
-          shop: filters.shop,
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-        } : undefined,
-      });
-
-      const customerStats = await this.customerHistoryRepository.getCustomerStats(shopId, customerId);
-      const customerInfo = await this.customerHistoryRepository.getCustomerInfo(shopId, customerId);
+      const [queueHistoryResult, customerStats, customerInfo] =
+        await Promise.all([
+          this.customerHistoryRepository.getCustomerQueueHistory({
+            page: currentPage,
+            limit: perPage,
+            shopId,
+            customerId,
+            filters: filters
+              ? {
+                  status: filters.status,
+                  dateRange: filters.dateRange,
+                  shop: filters.shop,
+                  startDate: filters.startDate,
+                  endDate: filters.endDate,
+                }
+              : undefined,
+          }),
+          this.customerHistoryRepository.getCustomerStats(shopId, customerId),
+          this.customerHistoryRepository.getCustomerInfo(shopId, customerId),
+        ]);
 
       return CustomerHistoryMapper.toDTO({
         queueHistory: queueHistoryResult.data,
@@ -78,17 +70,35 @@ export class GetCustomerHistoryUseCase implements IUseCase<{
         pagination: queueHistoryResult.pagination,
       });
     } catch (error) {
-      if (error instanceof ShopCustomerHistoryError) {
-        throw error;
-      }
-
-      throw new ShopCustomerHistoryError(
-        ShopCustomerHistoryErrorType.UNKNOWN,
-        "Failed to get customer history data",
-        "GetCustomerHistoryUseCase.execute",
-        { input },
-        error as Error
-      );
+      return CustomerHistoryMapper.toDTO({
+        queueHistory: [],
+        customerStats: {
+          totalQueues: 0,
+          completedQueues: 0,
+          cancelledQueues: 0,
+          totalSpent: 0,
+          averageRating: 0,
+          favoriteService: "",
+          memberSince: "",
+        },
+        customerInfo: {
+          customerName: "",
+          memberSince: "",
+        },
+        filters: {
+          status: "all",
+          dateRange: "all",
+          shop: "all",
+        },
+        pagination: {
+          currentPage: 1,
+          perPage: 10,
+          totalItems: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      });
     }
   }
 }

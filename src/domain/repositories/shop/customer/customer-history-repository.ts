@@ -1,8 +1,8 @@
-import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import type {
-  CustomerQueueHistoryEntity,
   CustomerStatsEntity,
   CustomerInfoEntity,
+  GetCustomerQueueHistoryWithPaginationParams,
+  CustomerQueueHistoryResult,
 } from "@/src/domain/entities/shop/customer/customer-history.entity";
 
 /**
@@ -44,43 +44,23 @@ export interface ShopCustomerHistoryRepository {
    * @returns Paginated customer queue history data
    * @throws ShopCustomerHistoryError if the operation fails
    */
-  getCustomerQueueHistory(params: PaginationParams & {
-    shopId: string;
-    customerId?: string;
-    filters?: {
-      status?: "all" | "completed" | "cancelled" | "no_show";
-      dateRange?: "all" | "month" | "quarter" | "year";
-      shop?: string;
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
-    data: CustomerQueueHistoryEntity[];
-    pagination: {
-      currentPage: number;
-      perPage: number;
-      totalItems: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
-  }>;
+  getCustomerQueueHistory(params: GetCustomerQueueHistoryWithPaginationParams): Promise<CustomerQueueHistoryResult>;
 
   /**
    * Get customer statistics
    * @param shopId Shop ID
-   * @param customerId Customer ID (optional)
+   * @param customerId Customer ID (required)
    * @returns Customer statistics data
    * @throws ShopCustomerHistoryError if the operation fails
    */
-  getCustomerStats(shopId: string, customerId?: string): Promise<CustomerStatsEntity>;
+  getCustomerStats(shopId: string, customerId: string): Promise<CustomerStatsEntity>;
 
   /**
    * Get customer information
    * @param shopId Shop ID
-   * @param customerId Customer ID (optional)
+   * @param customerId Customer ID (required)
    * @returns Customer information including name
    * @throws ShopCustomerHistoryError if the operation fails
    */
-  getCustomerInfo(shopId: string, customerId?: string): Promise<CustomerInfoEntity>;
+  getCustomerInfo(shopId: string, customerId: string): Promise<CustomerInfoEntity>;
 }

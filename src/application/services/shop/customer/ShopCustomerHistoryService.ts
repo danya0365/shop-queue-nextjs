@@ -2,7 +2,11 @@ import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import type {
   CustomerHistoryDataDTO,
   CustomerStatsDTO,
+  CustomerInfoDTO,
   HistoryFiltersDTO,
+  GetCustomerHistoryInputDTO,
+  GetCustomerStatsInputDTO,
+  GetCustomerInfoInputDTO,
 } from "@/src/application/dtos/shop/customer/customer-history-dto";
 import { GetCustomerHistoryUseCase } from "@/src/application/usecases/shop/customer/history/GetCustomerHistoryUseCase";
 import { GetCustomerStatsUseCase } from "@/src/application/usecases/shop/customer/history/GetCustomerStatsUseCase";
@@ -22,7 +26,7 @@ export interface IShopCustomerHistoryService {
    */
   getCustomerHistory(
     shopId: string,
-    customerId?: string,
+    customerId: string,
     currentPage?: number,
     perPage?: number,
     filters?: HistoryFiltersDTO
@@ -34,7 +38,7 @@ export interface IShopCustomerHistoryService {
    * @param customerId The customer ID (optional)
    * @returns Customer statistics
    */
-  getCustomerStats(shopId: string, customerId?: string): Promise<CustomerStatsDTO>;
+  getCustomerStats(shopId: string, customerId: string): Promise<CustomerStatsDTO>;
 
   /**
    * Get customer information
@@ -42,38 +46,20 @@ export interface IShopCustomerHistoryService {
    * @param customerId The customer ID (optional)
    * @returns Customer information
    */
-  getCustomerInfo(shopId: string, customerId?: string): Promise<{
-    customerName: string;
-    memberSince: string;
-  }>;
+  getCustomerInfo(shopId: string, customerId: string): Promise<CustomerInfoDTO>;
 }
 
 export class ShopCustomerHistoryService implements IShopCustomerHistoryService {
   constructor(
-    private readonly getCustomerHistoryUseCase: IUseCase<
-      {
-        shopId: string;
-        customerId?: string;
-        currentPage?: number;
-        perPage?: number;
-        filters?: HistoryFiltersDTO;
-      },
-      CustomerHistoryDataDTO
-    >,
-    private readonly getCustomerStatsUseCase: IUseCase<
-      { shopId: string; customerId?: string },
-      CustomerStatsDTO
-    >,
-    private readonly getCustomerInfoUseCase: IUseCase<
-      { shopId: string; customerId?: string },
-      { customerName: string; memberSince: string }
-    >,
+    private readonly getCustomerHistoryUseCase: IUseCase<GetCustomerHistoryInputDTO, CustomerHistoryDataDTO>,
+    private readonly getCustomerStatsUseCase: IUseCase<GetCustomerStatsInputDTO, CustomerStatsDTO>,
+    private readonly getCustomerInfoUseCase: IUseCase<GetCustomerInfoInputDTO, CustomerInfoDTO>,
     private readonly logger: Logger
   ) {}
 
   async getCustomerHistory(
     shopId: string,
-    customerId?: string,
+    customerId: string,
     currentPage: number = 1,
     perPage: number = 10,
     filters?: HistoryFiltersDTO
@@ -95,7 +81,7 @@ export class ShopCustomerHistoryService implements IShopCustomerHistoryService {
     }
   }
 
-  async getCustomerStats(shopId: string, customerId?: string): Promise<CustomerStatsDTO> {
+  async getCustomerStats(shopId: string, customerId: string): Promise<CustomerStatsDTO> {
     try {
       this.logger.info("Getting customer stats", { shopId, customerId });
 
@@ -107,10 +93,7 @@ export class ShopCustomerHistoryService implements IShopCustomerHistoryService {
     }
   }
 
-  async getCustomerInfo(shopId: string, customerId?: string): Promise<{
-    customerName: string;
-    memberSince: string;
-  }> {
+  async getCustomerInfo(shopId: string, customerId: string): Promise<CustomerInfoDTO> {
     try {
       this.logger.info("Getting customer info", { shopId, customerId });
 

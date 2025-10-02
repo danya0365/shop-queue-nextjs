@@ -1,6 +1,7 @@
 import type { HistoryFiltersDTO } from "@/src/application/dtos/shop/customer/customer-history-dto";
 import { ShopService } from "@/src/application/services/shop/ShopService";
 import { ShopCustomerHistoryService } from "@/src/application/services/shop/customer/ShopCustomerHistoryService";
+import { ShopCustomerService } from "@/src/application/services/shop/customer/ShopCustomerService";
 import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
@@ -79,41 +80,55 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
   constructor(
     logger: Logger,
     shopService: ShopService,
-    private readonly customerHistoryService: ShopCustomerHistoryService
+    private readonly customerHistoryService: ShopCustomerHistoryService,
+    private readonly shopCustomerService: ShopCustomerService
   ) {
     super(logger, shopService);
   }
 
   async getViewModel(
     shopId: string,
+    customerId?: string,
     currentPage: number = 1,
     perPage: number = getPaginationConfig().QUEUES_PER_PAGE,
-    filters: HistoryFilters = {
-      status: "all",
-      dateRange: "all",
-      shop: "all",
-    }
+    filters?: HistoryFilters
   ): Promise<CustomerHistoryViewModel> {
+    if (!customerId) {
+      return {
+        queueHistory: [],
+        customerStats: {
+          totalQueues: 0,
+          completedQueues: 0,
+          cancelledQueues: 0,
+          totalSpent: 0,
+          averageRating: 0,
+          favoriteService: "",
+          memberSince: "",
+        },
+        filters: {
+          status: "all",
+          dateRange: "all",
+          shop: "all",
+        },
+        customerName: "",
+        pagination: undefined,
+      };
+    }
     try {
-      this.logger.info(
-        "CustomerHistoryPresenter: Getting view model for shop",
-        { shopId, currentPage, perPage, filters }
-      );
-
       // Convert filters to DTO format
       const filtersDTO: HistoryFiltersDTO = {
-        status: filters.status,
-        dateRange: filters.dateRange,
-        shop: filters.shop,
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+        status: filters?.status || "all",
+        dateRange: filters?.dateRange || "all",
+        shop: filters?.shop || "all",
+        startDate: filters?.startDate,
+        endDate: filters?.endDate,
       };
 
       // Get customer history data from service
       const customerHistoryData =
         await this.customerHistoryService.getCustomerHistory(
           shopId,
-          undefined, // customerId - will be determined from auth context
+          customerId,
           currentPage,
           perPage,
           filtersDTO
@@ -168,7 +183,7 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
       return {
         queueHistory,
         customerStats,
-        filters,
+        filters: filtersDTO,
         customerName: customerHistoryData.customerName,
         pagination,
       };
@@ -177,6 +192,76 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
         "CustomerHistoryPresenter: Error getting view model",
         error
       );
+      throw error;
+    }
+  }
+
+  // Customer-related methods
+  async getCustomerByProfileId(profileId: string, shopId: string) {
+    try {
+      this.logger.info("Getting customer by profile ID", { profileId, shopId });
+      const customer = await this.shopCustomerService.getCustomerByProfileId(
+        profileId,
+        shopId
+      );
+      return customer;
+    } catch (error) {
+      this.logger.error("Error getting customer by profile ID", {
+        error,
+        profileId,
+        shopId,
+      });
+      throw error;
+    }
+  }
+
+  async getCustomerById(customerId: string) {
+    try {
+      this.logger.info("Getting customer by ID", { customerId });
+      const customer = await this.shopCustomerService.getCustomerById(
+        customerId
+      );
+      return customer;
+    } catch (error) {
+      this.logger.error("Error getting customer by ID", { error, customerId });
+      throw error;
+    }
+  }
+
+  async registerCustomer(shopId: string, name: string, phone: string) {
+    try {
+      this.logger.info("Registering customer", { shopId, name, phone });
+      const result = await this.shopCustomerService.registerCustomer(
+        shopId,
+        name,
+        phone
+      );
+      return result;
+    } catch (error) {
+      this.logger.error("Error registering customer", {
+        error,
+        shopId,
+        name,
+        phone,
+      });
+      throw error;
+    }
+  }
+
+  async linkCustomerToProfile(customerId: string, phone: string) {
+    try {
+      this.logger.info("Linking customer to profile", { customerId, phone });
+      const result = await this.shopCustomerService.linkCustomerToProfile(
+        customerId,
+        phone
+      );
+      return result;
+    } catch (error) {
+      this.logger.error("Error linking customer to profile", {
+        error,
+        customerId,
+        phone,
+      });
       throw error;
     }
   }
@@ -223,10 +308,14 @@ export class CustomerHistoryPresenterFactory {
       serverContainer.resolve<ShopCustomerHistoryService>(
         "ShopCustomerHistoryService"
       );
+    const shopCustomerService = serverContainer.resolve<ShopCustomerService>(
+      "ShopCustomerService"
+    );
     return new CustomerHistoryPresenter(
       logger,
       shopService,
-      customerHistoryService
+      customerHistoryService,
+      shopCustomerService
     );
   }
 }
@@ -241,10 +330,14 @@ export class ClientCustomerHistoryPresenterFactory {
       clientContainer.resolve<ShopCustomerHistoryService>(
         "ShopCustomerHistoryService"
       );
+    const shopCustomerService = clientContainer.resolve<ShopCustomerService>(
+      "ShopCustomerService"
+    );
     return new CustomerHistoryPresenter(
       logger,
       shopService,
-      customerHistoryService
+      customerHistoryService,
+      shopCustomerService
     );
   }
 }

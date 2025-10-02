@@ -4192,6 +4192,20 @@ export type Database = {
           profile_id: string
         }[]
       }
+      get_customer_info_by_customer: {
+        Args: { p_customer_id: string; p_shop_id: string }
+        Returns: {
+          id: string
+          shop_id: string
+          customer_name: string
+          customer_phone: string
+          member_since: string
+          profile_id: string
+          is_linked_to_profile: boolean
+          total_visits: number
+          last_visit_date: string
+        }[]
+      }
       get_customer_popular_services: {
         Args: { p_shop_id: string; p_limit?: number }
         Returns: {
@@ -4233,9 +4247,43 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_customer_queue_history_by_customer: {
+        Args: {
+          p_customer_id: string
+          p_shop_id: string
+          p_page?: number
+          p_limit?: number
+          p_status?: string
+          p_date_range?: string
+          p_start_date?: string
+          p_end_date?: string
+        }
+        Returns: Json
+      }
       get_customer_stats: {
         Args: { shop_id_param: string }
         Returns: Json
+      }
+      get_customer_stats_by_customer: {
+        Args: { p_customer_id: string; p_shop_id: string }
+        Returns: {
+          customer_id: string
+          shop_id: string
+          total_queues: number
+          completed_queues: number
+          cancelled_queues: number
+          no_show_queues: number
+          average_wait_time_minutes: number
+          average_service_time_minutes: number
+          average_rating: number
+          total_spent: number
+          member_since: string
+          last_visit_date: string
+          favorite_service_id: string
+          favorite_service_name: string
+          most_visited_shop_id: string
+          most_visited_shop_name: string
+        }[]
       }
       get_customer_top_popular_services: {
         Args: { p_shop_id: string; p_limit?: number }

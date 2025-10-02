@@ -1,16 +1,11 @@
-import {
-  DatabaseDataSource,
-  FilterOperator,
-  QueryOptions,
-  SortDirection,
-} from "@/src/domain/interfaces/datasources/database-datasource";
-import type { Logger } from "@/src/domain/interfaces/logger";
-import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import type {
-  CustomerQueueHistoryEntity,
-  CustomerStatsEntity,
   CustomerInfoEntity,
+  CustomerQueueHistoryResult,
+  CustomerStatsEntity,
+  GetCustomerQueueHistoryWithPaginationParams,
 } from "@/src/domain/entities/shop/customer/customer-history.entity";
+import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import {
   ShopCustomerHistoryError,
   ShopCustomerHistoryErrorType,
@@ -18,16 +13,15 @@ import {
 } from "@/src/domain/repositories/shop/customer/customer-history-repository";
 import { SupabaseCustomerHistoryMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-history-mapper";
 import {
-  CustomerQueueHistorySchema,
-  CustomerStatsSchema,
-  CustomerInfoSchema,
+  GetCustomerInfoByCustomerSchema,
+  GetCustomerQueueHistoryByCustomerResult,
+  GetCustomerQueueHistoryByCustomerSchema,
+  GetCustomerStatsByCustomerSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-history.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for database records
-type CustomerQueueHistorySchemaRecord = Record<string, unknown> & CustomerQueueHistorySchema;
-type CustomerStatsSchemaRecord = Record<string, unknown> & CustomerStatsSchema;
-type CustomerInfoSchemaRecord = Record<string, unknown> & CustomerInfoSchema;
+// Note: Using RPC schema types directly for type safety
 
 /**
  * Supabase implementation of the customer history repository
@@ -46,27 +40,9 @@ export class SupabaseCustomerHistoryRepository
    * @param params Pagination parameters with filters
    * @returns Paginated customer queue history data
    */
-  async getCustomerQueueHistory(params: PaginationParams & {
-    shopId: string;
-    customerId?: string;
-    filters?: {
-      status?: "all" | "completed" | "cancelled" | "no_show";
-      dateRange?: "all" | "month" | "quarter" | "year";
-      shop?: string;
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
-    data: CustomerQueueHistoryEntity[];
-    pagination: {
-      currentPage: number;
-      perPage: number;
-      totalItems: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
-  }> {
+  async getCustomerQueueHistory(
+    params: GetCustomerQueueHistoryWithPaginationParams
+  ): Promise<CustomerQueueHistoryResult> {
     try {
       const { shopId, customerId, page = 1, limit = 10, filters } = params;
 
@@ -79,135 +55,74 @@ export class SupabaseCustomerHistoryRepository
         );
       }
 
-      this.logger.info("Getting customer queue history", { shopId, customerId, page, limit, filters });
-
-      // Build query options for Supabase
-      const queryOptions: QueryOptions = {
-        filters: [],
-        sort: [
-          {
-            field: "queueDate",
-            direction: SortDirection.DESC,
-          },
-        ],
-      };
-
-      // Add filters
-      if (filters) {
-        if (filters.status && filters.status !== "all") {
-          queryOptions.filters?.push({
-            field: "status",
-            operator: FilterOperator.EQ,
-            value: filters.status,
-          });
-        }
-
-        if (filters.shop && filters.shop !== "all") {
-          queryOptions.filters?.push({
-            field: "shopName",
-            operator: FilterOperator.ILIKE,
-            value: filters.shop,
-          });
-        }
-
-        // Date range filtering
-        if (filters.dateRange && filters.dateRange !== "all") {
-          const now = new Date();
-          let startDate: Date;
-
-          switch (filters.dateRange) {
-            case "month":
-              startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-              break;
-            case "quarter":
-              const quarter = Math.floor(now.getMonth() / 3);
-              startDate = new Date(now.getFullYear(), quarter * 3, 1);
-              break;
-            case "year":
-              startDate = new Date(now.getFullYear(), 0, 1);
-              break;
-            default:
-              startDate = new Date(0);
-          }
-
-          queryOptions.filters?.push({
-            field: "queueDate",
-            operator: FilterOperator.GTE,
-            value: startDate.toISOString().split('T')[0],
-          });
-        }
-
-        // Custom date range
-        if (filters.startDate) {
-          queryOptions.filters?.push({
-            field: "queueDate",
-            operator: FilterOperator.GTE,
-            value: filters.startDate,
-          });
-        }
-
-        if (filters.endDate) {
-          queryOptions.filters?.push({
-            field: "queueDate",
-            operator: FilterOperator.LTE,
-            value: filters.endDate,
-          });
-        }
+      if (!customerId) {
+        throw new ShopCustomerHistoryError(
+          ShopCustomerHistoryErrorType.VALIDATION_ERROR,
+          "Customer ID is required",
+          "SupabaseCustomerHistoryRepository.getCustomerQueueHistory",
+          { customerId }
+        );
       }
 
-      // Add shop filter
-      queryOptions.filters?.push({
-        field: "shopId",
-        operator: FilterOperator.EQ,
-        value: shopId,
+      this.logger.info("Getting customer queue history", {
+        shopId,
+        customerId,
+        page,
+        limit,
+        filters,
       });
 
-      // Add customer filter if provided
-      if (customerId) {
-        queryOptions.filters?.push({
-          field: "customerId",
-          operator: FilterOperator.EQ,
-          value: customerId,
-        });
-      }
+      // Fetch data using RPC function
+      const rpcParams = {
+        p_customer_id: customerId,
+        p_shop_id: shopId,
+        p_page: page,
+        p_limit: limit,
+        p_status: filters?.status || "all",
+        p_date_range: filters?.dateRange || "all",
+        p_start_date: filters?.startDate || null,
+        p_end_date: filters?.endDate || null,
+      };
 
-      // Fetch data from Supabase
-      const result = await this.dataSource.getAdvanced(
-        "customer_queue_history",
-        queryOptions
-      );
+      const result =
+        await this.dataSource.callRpc<GetCustomerQueueHistoryByCustomerResult>(
+          "get_customer_queue_history_by_customer",
+          rpcParams
+        );
 
-      if (!result || !Array.isArray(result)) {
+      if (!result) {
         throw new ShopCustomerHistoryError(
           ShopCustomerHistoryErrorType.UNKNOWN,
           "Failed to fetch customer queue history",
           "SupabaseCustomerHistoryRepository.getCustomerQueueHistory",
-          { shopId, customerId }
+          { shopId, customerId, rpcParams }
         );
       }
 
-      const queueData = result as Array<CustomerQueueHistorySchemaRecord>;
-      
-      // Apply pagination manually
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedData = queueData.slice(startIndex, endIndex);
-      
-      // Transform the data using the mapper
-      const transformedData = paginatedData.map((item: CustomerQueueHistorySchemaRecord) =>
-        SupabaseCustomerHistoryMapper.toQueueHistoryEntity(item)
+      const rpcResult = result;
+
+      if (
+        !rpcResult.data ||
+        !Array.isArray(rpcResult.data) ||
+        !rpcResult.pagination
+      ) {
+        throw new ShopCustomerHistoryError(
+          ShopCustomerHistoryErrorType.UNKNOWN,
+          "Invalid RPC result structure",
+          "SupabaseCustomerHistoryRepository.getCustomerQueueHistory",
+          { shopId, customerId, rpcParams }
+        );
+      }
+
+      // Transform the data using the RPC mapper
+      const transformedData = rpcResult.data.map(
+        (item: GetCustomerQueueHistoryByCustomerSchema) =>
+          SupabaseCustomerHistoryMapper.toQueueHistoryEntityFromRPC(item)
       );
 
       return {
         data: transformedData,
-        pagination: {
-          currentPage: page,
-          perPage: limit,
-          totalItems: queueData.length,
-          totalPages: Math.ceil(queueData.length / limit),
-          hasNext: endIndex < queueData.length,
-          hasPrev: page > 1,
-        },
+        pagination: rpcResult.pagination,
       };
     } catch (error) {
       if (error instanceof ShopCustomerHistoryError) {
@@ -227,10 +142,13 @@ export class SupabaseCustomerHistoryRepository
   /**
    * Get customer statistics
    * @param shopId Shop ID
-   * @param customerId Customer ID (optional)
+   * @param customerId Customer ID (required)
    * @returns Customer statistics data
    */
-  async getCustomerStats(shopId: string, customerId?: string): Promise<CustomerStatsEntity> {
+  async getCustomerStats(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerStatsEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerHistoryError(
@@ -241,42 +159,39 @@ export class SupabaseCustomerHistoryRepository
         );
       }
 
-      this.logger.info("Getting customer stats", { shopId, customerId });
-
-      // Build query options
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shopId",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
-      };
-
-      if (customerId) {
-        queryOptions.filters?.push({
-          field: "customerId",
-          operator: FilterOperator.EQ,
-          value: customerId,
-        });
+      if (!customerId) {
+        throw new ShopCustomerHistoryError(
+          ShopCustomerHistoryErrorType.VALIDATION_ERROR,
+          "Customer ID is required",
+          "SupabaseCustomerHistoryRepository.getCustomerStats",
+          { customerId }
+        );
       }
 
-      // Fetch customer statistics from Supabase
-      const result = await this.dataSource.getAdvanced("customer_stats", queryOptions);
+      this.logger.info("Getting customer stats", { shopId, customerId });
+
+      // Fetch customer statistics using RPC function
+      const rpcParams = {
+        p_customer_id: customerId,
+        p_shop_id: shopId,
+      };
+
+      const result = await this.dataSource.callRpc<
+        GetCustomerStatsByCustomerSchema[]
+      >("get_customer_stats_by_customer", rpcParams);
 
       if (!result || !Array.isArray(result) || result.length === 0) {
         throw new ShopCustomerHistoryError(
           ShopCustomerHistoryErrorType.NOT_FOUND,
-          `Customer stats not found for shop ${shopId}`,
+          `Customer stats not found for customer ${customerId} in shop ${shopId}`,
           "SupabaseCustomerHistoryRepository.getCustomerStats",
           { shopId, customerId }
         );
       }
 
-      const statsData = result[0] as CustomerStatsSchemaRecord;
+      const statsData = result[0];
 
-      return SupabaseCustomerHistoryMapper.toStatsEntity(statsData);
+      return SupabaseCustomerHistoryMapper.toStatsEntityFromRPC(statsData);
     } catch (error) {
       if (error instanceof ShopCustomerHistoryError) {
         throw error;
@@ -295,10 +210,13 @@ export class SupabaseCustomerHistoryRepository
   /**
    * Get customer information
    * @param shopId Shop ID
-   * @param customerId Customer ID (optional)
+   * @param customerId Customer ID (required)
    * @returns Customer information including name
    */
-  async getCustomerInfo(shopId: string, customerId?: string): Promise<CustomerInfoEntity> {
+  async getCustomerInfo(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerInfoEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerHistoryError(
@@ -309,46 +227,41 @@ export class SupabaseCustomerHistoryRepository
         );
       }
 
+      if (!customerId) {
+        throw new ShopCustomerHistoryError(
+          ShopCustomerHistoryErrorType.VALIDATION_ERROR,
+          "Customer ID is required",
+          "SupabaseCustomerHistoryRepository.getCustomerInfo",
+          { customerId }
+        );
+      }
+
       this.logger.info("Getting customer info", { shopId, customerId });
 
-      // Build query options
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shopId",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
+      // Fetch customer information using RPC function
+      const rpcParams = {
+        p_customer_id: customerId,
+        p_shop_id: shopId,
       };
 
-      if (customerId) {
-        queryOptions.filters?.push({
-          field: "customerId",
-          operator: FilterOperator.EQ,
-          value: customerId,
-        });
-      }
-
-      // Fetch customer information from Supabase
-      const result = await this.dataSource.getAdvanced("customer_info", queryOptions);
+      const result = await this.dataSource.callRpc<
+        GetCustomerInfoByCustomerSchema[]
+      >("get_customer_info_by_customer", rpcParams);
 
       if (!result || !Array.isArray(result) || result.length === 0) {
-        // Return default customer info if not found
-        return SupabaseCustomerHistoryMapper.toCustomerInfoEntity({
-          id: "",
-          shop_id: shopId,
-          customer_id: customerId || "",
-          customer_name: "ลูกค้า",
-          member_since: new Date().toISOString().split('T')[0],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        } as CustomerInfoSchema);
+        throw new ShopCustomerHistoryError(
+          ShopCustomerHistoryErrorType.NOT_FOUND,
+          `Customer info not found for customer ${customerId} in shop ${shopId}`,
+          "SupabaseCustomerHistoryRepository.getCustomerInfo",
+          { shopId, customerId }
+        );
       }
 
-      const customerData = result[0] as CustomerInfoSchemaRecord;
+      const customerData = result[0];
 
-      return SupabaseCustomerHistoryMapper.toCustomerInfoEntity(customerData);
+      return SupabaseCustomerHistoryMapper.toCustomerInfoEntityFromRPC(
+        customerData
+      );
     } catch (error) {
       if (error instanceof ShopCustomerHistoryError) {
         throw error;

@@ -3,6 +3,53 @@
  * These types match the actual database structure
  */
 
+import { Database } from "@/src/domain/types/supabase";
+
+// Schema for get_customer_queue_history_by_customer RPC function
+export type GetCustomerQueueHistoryByCustomerSchema = {
+  id: string;
+  shop_id: string;
+  shop_name: string;
+  queue_number: string;
+  status: string;
+  priority: string;
+  customer_name: string;
+  services: Record<string, unknown> | unknown[];
+  estimated_duration: number;
+  estimated_call_time: string;
+  actual_wait_time: number;
+  served_at: string;
+  completed_at: string;
+  cancelled_at: string;
+  cancelled_reason: string;
+  feedback: string;
+  rating: number;
+  created_at: string;
+  updated_at: string;
+  queue_date: string;
+};
+
+// Schema for the RPC result structure
+export type GetCustomerQueueHistoryByCustomerResult = {
+  data: GetCustomerQueueHistoryByCustomerSchema[];
+  pagination: {
+    currentPage: number;
+    perPage: number;
+    totalItems: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+};
+
+// Schema for get_customer_stats_by_customer RPC function
+export type GetCustomerStatsByCustomerSchema =
+  Database["public"]["Functions"]["get_customer_stats_by_customer"]["Returns"][0];
+
+// Schema for get_customer_info_by_customer RPC function
+export type GetCustomerInfoByCustomerSchema =
+  Database["public"]["Functions"]["get_customer_info_by_customer"]["Returns"][0];
+
 /**
  * Customer queue history database schema
  */

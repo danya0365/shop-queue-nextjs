@@ -11,6 +11,9 @@ import type {
   CustomerQueueServiceSchema,
   CustomerStatsSchema,
   CustomerInfoSchema,
+  GetCustomerQueueHistoryByCustomerSchema,
+  GetCustomerStatsByCustomerSchema,
+  GetCustomerInfoByCustomerSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-history.schema";
 
 /**
@@ -18,6 +21,73 @@ import type {
  * Following Clean Architecture principles
  */
 export class SupabaseCustomerHistoryMapper {
+  /**
+   * Convert RPC queue history data to domain entity
+   */
+  static toQueueHistoryEntityFromRPC(data: GetCustomerQueueHistoryByCustomerSchema): CustomerQueueHistoryEntity {
+    return {
+      id: String(data.id || ""),
+      queueNumber: String(data.queue_number || ""),
+      shopName: String(data.shop_name || ""),
+      services: this.toQueueServiceEntitiesFromRPC(data.services as any || []),
+      totalAmount: 0, // RPC doesn't provide this directly
+      status: this.mapStatusToEnum(data.status) || QueueStatus.COMPLETED,
+      queueDate: String(data.queue_date || ""),
+      queueTime: "", // RPC doesn't provide this directly
+      completedAt: data.completed_at ? String(data.completed_at) : undefined,
+      waitTime: data.actual_wait_time ? Number(data.actual_wait_time) : undefined,
+      serviceTime: undefined, // RPC doesn't provide this directly
+      rating: data.rating ? Number(data.rating) : undefined,
+      feedback: data.feedback ? String(data.feedback) : undefined,
+      employeeName: undefined, // RPC doesn't provide this directly
+      paymentMethod: undefined, // RPC doesn't provide this directly
+    };
+  }
+
+  /**
+   * Convert RPC service data to domain entity
+   */
+  static toQueueServiceEntityFromRPC(service: { id?: string; name?: string; price?: number; quantity?: number }): CustomerQueueServiceEntity {
+    return {
+      id: String(service.id || ""),
+      name: String(service.name || ""),
+      price: Number(service.price || 0),
+      quantity: Number(service.quantity || 1),
+    };
+  }
+
+  /**
+   * Convert RPC services array to domain entities
+   */
+  static toQueueServiceEntitiesFromRPC(services: { id?: string; name?: string; price?: number; quantity?: number }[]): CustomerQueueServiceEntity[] {
+    return services.map(service => this.toQueueServiceEntityFromRPC(service));
+  }
+
+  /**
+   * Convert RPC stats data to domain entity
+   */
+  static toStatsEntityFromRPC(data: GetCustomerStatsByCustomerSchema): CustomerStatsEntity {
+    return {
+      totalQueues: Number(data.total_queues || 0),
+      completedQueues: Number(data.completed_queues || 0),
+      cancelledQueues: Number(data.cancelled_queues || 0),
+      totalSpent: Number(data.total_spent || 0),
+      averageRating: Number(data.average_rating || 0),
+      favoriteService: String(data.favorite_service_name || ""),
+      memberSince: String(data.member_since || ""),
+    };
+  }
+
+  /**
+   * Convert RPC customer info data to domain entity
+   */
+  static toCustomerInfoEntityFromRPC(data: GetCustomerInfoByCustomerSchema): CustomerInfoEntity {
+    return {
+      customerName: String(data.customer_name || ""),
+      memberSince: String(data.member_since || ""),
+    };
+  }
+
   /**
    * Convert Supabase queue history data to domain entity
    */

@@ -62,13 +62,14 @@ export interface CustomerHistoryDataDTO {
   customerStats: CustomerStatsDTO;
   filters: HistoryFiltersDTO;
   customerName: string;
+  customerInfo: CustomerInfoDTO;
   pagination?: PaginationDTO;
 }
 
 // Input DTOs for use cases
 export interface GetCustomerHistoryInputDTO {
   shopId: string;
-  customerId?: string;
+  customerId: string;
   currentPage?: number;
   perPage?: number;
   filters?: HistoryFiltersDTO;
@@ -76,5 +77,15 @@ export interface GetCustomerHistoryInputDTO {
 
 export interface GetCustomerStatsInputDTO {
   shopId: string;
-  customerId?: string;
+  customerId: string;
+}
+
+export interface GetCustomerInfoInputDTO {
+  shopId: string;
+  customerId: string;
+}
+
+export interface CustomerInfoDTO {
+  customerName: string;
+  memberSince: string;
 }
