@@ -13,7 +13,7 @@ import { GetCustomerByProfileIdUseCase } from "@/src/application/usecases/shop/c
 import { RegisterCustomerUseCase } from "@/src/application/usecases/shop/customer/customer/RegisterCustomerUseCase";
 import { LinkCustomerToProfileUseCase } from "@/src/application/usecases/shop/customer/customer/LinkCustomerToProfileUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import type { ShopCustomerQueueJoinRepository } from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import type { ShopCustomerRepository } from "@/src/domain/repositories/shop/customer/customer-repository";
 
 export interface IShopCustomerService {
   /**
@@ -108,7 +108,7 @@ export class ShopCustomerService implements IShopCustomerService {
 }
 
 export class ShopCustomerServiceFactory {
-  static create(repository: ShopCustomerQueueJoinRepository, logger: Logger): ShopCustomerService {
+  static create(repository: ShopCustomerRepository, logger: Logger): ShopCustomerService {
     const getCustomerByIdUseCase = new GetCustomerByIdUseCase(repository);
     const getCustomerByProfileIdUseCase = new GetCustomerByProfileIdUseCase(repository);
     const registerCustomerUseCase = new RegisterCustomerUseCase(repository);

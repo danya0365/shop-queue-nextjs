@@ -32,6 +32,7 @@ import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/
 import { ShopCustomerQueueJoinServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueJoinService";
 import { ShopCustomerQueueStatusServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueStatusService";
 import { ShopCustomerRewardServiceFactory } from "../application/services/shop/customer/ShopCustomerRewardService";
+import { ShopCustomerServiceFactory } from "../application/services/shop/customer/ShopCustomerService";
 import { ShopServiceFactory } from "../application/services/shop/ShopService";
 import { ShopSetupProgressServiceFactory } from "../application/services/shop/ShopSetupProgressService";
 import { ShopMarketplaceService } from "../application/services/shop/ShopMarketplaceService";
@@ -61,6 +62,7 @@ import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositor
 import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
 import { SupabaseCustomerQueueJoinRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-join-repository";
 import { SupabaseCustomerQueueStatusRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-status-repository";
+import { SupabaseCustomerRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-repository";
 import { SupabaseCustomerRewardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-reward-repository";
 import { SupabaseFeatureAccessRepository } from "../infrastructure/repositories/supabase-feature-access-repository";
 import { SupabaseProfileSubscriptionRepository } from "../infrastructure/repositories/supabase-profile-subscription-repository";
@@ -141,6 +143,10 @@ export function createClientContainer(): Container {
       logger
     );
     const customerRewardRepository = new SupabaseCustomerRewardRepository(
+      databaseDatasource,
+      logger
+    );
+    const customerRepository = new SupabaseCustomerRepository(
       databaseDatasource,
       logger
     );
@@ -299,6 +305,12 @@ export function createClientContainer(): Container {
       logger
     );
 
+    // Create shop customer service
+    const shopCustomerService = ShopCustomerServiceFactory.create(
+      customerRepository,
+      logger
+    );
+
     // Initialize datetime services
     const dateTimeConfigService = new DateTimeConfigService();
     const dateTimeFormattingService = new DateTimeFormattingService(
@@ -387,6 +399,7 @@ export function createClientContainer(): Container {
       "ShopCustomerQueueJoinService",
       shopCustomerQueueJoinService
     );
+    container.registerInstance("ShopCustomerService", shopCustomerService);
     container.registerInstance(
       "PosterTemplateBackendService",
       posterTemplateBackendService

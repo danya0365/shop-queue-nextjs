@@ -1,15 +1,15 @@
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { CustomerMapper } from "@/src/application/mappers/shop/customer/customer-mapper";
-import type { ShopCustomerQueueJoinRepository } from "@/src/domain/repositories/shop/customer/queue-join-repository";
+import type { ShopCustomerRepository } from "@/src/domain/repositories/shop/customer/customer-repository";
 import {
-  ShopCustomerQueueJoinError,
-  ShopCustomerQueueJoinErrorType,
-} from "@/src/domain/repositories/shop/customer/queue-join-repository";
+  ShopCustomerError,
+  ShopCustomerErrorType,
+} from "@/src/domain/repositories/shop/customer/customer-repository";
 import type { GetCustomerByProfileIdInputDTO, CustomerDTO } from "@/src/application/dtos/shop/customer/customer-dto";
 
 export class GetCustomerByProfileIdUseCase implements IUseCase<GetCustomerByProfileIdInputDTO, CustomerDTO | null> {
   constructor(
-    private readonly customerQueueJoinRepository: ShopCustomerQueueJoinRepository
+    private readonly customerRepository: ShopCustomerRepository
   ) {}
 
   async execute(input: GetCustomerByProfileIdInputDTO): Promise<CustomerDTO | null> {
@@ -18,8 +18,8 @@ export class GetCustomerByProfileIdUseCase implements IUseCase<GetCustomerByProf
     try {
       // Validate input
       if (!profileId) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.VALIDATION_ERROR,
+        throw new ShopCustomerError(
+          ShopCustomerErrorType.VALIDATION_ERROR,
           "Profile ID is required",
           "GetCustomerByProfileIdUseCase.execute",
           { profileId, shopId }
@@ -27,8 +27,8 @@ export class GetCustomerByProfileIdUseCase implements IUseCase<GetCustomerByProf
       }
 
       if (!shopId) {
-        throw new ShopCustomerQueueJoinError(
-          ShopCustomerQueueJoinErrorType.VALIDATION_ERROR,
+        throw new ShopCustomerError(
+          ShopCustomerErrorType.VALIDATION_ERROR,
           "Shop ID is required",
           "GetCustomerByProfileIdUseCase.execute",
           { profileId, shopId }
@@ -36,7 +36,7 @@ export class GetCustomerByProfileIdUseCase implements IUseCase<GetCustomerByProf
       }
 
       // Get customer from repository
-      const customerEntity = await this.customerQueueJoinRepository.getCustomerByProfileId(profileId, shopId);
+      const customerEntity = await this.customerRepository.getCustomerByProfileId(profileId, shopId);
 
       if (!customerEntity) {
         return null;
@@ -45,12 +45,12 @@ export class GetCustomerByProfileIdUseCase implements IUseCase<GetCustomerByProf
       // Map entity to DTO
       return CustomerMapper.toCustomerDTO(customerEntity);
     } catch (error) {
-      if (error instanceof ShopCustomerQueueJoinError) {
+      if (error instanceof ShopCustomerError) {
         throw error;
       }
 
-      throw new ShopCustomerQueueJoinError(
-        ShopCustomerQueueJoinErrorType.OPERATION_FAILED,
+      throw new ShopCustomerError(
+        ShopCustomerErrorType.OPERATION_FAILED,
         "Failed to get customer by profile ID",
         "GetCustomerByProfileIdUseCase.execute",
         { profileId, shopId, error: error instanceof Error ? error.message : String(error) },
