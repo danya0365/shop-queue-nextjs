@@ -1,13 +1,11 @@
 import {
-  QueueStatusStatsEntity,
   PopularServiceEntity,
   PromotionEntity,
 } from "@/src/domain/entities/shop/customer/customer-dashboard.entity";
 import {
-  QueueSchema,
-  ServiceSchema,
-  PromotionSchema,
   PopularServiceViewRecord,
+  PromotionSchema,
+  ServiceSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema";
 
 /**
@@ -15,37 +13,6 @@ import {
  * for customer dashboard functionality
  */
 export class SupabaseCustomerDashboardMapper {
-  /**
-   * Convert Supabase queue data to domain entity
-   */
-  static toQueueStatusStatsEntity(
-    queuesData: QueueSchema[]
-  ): QueueStatusStatsEntity {
-    const waitingQueues = queuesData.filter(
-      (queue) => queue.status === "waiting"
-    );
-    const servingQueues = queuesData.filter(
-      (queue) => queue.status === "serving"
-    );
-
-    const totalWaiting = waitingQueues.length;
-    const currentNumber =
-      servingQueues.length > 0
-        ? servingQueues[0].queue_number
-        : waitingQueues.length > 0
-        ? waitingQueues[0].queue_number
-        : "A001";
-    const estimatedWaitTime = totalWaiting * 5; // 5 minutes per person
-    const averageServiceTime = 15; // 15 minutes average
-
-    return {
-      totalWaiting,
-      currentNumber,
-      estimatedWaitTime,
-      averageServiceTime,
-    };
-  }
-
   /**
    * Convert Supabase service data to domain entity
    */
@@ -74,7 +41,9 @@ export class SupabaseCustomerDashboardMapper {
   /**
    * Convert Supabase popular services view data to domain entity
    */
-  static toPopularServiceEntityFromView(data: PopularServiceViewRecord): PopularServiceEntity {
+  static toPopularServiceEntityFromView(
+    data: PopularServiceViewRecord
+  ): PopularServiceEntity {
     return {
       id: String(data.id || ""),
       name: String(data.name || ""),
@@ -92,7 +61,10 @@ export class SupabaseCustomerDashboardMapper {
     data: PopularServiceViewRecord[]
   ): PopularServiceEntity[] {
     return data
-      .filter((service) => service.id && service.name && (service.queue_count || 0) > 0)
+      .filter(
+        (service) =>
+          service.id && service.name && (service.queue_count || 0) > 0
+      )
       .map((service) => this.toPopularServiceEntityFromView(service));
   }
 
@@ -115,15 +87,13 @@ export class SupabaseCustomerDashboardMapper {
    */
   static toPromotionEntities(data: PromotionSchema[]): PromotionEntity[] {
     const now = new Date();
-    
+
     return data
       .filter((promotion) => {
         const startDate = new Date(promotion.start_at || now);
         const endDate = new Date(promotion.end_at || now);
         return (
-          promotion.status === "active" &&
-          startDate <= now &&
-          endDate >= now
+          promotion.status === "active" && startDate <= now && endDate >= now
         );
       })
       .map((promotion) => this.toPromotionEntity(promotion));
@@ -132,7 +102,9 @@ export class SupabaseCustomerDashboardMapper {
   /**
    * Convert domain entities to Supabase data (if needed for create/update operations)
    */
-  static fromPopularServiceEntity(entity: PopularServiceEntity): Partial<ServiceSchema> {
+  static fromPopularServiceEntity(
+    entity: PopularServiceEntity
+  ): Partial<ServiceSchema> {
     return {
       name: entity.name,
       description: entity.description,
@@ -142,7 +114,9 @@ export class SupabaseCustomerDashboardMapper {
     };
   }
 
-  static fromPromotionEntity(entity: PromotionEntity): Partial<PromotionSchema> {
+  static fromPromotionEntity(
+    entity: PromotionEntity
+  ): Partial<PromotionSchema> {
     return {
       name: entity.title,
       description: entity.description,

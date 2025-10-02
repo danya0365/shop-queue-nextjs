@@ -1,5 +1,6 @@
 export interface QueueStatusStatsDTO {
   currentNumber: string;
+  totalConfirmed: number;
   totalWaiting: number;
   estimatedWaitTime: number;
   averageServiceTime: number;

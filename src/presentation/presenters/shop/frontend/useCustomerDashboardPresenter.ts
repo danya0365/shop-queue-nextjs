@@ -55,6 +55,10 @@ export function useCustomerDashboardPresenter(
     }
   }, [loadData, initialViewModel]);
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
   // Refresh data function
   const refreshData = useCallback(async () => {
     try {

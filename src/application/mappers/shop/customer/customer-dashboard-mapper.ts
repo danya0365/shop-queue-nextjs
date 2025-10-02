@@ -1,20 +1,21 @@
 import type {
-  CustomerDashboardEntity,
-  PopularServiceEntity,
-  PromotionEntity,
-  QueueStatusStatsEntity,
-} from "@/src/domain/entities/shop/customer/customer-dashboard.entity";
-import type {
   CustomerDashboardDataDTO,
   PopularServiceDTO,
   PromotionDTO,
   QueueStatusStatsDTO,
 } from "@/src/application/dtos/shop/customer/customer-dashboard-dto";
+import type {
+  CustomerDashboardEntity,
+  PopularServiceEntity,
+  PromotionEntity,
+  QueueStatusStatsEntity,
+} from "@/src/domain/entities/shop/customer/customer-dashboard.entity";
 
 export class QueueStatusStatsMapper {
   static toDTO(entity: QueueStatusStatsEntity): QueueStatusStatsDTO {
     return {
       currentNumber: entity.currentNumber,
+      totalConfirmed: entity.totalConfirmed,
       totalWaiting: entity.totalWaiting,
       estimatedWaitTime: entity.estimatedWaitTime,
       averageServiceTime: entity.averageServiceTime,
@@ -24,6 +25,7 @@ export class QueueStatusStatsMapper {
   static toEntity(dto: QueueStatusStatsDTO): QueueStatusStatsEntity {
     return {
       currentNumber: dto.currentNumber,
+      totalConfirmed: dto.totalConfirmed,
       totalWaiting: dto.totalWaiting,
       estimatedWaitTime: dto.estimatedWaitTime,
       averageServiceTime: dto.averageServiceTime,
@@ -83,8 +85,12 @@ export class CustomerDashboardMapper {
   static toDTO(entity: CustomerDashboardEntity): CustomerDashboardDataDTO {
     return {
       queueStatus: QueueStatusStatsMapper.toDTO(entity.queueStatus),
-      popularServices: entity.popularServices.map(service => PopularServiceMapper.toDTO(service)),
-      promotions: entity.promotions.map(promotion => PromotionMapper.toDTO(promotion)),
+      popularServices: entity.popularServices.map((service) =>
+        PopularServiceMapper.toDTO(service)
+      ),
+      promotions: entity.promotions.map((promotion) =>
+        PromotionMapper.toDTO(promotion)
+      ),
       canJoinQueue: entity.canJoinQueue,
       announcement: entity.announcement,
     };
@@ -93,8 +99,12 @@ export class CustomerDashboardMapper {
   static toEntity(dto: CustomerDashboardDataDTO): CustomerDashboardEntity {
     return {
       queueStatus: QueueStatusStatsMapper.toEntity(dto.queueStatus),
-      popularServices: dto.popularServices.map(service => PopularServiceMapper.toEntity(service)),
-      promotions: dto.promotions.map(promotion => PromotionMapper.toEntity(promotion)),
+      popularServices: dto.popularServices.map((service) =>
+        PopularServiceMapper.toEntity(service)
+      ),
+      promotions: dto.promotions.map((promotion) =>
+        PromotionMapper.toEntity(promotion)
+      ),
       canJoinQueue: dto.canJoinQueue,
       announcement: dto.announcement,
     };

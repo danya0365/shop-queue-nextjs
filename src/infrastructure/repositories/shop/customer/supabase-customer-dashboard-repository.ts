@@ -47,6 +47,7 @@ export class SupabaseCustomerDashboardRepository
       // Use RPC call to get comprehensive queue status data for anonymous access
       const queueStatusResult = await this.dataSource.callRpc<{
         waiting_queues: number;
+        confirmed_queues: number;
         serving_queues: number;
         average_wait_time_minutes: number;
         average_service_time_minutes: number;
@@ -69,23 +70,39 @@ export class SupabaseCustomerDashboardRepository
 
       const queueStatusData = queueStatusResult[0];
 
+      const queueProgressResult = await this.dataSource.callRpc<{
+        current_number: number;
+        total_ahead: number;
+        average_service_time: number;
+        estimated_call_time: string;
+      }>("get_customer_queue_progress", {
+        p_shop_id: shopId,
+      });
+
+      if (
+        !queueProgressResult ||
+        !Array.isArray(queueProgressResult) ||
+        queueProgressResult.length === 0
+      ) {
+        throw new ShopCustomerDashboardError(
+          ShopCustomerDashboardErrorType.DATABASE_ERROR,
+          "Failed to fetch queue progress data",
+          "SupabaseCustomerDashboardRepository.getQueueStatus",
+          { shopId }
+        );
+      }
+
+      const queueProgressData = queueProgressResult[0];
+      const currentNumber = queueProgressData.current_number;
+
       // Transform the RPC response to match the expected entity format
       const queueStatus: QueueStatusStatsEntity = {
-        currentNumber: String(
-          (queueStatusData.waiting_queues || 0) + (queueStatusData.serving_queues || 0)
-        ),
+        currentNumber: String(currentNumber),
+        totalConfirmed: queueStatusData.confirmed_queues || 0,
         totalWaiting: queueStatusData.waiting_queues || 0,
         estimatedWaitTime: queueStatusData.average_wait_time_minutes || 0,
         averageServiceTime: queueStatusData.average_service_time_minutes || 0,
       };
-
-      this.logger.info("Queue status retrieved successfully", {
-        shopId,
-        totalWaiting: queueStatus.totalWaiting,
-        currentNumber: queueStatus.currentNumber,
-        estimatedWaitTime: queueStatus.estimatedWaitTime,
-        averageServiceTime: queueStatus.averageServiceTime,
-      });
 
       return queueStatus;
     } catch (error) {

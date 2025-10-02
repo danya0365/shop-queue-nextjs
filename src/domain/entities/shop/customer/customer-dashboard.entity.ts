@@ -1,5 +1,6 @@
 export interface QueueStatusStatsEntity {
   currentNumber: string;
+  totalConfirmed: number;
   totalWaiting: number;
   estimatedWaitTime: number;
   averageServiceTime: number;

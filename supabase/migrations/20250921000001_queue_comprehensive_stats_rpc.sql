@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION public.get_queue_comprehensive_stats(
     p_shop_id UUID
 ) RETURNS TABLE(
     waiting_queues BIGINT,
+    confirmed_queues BIGINT,
     serving_queues BIGINT,
     average_wait_time_minutes DECIMAL(10,2),
     average_service_time_minutes DECIMAL(10,2)
@@ -19,6 +20,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         COALESCE(qcsv.waiting_queues, 0) as waiting_queues,
+        COALESCE(qcsv.confirmed_queues, 0) as confirmed_queues,
         COALESCE(qcsv.serving_queues, 0) as serving_queues,
         COALESCE(qcsv.average_wait_time_minutes, 0) as average_wait_time_minutes,
         COALESCE(qcsv.average_service_time_minutes, 0) as average_service_time_minutes

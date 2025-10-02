@@ -165,7 +165,7 @@ export function CustomerDashboardView({
             <div className="text-center">
               <div className="w-16 h-16 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold">
-                  {queueStatus.currentNumber}
+                  {queueStatus.currentNumber || "-"}
                 </span>
               </div>
               <p className="text-sm shop-frontend-text-secondary">
@@ -176,7 +176,7 @@ export function CustomerDashboardView({
             <div className="text-center">
               <div className="w-16 h-16 shop-frontend-queue-waiting rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold">
-                  {queueStatus.totalWaiting}
+                  {queueStatus.totalConfirmed}
                 </span>
               </div>
               <p className="text-sm shop-frontend-text-secondary">คิวรอ</p>
@@ -185,7 +185,7 @@ export function CustomerDashboardView({
             <div className="text-center">
               <div className="w-16 h-16 shop-frontend-queue-time rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold">
-                  {queueStatus.estimatedWaitTime}
+                  {Math.floor(queueStatus.estimatedWaitTime)}
                 </span>
               </div>
               <p className="text-sm shop-frontend-text-secondary">
@@ -196,7 +196,7 @@ export function CustomerDashboardView({
             <div className="text-center">
               <div className="w-16 h-16 shop-frontend-queue-average rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl font-bold">
-                  {queueStatus.averageServiceTime}
+                  {Math.floor(queueStatus.averageServiceTime)}
                 </span>
               </div>
               <p className="text-sm shop-frontend-text-secondary">
