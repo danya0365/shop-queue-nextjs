@@ -148,7 +148,7 @@ export function CustomerQueueStatusView({
             <div className="text-center">
               <div className="w-20 h-20 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold">
-                  {queueProgress.currentNumber}
+                  {queueProgress.currentNumber || "-"}
                 </span>
               </div>
               <p className="text-lg font-medium shop-frontend-text-primary mb-2">
@@ -200,7 +200,7 @@ export function CustomerQueueStatusView({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
               <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
-                {queueProgress.currentNumber}
+                {queueProgress.currentNumber || "-"}
               </div>
               <div className="text-sm shop-frontend-text-secondary">
                 คิวปัจจุบัน

@@ -1484,6 +1484,8 @@ END;
 $$;
 
 -- Function to get queue position and estimated wait time
+-- Only 'confirmed' status is counted as valid queue position
+-- 'waiting' status is considered spam and not counted
 CREATE OR REPLACE FUNCTION public.get_queue_position(
   p_queue_id UUID
 ) RETURNS TABLE(
@@ -1510,13 +1512,15 @@ BEGIN
     RAISE EXCEPTION 'queue_not_found: %', p_queue_id;
   END IF;
 
-  -- If queue is not waiting, return special values
-  IF v_status != 'waiting' THEN
+  -- If queue is not confirmed, return special values (0 means not in queue)
+  -- waiting = spam, not counted yet
+  -- serving, completed, cancelled, no_show = not in queue anymore
+  IF v_status != 'confirmed' THEN
     RETURN QUERY SELECT 0, 0, 0;
     RETURN;
   END IF;
 
-  -- Calculate position and wait time
+  -- Calculate position and wait time (only from 'confirmed' queues)
   RETURN QUERY
   WITH queue_stats AS (
     SELECT 
@@ -1525,7 +1529,7 @@ BEGIN
       estimated_duration
     FROM public.queues
     WHERE shop_id = v_shop_id 
-      AND status = 'waiting'
+      AND status = 'confirmed'
       AND created_at <= v_created_at
   ),
   current_queue AS (

@@ -149,11 +149,11 @@ BEGIN
     -- If no queue is currently being served, use empty string
     v_current_number := COALESCE(v_current_number, '');
     
-    -- Get total queues ahead (waiting and confirmed)
+    -- Get total queues ahead (only confirmed, waiting is spam)
     SELECT COUNT(*) INTO v_total_ahead
     FROM public.queues q
     WHERE q.shop_id = p_shop_id
-    AND q.status IN ('waiting', 'confirmed');
+    AND q.status = 'confirmed';
     
     -- Calculate average service time from completed queues in the last 30 days
     -- Default to 8 minutes if no historical data
