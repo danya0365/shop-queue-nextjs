@@ -18,8 +18,7 @@ export interface CustomerQueueHistory {
   services: HistoryService[];
   totalAmount: number;
   status: QueueStatus;
-  queueDate: string;
-  queueTime: string;
+  queueDateTime: string;
   completedAt?: string;
   waitTime?: number; // in minutes
   serviceTime?: number; // in minutes
@@ -55,7 +54,9 @@ export interface HistoryFilters {
 }
 
 // type filter
-export type HistoryFilterType = typeof import("@/src/domain/constants/filter.constants").ALL_FILTER_VALUE | QueueStatus;
+export type HistoryFilterType =
+  | typeof import("@/src/domain/constants/filter.constants").ALL_FILTER_VALUE
+  | QueueStatus;
 
 // Pagination interface
 export interface Pagination {
@@ -149,8 +150,7 @@ export class CustomerHistoryPresenter extends BaseShopPresenter {
           })),
           totalAmount: queue.totalAmount,
           status: queue.status,
-          queueDate: queue.queueDate,
-          queueTime: queue.queueTime,
+          queueDateTime: queue.queueDateTime,
           completedAt: queue.completedAt,
           waitTime: queue.waitTime,
           serviceTime: queue.serviceTime,

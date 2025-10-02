@@ -1,8 +1,8 @@
 // Customer History DTOs following Clean Architecture principles
 
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import { PaymentMethod } from "@/src/domain/entities/backend/backend-payment.entity";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
-import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 
 export interface CustomerQueueHistoryDTO {
   id: string;
@@ -11,8 +11,7 @@ export interface CustomerQueueHistoryDTO {
   services: HistoryServiceDTO[];
   totalAmount: number;
   status: QueueStatus;
-  queueDate: string;
-  queueTime: string;
+  queueDateTime: string;
   completedAt?: string;
   waitTime?: number; // in minutes
   serviceTime?: number; // in minutes

@@ -37,9 +37,6 @@ export class SupabaseCustomerHistoryMapper {
       0
     );
 
-    const queueDate = data.created_at ? data.created_at.split(" ")[0] : "";
-    const queueTime = data.created_at ? data.created_at.split(" ")[1] : "";
-
     return {
       id: data.id || "",
       queueNumber: data.queue_number || "",
@@ -47,8 +44,7 @@ export class SupabaseCustomerHistoryMapper {
       services,
       totalAmount,
       status: data.status as QueueStatus,
-      queueDate,
-      queueTime,
+      queueDateTime: data.created_at,
       completedAt: data.completed_at || undefined,
       waitTime: data.actual_wait_time
         ? Number(data.actual_wait_time)

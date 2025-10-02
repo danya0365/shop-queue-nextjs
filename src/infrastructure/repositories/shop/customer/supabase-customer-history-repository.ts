@@ -119,7 +119,6 @@ export class SupabaseCustomerHistoryRepository
         (item: GetCustomerQueueHistoryByCustomerSchema) =>
           SupabaseCustomerHistoryMapper.toQueueHistoryEntityFromRPC(item)
       );
-
       return {
         data: transformedData,
         pagination: rpcResult.pagination,

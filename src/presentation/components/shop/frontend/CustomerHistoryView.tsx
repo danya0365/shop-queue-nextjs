@@ -1,5 +1,6 @@
 "use client";
 
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import { PaymentMethod } from "@/src/domain/entities/shop/backend/backend-payment.entity";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { PaginationControls } from "@/src/presentation/components/common/PaginationControls";
@@ -8,7 +9,6 @@ import type {
   CustomerQueueHistory,
   HistoryFilterType,
 } from "@/src/presentation/presenters/shop/frontend/CustomerHistoryPresenter";
-import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import { useCustomerHistoryPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerHistoryPresenter";
 import { useState } from "react";
 
@@ -251,9 +251,7 @@ export function CustomerHistoryView({
               <select
                 value={filters.status || ALL_FILTER_VALUE}
                 onChange={(e) =>
-                  handleStatusFilterChange(
-                    e.target.value as HistoryFilterType
-                  )
+                  handleStatusFilterChange(e.target.value as HistoryFilterType)
                 }
                 className="shop-frontend-input w-full"
               >
@@ -333,7 +331,16 @@ export function CustomerHistoryView({
                             {queue.shopName}
                           </h4>
                           <p className="text-sm shop-frontend-text-secondary">
-                            {queue.queueDate} เวลา {queue.queueTime}
+                            {new Date(queue.queueDateTime).toLocaleString(
+                              "th-TH",
+                              { 
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
@@ -423,12 +430,15 @@ export function CustomerHistoryView({
                     </p>
                     <p className="shop-frontend-text-secondary">
                       วันที่:{" "}
-                      {new Date(selectedQueue.queueDate).toLocaleDateString(
+                      {new Date(selectedQueue.queueDateTime).toLocaleDateString(
                         "th-TH"
                       )}
                     </p>
                     <p className="shop-frontend-text-secondary">
-                      เวลา: {selectedQueue.queueTime}
+                      เวลา: {new Date(selectedQueue.queueDateTime).toLocaleTimeString(
+                        "th-TH",
+                        { hour: "2-digit", minute: "2-digit" }
+                      )}
                     </p>
                   </div>
                   <div>

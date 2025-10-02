@@ -1,6 +1,6 @@
+import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 import { PaymentMethod } from "../backend/backend-payment.entity";
 import { QueueStatus } from "../backend/backend-queue.entity";
-import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
 
 export interface CustomerQueueHistoryEntity {
   id: string;
@@ -9,8 +9,7 @@ export interface CustomerQueueHistoryEntity {
   services: CustomerQueueServiceEntity[];
   totalAmount: number;
   status: QueueStatus;
-  queueDate: string;
-  queueTime: string;
+  queueDateTime: string;
   completedAt?: string;
   waitTime?: number;
   serviceTime?: number;

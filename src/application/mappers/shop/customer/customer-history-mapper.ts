@@ -6,8 +6,8 @@ import type {
   HistoryFiltersDTO,
   PaginationDTO,
 } from "@/src/application/dtos/shop/customer/customer-history-dto";
-import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import { ALL_FILTER_VALUE } from "@/src/domain/constants/filter.constants";
+import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import type {
   CustomerInfoEntity,
   CustomerQueueHistoryEntity,
@@ -55,8 +55,7 @@ export class CustomerHistoryMapper {
         })),
         totalAmount: queue.totalAmount,
         status: queue.status as QueueStatus,
-        queueDate: queue.queueDate,
-        queueTime: queue.queueTime,
+        queueDateTime: queue.queueDateTime,
         completedAt: queue.completedAt,
         waitTime: queue.waitTime,
         serviceTime: queue.serviceTime,
