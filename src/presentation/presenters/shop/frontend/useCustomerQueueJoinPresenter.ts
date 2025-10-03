@@ -4,6 +4,7 @@ import { QueuePriority } from "@/src/domain/entities/shop/backend/backend-queue.
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import { useCallback, useEffect, useState } from "react";
+import { ClientCustomerPresenterFactory } from "./CustomerPresenter";
 import {
   ClientCustomerQueueJoinPresenterFactory,
   type CustomerQueueJoinViewModel,
@@ -11,7 +12,6 @@ import {
   type QueueService,
   type ServiceOption,
 } from "./CustomerQueueJoinPresenter";
-import { ClientCustomerPresenterFactory } from "./CustomerPresenter";
 
 const presenter = ClientCustomerQueueJoinPresenterFactory.create();
 const customerPresenter = ClientCustomerPresenterFactory.create();
@@ -48,6 +48,9 @@ export function useCustomerQueueJoinPresenter(
     Record<string, number>
   >({});
 
+  // State for controlling if priority can be set
+  const [isAllowSetPriority, setIsAllowSetPriority] = useState(false);
+
   // Initialize with initial view model if provided
   useEffect(() => {
     if (initialViewModel) {
@@ -55,6 +58,12 @@ export function useCustomerQueueJoinPresenter(
       setLoading(false);
     }
   }, [initialViewModel]);
+
+  // Update isAllowSetPriority when storedCustomer changes
+  useEffect(() => {
+    // Allow setting priority if user has a stored customer (is registered)
+    setIsAllowSetPriority(!!storedCustomer && !!activeProfile);
+  }, [storedCustomer, activeProfile]);
 
   // Load customer data from store and pre-fill form if available
   useEffect(() => {
@@ -66,10 +75,11 @@ export function useCustomerQueueJoinPresenter(
             "Loading customer data by profile ID for authenticated user"
           );
 
-          const profileCustomer = await customerPresenter.getCustomerByProfileId(
-            activeProfile.id,
-            shopId
-          );
+          const profileCustomer =
+            await customerPresenter.getCustomerByProfileId(
+              activeProfile.id,
+              shopId
+            );
 
           if (profileCustomer) {
             // Pre-fill form with customer data from profile
@@ -406,7 +416,7 @@ export function useCustomerQueueJoinPresenter(
         setActionLoading(false);
       }
     },
-  [viewModel, shopId, storedCustomer, setStoredCustomer, activeProfile?.id]
+    [viewModel, shopId, storedCustomer, setStoredCustomer, activeProfile?.id]
   );
 
   const reset = useCallback(() => {
@@ -471,5 +481,11 @@ export function useCustomerQueueJoinPresenter(
 
     // Helper function to get selected services as QueueService[]
     getSelectedServicesAsQueueServices,
+
+    // Priority control
+    isAllowSetPriority,
+
+    // Customer data
+    storedCustomer,
   };
 }

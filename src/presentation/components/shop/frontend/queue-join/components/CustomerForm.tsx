@@ -20,6 +20,7 @@ interface CustomerFormProps {
   priorityOptions: PriorityOption[];
   isShowBackButton?: boolean;
   onBackPressed?: () => void;
+  isAllowSetPriority: boolean;
   setCustomerName: (value: string) => void;
   setCustomerPhone: (value: string) => void;
   setPriority: (value: QueuePriority) => void;
@@ -45,6 +46,7 @@ export function CustomerForm({
   priorityOptions,
   isShowBackButton,
   onBackPressed,
+  isAllowSetPriority,
   setCustomerName,
   setCustomerPhone,
   setPriority,
@@ -54,12 +56,16 @@ export function CustomerForm({
 }: CustomerFormProps) {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    let newPriority = priority;
+    if (!isAllowSetPriority) {
+      newPriority = QueuePriority.NORMAL;
+    }
     handleSubmit({
       customerName,
       customerPhone,
       services: getSelectedServicesAsQueueServices(),
       specialRequests,
-      priority,
+      priority: newPriority,
     });
   };
 
@@ -99,53 +105,63 @@ export function CustomerForm({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium shop-frontend-text-primary mb-3">
-            ความเร่งด่วน
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {priorityOptions.map((option) => (
-              <label
-                key={option.value}
-                className={`relative flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  priority === option.value
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="priority"
-                  value={option.value}
-                  checked={priority === option.value}
-                  onChange={(e) => setPriority(e.target.value as QueuePriority)}
-                  className="sr-only"
-                />
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mb-2 ${
+        {isAllowSetPriority ? (
+          <div>
+            <label className="block text-sm font-medium shop-frontend-text-primary mb-3">
+              ความเร่งด่วน
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {priorityOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={`relative flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
                     priority === option.value
-                      ? "border-primary bg-primary"
-                      : "border-gray-300"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  {priority === option.value && (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  )}
-                </div>
-                <span className="font-medium text-sm text-center mb-1">
-                  {option.label}
-                </span>
-                {option.price > 0 ? (
-                  <span className="text-xs text-primary font-semibold">
-                    +฿{option.price}
+                  <input
+                    type="radio"
+                    name="priority"
+                    value={option.value}
+                    checked={priority === option.value}
+                    onChange={(e) =>
+                      setPriority(e.target.value as QueuePriority)
+                    }
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mb-2 ${
+                      priority === option.value
+                        ? "border-primary bg-primary"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {priority === option.value && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                  <span className="font-medium text-sm text-center mb-1">
+                    {option.label}
                   </span>
-                ) : (
-                  <span className="text-xs text-gray-500">ฟรี</span>
-                )}
-              </label>
-            ))}
+                  {option.price > 0 ? (
+                    <span className="text-xs text-primary font-semibold">
+                      +฿{option.price}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-500">ฟรี</span>
+                  )}
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="text-sm text-blue-700">
+              ⭐ สมาชิกเท่านั้นที่สามารถเลือกความเร่งด่วนได้
+            </p>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium shop-frontend-text-primary mb-2">

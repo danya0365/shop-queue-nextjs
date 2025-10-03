@@ -31,15 +31,17 @@ export function ClientCustomerQueueJoinView({
     setSpecialRequests,
     priority,
     setPriority,
-    handleServiceToggle,
-    increaseServiceQuantity,
-    decreaseServiceQuantity,
-    handleSubmit,
-    reset,
-    getSelectedServicesAsQueueServices,
     serviceQuantities,
     isShowFinalOrderSummary,
     setIsShowFinalOrderSummary,
+    storedCustomer,
+    handleSubmit,
+    getSelectedServicesAsQueueServices,
+    increaseServiceQuantity,
+    decreaseServiceQuantity,
+    handleServiceToggle,
+    updateServiceQuantity,
+    reset,
   } = useCustomerQueueJoinPresenter(shopId, initialViewModel);
   const device = useGetDevice();
 
@@ -227,6 +229,7 @@ export function ClientCustomerQueueJoinView({
             handleSubmit={handleSubmit}
             isShowBackButton={true}
             onBackPressed={() => setIsShowFinalOrderSummary(false)}
+            isAllowSetPriority={!!storedCustomer}
             getSelectedServicesAsQueueServices={
               getSelectedServicesAsQueueServices
             }
@@ -390,7 +393,7 @@ export function ClientCustomerQueueJoinView({
                 decreaseServiceQuantity={decreaseServiceQuantity}
                 increaseServiceQuantity={increaseServiceQuantity}
               />
-              <CustomerForm
+<CustomerForm
                 customerName={customerName}
                 customerPhone={customerPhone}
                 priority={priority}
@@ -404,6 +407,7 @@ export function ClientCustomerQueueJoinView({
                 setPriority={setPriority}
                 setSpecialRequests={setSpecialRequests}
                 handleSubmit={handleSubmit}
+                isAllowSetPriority={!!storedCustomer}
                 getSelectedServicesAsQueueServices={
                   getSelectedServicesAsQueueServices
                 }
