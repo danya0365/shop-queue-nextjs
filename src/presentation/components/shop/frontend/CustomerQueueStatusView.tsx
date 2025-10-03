@@ -24,6 +24,7 @@ export function CustomerQueueStatusView({
     handleSearch,
     handleCancel,
     refreshData,
+    resetData,
     getStatusColor,
     getStatusText,
     getStatusIcon,
@@ -118,7 +119,7 @@ export function CustomerQueueStatusView({
               ตรวจสอบสถานะคิว - {shopName}
             </h1>
           </div>
-          <form 
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSearch();
@@ -140,7 +141,7 @@ export function CustomerQueueStatusView({
                 className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold transition-colors"
                 disabled={actionLoading}
               >
-                {actionLoading ? 'กำลังค้นหา...' : 'ค้นหา'}
+                {actionLoading ? "กำลังค้นหา..." : "ค้นหา"}
               </button>
             </div>
           </form>
@@ -306,10 +307,13 @@ export function CustomerQueueStatusView({
             </button>
 
             <button
-              onClick={() => (window.location.href = `/shop/${shopId}`)}
+              onClick={() => {
+                resetData();
+              }}
               className="shop-frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
+              disabled={actionLoading}
             >
-              🏠 กลับหน้าหลัก
+              🔍 ค้นหาคิวอื่น
             </button>
 
             {canCancel && (

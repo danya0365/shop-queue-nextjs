@@ -108,6 +108,11 @@ export function useCustomerQueueStatusPresenter(
     }
   }, [loadData, viewModel]);
 
+  const resetData = useCallback(async () => {
+    setQueueNumber("");
+    await loadData();
+  }, [loadData]);
+
   // Helper functions for status display
   const getStatusColor = useCallback((status: string) => {
     switch (status) {
@@ -176,6 +181,7 @@ export function useCustomerQueueStatusPresenter(
     handleSearch,
     handleCancel,
     refreshData,
+    resetData,
     loadData,
 
     // Helper functions

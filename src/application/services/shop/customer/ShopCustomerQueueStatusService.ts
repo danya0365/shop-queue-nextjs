@@ -1,15 +1,16 @@
-import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import type {
   CustomerQueueStatusDTO,
-  QueueProgressDTO,
   CustomerQueueStatusViewModelDTO,
+  QueueProgressDTO,
 } from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
+import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import type { ShopService } from "@/src/application/services/shop/ShopService";
+import { CancelCustomerQueueUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueUseCase";
 import { GetCustomerQueueStatusUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetCustomerQueueStatusUseCase";
 import { GetQueueProgressUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueProgressUseCase";
-import { CancelCustomerQueueUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueUseCase";
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { CustomerQueueStatusRepository } from "@/src/domain/repositories/shop/customer/customer-queue-status-repository";
-import type { ShopService } from "@/src/application/services/shop/ShopService";
 
 export interface IShopCustomerQueueStatusService {
   /**
@@ -47,13 +48,12 @@ export interface IShopCustomerQueueStatusService {
    * @param queueNumber The queue number
    * @returns True if cancellation was successful
    */
-  cancelCustomerQueue(
-    shopId: string,
-    queueNumber: string
-  ): Promise<boolean>;
+  cancelCustomerQueue(shopId: string, queueNumber: string): Promise<boolean>;
 }
 
-export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusService {
+export class ShopCustomerQueueStatusService
+  implements IShopCustomerQueueStatusService
+{
   constructor(
     private readonly getCustomerQueueStatusUseCase: IUseCase<
       { shopId: string; queueId?: string },
@@ -86,19 +86,33 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
       if (queueIdentifier) {
         // Try to get queue status by treating the identifier as queue ID first
         try {
-          customerQueue = await this.getCustomerQueueStatusUseCase.execute({ shopId, queueId: queueIdentifier });
+          customerQueue = await this.getCustomerQueueStatusUseCase.execute({
+            shopId,
+            queueId: queueIdentifier,
+          });
         } catch {
           // If that fails, try to convert queue number to queue ID
-          this.logger.info("Attempting to convert queue number to queue ID", { queueIdentifier });
-          const queueId = await this.customerQueueStatusRepository.getQueueIdByNumber(shopId, queueIdentifier);
+          this.logger.info("Attempting to convert queue number to queue ID", {
+            queueIdentifier,
+          });
+          const queueId =
+            await this.customerQueueStatusRepository.getQueueIdByNumber(
+              shopId,
+              queueIdentifier
+            );
           if (queueId) {
-            customerQueue = await this.getCustomerQueueStatusUseCase.execute({ shopId, queueId });
+            customerQueue = await this.getCustomerQueueStatusUseCase.execute({
+              shopId,
+              queueId,
+            });
           }
         }
       }
-      
-      const queueProgress = await this.getQueueProgressUseCase.execute({ shopId });
-      
+
+      const queueProgress = await this.getQueueProgressUseCase.execute({
+        shopId,
+      });
+
       const shop = await this.shopService.getShopById(shopId);
 
       return {
@@ -107,8 +121,8 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
         shopName: shop?.name || "",
         isFound: !!customerQueue,
         canCancel:
-          customerQueue?.status === "waiting" ||
-          customerQueue?.status === "confirmed",
+          customerQueue?.status === QueueStatus.WAITING ||
+          customerQueue?.status === QueueStatus.CONFIRMED,
       };
     } catch (error) {
       this.logger.error("Error getting customer queue status view model", {
@@ -125,7 +139,10 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
     queueIdentifier: string
   ): Promise<CustomerQueueStatusDTO | null> {
     try {
-      this.logger.info("Getting customer queue status", { shopId, queueIdentifier });
+      this.logger.info("Getting customer queue status", {
+        shopId,
+        queueIdentifier,
+      });
 
       // Try to get queue status by treating the identifier as queue ID first
       try {
@@ -136,8 +153,14 @@ export class ShopCustomerQueueStatusService implements IShopCustomerQueueStatusS
         return result;
       } catch (originalError) {
         // If that fails, try to convert queue number to queue ID
-        this.logger.info("Attempting to convert queue number to queue ID", { queueIdentifier });
-        const queueId = await this.customerQueueStatusRepository.getQueueIdByNumber(shopId, queueIdentifier);
+        this.logger.info("Attempting to convert queue number to queue ID", {
+          queueIdentifier,
+        });
+        const queueId =
+          await this.customerQueueStatusRepository.getQueueIdByNumber(
+            shopId,
+            queueIdentifier
+          );
         if (queueId) {
           const result = await this.getCustomerQueueStatusUseCase.execute({
             shopId,
@@ -198,9 +221,13 @@ export class ShopCustomerQueueStatusServiceFactory {
     shopService: ShopService,
     logger: Logger
   ): ShopCustomerQueueStatusService {
-    const getCustomerQueueStatusUseCase = new GetCustomerQueueStatusUseCase(repository);
+    const getCustomerQueueStatusUseCase = new GetCustomerQueueStatusUseCase(
+      repository
+    );
     const getQueueProgressUseCase = new GetQueueProgressUseCase(repository);
-    const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(repository);
+    const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(
+      repository
+    );
 
     return new ShopCustomerQueueStatusService(
       getCustomerQueueStatusUseCase,
