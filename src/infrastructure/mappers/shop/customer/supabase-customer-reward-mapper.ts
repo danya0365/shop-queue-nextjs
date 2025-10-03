@@ -67,7 +67,7 @@ export class SupabaseCustomerRewardMapper {
       isAvailable: Boolean(data.is_available ?? true),
       stock: undefined, // not present on rewards table
       shopId: data.shop_id,
-      type: this.mapRewardTypeToEnum(String(data.type)) ?? RewardType.DISCOUNT,
+      type: data.type as RewardType,
       value: Number(data.value),
       termsAndConditions: [], // not present on rewards table
       expiryDate: undefined, // rewards has expiry_days; transform to concrete date if business rule defined
@@ -114,7 +114,7 @@ export class SupabaseCustomerRewardMapper {
       description: data.source_description ?? "",
       // Reward type is not available on reward_usages; choose a safe default
       // to satisfy the non-optional domain field while keeping mapping minimal
-      type: RewardType.DISCOUNT,
+      type: data.redemption_type as RewardType,
       value: Number(data.reward_value ?? 0),
       pointsCost: Number(data.points_used ?? 0),
       category: "", // not available on reward_usages
@@ -141,7 +141,7 @@ export class SupabaseCustomerRewardMapper {
       id: String(data.id || ""),
       name: data.name || "",
       description: data.description || "",
-      type: this.mapRewardTypeToEnum(data.type) || RewardType.DISCOUNT,
+      type: data.type as RewardType,
       value: Number(data.value || 0),
       pointsCost: Number(data.points_cost || 0),
       category: data.category || "",
@@ -168,8 +168,7 @@ export class SupabaseCustomerRewardMapper {
       id: String(data.id || ""),
       customerId: data.customer_id || "",
       shopId: data.shop_id || "",
-      type:
-        (data.type as RewardTransactionType) || RewardTransactionType.EARNED,
+      type: data.type as RewardTransactionType,
       points: Number(data.points || 0),
       description: data.description || "",
       date: data.date || "",
