@@ -118,7 +118,13 @@ export function CustomerQueueStatusView({
               ตรวจสอบสถานะคิว - {shopName}
             </h1>
           </div>
-          <div className="p-6">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
+            className="p-6"
+          >
             <div className="flex gap-4">
               <input
                 type="text"
@@ -126,15 +132,18 @@ export function CustomerQueueStatusView({
                 onChange={(e) => setQueueNumber(e.target.value)}
                 placeholder="กรอกหมายเลขคิว (เช่น A001)"
                 className="shop-frontend-input flex-1"
+                required
+                aria-label="หมายเลขคิว"
               />
               <button
-                onClick={handleSearch}
+                type="submit"
                 className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold transition-colors"
+                disabled={actionLoading}
               >
-                ค้นหา
+                {actionLoading ? 'กำลังค้นหา...' : 'ค้นหา'}
               </button>
             </div>
-          </div>
+          </form>
         </div>
 
         {/* Current Queue Info */}
