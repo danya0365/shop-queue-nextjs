@@ -1,6 +1,9 @@
 "use client";
 
+import { useCustomerStore } from "@/src/presentation/stores/customer-store";
+import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import { useCallback, useEffect, useState } from "react";
+import { ClientCustomerPresenterFactory } from "./CustomerPresenter";
 import type {
   CustomerQueue,
   CustomerQueueStatusViewModel,
@@ -9,6 +12,7 @@ import type {
 import { ClientQueueStatusPresenterFactory } from "./CustomerQueueStatusPresenter";
 
 const presenter = ClientQueueStatusPresenterFactory.create();
+const customerPresenter = ClientCustomerPresenterFactory.create();
 
 // Re-export types
 export type { CustomerQueue, QueueProgress };
@@ -22,10 +26,77 @@ export function useCustomerQueueStatusPresenter(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const { activeProfile } = useProfileStore();
+
+  // Customer store for persisting customer ID
+  const { customer: storedCustomer, setCustomer: setStoredCustomer } =
+    useCustomerStore();
 
   // State for search form
   const [queueNumber, setQueueNumber] = useState("");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  // Load customer data from store and pre-fill form if available
+  useEffect(() => {
+    const loadCustomerData = async () => {
+      // Case 1: User has active profile but no stored customer (first time in this shop)
+      if (activeProfile?.id && !storedCustomer) {
+        try {
+          console.log(
+            "Loading customer data by profile ID for authenticated user"
+          );
+
+          const profileCustomer =
+            await customerPresenter.getCustomerByProfileId(
+              activeProfile.id,
+              shopId
+            );
+
+          if (profileCustomer) {
+            // Store customer data for future use
+            setStoredCustomer({
+              id: profileCustomer.id,
+              name: profileCustomer.name,
+              phone: profileCustomer.phone,
+              shopId: profileCustomer.shopId,
+            });
+          }
+        } catch (error) {
+          console.error("Error loading customer by profile ID:", error);
+        }
+      }
+
+      // Case 2: User has stored customer data (existing logic)
+      if (storedCustomer && storedCustomer.shopId === shopId) {
+        try {
+          const currentCustomer = await customerPresenter.getCustomerById(
+            storedCustomer.id
+          );
+
+          // TODO: check if profile id is null and user is authenticated
+          // if so, link customer to profile
+          if (currentCustomer.profileId === null && activeProfile?.id) {
+            console.log("Customer is not linked to profile");
+            await customerPresenter.linkCustomerToProfile(
+              currentCustomer.id,
+              currentCustomer.phone
+            );
+          }
+        } catch (error) {
+          console.error("Error loading customer data:", error);
+          setStoredCustomer(null);
+        }
+      }
+    };
+
+    loadCustomerData();
+  }, [
+    storedCustomer,
+    shopId,
+    setStoredCustomer,
+    activeProfile?.id,
+    activeProfile,
+  ]);
 
   // Initialize with initial view model if provided
   useEffect(() => {
