@@ -52,6 +52,31 @@ export class SupabaseCustomerRewardMapper {
   }
 
   /**
+   * Convert rewards table row to AvailableRewardEntity (limited to existing columns)
+   */
+  static fromRewardRowToAvailableRewardEntity(
+    data: import("@/src/infrastructure/schemas/shop/customer/customer-reward.schema").RewardRowSchema
+  ): AvailableRewardEntity {
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description ?? "",
+      pointsCost: Number(data.points_required),
+      category: "", // not present on rewards table
+      imageUrl: undefined, // rewards has icon; keep consistent API and leave undefined or map if desired
+      isAvailable: Boolean(data.is_available ?? true),
+      stock: undefined, // not present on rewards table
+      shopId: data.shop_id,
+      type: this.mapRewardTypeToEnum(String(data.type)) ?? RewardType.DISCOUNT,
+      value: Number(data.value),
+      termsAndConditions: [], // not present on rewards table
+      expiryDate: undefined, // rewards has expiry_days; transform to concrete date if business rule defined
+      createdAt: data.created_at ?? new Date().toISOString(),
+      updatedAt: data.updated_at ?? new Date().toISOString(),
+    };
+  }
+
+  /**
    * Convert reward_transactions_view row to RewardTransactionEntity
    */
   static fromRewardTransactionsViewToEntity(

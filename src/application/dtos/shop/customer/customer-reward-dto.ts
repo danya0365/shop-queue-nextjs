@@ -180,7 +180,6 @@ export interface GetRewardTransactionsInputDTO {
 export interface GetRewardDetailsInputDTO {
   shopId: string;
   rewardId: string;
-  customerId?: string;
 }
 
 export interface RedeemRewardInputDTO {

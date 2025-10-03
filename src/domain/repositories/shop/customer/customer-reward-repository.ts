@@ -154,9 +154,8 @@ export interface ShopCustomerRewardRepository {
    */
   getRewardById(
     shopId: string,
-    rewardId: string,
-    customerId?: string
-  ): Promise<AvailableRewardEntity | CustomerRewardEntity>;
+    rewardId: string
+  ): Promise<AvailableRewardEntity>;
 
   /**
    * Redeem a reward for a customer

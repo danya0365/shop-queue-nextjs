@@ -192,3 +192,8 @@ export interface RewardTransactionsViewSchema {
  * RPC return helpers for enriched reward transactions
  */
 export type GetRewardTransactionsEnrichedReturns = RewardTransactionsViewSchema;
+
+/**
+ * Rewards table row schema alias
+ */
+export type RewardRowSchema = Database["public"]["Tables"]["rewards"]["Row"];

@@ -445,13 +445,16 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting reward transactions via VIEW RPC (reward_transactions_view)", {
-        shopId,
-        customerId,
-        page,
-        limit,
-        filters,
-      });
+      this.logger.info(
+        "Getting reward transactions via VIEW RPC (reward_transactions_view)",
+        {
+          shopId,
+          customerId,
+          page,
+          limit,
+          filters,
+        }
+      );
 
       // Build date range for RPC
       let p_start_date: string | null = null;
@@ -522,7 +525,8 @@ export class SupabaseCustomerRewardRepository
           shop_id: r.shop_id ?? "",
           customer_id: r.customer_id ?? "",
           type:
-            (r.type as import("@/src/domain/types/supabase").Database["public"]["Enums"]["transaction_type"]) ?? null,
+            (r.type as import("@/src/domain/types/supabase").Database["public"]["Enums"]["transaction_type"]) ??
+            null,
           points: r.points ?? 0,
           description: r.description ?? null,
           transaction_date: r.transaction_date ?? null,
@@ -581,9 +585,8 @@ export class SupabaseCustomerRewardRepository
    */
   async getRewardById(
     shopId: string,
-    rewardId: string,
-    customerId?: string
-  ): Promise<AvailableRewardEntity | CustomerRewardEntity> {
+    rewardId: string
+  ): Promise<AvailableRewardEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -593,16 +596,6 @@ export class SupabaseCustomerRewardRepository
           { shopId }
         );
       }
-
-      if (!customerId) {
-        throw new ShopCustomerRewardError(
-          ShopCustomerRewardErrorType.VALIDATION_ERROR,
-          "Customer ID is required",
-          "SupabaseCustomerRewardRepository.getRewardById",
-          { customerId }
-        );
-      }
-
       if (!rewardId) {
         throw new ShopCustomerRewardError(
           ShopCustomerRewardErrorType.VALIDATION_ERROR,
@@ -614,49 +607,45 @@ export class SupabaseCustomerRewardRepository
 
       this.logger.info("Getting reward by ID", {
         shopId,
-        customerId,
         rewardId,
       });
 
-      // First try to get from customer rewards (redeemed rewards)
-      const customerRewardQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-          {
-            field: "id",
-            operator: FilterOperator.EQ,
-            value: rewardId,
-          },
-        ],
-      };
+      // Call RPC to fetch single reward row
+      const row = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["get_reward_by_id"]["Returns"]
+      >("get_reward_by_id", {
+        p_shop_id: shopId,
+        p_reward_id: rewardId,
+      });
 
-      const customerRewards =
-        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-          "customer_rewards",
-          customerRewardQueryOptions
-        );
-
-      if (customerRewards.length > 0) {
-        return SupabaseCustomerRewardMapper.toCustomerRewardEntity(
-          customerRewards[0]
+      if (!row) {
+        throw new ShopCustomerRewardError(
+          ShopCustomerRewardErrorType.NOT_FOUND,
+          "Reward not found",
+          "SupabaseCustomerRewardRepository.getRewardById",
+          { shopId, rewardId }
         );
       }
 
-      throw new ShopCustomerRewardError(
-        ShopCustomerRewardErrorType.NOT_FOUND,
-        "Reward not found",
-        "SupabaseCustomerRewardRepository.getRewardById",
-        { shopId, rewardId, customerId }
-      );
+      const entity = SupabaseCustomerRewardMapper.fromRewardRowToAvailableRewardEntity({
+        id: row.id ?? "",
+        name: row.name ?? "",
+        description: row.description ?? null,
+        points_required: row.points_required ?? 0,
+        shop_id: row.shop_id ?? "",
+        type:
+          (row.type as import("@/src/domain/types/supabase").Database["public"]["Enums"]["reward_type"]) ??
+          ("discount" as any),
+        value: row.value ?? 0,
+        created_at: row.created_at ?? null,
+        updated_at: row.updated_at ?? null,
+        expiry_days: row.expiry_days ?? null,
+        icon: row.icon ?? null,
+        is_available: row.is_available ?? null,
+        usage_limit: row.usage_limit ?? null,
+      });
+
+      return entity;
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;
@@ -666,7 +655,7 @@ export class SupabaseCustomerRewardRepository
         ShopCustomerRewardErrorType.OPERATION_FAILED,
         "Failed to get reward by ID",
         "SupabaseCustomerRewardRepository.getRewardById",
-        { shopId, customerId, rewardId },
+        { shopId, rewardId },
         error
       );
     }

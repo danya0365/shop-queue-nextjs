@@ -1,6 +1,5 @@
 import type {
   AvailableRewardDTO,
-  CustomerRewardDTO,
   GetRewardDetailsInputDTO,
 } from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
@@ -12,18 +11,15 @@ import {
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
 
 export class GetRewardDetailsUseCase
-  implements
-    IUseCase<GetRewardDetailsInputDTO, CustomerRewardDTO | AvailableRewardDTO>
+  implements IUseCase<GetRewardDetailsInputDTO, AvailableRewardDTO>
 {
   constructor(
     private readonly customerRewardRepository: ShopCustomerRewardRepository
   ) {}
 
-  async execute(
-    input: GetRewardDetailsInputDTO
-  ): Promise<CustomerRewardDTO | AvailableRewardDTO> {
+  async execute(input: GetRewardDetailsInputDTO): Promise<AvailableRewardDTO> {
     try {
-      const { shopId, rewardId, customerId } = input;
+      const { shopId, rewardId } = input;
 
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -45,8 +41,7 @@ export class GetRewardDetailsUseCase
 
       const rewardEntity = await this.customerRewardRepository.getRewardById(
         shopId,
-        rewardId,
-        customerId
+        rewardId
       );
 
       if (!rewardEntity) {
@@ -58,12 +53,7 @@ export class GetRewardDetailsUseCase
         );
       }
 
-      // Check if it's a redeemed reward or available reward and map accordingly
-      if ("isRedeemed" in rewardEntity) {
-        return CustomerRewardMapper.toCustomerRewardDTO(rewardEntity);
-      } else {
-        return CustomerRewardMapper.toAvailableRewardDTO(rewardEntity);
-      }
+      return CustomerRewardMapper.toAvailableRewardDTO(rewardEntity);
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;

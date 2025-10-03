@@ -5079,6 +5079,24 @@ export type Database = {
         }
         Returns: number
       }
+      get_reward_by_id: {
+        Args: { p_shop_id: string; p_reward_id: string }
+        Returns: {
+          created_at: string | null
+          description: string | null
+          expiry_days: number | null
+          icon: string | null
+          id: string
+          is_available: boolean | null
+          name: string
+          points_required: number
+          shop_id: string
+          type: Database["public"]["Enums"]["reward_type"]
+          updated_at: string | null
+          usage_limit: number | null
+          value: number
+        }
+      }
       get_reward_transactions_enriched: {
         Args: {
           p_shop_id: string
