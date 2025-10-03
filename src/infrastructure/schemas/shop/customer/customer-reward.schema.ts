@@ -1,3 +1,5 @@
+import { Database } from "@/src/domain/types/supabase";
+
 /**
  * Database schema types for customer rewards
  * These types match the actual database structure
@@ -6,21 +8,8 @@
 /**
  * Customer points database schema
  */
-export interface CustomerPointsSchema {
-  id: string;
-  shop_id: string;
-  customer_id: string;
-  current_points: number;
-  total_earned: number;
-  total_redeemed: number;
-  points_expiring: number;
-  expiry_date: string | null;
-  tier: "Bronze" | "Silver" | "Gold" | "Platinum";
-  next_tier_points: number;
-  tier_benefits: string[];
-  created_at: string;
-  updated_at: string;
-}
+export type GetCustomerPointsSchema =
+  Database["public"]["Functions"]["get_customer_points"]["Returns"][0];
 
 /**
  * Customer reward database schema (redeemed rewards)
@@ -165,9 +154,6 @@ export interface RewardTransactionsFilterSchema {
 /**
  * Database query result schemas
  */
-export interface CustomerPointsResultSchema {
-  data: CustomerPointsSchema;
-}
 
 export interface AvailableRewardsResultSchema {
   data: AvailableRewardSchema[];

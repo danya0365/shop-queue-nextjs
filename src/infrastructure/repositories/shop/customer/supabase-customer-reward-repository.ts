@@ -1,3 +1,11 @@
+import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
+import type {
+  AvailableRewardEntity,
+  CustomerPointsEntity,
+  CustomerRewardEntity,
+  CustomerRewardStatsEntity,
+  RewardTransactionEntity,
+} from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import {
   DatabaseDataSource,
   FilterOperator,
@@ -6,14 +14,6 @@ import {
 } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
-import type {
-  CustomerRewardEntity,
-  CustomerPointsEntity,
-  RewardTransactionEntity,
-  AvailableRewardEntity,
-  CustomerRewardStatsEntity,
-} from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import {
   ShopCustomerRewardError,
   ShopCustomerRewardErrorType,
@@ -21,20 +21,19 @@ import {
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
 import { SupabaseCustomerRewardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-reward-mapper";
 import {
-  CustomerPointsSchema,
-  CustomerRewardSchema,
-  RewardTransactionSchema,
   AvailableRewardSchema,
-  CustomerRewardStatsSchema,
+  CustomerRewardSchema,
+  GetCustomerPointsSchema,
+  RewardTransactionSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
-// Extended types for database records
-type CustomerPointsSchemaRecord = Record<string, unknown> & CustomerPointsSchema;
-type CustomerRewardSchemaRecord = Record<string, unknown> & CustomerRewardSchema;
-type RewardTransactionSchemaRecord = Record<string, unknown> & RewardTransactionSchema;
-type AvailableRewardSchemaRecord = Record<string, unknown> & AvailableRewardSchema;
-type CustomerRewardStatsSchemaRecord = Record<string, unknown> & CustomerRewardStatsSchema;
+type CustomerRewardSchemaRecord = Record<string, unknown> &
+  CustomerRewardSchema;
+type RewardTransactionSchemaRecord = Record<string, unknown> &
+  RewardTransactionSchema;
+type AvailableRewardSchemaRecord = Record<string, unknown> &
+  AvailableRewardSchema;
 
 /**
  * Supabase implementation of the customer reward repository
@@ -54,7 +53,10 @@ export class SupabaseCustomerRewardRepository
    * @param customerId The customer ID
    * @returns Customer points entity
    */
-  async getCustomerPoints(shopId: string, customerId: string): Promise<CustomerPointsEntity> {
+  async getCustomerPoints(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPointsEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -74,29 +76,30 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting customer points", { shopId, customerId });
+      this.logger.info("Getting customer points via RPC", {
+        shopId,
+        customerId,
+      });
 
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-        ],
-      };
-
-      const results = await this.dataSource.getAdvanced<CustomerPointsSchemaRecord>(
-        "customer_points",
-        queryOptions
+      // Call the RPC function
+      const results = await this.dataSource.callRpc<GetCustomerPointsSchema[]>(
+        "get_customer_points",
+        {
+          p_shop_id: shopId,
+          p_customer_id: customerId,
+        }
       );
 
-      const result = results[0]; // Get the first result
+      if (!results) {
+        throw new ShopCustomerRewardError(
+          ShopCustomerRewardErrorType.OPERATION_FAILED,
+          "Failed to get customer points",
+          "SupabaseCustomerRewardRepository.getCustomerPoints",
+          { shopId, customerId }
+        );
+      }
+
+      const result = results?.[0]; // Get the first result
 
       if (!result) {
         throw new ShopCustomerRewardError(
@@ -128,16 +131,18 @@ export class SupabaseCustomerRewardRepository
    * @param params Pagination parameters with filters
    * @returns Paginated available rewards data
    */
-  async getAvailableRewards(params: PaginationParams & {
-    shopId: string;
-    customerId?: string;
-    filters?: {
-      category?: string;
-      isAvailable?: boolean;
-      minPointsCost?: number;
-      maxPointsCost?: number;
-    };
-  }): Promise<{
+  async getAvailableRewards(
+    params: PaginationParams & {
+      shopId: string;
+      customerId?: string;
+      filters?: {
+        category?: string;
+        isAvailable?: boolean;
+        minPointsCost?: number;
+        maxPointsCost?: number;
+      };
+    }
+  ): Promise<{
     data: AvailableRewardEntity[];
     pagination: {
       currentPage: number;
@@ -160,7 +165,13 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting available rewards", { shopId, customerId, page, limit, filters });
+      this.logger.info("Getting available rewards", {
+        shopId,
+        customerId,
+        page,
+        limit,
+        filters,
+      });
 
       // Build query options for Supabase
       const queryOptions: QueryOptions = {
@@ -217,16 +228,18 @@ export class SupabaseCustomerRewardRepository
       // Add pagination to query options
       queryOptions.pagination = {
         page,
-        pageSize: limit
+        pageSize: limit,
       };
 
-      const rewards = await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
-        "available_rewards",
-        queryOptions
-      );
+      const rewards =
+        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
+          "available_rewards",
+          queryOptions
+        );
 
-      const availableRewards = rewards.map((reward: AvailableRewardSchemaRecord) =>
-        SupabaseCustomerRewardMapper.toAvailableRewardEntity(reward)
+      const availableRewards = rewards.map(
+        (reward: AvailableRewardSchemaRecord) =>
+          SupabaseCustomerRewardMapper.toAvailableRewardEntity(reward)
       );
 
       return {
@@ -237,7 +250,7 @@ export class SupabaseCustomerRewardRepository
           totalItems: availableRewards.length, // This would need to be calculated properly with a count query
           totalPages: Math.ceil(availableRewards.length / limit),
           hasNext: page < Math.ceil(availableRewards.length / limit),
-          hasPrev: page > 1
+          hasPrev: page > 1,
         },
       };
     } catch (error) {
@@ -249,7 +262,13 @@ export class SupabaseCustomerRewardRepository
         ShopCustomerRewardErrorType.OPERATION_FAILED,
         "Failed to get available rewards",
         "SupabaseCustomerRewardRepository.getAvailableRewards",
-        { shopId: params.shopId, customerId: params.customerId, page: params.page, limit: params.limit, filters: params.filters },
+        {
+          shopId: params.shopId,
+          customerId: params.customerId,
+          page: params.page,
+          limit: params.limit,
+          filters: params.filters,
+        },
         error
       );
     }
@@ -260,17 +279,19 @@ export class SupabaseCustomerRewardRepository
    * @param params Pagination parameters with filters
    * @returns Paginated redeemed rewards data
    */
-  async getRedeemedRewards(params: PaginationParams & {
-    shopId: string;
-    customerId: string;
-    filters?: {
-      category?: string;
-      type?: RewardType;
-      dateRange?: "all" | "month" | "quarter" | "year" | "custom";
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
+  async getRedeemedRewards(
+    params: PaginationParams & {
+      shopId: string;
+      customerId: string;
+      filters?: {
+        category?: string;
+        type?: RewardType;
+        dateRange?: "all" | "month" | "quarter" | "year" | "custom";
+        startDate?: string;
+        endDate?: string;
+      };
+    }
+  ): Promise<{
     data: CustomerRewardEntity[];
     pagination: {
       currentPage: number;
@@ -302,7 +323,13 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting redeemed rewards", { shopId, customerId, page, limit, filters });
+      this.logger.info("Getting redeemed rewards", {
+        shopId,
+        customerId,
+        page,
+        limit,
+        filters,
+      });
 
       // Build query options for Supabase
       const queryOptions: QueryOptions = {
@@ -364,8 +391,12 @@ export class SupabaseCustomerRewardRepository
               endDate = new Date(now.getFullYear(), 11, 31);
               break;
             case "custom":
-              startDate = filters.startDate ? new Date(filters.startDate) : new Date();
-              endDate = filters.endDate ? new Date(filters.endDate) : new Date();
+              startDate = filters.startDate
+                ? new Date(filters.startDate)
+                : new Date();
+              endDate = filters.endDate
+                ? new Date(filters.endDate)
+                : new Date();
               break;
             default:
               startDate = new Date();
@@ -388,13 +419,14 @@ export class SupabaseCustomerRewardRepository
       // Add pagination to query options
       queryOptions.pagination = {
         page,
-        pageSize: limit
+        pageSize: limit,
       };
 
-      const rewards = await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-        "customer_rewards",
-        queryOptions
-      );
+      const rewards =
+        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
+          "customer_rewards",
+          queryOptions
+        );
 
       const totalRedeemed = rewards.map((reward: CustomerRewardSchemaRecord) =>
         SupabaseCustomerRewardMapper.toCustomerRewardEntity(reward)
@@ -408,7 +440,7 @@ export class SupabaseCustomerRewardRepository
           totalItems: totalRedeemed.length, // This would need to be calculated properly with a count query
           totalPages: Math.ceil(totalRedeemed.length / limit),
           hasNext: page < Math.ceil(totalRedeemed.length / limit),
-          hasPrev: page > 1
+          hasPrev: page > 1,
         },
       };
     } catch (error) {
@@ -422,7 +454,7 @@ export class SupabaseCustomerRewardRepository
         customerId: params.customerId,
         page: params.page,
         limit: params.limit,
-        filters: params.filters
+        filters: params.filters,
       };
 
       throw new ShopCustomerRewardError(
@@ -440,16 +472,18 @@ export class SupabaseCustomerRewardRepository
    * @param params Pagination parameters with filters
    * @returns Paginated reward transactions data
    */
-  async getRewardTransactions(params: PaginationParams & {
-    shopId: string;
-    customerId: string;
-    filters?: {
-      type?: "earned" | "redeemed" | "expired";
-      dateRange?: "all" | "month" | "quarter" | "year" | "custom";
-      startDate?: string;
-      endDate?: string;
-    };
-  }): Promise<{
+  async getRewardTransactions(
+    params: PaginationParams & {
+      shopId: string;
+      customerId: string;
+      filters?: {
+        type?: "earned" | "redeemed" | "expired";
+        dateRange?: "all" | "month" | "quarter" | "year" | "custom";
+        startDate?: string;
+        endDate?: string;
+      };
+    }
+  ): Promise<{
     data: RewardTransactionEntity[];
     pagination: {
       currentPage: number;
@@ -481,7 +515,13 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting reward transactions", { shopId, customerId, page, limit, filters });
+      this.logger.info("Getting reward transactions", {
+        shopId,
+        customerId,
+        page,
+        limit,
+        filters,
+      });
 
       // Build query options for Supabase
       const queryOptions: QueryOptions = {
@@ -535,8 +575,12 @@ export class SupabaseCustomerRewardRepository
               endDate = new Date(now.getFullYear(), 11, 31);
               break;
             case "custom":
-              startDate = filters.startDate ? new Date(filters.startDate) : new Date();
-              endDate = filters.endDate ? new Date(filters.endDate) : new Date();
+              startDate = filters.startDate
+                ? new Date(filters.startDate)
+                : new Date();
+              endDate = filters.endDate
+                ? new Date(filters.endDate)
+                : new Date();
               break;
             default:
               startDate = new Date();
@@ -559,16 +603,18 @@ export class SupabaseCustomerRewardRepository
       // Add pagination to query options
       queryOptions.pagination = {
         page,
-        pageSize: limit
+        pageSize: limit,
       };
 
-      const transactions = await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
-        "reward_transactions",
-        queryOptions
-      );
+      const transactions =
+        await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
+          "reward_transactions",
+          queryOptions
+        );
 
-      const rewardTransactions = transactions.map((transaction: RewardTransactionSchemaRecord) =>
-        SupabaseCustomerRewardMapper.toRewardTransactionEntity(transaction)
+      const rewardTransactions = transactions.map(
+        (transaction: RewardTransactionSchemaRecord) =>
+          SupabaseCustomerRewardMapper.toRewardTransactionEntity(transaction)
       );
 
       return {
@@ -579,7 +625,7 @@ export class SupabaseCustomerRewardRepository
           totalItems: rewardTransactions.length, // This would need to be calculated properly with a count query
           totalPages: Math.ceil(rewardTransactions.length / limit),
           hasNext: page < Math.ceil(rewardTransactions.length / limit),
-          hasPrev: page > 1
+          hasPrev: page > 1,
         },
       };
     } catch (error) {
@@ -593,7 +639,7 @@ export class SupabaseCustomerRewardRepository
         customerId: params.customerId,
         page: params.page,
         limit: params.limit,
-        filters: params.filters
+        filters: params.filters,
       };
 
       throw new ShopCustomerRewardError(
@@ -646,7 +692,11 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting reward by ID", { shopId, customerId, rewardId });
+      this.logger.info("Getting reward by ID", {
+        shopId,
+        customerId,
+        rewardId,
+      });
 
       // First try to get from customer rewards (redeemed rewards)
       const customerRewardQueryOptions: QueryOptions = {
@@ -669,13 +719,16 @@ export class SupabaseCustomerRewardRepository
         ],
       };
 
-      const customerRewards = await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-        "customer_rewards",
-        customerRewardQueryOptions
-      );
+      const customerRewards =
+        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
+          "customer_rewards",
+          customerRewardQueryOptions
+        );
 
       if (customerRewards.length > 0) {
-        return SupabaseCustomerRewardMapper.toCustomerRewardEntity(customerRewards[0]);
+        return SupabaseCustomerRewardMapper.toCustomerRewardEntity(
+          customerRewards[0]
+        );
       }
 
       // If not found in customer rewards, try available rewards
@@ -694,13 +747,16 @@ export class SupabaseCustomerRewardRepository
         ],
       };
 
-      const availableRewards = await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
-        "available_rewards",
-        availableRewardQueryOptions
-      );
+      const availableRewards =
+        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
+          "available_rewards",
+          availableRewardQueryOptions
+        );
 
       if (availableRewards.length > 0) {
-        return SupabaseCustomerRewardMapper.toAvailableRewardEntity(availableRewards[0]);
+        return SupabaseCustomerRewardMapper.toAvailableRewardEntity(
+          availableRewards[0]
+        );
       }
 
       throw new ShopCustomerRewardError(
@@ -731,7 +787,11 @@ export class SupabaseCustomerRewardRepository
    * @param rewardId The reward ID
    * @returns The redeemed reward entity
    */
-  async redeemReward(shopId: string, customerId: string, rewardId: string): Promise<CustomerRewardEntity> {
+  async redeemReward(
+    shopId: string,
+    customerId: string,
+    rewardId: string
+  ): Promise<CustomerRewardEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -783,10 +843,11 @@ export class SupabaseCustomerRewardRepository
         ],
       };
 
-      const availableRewards = await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
-        "available_rewards",
-        availableRewardQueryOptions
-      );
+      const availableRewards =
+        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
+          "available_rewards",
+          availableRewardQueryOptions
+        );
 
       if (availableRewards.length === 0) {
         throw new ShopCustomerRewardError(
@@ -806,7 +867,13 @@ export class SupabaseCustomerRewardRepository
           ShopCustomerRewardErrorType.INSUFFICIENT_POINTS,
           "Insufficient points to redeem reward",
           "SupabaseCustomerRewardRepository.redeemReward",
-          { shopId, customerId, rewardId, requiredPoints: availableReward.points_cost, availablePoints: customerPoints.currentPoints }
+          {
+            shopId,
+            customerId,
+            rewardId,
+            requiredPoints: availableReward.points_cost,
+            availablePoints: customerPoints.currentPoints,
+          }
         );
       }
 
@@ -824,10 +891,11 @@ export class SupabaseCustomerRewardRepository
         expires_at: availableReward.expires_at,
       };
 
-      const customerReward = await this.dataSource.insert<CustomerRewardSchemaRecord>(
-        "customer_rewards",
-        customerRewardData
-      );
+      const customerReward =
+        await this.dataSource.insert<CustomerRewardSchemaRecord>(
+          "customer_rewards",
+          customerRewardData
+        );
 
       // Create reward transaction record
       const transactionData = {
@@ -836,7 +904,8 @@ export class SupabaseCustomerRewardRepository
         reward_id: rewardId,
         transaction_type: "redemption",
         points_change: -availableReward.points_cost,
-        balance_after: customerPoints.currentPoints - availableReward.points_cost,
+        balance_after:
+          customerPoints.currentPoints - availableReward.points_cost,
         description: `Redeemed reward: ${availableReward.reward_name}`,
         created_at: new Date().toISOString(),
       };
@@ -848,31 +917,21 @@ export class SupabaseCustomerRewardRepository
 
       // Update customer points
       const updatedPointsData = {
-        total_points: customerPoints.currentPoints - availableReward.points_cost,
+        total_points:
+          customerPoints.currentPoints - availableReward.points_cost,
         redeemed_rewards: customerPoints.totalRedeemed + 1,
         updated_at: new Date().toISOString(),
       };
 
       // First get the customer points record to get its ID
-      const customerPointsRecords = await this.dataSource.getAdvanced<CustomerPointsSchemaRecord>(
-        "customer_points",
-        {
-          filters: [
-            {
-              field: "shop_id",
-              operator: FilterOperator.EQ,
-              value: shopId,
-            },
-            {
-              field: "customer_id",
-              operator: FilterOperator.EQ,
-              value: customerId,
-            },
-          ],
-        }
-      );
+      const customerPointsRecords = await this.dataSource.callRpc<
+        GetCustomerPointsSchema[]
+      >("get_customer_points", {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+      });
 
-      if (customerPointsRecords.length === 0) {
+      if (!customerPointsRecords) {
         throw new ShopCustomerRewardError(
           ShopCustomerRewardErrorType.NOT_FOUND,
           "Customer points record not found",
@@ -882,14 +941,16 @@ export class SupabaseCustomerRewardRepository
       }
 
       const customerPointsId = customerPointsRecords[0].id;
-      
+
       await this.dataSource.update(
         "customer_points",
         customerPointsId,
         updatedPointsData
       );
 
-      return SupabaseCustomerRewardMapper.toCustomerRewardEntity(customerReward);
+      return SupabaseCustomerRewardMapper.toCustomerRewardEntity(
+        customerReward
+      );
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;
@@ -911,7 +972,10 @@ export class SupabaseCustomerRewardRepository
    * @param customerId The customer ID
    * @returns Customer reward statistics entity
    */
-  async getCustomerRewardStats(shopId: string, customerId: string): Promise<CustomerRewardStatsEntity> {
+  async getCustomerRewardStats(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerRewardStatsEntity> {
     try {
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -952,10 +1016,11 @@ export class SupabaseCustomerRewardRepository
         ],
       };
 
-      const totalRedeemed = await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-        "customer_rewards",
-        totalRedeemedQueryOptions
-      );
+      const totalRedeemed =
+        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
+          "customer_rewards",
+          totalRedeemedQueryOptions
+        );
 
       // Get reward transactions count
       const transactionsQueryOptions: QueryOptions = {
@@ -973,10 +1038,11 @@ export class SupabaseCustomerRewardRepository
         ],
       };
 
-      const transactions = await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
-        "reward_transactions",
-        transactionsQueryOptions
-      );
+      const transactions =
+        await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
+          "reward_transactions",
+          transactionsQueryOptions
+        );
 
       // Calculate statistics
       const statsData = {
@@ -987,20 +1053,33 @@ export class SupabaseCustomerRewardRepository
         total_rewards_redeemed: totalRedeemed.length,
         total_points_earned: customerPoints.totalEarned,
         total_points_redeemed: transactions
-          .filter(t => t.transaction_type === "redemption")
+          .filter((t) => t.transaction_type === "redemption")
           .reduce((sum, t) => sum + Math.abs(Number(t.points_change || 0)), 0),
-        average_points_per_transaction: transactions.length > 0 
-          ? transactions.reduce((sum, t) => sum + Math.abs(Number(t.points_change || 0)), 0) / transactions.length 
-          : 0,
+        average_points_per_transaction:
+          transactions.length > 0
+            ? transactions.reduce(
+                (sum, t) => sum + Math.abs(Number(t.points_change || 0)),
+                0
+              ) / transactions.length
+            : 0,
         most_redeemed_category: "", // This would need to be calculated from reward categories
-        redemption_rate: totalRedeemed.length > 0 ? (totalRedeemed.filter(r => r.status === "completed").length / totalRedeemed.length) * 100 : 0,
-        last_redemption_date: totalRedeemed.length > 0 ? totalRedeemed[0].redeemed_at : null,
-        last_earn_date: transactions.length > 0 ? transactions[0].created_at : null,
+        redemption_rate:
+          totalRedeemed.length > 0
+            ? (totalRedeemed.filter((r) => r.status === "completed").length /
+                totalRedeemed.length) *
+              100
+            : 0,
+        last_redemption_date:
+          totalRedeemed.length > 0 ? totalRedeemed[0].redeemed_at : null,
+        last_earn_date:
+          transactions.length > 0 ? transactions[0].created_at : null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      return SupabaseCustomerRewardMapper.toCustomerRewardStatsEntity(statsData);
+      return SupabaseCustomerRewardMapper.toCustomerRewardStatsEntity(
+        statsData
+      );
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;
@@ -1022,7 +1101,10 @@ export class SupabaseCustomerRewardRepository
    * @param customerId The customer ID
    * @returns Customer information
    */
-  async getCustomerInfo(shopId: string, customerId: string): Promise<{
+  async getCustomerInfo(
+    shopId: string,
+    customerId: string
+  ): Promise<{
     customerName: string;
     memberSince: string;
   }> {
@@ -1051,7 +1133,7 @@ export class SupabaseCustomerRewardRepository
       // In a real implementation, this would fetch from a customers table
       const customerInfo = {
         customerName: `Customer ${customerId}`,
-        memberSince: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+        memberSince: new Date().toISOString().split("T")[0], // Format as YYYY-MM-DD
       };
 
       return customerInfo;

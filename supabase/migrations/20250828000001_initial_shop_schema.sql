@@ -1143,6 +1143,48 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Function to get customer points
+CREATE OR REPLACE FUNCTION public.get_customer_points(
+  p_shop_id UUID,
+  p_customer_id UUID
+)
+RETURNS TABLE (
+  id UUID,
+  customer_id UUID,
+  shop_id UUID,
+  current_points INTEGER,
+  total_earned INTEGER,
+  total_redeemed INTEGER,
+  membership_tier membership_tier,
+  tier_benefits TEXT[],
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    cp.id,
+    cp.customer_id,
+    cp.shop_id,
+    cp.current_points,
+    cp.total_earned,
+    cp.total_redeemed,
+    cp.membership_tier,
+    cp.tier_benefits,
+    cp.created_at,
+    cp.updated_at
+  FROM 
+    customer_points cp
+  WHERE 
+    cp.shop_id = p_shop_id
+    AND cp.customer_id = p_customer_id
+  LIMIT 1;
+END;
+$$;
+
 -- =============================================================================
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================

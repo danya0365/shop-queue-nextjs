@@ -4338,6 +4338,21 @@ export type Database = {
           last_visit_date: string
         }[]
       }
+      get_customer_points: {
+        Args: { p_shop_id: string; p_customer_id: string }
+        Returns: {
+          id: string
+          customer_id: string
+          shop_id: string
+          current_points: number
+          total_earned: number
+          total_redeemed: number
+          membership_tier: Database["public"]["Enums"]["membership_tier"]
+          tier_benefits: string[]
+          created_at: string
+          updated_at: string
+        }[]
+      }
       get_customer_popular_services: {
         Args: { p_shop_id: string; p_limit?: number }
         Returns: {
@@ -4862,6 +4877,7 @@ export type Database = {
         Args: { p_shop_id: string }
         Returns: {
           waiting_queues: number
+          confirmed_queues: number
           serving_queues: number
           average_wait_time_minutes: number
           average_service_time_minutes: number
@@ -4951,6 +4967,10 @@ export type Database = {
       }
       is_moderator_or_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_queue_owner: {
+        Args: { p_queue_id: string; p_customer_id: string }
         Returns: boolean
       }
       is_service_role: {

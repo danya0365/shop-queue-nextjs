@@ -46,7 +46,7 @@ export default async function CustomerRewardsPage({
 
   try {
     // Get view model from presenter
-    const viewModel = await presenter.getViewModel(shopId);
+    const viewModel = await presenter.getViewModel(shopId, "");
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <FrontendLayout shop={shopInfo}>

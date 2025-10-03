@@ -1,26 +1,26 @@
 import type {
-  CustomerRewardEntity,
-  CustomerPointsEntity,
-  RewardTransactionEntity,
-  AvailableRewardEntity,
-  CustomerRewardStatsEntity,
-} from "@/src/domain/entities/shop/customer/customer-reward.entity";
+  AvailableRewardDTO,
+  CustomerPointsDTO,
+  CustomerRewardDTO,
+  CustomerRewardStatsDTO,
+  RewardTransactionDTO,
+} from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import type {
-  CustomerPointsSchema,
-  CustomerRewardSchema,
-  RewardTransactionSchema,
-  AvailableRewardSchema,
-  CustomerRewardStatsSchema,
-} from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
+  AvailableRewardEntity,
+  CustomerPointsEntity,
+  CustomerRewardEntity,
+  CustomerRewardStatsEntity,
+  RewardTransactionEntity,
+} from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import type {
-  CustomerPointsDTO,
-  CustomerRewardDTO,
-  RewardTransactionDTO,
-  AvailableRewardDTO,
-  CustomerRewardStatsDTO,
-} from "@/src/application/dtos/shop/customer/customer-reward-dto";
+  AvailableRewardSchema,
+  CustomerRewardSchema,
+  CustomerRewardStatsSchema,
+  GetCustomerPointsSchema,
+  RewardTransactionSchema,
+} from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
 
 /**
  * Mapper for converting between Supabase data and domain entities
@@ -30,18 +30,20 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert Supabase customer points data to domain entity
    */
-  static toCustomerPointsEntity(data: CustomerPointsSchema): CustomerPointsEntity {
+  static toCustomerPointsEntity(
+    data: GetCustomerPointsSchema
+  ): CustomerPointsEntity {
     return {
-      id: String(data.id || ""),
+      id: data.id || "",
       customerId: data.customer_id || "",
       shopId: data.shop_id || "",
       currentPoints: Number(data.current_points || 0),
       totalEarned: Number(data.total_earned || 0),
       totalRedeemed: Number(data.total_redeemed || 0),
-      pointsExpiring: Number(data.points_expiring || 0),
-      expiryDate: data.expiry_date || undefined,
-      tier: this.mapTierToEnum(data.tier) || MembershipTier.BRONZE,
-      nextTierPoints: Number(data.next_tier_points || 0),
+      pointsExpiring: 0,
+      expiryDate: undefined,
+      tier: data.membership_tier as MembershipTier,
+      nextTierPoints: 0,
       tierBenefits: data.tier_benefits || [],
       lastUpdated: data.updated_at || new Date().toISOString(),
     };
@@ -50,7 +52,9 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert Supabase customer reward data to domain entity
    */
-  static toCustomerRewardEntity(data: CustomerRewardSchema): CustomerRewardEntity {
+  static toCustomerRewardEntity(
+    data: CustomerRewardSchema
+  ): CustomerRewardEntity {
     return {
       id: String(data.id || ""),
       name: data.name || "",
@@ -75,7 +79,9 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert Supabase reward transaction data to domain entity
    */
-  static toRewardTransactionEntity(data: RewardTransactionSchema): RewardTransactionEntity {
+  static toRewardTransactionEntity(
+    data: RewardTransactionSchema
+  ): RewardTransactionEntity {
     return {
       id: String(data.id || ""),
       customerId: data.customer_id || "",
@@ -95,7 +101,9 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert Supabase available reward data to domain entity
    */
-  static toAvailableRewardEntity(data: AvailableRewardSchema): AvailableRewardEntity {
+  static toAvailableRewardEntity(
+    data: AvailableRewardSchema
+  ): AvailableRewardEntity {
     return {
       id: String(data.id || ""),
       name: data.name || "",
@@ -118,7 +126,9 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert Supabase customer reward stats data to domain entity
    */
-  static toCustomerRewardStatsEntity(data: CustomerRewardStatsSchema): CustomerRewardStatsEntity {
+  static toCustomerRewardStatsEntity(
+    data: CustomerRewardStatsSchema
+  ): CustomerRewardStatsEntity {
     return {
       customerId: data.customer_id || "",
       shopId: data.shop_id || "",
@@ -126,7 +136,9 @@ export class SupabaseCustomerRewardMapper {
       totalRewardsRedeemed: Number(data.total_rewards_redeemed || 0),
       totalPointsEarned: Number(data.total_points_earned || 0),
       totalPointsRedeemed: Number(data.total_points_redeemed || 0),
-      averagePointsPerTransaction: Number(data.average_points_per_transaction || 0),
+      averagePointsPerTransaction: Number(
+        data.average_points_per_transaction || 0
+      ),
       mostRedeemedCategory: data.most_redeemed_category || "",
       redemptionRate: Number(data.redemption_rate || 0),
       lastRedemptionDate: data.last_redemption_date || undefined,
@@ -168,7 +180,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static toRewardTransactionDTO(entity: RewardTransactionEntity): RewardTransactionDTO {
+  static toRewardTransactionDTO(
+    entity: RewardTransactionEntity
+  ): RewardTransactionDTO {
     return {
       id: entity.id,
       type: entity.type,
@@ -179,7 +193,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static toAvailableRewardDTO(entity: AvailableRewardEntity): AvailableRewardDTO {
+  static toAvailableRewardDTO(
+    entity: AvailableRewardEntity
+  ): AvailableRewardDTO {
     return {
       id: entity.id,
       name: entity.name,
@@ -192,7 +208,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static toCustomerRewardStatsDTO(entity: CustomerRewardStatsEntity): CustomerRewardStatsDTO {
+  static toCustomerRewardStatsDTO(
+    entity: CustomerRewardStatsEntity
+  ): CustomerRewardStatsDTO {
     return {
       totalRewardsAvailable: entity.totalRewardsAvailable,
       totalRewardsRedeemed: entity.totalRewardsRedeemed,
@@ -209,7 +227,9 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Convert domain entities to Supabase data (if needed for create/update operations)
    */
-  static fromCustomerPointsEntity(entity: CustomerPointsEntity): Record<string, unknown> {
+  static fromCustomerPointsEntity(
+    entity: CustomerPointsEntity
+  ): Record<string, unknown> {
     return {
       id: entity.id,
       current_points: entity.currentPoints,
@@ -223,7 +243,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static fromCustomerRewardEntity(entity: CustomerRewardEntity): Record<string, unknown> {
+  static fromCustomerRewardEntity(
+    entity: CustomerRewardEntity
+  ): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -241,7 +263,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static fromRewardTransactionEntity(entity: RewardTransactionEntity): Record<string, unknown> {
+  static fromRewardTransactionEntity(
+    entity: RewardTransactionEntity
+  ): Record<string, unknown> {
     return {
       id: entity.id,
       type: entity.type,
@@ -252,7 +276,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static fromAvailableRewardEntity(entity: AvailableRewardEntity): Record<string, unknown> {
+  static fromAvailableRewardEntity(
+    entity: AvailableRewardEntity
+  ): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -265,7 +291,9 @@ export class SupabaseCustomerRewardMapper {
     };
   }
 
-  static fromCustomerRewardStatsEntity(entity: CustomerRewardStatsEntity): Record<string, unknown> {
+  static fromCustomerRewardStatsEntity(
+    entity: CustomerRewardStatsEntity
+  ): Record<string, unknown> {
     return {
       customer_id: entity.customerId,
       shop_id: entity.shopId,
@@ -284,18 +312,20 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Map membership tier string to enum
    */
-  private static mapTierToEnum(tier: string | undefined): MembershipTier | undefined {
+  private static mapTierToEnum(
+    tier: string | undefined
+  ): MembershipTier | undefined {
     if (!tier) return undefined;
-    
+
     const tierLower = tier.toLowerCase();
     switch (tierLower) {
-      case 'bronze':
+      case "bronze":
         return MembershipTier.BRONZE;
-      case 'silver':
+      case "silver":
         return MembershipTier.SILVER;
-      case 'gold':
+      case "gold":
         return MembershipTier.GOLD;
-      case 'platinum':
+      case "platinum":
         return MembershipTier.PLATINUM;
       default:
         return MembershipTier.BRONZE;
@@ -305,18 +335,20 @@ export class SupabaseCustomerRewardMapper {
   /**
    * Map reward type string to enum
    */
-  private static mapRewardTypeToEnum(type: string | undefined): RewardType | undefined {
+  private static mapRewardTypeToEnum(
+    type: string | undefined
+  ): RewardType | undefined {
     if (!type) return undefined;
-    
+
     const typeLower = type.toLowerCase();
     switch (typeLower) {
-      case 'discount':
+      case "discount":
         return RewardType.DISCOUNT;
-      case 'free_item':
+      case "free_item":
         return RewardType.FREE_ITEM;
-      case 'cashback':
+      case "cashback":
         return RewardType.CASHBACK;
-      case 'special_privilege':
+      case "special_privilege":
         return RewardType.SPECIAL_PRIVILEGE;
       default:
         return RewardType.DISCOUNT;

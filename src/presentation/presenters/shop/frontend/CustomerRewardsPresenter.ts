@@ -127,6 +127,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
   async getViewModel(
     shopId: string,
+    customerId: string,
     currentPage: number = 1,
     perPage: number = 10,
     filters?: RewardsFilters
@@ -180,7 +181,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
       const customerRewardsData =
         await this.customerRewardService.getCustomerRewardsData(
           shopId,
-          "customer-id", // customerId - will be determined from auth context
+          customerId,
           currentPage,
           perPage,
           availableRewardsFilters,
@@ -305,17 +306,22 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
   }
 
   // Action methods
-  async redeemReward(shopId: string, rewardId: string): Promise<void> {
+  async redeemReward(
+    shopId: string,
+    customerId: string,
+    rewardId: string
+  ): Promise<void> {
     try {
       this.logger.info("CustomerRewardsPresenter: Redeeming reward", {
         shopId,
+        customerId,
         rewardId,
       });
 
       // Call service to redeem reward
       await this.customerRewardService.redeemReward(
         shopId,
-        "customer-id", // customerId - will be determined from auth context
+        customerId,
         rewardId
       );
     } catch (error) {
@@ -329,19 +335,21 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
 
   async getRewardDetails(
     shopId: string,
+    customerId: string,
     rewardId: string
   ): Promise<CustomerReward | AvailableReward> {
     try {
       this.logger.info("CustomerRewardsPresenter: Getting reward details", {
         shopId,
+        customerId,
         rewardId,
       });
 
       // Call service to get reward details
       const rewardData = await this.customerRewardService.getRewardDetails(
         shopId,
-        rewardId,
-        "customer-id" // customerId - will be determined from auth context
+        customerId,
+        rewardId
       );
 
       // Convert DTO to ViewModel format
