@@ -911,14 +911,27 @@ export class SupabaseCustomerRewardRepository
 
       this.logger.info("Getting customer info", { shopId, customerId });
 
-      // Get customer basic info - for now, we'll return a simplified structure
-      // In a real implementation, this would fetch from a customers table
-      const customerInfo = {
-        customerName: `Customer ${customerId}`,
-        memberSince: new Date().toISOString().split("T")[0], // Format as YYYY-MM-DD
-      };
+      // Call RPC to get customer info by customer
+      const row = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["get_customer_info_by_customer"]["Returns"][0]
+      >("get_customer_info_by_customer", {
+        p_customer_id: customerId,
+        p_shop_id: shopId,
+      });
 
-      return customerInfo;
+      if (!row) {
+        throw new ShopCustomerRewardError(
+          ShopCustomerRewardErrorType.NOT_FOUND,
+          "Customer info not found",
+          "SupabaseCustomerRewardRepository.getCustomerInfo",
+          { shopId, customerId }
+        );
+      }
+
+      return {
+        customerName: row.customer_name ?? `Customer ${customerId}`,
+        memberSince: (row.member_since ?? new Date()).toString().split("T")[0],
+      };
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;
