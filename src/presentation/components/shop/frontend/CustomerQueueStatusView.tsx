@@ -208,7 +208,7 @@ export function CustomerQueueStatusView({
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
               <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
-                {queueProgress.totalAhead}
+                {customerQueue.totalAhead}
               </div>
               <div className="text-sm shop-frontend-text-secondary">
                 คิวข้างหน้า
@@ -216,7 +216,7 @@ export function CustomerQueueStatusView({
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
               <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
-                {queueProgress.estimatedCallTime}
+                {customerQueue.estimatedWaitTime}
               </div>
               <div className="text-sm shop-frontend-text-secondary">
                 เวลารอ (นาที)

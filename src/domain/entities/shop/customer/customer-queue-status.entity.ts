@@ -18,6 +18,7 @@ export interface CustomerQueueStatusEntity {
   totalPrice: number;
   estimatedWaitTime: number;
   position: number;
+  totalAhead: number;
   specialRequests?: string;
   createdAt: Date;
   updatedAt: Date;

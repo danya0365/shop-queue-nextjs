@@ -1,9 +1,9 @@
-import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
-import type { Logger } from "@/src/domain/interfaces/logger";
 import type {
   CustomerQueueStatusEntity,
   QueueProgressEntity,
 } from "@/src/domain/entities/shop/customer/customer-queue-status.entity";
+import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import {
   CustomerQueueStatusError,
   CustomerQueueStatusErrorType,
@@ -37,7 +37,7 @@ export class SupabaseCustomerQueueStatusRepository
    */
   async getQueueIdByNumber(
     shopId: string,
-    queueNumber: string,
+    queueNumber: string
   ): Promise<string | null> {
     try {
       this.logger.info("Getting queue ID by number", { shopId, queueNumber });
@@ -84,7 +84,7 @@ export class SupabaseCustomerQueueStatusRepository
    */
   async getCustomerQueueStatus(
     shopId: string,
-    queueId: string,
+    queueId: string
   ): Promise<CustomerQueueStatusEntity | null> {
     try {
       // Validate parameters
@@ -127,18 +127,19 @@ export class SupabaseCustomerQueueStatusRepository
 
       // Get queue position information
       let queuePosition = 0;
+      let totalAhead = 0;
       try {
-        const positionResult = await this.dataSource.callRpc<Array<{
-          queue_position: number;
-          estimated_wait_minutes: number;
-          ahead_count: number;
-        }>>(
-          "get_queue_position",
-          { p_queue_id: queueId }
-        );
+        const positionResult = await this.dataSource.callRpc<
+          Array<{
+            queue_position: number;
+            estimated_wait_minutes: number;
+            ahead_count: number;
+          }>
+        >("get_queue_position", { p_queue_id: queueId });
 
         if (positionResult && positionResult.length > 0) {
           queuePosition = positionResult[0].queue_position;
+          totalAhead = positionResult[0].ahead_count;
         }
       } catch (positionError) {
         // If get_queue_position fails, just log and continue with position 0
@@ -149,8 +150,12 @@ export class SupabaseCustomerQueueStatusRepository
       }
 
       // Map to entity with actual position
-      const entity = SupabaseCustomerQueueStatusMapper.toCustomerQueueStatusEntity(queueData);
-      entity.position = queuePosition;
+      const entity =
+        SupabaseCustomerQueueStatusMapper.toCustomerQueueStatusEntity(
+          queueData,
+          queuePosition,
+          totalAhead
+        );
 
       return entity;
     } catch (error) {
@@ -205,7 +210,9 @@ export class SupabaseCustomerQueueStatusRepository
 
       const progressData = result[0];
 
-      return SupabaseCustomerQueueStatusMapper.toQueueProgressEntity(progressData);
+      return SupabaseCustomerQueueStatusMapper.toQueueProgressEntity(
+        progressData
+      );
     } catch (error) {
       if (error instanceof CustomerQueueStatusError) {
         throw error;
@@ -232,7 +239,7 @@ export class SupabaseCustomerQueueStatusRepository
    */
   async cancelCustomerQueue(
     shopId: string,
-    queueNumber: string,
+    queueNumber: string
   ): Promise<boolean> {
     try {
       this.logger.info("Cancelling customer queue", { shopId, queueNumber });
@@ -265,9 +272,13 @@ export class SupabaseCustomerQueueStatusRepository
       }
 
       // Check if error message contains specific error types
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      if (errorMessage.includes("Queue not found") || errorMessage.includes("already completed")) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (
+        errorMessage.includes("Queue not found") ||
+        errorMessage.includes("already completed")
+      ) {
         throw new CustomerQueueStatusError(
           CustomerQueueStatusErrorType.NOT_FOUND,
           "Queue not found or already completed/cancelled",

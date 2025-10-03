@@ -18,6 +18,7 @@ export interface CustomerQueueStatusDTO {
   totalPrice: number;
   estimatedWaitTime: number;
   position: number;
+  totalAhead: number;
   specialRequests?: string;
   createdAt: string;
   updatedAt: string;

@@ -14,13 +14,14 @@ import { BaseShopPresenter } from "@/src/presentation/presenters/shop/BaseShopPr
 export interface CustomerQueue {
   id: string;
   queueNumber: string;
-  status: "waiting" | "confirmed" | "serving" | "completed" | "cancelled";
+  status: QueueStatus;
   customerName: string;
   customerPhone: string;
   services: string[];
   totalPrice: number;
   estimatedWaitTime: number;
   position: number;
+  totalAhead: number;
   specialRequests?: string;
   createdAt: string;
   updatedAt: string;
@@ -28,7 +29,6 @@ export interface CustomerQueue {
 
 export interface QueueProgress {
   currentNumber: string;
-  totalAhead: number;
   averageServiceTime: number;
   estimatedCallTime: string;
 }
@@ -101,13 +101,14 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
     return {
       id: dto.id,
       queueNumber: dto.queueNumber,
-      status: this.mapQueueStatusToString(dto.status),
+      status: dto.status,
       customerName: dto.customerName,
       customerPhone: dto.customerPhone,
       services: dto.services,
       totalPrice: dto.totalPrice,
       estimatedWaitTime: dto.estimatedWaitTime,
       position: dto.position,
+      totalAhead: dto.totalAhead,
       specialRequests: dto.specialRequests,
       createdAt: this.formatQueueTimeString(dto.createdAt),
       updatedAt: this.formatQueueTimeString(dto.updatedAt),
@@ -119,7 +120,6 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
   ): QueueProgress {
     return {
       currentNumber: dto.currentNumber,
-      totalAhead: dto.totalAhead,
       averageServiceTime: dto.averageServiceTime,
       estimatedCallTime: this.formatQueueTimeString(dto.estimatedCallTime),
     };
@@ -144,26 +144,6 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
       "ติดตามสถานะคิว",
       "ติดตามสถานะคิวของคุณและรับการแจ้งเตือนเมื่อใกล้ถึงคิว"
     );
-  }
-
-  /**
-   * Map QueueStatus enum to string literals for customer queue status view
-   */
-  private mapQueueStatusToString(
-    status: QueueStatus
-  ): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" {
-    switch (status) {
-      case QueueStatus.WAITING:
-        return "waiting";
-      case QueueStatus.SERVING:
-        return "serving";
-      case QueueStatus.COMPLETED:
-        return "completed";
-      case QueueStatus.CANCELLED:
-        return "cancelled";
-      default:
-        return "waiting";
-    }
   }
 }
 

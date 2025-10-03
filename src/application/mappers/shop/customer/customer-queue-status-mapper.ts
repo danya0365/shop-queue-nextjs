@@ -1,11 +1,11 @@
 import type {
-  CustomerQueueStatusEntity,
-  QueueProgressEntity,
-} from "@/src/domain/entities/shop/customer/customer-queue-status.entity";
-import type {
   CustomerQueueStatusDTO,
   QueueProgressDTO,
 } from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
+import type {
+  CustomerQueueStatusEntity,
+  QueueProgressEntity,
+} from "@/src/domain/entities/shop/customer/customer-queue-status.entity";
 
 /**
  * Mapper for customer queue status data transformation
@@ -26,6 +26,7 @@ export class CustomerQueueStatusMapper {
       totalPrice: entity.totalPrice,
       estimatedWaitTime: entity.estimatedWaitTime,
       position: entity.position,
+      totalAhead: entity.totalAhead,
       specialRequests: entity.specialRequests,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
@@ -58,6 +59,7 @@ export class CustomerQueueStatusMapper {
       totalPrice: dto.totalPrice,
       estimatedWaitTime: dto.estimatedWaitTime,
       position: dto.position,
+      totalAhead: dto.totalAhead,
       specialRequests: dto.specialRequests,
       createdAt: new Date(dto.createdAt),
       updatedAt: new Date(dto.updatedAt),

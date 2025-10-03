@@ -1,13 +1,13 @@
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
   CustomerQueueStatusEntity,
   QueueProgressEntity,
   QueueServiceEntity,
 } from "@/src/domain/entities/shop/customer/customer-queue-status.entity";
-import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type {
+  CustomerQueueServiceSchema,
   CustomerQueueStatusSchema,
   QueueProgressSchema,
-  CustomerQueueServiceSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-queue-status.schema";
 
 /**
@@ -19,25 +19,30 @@ export class SupabaseCustomerQueueStatusMapper {
    * Convert Supabase customer queue status data to domain entity
    * Updated to match RPC function return structure
    */
-  static toCustomerQueueStatusEntity(data: CustomerQueueStatusSchema): CustomerQueueStatusEntity {
+  static toCustomerQueueStatusEntity(
+    data: CustomerQueueStatusSchema,
+    position: number,
+    totalAhead: number
+  ): CustomerQueueStatusEntity {
     // Parse services from JSONB if it's an array
     const services = Array.isArray(data.services) ? data.services : [];
-    
+
     // Calculate total price from services
     const totalPrice = services.reduce((sum, service) => {
-      return sum + (Number(service.price || 0) * Number(service.quantity || 1));
+      return sum + Number(service.price || 0) * Number(service.quantity || 1);
     }, 0);
 
     return {
-      id: String(data.id || ""),
-      queueNumber: String(data.queue_number || ""),
+      id: data.id || "",
+      queueNumber: data.queue_number || "",
       status: this.mapStatusToEnum(data.status) || QueueStatus.WAITING,
-      customerName: String(data.customer_name || ""),
-      customerPhone: String(data.customer_phone || ""),
+      customerName: data.customer_name || "",
+      customerPhone: data.customer_phone || "",
       services: this.toQueueServiceNames(services),
       totalPrice: totalPrice,
       estimatedWaitTime: Number(data.estimated_duration || 0),
-      position: 0, // Position is not stored in DB, will be calculated separately if needed
+      position: position,
+      totalAhead: totalAhead,
       specialRequests: data.note ? String(data.note) : undefined,
       createdAt: new Date(data.created_at || Date.now()),
       updatedAt: new Date(data.updated_at || Date.now()),
@@ -49,7 +54,7 @@ export class SupabaseCustomerQueueStatusMapper {
    */
   static toQueueProgressEntity(data: QueueProgressSchema): QueueProgressEntity {
     return {
-      currentNumber: String(data.current_number || ""),
+      currentNumber: data.current_number || "",
       totalAhead: Number(data.total_ahead || 0),
       averageServiceTime: Number(data.average_service_time || 0),
       estimatedCallTime: new Date(data.estimated_call_time || Date.now()),
@@ -60,10 +65,12 @@ export class SupabaseCustomerQueueStatusMapper {
    * Convert Supabase service data to domain entity
    * Updated to match RPC function return structure
    */
-  static toQueueServiceEntity(data: CustomerQueueServiceSchema): QueueServiceEntity {
+  static toQueueServiceEntity(
+    data: CustomerQueueServiceSchema
+  ): QueueServiceEntity {
     return {
-      id: String(data.service_id || data.id || ""),
-      name: String(data.service_name || ""),
+      id: data.service_id || data.id || "",
+      name: data.service_name || "",
       price: Number(data.price || 0),
       duration: 0, // Duration not returned by RPC, default to 0
       category: undefined, // Category not returned by RPC
@@ -73,22 +80,26 @@ export class SupabaseCustomerQueueStatusMapper {
   /**
    * Convert array of Supabase service data to domain entities
    */
-  static toQueueServiceEntities(data: CustomerQueueServiceSchema[]): QueueServiceEntity[] {
-    return data.map(item => this.toQueueServiceEntity(item));
+  static toQueueServiceEntities(
+    data: CustomerQueueServiceSchema[]
+  ): QueueServiceEntity[] {
+    return data.map((item) => this.toQueueServiceEntity(item));
   }
 
   /**
    * Convert array of Supabase service data to service names (string array)
    */
   static toQueueServiceNames(data: CustomerQueueServiceSchema[]): string[] {
-    return data.map(item => String(item.service_name || ""));
+    return data.map((item) => item.service_name || "");
   }
 
   /**
    * Convert domain entity to Supabase schema (for updates/inserts)
    * Note: This is not used for RPC functions, kept for compatibility
    */
-  static fromCustomerQueueStatusEntity(entity: CustomerQueueStatusEntity): Partial<CustomerQueueStatusSchema> {
+  static fromCustomerQueueStatusEntity(
+    entity: CustomerQueueStatusEntity
+  ): Partial<CustomerQueueStatusSchema> {
     return {
       id: entity.id,
       shop_id: "", // This should be set by the repository
@@ -109,7 +120,9 @@ export class SupabaseCustomerQueueStatusMapper {
   /**
    * Convert domain entity to Supabase schema for queue progress
    */
-  static fromQueueProgressEntity(entity: QueueProgressEntity): Partial<QueueProgressSchema> {
+  static fromQueueProgressEntity(
+    entity: QueueProgressEntity
+  ): Partial<QueueProgressSchema> {
     return {
       shop_id: "", // This should be set by the repository
       current_number: entity.currentNumber,
@@ -124,9 +137,11 @@ export class SupabaseCustomerQueueStatusMapper {
    * @param status Status string from database
    * @returns QueueStatus enum value or undefined
    */
-  private static mapStatusToEnum(status: string | undefined): QueueStatus | undefined {
+  private static mapStatusToEnum(
+    status: string | undefined
+  ): QueueStatus | undefined {
     if (!status) return undefined;
-    
+
     switch (status.toLowerCase()) {
       case "waiting":
         return QueueStatus.WAITING;
@@ -150,9 +165,17 @@ export class SupabaseCustomerQueueStatusMapper {
    * @param status QueueStatus enum value
    * @returns Status string for database
    */
-  private static mapStatusToString(status: QueueStatus | undefined): "waiting" | "confirmed" | "serving" | "completed" | "cancelled" | undefined {
+  private static mapStatusToString(
+    status: QueueStatus | undefined
+  ):
+    | "waiting"
+    | "confirmed"
+    | "serving"
+    | "completed"
+    | "cancelled"
+    | undefined {
     if (!status) return undefined;
-    
+
     switch (status) {
       case QueueStatus.WAITING:
         return "waiting";
