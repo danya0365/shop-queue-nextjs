@@ -700,137 +700,96 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Redeeming reward", { shopId, customerId, rewardId });
-
-      // Get the available reward
-      const availableRewardQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "id",
-            operator: FilterOperator.EQ,
-            value: rewardId,
-          },
-          {
-            field: "is_available",
-            operator: FilterOperator.EQ,
-            value: true,
-          },
-        ],
-      };
-
-      const availableRewards =
-        await this.dataSource.getAdvanced<GetAvailableRewardsSchema>(
-          "available_rewards",
-          availableRewardQueryOptions
-        );
-
-      if (availableRewards.length === 0) {
-        throw new ShopCustomerRewardError(
-          ShopCustomerRewardErrorType.NOT_FOUND,
-          "Available reward not found",
-          "SupabaseCustomerRewardRepository.redeemReward",
-          { shopId, customerId, rewardId }
-        );
-      }
-
-      const availableReward = availableRewards[0];
-
-      // Check if customer has enough points
-      const customerPoints = await this.getCustomerPoints(shopId, customerId);
-      if (customerPoints.currentPoints < availableReward.points_cost) {
-        throw new ShopCustomerRewardError(
-          ShopCustomerRewardErrorType.INSUFFICIENT_POINTS,
-          "Insufficient points to redeem reward",
-          "SupabaseCustomerRewardRepository.redeemReward",
-          {
-            shopId,
-            customerId,
-            rewardId,
-            requiredPoints: availableReward.points_cost,
-            availablePoints: customerPoints.currentPoints,
-          }
-        );
-      }
-
-      // Create customer reward record
-      const customerRewardData = {
-        shop_id: shopId,
-        customer_id: customerId,
-        reward_id: rewardId,
-        reward_name: availableReward.name,
-        reward_description: availableReward.description,
-        category: availableReward.category,
-        points_cost: availableReward.points_cost,
-        status: "pending",
-        redeemed_at: new Date().toISOString(),
-        expires_at: "",
-      };
-
-      const customerReward =
-        await this.dataSource.insert<CustomerRewardSchemaRecord>(
-          "customer_rewards",
-          customerRewardData
-        );
-
-      // Create reward transaction record
-      const transactionData = {
-        shop_id: shopId,
-        customer_id: customerId,
-        reward_id: rewardId,
-        transaction_type: "redemption",
-        points_change: -availableReward.points_cost,
-        balance_after:
-          customerPoints.currentPoints - availableReward.points_cost,
-        description: `Redeemed reward: ${availableReward.name}`,
-        created_at: new Date().toISOString(),
-      };
-
-      await this.dataSource.insert<RewardTransactionSchemaRecord>(
-        "reward_transactions",
-        transactionData
-      );
-
-      // Update customer points
-      const updatedPointsData = {
-        total_points:
-          customerPoints.currentPoints - availableReward.points_cost,
-        redeemed_rewards: customerPoints.totalRedeemed + 1,
-        updated_at: new Date().toISOString(),
-      };
-
-      // First get the customer points record to get its ID
-      const customerPointsRecords = await this.dataSource.callRpc<
-        GetCustomerPointsSchema[]
-      >("get_customer_points", {
-        p_shop_id: shopId,
-        p_customer_id: customerId,
+      this.logger.info("Redeeming reward via RPC", {
+        shopId,
+        customerId,
+        rewardId,
       });
 
-      if (!customerPointsRecords) {
+      // Call the existing redeem_customer_reward RPC
+      type RedeemResult = {
+        success: boolean;
+        error?: string;
+        details?: string;
+        data?: {
+          redemption_id?: string;
+          redemption_code?: string;
+          reward_name?: string;
+          reward_value?: number;
+          points_used?: number;
+          expires_at?: string | null;
+          remaining_points?: number;
+        };
+      };
+
+      const redeemResult = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["redeem_customer_reward"]["Returns"]
+      >("redeem_customer_reward", {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+        p_reward_id: rewardId,
+        p_redemption_type:
+          "points_redemption" as import("@/src/domain/types/supabase").Database["public"]["Enums"]["redemption_type"],
+        p_source_description: null,
+        p_employee_id: null,
+      });
+
+      // redeemResult is Json; coerce to typed object
+      const parsed: RedeemResult = (redeemResult as unknown) as RedeemResult;
+      if (!parsed || parsed.success !== true || !parsed.data?.redemption_id) {
         throw new ShopCustomerRewardError(
-          ShopCustomerRewardErrorType.NOT_FOUND,
-          "Customer points record not found",
+          ShopCustomerRewardErrorType.OPERATION_FAILED,
+          parsed?.error || "Redeem RPC failed",
           "SupabaseCustomerRewardRepository.redeemReward",
-          { shopId, customerId }
+          { shopId, customerId, rewardId, details: parsed?.details }
         );
       }
 
-      const customerPointsId = customerPointsRecords[0].id;
+      const redemptionId = parsed.data.redemption_id;
 
-      await this.dataSource.update(
-        "customer_points",
-        customerPointsId,
-        updatedPointsData
-      );
+      // Fetch the created reward_usage row to return a fully mapped entity
+      const usageRow = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["get_reward_usage_by_id"]["Returns"]
+      >("get_reward_usage_by_id", { p_id: redemptionId });
 
-      return SupabaseCustomerRewardMapper.toCustomerRewardEntity(
-        customerReward
-      );
+      if (!usageRow) {
+        throw new ShopCustomerRewardError(
+          ShopCustomerRewardErrorType.NOT_FOUND,
+          "Redeemed reward usage not found",
+          "SupabaseCustomerRewardRepository.redeemReward",
+          { shopId, customerId, rewardId, redemptionId }
+        );
+      }
+
+      const entity =
+        SupabaseCustomerRewardMapper.fromRewardUsageToCustomerRewardEntity({
+          id: usageRow.id,
+          cancelled_at: usageRow.cancelled_at,
+          cancelled_by_employee_id: usageRow.cancelled_by_employee_id,
+          cancelled_reason: usageRow.cancelled_reason,
+          created_at: usageRow.created_at,
+          customer_id: usageRow.customer_id,
+          customer_point_transaction_id:
+            usageRow.customer_point_transaction_id,
+          expires_at: usageRow.expires_at,
+          issued_at: usageRow.issued_at,
+          metadata: usageRow.metadata,
+          notes: usageRow.notes,
+          points_used: usageRow.points_used,
+          redemption_code: usageRow.redemption_code,
+          redemption_type: usageRow.redemption_type,
+          reward_id: usageRow.reward_id,
+          reward_value: usageRow.reward_value,
+          shop_id: usageRow.shop_id,
+          source_description: usageRow.source_description,
+          status: usageRow.status,
+          updated_at: usageRow.updated_at,
+          used_at: usageRow.used_at,
+          used_by_employee_id: usageRow.used_by_employee_id,
+          used_queue_id: usageRow.used_queue_id,
+        });
+
+      return entity;
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;
