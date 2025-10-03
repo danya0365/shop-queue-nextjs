@@ -6,11 +6,7 @@ import type {
   CustomerRewardStatsEntity,
   RewardTransactionEntity,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
-import {
-  DatabaseDataSource,
-  FilterOperator,
-  QueryOptions,
-} from "@/src/domain/interfaces/datasources/database-datasource";
+import { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import {
@@ -20,18 +16,13 @@ import {
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
 import { SupabaseCustomerRewardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-reward-mapper";
 import {
-  CustomerRewardSchema,
   GetAvailableRewardsSchema,
   GetCustomerPointsSchema,
-  RewardTransactionSchema,
   RewardUsageSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
-type CustomerRewardSchemaRecord = Record<string, unknown> &
-  CustomerRewardSchema;
-type RewardTransactionSchemaRecord = Record<string, unknown> &
-  RewardTransactionSchema;
+// Removed unused legacy record helpers
 
 /**
  * Supabase implementation of the customer reward repository
@@ -836,89 +827,41 @@ export class SupabaseCustomerRewardRepository
 
       this.logger.info("Getting customer reward stats", { shopId, customerId });
 
-      // Get customer points
-      const customerPoints = await this.getCustomerPoints(shopId, customerId);
+      const row = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["get_customer_reward_stats"]["Returns"][0]
+      >("get_customer_reward_stats", {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+      });
 
-      // Get redeemed rewards count
-      const totalRedeemedQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-        ],
-      };
-
-      const totalRedeemed =
-        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-          "customer_rewards",
-          totalRedeemedQueryOptions
+      if (!row) {
+        throw new ShopCustomerRewardError(
+          ShopCustomerRewardErrorType.NOT_FOUND,
+          "Customer reward stats not found",
+          "SupabaseCustomerRewardRepository.getCustomerRewardStats",
+          { shopId, customerId }
         );
+      }
 
-      // Get reward transactions count
-      const transactionsQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-        ],
-      };
-
-      const transactions =
-        await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
-          "reward_transactions",
-          transactionsQueryOptions
-        );
-
-      // Calculate statistics
       const statsData = {
-        id: `${shopId}-${customerId}-${Date.now()}`, // Generate a unique ID
-        shop_id: shopId,
-        customer_id: customerId,
-        total_rewards_available: 0, // This would need to be calculated from available rewards
-        total_rewards_redeemed: totalRedeemed.length,
-        total_points_earned: customerPoints.totalEarned,
-        total_points_redeemed: transactions
-          .filter((t) => t.transaction_type === "redemption")
-          .reduce((sum, t) => sum + Math.abs(Number(t.points_change || 0)), 0),
-        average_points_per_transaction:
-          transactions.length > 0
-            ? transactions.reduce(
-                (sum, t) => sum + Math.abs(Number(t.points_change || 0)),
-                0
-              ) / transactions.length
-            : 0,
-        most_redeemed_category: "", // This would need to be calculated from reward categories
-        redemption_rate:
-          totalRedeemed.length > 0
-            ? (totalRedeemed.filter((r) => r.status === "completed").length /
-                totalRedeemed.length) *
-              100
-            : 0,
-        last_redemption_date:
-          totalRedeemed.length > 0 ? totalRedeemed[0].redeemed_at : null,
-        last_earn_date:
-          transactions.length > 0 ? transactions[0].created_at : null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        shop_id: row.shop_id ?? shopId,
+        customer_id: row.customer_id ?? customerId,
+        total_rewards_available: Number(row.total_rewards_available ?? 0),
+        total_rewards_redeemed: Number(row.total_rewards_redeemed ?? 0),
+        total_points_earned: Number(row.total_points_earned ?? 0),
+        total_points_redeemed: Number(row.total_points_redeemed ?? 0),
+        average_points_per_transaction: Number(
+          row.average_points_per_transaction ?? 0
+        ),
+        most_redeemed_category: row.most_redeemed_category ?? "",
+        redemption_rate: Number(row.redemption_rate ?? 0),
+        last_redemption_date: row.last_redemption_date ?? null,
+        last_earn_date: row.last_earn_date ?? null,
+        created_at: row.created_at ?? new Date().toISOString(),
+        updated_at: row.updated_at ?? new Date().toISOString(),
       };
 
-      return SupabaseCustomerRewardMapper.toCustomerRewardStatsEntity(
-        statsData
-      );
+      return SupabaseCustomerRewardMapper.toCustomerRewardStatsEntity(statsData);
     } catch (error) {
       if (error instanceof ShopCustomerRewardError) {
         throw error;

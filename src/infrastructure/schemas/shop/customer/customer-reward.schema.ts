@@ -58,7 +58,6 @@ export interface RewardTransactionSchema {
  * Customer reward statistics database schema
  */
 export interface CustomerRewardStatsSchema {
-  id: string;
   shop_id: string;
   customer_id: string;
   total_rewards_available: number;

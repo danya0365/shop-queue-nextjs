@@ -4578,6 +4578,24 @@ export type Database = {
           estimated_call_time: string
         }[]
       }
+      get_customer_reward_stats: {
+        Args: { p_shop_id: string; p_customer_id: string }
+        Returns: {
+          shop_id: string
+          customer_id: string
+          total_rewards_available: number
+          total_rewards_redeemed: number
+          total_points_earned: number
+          total_points_redeemed: number
+          average_points_per_transaction: number
+          most_redeemed_category: string
+          redemption_rate: number
+          last_redemption_date: string
+          last_earn_date: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       get_customer_stats: {
         Args: { shop_id_param: string }
         Returns: Json
