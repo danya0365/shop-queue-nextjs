@@ -67,3 +67,29 @@ export interface CancelCustomerQueueInputDTO {
   shopId: string;
   queueNumber: string;
 }
+
+/**
+ * Input DTO for getting queue ID by number
+ */
+export interface GetQueueIdByNumberInputDTO {
+  shopId: string;
+  queueNumber: string;
+}
+
+/**
+ * Output DTO for getting queue ID by number
+ */
+export type GetQueueIdByNumberOutputDTO = string | null;
+
+/**
+ * Input DTO for checking queue ownership
+ */
+export interface IsQueueOwnerInputDTO {
+  queueId: string;
+  customerId: string;
+}
+
+/**
+ * Output DTO for checking queue ownership
+ */
+export type IsQueueOwnerOutputDTO = boolean;

@@ -8,9 +8,10 @@ import type { ShopService } from "@/src/application/services/shop/ShopService";
 import { CancelCustomerQueueUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueUseCase";
 import { GetCustomerQueueStatusUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetCustomerQueueStatusUseCase";
 import { GetQueueProgressUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueProgressUseCase";
+import { GetQueueIdByNumberUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueIdByNumberUseCase";
+import { IsQueueOwnerUseCase } from "@/src/application/usecases/shop/customer/queue-status/IsQueueOwnerUseCase";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import type { CustomerQueueStatusRepository } from "@/src/domain/repositories/shop/customer/customer-queue-status-repository";
 
 export interface IShopCustomerQueueStatusService {
   /**
@@ -60,7 +61,14 @@ export class ShopCustomerQueueStatusService
       { shopId: string; queueId?: string },
       CustomerQueueStatusDTO | null
     >,
-    private readonly customerQueueStatusRepository: CustomerQueueStatusRepository,
+    private readonly getQueueIdByNumberUseCase: IUseCase<
+      { shopId: string; queueNumber: string },
+      string | null
+    >,
+    private readonly isQueueOwnerUseCase: IUseCase<
+      { queueId: string; customerId: string },
+      boolean
+    >,
     private readonly getQueueProgressUseCase: IUseCase<
       { shopId: string },
       QueueProgressDTO
@@ -97,11 +105,10 @@ export class ShopCustomerQueueStatusService
           this.logger.info("Attempting to convert queue number to queue ID", {
             queueIdentifier,
           });
-          const queueId =
-            await this.customerQueueStatusRepository.getQueueIdByNumber(
-              shopId,
-              queueIdentifier
-            );
+          const queueId = await this.getQueueIdByNumberUseCase.execute({
+            shopId,
+            queueNumber: queueIdentifier,
+          });
           if (queueId) {
             customerQueue = await this.getCustomerQueueStatusUseCase.execute({
               shopId,
@@ -122,10 +129,10 @@ export class ShopCustomerQueueStatusService
         customerQueue?.status === QueueStatus.CONFIRMED;
       if (customerId && customerQueue && canCancel) {
         try {
-          const isOwner = await this.customerQueueStatusRepository.isQueueOwner(
-            customerQueue.id,
-            customerId
-          );
+          const isOwner = await this.isQueueOwnerUseCase.execute({
+            queueId: customerQueue.id,
+            customerId,
+          });
           canCancel = isOwner;
         } catch (error) {
           this.logger.warn("Error checking queue ownership", {
@@ -175,11 +182,10 @@ export class ShopCustomerQueueStatusService
         this.logger.info("Attempting to convert queue number to queue ID", {
           queueIdentifier,
         });
-        const queueId =
-          await this.customerQueueStatusRepository.getQueueIdByNumber(
-            shopId,
-            queueIdentifier
-          );
+        const queueId = await this.getQueueIdByNumberUseCase.execute({
+          shopId,
+          queueNumber: queueIdentifier,
+        });
         if (queueId) {
           const result = await this.getCustomerQueueStatusUseCase.execute({
             shopId,
@@ -240,17 +246,34 @@ export class ShopCustomerQueueStatusServiceFactory {
     shopService: ShopService,
     logger: Logger
   ): ShopCustomerQueueStatusService {
+    // Initialize all use cases
     const getCustomerQueueStatusUseCase = new GetCustomerQueueStatusUseCase(
+      repository,
+      logger
+    );
+    
+    const getQueueIdByNumberUseCase = new GetQueueIdByNumberUseCase(
       repository
     );
-    const getQueueProgressUseCase = new GetQueueProgressUseCase(repository);
-    const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(
+    
+    const isQueueOwnerUseCase = new IsQueueOwnerUseCase(
       repository
+    );
+    
+    const getQueueProgressUseCase = new GetQueueProgressUseCase(
+      repository, 
+      logger
+    );
+    
+    const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(
+      repository,
+      logger
     );
 
     return new ShopCustomerQueueStatusService(
       getCustomerQueueStatusUseCase,
-      repository,
+      getQueueIdByNumberUseCase,
+      isQueueOwnerUseCase,
       getQueueProgressUseCase,
       cancelCustomerQueueUseCase,
       shopService,
