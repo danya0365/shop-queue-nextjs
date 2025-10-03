@@ -168,3 +168,27 @@ export interface RedeemRewardResultSchema {
  * Used for RPC that returns redeemed rewards directly from reward_usages
  */
 export type RewardUsageSchema = Database["public"]["Tables"]["reward_usages"]["Row"];
+
+/**
+ * Enriched reward transactions view schema
+ * Mirrors the SELECT list in reward_transactions_view
+ */
+export interface RewardTransactionsViewSchema {
+  id: string;
+  shop_id: string;
+  customer_id: string;
+  type: Database["public"]["Enums"]["transaction_type"];
+  points: number;
+  description: string | null;
+  transaction_date: string | null;
+  created_at: string | null;
+  related_queue_id: string | null;
+  reward_id: string | null;
+  redemption_code: string | null;
+  used_at: string | null;
+}
+
+/**
+ * RPC return helpers for enriched reward transactions
+ */
+export type GetRewardTransactionsEnrichedReturns = RewardTransactionsViewSchema;

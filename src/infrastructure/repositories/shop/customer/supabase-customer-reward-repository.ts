@@ -10,7 +10,6 @@ import {
   DatabaseDataSource,
   FilterOperator,
   QueryOptions,
-  SortDirection,
 } from "@/src/domain/interfaces/datasources/database-datasource";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
@@ -446,7 +445,7 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting reward transactions", {
+      this.logger.info("Getting reward transactions via VIEW RPC (reward_transactions_view)", {
         shopId,
         customerId,
         page,
@@ -454,108 +453,98 @@ export class SupabaseCustomerRewardRepository
         filters,
       });
 
-      // Build query options for Supabase
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-        ],
-        sort: [
-          {
-            field: "created_at",
-            direction: SortDirection.DESC,
-          },
-        ],
-      };
-
-      // Add filters
-      if (filters) {
-        if (filters.type) {
-          queryOptions.filters?.push({
-            field: "transaction_type",
-            operator: FilterOperator.EQ,
-            value: filters.type,
-          });
-        }
-
-        if (filters.dateRange && filters.dateRange !== "all") {
-          const now = new Date();
-          let startDate: Date;
-          let endDate: Date;
-
-          switch (filters.dateRange) {
-            case "month":
-              startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-              endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-              break;
-            case "quarter":
-              const quarter = Math.floor(now.getMonth() / 3);
-              startDate = new Date(now.getFullYear(), quarter * 3, 1);
-              endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
-              break;
-            case "year":
-              startDate = new Date(now.getFullYear(), 0, 1);
-              endDate = new Date(now.getFullYear(), 11, 31);
-              break;
-            case "custom":
-              startDate = filters.startDate
-                ? new Date(filters.startDate)
-                : new Date();
-              endDate = filters.endDate
-                ? new Date(filters.endDate)
-                : new Date();
-              break;
-            default:
-              startDate = new Date();
-              endDate = new Date();
+      // Build date range for RPC
+      let p_start_date: string | null = null;
+      let p_end_date: string | null = null;
+      if (filters && filters.dateRange && filters.dateRange !== "all") {
+        const now = new Date();
+        let startDate: Date;
+        let endDate: Date;
+        switch (filters.dateRange) {
+          case "month":
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            break;
+          case "quarter": {
+            const quarter = Math.floor(now.getMonth() / 3);
+            startDate = new Date(now.getFullYear(), quarter * 3, 1);
+            endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
+            break;
           }
-
-          queryOptions.filters?.push({
-            field: "created_at",
-            operator: FilterOperator.GTE,
-            value: startDate.toISOString(),
-          });
-          queryOptions.filters?.push({
-            field: "created_at",
-            operator: FilterOperator.LTE,
-            value: endDate.toISOString(),
-          });
+          case "year":
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear(), 11, 31);
+            break;
+          case "custom":
+            startDate = filters.startDate ? new Date(filters.startDate) : now;
+            endDate = filters.endDate ? new Date(filters.endDate) : now;
+            break;
+          default:
+            startDate = now;
+            endDate = now;
         }
+        p_start_date = startDate.toISOString();
+        p_end_date = endDate.toISOString();
       }
 
-      // Add pagination to query options
-      queryOptions.pagination = {
-        page,
-        pageSize: limit,
-      };
+      const p_type = filters?.type ?? null;
 
-      const transactions =
-        await this.dataSource.getAdvanced<RewardTransactionSchemaRecord>(
-          "reward_transactions",
-          queryOptions
-        );
+      const listParams = {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+        p_type,
+        p_start_date,
+        p_end_date,
+        p_page: page,
+        p_limit: limit,
+      } as const;
 
-      const rewardTransactions = transactions.map(
-        (transaction: RewardTransactionSchemaRecord) =>
-          SupabaseCustomerRewardMapper.toRewardTransactionEntity(transaction)
+      const countParams = {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+        p_type,
+        p_start_date,
+        p_end_date,
+      } as const;
+
+      const rows = await this.dataSource.callRpc<
+        import("@/src/domain/types/supabase").Database["public"]["Functions"]["get_reward_transactions_enriched"]["Returns"]
+      >("get_reward_transactions_enriched", listParams);
+
+      const totalItems = await this.dataSource.callRpc<number>(
+        "get_reward_transactions_enriched_count",
+        countParams
       );
 
+      const data = (rows ?? []).map((r) =>
+        SupabaseCustomerRewardMapper.fromRewardTransactionsViewToEntity({
+          id: r.id ?? "",
+          shop_id: r.shop_id ?? "",
+          customer_id: r.customer_id ?? "",
+          type:
+            (r.type as import("@/src/domain/types/supabase").Database["public"]["Enums"]["transaction_type"]) ?? null,
+          points: r.points ?? 0,
+          description: r.description ?? null,
+          transaction_date: r.transaction_date ?? null,
+          created_at: r.created_at ?? null,
+          related_queue_id: r.related_queue_id ?? null,
+          reward_id: r.reward_id ?? null,
+          redemption_code: r.redemption_code ?? null,
+          used_at: r.used_at ?? null,
+        })
+      );
+
+      const total = totalItems || data.length;
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+
       return {
-        data: rewardTransactions,
+        data,
         pagination: {
           currentPage: page,
           perPage: limit,
-          totalItems: rewardTransactions.length, // This would need to be calculated properly with a count query
-          totalPages: Math.ceil(rewardTransactions.length / limit),
-          hasNext: page < Math.ceil(rewardTransactions.length / limit),
+          totalItems: total,
+          totalPages,
+          hasNext: page < totalPages,
           hasPrev: page > 1,
         },
       };

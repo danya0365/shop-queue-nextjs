@@ -7,12 +7,13 @@ import type {
 } from "@/src/application/dtos/shop/customer/customer-reward-dto";
 import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import { RewardType } from "@/src/domain/entities/shop/backend/backend-reward.entity";
-import type {
+import {
   AvailableRewardEntity,
   CustomerPointsEntity,
   CustomerRewardEntity,
   CustomerRewardStatsEntity,
   RewardTransactionEntity,
+  RewardTransactionType,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import type {
   CustomerRewardSchema,
@@ -47,6 +48,30 @@ export class SupabaseCustomerRewardMapper {
       nextTierPoints: 0,
       tierBenefits: data.tier_benefits || [],
       lastUpdated: data.updated_at || new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Convert reward_transactions_view row to RewardTransactionEntity
+   */
+  static fromRewardTransactionsViewToEntity(
+    data: import("@/src/infrastructure/schemas/shop/customer/customer-reward.schema").RewardTransactionsViewSchema
+  ): RewardTransactionEntity {
+    const nowIso = new Date().toISOString();
+    return {
+      id: String(data.id || ""),
+      customerId: data.customer_id || "",
+      shopId: data.shop_id || "",
+      type: data.type as RewardTransactionType,
+      points: Number(data.points ?? 0),
+      description: data.description ?? "",
+      date: data.transaction_date ?? data.created_at ?? nowIso,
+      // Keep domain-specific fields undefined when not present in the view
+      relatedOrderId: undefined,
+      relatedRewardId: data.reward_id ?? undefined,
+      balanceBefore: 0,
+      balanceAfter: 0,
+      createdAt: data.created_at ?? nowIso,
     };
   }
 
@@ -118,7 +143,8 @@ export class SupabaseCustomerRewardMapper {
       id: String(data.id || ""),
       customerId: data.customer_id || "",
       shopId: data.shop_id || "",
-      type: data.type || "earned",
+      type:
+        (data.type as RewardTransactionType) || RewardTransactionType.EARNED,
       points: Number(data.points || 0),
       description: data.description || "",
       date: data.date || "",

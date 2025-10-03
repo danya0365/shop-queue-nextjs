@@ -54,7 +54,7 @@ export interface RewardTransactionEntity {
   id: string;
   customerId: string;
   shopId: string;
-  type: "earned" | "redeemed" | "expired";
+  type: RewardTransactionType;
   points: number;
   description: string;
   date: string;
@@ -63,6 +63,12 @@ export interface RewardTransactionEntity {
   balanceBefore: number;
   balanceAfter: number;
   createdAt: string;
+}
+
+export enum RewardTransactionType {
+  EARNED = "earned",
+  REDEEMED = "redeemed",
+  EXPIRED = "expired",
 }
 
 /**
