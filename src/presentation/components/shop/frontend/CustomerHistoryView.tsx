@@ -223,7 +223,7 @@ export function CustomerHistoryView({
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="px-2 sm:px-0">
         <h1 className="text-2xl sm:text-3xl font-bold shop-frontend-text-primary mb-1 sm:mb-2">

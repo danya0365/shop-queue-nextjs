@@ -55,7 +55,7 @@ export function ClientCustomerQueueJoinView({
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col gap-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted">กำลังโหลดข้อมูลการเข้าคิว...</p>
@@ -67,7 +67,7 @@ export function ClientCustomerQueueJoinView({
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col gap-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-2">
             เกิดข้อผิดพลาด
@@ -87,7 +87,7 @@ export function ClientCustomerQueueJoinView({
   // No data state
   if (!viewModel) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col gap-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-2">
             ไม่มีข้อมูล
@@ -119,11 +119,13 @@ export function ClientCustomerQueueJoinView({
 
   if (isSuccess && queueNumber) {
     return (
-      <div className="flex flex-col gap-6 sm:gap-8 px-3 sm:px-0">
+      <div className="flex flex-col gap-8">
         <div className="shop-frontend-card overflow-hidden">
           <div className="shop-frontend-shop-header p-6 sm:p-8 text-center">
             <span className="text-5xl sm:text-6xl mb-3 sm:mb-4 block">🎉</span>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">เข้าคิวสำเร็จ!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+              เข้าคิวสำเร็จ!
+            </h1>
             <p className="shop-frontend-shop-header-text-light text-sm sm:text-base">
               คุณได้รับหมายเลขคิวแล้ว
             </p>
@@ -132,7 +134,9 @@ export function ClientCustomerQueueJoinView({
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="text-center mb-6 sm:mb-8">
               <div className="w-20 h-20 sm:w-24 sm:h-24 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <span className="text-2xl sm:text-3xl font-bold">{queueNumber}</span>
+                <span className="text-2xl sm:text-3xl font-bold">
+                  {queueNumber}
+                </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-semibold shop-frontend-text-primary mb-1 sm:mb-2">
                 หมายเลขคิวของคุณ
@@ -173,7 +177,7 @@ export function ClientCustomerQueueJoinView({
 
   if (!isAcceptingQueues) {
     return (
-      <div className="flex flex-col gap-6 sm:gap-8 px-3 sm:px-0">
+      <div className="flex flex-col gap-8">
         <div className="shop-frontend-card p-6 sm:p-8 text-center">
           <span className="text-5xl sm:text-6xl mb-3 sm:mb-4 block">😔</span>
           <h1 className="text-xl sm:text-2xl font-bold shop-frontend-text-primary mb-2">
@@ -195,7 +199,7 @@ export function ClientCustomerQueueJoinView({
 
   if (isShowFinalOrderSummary) {
     return (
-      <div className="flex flex-col gap-6 sm:gap-8 px-3 sm:px-0">
+      <div className="flex flex-col gap-8">
         {/* Back Button */}
         <div className="flex justify-start">
           <button
@@ -247,9 +251,13 @@ export function ClientCustomerQueueJoinView({
           {shopName}
         </h1>
         <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-1.5 sm:gap-3 text-xs sm:text-sm shop-frontend-text-secondary">
-          <span className="whitespace-nowrap">⏰ รอประมาณ {estimatedWaitTime} นาที</span>
+          <span className="whitespace-nowrap">
+            ⏰ รอประมาณ {estimatedWaitTime} นาที
+          </span>
           <span className="hidden sm:inline">•</span>
-          <span className="whitespace-nowrap">👥 คิวหน้า {currentQueueLength} คน</span>
+          <span className="whitespace-nowrap">
+            👥 คิวหน้า {currentQueueLength} คน
+          </span>
           <span className="hidden sm:inline">•</span>
           <span
             className={`whitespace-nowrap ${
@@ -393,7 +401,7 @@ export function ClientCustomerQueueJoinView({
                 decreaseServiceQuantity={decreaseServiceQuantity}
                 increaseServiceQuantity={increaseServiceQuantity}
               />
-<CustomerForm
+              <CustomerForm
                 customerName={customerName}
                 customerPhone={customerPhone}
                 priority={priority}

@@ -75,13 +75,15 @@ export function CustomerDashboardView({
   } = viewModel;
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 px-3 sm:px-4 lg:px-0">
+    <div className="flex flex-col gap-8">
       {/* Announcement Banner */}
       {announcement && (
         <div className="shop-frontend-announcement p-3 sm:p-4 rounded-lg sm:rounded-xl">
           <div className="flex items-start sm:items-center space-x-2 sm:space-x-3">
             <span className="text-xl sm:text-2xl mt-0.5 sm:mt-0">📢</span>
-            <p className="font-medium text-sm sm:text-base break-words">{announcement}</p>
+            <p className="font-medium text-sm sm:text-base break-words">
+              {announcement}
+            </p>
           </div>
         </div>
       )}
@@ -91,7 +93,9 @@ export function CustomerDashboardView({
         <div className="shop-frontend-shop-header p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 truncate">{shopInfo.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 truncate">
+                {shopInfo.name}
+              </h1>
               <p className="shop-frontend-shop-header-text-light mb-3 sm:mb-4 text-sm sm:text-base">
                 {shopInfo.description}
               </p>
@@ -99,7 +103,9 @@ export function CustomerDashboardView({
                 <div className="flex items-center space-x-1 whitespace-nowrap">
                   <span>⭐</span>
                   <span>{shopInfo.rating}/5</span>
-                  <span className="hidden sm:inline">({shopInfo.totalReviews} รีวิว)</span>
+                  <span className="hidden sm:inline">
+                    ({shopInfo.totalReviews} รีวิว)
+                  </span>
                   <span className="sm:hidden">({shopInfo.totalReviews})</span>
                 </div>
                 <div className="hidden sm:flex items-center space-x-1">
@@ -107,7 +113,9 @@ export function CustomerDashboardView({
                 </div>
                 <div className="flex items-center space-x-1 whitespace-nowrap">
                   <span>🕒</span>
-                  <span className="truncate max-w-[120px] sm:max-w-none">{shopInfo.openingHours}</span>
+                  <span className="truncate max-w-[120px] sm:max-w-none">
+                    {shopInfo.openingHours}
+                  </span>
                 </div>
                 <div className="hidden sm:flex items-center space-x-1">
                   <span>•</span>
@@ -144,13 +152,22 @@ export function CustomerDashboardView({
                   options={{
                     errorCorrectionLevel: "M",
                     margin: 2,
-                    scale: typeof window !== 'undefined' && window.innerWidth < 640 ? 2.5 : 3,
-                    width: typeof window !== 'undefined' && window.innerWidth < 640 ? 100 : 120,
+                    scale:
+                      typeof window !== "undefined" && window.innerWidth < 640
+                        ? 2.5
+                        : 3,
+                    width:
+                      typeof window !== "undefined" && window.innerWidth < 640
+                        ? 100
+                        : 120,
                   }}
                   logo={{
                     src: "/qr-logo.png",
-                    options: { 
-                      width: typeof window !== 'undefined' && window.innerWidth < 640 ? 24 : 30
+                    options: {
+                      width:
+                        typeof window !== "undefined" && window.innerWidth < 640
+                          ? 24
+                          : 30,
                     },
                   }}
                 />
@@ -188,7 +205,9 @@ export function CustomerDashboardView({
                   {queueStatus.totalConfirmed}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm shop-frontend-text-secondary">คิวรอ</p>
+              <p className="text-xs sm:text-sm shop-frontend-text-secondary">
+                คิวรอ
+              </p>
             </div>
 
             <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
