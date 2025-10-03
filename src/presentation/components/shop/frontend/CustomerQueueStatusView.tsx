@@ -246,7 +246,9 @@ export function CustomerQueueStatusView({
                     เบอร์โทร:
                   </span>
                   <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.customerPhone}
+                    {customerQueue.customerPhone || (
+                      <span className="text-gray-400">ซ่อน</span>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
