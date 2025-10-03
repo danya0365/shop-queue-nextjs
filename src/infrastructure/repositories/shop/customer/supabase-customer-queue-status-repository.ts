@@ -231,8 +231,47 @@ export class SupabaseCustomerQueueStatusRepository
   }
 
   /**
+   * Check if a customer is the owner of a queue
+   * @param queueId The queue ID to check
+   * @param customerId The customer ID to verify ownership
+   * @returns Promise that resolves to boolean indicating if customer is the owner
+   * @throws CustomerQueueStatusError if the operation fails
+   */
+  async isQueueOwner(queueId: string, customerId: string): Promise<boolean> {
+    try {
+      this.logger.info("Checking queue ownership via RPC", {
+        queueId,
+        customerId,
+      });
+
+      const result = await this.dataSource.callRpc<boolean>("is_queue_owner", {
+        p_queue_id: queueId,
+        p_customer_id: customerId,
+      });
+      return result;
+    } catch (error) {
+      this.logger.error("Error in isQueueOwner RPC call", {
+        error,
+        queueId,
+        customerId,
+      });
+
+      if (error instanceof CustomerQueueStatusError) {
+        throw error;
+      }
+
+      throw new CustomerQueueStatusError(
+        CustomerQueueStatusErrorType.OPERATION_FAILED,
+        "Failed to verify queue ownership",
+        "isQueueOwner",
+        { queueId, customerId },
+        error
+      );
+    }
+  }
+
+  /**
    * Cancel a customer queue
-   * Uses RPC function to bypass RLS and perform security checks
    * @param shopId The shop ID
    * @param queueNumber The queue number
    * @returns True if cancellation was successful

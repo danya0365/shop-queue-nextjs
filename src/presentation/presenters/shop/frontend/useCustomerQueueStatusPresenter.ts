@@ -115,7 +115,8 @@ export function useCustomerQueueStatusPresenter(
 
         const newViewModel = await presenter.getViewModel(
           shopId,
-          searchQueueNumber
+          searchQueueNumber,
+          storedCustomer?.id
         );
 
         setViewModel(newViewModel);
@@ -128,7 +129,7 @@ export function useCustomerQueueStatusPresenter(
         setLoading(false);
       }
     },
-    [shopId]
+    [shopId, storedCustomer]
   );
 
   // Load data when dependencies change, but not if we have initial view model

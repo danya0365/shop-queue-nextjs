@@ -49,6 +49,18 @@ export interface CustomerQueueStatusRepository {
   ): Promise<string | null>;
 
   /**
+   * Check if a customer is the owner of a queue
+   * @param queueId The queue ID
+   * @param customerId The customer ID to check
+   * @returns True if the customer is the owner of the queue
+   * @throws CustomerQueueStatusError if the operation fails
+   */
+  isQueueOwner(
+    queueId: string,
+    customerId: string
+  ): Promise<boolean>;
+
+  /**
    * Get customer queue status by queue ID
    * @param shopId The shop ID
    * @param queueId The queue ID

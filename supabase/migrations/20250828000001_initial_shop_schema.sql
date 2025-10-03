@@ -1550,6 +1550,25 @@ BEGIN
 END;
 $$;
 
+-- Function to check if a customer is the owner of a queue
+-- This function can be called from the client with proper RLS
+CREATE OR REPLACE FUNCTION public.is_queue_owner(
+  p_queue_id UUID,
+  p_customer_id UUID
+)
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+AS $$
+  SELECT EXISTS (
+    SELECT 1 
+    FROM public.queues q
+    WHERE q.id = p_queue_id 
+    AND q.customer_id = p_customer_id
+    -- Add any additional security checks here if needed
+  );
+$$;
+
 
 -- =============================================================================
 -- QUEUE SERVICES TABLE RLS POLICIES

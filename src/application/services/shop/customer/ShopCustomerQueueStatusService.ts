@@ -21,7 +21,8 @@ export interface IShopCustomerQueueStatusService {
    */
   getCustomerQueueStatusViewModel(
     shopId: string,
-    queueIdentifier?: string
+    queueIdentifier?: string,
+    customerId?: string
   ): Promise<CustomerQueueStatusViewModelDTO>;
 
   /**
@@ -74,7 +75,8 @@ export class ShopCustomerQueueStatusService
 
   async getCustomerQueueStatusViewModel(
     shopId: string,
-    queueIdentifier?: string
+    queueIdentifier?: string,
+    customerId?: string
   ): Promise<CustomerQueueStatusViewModelDTO> {
     try {
       this.logger.info("Getting customer queue status view model", {
@@ -115,14 +117,31 @@ export class ShopCustomerQueueStatusService
 
       const shop = await this.shopService.getShopById(shopId);
 
+      let canCancel =
+        customerQueue?.status === QueueStatus.WAITING ||
+        customerQueue?.status === QueueStatus.CONFIRMED;
+      if (customerId && customerQueue && canCancel) {
+        try {
+          const isOwner = await this.customerQueueStatusRepository.isQueueOwner(
+            customerQueue.id,
+            customerId
+          );
+          canCancel = isOwner;
+        } catch (error) {
+          this.logger.warn("Error checking queue ownership", {
+            error,
+            queueId: customerQueue?.id,
+            customerId,
+          });
+        }
+      }
+
       return {
         customerQueue,
         queueProgress,
         shopName: shop?.name || "",
         isFound: !!customerQueue,
-        canCancel:
-          customerQueue?.status === QueueStatus.WAITING ||
-          customerQueue?.status === QueueStatus.CONFIRMED,
+        canCancel,
       };
     } catch (error) {
       this.logger.error("Error getting customer queue status view model", {
