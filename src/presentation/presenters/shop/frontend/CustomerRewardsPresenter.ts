@@ -38,7 +38,7 @@ export interface CustomerPoints {
   totalRedeemed: number;
   pointsExpiring: number;
   expiryDate?: string;
-  tier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  tier: MembershipTier;
   nextTierPoints: number;
   tierBenefits: string[];
 }
@@ -132,6 +132,54 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
     perPage: number = 10,
     filters?: RewardsFilters
   ): Promise<CustomerRewardsViewModel> {
+    if (!shopId || !customerId) {
+      return {
+        customerPoints: {
+          currentPoints: 0,
+          totalEarned: 0,
+          totalRedeemed: 0,
+          pointsExpiring: 0,
+          expiryDate: undefined,
+          tier: MembershipTier.BRONZE,
+          nextTierPoints: 0,
+          tierBenefits: [],
+        },
+        customerName: "",
+        availableRewards: {
+          data: [],
+          pagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        },
+        redeemedRewards: {
+          data: [],
+          pagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        },
+        rewardTransactions: {
+          data: [],
+          pagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        },
+      };
+    }
     try {
       this.logger.info("CustomerRewardsPresenter: Getting view model", {
         shopId,
@@ -196,9 +244,7 @@ export class CustomerRewardsPresenter extends BaseShopPresenter {
         totalRedeemed: customerRewardsData.customerPoints.totalRedeemed,
         pointsExpiring: customerRewardsData.customerPoints.pointsExpiring,
         expiryDate: customerRewardsData.customerPoints.expiryDate,
-        tier: this.mapMembershipTierToString(
-          customerRewardsData.customerPoints.tier
-        ),
+        tier: customerRewardsData.customerPoints.tier,
         nextTierPoints: customerRewardsData.customerPoints.nextTierPoints,
         tierBenefits: customerRewardsData.customerPoints.tierBenefits,
       };

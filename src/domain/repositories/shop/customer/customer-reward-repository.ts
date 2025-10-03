@@ -65,7 +65,6 @@ export interface ShopCustomerRewardRepository {
   getAvailableRewards(
     params: PaginationParams & {
       shopId: string;
-      customerId?: string;
       filters?: {
         category?: string;
         type?: RewardType;

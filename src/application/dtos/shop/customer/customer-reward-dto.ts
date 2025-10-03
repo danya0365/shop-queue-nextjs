@@ -156,7 +156,6 @@ export interface GetCustomerPointsInputDTO {
 
 export interface GetAvailableRewardsInputDTO {
   shopId: string;
-  customerId?: string;
   currentPage?: number;
   perPage?: number;
   filters?: AvailableRewardsFiltersDTO;

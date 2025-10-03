@@ -1,24 +1,24 @@
-import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import type {
-  CustomerRewardsDataDTO,
-  CustomerPointsDTO,
   AvailableRewardDTO,
-  CustomerRewardDTO,
-  RewardTransactionDTO,
-  CustomerRewardStatsDTO,
-  CustomerInfoDTO,
   AvailableRewardsFiltersDTO,
+  CustomerInfoDTO,
+  CustomerPointsDTO,
+  CustomerRewardDTO,
+  CustomerRewardsDataDTO,
+  CustomerRewardStatsDTO,
   RedeemedRewardsFiltersDTO,
+  RewardTransactionDTO,
   RewardTransactionsFiltersDTO,
 } from "@/src/application/dtos/shop/customer/customer-reward-dto";
-import { GetCustomerPointsUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerPointsUseCase";
+import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { GetAvailableRewardsUseCase } from "@/src/application/usecases/shop/customer/reward/GetAvailableRewardsUseCase";
+import { GetCustomerInfoUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerInfoUseCase";
+import { GetCustomerPointsUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerPointsUseCase";
+import { GetCustomerRewardStatsUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerRewardStatsUseCase";
 import { GetRedeemedRewardsUseCase } from "@/src/application/usecases/shop/customer/reward/GetRedeemedRewardsUseCase";
+import { GetRewardDetailsUseCase } from "@/src/application/usecases/shop/customer/reward/GetRewardDetailsUseCase";
 import { GetRewardTransactionsUseCase } from "@/src/application/usecases/shop/customer/reward/GetRewardTransactionsUseCase";
 import { RedeemRewardUseCase } from "@/src/application/usecases/shop/customer/reward/RedeemRewardUseCase";
-import { GetRewardDetailsUseCase } from "@/src/application/usecases/shop/customer/reward/GetRewardDetailsUseCase";
-import { GetCustomerRewardStatsUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerRewardStatsUseCase";
-import { GetCustomerInfoUseCase } from "@/src/application/usecases/shop/customer/reward/GetCustomerInfoUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { ShopCustomerRewardRepository } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
 
@@ -29,7 +29,10 @@ export interface IShopCustomerRewardService {
    * @param customerId The customer ID
    * @returns Customer points information
    */
-  getCustomerPoints(shopId: string, customerId: string): Promise<CustomerPointsDTO>;
+  getCustomerPoints(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPointsDTO>;
 
   /**
    * Get available rewards with pagination and filters
@@ -42,7 +45,6 @@ export interface IShopCustomerRewardService {
    */
   getAvailableRewards(
     shopId: string,
-    customerId?: string,
     currentPage?: number,
     perPage?: number,
     filters?: AvailableRewardsFiltersDTO
@@ -119,7 +121,11 @@ export interface IShopCustomerRewardService {
    * @param rewardId The reward ID
    * @returns Redeemed reward information
    */
-  redeemReward(shopId: string, customerId: string, rewardId: string): Promise<CustomerRewardDTO>;
+  redeemReward(
+    shopId: string,
+    customerId: string,
+    rewardId: string
+  ): Promise<CustomerRewardDTO>;
 
   /**
    * Get reward details by ID
@@ -128,7 +134,11 @@ export interface IShopCustomerRewardService {
    * @param customerId The customer ID (optional)
    * @returns Reward details
    */
-  getRewardDetails(shopId: string, rewardId: string, customerId?: string): Promise<CustomerRewardDTO | AvailableRewardDTO>;
+  getRewardDetails(
+    shopId: string,
+    rewardId: string,
+    customerId?: string
+  ): Promise<CustomerRewardDTO | AvailableRewardDTO>;
 
   /**
    * Get customer reward statistics
@@ -136,7 +146,10 @@ export interface IShopCustomerRewardService {
    * @param customerId The customer ID
    * @returns Customer reward statistics
    */
-  getCustomerRewardStats(shopId: string, customerId: string): Promise<CustomerRewardStatsDTO>;
+  getCustomerRewardStats(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerRewardStatsDTO>;
 
   /**
    * Get customer information
@@ -253,21 +266,30 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
     private readonly logger: Logger
   ) {}
 
-  async getCustomerPoints(shopId: string, customerId: string): Promise<CustomerPointsDTO> {
+  async getCustomerPoints(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPointsDTO> {
     try {
       this.logger.info("Getting customer points", { shopId, customerId });
 
-      const result = await this.getCustomerPointsUseCase.execute({ shopId, customerId });
+      const result = await this.getCustomerPointsUseCase.execute({
+        shopId,
+        customerId,
+      });
       return result;
     } catch (error) {
-      this.logger.error("Error getting customer points", { error, shopId, customerId });
+      this.logger.error("Error getting customer points", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
 
   async getAvailableRewards(
     shopId: string,
-    customerId?: string,
     currentPage: number = 1,
     perPage: number = 10,
     filters?: AvailableRewardsFiltersDTO
@@ -283,18 +305,28 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
     };
   }> {
     try {
-      this.logger.info("Getting available rewards", { shopId, customerId, currentPage, perPage, filters });
+      this.logger.info("Getting available rewards", {
+        shopId,
+        currentPage,
+        perPage,
+        filters,
+      });
 
       const result = await this.getAvailableRewardsUseCase.execute({
         shopId,
-        customerId,
         currentPage,
         perPage,
         filters,
       });
       return result;
     } catch (error) {
-      this.logger.error("Error getting available rewards", { error, shopId, customerId });
+      this.logger.error("Error getting available rewards", {
+        error,
+        shopId,
+        currentPage,
+        perPage,
+        filters,
+      });
       throw error;
     }
   }
@@ -317,7 +349,13 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
     };
   }> {
     try {
-      this.logger.info("Getting redeemed rewards", { shopId, customerId, currentPage, perPage, filters });
+      this.logger.info("Getting redeemed rewards", {
+        shopId,
+        customerId,
+        currentPage,
+        perPage,
+        filters,
+      });
 
       const result = await this.getRedeemedRewardsUseCase.execute({
         shopId,
@@ -328,7 +366,11 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
       });
       return result;
     } catch (error) {
-      this.logger.error("Error getting redeemed rewards", { error, shopId, customerId });
+      this.logger.error("Error getting redeemed rewards", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
@@ -351,7 +393,13 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
     };
   }> {
     try {
-      this.logger.info("Getting reward transactions", { shopId, customerId, currentPage, perPage, filters });
+      this.logger.info("Getting reward transactions", {
+        shopId,
+        customerId,
+        currentPage,
+        perPage,
+        filters,
+      });
 
       const result = await this.getRewardTransactionsUseCase.execute({
         shopId,
@@ -362,55 +410,112 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
       });
       return result;
     } catch (error) {
-      this.logger.error("Error getting reward transactions", { error, shopId, customerId });
+      this.logger.error("Error getting reward transactions", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
 
-  async redeemReward(shopId: string, customerId: string, rewardId: string): Promise<CustomerRewardDTO> {
+  async redeemReward(
+    shopId: string,
+    customerId: string,
+    rewardId: string
+  ): Promise<CustomerRewardDTO> {
     try {
       this.logger.info("Redeeming reward", { shopId, customerId, rewardId });
 
-      const result = await this.redeemRewardUseCase.execute({ shopId, customerId, rewardId });
+      const result = await this.redeemRewardUseCase.execute({
+        shopId,
+        customerId,
+        rewardId,
+      });
       return result;
     } catch (error) {
-      this.logger.error("Error redeeming reward", { error, shopId, customerId, rewardId });
+      this.logger.error("Error redeeming reward", {
+        error,
+        shopId,
+        customerId,
+        rewardId,
+      });
       throw error;
     }
   }
 
-  async getRewardDetails(shopId: string, rewardId: string, customerId?: string): Promise<CustomerRewardDTO | AvailableRewardDTO> {
+  async getRewardDetails(
+    shopId: string,
+    rewardId: string,
+    customerId?: string
+  ): Promise<CustomerRewardDTO | AvailableRewardDTO> {
     try {
-      this.logger.info("Getting reward details", { shopId, rewardId, customerId });
+      this.logger.info("Getting reward details", {
+        shopId,
+        rewardId,
+        customerId,
+      });
 
-      const result = await this.getRewardDetailsUseCase.execute({ shopId, rewardId, customerId });
+      const result = await this.getRewardDetailsUseCase.execute({
+        shopId,
+        rewardId,
+        customerId,
+      });
       return result;
     } catch (error) {
-      this.logger.error("Error getting reward details", { error, shopId, rewardId, customerId });
+      this.logger.error("Error getting reward details", {
+        error,
+        shopId,
+        rewardId,
+        customerId,
+      });
       throw error;
     }
   }
 
-  async getCustomerRewardStats(shopId: string, customerId: string): Promise<CustomerRewardStatsDTO> {
+  async getCustomerRewardStats(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerRewardStatsDTO> {
     try {
-      this.logger.info("Getting customer reward statistics", { shopId, customerId });
+      this.logger.info("Getting customer reward statistics", {
+        shopId,
+        customerId,
+      });
 
-      const result = await this.getCustomerRewardStatsUseCase.execute({ shopId, customerId });
+      const result = await this.getCustomerRewardStatsUseCase.execute({
+        shopId,
+        customerId,
+      });
       return result;
     } catch (error) {
-      this.logger.error("Error getting customer reward statistics", { error, shopId, customerId });
+      this.logger.error("Error getting customer reward statistics", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
 
-  async getCustomerInfo(shopId: string, customerId: string): Promise<CustomerInfoDTO> {
+  async getCustomerInfo(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerInfoDTO> {
     try {
       this.logger.info("Getting customer info", { shopId, customerId });
 
-      const result = await this.getCustomerInfoUseCase.execute({ shopId, customerId });
+      const result = await this.getCustomerInfoUseCase.execute({
+        shopId,
+        customerId,
+      });
       return result;
     } catch (error) {
-      this.logger.error("Error getting customer info", { error, shopId, customerId });
+      this.logger.error("Error getting customer info", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
@@ -425,14 +530,14 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
     rewardTransactionsFilters?: RewardTransactionsFiltersDTO
   ): Promise<CustomerRewardsDataDTO> {
     try {
-      this.logger.info("Getting customer rewards data", { 
-        shopId, 
-        customerId, 
-        currentPage, 
+      this.logger.info("Getting customer rewards data", {
+        shopId,
+        customerId,
+        currentPage,
         perPage,
         availableRewardsFilters,
         redeemedRewardsFilters,
-        rewardTransactionsFilters
+        rewardTransactionsFilters,
       });
 
       // Execute all operations in parallel for better performance
@@ -442,14 +547,31 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
         availableRewards,
         redeemedRewards,
         rewardTransactions,
-        customerStats
+        customerStats,
       ] = await Promise.all([
         this.getCustomerPoints(shopId, customerId),
         this.getCustomerInfo(shopId, customerId),
-        this.getAvailableRewards(shopId, customerId, currentPage, perPage, availableRewardsFilters),
-        this.getRedeemedRewards(shopId, customerId, currentPage, perPage, redeemedRewardsFilters),
-        this.getRewardTransactions(shopId, customerId, currentPage, perPage, rewardTransactionsFilters),
-        this.getCustomerRewardStats(shopId, customerId)
+        this.getAvailableRewards(
+          shopId,
+          currentPage,
+          perPage,
+          availableRewardsFilters
+        ),
+        this.getRedeemedRewards(
+          shopId,
+          customerId,
+          currentPage,
+          perPage,
+          redeemedRewardsFilters
+        ),
+        this.getRewardTransactions(
+          shopId,
+          customerId,
+          currentPage,
+          perPage,
+          rewardTransactionsFilters
+        ),
+        this.getCustomerRewardStats(shopId, customerId),
       ]);
 
       return {
@@ -461,23 +583,36 @@ export class ShopCustomerRewardService implements IShopCustomerRewardService {
         customerStats,
       };
     } catch (error) {
-      this.logger.error("Error getting customer rewards data", { error, shopId, customerId });
+      this.logger.error("Error getting customer rewards data", {
+        error,
+        shopId,
+        customerId,
+      });
       throw error;
     }
   }
 }
 
 export class ShopCustomerRewardServiceFactory {
-  static create(repository: ShopCustomerRewardRepository, logger: Logger): ShopCustomerRewardService {
+  static create(
+    repository: ShopCustomerRewardRepository,
+    logger: Logger
+  ): ShopCustomerRewardService {
     const getCustomerPointsUseCase = new GetCustomerPointsUseCase(repository);
-    const getAvailableRewardsUseCase = new GetAvailableRewardsUseCase(repository);
+    const getAvailableRewardsUseCase = new GetAvailableRewardsUseCase(
+      repository
+    );
     const getRedeemedRewardsUseCase = new GetRedeemedRewardsUseCase(repository);
-    const getRewardTransactionsUseCase = new GetRewardTransactionsUseCase(repository);
+    const getRewardTransactionsUseCase = new GetRewardTransactionsUseCase(
+      repository
+    );
     const redeemRewardUseCase = new RedeemRewardUseCase(repository);
     const getRewardDetailsUseCase = new GetRewardDetailsUseCase(repository);
-    const getCustomerRewardStatsUseCase = new GetCustomerRewardStatsUseCase(repository);
+    const getCustomerRewardStatsUseCase = new GetCustomerRewardStatsUseCase(
+      repository
+    );
     const getCustomerInfoUseCase = new GetCustomerInfoUseCase(repository);
-    
+
     return new ShopCustomerRewardService(
       getCustomerPointsUseCase,
       getAvailableRewardsUseCase,

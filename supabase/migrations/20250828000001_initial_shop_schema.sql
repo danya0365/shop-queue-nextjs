@@ -1185,6 +1185,112 @@ BEGIN
 END;
 $$;
 
+-- Available Rewards RPCs
+-- get_available_rewards and get_available_rewards_count
+-- SECURITY DEFINER to work under RLS, but constrained by p_shop_id
+
+CREATE OR REPLACE FUNCTION public.get_available_rewards(
+  p_shop_id uuid,
+  p_category text DEFAULT NULL,            -- rewards table has no category; kept for API shape
+  p_is_available boolean DEFAULT NULL,
+  p_min_points_cost integer DEFAULT NULL,
+  p_max_points_cost integer DEFAULT NULL,
+  p_page integer DEFAULT 1,
+  p_limit integer DEFAULT 10
+)
+RETURNS TABLE (
+  id uuid,
+  shop_id uuid,
+  name text,
+  description text,
+  points_cost integer,
+  category text,
+  image_url text,
+  is_available boolean,
+  stock integer,
+  type text,
+  value numeric,
+  expiry_date timestamptz,
+  terms_and_conditions text[],
+  created_at timestamptz,
+  updated_at timestamptz
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_offset integer := GREATEST((COALESCE(p_page, 1) - 1) * COALESCE(p_limit, 10), 0);
+BEGIN
+  -- Basic validation
+  IF p_shop_id IS NULL THEN
+    RAISE EXCEPTION 'p_shop_id is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    r.id,
+    r.shop_id,
+    r.name,
+    COALESCE(r.description, '') AS description,
+    r.points_required AS points_cost,
+    ''::text AS category,                        -- rewards has no category column
+    r.icon AS image_url,
+    COALESCE(r.is_available, false) AS is_available,
+    NULL::integer AS stock,                      -- not tracked; return NULL
+    r.type::text AS type,
+    r.value,
+    CASE 
+      WHEN r.expiry_days IS NOT NULL THEN NOW() + (r.expiry_days || ' days')::interval
+      ELSE NULL
+    END AS expiry_date,
+    ARRAY[]::text[] AS terms_and_conditions,     -- default empty array
+    r.created_at,
+    r.updated_at
+  FROM public.rewards r
+  WHERE r.shop_id = p_shop_id
+    AND (p_is_available IS NULL OR r.is_available = p_is_available)
+    AND (p_min_points_cost IS NULL OR r.points_required >= p_min_points_cost)
+    AND (p_max_points_cost IS NULL OR r.points_required <= p_max_points_cost)
+    -- p_category is accepted but rewards has no category column; noop here
+  ORDER BY r.points_required ASC, r.created_at DESC
+  OFFSET v_offset
+  LIMIT COALESCE(p_limit, 10);
+END;
+$$;
+
+-- Count function for pagination
+CREATE OR REPLACE FUNCTION public.get_available_rewards_count(
+  p_shop_id uuid,
+  p_category text DEFAULT NULL,
+  p_is_available boolean DEFAULT NULL,
+  p_min_points_cost integer DEFAULT NULL,
+  p_max_points_cost integer DEFAULT NULL
+)
+RETURNS bigint
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_count bigint;
+BEGIN
+  IF p_shop_id IS NULL THEN
+    RAISE EXCEPTION 'p_shop_id is required';
+  END IF;
+
+  SELECT COUNT(*)
+  INTO v_count
+  FROM public.rewards r
+  WHERE r.shop_id = p_shop_id
+    AND (p_is_available IS NULL OR r.is_available = p_is_available)
+    AND (p_min_points_cost IS NULL OR r.points_required >= p_min_points_cost)
+    AND (p_max_points_cost IS NULL OR r.points_required <= p_max_points_cost);
+    -- p_category unused (no matching column in rewards)
+
+  RETURN v_count;
+END;
+$$;
+
+
 -- =============================================================================
 -- QUEUES TABLE RLS POLICIES
 -- =============================================================================

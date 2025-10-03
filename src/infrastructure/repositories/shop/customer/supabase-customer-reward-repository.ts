@@ -21,8 +21,8 @@ import {
 } from "@/src/domain/repositories/shop/customer/customer-reward-repository";
 import { SupabaseCustomerRewardMapper } from "@/src/infrastructure/mappers/shop/customer/supabase-customer-reward-mapper";
 import {
-  AvailableRewardSchema,
   CustomerRewardSchema,
+  GetAvailableRewardsSchema,
   GetCustomerPointsSchema,
   RewardTransactionSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
@@ -32,8 +32,6 @@ type CustomerRewardSchemaRecord = Record<string, unknown> &
   CustomerRewardSchema;
 type RewardTransactionSchemaRecord = Record<string, unknown> &
   RewardTransactionSchema;
-type AvailableRewardSchemaRecord = Record<string, unknown> &
-  AvailableRewardSchema;
 
 /**
  * Supabase implementation of the customer reward repository
@@ -134,7 +132,6 @@ export class SupabaseCustomerRewardRepository
   async getAvailableRewards(
     params: PaginationParams & {
       shopId: string;
-      customerId?: string;
       filters?: {
         category?: string;
         isAvailable?: boolean;
@@ -154,7 +151,7 @@ export class SupabaseCustomerRewardRepository
     };
   }> {
     try {
-      const { shopId, customerId, page = 1, limit = 10, filters } = params;
+      const { shopId, page = 1, limit = 10, filters } = params;
 
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -167,89 +164,55 @@ export class SupabaseCustomerRewardRepository
 
       this.logger.info("Getting available rewards", {
         shopId,
-        customerId,
         page,
         limit,
         filters,
       });
+      // Call RPCs to bypass RLS safely and get proper pagination metadata
+      const rpcParamsForList = {
+        p_shop_id: shopId,
+        p_category: filters?.category ?? null,
+        p_is_available: filters?.isAvailable ?? null,
+        p_min_points_cost: filters?.minPointsCost ?? null,
+        p_max_points_cost: filters?.maxPointsCost ?? null,
+        p_page: page,
+        p_limit: limit,
+      } as const;
 
-      // Build query options for Supabase
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-        ],
-        sort: [
-          {
-            field: "points_cost",
-            direction: SortDirection.ASC,
-          },
-        ],
-      };
+      const rpcParamsForCount = {
+        p_shop_id: shopId,
+        p_category: filters?.category ?? null,
+        p_is_available: filters?.isAvailable ?? null,
+        p_min_points_cost: filters?.minPointsCost ?? null,
+        p_max_points_cost: filters?.maxPointsCost ?? null,
+      } as const;
 
-      // Add filters
-      if (filters) {
-        if (filters.category) {
-          queryOptions.filters?.push({
-            field: "category",
-            operator: FilterOperator.EQ,
-            value: filters.category,
-          });
-        }
+      // Fetch list
+      const rewards = await this.dataSource.callRpc<
+        GetAvailableRewardsSchema[]
+      >("get_available_rewards", rpcParamsForList);
 
-        if (filters.isAvailable !== undefined) {
-          queryOptions.filters?.push({
-            field: "is_available",
-            operator: FilterOperator.EQ,
-            value: filters.isAvailable,
-          });
-        }
+      // Fetch count
+      const totalItems = await this.dataSource.callRpc<number>(
+        "get_available_rewards_count",
+        rpcParamsForCount
+      );
 
-        if (filters.minPointsCost !== undefined) {
-          queryOptions.filters?.push({
-            field: "points_cost",
-            operator: FilterOperator.GTE,
-            value: filters.minPointsCost,
-          });
-        }
-
-        if (filters.maxPointsCost !== undefined) {
-          queryOptions.filters?.push({
-            field: "points_cost",
-            operator: FilterOperator.LTE,
-            value: filters.maxPointsCost,
-          });
-        }
-      }
-
-      // Add pagination to query options
-      queryOptions.pagination = {
-        page,
-        pageSize: limit,
-      };
-
-      const rewards =
-        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
-          "available_rewards",
-          queryOptions
-        );
-
-      const availableRewards = rewards.map(
-        (reward: AvailableRewardSchemaRecord) =>
+      const availableRewards = (rewards ?? []).map(
+        (reward: GetAvailableRewardsSchema) =>
           SupabaseCustomerRewardMapper.toAvailableRewardEntity(reward)
       );
+
+      const totalPages = Math.max(1, Math.ceil((totalItems || 0) / limit));
 
       return {
         data: availableRewards,
         pagination: {
           currentPage: page,
           perPage: limit,
-          totalItems: availableRewards.length, // This would need to be calculated properly with a count query
-          totalPages: Math.ceil(availableRewards.length / limit),
-          hasNext: page < Math.ceil(availableRewards.length / limit),
+          totalItems: totalItems || availableRewards.length,
+          totalPages,
+          hasNext: page < totalPages,
           hasPrev: page > 1,
         },
       };
@@ -264,7 +227,6 @@ export class SupabaseCustomerRewardRepository
         "SupabaseCustomerRewardRepository.getAvailableRewards",
         {
           shopId: params.shopId,
-          customerId: params.customerId,
           page: params.page,
           limit: params.limit,
           filters: params.filters,
@@ -731,34 +693,6 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      // If not found in customer rewards, try available rewards
-      const availableRewardQueryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "id",
-            operator: FilterOperator.EQ,
-            value: rewardId,
-          },
-        ],
-      };
-
-      const availableRewards =
-        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
-          "available_rewards",
-          availableRewardQueryOptions
-        );
-
-      if (availableRewards.length > 0) {
-        return SupabaseCustomerRewardMapper.toAvailableRewardEntity(
-          availableRewards[0]
-        );
-      }
-
       throw new ShopCustomerRewardError(
         ShopCustomerRewardErrorType.NOT_FOUND,
         "Reward not found",
@@ -844,7 +778,7 @@ export class SupabaseCustomerRewardRepository
       };
 
       const availableRewards =
-        await this.dataSource.getAdvanced<AvailableRewardSchemaRecord>(
+        await this.dataSource.getAdvanced<GetAvailableRewardsSchema>(
           "available_rewards",
           availableRewardQueryOptions
         );
@@ -882,13 +816,13 @@ export class SupabaseCustomerRewardRepository
         shop_id: shopId,
         customer_id: customerId,
         reward_id: rewardId,
-        reward_name: availableReward.reward_name,
-        reward_description: availableReward.reward_description,
+        reward_name: availableReward.name,
+        reward_description: availableReward.description,
         category: availableReward.category,
         points_cost: availableReward.points_cost,
         status: "pending",
         redeemed_at: new Date().toISOString(),
-        expires_at: availableReward.expires_at,
+        expires_at: "",
       };
 
       const customerReward =
@@ -906,7 +840,7 @@ export class SupabaseCustomerRewardRepository
         points_change: -availableReward.points_cost,
         balance_after:
           customerPoints.currentPoints - availableReward.points_cost,
-        description: `Redeemed reward: ${availableReward.reward_name}`,
+        description: `Redeemed reward: ${availableReward.name}`,
         created_at: new Date().toISOString(),
       };
 

@@ -34,7 +34,7 @@ export function CustomerQueueStatusView({
   } = useCustomerQueueStatusPresenter(shopId, initialViewModel);
 
   // Handle loading state
-  if (loading) {
+  if (loading && !viewModel) {
     return (
       <div className="flex flex-col gap-8">
         <div>

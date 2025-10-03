@@ -30,13 +30,7 @@ export class GetAvailableRewardsUseCase
     pagination: PaginationDTO;
   }> {
     try {
-      const {
-        shopId,
-        customerId,
-        currentPage = 1,
-        perPage = 10,
-        filters,
-      } = input;
+      const { shopId, currentPage = 1, perPage = 10, filters } = input;
 
       if (!shopId) {
         throw new ShopCustomerRewardError(
@@ -49,7 +43,6 @@ export class GetAvailableRewardsUseCase
 
       const result = await this.customerRewardRepository.getAvailableRewards({
         shopId,
-        customerId,
         page: currentPage,
         limit: perPage,
         filters: filters

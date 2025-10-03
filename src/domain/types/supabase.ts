@@ -4276,6 +4276,44 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_available_rewards: {
+        Args: {
+          p_shop_id: string
+          p_category?: string
+          p_is_available?: boolean
+          p_min_points_cost?: number
+          p_max_points_cost?: number
+          p_page?: number
+          p_limit?: number
+        }
+        Returns: {
+          id: string
+          shop_id: string
+          name: string
+          description: string
+          points_cost: number
+          category: string
+          image_url: string
+          is_available: boolean
+          stock: number
+          type: string
+          value: number
+          expiry_date: string
+          terms_and_conditions: string[]
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_available_rewards_count: {
+        Args: {
+          p_shop_id: string
+          p_category?: string
+          p_is_available?: boolean
+          p_min_points_cost?: number
+          p_max_points_cost?: number
+        }
+        Returns: number
+      }
       get_available_services: {
         Args: { p_shop_id: string }
         Returns: {

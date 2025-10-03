@@ -7,6 +7,7 @@ import type {
   RewardTransaction,
 } from "@/src/presentation/presenters/shop/frontend/CustomerRewardsPresenter";
 import { useCustomerRewardsPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerRewardsPresenter";
+import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 
@@ -25,6 +26,8 @@ export function CustomerRewardsView({
   shopId,
   initialViewModel,
 }: CustomerRewardsViewProps) {
+  const { getCustomer } = useCustomerStore();
+  const customer = getCustomer(shopId);
   const {
     viewModel,
     loading,
@@ -45,7 +48,7 @@ export function CustomerRewardsView({
   };
 
   // Loading state
-  if (loading) {
+  if (loading && !viewModel) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -152,7 +155,18 @@ export function CustomerRewardsView({
       </div>
 
       {/* Points Summary */}
-      <div className="shop-frontend-card">
+      <div className="shop-frontend-card relative">
+        {!customer ? (
+          <div className="absolute inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+            <div className="text-center py-8 z-10">
+              <div className="text-4xl mb-4">❌</div>
+              <p className="text-gray-600 dark:text-gray-400">
+                ไม่พบข้อมูลสมาชิก
+              </p>
+            </div>
+          </div>
+        ) : null}
         <div className="p-6 border-b shop-frontend-card-border">
           <h2 className="text-xl font-semibold shop-frontend-text-primary">
             สรุปแต้ม
@@ -189,7 +203,18 @@ export function CustomerRewardsView({
       </div>
 
       {/* Tier Benefits */}
-      <div className="shop-frontend-card p-6 mb-6">
+      <div className="shop-frontend-card p-6 mb-6 relative">
+        {!customer ? (
+          <div className="absolute inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+            <div className="text-center py-8 z-10">
+              <div className="text-4xl mb-4">❌</div>
+              <p className="text-gray-600 dark:text-gray-400">
+                ไม่พบข้อมูลสมาชิก
+              </p>
+            </div>
+          </div>
+        ) : null}
         <h3 className="text-lg font-medium shop-frontend-text-primary mb-4">
           สิทธิประโยชน์สมาชิก {viewModel.customerPoints.tier}
         </h3>
@@ -230,7 +255,7 @@ export function CustomerRewardsView({
 
         {/* Available Rewards Tab */}
         {activeTab === TabType.REWARDS && (
-          <div className="p-6">
+          <div className="p-6 relative min-h-48">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {viewModel.availableRewards.data.map(
                 (reward: AvailableReward) => (
@@ -303,7 +328,18 @@ export function CustomerRewardsView({
 
         {/* Redeemed Rewards Tab */}
         {activeTab === TabType.REDEEMED && (
-          <div className="p-6">
+          <div className="p-6 relative min-h-48">
+            {!customer ? (
+              <div className="absolute inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+                <div className="text-center py-8 z-10">
+                  <div className="text-4xl mb-4">❌</div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    ไม่พบข้อมูลสมาชิก
+                  </p>
+                </div>
+              </div>
+            ) : null}
             {viewModel.redeemedRewards.data.length === 0 ? (
               <div className="text-center py-8">
                 <div className="shop-frontend-text-muted text-6xl mb-4">📦</div>
@@ -375,7 +411,18 @@ export function CustomerRewardsView({
 
         {/* History Tab */}
         {activeTab === TabType.HISTORY && (
-          <div className="p-6">
+          <div className="p-6 relative min-h-48">
+            {!customer ? (
+              <div className="absolute inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+                <div className="text-center py-8 z-10">
+                  <div className="text-4xl mb-4">❌</div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    ไม่พบข้อมูลสมาชิก
+                  </p>
+                </div>
+              </div>
+            ) : null}
             <div className="space-y-4">
               {viewModel.rewardTransactions.data.map(
                 (transaction: RewardTransaction) => (

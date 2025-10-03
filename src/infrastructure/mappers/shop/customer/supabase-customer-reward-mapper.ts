@@ -15,7 +15,7 @@ import type {
   RewardTransactionEntity,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import type {
-  AvailableRewardSchema,
+  GetAvailableRewardsSchema,
   CustomerRewardSchema,
   CustomerRewardStatsSchema,
   GetCustomerPointsSchema,
@@ -102,10 +102,10 @@ export class SupabaseCustomerRewardMapper {
    * Convert Supabase available reward data to domain entity
    */
   static toAvailableRewardEntity(
-    data: AvailableRewardSchema
+    data: GetAvailableRewardsSchema
   ): AvailableRewardEntity {
     return {
-      id: String(data.id || ""),
+      id: data.id || "",
       name: data.name || "",
       description: data.description || "",
       pointsCost: Number(data.points_cost || 0),
@@ -113,7 +113,7 @@ export class SupabaseCustomerRewardMapper {
       imageUrl: data.image_url || undefined,
       isAvailable: Boolean(data.is_available),
       stock: data.stock !== undefined ? Number(data.stock) : undefined,
-      type: this.mapRewardTypeToEnum(data.type) || RewardType.DISCOUNT,
+      type: data.type as RewardType,
       value: data.value !== undefined ? Number(data.value) : undefined,
       expiryDate: data.expiry_date || undefined,
       termsAndConditions: data.terms_and_conditions,

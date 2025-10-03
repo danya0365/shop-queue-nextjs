@@ -11,6 +11,9 @@ import { Database } from "@/src/domain/types/supabase";
 export type GetCustomerPointsSchema =
   Database["public"]["Functions"]["get_customer_points"]["Returns"][0];
 
+export type GetAvailableRewardsSchema =
+  Database["public"]["Functions"]["get_available_rewards"]["Returns"][0];
+
 /**
  * Customer reward database schema (redeemed rewards)
  */
@@ -47,27 +50,6 @@ export interface RewardTransactionSchema {
   description: string;
   date: string;
   related_order_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Available reward database schema
- */
-export interface AvailableRewardSchema {
-  id: string;
-  shop_id: string;
-  name: string;
-  description: string;
-  points_cost: number;
-  category: string;
-  image_url: string | null;
-  is_available: boolean;
-  stock: number | null;
-  type: "discount" | "free_item" | "cashback" | "points";
-  value: number;
-  expiry_date: string | null;
-  terms_and_conditions: string[];
   created_at: string;
   updated_at: string;
 }
@@ -155,11 +137,6 @@ export interface RewardTransactionsFilterSchema {
  * Database query result schemas
  */
 
-export interface AvailableRewardsResultSchema {
-  data: AvailableRewardSchema[];
-  pagination: PaginationMetaSchema;
-}
-
 export interface RedeemedRewardsResultSchema {
   data: CustomerRewardSchema[];
   pagination: PaginationMetaSchema;
@@ -179,7 +156,7 @@ export interface CustomerInfoResultSchema {
 }
 
 export interface RewardDetailsResultSchema {
-  data: CustomerRewardSchema | AvailableRewardSchema;
+  data: CustomerRewardSchema;
 }
 
 export interface RedeemRewardResultSchema {
