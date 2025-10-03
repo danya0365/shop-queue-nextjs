@@ -143,7 +143,7 @@ export function CustomerHistoryView({
   };
 
   // Loading state
-  if (loading) {
+  if (loading && !viewModel) {
     return (
       <div className="flex flex-col gap-8">
         <div>
@@ -332,12 +332,12 @@ export function CustomerHistoryView({
                           <p className="text-sm shop-frontend-text-secondary">
                             {new Date(queue.queueDateTime).toLocaleString(
                               "th-TH",
-                              { 
+                              {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
                                 hour: "2-digit",
-                                minute: "2-digit"
+                                minute: "2-digit",
                               }
                             )}
                           </p>
@@ -434,7 +434,8 @@ export function CustomerHistoryView({
                       )}
                     </p>
                     <p className="shop-frontend-text-secondary">
-                      เวลา: {new Date(selectedQueue.queueDateTime).toLocaleTimeString(
+                      เวลา:{" "}
+                      {new Date(selectedQueue.queueDateTime).toLocaleTimeString(
                         "th-TH",
                         { hour: "2-digit", minute: "2-digit" }
                       )}

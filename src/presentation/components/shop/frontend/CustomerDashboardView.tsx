@@ -75,35 +75,42 @@ export function CustomerDashboardView({
   } = viewModel;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 px-3 sm:px-4 lg:px-0">
       {/* Announcement Banner */}
       {announcement && (
-        <div className="shop-frontend-announcement p-4 rounded-xl">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl">📢</span>
-            <p className="font-medium">{announcement}</p>
+        <div className="shop-frontend-announcement p-3 sm:p-4 rounded-lg sm:rounded-xl">
+          <div className="flex items-start sm:items-center space-x-2 sm:space-x-3">
+            <span className="text-xl sm:text-2xl mt-0.5 sm:mt-0">📢</span>
+            <p className="font-medium text-sm sm:text-base break-words">{announcement}</p>
           </div>
         </div>
       )}
 
       {/* Shop Header */}
       <div className="shop-frontend-card overflow-hidden">
-        <div className="shop-frontend-shop-header p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{shopInfo.name}</h1>
-              <p className="shop-frontend-shop-header-text-light mb-4">
+        <div className="shop-frontend-shop-header p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 truncate">{shopInfo.name}</h1>
+              <p className="shop-frontend-shop-header-text-light mb-3 sm:mb-4 text-sm sm:text-base">
                 {shopInfo.description}
               </p>
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-1">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex items-center space-x-1 whitespace-nowrap">
                   <span>⭐</span>
                   <span>{shopInfo.rating}/5</span>
-                  <span>({shopInfo.totalReviews} รีวิว)</span>
+                  <span className="hidden sm:inline">({shopInfo.totalReviews} รีวิว)</span>
+                  <span className="sm:hidden">({shopInfo.totalReviews})</span>
                 </div>
-                <div className="flex items-center space-x-1">
+                <div className="hidden sm:flex items-center space-x-1">
+                  <span>•</span>
+                </div>
+                <div className="flex items-center space-x-1 whitespace-nowrap">
                   <span>🕒</span>
-                  <span>{shopInfo.openingHours}</span>
+                  <span className="truncate max-w-[120px] sm:max-w-none">{shopInfo.openingHours}</span>
+                </div>
+                <div className="hidden sm:flex items-center space-x-1">
+                  <span>•</span>
                 </div>
                 <div
                   className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
@@ -117,10 +124,10 @@ export function CustomerDashboardView({
                 </div>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right sm:text-left">
               <button
                 onClick={() => setShowQRCode(!showQRCode)}
-                className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="shop-frontend-button-primary px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto text-sm sm:text-base"
               >
                 📱 QR Code
               </button>
@@ -129,24 +136,26 @@ export function CustomerDashboardView({
         </div>
 
         {showQRCode && (
-          <div className="p-6 shop-frontend-qr-section">
+          <div className="p-4 sm:p-6 shop-frontend-qr-section">
             <div className="text-center">
-              <div className="w-32 h-32 shop-frontend-qr-code rounded-lg mx-auto mb-4 flex items-center justify-center">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 shop-frontend-qr-code rounded-lg mx-auto mb-3 sm:mb-4 flex items-center justify-center">
                 <Canvas
                   text={`${window.location.origin}/shop/${shopId}/queue`}
                   options={{
                     errorCorrectionLevel: "M",
                     margin: 2,
-                    scale: 3,
-                    width: 120,
+                    scale: typeof window !== 'undefined' && window.innerWidth < 640 ? 2.5 : 3,
+                    width: typeof window !== 'undefined' && window.innerWidth < 640 ? 100 : 120,
                   }}
                   logo={{
                     src: "/qr-logo.png",
-                    options: { width: 30 },
+                    options: { 
+                      width: typeof window !== 'undefined' && window.innerWidth < 640 ? 24 : 30
+                    },
                   }}
                 />
               </div>
-              <p className="text-sm shop-frontend-text-secondary">
+              <p className="text-xs sm:text-sm shop-frontend-text-secondary">
                 สแกน QR Code เพื่อเข้าคิวด่วน
               </p>
             </div>
@@ -156,46 +165,46 @@ export function CustomerDashboardView({
 
       {/* Queue Status */}
       <div className="shop-frontend-card">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold shop-frontend-text-primary mb-6">
+        <div className="p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold shop-frontend-text-primary mb-4 sm:mb-6">
             สถานะคิวปัจจุบัน
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl font-bold">
                   {queueStatus.currentNumber || "-"}
                 </span>
               </div>
-              <p className="text-sm shop-frontend-text-secondary">
+              <p className="text-xs sm:text-sm shop-frontend-text-secondary">
                 คิวปัจจุบัน
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 shop-frontend-queue-waiting rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-waiting rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl font-bold">
                   {queueStatus.totalConfirmed}
                 </span>
               </div>
-              <p className="text-sm shop-frontend-text-secondary">คิวรอ</p>
+              <p className="text-xs sm:text-sm shop-frontend-text-secondary">คิวรอ</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 shop-frontend-queue-time rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-time rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl font-bold">
                   {Math.floor(queueStatus.estimatedWaitTime)}
                 </span>
               </div>
-              <p className="text-sm shop-frontend-text-secondary">
+              <p className="text-xs sm:text-sm shop-frontend-text-secondary">
                 เวลารอ (นาที)
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 shop-frontend-queue-average rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-bold">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-average rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl font-bold">
                   {Math.floor(queueStatus.averageServiceTime)}
                 </span>
               </div>
