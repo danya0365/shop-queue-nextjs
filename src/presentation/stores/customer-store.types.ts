@@ -14,10 +14,11 @@ export type StoreCustomer = {
 /**
  * Customer store state interface
  * Separates state properties from actions for better organization
+ * Now supports multiple customers separated by shop ID
  */
 export interface CustomerState {
-  // State properties
-  customer: StoreCustomer | null;
+  // State properties - customers mapped by shop ID
+  customers: Record<string, StoreCustomer>;
   loading: boolean;
   error: string | null;
 }
@@ -25,6 +26,7 @@ export interface CustomerState {
 /**
  * Customer store actions interface
  * Defines all the actions that can be performed on the customer state
+ * Updated to support multiple customers by shop ID
  */
 export interface CustomerActions {
   // UI state actions
@@ -32,9 +34,12 @@ export interface CustomerActions {
   setError: (error: string | null) => void;
   
   // Customer actions
-  setCustomer: (customer: StoreCustomer | null) => void;
-  clearCustomer: () => void;
-  loadCustomerFromStorage: () => Promise<void>;
+  setCustomer: (shopId: string, customer: StoreCustomer | null) => void;
+  getCustomer: (shopId: string) => StoreCustomer | null;
+  clearCustomer: (shopId: string) => void;
+  clearAllCustomers: () => void;
+  loadCustomerFromStorage: (shopId: string) => Promise<void>;
+  hasCustomer: (shopId: string) => boolean;
 }
 
 /**

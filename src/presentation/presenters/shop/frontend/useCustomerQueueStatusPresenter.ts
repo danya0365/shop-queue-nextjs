@@ -29,8 +29,8 @@ export function useCustomerQueueStatusPresenter(
   const { activeProfile } = useProfileStore();
 
   // Customer store for persisting customer ID
-  const { customer: storedCustomer, setCustomer: setStoredCustomer } =
-    useCustomerStore();
+  const { getCustomer, setCustomer: setStoredCustomer } = useCustomerStore();
+  const storedCustomer = getCustomer(shopId);
 
   // State for search form
   const [queueNumber, setQueueNumber] = useState("");
@@ -54,7 +54,7 @@ export function useCustomerQueueStatusPresenter(
 
           if (profileCustomer) {
             // Store customer data for future use
-            setStoredCustomer({
+            setStoredCustomer(shopId, {
               id: profileCustomer.id,
               name: profileCustomer.name,
               phone: profileCustomer.phone,
@@ -84,7 +84,7 @@ export function useCustomerQueueStatusPresenter(
           }
         } catch (error) {
           console.error("Error loading customer data:", error);
-          setStoredCustomer(null);
+          setStoredCustomer(shopId, null);
         }
       }
     };

@@ -13,7 +13,8 @@ export function CustomerQueueStatusView({
   shopId,
   initialViewModel,
 }: QueueStatusViewProps) {
-  const { customer } = useCustomerStore();
+  const { getCustomer } = useCustomerStore();
+  const customer = getCustomer(shopId);
   const {
     viewModel,
     loading,

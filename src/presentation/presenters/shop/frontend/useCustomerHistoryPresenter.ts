@@ -41,8 +41,8 @@ export function useCustomerHistoryPresenter(
   const { activeProfile } = useProfileStore();
 
   // Customer store for persisting customer ID
-  const { customer: storedCustomer, setCustomer: setStoredCustomer } =
-    useCustomerStore();
+  const { getCustomer, setCustomer: setStoredCustomer } = useCustomerStore();
+  const storedCustomer = getCustomer(shopId);
 
   // State for pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +80,7 @@ export function useCustomerHistoryPresenter(
 
           if (profileCustomer) {
             // Store customer data for future use
-            setStoredCustomer({
+            setStoredCustomer(shopId, {
               id: profileCustomer.id,
               name: profileCustomer.name,
               phone: profileCustomer.phone,
@@ -110,7 +110,7 @@ export function useCustomerHistoryPresenter(
           }
         } catch (error) {
           console.error("Error loading customer data:", error);
-          setStoredCustomer(null);
+          setStoredCustomer(shopId, null);
         }
       }
     };

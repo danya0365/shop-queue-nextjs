@@ -4,6 +4,7 @@ import { CustomerActions, CustomerState, CustomerStore } from "./customer-store.
 /**
  * Factory function to create customer store actions
  * This follows the factory pattern for better testability and dependency injection
+ * Updated to support multiple customers by shop ID
  */
 export const createCustomerActions = (
   logger: Logger,
@@ -20,15 +21,41 @@ export const createCustomerActions = (
   };
 
   // Customer actions
-  const setCustomer = (customer: CustomerStore['customer']) => {
-    set({ customer, error: null });
+  const setCustomer = (shopId: string, customer: CustomerStore['customers'][string] | null) => {
+    set((state) => {
+      const newCustomers = { ...state.customers };
+      if (customer) {
+        newCustomers[shopId] = customer;
+      } else {
+        delete newCustomers[shopId];
+      }
+      return { customers: newCustomers, error: null };
+    });
   };
 
-  const clearCustomer = () => {
-    set({ customer: null, error: null });
+  const getCustomer = (shopId: string) => {
+    const state = get();
+    return state.customers[shopId] || null;
   };
 
-  const loadCustomerFromStorage = async () => {
+  const clearCustomer = (shopId: string) => {
+    set((state) => {
+      const newCustomers = { ...state.customers };
+      delete newCustomers[shopId];
+      return { customers: newCustomers, error: null };
+    });
+  };
+
+  const clearAllCustomers = () => {
+    set({ customers: {}, error: null });
+  };
+
+  const hasCustomer = (shopId: string) => {
+    const state = get();
+    return shopId in state.customers;
+  };
+
+  const loadCustomerFromStorage = async (shopId: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -36,9 +63,12 @@ export const createCustomerActions = (
       // The customer data will be automatically loaded from storage
       // by the persist middleware, so we just need to ensure it's available
       const currentState = get();
+      const customer = currentState.customers[shopId];
+      
       logger.info('Customer loaded from storage', { 
-        customerId: currentState.customer?.id,
-        shopId: currentState.customer?.shopId 
+        customerId: customer?.id,
+        shopId: shopId,
+        hasCustomer: !!customer
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load customer from storage';
@@ -56,7 +86,10 @@ export const createCustomerActions = (
     
     // Customer actions
     setCustomer,
+    getCustomer,
     clearCustomer,
+    clearAllCustomers,
     loadCustomerFromStorage,
+    hasCustomer,
   };
 };

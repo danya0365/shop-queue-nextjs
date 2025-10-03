@@ -31,8 +31,8 @@ export const useCustomerStore = create<CustomerStore>()(
 
       // Return the combined state and actions
       return {
-        // Initial state
-        customer: null,
+        // Initial state - customers mapped by shop ID
+        customers: {},
         loading: false,
         error: null,
 
@@ -43,7 +43,7 @@ export const useCustomerStore = create<CustomerStore>()(
     {
       name: "customer-storage",
       storage: createJSONStorage(() => localforage),
-      partialize: (state) => ({ customer: state.customer }), // Only persist customer data
+      partialize: (state) => ({ customers: state.customers }), // Only persist customers data
     }
   )
 );

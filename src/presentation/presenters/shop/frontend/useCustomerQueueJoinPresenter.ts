@@ -32,8 +32,8 @@ export function useCustomerQueueJoinPresenter(
   const { activeProfile } = useProfileStore();
 
   // Customer store for persisting customer ID
-  const { customer: storedCustomer, setCustomer: setStoredCustomer } =
-    useCustomerStore();
+  const { getCustomer, setCustomer: setStoredCustomer } = useCustomerStore();
+  const storedCustomer = getCustomer(shopId);
 
   // State for form data
   const [customerName, setCustomerName] = useState("");
@@ -76,7 +76,7 @@ export function useCustomerQueueJoinPresenter(
             setCustomerName(profileCustomer.name);
             setCustomerPhone(profileCustomer.phone);
             // Store customer data for future use
-            setStoredCustomer({
+            setStoredCustomer(shopId, {
               id: profileCustomer.id,
               name: profileCustomer.name,
               phone: profileCustomer.phone,
@@ -119,7 +119,7 @@ export function useCustomerQueueJoinPresenter(
           }
         } catch (error) {
           console.error("Error loading customer data:", error);
-          setStoredCustomer(null);
+          setStoredCustomer(shopId, null);
         }
       }
     };
@@ -323,7 +323,7 @@ export function useCustomerQueueJoinPresenter(
           );
 
           // Store the customer ID in Zustand
-          setStoredCustomer({
+          setStoredCustomer(shopId, {
             id: registerResult.customerId,
             name: formData.customerName.trim(),
             phone: formData.customerPhone.trim(),
@@ -366,7 +366,7 @@ export function useCustomerQueueJoinPresenter(
             );
 
             // Update stored customer with new information
-            setStoredCustomer({
+            setStoredCustomer(shopId, {
               id: updateResult.customerId,
               name: formData.customerName.trim(),
               phone: formData.customerPhone.trim(),
