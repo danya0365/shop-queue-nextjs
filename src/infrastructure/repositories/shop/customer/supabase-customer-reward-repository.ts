@@ -627,23 +627,22 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      const entity = SupabaseCustomerRewardMapper.fromRewardRowToAvailableRewardEntity({
-        id: row.id ?? "",
-        name: row.name ?? "",
-        description: row.description ?? null,
-        points_required: row.points_required ?? 0,
-        shop_id: row.shop_id ?? "",
-        type:
-          (row.type as import("@/src/domain/types/supabase").Database["public"]["Enums"]["reward_type"]) ??
-          ("discount" as any),
-        value: row.value ?? 0,
-        created_at: row.created_at ?? null,
-        updated_at: row.updated_at ?? null,
-        expiry_days: row.expiry_days ?? null,
-        icon: row.icon ?? null,
-        is_available: row.is_available ?? null,
-        usage_limit: row.usage_limit ?? null,
-      });
+      const entity =
+        SupabaseCustomerRewardMapper.fromRewardRowToAvailableRewardEntity({
+          id: row.id ?? "",
+          name: row.name ?? "",
+          description: row.description ?? null,
+          points_required: row.points_required ?? 0,
+          shop_id: row.shop_id ?? "",
+          type: row.type as RewardType,
+          value: row.value ?? 0,
+          created_at: row.created_at ?? null,
+          updated_at: row.updated_at ?? null,
+          expiry_days: row.expiry_days ?? null,
+          icon: row.icon ?? null,
+          is_available: row.is_available ?? null,
+          usage_limit: row.usage_limit ?? null,
+        });
 
       return entity;
     } catch (error) {
