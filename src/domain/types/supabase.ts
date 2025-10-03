@@ -4940,6 +4940,50 @@ export type Database = {
           no_show: number
         }[]
       }
+      get_redeemed_rewards: {
+        Args: {
+          p_shop_id: string
+          p_customer_id: string
+          p_start_date?: string
+          p_end_date?: string
+          p_page?: number
+          p_limit?: number
+        }
+        Returns: {
+          cancelled_at: string | null
+          cancelled_by_employee_id: string | null
+          cancelled_reason: string | null
+          created_at: string | null
+          customer_id: string
+          customer_point_transaction_id: string | null
+          expires_at: string | null
+          id: string
+          issued_at: string | null
+          metadata: Json | null
+          notes: string | null
+          points_used: number
+          redemption_code: string
+          redemption_type: Database["public"]["Enums"]["redemption_type"] | null
+          reward_id: string
+          reward_value: number
+          shop_id: string
+          source_description: string | null
+          status: string | null
+          updated_at: string | null
+          used_at: string | null
+          used_by_employee_id: string | null
+          used_queue_id: string | null
+        }[]
+      }
+      get_redeemed_rewards_count: {
+        Args: {
+          p_shop_id: string
+          p_customer_id: string
+          p_start_date?: string
+          p_end_date?: string
+        }
+        Returns: number
+      }
       get_reward_type_stats: {
         Args: { p_shop_id?: string }
         Returns: {

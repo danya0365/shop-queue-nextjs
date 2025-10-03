@@ -25,6 +25,7 @@ import {
   GetAvailableRewardsSchema,
   GetCustomerPointsSchema,
   RewardTransactionSchema,
+  RewardUsageSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
@@ -285,7 +286,7 @@ export class SupabaseCustomerRewardRepository
         );
       }
 
-      this.logger.info("Getting redeemed rewards", {
+      this.logger.info("Getting redeemed rewards via RPC (reward_usages)", {
         shopId,
         customerId,
         page,
@@ -293,115 +294,83 @@ export class SupabaseCustomerRewardRepository
         filters,
       });
 
-      // Build query options for Supabase
-      const queryOptions: QueryOptions = {
-        filters: [
-          {
-            field: "shop_id",
-            operator: FilterOperator.EQ,
-            value: shopId,
-          },
-          {
-            field: "customer_id",
-            operator: FilterOperator.EQ,
-            value: customerId,
-          },
-        ],
-        sort: [
-          {
-            field: "redeemed_at",
-            direction: SortDirection.DESC,
-          },
-        ],
-      };
-
-      // Add filters
-      if (filters) {
-        if (filters.category) {
-          queryOptions.filters?.push({
-            field: "category",
-            operator: FilterOperator.EQ,
-            value: filters.category,
-          });
-        }
-
-        if (filters.type) {
-          queryOptions.filters?.push({
-            field: "type",
-            operator: FilterOperator.EQ,
-            value: filters.type,
-          });
-        }
-
-        if (filters.dateRange && filters.dateRange !== "all") {
-          const now = new Date();
-          let startDate: Date;
-          let endDate: Date;
-
-          switch (filters.dateRange) {
-            case "month":
-              startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-              endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-              break;
-            case "quarter":
+      // Compute date range params for RPC (only supported filter we use here)
+      let p_start_date: string | null = null;
+      let p_end_date: string | null = null;
+      if (filters && filters.dateRange && filters.dateRange !== "all") {
+        const now = new Date();
+        let startDate: Date;
+        let endDate: Date;
+        switch (filters.dateRange) {
+          case "month":
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            break;
+          case "quarter":
+            {
               const quarter = Math.floor(now.getMonth() / 3);
               startDate = new Date(now.getFullYear(), quarter * 3, 1);
               endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
-              break;
-            case "year":
-              startDate = new Date(now.getFullYear(), 0, 1);
-              endDate = new Date(now.getFullYear(), 11, 31);
-              break;
-            case "custom":
-              startDate = filters.startDate
-                ? new Date(filters.startDate)
-                : new Date();
-              endDate = filters.endDate
-                ? new Date(filters.endDate)
-                : new Date();
-              break;
-            default:
-              startDate = new Date();
-              endDate = new Date();
-          }
-
-          queryOptions.filters?.push({
-            field: "redeemed_at",
-            operator: FilterOperator.GTE,
-            value: startDate.toISOString(),
-          });
-          queryOptions.filters?.push({
-            field: "redeemed_at",
-            operator: FilterOperator.LTE,
-            value: endDate.toISOString(),
-          });
+            }
+            break;
+          case "year":
+            startDate = new Date(now.getFullYear(), 0, 1);
+            endDate = new Date(now.getFullYear(), 11, 31);
+            break;
+          case "custom":
+            startDate = filters.startDate ? new Date(filters.startDate) : now;
+            endDate = filters.endDate ? new Date(filters.endDate) : now;
+            break;
+          default:
+            startDate = now;
+            endDate = now;
         }
+        p_start_date = startDate.toISOString();
+        p_end_date = endDate.toISOString();
       }
 
-      // Add pagination to query options
-      queryOptions.pagination = {
-        page,
-        pageSize: limit,
-      };
+      // RPC params strictly limited to reward_usages columns and supported filters
+      const listParams = {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+        p_start_date,
+        p_end_date,
+        p_page: page,
+        p_limit: limit,
+      } as const;
 
-      const rewards =
-        await this.dataSource.getAdvanced<CustomerRewardSchemaRecord>(
-          "customer_rewards",
-          queryOptions
-        );
+      const countParams = {
+        p_shop_id: shopId,
+        p_customer_id: customerId,
+        p_start_date,
+        p_end_date,
+      } as const;
 
-      const totalRedeemed = rewards.map((reward: CustomerRewardSchemaRecord) =>
-        SupabaseCustomerRewardMapper.toCustomerRewardEntity(reward)
+      const rows = await this.dataSource.callRpc<RewardUsageSchema[]>(
+        "get_redeemed_rewards",
+        listParams
       );
 
+      const totalItems = await this.dataSource.callRpc<number>(
+        "get_redeemed_rewards_count",
+        countParams
+      );
+
+      const data = (rows ?? []).map((r) =>
+        SupabaseCustomerRewardMapper.fromRewardUsageToCustomerRewardEntity(r)
+      );
+
+      const total = totalItems || data.length;
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+
       return {
-        data: totalRedeemed,
+        data,
         pagination: {
           currentPage: page,
           perPage: limit,
-          totalItems: totalRedeemed.length, // This would need to be calculated properly with a count query
-          totalPages: Math.ceil(totalRedeemed.length / limit),
-          hasNext: page < Math.ceil(totalRedeemed.length / limit),
+          totalItems: total,
+          totalPages,
+          hasNext: page < totalPages,
           hasPrev: page > 1,
         },
       };

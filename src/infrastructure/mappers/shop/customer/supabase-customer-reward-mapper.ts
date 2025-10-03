@@ -15,11 +15,12 @@ import type {
   RewardTransactionEntity,
 } from "@/src/domain/entities/shop/customer/customer-reward.entity";
 import type {
-  GetAvailableRewardsSchema,
   CustomerRewardSchema,
   CustomerRewardStatsSchema,
+  GetAvailableRewardsSchema,
   GetCustomerPointsSchema,
   RewardTransactionSchema,
+  RewardUsageSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer-reward.schema";
 
 /**
@@ -46,6 +47,37 @@ export class SupabaseCustomerRewardMapper {
       nextTierPoints: 0,
       tierBenefits: data.tier_benefits || [],
       lastUpdated: data.updated_at || new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Convert reward_usages row to domain entity (best-effort mapping from available columns only)
+   */
+  static fromRewardUsageToCustomerRewardEntity(
+    data: RewardUsageSchema
+  ): CustomerRewardEntity {
+    // Only map columns that exist on reward_usages
+    const nowIso = new Date().toISOString();
+    return {
+      id: String(data.id || ""),
+      name: "", // not available on reward_usages
+      description: data.source_description ?? "",
+      // Reward type is not available on reward_usages; choose a safe default
+      // to satisfy the non-optional domain field while keeping mapping minimal
+      type: RewardType.DISCOUNT,
+      value: Number(data.reward_value ?? 0),
+      pointsCost: Number(data.points_used ?? 0),
+      category: "", // not available on reward_usages
+      imageUrl: undefined, // not available on reward_usages
+      expiryDate: data.expires_at ?? undefined,
+      termsAndConditions: [], // not available on reward_usages
+      isAvailable: false, // usage record implies already issued/used
+      isRedeemed: (data.status ?? "").toLowerCase() === "used",
+      redeemedAt: data.used_at ?? undefined,
+      shopId: data.shop_id,
+      customerId: data.customer_id,
+      createdAt: data.created_at ?? nowIso,
+      updatedAt: data.updated_at ?? nowIso,
     };
   }
 
@@ -307,29 +339,6 @@ export class SupabaseCustomerRewardMapper {
       last_redemption_date: entity.lastRedemptionDate,
       last_earn_date: entity.lastEarnDate,
     };
-  }
-
-  /**
-   * Map membership tier string to enum
-   */
-  private static mapTierToEnum(
-    tier: string | undefined
-  ): MembershipTier | undefined {
-    if (!tier) return undefined;
-
-    const tierLower = tier.toLowerCase();
-    switch (tierLower) {
-      case "bronze":
-        return MembershipTier.BRONZE;
-      case "silver":
-        return MembershipTier.SILVER;
-      case "gold":
-        return MembershipTier.GOLD;
-      case "platinum":
-        return MembershipTier.PLATINUM;
-      default:
-        return MembershipTier.BRONZE;
-    }
   }
 
   /**

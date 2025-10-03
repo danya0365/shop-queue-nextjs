@@ -162,3 +162,9 @@ export interface RewardDetailsResultSchema {
 export interface RedeemRewardResultSchema {
   data: CustomerRewardSchema;
 }
+
+/**
+ * Reward usage database schema (raw row from reward_usages table)
+ * Used for RPC that returns redeemed rewards directly from reward_usages
+ */
+export type RewardUsageSchema = Database["public"]["Tables"]["reward_usages"]["Row"];
