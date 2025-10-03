@@ -1194,6 +1194,7 @@ SET search_path = public
 AS $$
 DECLARE
   v_customer_id UUID;
+  v_profile_id UUID;
   v_queue_id UUID;
   v_queue_number TEXT;
   v_service_item JSONB;
@@ -1224,12 +1225,19 @@ BEGIN
   -- Create or find customer
   IF p_customer_id IS NOT NULL THEN
     -- Use provided customer_id and validate it exists
-    SELECT id INTO v_customer_id
+    SELECT id, profile_id INTO v_customer_id, v_profile_id
     FROM public.customers
     WHERE id = p_customer_id AND shop_id = p_shop_id AND is_active = true;
     
     IF v_customer_id IS NULL THEN
       RAISE EXCEPTION 'customer_not_found_or_inactive: %', p_customer_id;
+    END IF;
+    
+    -- If priority is not normal, verify profile ID matches active profile
+    IF p_priority != 'normal' THEN
+      IF v_profile_id IS NULL OR v_profile_id != public.get_active_profile_id() THEN
+        p_priority := 'normal'; -- Force normal priority if profile doesn't match
+      END IF;
     END IF;
   ELSE
     -- Find existing customer by name/phone or create new one
