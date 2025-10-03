@@ -223,26 +223,26 @@ export function CustomerHistoryView({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold shop-frontend-text-primary mb-2">
+      <div className="px-2 sm:px-0">
+        <h1 className="text-2xl sm:text-3xl font-bold shop-frontend-text-primary mb-1 sm:mb-2">
           ประวัติการใช้บริการ
         </h1>
-        <p className="shop-frontend-text-secondary">
+        <p className="text-sm sm:text-base shop-frontend-text-secondary">
           ดูประวัติคิวและการใช้บริการของคุณ
         </p>
       </div>
 
       {/* Filters */}
-      <div className="shop-frontend-card">
-        <div className="p-6 border-b shop-frontend-card-border">
-          <h3 className="text-lg font-medium shop-frontend-text-primary">
+      <div className="shop-frontend-card overflow-hidden">
+        <div className="p-4 sm:p-6 border-b shop-frontend-card-border">
+          <h3 className="text-base sm:text-lg font-medium shop-frontend-text-primary">
             ตัวกรอง
           </h3>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium shop-frontend-text-primary mb-1">
                 สถานะ
@@ -298,13 +298,13 @@ export function CustomerHistoryView({
       </div>
 
       {/* History List */}
-      <div className="shop-frontend-card">
-        <div className="p-6 border-b shop-frontend-card-border">
-          <h3 className="text-lg font-medium shop-frontend-text-primary">
+      <div className="shop-frontend-card overflow-hidden">
+        <div className="p-4 sm:p-6 border-b shop-frontend-card-border">
+          <h3 className="text-base sm:text-lg font-medium shop-frontend-text-primary">
             ประวัติการใช้บริการ
           </h3>
         </div>
-        <div className="p-6">
+        <div className="p-2 sm:p-4 md:p-6">
           {viewModel.queueHistory.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-6xl mb-4 block">📜</span>
@@ -316,20 +316,20 @@ export function CustomerHistoryView({
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {viewModel.queueHistory.map((queue) => (
-                <div key={queue.id}>
-                  <div className="shop-frontend-card shop-frontend-card-hover p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="shop-frontend-badge-info px-3 py-1 rounded-full text-sm font-medium">
+                <div key={queue.id} className="w-full">
+                  <div className="shop-frontend-card shop-frontend-card-hover p-3 sm:p-4 rounded-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-start sm:items-center gap-3 w-full sm:w-auto">
+                        <div className="shop-frontend-badge-info px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
                           #{queue.queueNumber}
                         </div>
-                        <div>
-                          <h4 className="font-medium shop-frontend-text-primary">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium shop-frontend-text-primary text-sm sm:text-base truncate">
                             {queue.shopName}
                           </h4>
-                          <p className="text-sm shop-frontend-text-secondary">
+                          <p className="text-xs sm:text-sm shop-frontend-text-secondary">
                             {new Date(queue.queueDateTime).toLocaleString(
                               "th-TH",
                               {
@@ -344,34 +344,36 @@ export function CustomerHistoryView({
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <p className="font-bold shop-frontend-service-price">
+                      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+                        <div className="text-right sm:text-left">
+                          <p className="font-bold shop-frontend-service-price text-sm sm:text-base">
                             ฿{queue.totalAmount}
                           </p>
-                          <p className="text-sm shop-frontend-text-secondary">
+                          <p className="text-xs sm:text-sm shop-frontend-text-secondary">
                             {queue.services.length} รายการ
                           </p>
                         </div>
 
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            queue.status === QueueStatus.COMPLETED
-                              ? "shop-frontend-badge-success"
-                              : queue.status === QueueStatus.CANCELLED
-                              ? "shop-frontend-status-cancelled"
-                              : "shop-frontend-badge-warning"
-                          }`}
-                        >
-                          {getStatusText(queue.status)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap ${
+                              queue.status === QueueStatus.COMPLETED
+                                ? "shop-frontend-badge-success"
+                                : queue.status === QueueStatus.CANCELLED
+                                ? "shop-frontend-status-cancelled"
+                                : "shop-frontend-badge-warning"
+                            }`}
+                          >
+                            {getStatusText(queue.status)}
+                          </span>
 
-                        <button
-                          onClick={() => handleViewDetails(queue)}
-                          className="shop-frontend-button-secondary px-4 py-2 rounded-lg text-sm font-medium"
-                        >
-                          ดูรายละเอียด
-                        </button>
+                          <button
+                            onClick={() => handleViewDetails(queue)}
+                            className="shop-frontend-button-secondary px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap"
+                          >
+                            ดูรายละเอียด
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -383,7 +385,7 @@ export function CustomerHistoryView({
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 0 && (
-          <div className="px-6 py-4 border-t shop-frontend-card-border">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t shop-frontend-card-border overflow-x-auto">
             <PaginationControls
               currentPage={pagination.currentPage}
               totalPages={pagination.totalPages}
