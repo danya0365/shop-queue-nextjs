@@ -25,6 +25,7 @@ export interface CustomerQueue {
   specialRequests?: string;
   createdAt: string;
   updatedAt: string;
+  isOwner: boolean;
 }
 
 export interface QueueProgress {
@@ -109,6 +110,7 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
       specialRequests: dto.specialRequests,
       createdAt: this.formatQueueTimeString(dto.createdAt),
       updatedAt: this.formatQueueTimeString(dto.updatedAt),
+      isOwner: dto.isOwner,
     };
   }
 

@@ -2,6 +2,7 @@
 
 import type { CustomerQueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
 import { useCustomerQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueStatusPresenter";
+import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 
 interface QueueStatusViewProps {
   shopId: string;
@@ -12,6 +13,7 @@ export function CustomerQueueStatusView({
   shopId,
   initialViewModel,
 }: QueueStatusViewProps) {
+  const { customer } = useCustomerStore();
   const {
     viewModel,
     loading,
@@ -256,7 +258,13 @@ export function CustomerQueueStatusView({
                     เบอร์โทร:
                   </span>
                   <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.customerPhone || (
+                    {customerQueue.isOwner ? (
+                      customer?.phone || (
+                        <span className="text-gray-400">ไม่ระบุ</span>
+                      )
+                    ) : customerQueue.customerPhone ? (
+                      customerQueue.customerPhone
+                    ) : (
                       <span className="text-gray-400">ซ่อนเบอร์โทร</span>
                     )}
                   </span>

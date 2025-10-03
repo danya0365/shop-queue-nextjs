@@ -30,6 +30,7 @@ export class CustomerQueueStatusMapper {
       specialRequests: entity.specialRequests,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
+      isOwner: false,
     };
   }
 

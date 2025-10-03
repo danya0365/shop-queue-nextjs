@@ -22,6 +22,7 @@ export interface CustomerQueueStatusDTO {
   specialRequests?: string;
   createdAt: string;
   updatedAt: string;
+  isOwner: boolean;
 }
 
 /**

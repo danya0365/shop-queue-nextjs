@@ -7,11 +7,12 @@ import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import type { ShopService } from "@/src/application/services/shop/ShopService";
 import { CancelCustomerQueueUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueUseCase";
 import { GetCustomerQueueStatusUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetCustomerQueueStatusUseCase";
-import { GetQueueProgressUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueProgressUseCase";
 import { GetQueueIdByNumberUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueIdByNumberUseCase";
+import { GetQueueProgressUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueProgressUseCase";
 import { IsQueueOwnerUseCase } from "@/src/application/usecases/shop/customer/queue-status/IsQueueOwnerUseCase";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
+import { CustomerQueueStatusRepository } from "@/src/domain/repositories/shop/customer/customer-queue-status-repository";
 
 export interface IShopCustomerQueueStatusService {
   /**
@@ -127,13 +128,17 @@ export class ShopCustomerQueueStatusService
       let canCancel =
         customerQueue?.status === QueueStatus.WAITING ||
         customerQueue?.status === QueueStatus.CONFIRMED;
-      if (customerId && customerQueue && canCancel) {
+      let isOwner = false;
+      if (customerId && customerQueue) {
         try {
-          const isOwner = await this.isQueueOwnerUseCase.execute({
+          isOwner = await this.isQueueOwnerUseCase.execute({
             queueId: customerQueue.id,
             customerId,
           });
-          canCancel = isOwner;
+          // Only update canCancel if the user is not the owner
+          if (canCancel) {
+            canCancel = isOwner;
+          }
         } catch (error) {
           this.logger.warn("Error checking queue ownership", {
             error,
@@ -141,6 +146,14 @@ export class ShopCustomerQueueStatusService
             customerId,
           });
         }
+      }
+
+      // Add isOwner flag to customerQueue if it exists
+      if (customerQueue) {
+        customerQueue = {
+          ...customerQueue,
+          isOwner,
+        };
       }
 
       return {
@@ -248,26 +261,17 @@ export class ShopCustomerQueueStatusServiceFactory {
   ): ShopCustomerQueueStatusService {
     // Initialize all use cases
     const getCustomerQueueStatusUseCase = new GetCustomerQueueStatusUseCase(
-      repository,
-      logger
-    );
-    
-    const getQueueIdByNumberUseCase = new GetQueueIdByNumberUseCase(
       repository
     );
-    
-    const isQueueOwnerUseCase = new IsQueueOwnerUseCase(
-      repository
-    );
-    
-    const getQueueProgressUseCase = new GetQueueProgressUseCase(
-      repository, 
-      logger
-    );
-    
+
+    const getQueueIdByNumberUseCase = new GetQueueIdByNumberUseCase(repository);
+
+    const isQueueOwnerUseCase = new IsQueueOwnerUseCase(repository);
+
+    const getQueueProgressUseCase = new GetQueueProgressUseCase(repository);
+
     const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(
-      repository,
-      logger
+      repository
     );
 
     return new ShopCustomerQueueStatusService(
