@@ -49,7 +49,7 @@ export function FrontendHeader() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8">
             <Link href="/" className="nav-link">
               หน้าหลัก
             </Link>
