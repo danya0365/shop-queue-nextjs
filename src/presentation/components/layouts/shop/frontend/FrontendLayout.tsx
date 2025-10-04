@@ -122,7 +122,6 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({ children, shop }) => {
               <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40">
                 <div className="flex justify-around items-center h-16">
                   {NAV_ITEMS.map((item) => {
-                    const Icon = item.icon;
                     const active = isActive(item);
                     return (
                       <Link
@@ -132,7 +131,7 @@ const FrontendLayout: React.FC<FrontendLayoutProps> = ({ children, shop }) => {
                           "flex flex-col items-center justify-center flex-1 h-full",
                           "text-sm font-medium transition-colors",
                           active
-                            ? "text-primary-600 dark:text-primary-400"
+                            ? "text-primary-600 dark:text-primary-400 border-t-2 border-purple-600 dark:border-purple-400"
                             : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                         )}
                       >
