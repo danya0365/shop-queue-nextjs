@@ -12,6 +12,7 @@ import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 import { PointsSummary } from "./components/PointsSummary";
 import { RedeemConfirmationModal } from "./components/RedeemConfirmationModal";
+import { TierBenefits } from "./components/TierBenefits";
 
 enum TabType {
   REWARDS = "rewards",
@@ -165,42 +166,11 @@ export function CustomerRewardsView({
       />
 
       {/* Tier Benefits */}
-      <div className="shop-frontend-card p-6 mb-6 relative">
-        {!customer ? (
-          <div className="absolute inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-            <div className="text-center py-8 z-10">
-              <div className="text-4xl mb-4">❌</div>
-              <p className="text-gray-600 dark:text-gray-400">
-                ไม่พบข้อมูลสมาชิก
-              </p>
-            </div>
-          </div>
-        ) : null}
-        <h3 className="text-lg font-medium shop-frontend-text-primary mb-4">
-          สิทธิประโยชน์สมาชิก {viewModel.customerPoints.tier}
-        </h3>
-        {viewModel.customerPoints.tierBenefits.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {viewModel.customerPoints.tierBenefits.map((benefit, index) => (
-              <div key={index} className="flex items-center">
-                <span className="shop-frontend-text-success mr-2">✓</span>
-                <span className="shop-frontend-text-primary">{benefit}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <div className="text-gray-400 dark:text-gray-500 text-lg mb-2">
-              ไม่พบสิทธิประโยชน์สำหรับระดับสมาชิกนี้
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              สิทธิประโยชน์จะแสดงที่นี่เมื่อมีกำหนดการสำหรับระดับ{" "}
-              {viewModel.customerPoints.tier}
-            </p>
-          </div>
-        )}
-      </div>
+      <TierBenefits
+        tier={viewModel.customerPoints.tier}
+        benefits={viewModel.customerPoints.tierBenefits}
+        shopId={shopId}
+      />
 
       {/* Tabs */}
       <div className="shop-frontend-card">
