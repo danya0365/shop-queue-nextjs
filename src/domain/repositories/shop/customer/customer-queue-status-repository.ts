@@ -81,14 +81,12 @@ export interface CustomerQueueStatusRepository {
   getQueueProgress(shopId: string): Promise<QueueProgressEntity>;
 
   /**
-   * Cancel a customer queue
-   * @param shopId The shop ID
-   * @param queueNumber The queue number
-   * @returns True if cancellation was successful
-   * @throws CustomerQueueStatusError if the operation fails
+   * Cancel a customer queue by queue ID with explicit ownership verification
+   * @param queueId The queue ID
+   * @param customerId The customer ID that must own the queue
    */
-  cancelCustomerQueue(
-    shopId: string,
-    queueNumber: string,
+  cancelCustomerQueueById(
+    queueId: string,
+    customerId: string,
   ): Promise<boolean>;
 }

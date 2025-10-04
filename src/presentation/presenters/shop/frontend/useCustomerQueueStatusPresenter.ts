@@ -155,10 +155,15 @@ export function useCustomerQueueStatusPresenter(
     setError(null);
 
     try {
-      // Mock API call - replace with actual service
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Use secure cancel by ID requiring explicit customer ownership
+      const queueId = viewModel.customerQueue.id;
+      const customerId = storedCustomer?.id;
+      if (!customerId) {
+        throw new Error("ต้องเข้าสู่ระบบหรือลงทะเบียนลูกค้าเพื่อยกเลิกคิว");
+      }
+      await presenter.cancelCustomerQueueById(queueId, customerId);
 
-      // Mock success response
+      // Close confirm modal
       setShowCancelConfirm(false);
 
       // Redirect to shop page after successful cancellation
@@ -170,7 +175,7 @@ export function useCustomerQueueStatusPresenter(
     } finally {
       setActionLoading(false);
     }
-  }, [viewModel, shopId]);
+  }, [viewModel, shopId, storedCustomer?.id]);
 
   // Function to refresh data
   const refreshData = useCallback(async () => {

@@ -96,7 +96,6 @@ BEGIN
     LEFT JOIN public.services s ON qs.service_id = s.id
     WHERE q.shop_id = p_shop_id
     AND q.queue_number = p_queue_number
-    AND q.status IN ('waiting', 'confirmed', 'serving')
     GROUP BY q.id, q.shop_id, q.customer_id, q.queue_number, q.status, q.priority,
              q.estimated_duration, q.estimated_call_time, q.served_by_employee_id, q.actual_wait_time, 
              q.note, q.feedback, q.rating, q.created_at, q.updated_at, q.served_at, q.completed_at, 
@@ -186,95 +185,6 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_customer_queue_progress(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_customer_queue_progress(UUID) TO anon;
 
--- =============================================================================
--- Function: cancel_customer_queue
--- Description: Cancel a customer queue with proper validation and security checks
--- Returns TRUE if successful, raises exception if failed
--- =============================================================================
-CREATE OR REPLACE FUNCTION public.cancel_customer_queue(
-    p_shop_id UUID,
-    p_queue_number TEXT
-)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-    v_queue_id UUID;
-    v_queue_status queue_status;
-    v_customer_id UUID;
-    v_customer_profile_id UUID;
-    v_current_profile_id UUID;
-BEGIN
-    -- Validate required parameters
-    IF p_shop_id IS NULL THEN
-        RAISE EXCEPTION 'Shop ID is required';
-    END IF;
-    
-    IF p_queue_number IS NULL OR p_queue_number = '' THEN
-        RAISE EXCEPTION 'Queue number is required';
-    END IF;
-    
-    -- Get the queue ID, status, and customer info
-    SELECT q.id, q.status, q.customer_id, c.profile_id
-    INTO v_queue_id, v_queue_status, v_customer_id, v_customer_profile_id
-    FROM public.queues q
-    LEFT JOIN public.customers c ON q.customer_id = c.id
-    WHERE q.shop_id = p_shop_id
-    AND q.queue_number = p_queue_number
-    AND q.status IN ('waiting', 'confirmed', 'serving');
-    
-    -- Check if queue was found
-    IF v_queue_id IS NULL THEN
-        RAISE EXCEPTION 'Queue not found or already completed/cancelled';
-    END IF;
-    
-    -- Security check: Only allow cancellation if:
-    -- 1. Customer is not linked to any profile (unauthenticated), OR
-    -- 2. Customer is linked to the currently authenticated user's profile
-    IF v_customer_profile_id IS NOT NULL THEN
-        -- Get current user's profile ID
-        BEGIN
-            v_current_profile_id := public.get_active_profile_id();
-        EXCEPTION
-            WHEN OTHERS THEN
-                v_current_profile_id := NULL;
-        END;
-        
-        -- Check if the authenticated user is the owner of this queue
-        IF v_current_profile_id IS NULL OR v_current_profile_id != v_customer_profile_id THEN
-            RAISE EXCEPTION 'Access denied: You can only cancel your own queues';
-        END IF;
-    END IF;
-    
-    -- Check if queue can be cancelled (only waiting or confirmed status)
-    IF v_queue_status NOT IN ('waiting', 'confirmed') THEN
-        RAISE EXCEPTION 'Queue cannot be cancelled: Invalid status %', v_queue_status;
-    END IF;
-    
-    -- Update queue status to cancelled
-    UPDATE public.queues
-    SET 
-        status = 'cancelled',
-        cancelled_at = CURRENT_TIMESTAMP,
-        cancelled_reason = 'Customer cancelled',
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = v_queue_id;
-    
-    -- Check if update was successful
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Failed to cancel queue';
-    END IF;
-    
-    -- Return success
-    RETURN TRUE;
-END;
-$$;
-
--- Grant execute permissions
-GRANT EXECUTE ON FUNCTION public.cancel_customer_queue(UUID, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.cancel_customer_queue(UUID, TEXT) TO anon;
 
 -- =============================================================================
 -- Comments
@@ -284,6 +194,3 @@ COMMENT ON FUNCTION public.get_customer_queue_by_number IS
 
 COMMENT ON FUNCTION public.get_customer_queue_progress IS 
 'Get queue progress information including current serving number, total ahead, and estimated wait time.';
-
-COMMENT ON FUNCTION public.cancel_customer_queue IS 
-'Cancel a customer queue with proper validation and security checks. Only allows cancellation of waiting or confirmed queues.';

@@ -5,11 +5,12 @@ import type {
 } from "@/src/application/dtos/shop/customer/customer-queue-status-dto";
 import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import type { ShopService } from "@/src/application/services/shop/ShopService";
-import { CancelCustomerQueueUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueUseCase";
+// Removed queue-number based cancel use case
 import { GetCustomerQueueStatusUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetCustomerQueueStatusUseCase";
 import { GetQueueIdByNumberUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueIdByNumberUseCase";
 import { GetQueueProgressUseCase } from "@/src/application/usecases/shop/customer/queue-status/GetQueueProgressUseCase";
 import { IsQueueOwnerUseCase } from "@/src/application/usecases/shop/customer/queue-status/IsQueueOwnerUseCase";
+import { CancelCustomerQueueByIdUseCase } from "@/src/application/usecases/shop/customer/queue-status/CancelCustomerQueueByIdUseCase";
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { CustomerQueueStatusRepository } from "@/src/domain/repositories/shop/customer/customer-queue-status-repository";
@@ -45,13 +46,8 @@ export interface IShopCustomerQueueStatusService {
    */
   getQueueProgress(shopId: string): Promise<QueueProgressDTO>;
 
-  /**
-   * Cancel customer queue
-   * @param shopId The shop ID
-   * @param queueNumber The queue number
-   * @returns True if cancellation was successful
-   */
-  cancelCustomerQueue(shopId: string, queueNumber: string): Promise<boolean>;
+  /** Cancel by queueId with explicit customer ownership */
+  cancelCustomerQueueById(queueId: string, customerId: string): Promise<boolean>;
 }
 
 export class ShopCustomerQueueStatusService
@@ -74,8 +70,9 @@ export class ShopCustomerQueueStatusService
       { shopId: string },
       QueueProgressDTO
     >,
-    private readonly cancelCustomerQueueUseCase: IUseCase<
-      { shopId: string; queueNumber: string },
+    // removed queue-number cancel use case
+    private readonly cancelCustomerQueueByIdUseCase: IUseCase<
+      { queueId: string; customerId: string },
       boolean
     >,
     private readonly shopService: ShopService,
@@ -230,23 +227,22 @@ export class ShopCustomerQueueStatusService
     }
   }
 
-  async cancelCustomerQueue(
-    shopId: string,
-    queueNumber: string
+  async cancelCustomerQueueById(
+    queueId: string,
+    customerId: string
   ): Promise<boolean> {
     try {
-      this.logger.info("Cancelling customer queue", { shopId, queueNumber });
-
-      const result = await this.cancelCustomerQueueUseCase.execute({
-        shopId,
-        queueNumber,
+      this.logger.info("Cancelling customer queue by ID", { queueId, customerId });
+      const result = await this.cancelCustomerQueueByIdUseCase.execute({
+        queueId,
+        customerId,
       });
       return result;
     } catch (error) {
-      this.logger.error("Error cancelling customer queue", {
+      this.logger.error("Error cancelling customer queue by ID", {
         error,
-        shopId,
-        queueNumber,
+        queueId,
+        customerId,
       });
       throw error;
     }
@@ -270,16 +266,14 @@ export class ShopCustomerQueueStatusServiceFactory {
 
     const getQueueProgressUseCase = new GetQueueProgressUseCase(repository);
 
-    const cancelCustomerQueueUseCase = new CancelCustomerQueueUseCase(
-      repository
-    );
+    const cancelCustomerQueueByIdUseCase = new CancelCustomerQueueByIdUseCase(repository);
 
     return new ShopCustomerQueueStatusService(
       getCustomerQueueStatusUseCase,
       getQueueIdByNumberUseCase,
       isQueueOwnerUseCase,
       getQueueProgressUseCase,
-      cancelCustomerQueueUseCase,
+      cancelCustomerQueueByIdUseCase,
       shopService,
       logger
     );

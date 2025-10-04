@@ -29,6 +29,75 @@ export class SupabaseCustomerQueueStatusRepository
   }
 
   /**
+   * Cancel a queue by ID with explicit customer ownership verification
+   */
+  async cancelCustomerQueueById(
+    queueId: string,
+    customerId: string
+  ): Promise<boolean> {
+    try {
+      this.logger.info("Cancelling customer queue by ID", { queueId, customerId });
+
+      const result = await this.dataSource.callRpc<boolean>(
+        "cancel_queue_by_id",
+        {
+          p_queue_id: queueId,
+          p_customer_id: customerId,
+        }
+      );
+
+      if (!result) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.OPERATION_FAILED,
+          "Failed to cancel queue",
+          "cancelCustomerQueueById",
+          { queueId }
+        );
+      }
+
+      return true;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes("Access denied")) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.UNAUTHORIZED,
+          "Access denied: You can only cancel your own queues",
+          "cancelCustomerQueueById",
+          { queueId, customerId },
+          error
+        );
+      }
+      if (msg.includes("Invalid status")) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.VALIDATION_ERROR,
+          "Queue cannot be cancelled: Invalid status",
+          "cancelCustomerQueueById",
+          { queueId },
+          error
+        );
+      }
+      if (msg.includes("Queue not found")) {
+        throw new CustomerQueueStatusError(
+          CustomerQueueStatusErrorType.NOT_FOUND,
+          "Queue not found",
+          "cancelCustomerQueueById",
+          { queueId },
+          error
+        );
+      }
+
+      this.logger.error("Error cancelling queue by ID", { error, queueId, customerId });
+      throw new CustomerQueueStatusError(
+        CustomerQueueStatusErrorType.OPERATION_FAILED,
+        "Failed to cancel customer queue",
+        "cancelCustomerQueueById",
+        { queueId, customerId },
+        error
+      );
+    }
+  }
+
+  /**
    * Get queue ID by queue number (helper method for backward compatibility)
    * Uses RPC function to bypass RLS
    * @param shopId The shop ID
@@ -270,96 +339,5 @@ export class SupabaseCustomerQueueStatusRepository
     }
   }
 
-  /**
-   * Cancel a customer queue
-   * @param shopId The shop ID
-   * @param queueNumber The queue number
-   * @returns True if cancellation was successful
-   */
-  async cancelCustomerQueue(
-    shopId: string,
-    queueNumber: string
-  ): Promise<boolean> {
-    try {
-      this.logger.info("Cancelling customer queue", { shopId, queueNumber });
-
-      // Use RPC function to cancel queue with security checks
-      const rpcParams = {
-        p_shop_id: shopId,
-        p_queue_number: queueNumber,
-      };
-
-      const result = await this.dataSource.callRpc<boolean>(
-        "cancel_customer_queue",
-        rpcParams
-      );
-
-      if (!result) {
-        throw new CustomerQueueStatusError(
-          CustomerQueueStatusErrorType.OPERATION_FAILED,
-          "Failed to cancel queue",
-          "cancelCustomerQueue",
-          { shopId, queueNumber }
-        );
-      }
-
-      this.logger.info("Successfully cancelled queue", { shopId, queueNumber });
-      return true;
-    } catch (error) {
-      if (error instanceof CustomerQueueStatusError) {
-        throw error;
-      }
-
-      // Check if error message contains specific error types
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
-      if (
-        errorMessage.includes("Queue not found") ||
-        errorMessage.includes("already completed")
-      ) {
-        throw new CustomerQueueStatusError(
-          CustomerQueueStatusErrorType.NOT_FOUND,
-          "Queue not found or already completed/cancelled",
-          "cancelCustomerQueue",
-          { shopId, queueNumber },
-          error
-        );
-      }
-
-      if (errorMessage.includes("Access denied")) {
-        throw new CustomerQueueStatusError(
-          CustomerQueueStatusErrorType.VALIDATION_ERROR,
-          "Access denied: You can only cancel your own queues",
-          "cancelCustomerQueue",
-          { shopId, queueNumber },
-          error
-        );
-      }
-
-      if (errorMessage.includes("Invalid status")) {
-        throw new CustomerQueueStatusError(
-          CustomerQueueStatusErrorType.VALIDATION_ERROR,
-          "Queue cannot be cancelled: Invalid status",
-          "cancelCustomerQueue",
-          { shopId, queueNumber },
-          error
-        );
-      }
-
-      this.logger.error("Error cancelling customer queue", {
-        error,
-        shopId,
-        queueNumber,
-      });
-
-      throw new CustomerQueueStatusError(
-        CustomerQueueStatusErrorType.OPERATION_FAILED,
-        "Failed to cancel customer queue",
-        "cancelCustomerQueue",
-        { shopId, queueNumber },
-        error
-      );
-    }
-  }
+  
 }

@@ -4215,8 +4215,8 @@ export type Database = {
         Args: { p_profile_id: string; p_action: string; p_shop_id?: string }
         Returns: boolean
       }
-      cancel_customer_queue: {
-        Args: { p_shop_id: string; p_queue_number: string }
+      cancel_queue_by_id: {
+        Args: { p_queue_id: string; p_customer_id: string }
         Returns: boolean
       }
       cleanup_old_activities: {

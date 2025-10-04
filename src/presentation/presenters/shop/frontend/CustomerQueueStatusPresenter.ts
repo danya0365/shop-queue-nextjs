@@ -136,6 +136,19 @@ export class CustomerQueueStatusPresenter extends BaseShopPresenter {
     }
   }
 
+  // New: cancel by queue ID with explicit customer ownership
+  async cancelCustomerQueueById(queueId: string, customerId: string): Promise<boolean> {
+    try {
+      return await this.shopCustomerQueueStatusService.cancelCustomerQueueById(
+        queueId,
+        customerId
+      );
+    } catch (error) {
+      this.logger.error("QueueStatusPresenter: Error cancelling queue by ID", error);
+      throw error;
+    }
+  }
+
   // Metadata generation
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
