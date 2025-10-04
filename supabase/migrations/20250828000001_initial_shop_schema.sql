@@ -1025,6 +1025,78 @@ BEGIN
 END;
 $$;
 
+-- Function to update customer by ID with strict security
+-- Security: Only updates customer if
+-- 1) The customer is unauthenticated (profile_id IS NULL) OR
+-- 2) The customer is linked to the currently authenticated user's profile
+CREATE OR REPLACE FUNCTION public.update_customer_by_id(
+  p_customer_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_phone TEXT DEFAULT NULL,
+  p_email TEXT DEFAULT NULL,
+  p_date_of_birth DATE DEFAULT NULL,
+  p_gender TEXT DEFAULT NULL,
+  p_address TEXT DEFAULT NULL,
+  p_notes TEXT DEFAULT NULL,
+  p_is_active BOOLEAN DEFAULT NULL
+)
+RETURNS TABLE(
+  id UUID,
+  name TEXT,
+  phone TEXT,
+  email TEXT,
+  date_of_birth DATE,
+  gender TEXT,
+  address TEXT,
+  notes TEXT,
+  is_active BOOLEAN,
+  shop_id UUID,
+  profile_id UUID,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Perform secured update and return the updated row
+  RETURN QUERY
+  UPDATE public.customers c
+  SET 
+    name = COALESCE(NULLIF(TRIM(p_name), ''), c.name),
+    phone = COALESCE(NULLIF(TRIM(p_phone), ''), c.phone),
+    email = COALESCE(p_email, c.email),
+    date_of_birth = COALESCE(p_date_of_birth, c.date_of_birth),
+    gender = COALESCE(p_gender, c.gender),
+    address = COALESCE(p_address, c.address),
+    notes = COALESCE(p_notes, c.notes),
+    is_active = COALESCE(p_is_active, c.is_active),
+    updated_at = NOW()
+  WHERE c.id = p_customer_id
+    AND (
+      c.profile_id IS NULL -- Unauthenticated customer
+      OR 
+      c.profile_id = public.get_active_profile_id() -- Authenticated user's own customer
+    )
+  RETURNING 
+    c.id,
+    c.name,
+    c.phone,
+    c.email,
+    c.date_of_birth,
+    c.gender,
+    c.address,
+    c.notes,
+    c.is_active,
+    c.shop_id,
+    c.profile_id,
+    c.created_at,
+    c.updated_at;
+END;
+$$;
+
+
 -- Function to link customer to authenticated profile
 CREATE OR REPLACE FUNCTION public.link_customer_to_profile(
   p_customer_id UUID,
@@ -1086,6 +1158,12 @@ CREATE OR REPLACE FUNCTION public.get_customer_by_id(
   id UUID,
   name TEXT,
   phone TEXT,
+  email TEXT,
+  date_of_birth DATE,
+  gender TEXT,
+  address TEXT,
+  notes TEXT,
+  is_active BOOLEAN,
   shop_id UUID,
   profile_id UUID,
   created_at TIMESTAMPTZ,
@@ -1100,6 +1178,12 @@ BEGIN
     c.id,
     c.name,
     c.phone,
+    c.email,
+    c.date_of_birth,
+    c.gender,
+    c.address,
+    c.notes,
+    c.is_active,
     c.shop_id,
     c.profile_id,
     c.created_at,
@@ -1114,10 +1198,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- =============================================================================
--- CUSTOMER PROFILE FUNCTIONS
--- =============================================================================
-
 -- Get customer by profile ID and shop ID
 -- Returns customer data for the currently authenticated user's profile in a specific shop
 -- Security: Only returns customer data for the currently authenticated user
@@ -1128,6 +1208,12 @@ CREATE OR REPLACE FUNCTION public.get_customer_by_profile_id(
   id UUID,
   name TEXT,
   phone TEXT,
+  email TEXT,
+  date_of_birth DATE,
+  gender TEXT,
+  address TEXT,
+  notes TEXT,
+  is_active BOOLEAN,
   shop_id UUID,
   profile_id UUID,
   created_at TIMESTAMPTZ,
@@ -1140,6 +1226,12 @@ BEGIN
     c.id,
     c.name,
     c.phone,
+    c.email,
+    c.date_of_birth,
+    c.gender,
+    c.address,
+    c.notes,
+    c.is_active,
     c.shop_id,
     c.profile_id,
     c.created_at,
@@ -1192,6 +1284,10 @@ BEGIN
   LIMIT 1;
 END;
 $$;
+
+-- =============================================================================
+-- REWARDS FUNCTIONS
+-- =============================================================================
 
 -- Available Rewards RPCs
 -- get_available_rewards and get_available_rewards_count

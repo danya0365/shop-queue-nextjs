@@ -4443,6 +4443,12 @@ export type Database = {
           id: string
           name: string
           phone: string
+          email: string
+          date_of_birth: string
+          gender: string
+          address: string
+          notes: string
+          is_active: boolean
           shop_id: string
           profile_id: string
           created_at: string
@@ -4455,6 +4461,12 @@ export type Database = {
           id: string
           name: string
           phone: string
+          email: string
+          date_of_birth: string
+          gender: string
+          address: string
+          notes: string
+          is_active: boolean
           shop_id: string
           profile_id: string
           created_at: string
@@ -5394,6 +5406,34 @@ export type Database = {
       should_send_notification: {
         Args: { p_credential_id: string }
         Returns: boolean
+      }
+      update_customer_by_id: {
+        Args: {
+          p_customer_id: string
+          p_name?: string
+          p_phone?: string
+          p_email?: string
+          p_date_of_birth?: string
+          p_gender?: string
+          p_address?: string
+          p_notes?: string
+          p_is_active?: boolean
+        }
+        Returns: {
+          id: string
+          name: string
+          phone: string
+          email: string
+          date_of_birth: string
+          gender: string
+          address: string
+          notes: string
+          is_active: boolean
+          shop_id: string
+          profile_id: string
+          created_at: string
+          updated_at: string
+        }[]
       }
       update_department: {
         Args: {
