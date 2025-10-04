@@ -229,29 +229,101 @@ export function CustomerQueueStatusView({
 
             {/* Stepper (4 statuses) */}
             <div className="p-6">
-              <div className="flex items-center justify-between">
+              {/* Mobile: 2x2 grid cards */}
+              <div
+                className="grid grid-cols-2 gap-3 md:hidden"
+                role="list"
+                aria-label="สถานะคิว"
+              >
                 {[
                   { key: QueueStatus.WAITING, label: "รอยืนยัน" },
                   { key: QueueStatus.CONFIRMED, label: "รอคิว" },
                   { key: QueueStatus.SERVING, label: "กำลังให้บริการ" },
                   { key: QueueStatus.COMPLETED, label: "เสร็จสิ้น" },
-                ].map((step, idx, arr) => {
-                  const current =
-                    customerQueue.status === QueueStatus.CONFIRMED
-                      ? QueueStatus.CONFIRMED
-                      : customerQueue.status;
+                ].map((step, idx) => {
                   const order = [
                     QueueStatus.WAITING,
                     QueueStatus.CONFIRMED,
                     QueueStatus.SERVING,
                     QueueStatus.COMPLETED,
                   ];
+                  const current = customerQueue.status;
                   const currentIndex = order.indexOf(current);
                   const stepIndex = order.indexOf(step.key);
                   const isActive = currentIndex === stepIndex;
                   const isDone = currentIndex > stepIndex;
                   return (
-                    <div key={step.key} className="flex-1 flex items-center">
+                    <div
+                      key={step.key}
+                      role="listitem"
+                      className={`rounded-xl border p-3 flex items-center gap-3 ${
+                        isActive
+                          ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-600"
+                          : isDone
+                          ? "bg-white border-purple-200 dark:bg-gray-800 dark:border-purple-700"
+                          : "bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+                      }`}
+                    >
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 rounded-full border text-sm font-semibold ${
+                          isActive
+                            ? "bg-purple-600 text-white border-purple-600"
+                            : isDone
+                            ? "bg-purple-100 text-purple-600 border-purple-300"
+                            : "bg-white text-gray-400 border-gray-300"
+                        }`}
+                        aria-current={isActive}
+                        aria-label={`ขั้นตอนที่ ${idx + 1}`}
+                      >
+                        {idx + 1}
+                      </div>
+                      <div className="text-sm font-medium">
+                        <div
+                          className={
+                            isActive
+                              ? "text-purple-700 dark:text-purple-300"
+                              : isDone
+                              ? "text-purple-600 dark:text-purple-400"
+                              : "shop-frontend-text-muted"
+                          }
+                        >
+                          {step.label}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop: connected horizontal stepper */}
+              <div
+                className="hidden md:flex items-center justify-between"
+                role="list"
+                aria-label="สถานะคิว"
+              >
+                {[
+                  { key: QueueStatus.WAITING, label: "รอยืนยัน" },
+                  { key: QueueStatus.CONFIRMED, label: "รอคิว" },
+                  { key: QueueStatus.SERVING, label: "กำลังให้บริการ" },
+                  { key: QueueStatus.COMPLETED, label: "เสร็จสิ้น" },
+                ].map((step, idx, arr) => {
+                  const order = [
+                    QueueStatus.WAITING,
+                    QueueStatus.CONFIRMED,
+                    QueueStatus.SERVING,
+                    QueueStatus.COMPLETED,
+                  ];
+                  const current = customerQueue.status;
+                  const currentIndex = order.indexOf(current);
+                  const stepIndex = order.indexOf(step.key);
+                  const isActive = currentIndex === stepIndex;
+                  const isDone = currentIndex > stepIndex;
+                  return (
+                    <div
+                      key={step.key}
+                      className="flex-1 flex items-center"
+                      role="listitem"
+                    >
                       <div
                         className={`flex items-center justify-center w-9 h-9 rounded-full border text-sm font-semibold mr-2 ${
                           isActive
@@ -261,6 +333,7 @@ export function CustomerQueueStatusView({
                             : "bg-white text-gray-400 border-gray-300"
                         }`}
                         aria-current={isActive}
+                        aria-label={`ขั้นตอนที่ ${idx + 1}`}
                       >
                         {idx + 1}
                       </div>
@@ -297,10 +370,10 @@ export function CustomerQueueStatusView({
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
               <div className="text-sm shop-frontend-text-secondary mb-1">
-                คิวข้างหน้า
+                จำนวนคิวข้างหน้า
               </div>
               <div className="text-3xl font-extrabold shop-frontend-text-primary">
-                {customerQueue.totalAhead}
+                {customerQueue.totalAhead} คิว
               </div>
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">

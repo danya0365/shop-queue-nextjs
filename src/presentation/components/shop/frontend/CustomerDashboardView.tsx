@@ -263,7 +263,7 @@ export function CustomerDashboardView({
                 </span>
               </div>
               <p className="text-xs sm:text-sm shop-frontend-text-secondary">
-                คิวรอ
+                รอคิว
               </p>
             </div>
 
