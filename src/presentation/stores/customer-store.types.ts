@@ -1,4 +1,4 @@
-import { CustomerEntity } from '@/src/domain/entities/shop/backend/backend-customer.entity';
+import { CustomerEntity } from "@/src/domain/entities/shop/backend/backend-customer.entity";
 
 /**
  * Represents the customer data stored in the customer store
@@ -8,6 +8,7 @@ export type StoreCustomer = {
   id: string;
   name: string;
   phone: string;
+  joinedDate: string;
   shopId: string;
 };
 
@@ -32,7 +33,7 @@ export interface CustomerActions {
   // UI state actions
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  
+
   // Customer actions
   setCustomer: (shopId: string, customer: StoreCustomer | null) => void;
   getCustomer: (shopId: string) => StoreCustomer | null;
@@ -50,13 +51,16 @@ export type CustomerStore = CustomerState & CustomerActions;
 /**
  * Helper function to map Customer domain entity to StoreCustomer presentation model
  */
-export const mapCustomerToStoreCustomer = (customer: CustomerEntity | null): StoreCustomer | null => {
+export const mapCustomerToStoreCustomer = (
+  customer: CustomerEntity | null
+): StoreCustomer | null => {
   if (!customer) return null;
-  
+
   return {
     id: customer.id,
     name: customer.name,
-    phone: customer.phone || '',
+    phone: customer.phone || "",
+    joinedDate: customer.createdAt,
     shopId: customer.shopId,
   };
 };
