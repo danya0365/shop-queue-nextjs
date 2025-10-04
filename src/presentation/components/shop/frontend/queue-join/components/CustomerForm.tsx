@@ -156,8 +156,8 @@ export function CustomerForm({
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-sm text-blue-700">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+            <p className="text-sm text-blue-700 dark:text-blue-200">
               ⭐ สมาชิกเท่านั้นที่สามารถเลือกความเร่งด่วนได้
             </p>
           </div>

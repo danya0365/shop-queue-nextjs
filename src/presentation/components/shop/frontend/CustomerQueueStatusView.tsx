@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import { getFormatPhone } from "@/src/domain/utils/phone";
 import type { CustomerQueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
@@ -15,6 +17,7 @@ export function CustomerQueueStatusView({
   shopId,
   initialViewModel,
 }: QueueStatusViewProps) {
+  const [hasSearched, setHasSearched] = useState(false);
   const { getCustomer } = useCustomerStore();
   const customer = getCustomer(shopId);
   const {
@@ -34,6 +37,13 @@ export function CustomerQueueStatusView({
     getStatusText,
     getStatusIcon,
   } = useCustomerQueueStatusPresenter(shopId, initialViewModel);
+
+  // Hide not-found alert once a valid result is found
+  useEffect(() => {
+    if (viewModel?.isFound) {
+      setHasSearched(false);
+    }
+  }, [viewModel?.isFound]);
 
   // Handle loading state
   if (loading && !viewModel) {
@@ -127,6 +137,7 @@ export function CustomerQueueStatusView({
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              setHasSearched(true);
               handleSearch();
             }}
             className="p-6"
@@ -156,6 +167,33 @@ export function CustomerQueueStatusView({
                 {actionLoading ? "กำลังค้นหา..." : "ค้นหา"}
               </button>
             </div>
+            {/** Not-found alert: show only after a submit attempt and when still not found */}
+            {hasSearched && !actionLoading && viewModel?.isFound === false && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-lg font-semibold mb-1">ไม่พบคิวที่ค้นหา</div>
+                    <p className="text-sm">
+                      ไม่พบคิวหมายเลข <span className="font-bold">{queueNumber}</span> ในระบบ กรุณาตรวจสอบหมายเลขให้ถูกต้อง หรือสอบถามพนักงานหน้าร้าน
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasSearched(false);
+                      resetData();
+                    }}
+                    className="shop-frontend-button-secondary whitespace-nowrap px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    ล้างค่าและเริ่มใหม่
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
         </div>
 
