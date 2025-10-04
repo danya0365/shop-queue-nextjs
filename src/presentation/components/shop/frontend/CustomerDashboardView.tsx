@@ -356,38 +356,118 @@ export function CustomerDashboardView({
       {promotions.length > 0 && (
         <div className="shop-frontend-card">
           <div className="p-6 border-b shop-frontend-card-border">
-            <h2 className="text-xl font-semibold shop-frontend-text-primary">
-              โปรโมชันพิเศษ
-            </h2>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold shop-frontend-text-primary">
+                  โปรโมชันพิเศษ
+                </h2>
+                <p className="text-sm shop-frontend-text-muted mt-1">
+                  สิทธิพิเศษเฉพาะลูกค้าหน้าร้าน ใช้ได้ภายในระยะเวลาที่กำหนด
+                </p>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-xs shop-frontend-text-muted">
+                <span>⏳</span>
+                <span>อัปเดตอัตโนมัติ</span>
+              </div>
+            </div>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {promotions.map((promotion) => (
-                <div
-                  key={promotion.id}
-                  className="shop-frontend-promotion-card rounded-lg p-6"
-                >
-                  <div className="flex items-start space-x-4">
-                    <span className="text-3xl">{promotion.icon}</span>
-                    <div className="flex-1">
-                      <h3 className="font-semibold shop-frontend-text-primary mb-2">
-                        {promotion.title}
-                      </h3>
-                      <p className="text-sm shop-frontend-text-secondary mb-3">
-                        {promotion.description}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="shop-frontend-promotion-badge px-3 py-1 rounded-full text-sm font-medium">
-                          ลด {promotion.discount}%
-                        </span>
-                        <span className="text-xs shop-frontend-text-muted">
-                          ถึง {promotion.validUntil}
-                        </span>
+              {promotions.map((promotion) => {
+                const endAt = new Date(promotion.validUntil);
+                const nowTs = Date.now();
+                const diffMs = endAt.getTime() - nowTs;
+                const isExpired = diffMs <= 0;
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const thDate = isNaN(endAt.getTime())
+                  ? promotion.validUntil
+                  : endAt.toLocaleDateString("th-TH", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    });
+
+                const urgencyClass = isExpired
+                  ? "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  : diffMs < 1000 * 60 * 60 * 24
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+
+                const timeLabel = isExpired
+                  ? "หมดเขตแล้ว"
+                  : diffDays > 0
+                  ? `เหลืออีก ${diffDays} วัน`
+                  : `เหลืออีก ${diffHours} ชม.`;
+
+                return (
+                  <div
+                    key={promotion.id}
+                    className="rounded-xl p-5 shop-frontend-card-hover border shop-frontend-card-border bg-white dark:bg-gray-800"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                        <span>{promotion.icon}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="font-semibold shop-frontend-text-primary text-base truncate">
+                            {promotion.title}
+                          </h3>
+                          <div className={cn("px-2.5 py-1 rounded-full text-xs font-medium", urgencyClass)}>
+                            {timeLabel}
+                          </div>
+                        </div>
+                        <p className="text-sm shop-frontend-text-secondary mt-1 line-clamp-2">
+                          {promotion.description}
+                        </p>
+
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                              🔖 ลด {promotion.discount}%
+                            </span>
+                            <span className="text-xs shop-frontend-text-muted">
+                              หมดเขต: {thDate}
+                            </span>
+                          </div>
+                          <Link
+                            href={`/shop/${shopId}/queue`}
+                            className={cn(
+                              "px-3 py-1.5 text-sm rounded-lg font-medium",
+                              isExpired
+                                ? "shop-frontend-button-disabled cursor-not-allowed"
+                                : "shop-frontend-button-primary"
+                            )}
+                            aria-disabled={isExpired}
+                            tabIndex={isExpired ? -1 : 0}
+                          >
+                            ใช้โปรโมชัน
+                          </Link>
+                        </div>
+
+                        {!isExpired && (
+                          <div className="mt-3">
+                            <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                              {(() => {
+                                const totalWindow = endAt.getTime() - (new Date(endAt.getTime() - (1000 * 60 * 60 * 24 * 14))).getTime();
+                                const elapsed = Math.max(0, totalWindow - diffMs);
+                                const pct = Math.max(0, Math.min(100, Math.round((elapsed / Math.max(1, totalWindow)) * 100)));
+                                return (
+                                  <div
+                                    className="h-full bg-gradient-to-r from-amber-400 to-red-500"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
