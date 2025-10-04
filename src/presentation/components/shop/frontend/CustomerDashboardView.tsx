@@ -245,7 +245,7 @@ export function CustomerDashboardView({
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <span className="text-xl sm:text-2xl font-bold">
                   {queueStatus.currentNumber || "-"}
@@ -256,7 +256,7 @@ export function CustomerDashboardView({
               </p>
             </div>
 
-            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-waiting rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <span className="text-xl sm:text-2xl font-bold">
                   {queueStatus.totalConfirmed}
@@ -267,7 +267,7 @@ export function CustomerDashboardView({
               </p>
             </div>
 
-            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-time rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <span className="text-xl sm:text-2xl font-bold">
                   {Math.floor(queueStatus.estimatedWaitTime)}
@@ -278,7 +278,7 @@ export function CustomerDashboardView({
               </p>
             </div>
 
-            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="text-center p-2 sm:p-3 bg-white dark:bg-gray-800">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 shop-frontend-queue-average rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
                 <span className="text-xl sm:text-2xl font-bold">
                   {Math.floor(queueStatus.averageServiceTime)}
