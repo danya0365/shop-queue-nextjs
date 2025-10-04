@@ -1087,7 +1087,9 @@ CREATE OR REPLACE FUNCTION public.get_customer_by_id(
   name TEXT,
   phone TEXT,
   shop_id UUID,
-  profile_id UUID
+  profile_id UUID,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
 ) AS $$
 BEGIN
   -- Security check: Only return customer data if:
@@ -1099,7 +1101,9 @@ BEGIN
     c.name,
     c.phone,
     c.shop_id,
-    c.profile_id
+    c.profile_id,
+    c.created_at,
+    c.updated_at
   FROM public.customers c
   WHERE c.id = p_customer_id
     AND (
@@ -1125,7 +1129,9 @@ CREATE OR REPLACE FUNCTION public.get_customer_by_profile_id(
   name TEXT,
   phone TEXT,
   shop_id UUID,
-  profile_id UUID
+  profile_id UUID,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
 ) AS $$
 BEGIN
   -- Security check: Only return customer data for the currently authenticated user
@@ -1135,7 +1141,9 @@ BEGIN
     c.name,
     c.phone,
     c.shop_id,
-    c.profile_id
+    c.profile_id,
+    c.created_at,
+    c.updated_at
   FROM public.customers c
   WHERE c.profile_id = p_profile_id
     AND c.shop_id = p_shop_id

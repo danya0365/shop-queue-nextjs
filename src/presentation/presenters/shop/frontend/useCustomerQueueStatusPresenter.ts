@@ -59,6 +59,7 @@ export function useCustomerQueueStatusPresenter(
               name: profileCustomer.name,
               phone: profileCustomer.phone,
               shopId: profileCustomer.shopId,
+              joinedDate: profileCustomer.createdAt,
             });
           }
         } catch (error) {

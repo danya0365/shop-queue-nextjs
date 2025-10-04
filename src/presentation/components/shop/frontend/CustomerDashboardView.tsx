@@ -6,6 +6,46 @@ import { useQRCode } from "next-qrcode";
 import Link from "next/link";
 import { useState } from "react";
 
+// Utility function to check if the shop is currently open based on opening hours
+// Accepts nullable open/close times to align with OpeningHourDTO (string | null)
+const isShopOpenNow = (
+  openingHours: Array<{
+    dayOfWeek: string;
+    openTime: string | null;
+    closeTime: string | null;
+  }>
+) => {
+  if (!openingHours || openingHours.length === 0) return false;
+
+  const now = new Date();
+  const currentDay = now.toLocaleString("th-TH", { weekday: "long" });
+  const currentTime = now.getHours() * 100 + now.getMinutes();
+
+  // Find today's opening hours
+  const todayHours = openingHours.find(
+    (hour) => hour.dayOfWeek.toLowerCase() === currentDay.toLowerCase()
+  );
+
+  if (!todayHours) return false;
+
+  // Ensure we have valid open/close times
+  if (!todayHours.openTime || !todayHours.closeTime) return false;
+
+  // Parse opening and closing times (format: "HH:MM")
+  const [openHour, openMinute] = todayHours.openTime.split(":").map(Number);
+  const [closeHour, closeMinute] = todayHours.closeTime.split(":").map(Number);
+
+  const openTime = openHour * 100 + openMinute;
+  const closeTime = closeHour * 100 + closeMinute;
+
+  // Handle overnight hours (e.g., 22:00 - 05:00)
+  if (closeTime < openTime) {
+    return currentTime >= openTime || currentTime < closeTime;
+  }
+
+  return currentTime >= openTime && currentTime < closeTime;
+};
+
 interface CustomerDashboardViewProps {
   shopId: string;
   initialViewModel?: import("@/src/presentation/presenters/shop/frontend/CustomerDashboardPresenter").CustomerDashboardViewModel;
@@ -103,7 +143,7 @@ export function CustomerDashboardView({
                 {shopInfo.description}
               </p>
               <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-                {process.env.IS_SHOW_RATING === "true" && (
+                {IS_SHOW_RATING && (
                   <>
                     <div
                       className={cn(
@@ -135,13 +175,17 @@ export function CustomerDashboardView({
                 </div>
                 <div
                   className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
-                    shopInfo.isOpen
+                    isShopOpenNow(shopInfo.openingHours)
                       ? "shop-frontend-status-open"
                       : "shop-frontend-status-closed"
                   }`}
                 >
                   <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span>{shopInfo.isOpen ? "เปิดอยู่" : "ปิดแล้ว"}</span>
+                  <span>
+                    {isShopOpenNow(shopInfo.openingHours)
+                      ? "เปิดอยู่"
+                      : "ปิดแล้ว"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -263,7 +307,9 @@ export function CustomerDashboardView({
                   ไม่สามารถเข้าคิวได้ในขณะนี้
                 </button>
                 <p className="text-sm shop-frontend-text-muted mt-2">
-                  {!shopInfo.isOpen ? "ร้านปิดแล้ว" : "คิวเต็ม กรุณารอสักครู่"}
+                  {!isShopOpenNow(shopInfo.openingHours)
+                    ? "ร้านปิดแล้ว"
+                    : "คิวเต็ม กรุณารอสักครู่"}
                 </p>
               </div>
             )}

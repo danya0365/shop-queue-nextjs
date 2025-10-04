@@ -73,10 +73,11 @@ export function useCustomerHistoryPresenter(
             "Loading customer data by profile ID for authenticated user"
           );
 
-          const profileCustomer = await customerPresenter.getCustomerByProfileId(
-            activeProfile.id,
-            shopId
-          );
+          const profileCustomer =
+            await customerPresenter.getCustomerByProfileId(
+              activeProfile.id,
+              shopId
+            );
 
           if (profileCustomer) {
             // Store customer data for future use
@@ -85,6 +86,7 @@ export function useCustomerHistoryPresenter(
               name: profileCustomer.name,
               phone: profileCustomer.phone,
               shopId: profileCustomer.shopId,
+              joinedDate: profileCustomer.createdAt,
             });
           }
         } catch (error) {

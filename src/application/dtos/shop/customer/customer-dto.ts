@@ -7,6 +7,7 @@ export interface CustomerDTO {
   phone: string;
   shopId: string;
   profileId?: string | null;
+  createdAt: string;
 }
 
 export interface GetCustomerByIdInputDTO {

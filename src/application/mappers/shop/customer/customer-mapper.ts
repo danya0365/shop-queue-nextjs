@@ -1,12 +1,12 @@
 import type {
   CustomerDTO,
-  RegisterCustomerOutputDTO,
   LinkCustomerToProfileOutputDTO,
+  RegisterCustomerOutputDTO,
 } from "@/src/application/dtos/shop/customer/customer-dto";
 import type {
   CustomerEntity,
-  RegisterCustomerResultEntity,
   LinkCustomerToProfileResultEntity,
+  RegisterCustomerResultEntity,
 } from "@/src/domain/entities/shop/customer/customer.entity";
 
 /**
@@ -24,13 +24,16 @@ export class CustomerMapper {
       phone: entity.phone,
       shopId: entity.shopId,
       profileId: entity.profileId,
+      createdAt: entity.createdAt,
     };
   }
 
   /**
    * Convert RegisterCustomerResultEntity to RegisterCustomerOutputDTO
    */
-  static toRegisterCustomerOutputDTO(entity: RegisterCustomerResultEntity): RegisterCustomerOutputDTO {
+  static toRegisterCustomerOutputDTO(
+    entity: RegisterCustomerResultEntity
+  ): RegisterCustomerOutputDTO {
     return {
       customerId: entity.customerId,
     };
@@ -39,7 +42,9 @@ export class CustomerMapper {
   /**
    * Convert LinkCustomerToProfileResultEntity to LinkCustomerToProfileOutputDTO
    */
-  static toLinkCustomerToProfileOutputDTO(entity: LinkCustomerToProfileResultEntity): LinkCustomerToProfileOutputDTO {
+  static toLinkCustomerToProfileOutputDTO(
+    entity: LinkCustomerToProfileResultEntity
+  ): LinkCustomerToProfileOutputDTO {
     return {
       success: entity.success,
     };
@@ -52,7 +57,7 @@ export class CustomerMapper {
     shopId: string;
     name: string;
     phone: string;
-  }): Omit<CustomerEntity, 'id' | 'profileId'> {
+  }): Omit<CustomerEntity, "id" | "profileId" | "createdAt"> {
     return {
       shopId: input.shopId,
       name: input.name,

@@ -29,6 +29,7 @@ export class CustomerMapper {
       phone: schema.phone || "",
       shopId: schema.shop_id || "",
       profileId: schema.profile_id || null,
+      createdAt: schema.created_at || "",
     };
   }
 
@@ -44,6 +45,7 @@ export class CustomerMapper {
       phone: entity.phone,
       shopId: entity.shopId,
       profileId: entity.profileId,
+      createdAt: entity.createdAt,
     };
   }
 

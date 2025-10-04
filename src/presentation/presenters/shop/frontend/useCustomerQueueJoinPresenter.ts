@@ -91,6 +91,7 @@ export function useCustomerQueueJoinPresenter(
               name: profileCustomer.name,
               phone: profileCustomer.phone,
               shopId: profileCustomer.shopId,
+              joinedDate: profileCustomer.createdAt,
             });
           } else {
             if (activeProfile) {
@@ -338,6 +339,7 @@ export function useCustomerQueueJoinPresenter(
             name: formData.customerName.trim(),
             phone: formData.customerPhone.trim(),
             shopId: shopId,
+            joinedDate: new Date().toISOString(),
           });
 
           finalFormData.customerId = registerResult.customerId;
@@ -381,6 +383,7 @@ export function useCustomerQueueJoinPresenter(
               name: formData.customerName.trim(),
               phone: formData.customerPhone.trim(),
               shopId: shopId,
+              joinedDate: new Date().toISOString(),
             });
           }
         }

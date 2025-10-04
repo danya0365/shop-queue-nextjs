@@ -17,4 +17,4 @@ export type LinkCustomerToProfileSchema =
 
 // Schema for get_customer_by_profile_id RPC function (not found in types, using Json as fallback)
 export type GetCustomerByProfileIdSchema =
-  Database["public"]["Functions"]["get_customer_by_id"]["Returns"][0];
+  Database["public"]["Functions"]["get_customer_by_profile_id"]["Returns"][0];

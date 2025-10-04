@@ -4445,6 +4445,8 @@ export type Database = {
           phone: string
           shop_id: string
           profile_id: string
+          created_at: string
+          updated_at: string
         }[]
       }
       get_customer_by_profile_id: {
@@ -4455,6 +4457,8 @@ export type Database = {
           phone: string
           shop_id: string
           profile_id: string
+          created_at: string
+          updated_at: string
         }[]
       }
       get_customer_info_by_customer: {

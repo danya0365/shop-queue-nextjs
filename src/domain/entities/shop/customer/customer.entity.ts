@@ -6,6 +6,7 @@ export interface CustomerEntity {
   phone: string;
   shopId: string;
   profileId?: string | null;
+  createdAt: string;
 }
 
 export interface RegisterCustomerResultEntity {
