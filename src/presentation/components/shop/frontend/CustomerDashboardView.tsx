@@ -26,17 +26,47 @@ const isShopOpenNow = (
   // Helper: map weekday label to index Sun=0..Sat=6 (supports English/Thai and numeric forms)
   const toDayIndex = (label?: string | null): number | null => {
     if (!label) return null;
-    let s = label.trim().toLowerCase().replace(/^วัน\s*/, "").replace(/\.+$/, "");
+    let s = label
+      .trim()
+      .toLowerCase()
+      .replace(/^วัน\s*/, "")
+      .replace(/\.+$/, "");
     if (s.length > 3 && /^[a-z]/.test(s)) s = s.slice(0, 3);
-    const enLong = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-    const enShort = ["sun","mon","tue","wed","thu","fri","sat"];
-    const thLong = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"].map(x=>x.toLowerCase());
-    const thShort = ["อา","จ","อ","พ","พฤ","ศ","ส"].map(x=>x.toLowerCase());
-    if (/^[0-6]$/.test(s)) return parseInt(s,10);
-    if (/^[1-7]$/.test(s)) { const n=parseInt(s,10); return n===7?0:n; }
-    const idxs = [enLong.indexOf(s), enShort.indexOf(s), thLong.indexOf(s), thShort.indexOf(s)];
-    const found = idxs.find(i=>i!==-1);
-    return found!==undefined && found!==-1 ? found : null;
+    const enLong = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const enShort = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const thLong = [
+      "อาทิตย์",
+      "จันทร์",
+      "อังคาร",
+      "พุธ",
+      "พฤหัสบดี",
+      "ศุกร์",
+      "เสาร์",
+    ].map((x) => x.toLowerCase());
+    const thShort = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((x) =>
+      x.toLowerCase()
+    );
+    if (/^[0-6]$/.test(s)) return parseInt(s, 10);
+    if (/^[1-7]$/.test(s)) {
+      const n = parseInt(s, 10);
+      return n === 7 ? 0 : n;
+    }
+    const idxs = [
+      enLong.indexOf(s),
+      enShort.indexOf(s),
+      thLong.indexOf(s),
+      thShort.indexOf(s),
+    ];
+    const found = idxs.find((i) => i !== -1);
+    return found !== undefined && found !== -1 ? found : null;
   };
 
   const parseHHmm = (t: string) => {
@@ -54,7 +84,10 @@ const isShopOpenNow = (
     const tz = (h.timezone && h.timezone.trim()) || fallbackTz;
 
     // Determine current weekday index in this timezone
-    const weekdayShort = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: tz }).format(now);
+    const weekdayShort = new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      timeZone: tz,
+    }).format(now);
     const currentDayIndex = toDayIndex(weekdayShort);
     const ruleDayIndex = toDayIndex(h.dayOfWeek);
     if (currentDayIndex == null || ruleDayIndex == null) continue;
@@ -66,10 +99,15 @@ const isShopOpenNow = (
     if (!h.openTime || !h.closeTime) continue;
 
     // Current time HHmm in this timezone
-    const parts = new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz }).formatToParts(now);
-    const hourStr = parts.find(p=>p.type==="hour")?.value ?? "00";
-    const minuteStr = parts.find(p=>p.type==="minute")?.value ?? "00";
-    const currentTime = parseInt(hourStr,10)*100 + parseInt(minuteStr,10);
+    const parts = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: tz,
+    }).formatToParts(now);
+    const hourStr = parts.find((p) => p.type === "hour")?.value ?? "00";
+    const minuteStr = parts.find((p) => p.type === "minute")?.value ?? "00";
+    const currentTime = parseInt(hourStr, 10) * 100 + parseInt(minuteStr, 10);
 
     const openVal = parseHHmm(h.openTime);
     const closeVal = parseHHmm(h.closeTime);
@@ -419,7 +457,9 @@ export function CustomerDashboardView({
                 const diffMs = endAt.getTime() - nowTs;
                 const isExpired = diffMs <= 0;
                 const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const diffHours = Math.floor(
+                  (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+                );
                 const thDate = isNaN(endAt.getTime())
                   ? promotion.validUntil
                   : endAt.toLocaleDateString("th-TH", {
@@ -462,7 +502,12 @@ export function CustomerDashboardView({
                           <h3 className="font-semibold shop-frontend-text-primary text-base truncate">
                             {promotion.title}
                           </h3>
-                          <div className={cn("px-2.5 py-1 rounded-full text-xs font-medium", urgencyClass)}>
+                          <div
+                            className={cn(
+                              "px-2.5 py-1 rounded-full text-xs font-medium",
+                              urgencyClass
+                            )}
+                          >
                             {timeLabel}
                           </div>
                         </div>
@@ -470,37 +515,60 @@ export function CustomerDashboardView({
                           {promotion.description}
                         </p>
 
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-[auto,1fr,auto] items-center gap-3 sm:gap-4">
+                          {/* Discount badge */}
+                          <div className="flex items-center">
                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                               🔖 ลด {promotion.discount}%
                             </span>
-                            <span className="text-xs shop-frontend-text-muted">
-                              หมดเขต: {thDate}
-                            </span>
                           </div>
-                          <Link
-                            href={`/shop/${shopId}/queue`}
-                            className={cn(
-                              "px-3 py-1.5 text-sm rounded-lg font-medium",
-                              isExpired
-                                ? "shop-frontend-button-disabled cursor-not-allowed"
-                                : "shop-frontend-button-primary"
-                            )}
-                            aria-disabled={isExpired}
-                            tabIndex={isExpired ? -1 : 0}
-                          >
-                            ใช้โปรโมชัน
-                          </Link>
+
+                          {/* Expiry */}
+                          <div className="flex items-center text-xs sm:text-sm shop-frontend-text-muted">
+                            <span className="mr-1">🗓️</span>
+                            <span className="truncate">หมดเขต: {thDate}</span>
+                          </div>
+
+                          {/* Action */}
+                          <div className="sm:justify-self-end">
+                            <Link
+                              href={`/shop/${shopId}/queue`}
+                              className={cn(
+                                "w-full sm:w-auto px-3 py-1.5 text-sm rounded-lg font-medium text-center inline-flex justify-center",
+                                isExpired
+                                  ? "shop-frontend-button-disabled cursor-not-allowed"
+                                  : "shop-frontend-button-primary"
+                              )}
+                              aria-disabled={isExpired}
+                              tabIndex={isExpired ? -1 : 0}
+                            >
+                              ใช้โปรโมชัน
+                            </Link>
+                          </div>
                         </div>
 
                         {!isExpired && (
                           <div className="mt-3">
                             <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                               {(() => {
-                                const totalWindow = endAt.getTime() - (new Date(endAt.getTime() - (1000 * 60 * 60 * 24 * 14))).getTime();
-                                const elapsed = Math.max(0, totalWindow - diffMs);
-                                const pct = Math.max(0, Math.min(100, Math.round((elapsed / Math.max(1, totalWindow)) * 100)));
+                                const totalWindow =
+                                  endAt.getTime() -
+                                  new Date(
+                                    endAt.getTime() - 1000 * 60 * 60 * 24 * 14
+                                  ).getTime();
+                                const elapsed = Math.max(
+                                  0,
+                                  totalWindow - diffMs
+                                );
+                                const pct = Math.max(
+                                  0,
+                                  Math.min(
+                                    100,
+                                    Math.round(
+                                      (elapsed / Math.max(1, totalWindow)) * 100
+                                    )
+                                  )
+                                );
                                 return (
                                   <div
                                     className="h-full bg-gradient-to-r from-amber-400 to-red-500"
