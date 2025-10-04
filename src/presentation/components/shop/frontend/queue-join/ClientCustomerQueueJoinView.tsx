@@ -146,11 +146,11 @@ export function ClientCustomerQueueJoinView({
               </p>
             </div>
 
-            <div className="shop-frontend-qr-section rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+            <div className="shop-frontend-detail-section rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
               <h3 className="font-semibold shop-frontend-text-primary mb-3 sm:mb-4 text-center sm:text-left">
                 รายละเอียดคิว
               </h3>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <button
                   onClick={() =>
                     (window.location.href = `/shop/${shopId}/status?queue=${queueNumber}`)
