@@ -1,6 +1,7 @@
 "use client";
 
 import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
+import { getFormatPhone } from "@/src/domain/utils/phone";
 import type { CustomerQueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
 import { useCustomerQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueStatusPresenter";
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
@@ -410,11 +411,11 @@ export function CustomerQueueStatusView({
                     </span>
                     <span className="shop-frontend-text-primary font-medium">
                       {customerQueue.isOwner ? (
-                        customer?.phone || (
+                        getFormatPhone(customer?.phone) || (
                           <span className="text-gray-400">ไม่ระบุ</span>
                         )
                       ) : customerQueue.customerPhone ? (
-                        customerQueue.customerPhone
+                        getFormatPhone(customerQueue.customerPhone)
                       ) : (
                         <span className="text-gray-400">ซ่อนเบอร์โทร</span>
                       )}
