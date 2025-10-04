@@ -16,7 +16,8 @@ export interface ShopInfo {
   qrCodeUrl: string;
   qrCodeJoinQueueUrl: string;
   logo?: string;
-  openingHours: string;
+  openingHours: OpeningHourDTO[];
+  formattedOpeningHours: string;
   services: string[];
   servicesCount: number;
   isOpen: boolean;
@@ -47,7 +48,8 @@ export abstract class BaseShopPresenter {
       qrCodeUrl: `${getAppUrl()}/shop/${shopId}`,
       qrCodeJoinQueueUrl: `${getAppUrl()}/shop/${shopId}/queue`,
       logo: "/images/shop-logo.png",
-      openingHours: this.createOpeningHoursString(shop.openingHours),
+      openingHours: shop.openingHours,
+      formattedOpeningHours: this.createOpeningHoursString(shop.openingHours),
       services: this.createServicesString(shop.services),
       servicesCount: shop.services.length,
       isOpen: shop.status === "active",

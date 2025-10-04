@@ -1,6 +1,7 @@
 "use client";
 
 import { useCustomerDashboardPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerDashboardPresenter";
+import { cn } from "@/src/utils/cn";
 import { useQRCode } from "next-qrcode";
 import Link from "next/link";
 import { useState } from "react";
@@ -9,6 +10,8 @@ interface CustomerDashboardViewProps {
   shopId: string;
   initialViewModel?: import("@/src/presentation/presenters/shop/frontend/CustomerDashboardPresenter").CustomerDashboardViewModel;
 }
+
+const IS_SHOW_RATING = false;
 
 export function CustomerDashboardView({
   shopId,
@@ -91,7 +94,7 @@ export function CustomerDashboardView({
       {/* Shop Header */}
       <div className="shop-frontend-card overflow-hidden">
         <div className="shop-frontend-shop-header p-4 sm:p-6 lg:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 truncate">
                 {shopInfo.name}
@@ -99,22 +102,32 @@ export function CustomerDashboardView({
               <p className="shop-frontend-shop-header-text-light mb-3 sm:mb-4 text-sm sm:text-base">
                 {shopInfo.description}
               </p>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                <div className="flex items-center space-x-1 whitespace-nowrap">
-                  <span>⭐</span>
-                  <span>{shopInfo.rating}/5</span>
-                  <span className="hidden sm:inline">
-                    ({shopInfo.totalReviews} รีวิว)
-                  </span>
-                  <span className="sm:hidden">({shopInfo.totalReviews})</span>
-                </div>
-                <div className="hidden sm:flex items-center space-x-1">
-                  <span>•</span>
-                </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                {process.env.IS_SHOW_RATING === "true" && (
+                  <>
+                    <div
+                      className={cn(
+                        "flex items-center space-x-1 whitespace-nowrap"
+                      )}
+                    >
+                      <span>⭐</span>
+                      <span>{shopInfo.rating}/5</span>
+                      <span className="hidden sm:inline">
+                        ({shopInfo.totalReviews} รีวิว)
+                      </span>
+                      <span className="sm:hidden">
+                        ({shopInfo.totalReviews})
+                      </span>
+                    </div>
+                    <div className="hidden sm:flex items-center space-x-1">
+                      <span>•</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex items-center space-x-1 whitespace-nowrap">
                   <span>🕒</span>
                   <span className="truncate max-w-[120px] sm:max-w-none">
-                    {shopInfo.openingHours}
+                    {shopInfo.formattedOpeningHours}
                   </span>
                 </div>
                 <div className="hidden sm:flex items-center space-x-1">
@@ -413,7 +426,7 @@ export function CustomerDashboardView({
                 เวลาเปิด-ปิด
               </p>
               <p className="shop-frontend-text-secondary">
-                {shopInfo.openingHours}
+                {shopInfo.formattedOpeningHours}
               </p>
             </div>
           </div>

@@ -173,7 +173,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
               เวลาทำการ
             </p>
             <p className="font-medium text-gray-900 dark:text-gray-100">
-              {viewModel.shopInfo.openingHours}
+              {viewModel.shopInfo.formattedOpeningHours}
             </p>
           </div>
           <div className="md:col-span-2">
@@ -595,7 +595,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                       <p>📞 {viewModel.shopInfo.phone}</p>
                     )}
                     {customization.showOpeningHours && (
-                      <p>🕒 {viewModel.shopInfo.openingHours}</p>
+                      <p>🕒 {viewModel.shopInfo.formattedOpeningHours}</p>
                     )}
                     {customization.showAddress && (
                       <p className="text-xs opacity-80">
@@ -702,7 +702,7 @@ export function PostersView({ shopId, initialViewModel }: PostersViewProps) {
                   <p>📞 {viewModel.shopInfo.phone}</p>
                 )}
                 {customization.showOpeningHours && (
-                  <p>🕒 {viewModel.shopInfo.openingHours}</p>
+                  <p>🕒 {viewModel.shopInfo.formattedOpeningHours}</p>
                 )}
                 {customization.showAddress && (
                   <p className="text-xs opacity-80">
