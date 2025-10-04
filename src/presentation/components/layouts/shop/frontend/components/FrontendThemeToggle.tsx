@@ -99,7 +99,7 @@ export function FrontendThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border shop-frontend-sidebar-border shop-frontend-sidebar-bg backdrop-blur-sm transition-all duration-200 hover:scale-105 shop-frontend-sidebar-hover hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+      className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border shop-frontend-sidebar-border shop-frontend-sidebar-bg backdrop-blur-sm transition-all duration-200 hover:scale-105 shop-frontend-sidebar-hover hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
       title={getTooltip()}
       aria-label={getTooltip()}
     >
