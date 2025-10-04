@@ -6,8 +6,9 @@ import { useQRCode } from "next-qrcode";
 import Link from "next/link";
 import { useState } from "react";
 
-// Utility function to check if the shop is currently open based on opening hours
-// Accepts nullable open/close times to align with OpeningHourDTO (string | null)
+// Utility: Check if the shop is currently open using local shop timezone (default Asia/Bangkok, GMT+7)
+// - openingHours dayOfWeek in seed are English (monday..sunday); we map to weekday index
+// - open/close may be "HH:MM" or "HH:MM:SS"
 const isShopOpenNow = (
   openingHours: Array<{
     dayOfWeek: string;
@@ -17,33 +18,62 @@ const isShopOpenNow = (
 ) => {
   if (!openingHours || openingHours.length === 0) return false;
 
-  const now = new Date();
-  const currentDay = now.toLocaleString("th-TH", { weekday: "long" });
-  const currentTime = now.getHours() * 100 + now.getMinutes();
+  const timeZone = "Asia/Bangkok"; // default +7 as requested
+  const now = new Date(); // UTC instant
 
-  // Find today's opening hours
-  const todayHours = openingHours.find(
-    (hour) => hour.dayOfWeek.toLowerCase() === currentDay.toLowerCase()
-  );
+  // Helper: map weekday label to index Sun=0..Sat=6 (supports English/Thai and numeric forms)
+  const toDayIndex = (label?: string | null): number | null => {
+    if (!label) return null;
+    let s = label.trim().toLowerCase().replace(/^วัน\s*/, "").replace(/\.+$/, "");
+    if (s.length > 3 && /^[a-z]/.test(s)) s = s.slice(0, 3);
+    const enLong = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+    const enShort = ["sun","mon","tue","wed","thu","fri","sat"];
+    const thLong = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"].map(x=>x.toLowerCase());
+    const thShort = ["อา","จ","อ","พ","พฤ","ศ","ส"].map(x=>x.toLowerCase());
+    if (/^[0-6]$/.test(s)) return parseInt(s,10);
+    if (/^[1-7]$/.test(s)) { const n=parseInt(s,10); return n===7?0:n; }
+    const idxs = [enLong.indexOf(s), enShort.indexOf(s), thLong.indexOf(s), thShort.indexOf(s)];
+    const found = idxs.find(i=>i!==-1);
+    return found!==undefined && found!==-1 ? found : null;
+  };
+
+  // Current weekday index in shop timezone
+  const weekdayShort = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone }).format(now); // e.g., Sat
+  const currentDayIndex = toDayIndex(weekdayShort);
+  if (currentDayIndex == null) return false;
+
+  // Current time HHmm in shop timezone
+  const parts = new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone }).formatToParts(now);
+  const hourStr = parts.find(p=>p.type==="hour")?.value ?? "00";
+  const minuteStr = parts.find(p=>p.type==="minute")?.value ?? "00";
+  const currentTime = parseInt(hourStr,10)*100 + parseInt(minuteStr,10);
+
+  // Find today's opening hours (seed uses english day names)
+  const todayHours = openingHours.find((h) => toDayIndex(h.dayOfWeek) === currentDayIndex);
 
   if (!todayHours) return false;
 
-  // Ensure we have valid open/close times
   if (!todayHours.openTime || !todayHours.closeTime) return false;
 
-  // Parse opening and closing times (format: "HH:MM")
-  const [openHour, openMinute] = todayHours.openTime.split(":").map(Number);
-  const [closeHour, closeMinute] = todayHours.closeTime.split(":").map(Number);
+  // Parse HH:MM or HH:MM:SS
+  const parseHHmm = (t: string) => {
+    const [h, m] = t.split(":");
+    const hh = parseInt(h, 10);
+    const mm = parseInt(m ?? "0", 10);
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+    return hh * 100 + mm;
+  };
 
-  const openTime = openHour * 100 + openMinute;
-  const closeTime = closeHour * 100 + closeMinute;
+  const openVal = parseHHmm(todayHours.openTime);
+  const closeVal = parseHHmm(todayHours.closeTime);
+  if (openVal == null || closeVal == null) return false;
 
   // Handle overnight hours (e.g., 22:00 - 05:00)
-  if (closeTime < openTime) {
-    return currentTime >= openTime || currentTime < closeTime;
+  if (closeVal < openVal) {
+    return currentTime >= openVal || currentTime < closeVal;
   }
 
-  return currentTime >= openTime && currentTime < closeTime;
+  return currentTime >= openVal && currentTime < closeVal;
 };
 
 interface CustomerDashboardViewProps {
