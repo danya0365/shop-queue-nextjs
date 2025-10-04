@@ -209,7 +209,8 @@ export class SupabaseCustomerDashboardRepository
    */
   async getPromotions(
     shopId: string,
-    limit?: number
+    page: number = 1,
+    limit: number = 10
   ): Promise<PromotionEntity[]> {
     try {
       if (!shopId) {
@@ -221,14 +222,15 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      this.logger.info("Getting promotions", { shopId, limit });
+      this.logger.info("Getting promotions", { shopId, page, limit });
 
       // Use RPC call to get promotions data
       const promotionsData = await this.dataSource.callRpc<
         Array<Record<string, unknown>>
       >("get_customer_promotions", {
         p_shop_id: shopId,
-        p_limit: limit || 10,
+        p_page: page,
+        p_limit: limit,
       });
 
       if (!promotionsData || !Array.isArray(promotionsData)) {
@@ -240,9 +242,9 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      // Transform the data using the mapper
+      // Transform the data using the mapper (use schema type for strong typing)
       const promotions = SupabaseCustomerDashboardMapper.toPromotionEntities(
-        promotionsData as any[]
+        promotionsData as unknown as import("@/src/infrastructure/schemas/shop/customer/customer-dashboard.schema").PromotionSchema[]
       );
 
       this.logger.info("Promotions retrieved successfully", {
@@ -260,6 +262,48 @@ export class SupabaseCustomerDashboardRepository
         ShopCustomerDashboardErrorType.DATABASE_ERROR,
         "Failed to get promotions",
         "SupabaseCustomerDashboardRepository.getPromotions",
+        { shopId },
+        error as Error
+      );
+    }
+  }
+
+  /**
+   * Get total count for active and valid promotions (for pagination)
+   */
+  async getPromotionsCount(shopId: string): Promise<number> {
+    try {
+      if (!shopId) {
+        throw new ShopCustomerDashboardError(
+          ShopCustomerDashboardErrorType.VALIDATION_ERROR,
+          "Shop ID is required",
+          "SupabaseCustomerDashboardRepository.getPromotionsCount",
+          { shopId }
+        );
+      }
+
+      const result = await this.dataSource.callRpc<Array<{ count: number } | number>>(
+        "get_customer_promotions_count",
+        { p_shop_id: shopId }
+      );
+
+      // Depending on datasource implementation, RPC can return [number] or [{count:number}]
+      if (!result || !Array.isArray(result) || result.length === 0) {
+        return 0;
+      }
+
+      const first = result[0] as any;
+      const count = typeof first === "number" ? first : first.count;
+      return Number(count) || 0;
+    } catch (error) {
+      if (error instanceof ShopCustomerDashboardError) {
+        throw error;
+      }
+      this.logger.error("Error getting promotions count", error);
+      throw new ShopCustomerDashboardError(
+        ShopCustomerDashboardErrorType.DATABASE_ERROR,
+        "Failed to get promotions count",
+        "SupabaseCustomerDashboardRepository.getPromotionsCount",
         { shopId },
         error as Error
       );

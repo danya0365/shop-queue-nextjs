@@ -7,8 +7,9 @@ import type {
 } from "@/src/application/dtos/shop/customer/customer-dashboard-dto";
 import { GetCustomerDashboardUseCase } from "@/src/application/usecases/shop/customer/dashboard/GetCustomerDashboardUseCase";
 import { GetPopularServicesUseCase } from "@/src/application/usecases/shop/customer/dashboard/GetPopularServicesUseCase";
-import { GetPromotionsUseCase } from "@/src/application/usecases/shop/customer/dashboard/GetPromotionsUseCase";
+import { GetPromotionsUseCase, type GetPromotionsInput } from "@/src/application/usecases/shop/customer/dashboard/GetPromotionsUseCase";
 import { GetQueueStatusUseCase } from "@/src/application/usecases/shop/customer/dashboard/GetQueueStatusUseCase";
+import { GetPromotionsCountUseCase } from "@/src/application/usecases/shop/customer/dashboard/GetPromotionsCountUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { ShopCustomerDashboardRepository } from "@/src/domain/repositories/shop/customer/customer-dashboard-repository";
 
@@ -29,11 +30,14 @@ export interface IShopCustomerDashboardService {
   getPopularServices(shopId: string, limit?: number): Promise<PopularServiceDTO[]>;
 
   /**
-   * Get active promotions for a shop
-   * @param shopId The shop ID
-   * @returns Array of active promotions
+   * Get active promotions for a shop (paginated)
    */
-  getPromotions(shopId: string): Promise<PromotionDTO[]>;
+  getPromotions(shopId: string, page?: number, limit?: number): Promise<PromotionDTO[]>;
+
+  /**
+   * Get total promotions count (for pagination)
+   */
+  getPromotionsCount(shopId: string): Promise<number>;
 
   /**
    * Get complete customer dashboard data
@@ -50,8 +54,9 @@ export class ShopCustomerDashboardService implements IShopCustomerDashboardServi
       { shopId: string; limit?: number },
       PopularServiceDTO[]
     >,
-    private readonly getPromotionsUseCase: IUseCase<string, PromotionDTO[]>,
+    private readonly getPromotionsUseCase: IUseCase<GetPromotionsInput, PromotionDTO[]>,
     private readonly getCustomerDashboardUseCase: IUseCase<string, CustomerDashboardDataDTO>,
+    private readonly getPromotionsCountUseCase: IUseCase<string, number>,
     private readonly logger: Logger
   ) {}
 
@@ -82,14 +87,25 @@ export class ShopCustomerDashboardService implements IShopCustomerDashboardServi
     }
   }
 
-  async getPromotions(shopId: string): Promise<PromotionDTO[]> {
+  async getPromotions(shopId: string, page: number = 1, limit: number = 10): Promise<PromotionDTO[]> {
     try {
-      this.logger.info("Getting promotions", { shopId });
+      this.logger.info("Getting promotions", { shopId, page, limit });
 
-      const result = await this.getPromotionsUseCase.execute(shopId);
+      const result = await this.getPromotionsUseCase.execute({ shopId, page, limit });
       return result;
     } catch (error) {
       this.logger.error("Error getting promotions", { error, shopId });
+      throw error;
+    }
+  }
+
+  async getPromotionsCount(shopId: string): Promise<number> {
+    try {
+      this.logger.info("Getting promotions count", { shopId });
+      const count = await this.getPromotionsCountUseCase.execute(shopId);
+      return Number(count) || 0;
+    } catch (error) {
+      this.logger.error("Error getting promotions count", { error, shopId });
       throw error;
     }
   }
@@ -113,12 +129,14 @@ export class ShopCustomerDashboardServiceFactory {
     const getPopularServicesUseCase = new GetPopularServicesUseCase(repository);
     const getPromotionsUseCase = new GetPromotionsUseCase(repository);
     const getCustomerDashboardUseCase = new GetCustomerDashboardUseCase(repository);
-    
+    const getPromotionsCountUseCase = new GetPromotionsCountUseCase(repository);
+
     return new ShopCustomerDashboardService(
       getQueueStatusUseCase,
       getPopularServicesUseCase,
       getPromotionsUseCase,
       getCustomerDashboardUseCase,
+      getPromotionsCountUseCase,
       logger
     );
   }

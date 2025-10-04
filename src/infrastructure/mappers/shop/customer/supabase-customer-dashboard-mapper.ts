@@ -16,7 +16,8 @@ export class SupabaseCustomerDashboardMapper {
       description: String(data.description || ""),
       discount: Number(data.value || 0),
       validUntil: String(data.end_at || ""),
-      icon: String(""), // No icon field in promotion schema
+      icon: data.icon ?? undefined,
+      imageUrl: data.image_url ?? undefined,
     };
   }
 

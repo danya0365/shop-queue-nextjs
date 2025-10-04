@@ -31,7 +31,8 @@ export interface Promotion {
   description: string;
   discount: number;
   validUntil: string;
-  icon: string;
+  icon?: string;
+  imageUrl?: string;
 }
 
 // Define ViewModel interface

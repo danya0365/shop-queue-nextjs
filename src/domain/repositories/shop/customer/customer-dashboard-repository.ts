@@ -42,11 +42,19 @@ export interface ShopCustomerDashboardRepository {
   getPopularServices(shopId: string, limit?: number): Promise<PopularServiceEntity[]>;
 
   /**
-   * Get active promotions for a shop
+   * Get active promotions for a shop (paginated)
    * @param shopId The shop ID
+   * @param page Page number (1-based). Optional, defaults to 1.
+   * @param limit Items per page. Optional, defaults to 10.
    * @returns Array of active promotions
    */
-  getPromotions(shopId: string): Promise<PromotionEntity[]>;
+  getPromotions(shopId: string, page?: number, limit?: number): Promise<PromotionEntity[]>;
+
+  /**
+   * Get total count of active and currently valid promotions for a shop
+   * Used for pagination metadata
+   */
+  getPromotionsCount(shopId: string): Promise<number>;
 
   /**
    * Get complete customer dashboard data

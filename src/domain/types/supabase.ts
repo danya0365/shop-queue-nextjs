@@ -1291,7 +1291,9 @@ export type Database = {
           created_by: string
           description: string | null
           end_at: string
+          icon: string | null
           id: string
+          image_url: string | null
           max_discount_amount: number | null
           min_purchase_amount: number | null
           name: string
@@ -1309,7 +1311,9 @@ export type Database = {
           created_by: string
           description?: string | null
           end_at: string
+          icon?: string | null
           id?: string
+          image_url?: string | null
           max_discount_amount?: number | null
           min_purchase_amount?: number | null
           name: string
@@ -1327,7 +1331,9 @@ export type Database = {
           created_by?: string
           description?: string | null
           end_at?: string
+          icon?: string | null
           id?: string
+          image_url?: string | null
           max_discount_amount?: number | null
           min_purchase_amount?: number | null
           name?: string
@@ -4533,7 +4539,7 @@ export type Database = {
         }[]
       }
       get_customer_promotions: {
-        Args: { p_shop_id: string; p_limit?: number }
+        Args: { p_shop_id: string; p_page?: number; p_limit?: number }
         Returns: {
           id: string
           shop_id: string
@@ -4546,9 +4552,15 @@ export type Database = {
           end_at: string
           usage_limit: number
           conditions: Json
+          icon: string
+          image_url: string
           created_at: string
           updated_at: string
         }[]
+      }
+      get_customer_promotions_count: {
+        Args: { p_shop_id: string }
+        Returns: number
       }
       get_customer_queue_by_number: {
         Args: { p_shop_id: string; p_queue_number: string }

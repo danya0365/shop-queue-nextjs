@@ -829,6 +829,7 @@ INSERT INTO promotions (
   start_at,
   end_at,
   usage_limit,
+  icon,
   created_by,
   created_at,
   updated_at
@@ -844,6 +845,7 @@ SELECT
   promo_info.start_at,
   promo_info.end_at,
   promo_info.usage_limit,
+  promo_info.icon,
   p.id AS created_by,
   promo_info.created_at,
   promo_info.updated_at
@@ -852,10 +854,10 @@ JOIN shops s ON s.id = sd.shop_id
 JOIN profiles p ON p.id = s.owner_id
 CROSS JOIN (
   VALUES 
-    ('ส่วนลดซ่อมจอ 20%'::text, 'ส่วนลด 20% สำหรับการซ่อมหน้าจอมือถือทุกรุ่น'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '25 days', NOW() + INTERVAL '35 days', 80::integer, NOW() - INTERVAL '25 days', NOW() - INTERVAL '45 minutes'),
-    ('ลด 200 บาท'::text, 'ส่วนลดเงินสด 200 บาท เมื่อซ่อมมือถือครบ 1000 บาท'::text, 'fixed_amount'::public.promotion_type, 200.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '12 days', NOW() + INTERVAL '28 days', 60::integer, NOW() - INTERVAL '12 days', NOW() - INTERVAL '1 hour'),
-    ('ตรวจเช็คฟรี'::text, 'บริการตรวจเช็คเครื่องฟรี ไม่มีค่าใช้จ่าย'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '8 days', NOW() + INTERVAL '22 days', 100::integer, NOW() - INTERVAL '8 days', NOW() - INTERVAL '20 minutes'),
-    ('โปรโมชั่นปีใหม่'::text, 'ส่วนลดพิเศษ 35% ในช่วงเทศกาลปีใหม่'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '60 days', NOW() + INTERVAL '90 days', 120::integer, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '120 days', NOW() - INTERVAL '20 days', 100::integer, NOW() - INTERVAL '120 days', NOW() - INTERVAL '20 days')
-) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at);
+    ('ส่วนลดซ่อมจอ 20%'::text, 'ส่วนลด 20% สำหรับการซ่อมหน้าจอมือถือทุกรุ่น'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '25 days', NOW() + INTERVAL '35 days', 80::integer, '📱'::text, NOW() - INTERVAL '25 days', NOW() - INTERVAL '45 minutes'),
+    ('ลด 200 บาท'::text, 'ส่วนลดเงินสด 200 บาท เมื่อซ่อมมือถือครบ 1000 บาท'::text, 'fixed_amount'::public.promotion_type, 200.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '12 days', NOW() + INTERVAL '28 days', 60::integer, '💵'::text, NOW() - INTERVAL '12 days', NOW() - INTERVAL '1 hour'),
+    ('ตรวจเช็คฟรี'::text, 'บริการตรวจเช็คเครื่องฟรี ไม่มีค่าใช้จ่าย'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '8 days', NOW() + INTERVAL '22 days', 100::integer, '🆓'::text, NOW() - INTERVAL '8 days', NOW() - INTERVAL '20 minutes'),
+    ('โปรโมชั่นปีใหม่'::text, 'ส่วนลดพิเศษ 35% ในช่วงเทศกาลปีใหม่'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '60 days', NOW() + INTERVAL '90 days', 120::integer, '🎉'::text, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
+    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '120 days', NOW() - INTERVAL '20 days', 100::integer, '⛔'::text, NOW() - INTERVAL '120 days', NOW() - INTERVAL '20 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, icon, created_at, updated_at);
 

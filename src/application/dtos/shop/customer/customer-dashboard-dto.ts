@@ -23,7 +23,8 @@ export interface PromotionDTO {
   description: string;
   discount: number;
   validUntil: string;
-  icon: string;
+  icon?: string;
+  imageUrl?: string;
 }
 
 export interface CustomerDashboardDataDTO {

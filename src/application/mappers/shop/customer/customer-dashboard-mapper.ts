@@ -70,6 +70,7 @@ export class PromotionMapper {
       discount: entity.discount,
       validUntil: entity.validUntil,
       icon: entity.icon,
+      imageUrl: entity.imageUrl,
     };
   }
 
@@ -81,6 +82,7 @@ export class PromotionMapper {
       discount: dto.discount,
       validUntil: dto.validUntil,
       icon: dto.icon,
+      imageUrl: dto.imageUrl,
     };
   }
 }

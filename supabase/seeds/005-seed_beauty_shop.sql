@@ -751,6 +751,7 @@ INSERT INTO promotions (
   start_at,
   end_at,
   usage_limit,
+  icon,
   created_by,
   created_at,
   updated_at
@@ -766,6 +767,7 @@ SELECT
   promo_info.start_at,
   promo_info.end_at,
   promo_info.usage_limit,
+  promo_info.icon,
   p.id AS created_by,
   promo_info.created_at,
   promo_info.updated_at
@@ -774,10 +776,10 @@ JOIN shops s ON s.id = sd.shop_id
 JOIN profiles p ON p.id = s.owner_id
 CROSS JOIN (
   VALUES 
-    ('ส่วนลดความงาม 20%'::text, 'ส่วนลด 20% สำหรับบริการความงามทุกประเภท'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '22 days', NOW() + INTERVAL '38 days', 100::integer, NOW() - INTERVAL '22 days', NOW() - INTERVAL '25 minutes'),
-    ('ลด 150 บาท'::text, 'ส่วนลดเงินสด 150 บาท เมื่อใช้บริการครบ 800 บาท'::text, 'fixed_amount'::public.promotion_type, 150.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '16 days', NOW() + INTERVAL '34 days', 80::integer, NOW() - INTERVAL '16 days', NOW() - INTERVAL '50 minutes'),
-    ('ทำเล็บฟรี'::text, 'บริการทำเล็บมือฟรี เมื่อทำผมครบ 1000 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '12 days', NOW() + INTERVAL '18 days', 60::integer, NOW() - INTERVAL '12 days', NOW() - INTERVAL '10 minutes'),
-    ('โปรโมชั่นวาเลนไทน์'::text, 'ส่วนลด 30% ในช่วงเทศกาลวาเลนไทน์'::text, 'percentage'::public.promotion_type, 30.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '35 days', NOW() + INTERVAL '65 days', 150::integer, NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
-    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 22.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days', 90::integer, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days')
-) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at);
+    ('ส่วนลดความงาม 20%'::text, 'ส่วนลด 20% สำหรับบริการความงามทุกประเภท'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '22 days', NOW() + INTERVAL '38 days', 100::integer, '💄'::text, NOW() - INTERVAL '22 days', NOW() - INTERVAL '25 minutes'),
+    ('ลด 150 บาท'::text, 'ส่วนลดเงินสด 150 บาท เมื่อใช้บริการครบ 800 บาท'::text, 'fixed_amount'::public.promotion_type, 150.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '16 days', NOW() + INTERVAL '34 days', 80::integer, '💵'::text, NOW() - INTERVAL '16 days', NOW() - INTERVAL '50 minutes'),
+    ('ทำเล็บฟรี'::text, 'บริการทำเล็บมือฟรี เมื่อทำผมครบ 1000 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '12 days', NOW() + INTERVAL '18 days', 60::integer, '💅'::text, NOW() - INTERVAL '12 days', NOW() - INTERVAL '10 minutes'),
+    ('โปรโมชั่นวาเลนไทน์'::text, 'ส่วนลด 30% ในช่วงเทศกาลวาเลนไทน์'::text, 'percentage'::public.promotion_type, 30.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '35 days', NOW() + INTERVAL '65 days', 150::integer, '💘'::text, NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
+    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 22.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days', 90::integer, '⛔'::text, NOW() - INTERVAL '100 days', NOW() - INTERVAL '18 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, icon, created_at, updated_at);
 

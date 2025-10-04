@@ -446,8 +446,16 @@ export function CustomerDashboardView({
                     className="rounded-xl p-5 shop-frontend-card-hover border shop-frontend-card-border bg-white dark:bg-gray-800"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                        <span>{promotion.icon}</span>
+                      <div className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 overflow-hidden">
+                        {promotion.imageUrl ? (
+                          <img
+                            src={promotion.imageUrl}
+                            alt={promotion.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{promotion.icon || "🎉"}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">

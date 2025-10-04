@@ -23,7 +23,8 @@ export interface PromotionEntity {
   description: string;
   discount: number;
   validUntil: string;
-  icon: string;
+  icon?: string;
+  imageUrl?: string;
 }
 
 export interface CustomerDashboardEntity {

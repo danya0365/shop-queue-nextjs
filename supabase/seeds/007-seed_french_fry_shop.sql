@@ -851,6 +851,7 @@ INSERT INTO promotions (
   start_at,
   end_at,
   usage_limit,
+  icon,
   created_by,
   created_at,
   updated_at
@@ -866,6 +867,7 @@ SELECT
   promo_info.start_at,
   promo_info.end_at,
   promo_info.usage_limit,
+  promo_info.icon,
   p.id AS created_by,
   promo_info.created_at,
   promo_info.updated_at
@@ -874,12 +876,12 @@ JOIN shops s ON s.id = sd.shop_id
 JOIN profiles p ON s.owner_id = p.id
 CROSS JOIN (
   VALUES 
-    ('ส่วนลดเฟรนช์ฟราย 18%'::text, 'ส่วนลด 18% สำหรับเฟรนช์ฟรายทุกเมนู'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '24 days', NOW() + INTERVAL '36 days', 110::integer, NOW() - INTERVAL '24 days', NOW() - INTERVAL '40 minutes'),
-    ('ลด 60 บาท'::text, 'ส่วนลดเงินสด 60 บาท เมื่อสั่งครบ 300 บาท'::text, 'fixed_amount'::public.promotion_type, 60.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '17 days', NOW() + INTERVAL '23 days', 85::integer, NOW() - INTERVAL '17 days', NOW() - INTERVAL '1 hour'),
-    ('เครื่องดื่มฟรี'::text, 'เครื่องดื่มฟรี 1 แก้ว เมื่อสั่งเฟรนช์ฟรายครบ 200 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '11 days', NOW() + INTERVAL '19 days', 75::integer, NOW() - INTERVAL '11 days', NOW() - INTERVAL '8 minutes'),
-    ('โปรโมชั่นฤดูร้อน'::text, 'ส่วนลด 35% ในช่วงฤดูร้อน'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '25 days', NOW() + INTERVAL '55 days', 130::integer, NOW() - INTERVAL '7 days', NOW() - INTERVAL '7 days'),
-    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days', 95::integer, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days')
-) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at)
+    ('ส่วนลดเฟรนช์ฟราย 18%'::text, 'ส่วนลด 18% สำหรับเฟรนช์ฟรายทุกเมนู'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '24 days', NOW() + INTERVAL '36 days', 110::integer, '🍟'::text, NOW() - INTERVAL '24 days', NOW() - INTERVAL '40 minutes'),
+    ('ลด 60 บาท'::text, 'ส่วนลดเงินสด 60 บาท เมื่อสั่งครบ 300 บาท'::text, 'fixed_amount'::public.promotion_type, 60.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '17 days', NOW() + INTERVAL '23 days', 85::integer, '💵'::text, NOW() - INTERVAL '17 days', NOW() - INTERVAL '1 hour'),
+    ('เครื่องดื่มฟรี'::text, 'เครื่องดื่มฟรี 1 แก้ว เมื่อสั่งเฟรนช์ฟรายครบ 200 บาท'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '11 days', NOW() + INTERVAL '19 days', 75::integer, '🥤'::text, NOW() - INTERVAL '11 days', NOW() - INTERVAL '8 minutes'),
+    ('โปรโมชั่นฤดูร้อน'::text, 'ส่วนลด 35% ในช่วงฤดูร้อน'::text, 'percentage'::public.promotion_type, 35.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '25 days', NOW() + INTERVAL '55 days', 130::integer, '☀️'::text, NOW() - INTERVAL '7 days', NOW() - INTERVAL '7 days'),
+    ('โปรโมชั่นเก่า'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 20.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days', 95::integer, '⛔'::text, NOW() - INTERVAL '95 days', NOW() - INTERVAL '22 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, icon, created_at, updated_at)
 WHERE p.username = 'french_fry_owner';
 
 -- เรียกใช้ฟังก์ชัน redeem_customer_reward โดยดึงพารามิเตอร์จาก seed data ที่มีอยู่

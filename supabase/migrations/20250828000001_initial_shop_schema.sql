@@ -247,6 +247,8 @@ CREATE TABLE promotions (
     usage_limit INTEGER,
     status promotion_status DEFAULT 'active',
     conditions JSONB DEFAULT '[]',
+    icon TEXT,
+    image_url TEXT,
     created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -755,6 +755,7 @@ INSERT INTO promotions (
   start_at,
   end_at,
   usage_limit,
+  icon,
   created_by,
   created_at,
   updated_at
@@ -770,6 +771,7 @@ SELECT
   promo_info.start_at,
   promo_info.end_at,
   promo_info.usage_limit,
+  promo_info.icon,
   p.id AS created_by,
   promo_info.created_at,
   promo_info.updated_at
@@ -778,9 +780,9 @@ JOIN shops s ON s.id = sd.shop_id
 JOIN profiles p ON p.id = s.owner_id
 CROSS JOIN (
   VALUES 
-    ('ส่วนลดซักรีด 15%'::text, 'ส่วนลด 15% สำหรับบริการซักรีดทุกประเภท'::text, 'percentage'::public.promotion_type, 15.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '18 days', NOW() + INTERVAL '42 days', 120::integer, NOW() - INTERVAL '18 days', NOW() - INTERVAL '30 minutes'),
-    ('ลด 80 บาท'::text, 'ส่วนลดเงินสด 80 บาท เมื่อใช้บริการครบ 400 บาท'::text, 'fixed_amount'::public.promotion_type, 80.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '14 days', NOW() + INTERVAL '26 days', 90::integer, NOW() - INTERVAL '14 days', NOW() - INTERVAL '1 hour'),
-    ('รีดฟรี 5 ชิ้น'::text, 'บริการรีดฟรี 5 ชิ้น เมื่อซักครบ 20 ชิ้น'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '10 days', NOW() + INTERVAL '20 days', 70::integer, NOW() - INTERVAL '10 days', NOW() - INTERVAL '15 minutes'),
-    ('โปรโมชั่นเสื้อผ้า'::text, 'ส่วนลด 25% สำหรับการซักเสื้อผ้าในช่วงฤดูฝน'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '20 days', NOW() + INTERVAL '50 days', 100::integer, NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
-    ('โปรโมชั่นหมดอายุ'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '80 days', NOW() - INTERVAL '12 days', 80::integer, NOW() - INTERVAL '80 days', NOW() - INTERVAL '12 days')
-) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, created_at, updated_at);
+    ('ส่วนลดซักรีด 15%'::text, 'ส่วนลด 15% สำหรับบริการซักรีดทุกประเภท'::text, 'percentage'::public.promotion_type, 15.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '18 days', NOW() + INTERVAL '42 days', 120::integer, '🧺'::text, NOW() - INTERVAL '18 days', NOW() - INTERVAL '30 minutes'),
+    ('ลด 80 บาท'::text, 'ส่วนลดเงินสด 80 บาท เมื่อใช้บริการครบ 400 บาท'::text, 'fixed_amount'::public.promotion_type, 80.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '14 days', NOW() + INTERVAL '26 days', 90::integer, '💵'::text, NOW() - INTERVAL '14 days', NOW() - INTERVAL '1 hour'),
+    ('รีดฟรี 5 ชิ้น'::text, 'บริการรีดฟรี 5 ชิ้น เมื่อซักครบ 20 ชิ้น'::text, 'free_item'::public.promotion_type, 0.00::numeric, 'active'::public.promotion_status, NOW() - INTERVAL '10 days', NOW() + INTERVAL '20 days', 70::integer, '🧼'::text, NOW() - INTERVAL '10 days', NOW() - INTERVAL '15 minutes'),
+    ('โปรโมชั่นเสื้อผ้า'::text, 'ส่วนลด 25% สำหรับการซักเสื้อผ้าในช่วงฤดูฝน'::text, 'percentage'::public.promotion_type, 25.00::numeric, 'scheduled'::public.promotion_status, NOW() + INTERVAL '20 days', NOW() + INTERVAL '50 days', 100::integer, '👕'::text, NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
+    ('โปรโมชั่นหมดอายุ'::text, 'ส่วนลดที่หมดอายุแล้ว สำหรับทดสอบ'::text, 'percentage'::public.promotion_type, 18.00::numeric, 'inactive'::public.promotion_status, NOW() - INTERVAL '80 days', NOW() - INTERVAL '12 days', 80::integer, '⛔'::text, NOW() - INTERVAL '80 days', NOW() - INTERVAL '12 days')
+) AS promo_info(name, description, type, value, status, start_at, end_at, usage_limit, icon, created_at, updated_at);
