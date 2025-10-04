@@ -116,6 +116,7 @@ CREATE TABLE shop_opening_hours (
     close_time TIME,
     break_start TIME,
     break_end TIME,
+    timezone TEXT DEFAULT 'Asia/Bangkok',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

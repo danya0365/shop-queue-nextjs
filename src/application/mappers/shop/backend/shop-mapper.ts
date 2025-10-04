@@ -48,6 +48,7 @@ export class ShopMapper {
         closeTime: hour.closeTime,
         breakStart: hour.breakStart,
         breakEnd: hour.breakEnd,
+        timezone: hour.timezone,
         createdAt: new Date(entity.createdAt),
         updatedAt: new Date(entity.updatedAt),
       })),

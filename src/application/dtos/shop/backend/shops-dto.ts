@@ -59,6 +59,7 @@ export interface CreateShopInputDTO {
     closeTime?: string;
     breakStart?: string;
     breakEnd?: string;
+    timezone?: string;
   }>;
 }
 
@@ -83,6 +84,7 @@ export interface UpdateShopInputDTO {
     closeTime?: string;
     breakStart?: string;
     breakEnd?: string;
+    timezone?: string;
   }>;
 }
 

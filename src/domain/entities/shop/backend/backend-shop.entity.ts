@@ -75,6 +75,7 @@ export interface ShopOpeningHourEntity {
   breakStart: string;
   breakEnd: string;
   isOpen: boolean;
+  timezone: string;
 }
 
 /**

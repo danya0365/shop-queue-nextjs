@@ -15,6 +15,7 @@ export interface OpeningHourSchema {
   close_time: string | null;
   break_start: string | null;
   break_end: string | null;
+  timezone: string; // IANA timezone, e.g., 'Asia/Bangkok'
   created_at: string;
   updated_at: string;
 }

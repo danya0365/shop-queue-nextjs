@@ -79,6 +79,7 @@ export class GetOpeningHourByIdUseCase {
       breakEnd: entity.breakEnd,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      timezone: entity.timezone,
     };
   }
 }

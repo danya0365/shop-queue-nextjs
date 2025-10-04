@@ -61,7 +61,8 @@ export class CreateOpeningHourUseCase {
         input.openTime,
         input.closeTime,
         input.breakStart,
-        input.breakEnd
+        input.breakEnd,
+        input.timezone || 'Asia/Bangkok'
       );
 
       // Save to repository
@@ -198,6 +199,7 @@ export class CreateOpeningHourUseCase {
       breakEnd: entity.breakEnd,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      timezone: entity.timezone,
     };
   }
 }

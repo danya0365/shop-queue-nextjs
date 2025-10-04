@@ -9,6 +9,7 @@ export interface OpeningHourDTO {
   closeTime: string | null;
   breakStart: string | null;
   breakEnd: string | null;
+  timezone: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ export interface CreateOpeningHourInputDTO {
   closeTime?: string;
   breakStart?: string;
   breakEnd?: string;
+  timezone?: string;
 }
 
 export interface UpdateOpeningHourInputDTO {
@@ -30,6 +32,7 @@ export interface UpdateOpeningHourInputDTO {
   closeTime?: string;
   breakStart?: string;
   breakEnd?: string;
+  timezone?: string;
 }
 
 export interface BulkUpdateOpeningHourInputDTO {
@@ -39,6 +42,7 @@ export interface BulkUpdateOpeningHourInputDTO {
   closeTime?: string;
   breakStart?: string;
   breakEnd?: string;
+  timezone?: string;
 }
 
 export interface OpeningHoursStatsDTO {

@@ -18,6 +18,7 @@ export class OpeningHourEntity {
     public readonly closeTime: string | null,
     public readonly breakStart: string | null,
     public readonly breakEnd: string | null,
+    public readonly timezone: string, // IANA timezone for this day's schedule
     public readonly createdAt: Date,
     public readonly updatedAt: Date
   ) {}
@@ -68,7 +69,8 @@ export class OpeningHourEntity {
     openTime?: string,
     closeTime?: string,
     breakStart?: string,
-    breakEnd?: string
+    breakEnd?: string,
+    timezone: string = 'Asia/Bangkok'
   ): OpeningHourEntity {
     const now = new Date();
     return new OpeningHourEntity(
@@ -80,6 +82,7 @@ export class OpeningHourEntity {
       closeTime || null,
       breakStart || null,
       breakEnd || null,
+      timezone,
       now,
       now
     );
@@ -90,7 +93,8 @@ export class OpeningHourEntity {
     openTime?: string,
     closeTime?: string,
     breakStart?: string,
-    breakEnd?: string
+    breakEnd?: string,
+    timezone?: string
   ): OpeningHourEntity {
     return new OpeningHourEntity(
       this.id,
@@ -101,6 +105,7 @@ export class OpeningHourEntity {
       closeTime ?? this.closeTime,
       breakStart ?? this.breakStart,
       breakEnd ?? this.breakEnd,
+      timezone ?? this.timezone,
       this.createdAt,
       new Date()
     );

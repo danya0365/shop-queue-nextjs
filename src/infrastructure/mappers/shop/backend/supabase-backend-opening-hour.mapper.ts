@@ -23,6 +23,7 @@ export class SupabaseBackendOpeningHourMapper {
       schema.close_time,
       schema.break_start,
       schema.break_end,
+      schema.timezone || 'Asia/Bangkok',
       new Date(schema.created_at),
       new Date(schema.updated_at)
     );
@@ -39,6 +40,7 @@ export class SupabaseBackendOpeningHourMapper {
       close_time: entity.closeTime,
       break_start: entity.breakStart,
       break_end: entity.breakEnd,
+      timezone: entity.timezone,
     };
   }
 
@@ -51,6 +53,7 @@ export class SupabaseBackendOpeningHourMapper {
       close_time: entity.closeTime,
       break_start: entity.breakStart,
       break_end: entity.breakEnd,
+      timezone: entity.timezone,
     };
   }
 
@@ -64,6 +67,7 @@ export class SupabaseBackendOpeningHourMapper {
       closeTime: entity.closeTime,
       breakStart: entity.breakStart,
       breakEnd: entity.breakEnd,
+      timezone: entity.timezone,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
@@ -83,6 +87,7 @@ export class SupabaseBackendOpeningHourMapper {
       dto.closeTime,
       dto.breakStart,
       dto.breakEnd,
+      dto.timezone || 'Asia/Bangkok',
       dto.createdAt,
       dto.updatedAt
     );

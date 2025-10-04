@@ -7,6 +7,7 @@ export interface EditFormState {
   closeTime: string;
   breakStart: string;
   breakEnd: string;
+  timezone: string;
 }
 
 export interface NotificationState {
@@ -36,6 +37,7 @@ export function useOpeningHoursState(): UseOpeningHoursStateReturn {
     closeTime: "",
     breakStart: "",
     breakEnd: "",
+    timezone: "Asia/Bangkok",
   });
   const [notification, setNotification] = useState<NotificationState>({
     show: false,
@@ -49,6 +51,7 @@ export function useOpeningHoursState(): UseOpeningHoursStateReturn {
       closeTime: "",
       breakStart: "",
       breakEnd: "",
+      timezone: "Asia/Bangkok",
     });
   };
 

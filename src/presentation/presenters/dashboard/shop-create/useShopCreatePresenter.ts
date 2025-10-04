@@ -33,6 +33,7 @@ const mapDayToOpeningHours = (
         ? undefined
         : dayData.breakEnd,
     is24Hours: !dayData.closed && dayData.is24Hours,
+    timezone: dayData.timezone || 'Asia/Bangkok',
   };
 };
 
@@ -76,6 +77,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     tuesday: {
       openTime: string;
@@ -85,6 +87,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     wednesday: {
       openTime: string;
@@ -94,6 +97,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     thursday: {
       openTime: string;
@@ -103,6 +107,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     friday: {
       openTime: string;
@@ -112,6 +117,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     saturday: {
       openTime: string;
@@ -121,6 +127,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
     sunday: {
       openTime: string;
@@ -130,6 +137,7 @@ export interface ShopCreateData {
       closed: boolean;
       hasBreak: boolean;
       is24Hours: boolean;
+      timezone: string;
     };
   };
 }

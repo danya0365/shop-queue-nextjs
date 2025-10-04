@@ -52,6 +52,7 @@ export interface ShopOpeningHourSchema {
   is_open: boolean;
   break_start: string;
   break_end: string;
+  timezone: string;
 }
 
 /**

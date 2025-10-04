@@ -124,6 +124,7 @@ export class UpdateShopUseCase
           closeTime: hour.closeTime || "",
           breakStart: hour.breakStart || "",
           breakEnd: hour.breakEnd || "",
+          timezone: hour.timezone || "",
         }));
       }
 

@@ -19,6 +19,7 @@ export interface OpeningHours {
   breakStart?: string;
   breakEnd?: string;
   is24Hours?: boolean;
+  timezone?: string;
 }
 
 

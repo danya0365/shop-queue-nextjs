@@ -64,6 +64,7 @@ export class ShopBackendOpeningHoursService
       breakEnd: dto.breakEnd,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      timezone: dto.timezone,
     };
   }
 
@@ -108,6 +109,7 @@ export class ShopBackendOpeningHoursService
       closeTime: data.closeTime,
       breakStart: data.breakStart,
       breakEnd: data.breakEnd,
+      timezone: data.timezone,
     });
 
     return this.dtoToOpeningHour(result.openingHour);
@@ -131,6 +133,7 @@ export class ShopBackendOpeningHoursService
       closeTime: data.closeTime,
       breakStart: data.breakStart,
       breakEnd: data.breakEnd,
+      timezone: data.timezone,
     });
 
     return this.dtoToOpeningHour(result.openingHour);

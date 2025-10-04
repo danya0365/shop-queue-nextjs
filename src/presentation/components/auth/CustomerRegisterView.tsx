@@ -7,7 +7,9 @@ interface CustomerRegisterViewProps {
   redirectPath?: string;
 }
 
-export const CustomerRegisterView: React.FC<CustomerRegisterViewProps> = ({ redirectPath }) => {
+export const CustomerRegisterView: React.FC<CustomerRegisterViewProps> = ({
+  redirectPath,
+}) => {
   return (
     <div className="container flex items-center justify-center min-h-[calc(100vh-200px)] py-10 mx-auto">
       <div className="flex w-full max-w-5xl shadow-lg rounded-lg overflow-hidden">
@@ -17,7 +19,7 @@ export const CustomerRegisterView: React.FC<CustomerRegisterViewProps> = ({ redi
               <h2 className="text-2xl font-bold text-hero-card-text mb-4">
                 ยินดีต้อนรับสู่ระบบจองคิว
               </h2>
-              <p className="text-hero-card-text-muted mb-6">
+              <p className="text-hero-card-text mb-6">
                 สมัครสมาชิกเพื่อจองคิวและรับบริการจากร้านค้าต่างๆ
                 ช่วยให้คุณประหยัดเวลาและได้รับประสบการณ์ที่ดีที่สุด
               </p>

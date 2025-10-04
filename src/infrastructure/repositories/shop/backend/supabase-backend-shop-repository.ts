@@ -541,6 +541,7 @@ export class SupabaseShopBackendShopRepository
           is_open: hour.isOpen,
           break_start: hour.breakStart || null,
           break_end: hour.breakEnd || null,
+          timezone: hour.timezone || null,
         })) || [];
 
       await Promise.all([

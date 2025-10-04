@@ -2020,6 +2020,7 @@ export type Database = {
           is_open: boolean | null
           open_time: string | null
           shop_id: string
+          timezone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -2032,6 +2033,7 @@ export type Database = {
           is_open?: boolean | null
           open_time?: string | null
           shop_id: string
+          timezone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -2044,6 +2046,7 @@ export type Database = {
           is_open?: boolean | null
           open_time?: string | null
           shop_id?: string
+          timezone?: string | null
           updated_at?: string | null
         }
         Relationships: [

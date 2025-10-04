@@ -56,7 +56,8 @@ export class UpdateOpeningHourUseCase {
         input.openTime,
         input.closeTime,
         input.breakStart,
-        input.breakEnd
+        input.breakEnd,
+        input.timezone
       );
 
       // Save to repository
@@ -153,6 +154,7 @@ export class UpdateOpeningHourUseCase {
       breakEnd: entity.breakEnd,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      timezone: entity.timezone,
     };
   }
 }

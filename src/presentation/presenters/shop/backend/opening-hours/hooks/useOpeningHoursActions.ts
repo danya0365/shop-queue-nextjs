@@ -12,7 +12,7 @@ export interface UseOpeningHoursActionsDependencies {
   weeklySchedule: Record<string, OpeningHourDTO>;
   updateOpeningHour: (hourId: string, data: UpdateOpeningHourInputDTO) => Promise<void>;
   bulkUpdateOpeningHours: (hours: BulkUpdateOpeningHourInputDTO[]) => Promise<void>;
-  setEditForm: (editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string }) => void;
+  setEditForm: (editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => void;
   setSelectedDay: (selectedDay: string | null) => void;
   setNotification: (notification: { show: boolean; message: string; type: "success" | "error" }) => void;
   getDayOrder: () => string[];
@@ -21,7 +21,7 @@ export interface UseOpeningHoursActionsDependencies {
 export interface UseOpeningHoursActionsReturn {
   handleToggleDayStatus: (day: string, currentStatus: boolean) => Promise<void>;
   handleEditDay: (day: string) => void;
-  handleSaveDay: (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string }) => Promise<void>;
+  handleSaveDay: (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => Promise<void>;
   handleQuickAction: (action: string) => Promise<void>;
   showNotification: (message: string, type: "success" | "error") => void;
 }
@@ -83,12 +83,13 @@ export function useOpeningHoursActions(
         closeTime: dayData.closeTime || "",
         breakStart: dayData.breakStart || "",
         breakEnd: dayData.breakEnd || "",
+        timezone: dayData.timezone || "Asia/Bangkok",
       });
       setSelectedDay(day);
     }
   };
 
-  const handleSaveDay = async (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string }) => {
+  const handleSaveDay = async (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => {
     if (!selectedDay) return;
 
     try {
@@ -100,6 +101,7 @@ export function useOpeningHoursActions(
           closeTime: editForm.closeTime || undefined,
           breakStart: editForm.breakStart || undefined,
           breakEnd: editForm.breakEnd || undefined,
+          timezone: editForm.timezone || undefined,
         });
         setSelectedDay(null);
         const dayLabels = {

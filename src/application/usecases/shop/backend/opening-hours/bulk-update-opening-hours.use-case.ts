@@ -207,6 +207,7 @@ export class BulkUpdateOpeningHoursUseCase {
       breakEnd: entity.breakEnd,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      timezone: entity.timezone,
     };
   }
 }

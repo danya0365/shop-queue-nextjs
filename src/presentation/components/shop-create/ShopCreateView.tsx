@@ -46,6 +46,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         tuesday: {
           openTime: "09:00",
@@ -55,6 +56,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         wednesday: {
           openTime: "09:00",
@@ -64,6 +66,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         thursday: {
           openTime: "09:00",
@@ -73,6 +76,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         friday: {
           openTime: "09:00",
@@ -82,6 +86,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         saturday: {
           openTime: "09:00",
@@ -91,6 +96,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: false,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
         sunday: {
           openTime: "09:00",
@@ -100,6 +106,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
           closed: true,
           hasBreak: false,
           is24Hours: false,
+          timezone: "Asia/Bangkok",
         },
       },
     };
@@ -131,7 +138,8 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
       | "breakEnd"
       | "closed"
       | "hasBreak"
-      | "is24Hours",
+      | "is24Hours"
+      | "timezone",
     value: string | boolean
   ) => {
     setFormData((prev) => ({
@@ -159,6 +167,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
         closed: !templateHour.isOpen,
         hasBreak: !!(templateHour.breakStart && templateHour.breakEnd),
         is24Hours: templateHour.is24Hours || false,
+        timezone: templateHour.timezone || "Asia/Bangkok",
       };
     });
 
@@ -633,7 +642,7 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                                 </div>
 
                                 {!hours.is24Hours && (
-                                  <div className="flex items-center">
+                                  <div className="flex items-center flex-wrap gap-3">
                                     <div className="w-12 text-sm text-muted">
                                       เปิด
                                     </div>
@@ -664,6 +673,33 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
                                       }
                                       className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                                     />
+
+                                    {/* Timezone selector */}
+                                    <div className="w-24 text-sm text-muted text-center">
+                                      TZ
+                                    </div>
+                                    <select
+                                      value={hours.timezone || "Asia/Bangkok"}
+                                      onChange={(e) =>
+                                        handleOperatingHoursChange(
+                                          day,
+                                          "timezone",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                    >
+                                      <option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</option>
+                                      <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh (GMT+7)</option>
+                                      <option value="Asia/Jakarta">Asia/Jakarta (GMT+7)</option>
+                                      <option value="Asia/Kuala_Lumpur">Asia/Kuala_Lumpur (GMT+8)</option>
+                                      <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+                                      <option value="Asia/Hong_Kong">Asia/Hong_Kong (GMT+8)</option>
+                                      <option value="Asia/Shanghai">Asia/Shanghai (GMT+8)</option>
+                                      <option value="Asia/Manila">Asia/Manila (GMT+8)</option>
+                                      <option value="Asia/Tokyo">Asia/Tokyo (GMT+9)</option>
+                                      <option value="Asia/Kolkata">Asia/Kolkata (GMT+5:30)</option>
+                                    </select>
                                   </div>
                                 )}
 

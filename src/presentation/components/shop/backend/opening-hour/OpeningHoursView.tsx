@@ -233,7 +233,7 @@ export function OpeningHoursView({
                       </div>
 
                       {dayData.isOpen && (
-                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-4">
                           {/* Operating Hours */}
                           <div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -271,6 +271,16 @@ export function OpeningHoursView({
                                 dayData.breakStart,
                                 dayData.breakEnd
                               )}
+                            </p>
+                          </div>
+
+                          {/* Timezone */}
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Timezone
+                            </p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {dayData.timezone || "Asia/Bangkok"}
                             </p>
                           </div>
                         </div>
@@ -327,7 +337,7 @@ export function OpeningHoursView({
                   {/* Edit Form */}
                   {editMode && selectedDay === day && (
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             เวลาเปิด
@@ -391,6 +401,33 @@ export function OpeningHoursView({
                             }
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Timezone
+                          </label>
+                          <select
+                            value={editForm.timezone || "Asia/Bangkok"}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                timezone: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                          >
+                            {/* Common Asia timezones; can be expanded as needed */}
+                            <option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</option>
+                            <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh (GMT+7)</option>
+                            <option value="Asia/Jakarta">Asia/Jakarta (GMT+7)</option>
+                            <option value="Asia/Kuala_Lumpur">Asia/Kuala_Lumpur (GMT+8)</option>
+                            <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+                            <option value="Asia/Hong_Kong">Asia/Hong_Kong (GMT+8)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (GMT+9)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (GMT+8)</option>
+                            <option value="Asia/Manila">Asia/Manila (GMT+8)</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata (GMT+5:30)</option>
+                          </select>
                         </div>
                       </div>
                       <div className="flex justify-end space-x-2 mt-4">
