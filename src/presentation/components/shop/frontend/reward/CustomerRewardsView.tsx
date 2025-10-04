@@ -11,6 +11,7 @@ import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
 import { PointsSummary } from "./components/PointsSummary";
+import { RedeemConfirmationModal } from "./components/RedeemConfirmationModal";
 
 enum TabType {
   REWARDS = "rewards",
@@ -38,9 +39,9 @@ export function CustomerRewardsView({
     refreshData,
   } = useCustomerRewardsPresenter(shopId, initialViewModel);
   const [activeTab, setActiveTab] = useState<TabType>(TabType.REWARDS);
-  const [selectedReward, setSelectedReward] = useState<
-    AvailableReward | CustomerReward | null
-  >(null);
+  const [selectedReward, setSelectedReward] = useState<AvailableReward | null>(
+    null
+  );
   const [showRedeemModal, setShowRedeemModal] = useState(false);
 
   const handleRedeemReward = (reward: AvailableReward) => {
@@ -194,7 +195,8 @@ export function CustomerRewardsView({
               ไม่พบสิทธิประโยชน์สำหรับระดับสมาชิกนี้
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              สิทธิประโยชน์จะแสดงที่นี่เมื่อมีกำหนดการสำหรับระดับ {viewModel.customerPoints.tier}
+              สิทธิประโยชน์จะแสดงที่นี่เมื่อมีกำหนดการสำหรับระดับ{" "}
+              {viewModel.customerPoints.tier}
             </p>
           </div>
         )}
@@ -434,59 +436,13 @@ export function CustomerRewardsView({
       </div>
 
       {/* Redeem Confirmation Modal */}
-      {showRedeemModal && selectedReward && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">
-                {(selectedReward as AvailableReward).imageUrl}
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                ยืนยันการแลกของรางวัล
-              </h3>
-              <p className="text-gray-600">{selectedReward.name}</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">ของรางวัล:</span>
-                <span className="font-medium">{selectedReward.name}</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">ใช้แต้ม:</span>
-                <span className="font-medium text-blue-600">
-                  {(selectedReward as AvailableReward).pointsCost} แต้ม
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">แต้มคงเหลือ:</span>
-                <span className="font-medium">
-                  {(
-                    viewModel.customerPoints.currentPoints -
-                    (selectedReward as AvailableReward).pointsCost
-                  ).toLocaleString()}{" "}
-                  แต้ม
-                </span>
-              </div>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowRedeemModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={confirmRedeem}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                ยืนยันการแลก
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RedeemConfirmationModal
+        isOpen={showRedeemModal}
+        reward={selectedReward}
+        currentPoints={viewModel?.customerPoints.currentPoints || 0}
+        onConfirm={confirmRedeem}
+        onCancel={() => setShowRedeemModal(false)}
+      />
     </div>
   );
 }
