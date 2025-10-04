@@ -8,6 +8,7 @@ import {
   GetCustomerByProfileIdSchema,
   LinkCustomerToProfileSchema,
   RegisterCustomerSchema,
+  UpdateCustomerSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer.schema";
 
 /**
@@ -21,7 +22,7 @@ export class CustomerMapper {
    * @returns CustomerEntity
    */
   public static toEntity(
-    schema: GetCustomerByIdSchema | GetCustomerByProfileIdSchema
+    schema: GetCustomerByIdSchema | GetCustomerByProfileIdSchema | UpdateCustomerSchema
   ): CustomerEntity {
     return {
       id: schema.id || "",

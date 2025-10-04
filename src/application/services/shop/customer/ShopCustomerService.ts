@@ -7,11 +7,14 @@ import type {
   RegisterCustomerOutputDTO,
   LinkCustomerToProfileInputDTO,
   LinkCustomerToProfileOutputDTO,
+  UpdateCustomerInputDTO,
+  UpdateCustomerOutputDTO,
 } from "@/src/application/dtos/shop/customer/customer-dto";
 import { GetCustomerByIdUseCase } from "@/src/application/usecases/shop/customer/customer/GetCustomerByIdUseCase";
 import { GetCustomerByProfileIdUseCase } from "@/src/application/usecases/shop/customer/customer/GetCustomerByProfileIdUseCase";
 import { RegisterCustomerUseCase } from "@/src/application/usecases/shop/customer/customer/RegisterCustomerUseCase";
 import { LinkCustomerToProfileUseCase } from "@/src/application/usecases/shop/customer/customer/LinkCustomerToProfileUseCase";
+import { UpdateCustomerUseCase } from "@/src/application/usecases/shop/customer/customer/UpdateCustomerUseCase";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import type { ShopCustomerRepository } from "@/src/domain/repositories/shop/customer/customer-repository";
 
@@ -47,6 +50,11 @@ export interface IShopCustomerService {
    * @returns Link result
    */
   linkCustomerToProfile(customerId: string, phone: string): Promise<LinkCustomerToProfileOutputDTO>;
+
+  /**
+   * Update an existing customer
+   */
+  updateCustomer(input: UpdateCustomerInputDTO): Promise<UpdateCustomerOutputDTO>;
 }
 
 export class ShopCustomerService implements IShopCustomerService {
@@ -55,6 +63,7 @@ export class ShopCustomerService implements IShopCustomerService {
     private readonly getCustomerByProfileIdUseCase: IUseCase<GetCustomerByProfileIdInputDTO, CustomerDTO | null>,
     private readonly registerCustomerUseCase: IUseCase<RegisterCustomerInputDTO, RegisterCustomerOutputDTO>,
     private readonly linkCustomerToProfileUseCase: IUseCase<LinkCustomerToProfileInputDTO, LinkCustomerToProfileOutputDTO>,
+    private readonly updateCustomerUseCase: IUseCase<UpdateCustomerInputDTO, UpdateCustomerOutputDTO>,
     private readonly logger: Logger
   ) {}
 
@@ -105,6 +114,17 @@ export class ShopCustomerService implements IShopCustomerService {
       throw error;
     }
   }
+
+  async updateCustomer(input: UpdateCustomerInputDTO): Promise<UpdateCustomerOutputDTO> {
+    try {
+      this.logger.info("Updating customer", { input });
+      const result = await this.updateCustomerUseCase.execute(input);
+      return result;
+    } catch (error) {
+      this.logger.error("Error updating customer", { error, input });
+      throw error;
+    }
+  }
 }
 
 export class ShopCustomerServiceFactory {
@@ -113,12 +133,14 @@ export class ShopCustomerServiceFactory {
     const getCustomerByProfileIdUseCase = new GetCustomerByProfileIdUseCase(repository);
     const registerCustomerUseCase = new RegisterCustomerUseCase(repository);
     const linkCustomerToProfileUseCase = new LinkCustomerToProfileUseCase(repository);
+    const updateCustomerUseCase = new UpdateCustomerUseCase(repository);
     
     return new ShopCustomerService(
       getCustomerByIdUseCase,
       getCustomerByProfileIdUseCase,
       registerCustomerUseCase,
       linkCustomerToProfileUseCase,
+      updateCustomerUseCase,
       logger
     );
   }

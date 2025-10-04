@@ -10,6 +10,7 @@ import type {
   GetCustomerByProfileIdSchema,
   RegisterCustomerSchema,
   LinkCustomerToProfileSchema,
+  UpdateCustomerSchema,
 } from "@/src/infrastructure/schemas/shop/customer/customer.schema";
 import { StandardRepository } from "../../base/standard-repository";
 import type { DatabaseDataSource } from "@/src/domain/interfaces/datasources/database-datasource";
@@ -207,6 +208,69 @@ export class SupabaseCustomerRepository
           : "Unknown error linking customer to profile",
         "linkCustomerToProfile",
         { customerId, phone },
+        error
+      );
+    }
+  }
+
+  /**
+   * Update existing customer via RPC update_customer_by_id
+   */
+  async updateCustomer(input: {
+    customerId: string;
+    name?: string;
+    phone?: string;
+    email?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    address?: string | null;
+    notes?: string | null;
+    isActive?: boolean | null;
+  }): Promise<CustomerEntity> {
+    const {
+      customerId,
+      name,
+      phone,
+      email,
+      dateOfBirth,
+      gender,
+      address,
+      notes,
+      isActive,
+    } = input;
+    try {
+      const result = await this.dataSource.callRpc<UpdateCustomerSchema[]>(
+        "update_customer_by_id",
+        {
+          p_customer_id: customerId,
+          p_name: name ?? null,
+          p_phone: phone ?? null,
+          p_email: email ?? null,
+          p_date_of_birth: dateOfBirth ?? null,
+          p_gender: gender ?? null,
+          p_address: address ?? null,
+          p_notes: notes ?? null,
+          p_is_active: typeof isActive === "boolean" ? isActive : null,
+        }
+      );
+
+      if (!result || result.length === 0) {
+        throw new ShopCustomerError(
+          ShopCustomerErrorType.OPERATION_FAILED,
+          "Failed to update customer or unauthorized",
+          "updateCustomer",
+          { input }
+        );
+      }
+
+      return CustomerMapper.toEntity(result[0]);
+    } catch (error) {
+      this.logger.error("Error updating customer", { error, input });
+      throw new ShopCustomerError(
+        ShopCustomerErrorType.OPERATION_FAILED,
+        error instanceof Error ? error.message : "Unknown error updating customer",
+        "updateCustomer",
+        { input },
         error
       );
     }

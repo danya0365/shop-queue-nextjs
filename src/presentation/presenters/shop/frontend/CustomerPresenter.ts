@@ -98,6 +98,30 @@ export class CustomerPresenter extends BaseShopPresenter {
       throw error;
     }
   }
+
+  /**
+   * Update existing customer
+   */
+  async updateCustomer(input: {
+    customerId: string;
+    name?: string;
+    phone?: string;
+    email?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    address?: string | null;
+    notes?: string | null;
+    isActive?: boolean | null;
+  }) {
+    try {
+      this.logger.info("Updating customer", { input });
+      const result = await this.shopCustomerService.updateCustomer(input);
+      return result;
+    } catch (error) {
+      this.logger.error("Error updating customer", { error, input });
+      throw error;
+    }
+  }
 }
 
 // Factory class for server-side

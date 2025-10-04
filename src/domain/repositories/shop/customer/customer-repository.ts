@@ -68,4 +68,22 @@ export interface ShopCustomerRepository {
    * @throws ShopCustomerError if the operation fails
    */
   linkCustomerToProfile(customerId: string, phone: string): Promise<{ success: boolean }>;
+
+  /**
+   * Update an existing customer
+   * Domain-layer update type (keeps domain independent of application DTOs)
+   */
+  updateCustomer(
+    input: {
+      customerId: string;
+      name?: string;
+      phone?: string;
+      email?: string | null;
+      dateOfBirth?: string | null; // ISO date string
+      gender?: string | null;
+      address?: string | null;
+      notes?: string | null;
+      isActive?: boolean | null;
+    }
+  ): Promise<CustomerEntity>;
 }

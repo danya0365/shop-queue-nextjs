@@ -37,3 +37,18 @@ export interface LinkCustomerToProfileInputDTO {
 export interface LinkCustomerToProfileOutputDTO {
   success: boolean;
 }
+
+// Update customer
+export interface UpdateCustomerInputDTO {
+  customerId: string;
+  name?: string;
+  phone?: string;
+  email?: string | null;
+  dateOfBirth?: string | null; // ISO date string
+  gender?: string | null;
+  address?: string | null;
+  notes?: string | null;
+  isActive?: boolean | null;
+}
+
+export type UpdateCustomerOutputDTO = CustomerDTO;

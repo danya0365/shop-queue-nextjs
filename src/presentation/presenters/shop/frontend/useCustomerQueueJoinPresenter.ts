@@ -371,19 +371,19 @@ export function useCustomerQueueJoinPresenter(
             currentCustomer.name !== formData.customerName.trim() ||
             currentCustomer.phone !== formData.customerPhone.trim()
           ) {
-            const updateResult = await customerPresenter.registerCustomer(
-              shopId,
-              formData.customerName.trim(),
-              formData.customerPhone.trim()
-            );
-
-            // Update stored customer with new information
-            setStoredCustomer(shopId, {
-              id: updateResult.customerId,
+            const updated = await customerPresenter.updateCustomer({
+              customerId: currentCustomer.id,
               name: formData.customerName.trim(),
               phone: formData.customerPhone.trim(),
-              shopId: shopId,
-              joinedDate: new Date().toISOString(),
+            });
+
+            // Update stored customer with new information (ID stays the same)
+            setStoredCustomer(shopId, {
+              id: updated.id,
+              name: updated.name,
+              phone: updated.phone,
+              shopId: updated.shopId,
+              joinedDate: updated.createdAt,
             });
           }
         }
