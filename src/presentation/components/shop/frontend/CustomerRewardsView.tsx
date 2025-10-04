@@ -218,14 +218,25 @@ export function CustomerRewardsView({
         <h3 className="text-lg font-medium shop-frontend-text-primary mb-4">
           สิทธิประโยชน์สมาชิก {viewModel.customerPoints.tier}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {viewModel.customerPoints.tierBenefits.map((benefit, index) => (
-            <div key={index} className="flex items-center">
-              <span className="shop-frontend-text-success mr-2">✓</span>
-              <span className="shop-frontend-text-primary">{benefit}</span>
+        {viewModel.customerPoints.tierBenefits.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {viewModel.customerPoints.tierBenefits.map((benefit, index) => (
+              <div key={index} className="flex items-center">
+                <span className="shop-frontend-text-success mr-2">✓</span>
+                <span className="shop-frontend-text-primary">{benefit}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <div className="text-gray-400 dark:text-gray-500 text-lg mb-2">
+              ไม่พบสิทธิประโยชน์สำหรับระดับสมาชิกนี้
             </div>
-          ))}
-        </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              สิทธิประโยชน์จะแสดงที่นี่เมื่อมีกำหนดการสำหรับระดับ {viewModel.customerPoints.tier}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
