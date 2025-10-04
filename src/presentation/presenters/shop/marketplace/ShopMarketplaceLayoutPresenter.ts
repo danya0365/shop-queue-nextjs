@@ -14,15 +14,8 @@ export interface Category {
   name: string;
 }
 
-export interface NavigationLink {
-  href: string;
-  label: string;
-  order: number;
-}
-
 export interface ShopMarketplaceLayoutViewModel {
   categories: Category[];
-  navigationLinks: NavigationLink[];
   heroTitle: string;
   heroDescription: string;
   searchPlaceholder: string;
@@ -39,14 +32,10 @@ export class ShopMarketplaceLayoutPresenter {
    */
   async getLayoutViewModel(): Promise<ShopMarketplaceLayoutViewModel> {
     try {
-      const [categories, navigationLinks] = await Promise.all([
-        this.getPopularCategories(),
-        this.getNavigationLinks(),
-      ]);
+      const [categories] = await Promise.all([this.getPopularCategories()]);
 
       return {
         categories,
-        navigationLinks,
         heroTitle: "ค้นหาร้านค้าที่ใช่สำหรับคุณ",
         heroDescription: "สำรวจร้านค้ามากมาย จองคิวและรับบริการได้ทันที",
         searchPlaceholder: "ค้นหาร้านค้า, บริการ, หรือสถานที่...",
@@ -62,21 +51,6 @@ export class ShopMarketplaceLayoutPresenter {
       return await this.marketplaceService.getPopularCategories();
     } catch (error) {
       this.logger.error("Error getting popular categories:", error);
-      throw error;
-    }
-  }
-
-  async getNavigationLinks(): Promise<NavigationLink[]> {
-    try {
-      const navigationLinks = [
-        { href: "/shop", label: "ตลาดร้านค้า", order: 1 },
-        { href: "/shop/categories", label: "หมวดหมู่", order: 2 },
-        { href: "/shop/about", label: "เกี่ยวกับเรา", order: 3 },
-        { href: "/shop/contact", label: "ติดต่อเรา", order: 4 },
-      ];
-      return navigationLinks;
-    } catch (error) {
-      this.logger.error("Error getting navigation links:", error);
       throw error;
     }
   }

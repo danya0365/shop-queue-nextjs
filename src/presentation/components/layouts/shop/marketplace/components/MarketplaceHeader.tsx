@@ -2,7 +2,6 @@
 
 import { MarketplaceThemeToggle } from "@/src/presentation/components/common/ThemeToggle";
 import { useLoginRedirect } from "@/src/presentation/hooks/login-redirect";
-import { NavigationLink } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import {
@@ -19,6 +18,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { NavigationLink } from "../ShopMarketplaceLayout";
 
 interface MarketplaceHeaderProps {
   navigationLinks: NavigationLink[];
