@@ -189,7 +189,7 @@ export function CustomerQueueStatusView({
       {isFound && customerQueue && (
         <>
           {/* Queue Status Card */}
-          <div className="shop-frontend-card">
+          <div className="shop-frontend-card rounded-lg text-center overflow-hidden">
             <div className="shop-frontend-shop-header p-6">
               <div className="text-center">
                 <div className="text-6xl mb-4">
