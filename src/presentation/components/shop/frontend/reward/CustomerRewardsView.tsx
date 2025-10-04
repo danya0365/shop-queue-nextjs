@@ -10,6 +10,7 @@ import { useCustomerRewardsPresenter } from "@/src/presentation/presenters/shop/
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { cn } from "@/src/utils/cn";
 import { useState } from "react";
+import { PointsSummary } from "./components/PointsSummary";
 
 enum TabType {
   REWARDS = "rewards",
@@ -155,52 +156,12 @@ export function CustomerRewardsView({
       </div>
 
       {/* Points Summary */}
-      <div className="shop-frontend-card relative">
-        {!customer ? (
-          <div className="absolute inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-            <div className="text-center py-8 z-10">
-              <div className="text-4xl mb-4">❌</div>
-              <p className="text-gray-600 dark:text-gray-400">
-                ไม่พบข้อมูลสมาชิก
-              </p>
-            </div>
-          </div>
-        ) : null}
-        <div className="p-6 border-b shop-frontend-card-border">
-          <h2 className="text-xl font-semibold shop-frontend-text-primary">
-            สรุปแต้ม
-          </h2>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold shop-frontend-text-primary mb-2">
-                {viewModel.customerPoints.currentPoints}
-              </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                แต้มปัจจุบัน
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold shop-frontend-text-success mb-2">
-                {viewModel.customerPoints.totalEarned}
-              </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                แต้มที่ได้รับ
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold shop-frontend-text-muted mb-2">
-                {viewModel.customerPoints.totalRedeemed}
-              </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                แต้มที่ใช้แล้ว
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PointsSummary
+        currentPoints={viewModel.customerPoints.currentPoints}
+        totalEarned={viewModel.customerPoints.totalEarned}
+        totalRedeemed={viewModel.customerPoints.totalRedeemed}
+        shopId={shopId}
+      />
 
       {/* Tier Benefits */}
       <div className="shop-frontend-card p-6 mb-6 relative">
