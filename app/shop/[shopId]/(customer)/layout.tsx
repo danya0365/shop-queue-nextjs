@@ -1,7 +1,6 @@
 import { ShopService } from "@/src/application/services/shop/ShopService";
 import { getServerContainer } from "@/src/di/server-container";
 import { Logger } from "@/src/domain/interfaces/logger";
-import { ConsoleLogger } from "@/src/infrastructure/loggers/console-logger";
 import { redirect } from "next/navigation";
 
 interface CustomerLayoutProps {
@@ -19,27 +18,25 @@ export default async function CustomerLayout({
 }: CustomerLayoutProps) {
   const { shopId } = await params;
 
-  try {
-    const container = await getServerContainer();
-    const shopService = container.resolve<ShopService>("ShopService");
-    const logger = container.resolve<Logger>("Logger");
+  const container = await getServerContainer();
+  const shopService = container.resolve<ShopService>("ShopService");
+  const logger = container.resolve<Logger>("Logger");
 
-    const shop = await shopService.getShopById(shopId);
+  const shop = await shopService.getShopById(shopId);
 
-    if (!shop) {
-      logger.warn(`Customer routes: shop not found: ${shopId}`);
-      redirect("/?error=shop_not_found");
-    }
-
-    if (shop.status && shop.status !== "active") {
-      logger.warn(`Customer routes: shop inactive: ${shopId} (status=${shop.status})`);
-      redirect(`/shop/${shopId}/inactive`);
-    }
-
-    return <>{children}</>;
-  } catch (error) {
-    const logger = new ConsoleLogger();
-    logger.error(`Error validating customer layout for shop ${shopId}:`, error);
-    redirect("/?error=shop_validation_failed");
+  if (!shop) {
+    logger.warn(`Customer routes: shop not found: ${shopId}`);
+    redirect("/?error=shop_not_found");
   }
+
+  logger.info(`Customer routes: shop ${shopId}`, { shop });
+
+  if (shop.status && shop.status !== "active") {
+    logger.warn(
+      `Customer routes: shop inactive: ${shopId} (status=${shop.status})`
+    );
+    redirect(`/shop/${shopId}/inactive`);
+  }
+
+  return <>{children}</>;
 }

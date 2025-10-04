@@ -1,5 +1,5 @@
 import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
-import { CustomerDashboardPresenterFactory } from "@/src/presentation/presenters/shop/frontend/CustomerDashboardPresenter";
+import { ShopPresenterFactory } from "@/src/presentation/presenters/shop/ShopPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -14,7 +14,7 @@ export async function generateMetadata({
   params,
 }: InactiveShopPageProps): Promise<Metadata> {
   const { shopId } = await params;
-  const presenter = await CustomerDashboardPresenterFactory.create();
+  const presenter = await ShopPresenterFactory.create();
   try {
     const shop = await presenter.getShopInfo(shopId);
     const title = shop?.name ? `${shop.name} | ร้านปิดชั่วคราว` : "ร้านปิดชั่วคราว";
@@ -35,13 +35,13 @@ export async function generateMetadata({
 
 export default async function InactiveShopPage({ params }: InactiveShopPageProps) {
   const { shopId } = await params;
-  const presenter = await CustomerDashboardPresenterFactory.create();
+  const presenter = await ShopPresenterFactory.create();
 
   try {
     const shop = await presenter.getShopInfo(shopId);
 
     return (
-      <FrontendLayout shop={shop}>
+      <FrontendLayout>
         <div className="min-h-[60vh] flex items-center justify-center px-6 py-16">
           <div className="max-w-xl w-full text-center">
             <div className="mb-4 text-5xl" aria-hidden>⏸️</div>

@@ -22,11 +22,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    -- ตรวจสอบว่า shop_id มีอยู่จริงและ active
-    IF NOT EXISTS (SELECT 1 FROM shops WHERE shops.id = p_shop_id AND shops.status = 'active') THEN
-        RAISE EXCEPTION 'Shop not found or inactive';
-    END IF;
-    
     -- คืนค่าข้อมูล popular services ตามเงื่อนไข
     RETURN QUERY
     SELECT 
@@ -72,11 +67,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    -- ตรวจสอบว่า shop_id มีอยู่จริงและ active
-    IF NOT EXISTS (SELECT 1 FROM shops WHERE shops.id = p_shop_id AND shops.status = 'active') THEN
-        RAISE EXCEPTION 'Shop not found or inactive';
-    END IF;
-    
     -- ตรวจสอบว่า category มีอยู่จริง
     IF p_category IS NULL OR p_category = '' THEN
         RAISE EXCEPTION 'Category is required';
@@ -133,11 +123,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    -- ตรวจสอบว่า shop_id มีอยู่จริงและ active
-    IF NOT EXISTS (SELECT 1 FROM shops WHERE id = p_shop_id AND status = 'active') THEN
-        RAISE EXCEPTION 'Shop not found or inactive';
-    END IF;
-    
     -- คืนค่าข้อมูล top popular services
     RETURN QUERY
     WITH top_popular_services AS (

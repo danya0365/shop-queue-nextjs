@@ -23,11 +23,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-    -- ตรวจสอบว่า shop_id มีอยู่จริงและ active
-    IF NOT EXISTS (SELECT 1 FROM shops WHERE shops.id = p_shop_id AND shops.status = 'active') THEN
-        RAISE EXCEPTION 'Shop not found or inactive';
-    END IF;
-    
     -- คืนค่าข้อมูล available services ที่ active และ available
     RETURN QUERY
     SELECT 
