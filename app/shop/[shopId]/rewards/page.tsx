@@ -1,5 +1,5 @@
 import FrontendLayout from "@/src/presentation/components/layouts/shop/frontend/FrontendLayout";
-import { CustomerRewardsView } from "@/src/presentation/components/shop/frontend/CustomerRewardsView";
+import { CustomerRewardsView } from "@/src/presentation/components/shop/frontend/reward/CustomerRewardsView";
 import { CustomerRewardsPresenterFactory } from "@/src/presentation/presenters/shop/frontend/CustomerRewardsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
