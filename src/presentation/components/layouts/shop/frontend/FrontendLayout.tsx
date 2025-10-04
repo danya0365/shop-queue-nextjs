@@ -58,8 +58,10 @@ const NAV_ITEMS = [
 ];
 
 const FrontendLayout: React.FC<FrontendLayoutProps> = ({ children, shop }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => window.innerWidth > 1024
+  );
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
   const pathname = usePathname();
   const shopId = shop?.id || "";
 
