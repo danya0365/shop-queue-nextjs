@@ -44,9 +44,9 @@ export class RegisterCustomerUseCase implements IUseCase<RegisterCustomerInputDT
         );
       }
 
-      // Basic phone validation
-      const phoneRegex = /^[0-9+\-\s()]+$/;
-      if (!phoneRegex.test(phone)) {
+      // Normalize and validate phone (keep digits only, expect 10 digits)
+      const cleanedPhone = phone.replace(/\D/g, "");
+      if (!/^\d{10}$/.test(cleanedPhone)) {
         throw new ShopCustomerError(
           ShopCustomerErrorType.VALIDATION_ERROR,
           "Invalid phone number format",
@@ -56,7 +56,11 @@ export class RegisterCustomerUseCase implements IUseCase<RegisterCustomerInputDT
       }
 
       // Register customer through repository
-      const registerResultEntity = await this.customerRepository.registerCustomer(shopId, name, phone);
+      const registerResultEntity = await this.customerRepository.registerCustomer(
+        shopId,
+        name.trim(),
+        cleanedPhone
+      );
 
       if (!registerResultEntity || !registerResultEntity.customerId) {
         throw new ShopCustomerError(

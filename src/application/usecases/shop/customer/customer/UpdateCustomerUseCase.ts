@@ -37,9 +37,11 @@ export class UpdateCustomerUseCase
       );
     }
 
+    let cleanedPhone: string | undefined = undefined;
     if (phone !== undefined) {
-      const normalized = phone.replace(/[-\s]/g, "");
-      if (!/^\d{10}$/.test(normalized)) {
+      // Keep only digits for phone, remove spaces, dashes, etc.
+      cleanedPhone = phone.replace(/\D/g, "");
+      if (!/^\d{10}$/.test(cleanedPhone)) {
         throw new ShopCustomerError(
           ShopCustomerErrorType.VALIDATION_ERROR,
           "invalid phone format",
@@ -53,7 +55,7 @@ export class UpdateCustomerUseCase
       const entity = await this.repository.updateCustomer({
         customerId,
         name,
-        phone,
+        phone: cleanedPhone,
         email: email ?? null,
         dateOfBirth: dateOfBirth ?? null,
         gender: gender ?? null,

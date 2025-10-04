@@ -1,6 +1,8 @@
 "use client";
 
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
+import React from "react";
+import { getFormatPhone } from "@/src/domain/utils/phone";
 import { cn } from "@/src/utils/cn";
 
 interface PointItemProps {
@@ -131,7 +133,7 @@ export function PointsSummary({
             </h2>
             {customer.phone && (
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                {customer.phone}
+                {getFormatPhone(customer.phone)}
               </p>
             )}
             {customer.joinedDate && (
