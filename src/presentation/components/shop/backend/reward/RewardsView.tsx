@@ -1,7 +1,13 @@
 "use client";
 
+import type { Reward } from "@/src/application/services/shop/backend/rewards-backend-service";
 import { RewardsViewModel } from "@/src/presentation/presenters/shop/backend/RewardsPresenter";
-import { useRewardsPresenter } from "@/src/presentation/presenters/shop/backend/useRewardsPresenter";
+import {
+  useRewardsPresenter,
+  type CreateRewardFormData,
+  type UpdateRewardFormData,
+} from "@/src/presentation/presenters/shop/backend/useRewardsPresenter";
+import React from "react";
 
 interface RewardsViewProps {
   shopId: string;
@@ -11,6 +17,10 @@ interface RewardsViewProps {
 export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
   const [state, actions] = useRewardsPresenter(shopId, initialViewModel);
   const viewModel = state.viewModel;
+
+  const selectedReward = viewModel?.rewards.find(
+    (r) => r.id === state.selectedRewardId
+  );
 
   const formatPoints = (points: number) => {
     return new Intl.NumberFormat("th-TH").format(points);
@@ -139,44 +149,6 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
 
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* Development Status Overlay */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🚧</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              กำลังพัฒนาระบบ
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              เปิดใช้งานเร็วๆ นี้
-            </p>
-          </div>
-          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>กำลังปรับปรุงฟีเจอร์การจัดการรางวัล</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
-              <span>เพิ่มประสิทธิภาพการทำงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
-              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ขออภัยในความไม่สะดวก
-              <br />
-              ทีมงานกำลังพัฒนาเพื่อคุณ
-            </p>
-          </div>
-        </div>
-      </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -358,7 +330,10 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <button className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                  <button
+                    onClick={() => actions.openEditModal(reward.id)}
+                    className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -373,7 +348,10 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                       />
                     </svg>
                   </button>
-                  <button className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                  <button
+                    onClick={() => actions.openDeleteModal(reward.id)}
+                    className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -461,6 +439,7 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                     {reward.isAvailable ? "เปิดใช้งาน" : "ปิดใช้งาน"}
                   </span>
                   <button
+                    onClick={() => actions.toggleRewardAvailability(reward.id)}
                     className={`text-sm font-medium ${
                       reward.isAvailable
                         ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -476,27 +455,337 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         )}
       </div>
 
-      {/* Create Reward Modal Placeholder */}
+      {/* Create Reward Modal */}
       {state.isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              เพิ่มรางวัลใหม่
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={actions.closeCreateModal}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
-            </div>
-          </div>
-        </div>
+        <CreateRewardModal
+          shopId={shopId}
+          onClose={actions.closeCreateModal}
+          onSubmit={actions.createReward}
+          loading={state.loading}
+        />
       )}
+
+      {/* Edit Reward Modal */}
+      {state.isEditModalOpen && selectedReward && (
+        <EditRewardModal
+          reward={selectedReward}
+          shopId={shopId}
+          onClose={actions.closeEditModal}
+          onSubmit={actions.updateReward}
+          loading={state.loading}
+        />
+      )}
+
+      {/* Delete Reward Confirmation */}
+      {state.isDeleteModalOpen && selectedReward && (
+        <DeleteRewardConfirmation
+          reward={selectedReward}
+          onClose={actions.closeDeleteModal}
+          onConfirm={() => actions.deleteReward(selectedReward.id)}
+          loading={state.loading}
+        />
+      )}
+    </div>
+  );
+}
+
+// Inline simple modals for Rewards CRUD (kept minimal and consistent with Employees pattern)
+function CreateRewardModal({
+  shopId,
+  onClose,
+  onSubmit,
+  loading,
+}: {
+  shopId: string;
+  onClose: () => void;
+  onSubmit: (data: CreateRewardFormData) => Promise<boolean>;
+  loading: boolean;
+}) {
+  const [form, setForm] = React.useState<Omit<CreateRewardFormData, "shopId">>({
+    name: "",
+    description: "",
+    type: "discount",
+    pointsRequired: 0,
+    value: 0,
+    expiryDays: 30,
+    usageLimit: undefined as number | undefined,
+    icon: "🎁",
+  });
+
+  const handleSubmit = async () => {
+    const ok = await onSubmit({ ...form, shopId });
+    if (ok) onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          เพิ่มรางวัลใหม่
+        </h3>
+        <div className="space-y-3">
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="ชื่อรางวัล"
+            value={form.name}
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value as string })
+            }
+          />
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="คำอธิบาย (ไม่บังคับ)"
+            value={form.description}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value as string })
+            }
+          />
+          <select
+            className="w-full px-3 py-2 border rounded"
+            value={form.type}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                type: e.target.value as CreateRewardFormData["type"],
+              })
+            }
+          >
+            <option value="discount">ส่วนลด</option>
+            <option value="free_item">ของฟรี</option>
+            <option value="cashback">คืนเงิน</option>
+            <option value="special_privilege">สิทธิพิเศษ</option>
+          </select>
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="มูลค่า"
+            value={form.value}
+            onChange={(e) =>
+              setForm({ ...form, value: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="วันหมดอายุ"
+            value={form.expiryDays}
+            onChange={(e) =>
+              setForm({ ...form, expiryDays: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="จำนวนครั้งที่ใช้ได้ (ไม่บังคับ)"
+            value={form.usageLimit ?? ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                usageLimit:
+                  e.target.value === "" ? undefined : Number(e.target.value),
+              })
+            }
+          />
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="ไอคอน (emoji)"
+            value={form.icon}
+            onChange={(e) => setForm({ ...form, icon: e.target.value })}
+          />
+        </div>
+        <div className="flex justify-end space-x-2 mt-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          >
+            ยกเลิก
+          </button>
+          <button
+            disabled={loading}
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+          >
+            บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditRewardModal({
+  reward,
+  shopId,
+  onClose,
+  onSubmit,
+  loading,
+}: {
+  reward: Reward;
+  shopId: string;
+  onClose: () => void;
+  onSubmit: (data: UpdateRewardFormData) => Promise<boolean>;
+  loading: boolean;
+}) {
+  type EditForm = Omit<UpdateRewardFormData, "type"> & {
+    type: NonNullable<UpdateRewardFormData["type"]>;
+  };
+  const [form, setForm] = React.useState<EditForm>({
+    id: reward.id,
+    name: reward.name,
+    description: reward.description ?? "",
+    type: reward.type,
+    pointsRequired: reward.pointsRequired,
+    value: reward.value,
+    isAvailable: reward.isAvailable,
+    expiryDays: reward.expiryDays,
+    usageLimit: reward.usageLimit,
+    icon: reward.icon ?? "🎁",
+    shopId,
+  });
+
+  const handleSubmit = async () => {
+    const ok = await onSubmit(form);
+    if (ok) onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          แก้ไขรางวัล
+        </h3>
+        <div className="space-y-3">
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="ชื่อรางวัล"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="คำอธิบาย (ไม่บังคับ)"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <select
+            className="w-full px-3 py-2 border rounded"
+            value={form.type}
+            onChange={(e) =>
+              setForm({ ...form, type: e.target.value as Reward["type"] })
+            }
+          >
+            <option value="discount">ส่วนลด</option>
+            <option value="free_item">ของฟรี</option>
+            <option value="cashback">คืนเงิน</option>
+            <option value="special_privilege">สิทธิพิเศษ</option>
+          </select>
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="แต้มที่ต้องใช้"
+            value={form.pointsRequired}
+            onChange={(e) =>
+              setForm({ ...form, pointsRequired: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="มูลค่า"
+            value={form.value}
+            onChange={(e) =>
+              setForm({ ...form, value: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="วันหมดอายุ"
+            value={form.expiryDays}
+            onChange={(e) =>
+              setForm({ ...form, expiryDays: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded"
+            placeholder="จำนวนครั้งที่ใช้ได้ (ไม่บังคับ)"
+            value={form.usageLimit ?? ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                usageLimit:
+                  e.target.value === "" ? undefined : Number(e.target.value),
+              })
+            }
+          />
+          <input
+            className="w-full px-3 py-2 border rounded"
+            placeholder="ไอคอน (emoji)"
+            value={form.icon}
+            onChange={(e) => setForm({ ...form, icon: e.target.value })}
+          />
+        </div>
+        <div className="flex justify-end space-x-2 mt-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          >
+            ยกเลิก
+          </button>
+          <button
+            disabled={loading}
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+          >
+            บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeleteRewardConfirmation({
+  reward,
+  onClose,
+  onConfirm,
+  loading,
+}: {
+  reward: Reward;
+  onClose: () => void;
+  onConfirm: () => Promise<boolean>;
+  loading: boolean;
+}) {
+  const handleConfirm = async () => {
+    const ok = await onConfirm();
+    if (ok) onClose();
+  };
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          ยืนยันการลบ
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          คุณต้องการลบรางวัล &quot;{reward.name}&quot; ใช่หรือไม่?
+        </p>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          >
+            ยกเลิก
+          </button>
+          <button
+            disabled={loading}
+            onClick={handleConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
+          >
+            ลบ
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -167,8 +167,20 @@ export const useRewardsPresenter = (
         throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
       }
 
-      // API call would go here
-      // const result = await rewardsService.createReward(data.shopId, data);
+      const { ClientRewardsPresenterFactory } = await import(
+        "./RewardsPresenter"
+      );
+      const presenter = await ClientRewardsPresenterFactory.create();
+      await presenter.createReward(data.shopId, {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        pointsRequired: data.pointsRequired,
+        value: data.value,
+        expiryDays: data.expiryDays,
+        usageLimit: data.usageLimit,
+        icon: data.icon,
+      });
 
       logger.info("RewardsPresenter: Reward created successfully", { data });
       setIsCreateModalOpen(false);
@@ -213,8 +225,21 @@ export const useRewardsPresenter = (
         throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
       }
 
-      // API call would go here
-      // const result = await rewardsService.updateReward(data.shopId || shopId, data.id, data);
+      const { ClientRewardsPresenterFactory } = await import(
+        "./RewardsPresenter"
+      );
+      const presenter = await ClientRewardsPresenterFactory.create();
+      await presenter.updateReward(data.shopId ?? shopId, data.id, {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        pointsRequired: data.pointsRequired,
+        value: data.value,
+        isAvailable: data.isAvailable,
+        expiryDays: data.expiryDays,
+        usageLimit: data.usageLimit,
+        icon: data.icon,
+      });
 
       logger.info("RewardsPresenter: Reward updated successfully", { data });
       setIsEditModalOpen(false);
@@ -244,8 +269,11 @@ export const useRewardsPresenter = (
         throw new Error("ไม่พบรหัสรางวัล");
       }
 
-      // API call would go here
-      // const result = await rewardsService.deleteReward(shopId, id);
+      const { ClientRewardsPresenterFactory } = await import(
+        "./RewardsPresenter"
+      );
+      const presenter = await ClientRewardsPresenterFactory.create();
+      await presenter.deleteReward(shopId, id);
 
       logger.info("RewardsPresenter: Reward deleted successfully", { id });
       setIsDeleteModalOpen(false);
@@ -275,8 +303,11 @@ export const useRewardsPresenter = (
         throw new Error("ไม่พบรหัสรางวัล");
       }
 
-      // API call would go here
-      // const result = await rewardsService.toggleRewardAvailability(shopId, id);
+      const { ClientRewardsPresenterFactory } = await import(
+        "./RewardsPresenter"
+      );
+      const presenter = await ClientRewardsPresenterFactory.create();
+      await presenter.toggleRewardAvailability(shopId, id);
 
       logger.info("RewardsPresenter: Reward availability toggled successfully", { id });
       await loadData(); // Refresh data after toggle
