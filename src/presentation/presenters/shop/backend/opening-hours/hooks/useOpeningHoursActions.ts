@@ -6,13 +6,12 @@ import {
   BulkUpdateOpeningHourInputDTO, 
   UpdateOpeningHourInputDTO 
 } from "@/src/application/dtos/shop/backend/opening-hour-dto";
-import { OpeningHoursViewModel } from "../OpeningHoursPresenter";
 
 export interface UseOpeningHoursActionsDependencies {
   weeklySchedule: Record<string, OpeningHourDTO>;
   updateOpeningHour: (hourId: string, data: UpdateOpeningHourInputDTO) => Promise<void>;
   bulkUpdateOpeningHours: (hours: BulkUpdateOpeningHourInputDTO[]) => Promise<void>;
-  setEditForm: (editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => void;
+  setEditForm: (editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string; is24Hours: boolean }) => void;
   setSelectedDay: (selectedDay: string | null) => void;
   setNotification: (notification: { show: boolean; message: string; type: "success" | "error" }) => void;
   getDayOrder: () => string[];
@@ -21,7 +20,7 @@ export interface UseOpeningHoursActionsDependencies {
 export interface UseOpeningHoursActionsReturn {
   handleToggleDayStatus: (day: string, currentStatus: boolean) => Promise<void>;
   handleEditDay: (day: string) => void;
-  handleSaveDay: (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => Promise<void>;
+  handleSaveDay: (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string; is24Hours: boolean }) => Promise<void>;
   handleQuickAction: (action: string) => Promise<void>;
   showNotification: (message: string, type: "success" | "error") => void;
 }
@@ -78,31 +77,47 @@ export function useOpeningHoursActions(
   const handleEditDay = (day: string) => {
     const dayData = weeklySchedule[day];
     if (dayData) {
+      const is24 =
+        !!dayData.isOpen &&
+        (dayData.openTime === "00:00" || dayData.openTime === "00:00:00") &&
+        (dayData.closeTime === "23:59" || dayData.closeTime === "23:59:59");
       setEditForm({
         openTime: dayData.openTime || "",
         closeTime: dayData.closeTime || "",
         breakStart: dayData.breakStart || "",
         breakEnd: dayData.breakEnd || "",
         timezone: dayData.timezone || "Asia/Bangkok",
+        is24Hours: is24,
       });
       setSelectedDay(day);
     }
   };
 
-  const handleSaveDay = async (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string }) => {
+  const handleSaveDay = async (selectedDay: string | null, editForm: { openTime: string; closeTime: string; breakStart: string; breakEnd: string; timezone: string; is24Hours: boolean }) => {
     if (!selectedDay) return;
 
     try {
       const dayData = weeklySchedule[selectedDay];
       if (dayData) {
-        await updateOpeningHour(dayData.id, {
+        const payload: UpdateOpeningHourInputDTO = {
           id: dayData.id,
-          openTime: editForm.openTime || undefined,
-          closeTime: editForm.closeTime || undefined,
-          breakStart: editForm.breakStart || undefined,
-          breakEnd: editForm.breakEnd || undefined,
           timezone: editForm.timezone || undefined,
-        });
+        };
+
+        if (editForm.is24Hours) {
+          payload.isOpen = true;
+          payload.openTime = "00:00";
+          payload.closeTime = "23:59";
+          payload.breakStart = undefined;
+          payload.breakEnd = undefined;
+        } else {
+          payload.openTime = editForm.openTime || undefined;
+          payload.closeTime = editForm.closeTime || undefined;
+          payload.breakStart = editForm.breakStart || undefined;
+          payload.breakEnd = editForm.breakEnd || undefined;
+        }
+
+        await updateOpeningHour(dayData.id, payload);
         setSelectedDay(null);
         const dayLabels = {
           monday: "จันทร์",

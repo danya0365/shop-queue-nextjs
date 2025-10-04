@@ -21,9 +21,17 @@ const mapDayToOpeningHours = (
     dayOfWeek,
     isOpen: !dayData.closed,
     openTime:
-      dayData.closed || dayData.is24Hours ? undefined : dayData.openTime,
+      dayData.closed
+        ? undefined
+        : dayData.is24Hours
+        ? "00:00"
+        : dayData.openTime,
     closeTime:
-      dayData.closed || dayData.is24Hours ? undefined : dayData.closeTime,
+      dayData.closed
+        ? undefined
+        : dayData.is24Hours
+        ? "23:59"
+        : dayData.closeTime,
     breakStart:
       dayData.closed || dayData.is24Hours || !dayData.hasBreak
         ? undefined

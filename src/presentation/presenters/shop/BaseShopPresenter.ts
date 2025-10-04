@@ -110,13 +110,14 @@ export abstract class BaseShopPresenter {
       if (key === "closed") return; // Skip closed days for now
 
       const [openTime, closeTime] = key.split("-");
+      const openStr = this.formatTimeString(openTime);
+      const closeStr = this.formatTimeString(closeTime);
+      const is24h = openStr === "00:00" && closeStr === "23:59";
       const dayRanges = this.createDayRanges(days);
 
       dayRanges.forEach((range) => {
         summaries.push(
-          `${range}: ${this.formatTimeString(
-            openTime
-          )} - ${this.formatTimeString(closeTime)}`
+          is24h ? `${range}: 24 ชั่วโมง` : `${range}: ${openStr} - ${closeStr}`
         );
       });
     });

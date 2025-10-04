@@ -8,6 +8,7 @@ export interface EditFormState {
   breakStart: string;
   breakEnd: string;
   timezone: string;
+  is24Hours: boolean;
 }
 
 export interface NotificationState {
@@ -38,6 +39,7 @@ export function useOpeningHoursState(): UseOpeningHoursStateReturn {
     breakStart: "",
     breakEnd: "",
     timezone: "Asia/Bangkok",
+    is24Hours: false,
   });
   const [notification, setNotification] = useState<NotificationState>({
     show: false,
@@ -52,6 +54,7 @@ export function useOpeningHoursState(): UseOpeningHoursStateReturn {
       breakStart: "",
       breakEnd: "",
       timezone: "Asia/Bangkok",
+      is24Hours: false,
     });
   };
 

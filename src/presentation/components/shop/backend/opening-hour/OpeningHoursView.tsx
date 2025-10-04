@@ -338,6 +338,28 @@ export function OpeningHoursView({
                   {editMode && selectedDay === day && (
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        {/* 24 Hours Toggle */}
+                        <div className="sm:col-span-2 lg:col-span-5">
+                          <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <input
+                              type="checkbox"
+                              checked={!!editForm.is24Hours}
+                              onChange={(e) => {
+                                const is24 = e.target.checked;
+                                setEditForm({
+                                  ...editForm,
+                                  is24Hours: is24,
+                                  openTime: is24 ? "00:00" : editForm.openTime,
+                                  closeTime: is24 ? "23:59" : editForm.closeTime,
+                                  breakStart: is24 ? "" : editForm.breakStart,
+                                  breakEnd: is24 ? "" : editForm.breakEnd,
+                                });
+                              }}
+                              className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                            />
+                            เปิด 24 ชั่วโมง
+                          </label>
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             เวลาเปิด
@@ -351,7 +373,8 @@ export function OpeningHoursView({
                                 openTime: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            disabled={!!editForm.is24Hours}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${editForm.is24Hours ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600'}`}
                           />
                         </div>
                         <div>
@@ -367,7 +390,8 @@ export function OpeningHoursView({
                                 closeTime: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            disabled={!!editForm.is24Hours}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${editForm.is24Hours ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600'}`}
                           />
                         </div>
                         <div>
@@ -383,7 +407,8 @@ export function OpeningHoursView({
                                 breakStart: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            disabled={!!editForm.is24Hours}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${editForm.is24Hours ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600'}`}
                           />
                         </div>
                         <div>
@@ -399,7 +424,8 @@ export function OpeningHoursView({
                                 breakEnd: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            disabled={!!editForm.is24Hours}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${editForm.is24Hours ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600'}`}
                           />
                         </div>
                         <div>

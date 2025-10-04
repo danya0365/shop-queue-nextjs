@@ -26,6 +26,7 @@ interface UseOpeningHoursPresenterReturn {
     breakStart: string;
     breakEnd: string;
     timezone: string;
+    is24Hours: boolean;
   };
   notification: {
     show: boolean;
@@ -54,6 +55,7 @@ interface UseOpeningHoursPresenterReturn {
     breakStart: string;
     breakEnd: string;
     timezone: string;
+    is24Hours: boolean;
   }) => void;
   setNotification: (notification: {
     show: boolean;
