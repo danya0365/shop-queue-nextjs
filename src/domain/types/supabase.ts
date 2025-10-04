@@ -4511,6 +4511,10 @@ export type Database = {
           queue_count: number
           revenue: number
           category: string
+          price: number
+          icon: string
+          description: string
+          estimate_duration: number
         }[]
       }
       get_customer_popular_services_by_category: {

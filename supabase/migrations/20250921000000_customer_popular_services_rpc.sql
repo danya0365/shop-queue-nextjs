@@ -11,7 +11,11 @@ RETURNS TABLE (
     shop_id UUID,
     queue_count BIGINT,
     revenue NUMERIC,
-    category TEXT
+    category TEXT,
+    price NUMERIC,
+    icon TEXT,
+    description TEXT,
+    estimate_duration INTEGER
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -26,19 +30,24 @@ BEGIN
     -- คืนค่าข้อมูล popular services ตามเงื่อนไข
     RETURN QUERY
     SELECT 
-        popular_services_view.id,
-        popular_services_view.name,
-        popular_services_view.shop_id,
-        popular_services_view.queue_count,
-        popular_services_view.revenue,
-        popular_services_view.category
+        v.id,
+        v.name,
+        v.shop_id,
+        v.queue_count,
+        v.revenue,
+        v.category,
+        s.price,
+        s.icon,
+        s.description,
+        s.estimated_duration AS estimate_duration
     FROM 
-        popular_services_view
+        popular_services_view v
+        JOIN services s ON s.id = v.id
     WHERE 
-        popular_services_view.shop_id = p_shop_id
+        v.shop_id = p_shop_id
     ORDER BY 
-        popular_services_view.queue_count DESC,
-        popular_services_view.revenue DESC
+        v.queue_count DESC,
+        v.revenue DESC
     LIMIT p_limit;
 END;
 $$;

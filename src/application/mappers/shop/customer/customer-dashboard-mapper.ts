@@ -39,9 +39,11 @@ export class PopularServiceMapper {
       id: entity.id,
       name: entity.name,
       price: entity.price,
+      revenue: entity.revenue,
       description: entity.description,
       estimatedTime: entity.estimatedTime,
       icon: entity.icon,
+      category: entity.category,
     };
   }
 
@@ -50,9 +52,11 @@ export class PopularServiceMapper {
       id: dto.id,
       name: dto.name,
       price: dto.price,
+      revenue: dto.revenue,
       description: dto.description,
       estimatedTime: dto.estimatedTime,
       icon: dto.icon,
+      category: dto.category,
     };
   }
 }

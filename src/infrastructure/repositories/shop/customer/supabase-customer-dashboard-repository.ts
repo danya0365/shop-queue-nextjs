@@ -165,6 +165,10 @@ export class SupabaseCustomerDashboardRepository
         queue_count: number;
         revenue: number;
         category: string;
+        price: number | null;
+        icon: string | null;
+        description: string | null;
+        estimate_duration: number | null;
       }>;
 
       // Transform the RPC response to match PopularServiceEntity format
@@ -172,10 +176,12 @@ export class SupabaseCustomerDashboardRepository
         (service) => ({
           id: service.id,
           name: service.name,
-          price: service.revenue, // Using revenue as price since RPC doesn't provide price directly
-          description: "",
-          estimatedTime: 0, // RPC doesn't provide this
-          icon: "", // RPC doesn't provide this
+          price: service.price ?? 0,
+          revenue: Number(service.revenue) || 0,
+          description: service.description ?? "",
+          estimatedTime: service.estimate_duration ?? 0,
+          icon: service.icon ?? "",
+          category: service.category ?? "",
         })
       );
 

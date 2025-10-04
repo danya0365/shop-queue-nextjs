@@ -10,9 +10,11 @@ export interface PopularServiceEntity {
   id: string;
   name: string;
   price: number;
+  revenue: number;
   description: string;
   estimatedTime: number;
   icon: string;
+  category: string;
 }
 
 export interface PromotionEntity {
