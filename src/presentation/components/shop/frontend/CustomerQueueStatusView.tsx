@@ -1,5 +1,6 @@
 "use client";
 
+import { QueueStatus } from "@/src/domain/entities/shop/backend/backend-queue.entity";
 import type { CustomerQueueStatusViewModel } from "@/src/presentation/presenters/shop/frontend/CustomerQueueStatusPresenter";
 import { useCustomerQueueStatusPresenter } from "@/src/presentation/presenters/shop/frontend/useCustomerQueueStatusPresenter";
 import { useCustomerStore } from "@/src/presentation/stores/customer-store";
@@ -141,7 +142,8 @@ export function CustomerQueueStatusView({
                   aria-label="หมายเลขคิว"
                 />
                 <p className="shop-frontend-text-muted text-sm mt-2">
-                  ใบเสร็จหรือหน้าจอเข้าคิวจะแสดงหมายเลขคิวของคุณ (ตัวอย่าง: A001)
+                  ใบเสร็จหรือหน้าจอเข้าคิวจะแสดงหมายเลขคิวของคุณ (ตัวอย่าง:
+                  A001)
                 </p>
               </div>
               <button
@@ -166,20 +168,28 @@ export function CustomerQueueStatusView({
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-                <div className="text-sm shop-frontend-text-secondary mb-1">คิวที่กำลังให้บริการ</div>
+                <div className="text-sm shop-frontend-text-secondary mb-1">
+                  คิวที่กำลังให้บริการ
+                </div>
                 <div className="text-3xl font-extrabold shop-frontend-text-primary">
                   {queueProgress.currentNumber || "-"}
                 </div>
               </div>
               <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-                <div className="text-sm shop-frontend-text-secondary mb-1">เวลาเฉลี่ยต่อคิว</div>
+                <div className="text-sm shop-frontend-text-secondary mb-1">
+                  เวลาเฉลี่ยต่อคิว
+                </div>
                 <div className="text-2xl font-bold shop-frontend-text-primary">
                   {queueProgress.averageServiceTime} นาที
                 </div>
               </div>
               <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-                <div className="text-sm shop-frontend-text-secondary mb-1">แนะนำ</div>
-                <div className="text-sm shop-frontend-text-muted">เตรียมตัวล่วงหน้า ~5 นาที</div>
+                <div className="text-sm shop-frontend-text-secondary mb-1">
+                  แนะนำ
+                </div>
+                <div className="text-sm shop-frontend-text-muted">
+                  เตรียมตัวล่วงหน้า ~5 นาที
+                </div>
               </div>
             </div>
           </div>
@@ -217,19 +227,29 @@ export function CustomerQueueStatusView({
               </div>
             </div>
 
-            {/* Stepper */}
+            {/* Stepper (4 statuses) */}
             <div className="p-6">
               <div className="flex items-center justify-between">
                 {[
-                  { key: "waiting", label: "รอคิว" },
-                  { key: "serving", label: "กำลังให้บริการ" },
-                  { key: "completed", label: "เสร็จสิ้น" },
-                ].map((step, idx) => {
-                  const isActive =
-                    customerQueue.status === step.key ||
-                    (step.key === "completed" && customerQueue.status === "cancelled");
-                  const isDone =
-                    customerQueue.status === "serving" && step.key === "waiting";
+                  { key: QueueStatus.WAITING, label: "รอยืนยัน" },
+                  { key: QueueStatus.CONFIRMED, label: "รอคิว" },
+                  { key: QueueStatus.SERVING, label: "กำลังให้บริการ" },
+                  { key: QueueStatus.COMPLETED, label: "เสร็จสิ้น" },
+                ].map((step, idx, arr) => {
+                  const current =
+                    customerQueue.status === QueueStatus.CONFIRMED
+                      ? QueueStatus.CONFIRMED
+                      : customerQueue.status;
+                  const order = [
+                    QueueStatus.WAITING,
+                    QueueStatus.CONFIRMED,
+                    QueueStatus.SERVING,
+                    QueueStatus.COMPLETED,
+                  ];
+                  const currentIndex = order.indexOf(current);
+                  const stepIndex = order.indexOf(step.key);
+                  const isActive = currentIndex === stepIndex;
+                  const isDone = currentIndex > stepIndex;
                   return (
                     <div key={step.key} className="flex-1 flex items-center">
                       <div
@@ -255,7 +275,7 @@ export function CustomerQueueStatusView({
                       >
                         {step.label}
                       </span>
-                      {idx < 2 && (
+                      {idx < arr.length - 1 && (
                         <div className="flex-1 h-0.5 mx-2 bg-gray-200 dark:bg-gray-700" />
                       )}
                     </div>
@@ -268,19 +288,25 @@ export function CustomerQueueStatusView({
           {/* Progress Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-sm shop-frontend-text-secondary mb-1">คิวปัจจุบัน</div>
+              <div className="text-sm shop-frontend-text-secondary mb-1">
+                คิวปัจจุบัน
+              </div>
               <div className="text-3xl font-extrabold shop-frontend-text-primary">
                 {queueProgress.currentNumber || "-"}
               </div>
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-sm shop-frontend-text-secondary mb-1">คิวข้างหน้า</div>
+              <div className="text-sm shop-frontend-text-secondary mb-1">
+                คิวข้างหน้า
+              </div>
               <div className="text-3xl font-extrabold shop-frontend-text-primary">
                 {customerQueue.totalAhead}
               </div>
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-sm shop-frontend-text-secondary mb-1">เวลารอโดยประมาณ</div>
+              <div className="text-sm shop-frontend-text-secondary mb-1">
+                เวลารอโดยประมาณ
+              </div>
               <div className="text-2xl font-bold shop-frontend-text-primary">
                 {customerQueue.estimatedWaitTime} นาที
               </div>
@@ -298,13 +324,17 @@ export function CustomerQueueStatusView({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="shop-frontend-text-secondary">ชื่อลูกค้า</span>
+                    <span className="shop-frontend-text-secondary">
+                      ชื่อลูกค้า
+                    </span>
                     <span className="shop-frontend-text-primary font-medium">
                       {customerQueue.customerName}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="shop-frontend-text-secondary">เบอร์โทร</span>
+                    <span className="shop-frontend-text-secondary">
+                      เบอร์โทร
+                    </span>
                     <span className="shop-frontend-text-primary font-medium">
                       {customerQueue.isOwner ? (
                         customer?.phone || (
@@ -318,13 +348,17 @@ export function CustomerQueueStatusView({
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="shop-frontend-text-secondary">เวลาเข้าคิว</span>
+                    <span className="shop-frontend-text-secondary">
+                      เวลาเข้าคิว
+                    </span>
                     <span className="shop-frontend-text-primary font-medium">
                       {customerQueue.createdAt}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="shop-frontend-text-secondary">ราคารวม</span>
+                    <span className="shop-frontend-text-secondary">
+                      ราคารวม
+                    </span>
                     <span className="shop-frontend-service-price font-bold text-lg">
                       ฿{customerQueue.totalPrice}
                     </span>
@@ -332,10 +366,15 @@ export function CustomerQueueStatusView({
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <span className="shop-frontend-text-secondary block mb-2">บริการที่เลือก</span>
+                    <span className="shop-frontend-text-secondary block mb-2">
+                      บริการที่เลือก
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {customerQueue.services.map((s) => (
-                        <span key={s} className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 shop-frontend-text-primary">
+                        <span
+                          key={s}
+                          className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 shop-frontend-text-primary"
+                        >
                           {s}
                         </span>
                       ))}
@@ -343,7 +382,9 @@ export function CustomerQueueStatusView({
                   </div>
                   {customerQueue.specialRequests && (
                     <div>
-                      <span className="shop-frontend-text-secondary block mb-2">คำขอพิเศษ</span>
+                      <span className="shop-frontend-text-secondary block mb-2">
+                        คำขอพิเศษ
+                      </span>
                       <div className="shop-frontend-card-secondary rounded-lg p-4 shop-frontend-text-primary">
                         {customerQueue.specialRequests}
                       </div>
