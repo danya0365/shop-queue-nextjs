@@ -140,8 +140,6 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      this.logger.info("Getting popular services", { shopId, limit });
-
       // Use RPC call instead of direct view query for RLS compliance
       const servicesResult = await this.dataSource.callRpc(
         "get_customer_popular_services",
@@ -175,16 +173,11 @@ export class SupabaseCustomerDashboardRepository
           id: service.id,
           name: service.name,
           price: service.revenue, // Using revenue as price since RPC doesn't provide price directly
-          description: service.category || "", // Using category as description
+          description: "",
           estimatedTime: 0, // RPC doesn't provide this
           icon: "", // RPC doesn't provide this
         })
       );
-
-      this.logger.info("Popular services retrieved successfully", {
-        shopId,
-        count: popularServices.length,
-      });
 
       return popularServices;
     } catch (error) {

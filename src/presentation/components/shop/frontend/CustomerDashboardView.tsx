@@ -336,9 +336,7 @@ export function CustomerDashboardView({
                   <h3 className="font-semibold shop-frontend-text-primary mb-2">
                     {service.name}
                   </h3>
-                  <p className="text-sm shop-frontend-text-secondary mb-3">
-                    {service.description}
-                  </p>
+
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-bold shop-frontend-service-price">
                       ฿{service.price}
