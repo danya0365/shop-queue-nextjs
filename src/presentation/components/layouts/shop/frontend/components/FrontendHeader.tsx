@@ -13,12 +13,14 @@ import { FrontendThemeToggle } from "./FrontendThemeToggle";
 
 interface FrontendHeaderProps {
   shop: ShopInfo | undefined;
+  isShowToggleSidebarButton: boolean;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
 }
 
 const FrontendHeader: React.FC<FrontendHeaderProps> = ({
   shop,
+  isShowToggleSidebarButton,
   sidebarOpen,
   toggleSidebar,
 }) => {
@@ -47,12 +49,14 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
           <div className="flex justify-between items-center h-16">
             {/* Left side - Logo and Menu Button */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <button
-                onClick={toggleSidebar}
-                className="p-2 rounded-lg shop-frontend-header-text-light shop-frontend-header-hover transition-colors lg:hidden"
-              >
-                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
+              {isShowToggleSidebarButton ? (
+                <button
+                  onClick={toggleSidebar}
+                  className="p-2 rounded-lg shop-frontend-header-text-light shop-frontend-header-hover transition-colors lg:hidden"
+                >
+                  {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              ) : null}
 
               <Link
                 href="/"
