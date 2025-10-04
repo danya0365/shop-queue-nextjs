@@ -37,13 +37,13 @@
     @apply bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200;
   }
   .shop-frontend-sidebar-border {
-    @apply border-purple-200 dark:border-purple-700;
+    @apply border-purple-100 dark:border-purple-800;
   }
   .shop-frontend-footer-bg {
     @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-md;
   }
   .shop-frontend-footer-border {
-    @apply border-purple-200 dark:border-purple-700;
+    @apply border-purple-100 dark:border-purple-800;
   }
   .shop-frontend-footer-text {
     @apply text-gray-600 dark:text-gray-300;
@@ -66,10 +66,10 @@
     @apply text-purple-100;
   }
   .shop-frontend-card {
-    @apply bg-white rounded-xl shadow-sm border dark:bg-gray-800 border-purple-200 dark:border-purple-700;
+    @apply bg-white rounded-xl border dark:bg-gray-800 border-purple-100 dark:border-purple-800;
   }
   .shop-frontend-card-border {
-    @apply border-purple-200 dark:border-purple-700;
+    @apply border-purple-100 dark:border-purple-800;
   }
   .shop-frontend-card-hover {
     @apply hover:shadow-md transition-shadow;
