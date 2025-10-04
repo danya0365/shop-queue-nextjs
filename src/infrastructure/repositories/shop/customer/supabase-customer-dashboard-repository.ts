@@ -282,10 +282,9 @@ export class SupabaseCustomerDashboardRepository
         );
       }
 
-      const result = await this.dataSource.callRpc<Array<{ count: number } | number>>(
-        "get_customer_promotions_count",
-        { p_shop_id: shopId }
-      );
+      const result = await this.dataSource.callRpc<
+        Array<{ count: number } | number>
+      >("get_customer_promotions_count", { p_shop_id: shopId });
 
       // Depending on datasource implementation, RPC can return [number] or [{count:number}]
       if (!result || !Array.isArray(result) || result.length === 0) {
@@ -360,12 +359,6 @@ export class SupabaseCustomerDashboardRepository
         canJoinQueue,
         announcement,
       };
-
-      this.logger.info("Customer dashboard data retrieved successfully", {
-        shopId,
-        canJoinQueue,
-        promotionsCount: promotions.length,
-      });
 
       return customerDashboard;
     } catch (error) {

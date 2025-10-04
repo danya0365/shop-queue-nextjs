@@ -29,8 +29,6 @@ export default async function CustomerLayout({
     redirect("/?error=shop_not_found");
   }
 
-  logger.info(`Customer routes: shop ${shopId}`, { shop });
-
   if (shop.status && shop.status !== "active") {
     logger.warn(
       `Customer routes: shop inactive: ${shopId} (status=${shop.status})`
