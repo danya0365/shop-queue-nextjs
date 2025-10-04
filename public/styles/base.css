@@ -20,7 +20,7 @@
 
   /* ใช้ tokens กับ body ผ่าน utilities ของ Tailwind */
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-gradient-to-br from-gray-50 via-orange-50 to-amber-50 dark:from-black dark:via-gray-900 dark:to-gray-900;
     font-family: var(--font-sans);
   }
 }
