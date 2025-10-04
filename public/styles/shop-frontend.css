@@ -34,7 +34,7 @@
     @apply hover:bg-purple-100 dark:hover:bg-purple-800;
   }
   .shop-frontend-sidebar-active {
-    @apply bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 border-r-2 border-purple-700;
+    @apply bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200;
   }
   .shop-frontend-sidebar-border {
     @apply border-purple-200 dark:border-purple-700;
