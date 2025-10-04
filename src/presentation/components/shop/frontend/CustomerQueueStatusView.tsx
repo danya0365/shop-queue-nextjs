@@ -43,8 +43,8 @@ export function CustomerQueueStatusView({
           </h1>
         </div>
         <div className="shop-frontend-card">
-          <div className="p-6 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
             <p className="shop-frontend-text-secondary">กำลังโหลดข้อมูล...</p>
           </div>
         </div>
@@ -62,10 +62,10 @@ export function CustomerQueueStatusView({
           </h1>
         </div>
         <div className="shop-frontend-card">
-          <div className="p-6 text-center">
+          <div className="p-8 text-center">
             <div className="text-6xl mb-4">❌</div>
-            <p className="shop-frontend-text-secondary mb-4">เกิดข้อผิดพลาด</p>
-            <p className="shop-frontend-text-primary mb-4">{error}</p>
+            <p className="shop-frontend-text-secondary mb-2">เกิดข้อผิดพลาด</p>
+            <p className="shop-frontend-text-primary mb-6">{error}</p>
             <button
               onClick={refreshData}
               className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold"
@@ -88,9 +88,9 @@ export function CustomerQueueStatusView({
           </h1>
         </div>
         <div className="shop-frontend-card">
-          <div className="p-6 text-center">
+          <div className="p-10 text-center">
             <div className="text-6xl mb-4">📋</div>
-            <p className="shop-frontend-text-secondary mb-4">ไม่พบข้อมูลคิว</p>
+            <p className="shop-frontend-text-secondary mb-6">ไม่พบข้อมูลคิว</p>
             <button
               onClick={refreshData}
               className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold"
@@ -129,20 +129,26 @@ export function CustomerQueueStatusView({
             }}
             className="p-6"
           >
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={queueNumber}
-                onChange={(e) => setQueueNumber(e.target.value)}
-                placeholder="กรอกหมายเลขคิว (เช่น A001)"
-                className="shop-frontend-input flex-1"
-                required
-                aria-label="หมายเลขคิว"
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={queueNumber}
+                  onChange={(e) => setQueueNumber(e.target.value)}
+                  placeholder="กรอกหมายเลขคิว (เช่น A001)"
+                  className="shop-frontend-input w-full h-12 text-lg"
+                  required
+                  aria-label="หมายเลขคิว"
+                />
+                <p className="shop-frontend-text-muted text-sm mt-2">
+                  ใบเสร็จหรือหน้าจอเข้าคิวจะแสดงหมายเลขคิวของคุณ (ตัวอย่าง: A001)
+                </p>
+              </div>
               <button
                 type="submit"
-                className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold transition-colors"
+                className="shop-frontend-button-primary px-6 py-3 rounded-lg font-semibold transition-colors h-12"
                 disabled={actionLoading}
+                aria-busy={actionLoading}
               >
                 {actionLoading ? "กำลังค้นหา..." : "ค้นหา"}
               </button>
@@ -158,18 +164,23 @@ export function CustomerQueueStatusView({
             </h2>
           </div>
           <div className="p-6">
-            <div className="text-center">
-              <div className="w-20 h-20 shop-frontend-queue-current rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
+                <div className="text-sm shop-frontend-text-secondary mb-1">คิวที่กำลังให้บริการ</div>
+                <div className="text-3xl font-extrabold shop-frontend-text-primary">
                   {queueProgress.currentNumber || "-"}
-                </span>
+                </div>
               </div>
-              <p className="text-lg font-medium shop-frontend-text-primary mb-2">
-                คิวที่กำลังให้บริการ
-              </p>
-              <p className="shop-frontend-text-secondary">
-                เวลาเฉลี่ยต่อคิว: {queueProgress.averageServiceTime} นาที
-              </p>
+              <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
+                <div className="text-sm shop-frontend-text-secondary mb-1">เวลาเฉลี่ยต่อคิว</div>
+                <div className="text-2xl font-bold shop-frontend-text-primary">
+                  {queueProgress.averageServiceTime} นาที
+                </div>
+              </div>
+              <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
+                <div className="text-sm shop-frontend-text-secondary mb-1">แนะนำ</div>
+                <div className="text-sm shop-frontend-text-muted">เตรียมตัวล่วงหน้า ~5 นาที</div>
+              </div>
             </div>
           </div>
         </div>
@@ -189,22 +200,67 @@ export function CustomerQueueStatusView({
       {isFound && customerQueue && (
         <>
           {/* Queue Status Card */}
-          <div className="shop-frontend-card rounded-lg text-center overflow-hidden">
-            <div className="shop-frontend-shop-header p-6">
-              <div className="text-center">
-                <div className="text-6xl mb-4">
-                  {getStatusIcon(customerQueue.status)}
-                </div>
-                <h2 className="text-3xl font-bold mb-2">
-                  คิวหมายเลข {customerQueue.queueNumber}
-                </h2>
-                <div
-                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border ${getStatusColor(
-                    customerQueue.status
-                  )}`}
-                >
-                  {getStatusText(customerQueue.status)}
-                </div>
+          <div className="shop-frontend-card rounded-lg overflow-hidden">
+            <div className="shop-frontend-shop-header p-8 text-center">
+              <div className="text-6xl mb-4">
+                {getStatusIcon(customerQueue.status)}
+              </div>
+              <h2 className="text-3xl font-bold mb-3">
+                คิวหมายเลข {customerQueue.queueNumber}
+              </h2>
+              <div
+                className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border ${getStatusColor(
+                  customerQueue.status
+                )}`}
+              >
+                {getStatusText(customerQueue.status)}
+              </div>
+            </div>
+
+            {/* Stepper */}
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                {[
+                  { key: "waiting", label: "รอคิว" },
+                  { key: "serving", label: "กำลังให้บริการ" },
+                  { key: "completed", label: "เสร็จสิ้น" },
+                ].map((step, idx) => {
+                  const isActive =
+                    customerQueue.status === step.key ||
+                    (step.key === "completed" && customerQueue.status === "cancelled");
+                  const isDone =
+                    customerQueue.status === "serving" && step.key === "waiting";
+                  return (
+                    <div key={step.key} className="flex-1 flex items-center">
+                      <div
+                        className={`flex items-center justify-center w-9 h-9 rounded-full border text-sm font-semibold mr-2 ${
+                          isActive
+                            ? "bg-purple-600 text-white border-purple-600"
+                            : isDone
+                            ? "bg-purple-100 text-purple-600 border-purple-300"
+                            : "bg-white text-gray-400 border-gray-300"
+                        }`}
+                        aria-current={isActive}
+                      >
+                        {idx + 1}
+                      </div>
+                      <span
+                        className={`text-sm ${
+                          isActive
+                            ? "text-purple-700 dark:text-purple-300"
+                            : isDone
+                            ? "text-purple-600 dark:text-purple-400"
+                            : "shop-frontend-text-muted"
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+                      {idx < 2 && (
+                        <div className="flex-1 h-0.5 mx-2 bg-gray-200 dark:bg-gray-700" />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -212,27 +268,21 @@ export function CustomerQueueStatusView({
           {/* Progress Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
+              <div className="text-sm shop-frontend-text-secondary mb-1">คิวปัจจุบัน</div>
+              <div className="text-3xl font-extrabold shop-frontend-text-primary">
                 {queueProgress.currentNumber || "-"}
               </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                คิวปัจจุบัน
-              </div>
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
+              <div className="text-sm shop-frontend-text-secondary mb-1">คิวข้างหน้า</div>
+              <div className="text-3xl font-extrabold shop-frontend-text-primary">
                 {customerQueue.totalAhead}
               </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                คิวข้างหน้า
-              </div>
             </div>
             <div className="shop-frontend-card-secondary p-6 rounded-lg text-center">
-              <div className="text-2xl font-bold shop-frontend-text-primary mb-1">
-                {customerQueue.estimatedWaitTime}
-              </div>
-              <div className="text-sm shop-frontend-text-secondary">
-                เวลารอ (นาที)
+              <div className="text-sm shop-frontend-text-secondary mb-1">เวลารอโดยประมาณ</div>
+              <div className="text-2xl font-bold shop-frontend-text-primary">
+                {customerQueue.estimatedWaitTime} นาที
               </div>
             </div>
           </div>
@@ -245,62 +295,60 @@ export function CustomerQueueStatusView({
               </h3>
             </div>
             <div className="p-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="shop-frontend-text-secondary">
-                    ชื่อลูกค้า:
-                  </span>
-                  <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.customerName}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="shop-frontend-text-secondary">
-                    เบอร์โทร:
-                  </span>
-                  <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.isOwner ? (
-                      customer?.phone || (
-                        <span className="text-gray-400">ไม่ระบุ</span>
-                      )
-                    ) : customerQueue.customerPhone ? (
-                      customerQueue.customerPhone
-                    ) : (
-                      <span className="text-gray-400">ซ่อนเบอร์โทร</span>
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="shop-frontend-text-secondary">
-                    เวลาเข้าคิว:
-                  </span>
-                  <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.createdAt}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="shop-frontend-text-secondary">
-                    บริการที่เลือก:
-                  </span>
-                  <span className="shop-frontend-text-primary font-medium">
-                    {customerQueue.services.join(", ")}
-                  </span>
-                </div>
-                {customerQueue.specialRequests && (
-                  <div className="flex justify-between items-start">
-                    <span className="shop-frontend-text-secondary">
-                      คำขอพิเศษ:
-                    </span>
-                    <span className="shop-frontend-text-primary font-medium text-right">
-                      {customerQueue.specialRequests}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="shop-frontend-text-secondary">ชื่อลูกค้า</span>
+                    <span className="shop-frontend-text-primary font-medium">
+                      {customerQueue.customerName}
                     </span>
                   </div>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="shop-frontend-text-secondary">ราคารวม:</span>
-                  <span className="shop-frontend-service-price font-bold text-lg">
-                    ฿{customerQueue.totalPrice}
-                  </span>
+                  <div className="flex justify-between items-center">
+                    <span className="shop-frontend-text-secondary">เบอร์โทร</span>
+                    <span className="shop-frontend-text-primary font-medium">
+                      {customerQueue.isOwner ? (
+                        customer?.phone || (
+                          <span className="text-gray-400">ไม่ระบุ</span>
+                        )
+                      ) : customerQueue.customerPhone ? (
+                        customerQueue.customerPhone
+                      ) : (
+                        <span className="text-gray-400">ซ่อนเบอร์โทร</span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="shop-frontend-text-secondary">เวลาเข้าคิว</span>
+                    <span className="shop-frontend-text-primary font-medium">
+                      {customerQueue.createdAt}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="shop-frontend-text-secondary">ราคารวม</span>
+                    <span className="shop-frontend-service-price font-bold text-lg">
+                      ฿{customerQueue.totalPrice}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <span className="shop-frontend-text-secondary block mb-2">บริการที่เลือก</span>
+                    <div className="flex flex-wrap gap-2">
+                      {customerQueue.services.map((s) => (
+                        <span key={s} className="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-700 shop-frontend-text-primary">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {customerQueue.specialRequests && (
+                    <div>
+                      <span className="shop-frontend-text-secondary block mb-2">คำขอพิเศษ</span>
+                      <div className="shop-frontend-card-secondary rounded-lg p-4 shop-frontend-text-primary">
+                        {customerQueue.specialRequests}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -319,7 +367,7 @@ export function CustomerQueueStatusView({
               onClick={() => {
                 resetData();
               }}
-              className="shop-frontend-button-secondary px-6 py-3 rounded-lg font-semibold"
+              className="shop-frontend-button-secondary px-6 py-3 rounded-lg font-semibold disabled:opacity-60"
               disabled={actionLoading}
             >
               🔍 ค้นหาคิวอื่น
@@ -328,7 +376,7 @@ export function CustomerQueueStatusView({
             {canCancel && (
               <button
                 onClick={() => setShowCancelConfirm(true)}
-                className="shop-frontend-button-danger px-6 py-3 rounded-lg font-semibold"
+                className="shop-frontend-button-cancel px-6 py-3 rounded-lg font-semibold disabled:opacity-60"
                 disabled={actionLoading}
               >
                 ❌ ยกเลิกคิว
@@ -340,7 +388,7 @@ export function CustomerQueueStatusView({
 
       {/* Cancel Confirmation Modal */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 shop-frontend-overlay flex items-center justify-center p-4 z-50">
           <div className="shop-frontend-card p-6 max-w-md w-full">
             <div className="text-center mb-6">
               <span className="text-6xl mb-4 block">⚠️</span>
@@ -351,16 +399,16 @@ export function CustomerQueueStatusView({
                 คุณแน่ใจหรือไม่ที่จะยกเลิกคิว {customerQueue?.queueNumber}?
               </p>
             </div>
-            <div className="flex space-x-4">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 shop-frontend-button-secondary px-4 py-2 rounded-lg font-medium transition-colors"
+                className="shop-frontend-button-primary px-4 py-2 rounded-lg font-medium"
               >
                 ไม่ยกเลิก
               </button>
               <button
                 onClick={handleCancel}
-                className="flex-1 shop-frontend-button-danger px-4 py-2 rounded-lg font-medium transition-colors"
+                className="shop-frontend-button-cancel px-4 py-2 rounded-lg font-medium disabled:opacity-60"
                 disabled={actionLoading}
               >
                 {actionLoading ? "กำลังยกเลิก..." : "ยืนยันยกเลิก"}
