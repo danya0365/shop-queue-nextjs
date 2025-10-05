@@ -4,14 +4,14 @@ import { RewardMapper } from '@/src/application/mappers/shop/backend/reward-mapp
 import type { ShopBackendRewardRepository } from '@/src/domain/repositories/shop/backend/backend-reward-repository';
 import { ShopBackendRewardError, ShopBackendRewardErrorType } from '@/src/domain/repositories/shop/backend/backend-reward-repository';
 
-export class GetRewardStatsUseCase implements IUseCase<void, RewardStatsDTO> {
+export class GetRewardStatsUseCase implements IUseCase<string, RewardStatsDTO> {
   constructor(
     private readonly rewardRepository: ShopBackendRewardRepository
   ) { }
 
-  async execute(): Promise<RewardStatsDTO> {
+  async execute(shopId: string): Promise<RewardStatsDTO> {
     try {
-      const stats = await this.rewardRepository.getRewardStats();
+      const stats = await this.rewardRepository.getRewardStats(shopId);
       return RewardMapper.statsToDTO(stats);
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {

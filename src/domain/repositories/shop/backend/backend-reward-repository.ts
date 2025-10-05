@@ -40,21 +40,21 @@ export interface ShopBackendRewardRepository {
    * @returns Paginated rewards data
    * @throws ShopBackendRewardError if the operation fails
    */
-  getPaginatedRewards(params: PaginationParams): Promise<PaginatedRewardsEntity>;
+  getPaginatedRewards(params: PaginationParams & { shopId: string }): Promise<PaginatedRewardsEntity>;
 
   /**
    * Get reward statistics
    * @returns Reward statistics data
    * @throws ShopBackendRewardError if the operation fails
    */
-  getRewardStats(): Promise<RewardStatsEntity>;
+  getRewardStats(shopId: string): Promise<RewardStatsEntity>;
 
   /**
    * Get reward type statistics
    * @returns Reward type statistics data
    * @throws ShopBackendRewardError if the operation fails
    */
-  getRewardTypeStats(): Promise<RewardTypeStatsEntity>;
+  getRewardTypeStats(shopId: string): Promise<RewardTypeStatsEntity>;
 
   /**
    * Get recent reward usage
@@ -62,7 +62,7 @@ export interface ShopBackendRewardRepository {
    * @returns Array of reward usage entities
    * @throws ShopBackendRewardError if the operation fails
    */
-  getRecentRewardUsage(limit?: number): Promise<RewardUsageEntity[]>;
+  getRecentRewardUsage(limit: number | undefined, shopId: string): Promise<RewardUsageEntity[]>;
 
   /**
    * Get reward by ID

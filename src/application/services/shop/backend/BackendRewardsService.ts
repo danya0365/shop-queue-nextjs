@@ -10,8 +10,8 @@ import type { Logger } from '@/src/domain/interfaces/logger';
 import { ShopBackendRewardRepository } from '@/src/domain/repositories/shop/backend/backend-reward-repository';
 
 export interface IShopBackendRewardsService {
-  getRewardsData(page?: number, perPage?: number): Promise<RewardsDataDTO>;
-  getRewardStats(): Promise<RewardStatsDTO>;
+  getRewardsData(shopId: string, page?: number, perPage?: number): Promise<RewardsDataDTO>;
+  getRewardStats(shopId: string): Promise<RewardStatsDTO>;
   getRewardById(id: string): Promise<RewardDTO>;
   createReward(params: CreateRewardDTO): Promise<RewardDTO>;
   updateReward(id: string, params: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO>;
@@ -21,7 +21,7 @@ export interface IShopBackendRewardsService {
 export class ShopBackendRewardsService implements IShopBackendRewardsService {
   constructor(
     private readonly getRewardsPaginatedUseCase: IUseCase<GetRewardsPaginatedInput, RewardsDataDTO>,
-    private readonly getRewardStatsUseCase: IUseCase<void, RewardStatsDTO>,
+    private readonly getRewardStatsUseCase: IUseCase<string, RewardStatsDTO>,
     private readonly getRewardByIdUseCase: IUseCase<string, RewardDTO>,
     private readonly createRewardUseCase: IUseCase<CreateRewardDTO, RewardDTO>,
     private readonly updateRewardUseCase: IUseCase<UpdateRewardDTO, RewardDTO>,
@@ -35,14 +35,14 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    * @param perPage Items per page (default: 10)
    * @returns Rewards data DTO
    */
-  async getRewardsData(page: number = 1, perPage: number = 10): Promise<RewardsDataDTO> {
+  async getRewardsData(shopId: string, page: number = 1, perPage: number = 10): Promise<RewardsDataDTO> {
     try {
-      this.logger.info('Getting rewards data', { page, perPage });
+      this.logger.info('Getting rewards data', { shopId, page, perPage });
 
-      const result = await this.getRewardsPaginatedUseCase.execute({ page, limit: perPage });
+      const result = await this.getRewardsPaginatedUseCase.execute({ shopId, page, limit: perPage });
       return result;
     } catch (error) {
-      this.logger.error('Error getting rewards data', { error, page, perPage });
+      this.logger.error('Error getting rewards data', { error, shopId, page, perPage });
       throw error;
     }
   }
@@ -51,14 +51,14 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    * Get reward statistics
    * @returns Reward stats DTO
    */
-  async getRewardStats(): Promise<RewardStatsDTO> {
+  async getRewardStats(shopId: string): Promise<RewardStatsDTO> {
     try {
-      this.logger.info('Getting reward stats');
+      this.logger.info('Getting reward stats', { shopId });
 
-      const stats = await this.getRewardStatsUseCase.execute();
+      const stats = await this.getRewardStatsUseCase.execute(shopId);
       return stats;
     } catch (error) {
-      this.logger.error('Error getting reward stats', { error });
+      this.logger.error('Error getting reward stats', { error, shopId });
       throw error;
     }
   }

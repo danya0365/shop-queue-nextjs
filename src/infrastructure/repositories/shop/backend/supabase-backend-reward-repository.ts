@@ -1,33 +1,54 @@
-import { CreateRewardEntity, PaginatedRewardsEntity, RewardEntity, RewardStatsEntity, RewardTypeStatsEntity, RewardUsageEntity } from "@/src/domain/entities/shop/backend/backend-reward.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "@/src/domain/interfaces/datasources/database-datasource";
+import {
+  CreateRewardEntity,
+  PaginatedRewardsEntity,
+  RewardEntity,
+  RewardStatsEntity,
+  RewardTypeStatsEntity,
+  RewardUsageEntity,
+} from "@/src/domain/entities/shop/backend/backend-reward.entity";
+import {
+  DatabaseDataSource,
+  FilterOperator,
+  QueryOptions,
+  SortDirection,
+} from "@/src/domain/interfaces/datasources/database-datasource";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
-import { ShopBackendRewardError, ShopBackendRewardErrorType, ShopBackendRewardRepository } from "@/src/domain/repositories/shop/backend/backend-reward-repository";
+import {
+  ShopBackendRewardError,
+  ShopBackendRewardErrorType,
+  ShopBackendRewardRepository,
+} from "@/src/domain/repositories/shop/backend/backend-reward-repository";
 import { SupabaseShopBackendRewardMapper } from "@/src/infrastructure/mappers/shop/backend/supabase-backend-reward.mapper";
-import { RewardSchema, RewardStatsSchema, RewardUsageSchema } from "@/src/infrastructure/schemas/shop/backend/reward.schema";
+import {
+  RewardSchema,
+  RewardStatsSchema,
+  RewardUsageSchema,
+} from "@/src/infrastructure/schemas/shop/backend/reward.schema";
 import { StandardRepository } from "../../base/standard-repository";
 
 // Extended types for joined data
 type RewardWithJoins = RewardSchema & {
-  shops?: { name?: string }
+  shops?: { name?: string };
 };
 type RewardSchemaRecord = Record<string, unknown> & RewardSchema;
 type RewardStatsSchemaRecord = Record<string, unknown> & RewardStatsSchema;
-type RewardUsageWithJoins = Record<string, unknown> & RewardUsageSchema & {
-  customers?: { name?: string },
-  rewards?: { name?: string, icon?: string },
-  queues?: { queue_number?: string }
-};
+type RewardUsageWithJoins = Record<string, unknown> &
+  RewardUsageSchema & {
+    customers?: { name?: string };
+    rewards?: { name?: string; icon?: string };
+    queues?: { queue_number?: string };
+  };
 
 /**
  * Supabase implementation of the reward repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseShopBackendRewardRepository extends StandardRepository implements ShopBackendRewardRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseShopBackendRewardRepository
+  extends StandardRepository
+  implements ShopBackendRewardRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "ShopBackendReward");
   }
 
@@ -36,62 +57,71 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * @param params Pagination parameters
    * @returns Paginated rewards data
    */
-  async getPaginatedRewards(params: PaginationParams): Promise<PaginatedRewardsEntity> {
+  async getPaginatedRewards(
+    params: PaginationParams & { shopId: string }
+  ): Promise<PaginatedRewardsEntity> {
     try {
-      const { page, limit } = params;
+      const { page, limit, shopId } = params;
       const offset = (page - 1) * limit;
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
+          { table: "shops", on: { fromField: "shop_id", toField: "id" } },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
-        }
+          offset,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const rewards = await this.dataSource.getAdvanced<RewardSchemaRecord>(
-        'rewards',
+        "rewards",
         queryOptions
       );
 
-      // Count total items
-      const totalItems = await this.dataSource.count('rewards', queryOptions);
+      // Count total items with the same filters
+      const totalItems = await this.dataSource.count("rewards", {
+        filters: queryOptions.filters,
+        joins: queryOptions.joins,
+      });
 
-      // Map database results to domain entities
-      const mappedRewards = rewards.map(reward => {
-        // Handle joined data from shops table
+      // Map database results to domain entities (already filtered by shopId)
+      const data = rewards.map((reward) => {
         const rewardWithJoinedData = reward as RewardWithJoins;
-
-        const rewardWithJoins = {
+        return SupabaseShopBackendRewardMapper.toDomain({
           ...reward,
-          shop_name: rewardWithJoinedData.shops?.name
-        };
-        return SupabaseShopBackendRewardMapper.toDomain(rewardWithJoins);
+          shop_name: rewardWithJoinedData.shops?.name,
+        });
       });
 
       // Create pagination metadata
-      const pagination = SupabaseShopBackendRewardMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseShopBackendRewardMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
-        data: mappedRewards,
-        pagination
+        data,
+        pagination,
       };
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedRewards', { error });
+      this.logger.error("Error in getPaginatedRewards", { error });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching rewards',
-        'getPaginatedRewards',
+        "An unexpected error occurred while fetching rewards",
+        "getPaginatedRewards",
         {},
         error
       );
@@ -102,21 +132,25 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * Get reward statistics from database
    * @returns Reward statistics
    */
-  async getRewardStats(): Promise<RewardStatsEntity> {
+  async getRewardStats(shopId: string): Promise<RewardStatsEntity> {
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for reward statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<RewardStatsSchemaRecord>(
-        'reward_stats_summary_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<RewardStatsSchemaRecord>(
+          "reward_stats_by_shop_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -126,7 +160,7 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
           totalRedemptions: 0,
           totalPointsRedeemed: 0,
           averageRedemptionValue: 0,
-          popularRewardType: null
+          popularRewardType: null,
         };
       }
 
@@ -138,11 +172,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in getRewardStats', { error });
+      this.logger.error("Error in getRewardStats", { error });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching reward statistics',
-        'getRewardStats',
+        "An unexpected error occurred while fetching reward statistics",
+        "getRewardStats",
         {},
         error
       );
@@ -153,26 +187,35 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * Get reward type statistics from database
    * @returns Reward type statistics
    */
-  async getRewardTypeStats(): Promise<RewardTypeStatsEntity> {
+  async getRewardTypeStats(shopId: string): Promise<RewardTypeStatsEntity> {
     try {
       // Use getAdvanced to fetch reward type statistics
       const queryOptions: QueryOptions = {
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
         pagination: {
           limit: 10,
-          offset: 0
-        }
+          offset: 0,
+        },
       };
 
       interface TypeStatsResult extends Record<string, unknown> {
-        discount: { count: number; percentage: number; totalValue: number };
-        free_item: { count: number; percentage: number; totalValue: number };
-        cashback: { count: number; percentage: number; totalValue: number };
-        special_privilege: { count: number; percentage: number; totalValue: number };
-        total_rewards: number;
+        reward_type_stats: {
+          discount: { count: number; percentage: number; totalValue: number };
+          free_item: { count: number; percentage: number; totalValue: number };
+          cashback: { count: number; percentage: number; totalValue: number };
+          special_privilege: {
+            count: number;
+            percentage: number;
+            totalValue: number;
+          };
+          total_rewards: number;
+        };
       }
 
       const typeStatsDatas = await this.dataSource.getAdvanced<TypeStatsResult>(
-        'reward_type_stats_summary_view',
+        "reward_type_stats_by_shop_view",
         queryOptions
       );
 
@@ -183,19 +226,35 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
           free_item: { count: 0, percentage: 0, totalValue: 0 },
           cashback: { count: 0, percentage: 0, totalValue: 0 },
           special_privilege: { count: 0, percentage: 0, totalValue: 0 },
-          totalRewards: 0
+          totalRewards: 0,
         };
       }
 
-      const typeStatsData = typeStatsDatas[0];
+      const typeStatsData = typeStatsDatas[0].reward_type_stats;
 
       // Initialize default stats structure
       const defaultStats = {
-        discount: { count: typeStatsData.discount.count, percentage: typeStatsData.discount.percentage, totalValue: typeStatsData.discount.totalValue },
-        free_item: { count: typeStatsData.free_item.count, percentage: typeStatsData.free_item.percentage, totalValue: typeStatsData.free_item.totalValue },
-        cashback: { count: typeStatsData.cashback.count, percentage: typeStatsData.cashback.percentage, totalValue: typeStatsData.cashback.totalValue },
-        special_privilege: { count: typeStatsData.special_privilege.count, percentage: typeStatsData.special_privilege.percentage, totalValue: typeStatsData.special_privilege.totalValue },
-        totalRewards: typeStatsData.total_rewards
+        discount: {
+          count: typeStatsData.discount.count,
+          percentage: typeStatsData.discount.percentage,
+          totalValue: typeStatsData.discount.totalValue,
+        },
+        free_item: {
+          count: typeStatsData.free_item.count,
+          percentage: typeStatsData.free_item.percentage,
+          totalValue: typeStatsData.free_item.totalValue,
+        },
+        cashback: {
+          count: typeStatsData.cashback.count,
+          percentage: typeStatsData.cashback.percentage,
+          totalValue: typeStatsData.cashback.totalValue,
+        },
+        special_privilege: {
+          count: typeStatsData.special_privilege.count,
+          percentage: typeStatsData.special_privilege.percentage,
+          totalValue: typeStatsData.special_privilege.totalValue,
+        },
+        totalRewards: typeStatsData.total_rewards,
       };
 
       return defaultStats;
@@ -204,11 +263,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in getRewardTypeStats', { error });
+      this.logger.error("Error in getRewardTypeStats", { error });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching reward type statistics',
-        'getRewardTypeStats',
+        "An unexpected error occurred while fetching reward type statistics",
+        "getRewardTypeStats",
         {},
         error
       );
@@ -220,38 +279,47 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * @param limit Number of recent usage records to fetch
    * @returns Array of reward usage entities
    */
-  async getRecentRewardUsage(limit: number = 10): Promise<RewardUsageEntity[]> {
+  async getRecentRewardUsage(
+    limit: number = 10,
+    shopId: string
+  ): Promise<RewardUsageEntity[]> {
     try {
       // Use getAdvanced to fetch recent reward usage data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'customers', on: { fromField: 'customer_id', toField: 'id' } },
-          { table: 'rewards', on: { fromField: 'reward_id', toField: 'id' } },
-          { table: 'queues', on: { fromField: 'queue_id', toField: 'id' } }
+          {
+            table: "customers",
+            on: { fromField: "customer_id", toField: "id" },
+          },
+          { table: "rewards", on: { fromField: "reward_id", toField: "id" } },
+          { table: "queues", on: { fromField: "queue_id", toField: "id" } },
         ],
-        sort: [{ field: 'used_at', direction: SortDirection.DESC }],
+        filters: [
+          { field: "shop_id", operator: FilterOperator.EQ, value: shopId },
+        ],
+        sort: [{ field: "used_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset: 0
-        }
+          offset: 0,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
       const usageData = await this.dataSource.getAdvanced<RewardUsageWithJoins>(
-        'reward_usages',
+        "reward_usages",
         queryOptions
       );
 
       // Map database results to domain entities
-      return usageData.map(usage => {
+      return usageData.map((usage) => {
         const usageWithJoinedData = usage as RewardUsageWithJoins;
         return SupabaseShopBackendRewardMapper.usageToDomain({
           ...usageWithJoinedData,
-          reward_name: usageWithJoinedData.rewards?.name || '',
-          reward_icon: usageWithJoinedData.rewards?.icon || '',
-          customer_name: usageWithJoinedData.customers?.name || '',
-          queue_number: usageWithJoinedData.queues?.queue_number || ''
+          reward_name: usageWithJoinedData.rewards?.name || "",
+          reward_icon: usageWithJoinedData.rewards?.icon || "",
+          customer_name: usageWithJoinedData.customers?.name || "",
+          queue_number: usageWithJoinedData.queues?.queue_number || "",
         });
       });
     } catch (error) {
@@ -259,11 +327,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in getRecentRewardUsage', { error, limit });
+      this.logger.error("Error in getRecentRewardUsage", { error, limit });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching recent reward usage',
-        'getRecentRewardUsage',
+        "An unexpected error occurred while fetching recent reward usage",
+        "getRecentRewardUsage",
         { limit },
         error
       );
@@ -280,13 +348,13 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const reward = await this.dataSource.getById<RewardSchemaRecord>(
-        'rewards',
+        "rewards",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } }
-          ]
+            { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+          ],
         }
       );
 
@@ -294,26 +362,22 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         return null;
       }
 
-      // Handle joined data from shops table
+      // Handle joined data from shops table and map
       const rewardWithJoinedData = reward as RewardWithJoins;
-
-      const rewardWithJoins = {
+      return SupabaseShopBackendRewardMapper.toDomain({
         ...reward,
-        shop_name: rewardWithJoinedData.shops?.name
-      };
-
-      // Map database result to domain entity
-      return SupabaseShopBackendRewardMapper.toDomain(rewardWithJoins);
+        shop_name: rewardWithJoinedData.shops?.name,
+      });
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {
         throw error;
       }
 
-      this.logger.error('Error in getRewardById', { error, id });
+      this.logger.error("Error in getRewardById", { error, id });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching reward',
-        'getRewardById',
+        "An unexpected error occurred while fetching reward",
+        "getRewardById",
         { id },
         error
       );
@@ -325,7 +389,9 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * @param reward Reward data to create
    * @returns Created reward entity
    */
-  async createReward(reward: Omit<CreateRewardEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<RewardEntity> {
+  async createReward(
+    reward: Omit<CreateRewardEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<RewardEntity> {
     try {
       // Convert domain entity to database schema
       const rewardSchema = {
@@ -338,20 +404,20 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         is_available: reward.isAvailable ?? true,
         expiry_days: reward.expiryDays || null,
         usage_limit: reward.usageLimit || null,
-        icon: reward.icon || null
+        icon: reward.icon || null,
       };
 
       // Create reward in database
       const createdReward = await this.dataSource.insert<RewardSchemaRecord>(
-        'rewards',
+        "rewards",
         rewardSchema
       );
 
       if (!createdReward) {
         throw new ShopBackendRewardError(
           ShopBackendRewardErrorType.OPERATION_FAILED,
-          'Failed to create reward',
-          'createReward',
+          "Failed to create reward",
+          "createReward",
           { reward }
         );
       }
@@ -363,11 +429,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in createReward', { error, reward });
+      this.logger.error("Error in createReward", { error, reward });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while creating reward',
-        'createReward',
+        "An unexpected error occurred while creating reward",
+        "createReward",
         { reward },
         error
       );
@@ -380,7 +446,10 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
    * @param reward Reward data to update
    * @returns Updated reward entity
    */
-  async updateReward(id: string, reward: Partial<Omit<RewardEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<RewardEntity> {
+  async updateReward(
+    id: string,
+    reward: Partial<Omit<RewardEntity, "id" | "createdAt" | "updatedAt">>
+  ): Promise<RewardEntity> {
     try {
       // Check if reward exists
       const existingReward = await this.getRewardById(id);
@@ -388,7 +457,7 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw new ShopBackendRewardError(
           ShopBackendRewardErrorType.NOT_FOUND,
           `Reward with ID ${id} not found`,
-          'updateReward',
+          "updateReward",
           { id, reward }
         );
       }
@@ -396,18 +465,23 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
       // Convert domain entity to database schema
       const rewardSchema: Partial<RewardSchema> = {};
       if (reward.name !== undefined) rewardSchema.name = reward.name;
-      if (reward.description !== undefined) rewardSchema.description = reward.description;
+      if (reward.description !== undefined)
+        rewardSchema.description = reward.description;
       if (reward.type !== undefined) rewardSchema.type = reward.type;
-      if (reward.pointsRequired !== undefined) rewardSchema.points_required = reward.pointsRequired;
+      if (reward.pointsRequired !== undefined)
+        rewardSchema.points_required = reward.pointsRequired;
       if (reward.value !== undefined) rewardSchema.value = reward.value;
-      if (reward.isAvailable !== undefined) rewardSchema.is_available = reward.isAvailable;
-      if (reward.expiryDays !== undefined) rewardSchema.expiry_days = reward.expiryDays;
-      if (reward.usageLimit !== undefined) rewardSchema.usage_limit = reward.usageLimit;
+      if (reward.isAvailable !== undefined)
+        rewardSchema.is_available = reward.isAvailable;
+      if (reward.expiryDays !== undefined)
+        rewardSchema.expiry_days = reward.expiryDays;
+      if (reward.usageLimit !== undefined)
+        rewardSchema.usage_limit = reward.usageLimit;
       if (reward.icon !== undefined) rewardSchema.icon = reward.icon;
 
       // Update reward in database
       const updatedReward = await this.dataSource.update<RewardSchemaRecord>(
-        'rewards',
+        "rewards",
         id,
         rewardSchema
       );
@@ -415,8 +489,8 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
       if (!updatedReward) {
         throw new ShopBackendRewardError(
           ShopBackendRewardErrorType.OPERATION_FAILED,
-          'Failed to update reward',
-          'updateReward',
+          "Failed to update reward",
+          "updateReward",
           { id, reward }
         );
       }
@@ -428,11 +502,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in updateReward', { error, id, reward });
+      this.logger.error("Error in updateReward", { error, id, reward });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while updating reward',
-        'updateReward',
+        "An unexpected error occurred while updating reward",
+        "updateReward",
         { id, reward },
         error
       );
@@ -452,16 +526,13 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw new ShopBackendRewardError(
           ShopBackendRewardErrorType.NOT_FOUND,
           `Reward with ID ${id} not found`,
-          'deleteReward',
+          "deleteReward",
           { id }
         );
       }
 
       // Delete reward from database
-      await this.dataSource.delete(
-        'rewards',
-        id
-      );
+      await this.dataSource.delete("rewards", id);
 
       // Since we've already checked if the reward exists, we can return true
       return true;
@@ -470,11 +541,11 @@ export class SupabaseShopBackendRewardRepository extends StandardRepository impl
         throw error;
       }
 
-      this.logger.error('Error in deleteReward', { error, id });
+      this.logger.error("Error in deleteReward", { error, id });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting reward',
-        'deleteReward',
+        "An unexpected error occurred while deleting reward",
+        "deleteReward",
         { id },
         error
       );

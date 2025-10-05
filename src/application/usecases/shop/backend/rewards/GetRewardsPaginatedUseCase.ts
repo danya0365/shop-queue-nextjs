@@ -5,6 +5,7 @@ import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 import { ShopBackendRewardError, ShopBackendRewardErrorType, ShopBackendRewardRepository } from "@/src/domain/repositories/shop/backend/backend-reward-repository";
 
 export interface GetRewardsPaginatedInput {
+  shopId: string;
   page?: number;
   limit?: number;
 }
@@ -32,10 +33,10 @@ export class GetRewardsPaginatedUseCase implements IUseCase<GetRewardsPaginatedI
 
       // Get rewards, stats, type stats, and recent usage in parallel
       const [paginatedRewards, stats, typeStats, recentUsage] = await Promise.all([
-        this.rewardRepository.getPaginatedRewards(paginationParams),
-        this.rewardRepository.getRewardStats(),
-        this.rewardRepository.getRewardTypeStats(),
-        this.rewardRepository.getRecentRewardUsage(5)
+        this.rewardRepository.getPaginatedRewards({ ...paginationParams, shopId: input.shopId }),
+        this.rewardRepository.getRewardStats(input.shopId),
+        this.rewardRepository.getRewardTypeStats(input.shopId),
+        this.rewardRepository.getRecentRewardUsage(5, input.shopId)
       ]);
 
       return RewardMapper.toRewardsDataDTO(paginatedRewards, stats, typeStats, recentUsage);
