@@ -1,19 +1,19 @@
 "use client";
 
-import type { RewardDTO } from "@/src/application/dtos/shop/backend/reward-dto";
-import { RewardType } from "@/src/domain/entities/backend/backend-reward.entity";
 import { RewardsViewModel } from "@/src/presentation/presenters/shop/backend/RewardsPresenter";
 import {
   useRewardsPresenter,
-  type CreateRewardFormData,
-  type UpdateRewardFormData,
 } from "@/src/presentation/presenters/shop/backend/useRewardsPresenter";
 import React from "react";
+import { CreateRewardModal } from "./modals/CreateRewardModal";
+import { EditRewardModal } from "./modals/EditRewardModal";
+import { DeleteRewardConfirmation } from "./modals/DeleteRewardConfirmation";
 
 interface RewardsViewProps {
   shopId: string;
   initialViewModel?: RewardsViewModel;
 }
+
 
 export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
   const [state, actions] = useRewardsPresenter(shopId, initialViewModel);
@@ -89,7 +89,6 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">
                 กำลังโหลดข้อมูลรางวัล...
               </p>
@@ -623,311 +622,12 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         <DeleteRewardConfirmation
           reward={selectedReward}
           onClose={actions.closeDeleteModal}
-          onConfirm={() => actions.deleteReward(selectedReward.id)}
+          onConfirm={async () => {
+            await actions.deleteReward(selectedReward.id);
+          }}
           loading={state.loading}
         />
       )}
-    </div>
-  );
-}
-
-// Inline simple modals for Rewards CRUD (kept minimal and consistent with Employees pattern)
-function CreateRewardModal({
-  shopId,
-  onClose,
-  onSubmit,
-  loading,
-}: {
-  shopId: string;
-  onClose: () => void;
-  onSubmit: (data: CreateRewardFormData) => Promise<boolean>;
-  loading: boolean;
-}) {
-  const [form, setForm] = React.useState<Omit<CreateRewardFormData, "shopId">>({
-    name: "",
-    description: "",
-    type: RewardType.DISCOUNT,
-    pointsRequired: 0,
-    value: 0,
-    expiryDays: 30,
-    usageLimit: undefined as number | undefined,
-    icon: "🎁",
-  });
-
-  const handleSubmit = async () => {
-    const ok = await onSubmit({ ...form, shopId });
-    if (ok) onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          เพิ่มรางวัลใหม่
-        </h3>
-        <div className="space-y-3">
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="ชื่อรางวัล"
-            value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value as string })
-            }
-          />
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="คำอธิบาย (ไม่บังคับ)"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value as string })
-            }
-          />
-          <select
-            className="w-full px-3 py-2 border rounded"
-            value={form.type}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                type: e.target.value as CreateRewardFormData["type"],
-              })
-            }
-          >
-            <option value={RewardType.DISCOUNT}>ส่วนลด</option>
-            <option value={RewardType.FREE_ITEM}>ของฟรี</option>
-            <option value={RewardType.CASHBACK}>คืนเงิน</option>
-            <option value={RewardType.SPECIAL_PRIVILEGE}>สิทธิพิเศษ</option>
-          </select>
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="มูลค่า"
-            value={form.value}
-            onChange={(e) =>
-              setForm({ ...form, value: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="วันหมดอายุ"
-            value={form.expiryDays}
-            onChange={(e) =>
-              setForm({ ...form, expiryDays: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="จำนวนครั้งที่ใช้ได้ (ไม่บังคับ)"
-            value={form.usageLimit ?? ""}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                usageLimit:
-                  e.target.value === "" ? undefined : Number(e.target.value),
-              })
-            }
-          />
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="ไอคอน (emoji)"
-            value={form.icon}
-            onChange={(e) => setForm({ ...form, icon: e.target.value })}
-          />
-        </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            ยกเลิก
-          </button>
-          <button
-            disabled={loading}
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-          >
-            บันทึก
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditRewardModal({
-  reward,
-  shopId,
-  onClose,
-  onSubmit,
-  loading,
-}: {
-  reward: RewardDTO;
-  shopId: string;
-  onClose: () => void;
-  onSubmit: (data: UpdateRewardFormData) => Promise<boolean>;
-  loading: boolean;
-}) {
-  type EditForm = Omit<UpdateRewardFormData, "type"> & {
-    type: NonNullable<UpdateRewardFormData["type"]>;
-  };
-  const [form, setForm] = React.useState<EditForm>({
-    id: reward.id,
-    name: reward.name,
-    description: reward.description ?? "",
-    type: reward.type,
-    pointsRequired: reward.pointsRequired,
-    value: reward.value,
-    isAvailable: reward.isAvailable,
-    expiryDays: reward.expiryDays,
-    usageLimit: reward.usageLimit,
-    icon: reward.icon ?? "🎁",
-    shopId,
-  });
-
-  const handleSubmit = async () => {
-    const ok = await onSubmit(form);
-    if (ok) onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          แก้ไขรางวัล
-        </h3>
-        <div className="space-y-3">
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="ชื่อรางวัล"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="คำอธิบาย (ไม่บังคับ)"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-          <select
-            className="w-full px-3 py-2 border rounded"
-            value={form.type}
-            onChange={(e) =>
-              setForm({ ...form, type: e.target.value as RewardDTO["type"] })
-            }
-          >
-            <option value="discount">ส่วนลด</option>
-            <option value="free_item">ของฟรี</option>
-            <option value="cashback">คืนเงิน</option>
-            <option value="special_privilege">สิทธิพิเศษ</option>
-          </select>
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="แต้มที่ต้องใช้"
-            value={form.pointsRequired}
-            onChange={(e) =>
-              setForm({ ...form, pointsRequired: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="มูลค่า"
-            value={form.value}
-            onChange={(e) =>
-              setForm({ ...form, value: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="วันหมดอายุ"
-            value={form.expiryDays}
-            onChange={(e) =>
-              setForm({ ...form, expiryDays: Number(e.target.value) })
-            }
-          />
-          <input
-            type="number"
-            className="w-full px-3 py-2 border rounded"
-            placeholder="จำนวนครั้งที่ใช้ได้ (ไม่บังคับ)"
-            value={form.usageLimit ?? ""}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                usageLimit:
-                  e.target.value === "" ? undefined : Number(e.target.value),
-              })
-            }
-          />
-          <input
-            className="w-full px-3 py-2 border rounded"
-            placeholder="ไอคอน (emoji)"
-            value={form.icon}
-            onChange={(e) => setForm({ ...form, icon: e.target.value })}
-          />
-        </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            ยกเลิก
-          </button>
-          <button
-            disabled={loading}
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
-          >
-            บันทึก
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DeleteRewardConfirmation({
-  reward,
-  onClose,
-  onConfirm,
-  loading,
-}: {
-  reward: RewardDTO;
-  onClose: () => void;
-  onConfirm: () => Promise<boolean>;
-  loading: boolean;
-}) {
-  const handleConfirm = async () => {
-    const ok = await onConfirm();
-    if (ok) onClose();
-  };
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          ยืนยันการลบ
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          คุณต้องการลบรางวัล &quot;{reward.name}&quot; ใช่หรือไม่?
-        </p>
-        <div className="flex justify-end space-x-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            ยกเลิก
-          </button>
-          <button
-            disabled={loading}
-            onClick={handleConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
-          >
-            ลบ
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
