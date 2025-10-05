@@ -10,6 +10,7 @@ import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 import type { ShopBackendAnalyticsService } from "@/src/application/services/shop/backend/BackendAnalyticsService";
+import type { ShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 
 // Define interfaces for data structures
 export interface RevenueData {
@@ -85,7 +86,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly analyticsService: ShopBackendAnalyticsService
+    private readonly analyticsService: ShopBackendAnalyticsService,
+    private readonly dashboardService: ShopBackendDashboardService
   ) {
     super(
       logger,
@@ -126,7 +128,7 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       const isFreeTier = false; // TODO: for test
       //const isFreeTier = subscriptionPlan.tier === 'free';
 
-      // Real data via analytics service
+      // Real data via analytics and dashboard services
       // Summary for overall metrics + peak hours + top services (month)
       const summary = await this.analyticsService.getSummary(shopId);
 
@@ -152,9 +154,46 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         avgRating: 0, // not available in analytics, keep 0
         popularityRank: idx + 1,
       }));
+      // Revenue stats (real) via dashboard service
+      const revenueStats = await this.dashboardService.getRevenueStats(shopId);
+      const avgDaily = revenueStats.averageDailyRevenue ?? 0;
+      const paymentsThisMonth = revenueStats.paymentsThisMonth ?? 0;
+      const avgPaymentAmount = revenueStats.averagePaymentAmount ?? 0;
 
-      // Employee performance not implemented in analytics yet -> keep mock for now
-      const employeePerformance = this.getEmployeePerformance();
+      // Build a simple daily series using averageDailyRevenue as a baseline
+      const days = Math.min(30, dataRetentionDays);
+      const today = new Date();
+      const revenueData: RevenueData[] = Array.from({ length: days }).map((_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() - (days - 1 - i));
+        const revenue = Math.max(0, avgDaily);
+        const ordersEstimate = Math.max(0, Math.round(paymentsThisMonth / days));
+        const aov = ordersEstimate > 0 ? revenue / ordersEstimate : avgPaymentAmount;
+        return {
+          date: d.toISOString().slice(0, 10),
+          revenue,
+          orders: ordersEstimate,
+          avgOrderValue: aov,
+        };
+      });
+
+      const totalRevenue = (revenueStats.revenueThisMonth ?? 0) || (revenueStats.totalRevenue ?? 0);
+      const totalOrders = (revenueStats.paymentsThisMonth ?? 0) || (revenueStats.totalPayments ?? 0);
+      const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : (avgPaymentAmount ?? 0);
+      const growthRate = revenueStats.monthlyGrowthPercentage ?? 0;
+
+      // Employee performance: placeholder until a dedicated use case exists
+      const employeePerformance: EmployeePerformance[] = [
+        {
+          employeeId: "aggregate",
+          employeeName: "ภาพรวมพนักงาน",
+          totalQueues: 0,
+          totalRevenue,
+          avgServiceTime: 0,
+          customerRating: 0,
+          efficiency: 0,
+        },
+      ];
 
       // Customer insights using summary peak hours and rough totals
       const customerInsights = {
@@ -165,18 +204,6 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         customerSatisfaction: 0,
         peakHours: peakHours.map((p) => ({ hour: p.hour, queueCount: p.queueCount })),
       };
-
-      // Revenue chart is not provided by analytics; keep simple mock filtered by retention
-      const revenueData = this.getRevenueData(dataRetentionDays);
-
-      const totalRevenue = revenueData.reduce(
-        (sum, data) => sum + data.revenue,
-        0
-      );
-      const totalOrders = revenueData.reduce(
-        (sum, data) => sum + data.orders,
-        0
-      );
 
       return {
         revenueData,
@@ -189,8 +216,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         },
         totalRevenue,
         totalOrders,
-        avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
-        growthRate: 12.5, // Mock growth rate
+        avgOrderValue,
+        growthRate,
         subscription: {
           limits,
           usage,
@@ -367,6 +394,9 @@ export class AnalyticsPresenterFactory {
       serverContainer.resolve<ShopBackendAnalyticsService>(
         "ShopBackendAnalyticsService"
       );
+    const dashboardService = serverContainer.resolve<ShopBackendDashboardService>(
+      "ShopBackendDashboardService"
+    );
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
@@ -380,7 +410,8 @@ export class AnalyticsPresenterFactory {
       authService,
       profileService,
       subscriptionService,
-      analyticsService
+      analyticsService,
+      dashboardService
     );
   }
 }
@@ -395,6 +426,9 @@ export class ClientAnalyticsPresenterFactory {
       clientContainer.resolve<ShopBackendAnalyticsService>(
         "ShopBackendAnalyticsService"
       );
+    const dashboardService = clientContainer.resolve<ShopBackendDashboardService>(
+      "ShopBackendDashboardService"
+    );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -408,7 +442,8 @@ export class ClientAnalyticsPresenterFactory {
       authService,
       profileService,
       subscriptionService,
-      analyticsService
+      analyticsService,
+      dashboardService
     );
   }
 }
