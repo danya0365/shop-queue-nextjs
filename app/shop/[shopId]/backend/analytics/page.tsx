@@ -49,7 +49,7 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <AnalyticsView viewModel={viewModel} />
+        <AnalyticsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

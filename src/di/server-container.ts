@@ -14,6 +14,7 @@ import { ShopBackendPaymentsServiceFactory } from "../application/services/shop/
 import { ShopBackendPromotionsServiceFactory } from "../application/services/shop/backend/BackendPromotionsService";
 import { ShopBackendQueuesServiceFactory } from "../application/services/shop/backend/BackendQueuesService";
 import { ShopBackendRewardsServiceFactory } from "../application/services/shop/backend/BackendRewardsService";
+import { ShopBackendAnalyticsServiceFactory } from "../application/services/shop/backend/BackendAnalyticsService";
 import { ShopBackendServicesServiceFactory } from "../application/services/shop/backend/BackendServicesService";
 import { ShopBackendShopSettingsServiceFactory } from "../application/services/shop/backend/BackendShopSettingsService";
 import { ShopBackendShopsServiceFactory } from "../application/services/shop/backend/BackendShopsService";
@@ -54,6 +55,7 @@ import { SupabaseShopBackendPaymentRepository } from "../infrastructure/reposito
 import { SupabaseShopBackendPromotionRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-promotion-repository";
 import { SupabaseShopBackendQueueRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-repository";
 import { SupabaseShopBackendRewardRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-reward-repository";
+import { SupabaseShopBackendQueueAnalyticsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-queue-analytics-repository";
 import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
@@ -150,6 +152,10 @@ export async function createServerContainer(): Promise<Container> {
     const shopBackendDepartmentRepository =
       new SupabaseShopBackendDepartmentRepository(databaseDatasource, logger);
     const shopBackendRewardRepository = new SupabaseShopBackendRewardRepository(
+      databaseDatasource,
+      logger
+    );
+    const shopBackendQueueAnalyticsRepository = new SupabaseShopBackendQueueAnalyticsRepository(
       databaseDatasource,
       logger
     );
@@ -270,6 +276,11 @@ export async function createServerContainer(): Promise<Container> {
       );
     const shopBackendRewardsService = ShopBackendRewardsServiceFactory.create(
       shopBackendRewardRepository,
+      logger
+    );
+    const shopBackendAnalyticsService = ShopBackendAnalyticsServiceFactory.create(
+      shopBackendQueueRepository,
+      shopBackendQueueAnalyticsRepository,
       logger
     );
 
@@ -397,6 +408,10 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance(
       "ShopBackendRewardsService",
       shopBackendRewardsService
+    );
+    container.registerInstance(
+      "ShopBackendAnalyticsService",
+      shopBackendAnalyticsService
     );
     container.registerInstance("ShopCustomerService", shopCustomerService);
     container.registerInstance(

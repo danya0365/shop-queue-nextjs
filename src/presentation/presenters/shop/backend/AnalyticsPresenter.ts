@@ -9,6 +9,7 @@ import { ISubscriptionService } from "@/src/application/services/subscription/Su
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
+import type { ShopBackendAnalyticsService } from "@/src/application/services/shop/backend/BackendAnalyticsService";
 
 // Define interfaces for data structures
 export interface RevenueData {
@@ -83,7 +84,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
     shopService: IShopService,
     authService: IAuthService,
     profileService: IProfileService,
-    subscriptionService: ISubscriptionService
+    subscriptionService: ISubscriptionService,
+    private readonly analyticsService: ShopBackendAnalyticsService
   ) {
     super(
       logger,
@@ -124,11 +126,48 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       const isFreeTier = false; // TODO: for test
       //const isFreeTier = subscriptionPlan.tier === 'free';
 
-      // Mock data - replace with actual service calls
-      const revenueData = this.getRevenueData(dataRetentionDays);
-      const serviceStats = this.getServiceStats();
+      // Real data via analytics service
+      // Summary for overall metrics + peak hours + top services (month)
+      const summary = await this.analyticsService.getSummary(shopId);
+
+      // Peak hours from summary for customer insights
+      const peakHours = summary.peakHours;
+
+      // Service analytics (month) for service stats
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+      const serviceAnalytics = await this.analyticsService.getServiceAnalytics({
+        shopId,
+        dateFrom: monthStart,
+        dateTo: monthEnd,
+      });
+
+      // Map service analytics to view's ServiceStats
+      const serviceStats = serviceAnalytics.serviceStats.map((s, idx) => ({
+        serviceId: s.serviceId,
+        serviceName: s.serviceName,
+        totalOrders: s.totalQueues,
+        totalRevenue: s.revenue,
+        avgRating: 0, // not available in analytics, keep 0
+        popularityRank: idx + 1,
+      }));
+
+      // Employee performance not implemented in analytics yet -> keep mock for now
       const employeePerformance = this.getEmployeePerformance();
-      const customerInsights = this.getCustomerInsights();
+
+      // Customer insights using summary peak hours and rough totals
+      const customerInsights = {
+        totalCustomers: 0,
+        newCustomers: 0,
+        returningCustomers: 0,
+        avgVisitsPerCustomer: 0,
+        customerSatisfaction: 0,
+        peakHours: peakHours.map((p) => ({ hour: p.hour, queueCount: p.queueCount })),
+      };
+
+      // Revenue chart is not provided by analytics; keep simple mock filtered by retention
+      const revenueData = this.getRevenueData(dataRetentionDays);
 
       const totalRevenue = revenueData.reduce(
         (sum, data) => sum + data.revenue,
@@ -324,6 +363,10 @@ export class AnalyticsPresenterFactory {
   static async create(): Promise<AnalyticsPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
+    const analyticsService =
+      serverContainer.resolve<ShopBackendAnalyticsService>(
+        "ShopBackendAnalyticsService"
+      );
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
@@ -336,7 +379,36 @@ export class AnalyticsPresenterFactory {
       shopService,
       authService,
       profileService,
-      subscriptionService
+      subscriptionService,
+      analyticsService
+    );
+  }
+}
+
+// Client Factory class
+export class ClientAnalyticsPresenterFactory {
+  static async create(): Promise<AnalyticsPresenter> {
+    const { getClientContainer } = await import("@/src/di/client-container");
+    const clientContainer = await getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const analyticsService =
+      clientContainer.resolve<ShopBackendAnalyticsService>(
+        "ShopBackendAnalyticsService"
+      );
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new AnalyticsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      analyticsService
     );
   }
 }

@@ -4,6 +4,7 @@ import type {
   AnalyticsFilters,
   AnalyticsViewModel,
 } from "@/src/presentation/presenters/shop/backend/AnalyticsPresenter";
+import { useAnalyticsPresenter } from "@/src/presentation/presenters/shop/backend/useAnalyticsPresenter";
 import Link from "next/link";
 import { useState } from "react";
 import { DataRetentionWarning } from "./components/DataRetentionWarning";
@@ -17,11 +18,16 @@ enum Tab {
 }
 
 interface AnalyticsViewProps {
-  viewModel: AnalyticsViewModel;
+  shopId: string;
+  initialViewModel?: AnalyticsViewModel;
 }
 
-export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
-  const [filters, setFilters] = useState<AnalyticsFilters>(viewModel.filters);
+export function AnalyticsView({ shopId, initialViewModel }: AnalyticsViewProps) {
+  const [state] = useAnalyticsPresenter(shopId, initialViewModel);
+  const viewModel = state.viewModel as AnalyticsViewModel;
+  const [filters, setFilters] = useState<AnalyticsFilters>(
+    viewModel?.filters ?? { dateRange: "month" }
+  );
   const [activeTab, setActiveTab] = useState<Tab>(Tab.OVERVIEW);
 
   const formatCurrency = (amount: number) => {
@@ -41,6 +47,30 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
   const getGrowthIcon = (rate: number) => {
     return rate >= 0 ? "📈" : "📉";
   };
+
+  if (state.loading && !viewModel) {
+    return (
+      <div className="py-16 text-center text-gray-600 dark:text-gray-400">
+        กำลังโหลดข้อมูลรายงาน...
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className="py-16 text-center text-red-600 dark:text-red-400">
+        {state.error}
+      </div>
+    );
+  }
+
+  if (!viewModel) {
+    return (
+      <div className="py-16 text-center text-gray-600 dark:text-gray-400">
+        ไม่พบข้อมูลรายงาน
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 relative">
