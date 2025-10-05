@@ -40,6 +40,8 @@ export class RewardMapper {
       usageLimit: entity.usageLimit,
       usageCount: entity.usageCount,
       remainingUsage: entity.remainingUsage,
+      redeemCount: entity.redeemCount,
+      remainingRedemptions: entity.remainingRedemptions,
       icon: entity.icon,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

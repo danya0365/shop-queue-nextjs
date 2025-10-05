@@ -275,7 +275,11 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
             สถิติประเภทรางวัล
           </h2>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            รวมทั้งหมด: {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.totalRewards)} รายการ
+            รวมทั้งหมด:{" "}
+            {new Intl.NumberFormat("th-TH").format(
+              viewModel.typeStats.totalRewards
+            )}{" "}
+            รายการ
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -283,14 +287,21 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="rounded-xl p-4 border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-800 dark:text-blue-200">ส่วนลด</p>
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  ส่วนลด
+                </p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                   {viewModel.typeStats.discount.count}
                 </p>
                 <p className="text-xs text-blue-700/70 dark:text-blue-300/80">
-                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
-                    viewModel.typeStats.discount.percentage
-                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.discount.totalValue)} บาท
+                  {new Intl.NumberFormat("th-TH", {
+                    maximumFractionDigits: 2,
+                  }).format(viewModel.typeStats.discount.percentage)}
+                  % • มูลค่ารวม{" "}
+                  {new Intl.NumberFormat("th-TH").format(
+                    viewModel.typeStats.discount.totalValue
+                  )}{" "}
+                  บาท
                 </p>
               </div>
               <div className="text-2xl">🎫</div>
@@ -301,14 +312,21 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="rounded-xl p-4 border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-800 dark:text-green-200">ของฟรี</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  ของฟรี
+                </p>
                 <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                   {viewModel.typeStats.freeItem.count}
                 </p>
                 <p className="text-xs text-green-700/70 dark:text-green-300/80">
-                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
-                    viewModel.typeStats.freeItem.percentage
-                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.freeItem.totalValue)} บาท
+                  {new Intl.NumberFormat("th-TH", {
+                    maximumFractionDigits: 2,
+                  }).format(viewModel.typeStats.freeItem.percentage)}
+                  % • มูลค่ารวม{" "}
+                  {new Intl.NumberFormat("th-TH").format(
+                    viewModel.typeStats.freeItem.totalValue
+                  )}{" "}
+                  บาท
                 </p>
               </div>
               <div className="text-2xl">🆓</div>
@@ -319,14 +337,21 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="rounded-xl p-4 border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950/40">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">คืนเงิน</p>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  คืนเงิน
+                </p>
                 <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
                   {viewModel.typeStats.cashback.count}
                 </p>
                 <p className="text-xs text-yellow-700/70 dark:text-yellow-300/80">
-                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
-                    viewModel.typeStats.cashback.percentage
-                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.cashback.totalValue)} บาท
+                  {new Intl.NumberFormat("th-TH", {
+                    maximumFractionDigits: 2,
+                  }).format(viewModel.typeStats.cashback.percentage)}
+                  % • มูลค่ารวม{" "}
+                  {new Intl.NumberFormat("th-TH").format(
+                    viewModel.typeStats.cashback.totalValue
+                  )}{" "}
+                  บาท
                 </p>
               </div>
               <div className="text-2xl">💸</div>
@@ -337,14 +362,21 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="rounded-xl p-4 border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/40">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-800 dark:text-purple-200">สิทธิพิเศษ</p>
+                <p className="text-sm text-purple-800 dark:text-purple-200">
+                  สิทธิพิเศษ
+                </p>
                 <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                   {viewModel.typeStats.specialPrivilege.count}
                 </p>
                 <p className="text-xs text-purple-700/70 dark:text-purple-300/80">
-                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
-                    viewModel.typeStats.specialPrivilege.percentage
-                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.specialPrivilege.totalValue)} บาท
+                  {new Intl.NumberFormat("th-TH", {
+                    maximumFractionDigits: 2,
+                  }).format(viewModel.typeStats.specialPrivilege.percentage)}
+                  % • มูลค่ารวม{" "}
+                  {new Intl.NumberFormat("th-TH").format(
+                    viewModel.typeStats.specialPrivilege.totalValue
+                  )}{" "}
+                  บาท
                 </p>
               </div>
               <div className="text-2xl">🌟</div>
@@ -500,6 +532,15 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
                     ถูกแลกแล้ว:
+                  </span>
+                  <span className="font-semibold text-orange-600">
+                    {reward.redeemCount} ครั้ง
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    จำนวนการใช้:
                   </span>
                   <span className="font-semibold text-orange-600">
                     {reward.usageCount} ครั้ง

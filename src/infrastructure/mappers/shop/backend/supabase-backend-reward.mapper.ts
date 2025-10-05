@@ -24,7 +24,12 @@ export class SupabaseShopBackendRewardMapper {
    * @returns Reward domain entity
    */
   public static toDomain(
-    schema: RewardSchema & { usage_count: number; remaining_usage: number }
+    schema: RewardSchema & {
+      usage_count: number;
+      remaining_usage: number;
+      redeem_count: number;
+      remaining_redemptions: number;
+    }
   ): RewardEntity {
     return {
       id: schema.id,
@@ -40,6 +45,8 @@ export class SupabaseShopBackendRewardMapper {
       usageLimit: schema.usage_limit || 0,
       usageCount: schema.usage_count || 0,
       remainingUsage: schema.remaining_usage || 0,
+      redeemCount: schema.redeem_count || 0,
+      remainingRedemptions: schema.remaining_redemptions || 0,
       icon: schema.icon || "",
       createdAt: schema.created_at,
       updatedAt: schema.updated_at,

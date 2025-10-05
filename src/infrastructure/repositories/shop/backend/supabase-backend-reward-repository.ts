@@ -96,25 +96,38 @@ export class SupabaseShopBackendRewardRepository
       type UsageViewRow = Record<string, unknown> & {
         reward_id: string;
         shop_id: string;
-        usage_count: number | null;
-        remaining_usage: number | null;
+        usage_count: number;
+        remaining_usage: number;
+        issued_count: number;
       };
 
       const rewardIds = rewards.map((r) => (r as RewardSchema).id);
-      const usageMap = new Map<string, { usage_count: number; remaining_usage: number | null }>();
+      const usageMap = new Map<
+        string,
+        {
+          usage_count: number;
+          remaining_usage: number;
+          issued_count: number;
+        }
+      >();
       if (rewardIds.length > 0) {
         const usageRows = await this.dataSource.getAdvanced<UsageViewRow>(
           "reward_usage_by_reward_view",
           {
             filters: [
-              { field: "reward_id", operator: FilterOperator.IN, value: rewardIds },
+              {
+                field: "reward_id",
+                operator: FilterOperator.IN,
+                value: rewardIds,
+              },
             ],
           }
         );
         for (const row of usageRows) {
           usageMap.set(row.reward_id, {
-            usage_count: row.usage_count ?? 0,
-            remaining_usage: row.remaining_usage ?? 0,
+            usage_count: row.usage_count,
+            remaining_usage: row.remaining_usage,
+            issued_count: row.issued_count,
           });
         }
       }
@@ -125,12 +138,18 @@ export class SupabaseShopBackendRewardRepository
         const usage = usageMap.get(rewardWithJoinedData.id) || {
           usage_count: 0,
           remaining_usage: 0,
+          issued_count: 0,
         };
+        const remainingRedemptions =
+          (reward.usage_limit as number | 0) -
+          (usage?.issued_count as number | 0);
         return SupabaseShopBackendRewardMapper.toDomain({
           ...reward,
           shop_name: rewardWithJoinedData.shops?.name,
           usage_count: usage.usage_count,
-          remaining_usage: usage.remaining_usage ?? 0,
+          remaining_usage: usage.remaining_usage,
+          redeem_count: usage.issued_count,
+          remaining_redemptions: remainingRedemptions,
         });
       });
 
@@ -400,6 +419,7 @@ export class SupabaseShopBackendRewardRepository
         reward_id: string;
         usage_count: number | null;
         remaining_usage: number | null;
+        issued_count: number | null;
       };
       const usageRows = await this.dataSource.getAdvanced<UsageViewRowSingle>(
         "reward_usage_by_reward_view",
@@ -414,11 +434,15 @@ export class SupabaseShopBackendRewardRepository
 
       // Handle joined data from shops table and map
       const rewardWithJoinedData = reward as RewardWithJoins;
+      const remainingRedemptions =
+        (reward.usage_limit as number | 0) - (usage?.issued_count as number | 0);
       return SupabaseShopBackendRewardMapper.toDomain({
         ...reward,
         shop_name: rewardWithJoinedData.shops?.name,
         usage_count: (usage?.usage_count as number | null) ?? 0,
         remaining_usage: (usage?.remaining_usage as number | null) ?? 0,
+        redeem_count: (usage?.issued_count as number | null) ?? 0,
+        remaining_redemptions: remainingRedemptions,
       });
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {

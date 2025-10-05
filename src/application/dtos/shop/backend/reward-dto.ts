@@ -14,6 +14,8 @@ export interface RewardDTO {
   usageLimit: number;
   usageCount: number;
   remainingUsage: number;
+  redeemCount: number;
+  remainingRedemptions: number;
   icon: string;
   createdAt: string;
   updatedAt: string;

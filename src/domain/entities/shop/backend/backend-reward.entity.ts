@@ -19,7 +19,9 @@ export interface RewardEntity {
   isAvailable: boolean;
   expiryDays: number;
   usageLimit: number;
+  redeemCount: number;
   usageCount: number;
+  remainingRedemptions: number;
   remainingUsage: number;
   icon: string;
   createdAt: string;
