@@ -2,6 +2,9 @@
 
 import { PromotionsViewModel } from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
 import { usePromotionsPresenter } from "@/src/presentation/presenters/shop/backend/usePromotionsPresenter";
+import { CreatePromotionModal } from "./modals/CreatePromotionModal";
+import { EditPromotionModal } from "./modals/EditPromotionModal";
+import { DeletePromotionConfirmation } from "./modals/DeletePromotionConfirmation";
 
 interface PromotionsViewProps {
   shopId: string;
@@ -53,7 +56,7 @@ export function PromotionsView({
       percentage: "ส่วนลด %",
       fixed_amount: "ส่วนลดคงที่",
       buy_x_get_y: "ซื้อ X แถม Y",
-      free_shipping: "ส่งฟรี",
+      free_item: "ของแถม",
     };
     return typeLabels[type as keyof typeof typeLabels] || type;
   };
@@ -66,7 +69,7 @@ export function PromotionsView({
         "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       buy_x_get_y:
         "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      free_shipping:
+      free_item:
         "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
     };
     return (
@@ -470,6 +473,7 @@ export function PromotionsView({
                 <div className="flex justify-between items-center">
                   {getStatusBadge(promotion.status)}
                   <button
+                    onClick={() => actions.togglePromotionStatus(promotion.id)}
                     className={`text-sm font-medium ${
                       promotion.status === "active"
                         ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -485,26 +489,52 @@ export function PromotionsView({
         )}
       </div>
 
-      {/* Create Promotion Modal Placeholder */}
+      {/* Create Promotion Modal */}
       {state.showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              เพิ่มโปรโมชั่นใหม่
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={actions.closeCreateModal}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
-            </div>
-          </div>
-        </div>
+        <CreatePromotionModal
+          shopId={shopId}
+          onClose={actions.closeCreateModal}
+          onSubmit={actions.createPromotion}
+          loading={state.isCreating}
+        />
+      )}
+
+      {/* Edit Promotion Modal */}
+      {state.showEditModal && state.selectedPromotion && (
+        <EditPromotionModal
+          promotion={state.selectedPromotion}
+          shopId={shopId}
+          onClose={actions.closeEditModal}
+          onSubmit={async (data) =>
+            actions.updatePromotion({
+              id: data.id,
+              name: data.name,
+              description: data.description,
+              type: data.type,
+              value: data.value,
+              minPurchaseAmount: data.minPurchaseAmount,
+              maxDiscountAmount: data.maxDiscountAmount,
+              usageLimit: data.usageLimit,
+              startAt: data.startAt,
+              endAt: data.endAt,
+              status: data.status,
+              conditions: data.conditions,
+            })
+          }
+          loading={state.isUpdating}
+        />
+      )}
+
+      {/* Delete Confirmation */}
+      {state.showDeleteModal && state.selectedPromotion && (
+        <DeletePromotionConfirmation
+          promotion={state.selectedPromotion}
+          onClose={actions.closeDeleteModal}
+          onConfirm={async () => {
+            await actions.deletePromotion(state.selectedPromotion!.id);
+          }}
+          loading={state.isDeleting}
+        />
       )}
 
       {/* Error Message */}
@@ -554,44 +584,6 @@ export function PromotionsView({
           </div>
         </div>
       )}
-      {/* Development Status Overlay */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🚧</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              กำลังพัฒนาระบบ
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              เปิดใช้งานเร็วๆ นี้
-            </p>
-          </div>
-          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>กำลังปรับปรุงฟีเจอร์การจัดการโปรโมชั่น</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
-              <span>เพิ่มประสิทธิภาพการทำงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
-              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ขออภัยในความไม่สะดวก
-              <br />
-              ทีมงานกำลังพัฒนาเพื่อคุณ
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

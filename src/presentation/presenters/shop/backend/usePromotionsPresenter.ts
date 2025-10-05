@@ -1,35 +1,42 @@
-import { getClientService } from '@/src/di/client-container';
-import { Logger } from '@/src/domain/interfaces/logger';
-import { PromotionsViewModel } from './PromotionsPresenter';
-import { useCallback, useEffect, useState } from 'react';
+import { getClientService } from "@/src/di/client-container";
+import { Logger } from "@/src/domain/interfaces/logger";
+import { useCallback, useEffect, useState } from "react";
+import {
+  type PromotionData,
+  type PromotionsViewModel,
+  ClientPromotionsPresenterFactory,
+} from "./PromotionsPresenter";
+
+const presenter = ClientPromotionsPresenterFactory.create();
 
 // Define form/action data interfaces
 export interface CreatePromotionData {
   name: string;
   description?: string;
-  type: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'free_shipping';
+  type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
   value: number;
   minPurchaseAmount?: number;
   maxDiscountAmount?: number;
   usageLimit?: number;
   startAt: string;
   endAt: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, string>[];
+  status?: "active" | "inactive" | "expired" | "scheduled";
 }
 
 export interface UpdatePromotionData {
   id: string;
   name?: string;
   description?: string;
-  type?: 'percentage' | 'fixed_amount' | 'buy_x_get_y' | 'free_shipping';
-  status?: 'active' | 'inactive' | 'expired' | 'scheduled';
+  type?: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
+  status?: "active" | "inactive" | "expired" | "scheduled";
   value?: number;
   minPurchaseAmount?: number;
   maxDiscountAmount?: number;
   usageLimit?: number;
   startAt?: string;
   endAt?: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, string>[];
 }
 
 // Define state interface
@@ -40,7 +47,7 @@ export interface PromotionsPresenterState {
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
-  selectedPromotion: any | null;
+  selectedPromotion: PromotionData | null;
   showCreateModal: boolean;
   showEditModal: boolean;
   showDeleteModal: boolean;
@@ -53,12 +60,13 @@ export interface PromotionsPresenterActions {
   createPromotion: (data: CreatePromotionData) => Promise<boolean>;
   updatePromotion: (data: UpdatePromotionData) => Promise<boolean>;
   deletePromotion: (id: string) => Promise<boolean>;
-  setSelectedPromotion: (promotion: any | null) => void;
+  togglePromotionStatus: (id: string) => Promise<boolean>;
+  setSelectedPromotion: (promotion: PromotionData | null) => void;
   openCreateModal: () => void;
   closeCreateModal: () => void;
-  openEditModal: (promotion: any) => void;
+  openEditModal: (promotion: PromotionData) => void;
   closeEditModal: () => void;
-  openDeleteModal: (promotion: any) => void;
+  openDeleteModal: (promotion: PromotionData) => void;
   closeDeleteModal: () => void;
   setSearchTerm: (term: string) => void;
   setStatusFilter: (status: string) => void;
@@ -77,8 +85,8 @@ export const usePromotionsPresenter = (
   shopId: string,
   initialViewModel?: PromotionsViewModel
 ): PromotionsPresenterHook => {
-  const logger = getClientService<Logger>('Logger');
-  
+  const logger = getClientService<Logger>("Logger");
+
   const [viewModel, setViewModel] = useState<PromotionsViewModel | null>(
     initialViewModel || null
   );
@@ -87,12 +95,13 @@ export const usePromotionsPresenter = (
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedPromotion, setSelectedPromotion] = useState<any | null>(null);
+  const [selectedPromotion, setSelectedPromotion] =
+    useState<PromotionData | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Initialize with initial view model if provided
   useEffect(() => {
@@ -108,19 +117,13 @@ export const usePromotionsPresenter = (
       setIsLoading(true);
       setError(null);
 
-      const { ClientPromotionsPresenterFactory } = await import(
-        './PromotionsPresenter'
-      );
-      const presenter = await ClientPromotionsPresenterFactory.create();
-
       const newViewModel = await presenter.getViewModel(shopId);
-
       setViewModel(newViewModel);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to load promotions data'
+        err instanceof Error ? err.message : "Failed to load promotions data"
       );
-      console.error('Error loading promotions data:', err);
+      console.error("Error loading promotions data:", err);
     } finally {
       setIsLoading(false);
     }
@@ -132,71 +135,90 @@ export const usePromotionsPresenter = (
       loadData();
     }
   }, [loadData, initialViewModel]);
-  
-  const createPromotion = async (data: CreatePromotionData): Promise<boolean> => {
+
+  const createPromotion = async (
+    data: CreatePromotionData
+  ): Promise<boolean> => {
     setIsCreating(true);
     setError(null);
 
     try {
       // Validation logic
       if (!data.name?.trim()) {
-        throw new Error('ชื่อโปรโมชั่นจำเป็นต้องระบุ');
+        throw new Error("ชื่อโปรโมชั่นจำเป็นต้องระบุ");
       }
 
       if (!data.type) {
-        throw new Error('ประเภทโปรโมชั่นจำเป็นต้องระบุ');
+        throw new Error("ประเภทโปรโมชั่นจำเป็นต้องระบุ");
       }
 
       if (data.value <= 0) {
-        throw new Error('ค่าส่วนลดต้องมากกว่า 0');
+        throw new Error("ค่าส่วนลดต้องมากกว่า 0");
       }
 
       if (!data.startAt) {
-        throw new Error('วันที่เริ่มต้นจำเป็นต้องระบุ');
+        throw new Error("วันที่เริ่มต้นจำเป็นต้องระบุ");
       }
 
       if (!data.endAt) {
-        throw new Error('วันที่สิ้นสุดจำเป็นต้องระบุ');
+        throw new Error("วันที่สิ้นสุดจำเป็นต้องระบุ");
       }
 
       const startDate = new Date(data.startAt);
       const endDate = new Date(data.endAt);
 
       if (endDate <= startDate) {
-        throw new Error('วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น');
+        throw new Error("วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น");
       }
 
-      if (data.type === 'percentage' && data.value > 100) {
-        throw new Error('ส่วนลดเปอร์เซ็นต์ต้องไม่เกิน 100%');
+      if (data.type === "percentage" && data.value > 100) {
+        throw new Error("ส่วนลดเปอร์เซ็นต์ต้องไม่เกิน 100%");
       }
 
-      // API call would go here
-      // const result = await promotionsService.createPromotion(data);
-      
-      logger.info('PromotionsPresenter: Promotion created successfully');
+      await presenter.createPromotion(shopId, {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        value: data.value,
+        minPurchaseAmount: data.minPurchaseAmount,
+        maxDiscountAmount: data.maxDiscountAmount,
+        usageLimit: data.usageLimit,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        status: data.status,
+        conditions: data.conditions,
+      });
+
+      await loadData();
       setShowCreateModal(false);
       return true;
     } catch (error) {
-      logger.error('PromotionsPresenter: Error creating promotion', error);
-      setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการสร้างโปรโมชั่น');
+      logger.error("PromotionsPresenter: Error creating promotion", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการสร้างโปรโมชั่น"
+      );
       return false;
     } finally {
       setIsCreating(false);
     }
   };
 
-  const updatePromotion = async (data: UpdatePromotionData): Promise<boolean> => {
+  const updatePromotion = async (
+    data: UpdatePromotionData
+  ): Promise<boolean> => {
     setIsUpdating(true);
     setError(null);
 
     try {
       // Validation logic
       if (data.name !== undefined && !data.name?.trim()) {
-        throw new Error('ชื่อโปรโมชั่นจำเป็นต้องระบุ');
+        throw new Error("ชื่อโปรโมชั่นจำเป็นต้องระบุ");
       }
 
       if (data.value !== undefined && data.value <= 0) {
-        throw new Error('ค่าส่วนลดต้องมากกว่า 0');
+        throw new Error("ค่าส่วนลดต้องมากกว่า 0");
       }
 
       if (data.startAt && data.endAt) {
@@ -204,24 +226,43 @@ export const usePromotionsPresenter = (
         const endDate = new Date(data.endAt);
 
         if (endDate <= startDate) {
-          throw new Error('วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น');
+          throw new Error("วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น");
         }
       }
 
-      if (data.type === 'percentage' && data.value !== undefined && data.value > 100) {
-        throw new Error('ส่วนลดเปอร์เซ็นต์ต้องไม่เกิน 100%');
+      if (
+        data.type === "percentage" &&
+        data.value !== undefined &&
+        data.value > 100
+      ) {
+        throw new Error("ส่วนลดเปอร์เซ็นต์ต้องไม่เกิน 100%");
       }
 
-      // API call would go here
-      // const result = await promotionsService.updatePromotion(data);
-      
-      logger.info('PromotionsPresenter: Promotion updated successfully');
+      if (!presenter) throw new Error("Presenter not initialized");
+      await presenter.updatePromotion(shopId, data.id, {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        status: data.status,
+        value: data.value,
+        minPurchaseAmount: data.minPurchaseAmount,
+        maxDiscountAmount: data.maxDiscountAmount,
+        usageLimit: data.usageLimit,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        conditions: data.conditions,
+      });
+      await loadData();
       setShowEditModal(false);
       setSelectedPromotion(null);
       return true;
     } catch (error) {
-      logger.error('PromotionsPresenter: Error updating promotion', error);
-      setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการอัปเดตโปรโมชั่น');
+      logger.error("PromotionsPresenter: Error updating promotion", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการอัปเดตโปรโมชั่น"
+      );
       return false;
     } finally {
       setIsUpdating(false);
@@ -234,22 +275,45 @@ export const usePromotionsPresenter = (
 
     try {
       if (!promotionId) {
-        throw new Error('Promotion ID is required');
+        throw new Error("Promotion ID is required");
       }
 
-      // API call would go here
-      // const result = await promotionsService.deletePromotion(promotionId);
-      
-      logger.info('PromotionsPresenter: Promotion deleted successfully');
+      if (!presenter) throw new Error("Presenter not initialized");
+      await presenter.deletePromotion(shopId, promotionId);
+      await loadData();
       setShowDeleteModal(false);
       setSelectedPromotion(null);
       return true;
     } catch (error) {
-      logger.error('PromotionsPresenter: Error deleting promotion', error);
-      setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการลบโปรโมชั่น');
+      logger.error("PromotionsPresenter: Error deleting promotion", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการลบโปรโมชั่น"
+      );
       return false;
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const togglePromotionStatus = async (id: string): Promise<boolean> => {
+    try {
+      if (!presenter) throw new Error("Presenter not initialized");
+      await presenter.togglePromotionStatus(shopId, id);
+      await loadData();
+      return true;
+    } catch (error) {
+      logger.error(
+        "PromotionsPresenter: Error toggling promotion status",
+        error
+      );
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการเปลี่ยนสถานะโปรโมชั่น"
+      );
+      return false;
     }
   };
 
@@ -263,37 +327,38 @@ export const usePromotionsPresenter = (
     setShowCreateModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
-    logger.info('PromotionsPresenter: Reset');
+    logger.info("PromotionsPresenter: Reset");
   };
 
   return [
-    { 
+    {
       viewModel,
-      isLoading, 
-      error, 
-      isCreating, 
-      isUpdating, 
-      isDeleting, 
+      isLoading,
+      error,
+      isCreating,
+      isUpdating,
+      isDeleting,
       selectedPromotion,
       showCreateModal,
       showEditModal,
       showDeleteModal,
       searchTerm,
-      statusFilter
+      statusFilter,
     },
-    { 
-      createPromotion, 
-      updatePromotion, 
+    {
+      createPromotion,
+      updatePromotion,
       deletePromotion,
+      togglePromotionStatus,
       setSelectedPromotion,
       openCreateModal: () => setShowCreateModal(true),
       closeCreateModal: () => setShowCreateModal(false),
-      openEditModal: (promotion: any) => {
+      openEditModal: (promotion: PromotionData) => {
         setSelectedPromotion(promotion);
         setShowEditModal(true);
       },
       closeEditModal: () => setShowEditModal(false),
-      openDeleteModal: (promotion: any) => {
+      openDeleteModal: (promotion: PromotionData) => {
         setSelectedPromotion(promotion);
         setShowDeleteModal(true);
       },
@@ -301,7 +366,7 @@ export const usePromotionsPresenter = (
       setSearchTerm,
       setStatusFilter,
       refreshData: loadData,
-      setError 
-    }
+      setError,
+    },
   ] as const;
 };
