@@ -19,6 +19,7 @@ export interface RewardDTO {
   icon: string;
   createdAt: string;
   updatedAt: string;
+  isCanDelete?: boolean;
 }
 
 export interface RewardStatsDTO {

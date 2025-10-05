@@ -329,7 +329,7 @@ CREATE TABLE reward_usages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
     customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    reward_id UUID NOT NULL REFERENCES rewards(id) ON DELETE CASCADE,
+    reward_id UUID NOT NULL REFERENCES rewards(id) ON DELETE RESTRICT,
     customer_point_transaction_id UUID REFERENCES customer_point_transactions(id) ON DELETE CASCADE, -- NULLABLE สำหรับรางวัลฟรี
     redemption_code TEXT NOT NULL UNIQUE, -- รหัสสำหรับใช้แลกรางวัล เช่น "RW240906001"
     redemption_type redemption_type DEFAULT 'points_redemption', -- ประเภทการแลกรางวัล

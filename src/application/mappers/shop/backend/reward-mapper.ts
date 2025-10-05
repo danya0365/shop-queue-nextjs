@@ -45,6 +45,7 @@ export class RewardMapper {
       icon: entity.icon,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      isCanDelete: entity.isCanDelete,
     };
   }
 

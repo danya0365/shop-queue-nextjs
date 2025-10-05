@@ -26,6 +26,8 @@ export interface RewardEntity {
   icon: string;
   createdAt: string;
   updatedAt: string;
+  // Derived flag: true when there is no usage/redeem history
+  isCanDelete?: boolean;
 }
 
 export interface CreateRewardEntity {

@@ -618,6 +618,21 @@ export class SupabaseShopBackendRewardRepository
         );
       }
 
+      // Restrict delete when there are usages to align with FK ON DELETE RESTRICT
+      const usageCount = await this.dataSource.count("reward_usages", {
+        filters: [
+          { field: "reward_id", operator: FilterOperator.EQ, value: id },
+        ],
+      });
+      if ((usageCount as number) > 0) {
+        throw new ShopBackendRewardError(
+          ShopBackendRewardErrorType.VALIDATION_ERROR,
+          "ไม่สามารถลบรางวัลได้ เนื่องจากมีประวัติการใช้งานอยู่",
+          "deleteReward",
+          { id, isCanDelete: false, usageCount }
+        );
+      }
+
       // Delete reward from database
       await this.dataSource.delete("rewards", id);
 

@@ -50,6 +50,8 @@ export class SupabaseShopBackendRewardMapper {
       icon: schema.icon || "",
       createdAt: schema.created_at,
       updatedAt: schema.updated_at,
+      // can delete only when there is no usage/redemption history
+      isCanDelete: (schema.redeem_count || 0) === 0,
     };
   }
 
