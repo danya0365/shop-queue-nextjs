@@ -242,13 +242,52 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                ถูกแลกแล้ว
+                ออกแล้วทั้งหมด (รวมที่ยังไม่ใช้)
               </p>
               <p className="text-2xl font-bold text-orange-600">
                 {viewModel.totalRedeemed}
               </p>
             </div>
             <div className="text-2xl">🎯</div>
+          </div>
+        </div>
+
+        {/* Total Points Redeemed */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่ใช้ไปทั้งหมด</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {new Intl.NumberFormat("th-TH").format(viewModel.totalPointsRedeemed)} แต้ม
+              </p>
+            </div>
+            <div className="text-2xl">📈</div>
+          </div>
+        </div>
+
+        {/* Average Redemption Value */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มเฉลี่ยต่อการแลก</p>
+              <p className="text-2xl font-bold text-indigo-600">
+                {new Intl.NumberFormat("th-TH").format(viewModel.averageRedemptionValue)} แต้ม
+              </p>
+            </div>
+            <div className="text-2xl">🧮</div>
+          </div>
+        </div>
+
+        {/* Popular Reward Type */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">ประเภทรางวัลยอดนิยม</p>
+              <p className="text-2xl font-bold">
+                {viewModel.popularRewardType ? getTypeLabel(viewModel.popularRewardType) : "ไม่มีข้อมูล"}
+              </p>
+            </div>
+            <div className="text-2xl">🏆</div>
           </div>
         </div>
       </div>

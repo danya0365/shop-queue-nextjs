@@ -21,6 +21,9 @@ export interface RewardsViewModel {
   inactiveRewards: number;
   totalPointsRequired: number;
   totalRedeemed: number;
+  totalPointsRedeemed: number;
+  averageRedemptionValue: number;
+  popularRewardType: Reward["type"] | null;
   rewardsByType: {
     discount: number;
     free_item: number;
@@ -77,6 +80,10 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
         0
       );
       const totalRedeemed = rewardsData.stats.totalRedemptions;
+      const totalPointsRedeemed = rewardsData.stats.totalPointsRedeemed;
+      const averageRedemptionValue = rewardsData.stats.averageRedemptionValue;
+      const popularRewardType = (rewardsData.stats
+        .popularRewardType || null) as Reward["type"] | null;
 
       // Calculate rewards by type
       const rewardsByType = {
@@ -94,6 +101,9 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
         inactiveRewards,
         totalPointsRequired,
         totalRedeemed,
+        totalPointsRedeemed,
+        averageRedemptionValue,
+        popularRewardType,
         rewardsByType,
       };
     } catch (error) {
