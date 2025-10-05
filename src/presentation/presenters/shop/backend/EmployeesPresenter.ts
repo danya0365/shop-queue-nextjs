@@ -59,6 +59,8 @@ export interface Employee {
     averageServiceTime: number;
     rating: number;
   };
+  // optional flag to inform UI if deletion is allowed
+  isCanDelete?: boolean;
 }
 
 export interface Department {
@@ -180,6 +182,7 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       const canAddEmployee = !staffLimitReached;
 
       // Transform EmployeeDTO to Employee interface for View compatibility
+      type EmployeeDTOWithDelete = typeof employees[number] & { isCanDelete?: boolean };
       const transformedEmployees: Employee[] = employees.map((emp) => ({
         id: emp.id,
         employeeCode: emp.employeeCode,
@@ -203,6 +206,7 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
           isActive: emp.profile.isActive,
         } : undefined,
         todayStats: emp.todayStats,
+        isCanDelete: (emp as EmployeeDTOWithDelete).isCanDelete ?? true,
       }));
 
       // Create departments from unique department names

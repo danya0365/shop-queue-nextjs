@@ -547,6 +547,22 @@ export class SupabaseShopBackendEmployeeRepository
         throw error;
       }
 
+      // Map FK violations to validation error so UI can show proper alert
+      const message = (error as Error)?.message || "";
+      const isFKViolation =
+        message.includes("foreign key") ||
+        message.includes("violates foreign key constraint") ||
+        (error as any)?.code === "23503"; // Postgres FK violation
+      if (isFKViolation) {
+        throw new ShopBackendEmployeeError(
+          ShopBackendEmployeeErrorType.VALIDATION_ERROR,
+          "ไม่สามารถลบพนักงานได้ เนื่องจากมีการอ้างอิงข้อมูลอยู่",
+          "deleteEmployee",
+          { id, isCanDelete: false },
+          error
+        );
+      }
+
       this.logger.error("Error in deleteEmployee", { error, id });
       throw new ShopBackendEmployeeError(
         ShopBackendEmployeeErrorType.UNKNOWN,

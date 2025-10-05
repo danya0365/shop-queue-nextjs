@@ -21,6 +21,9 @@ export function DeleteEmployeeConfirmation({
 
   const handleConfirm = async () => {
     try {
+      if (employee?.isCanDelete === false) {
+        return;
+      }
       await onConfirm();
       onClose();
     } catch (error) {
@@ -61,6 +64,11 @@ export function DeleteEmployeeConfirmation({
             คุณแน่ใจหรือไม่ว่าต้องการลบพนักงานรายนี้?
             การกระทำนี้ไม่สามารถย้อนกลับได้
           </p>
+          {employee?.isCanDelete === false && (
+            <div className="mt-2 p-3 rounded-md bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800">
+              ไม่สามารถลบพนักงานนี้ได้ เนื่องจากมีการอ้างอิงข้อมูลอยู่ (เช่น คิว/ธุรกรรมที่เกี่ยวข้อง)
+            </div>
+          )}
 
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
             <div className="flex items-center">
@@ -105,7 +113,7 @@ export function DeleteEmployeeConfirmation({
           </button>
           <button
             onClick={handleConfirm}
-            disabled={loading}
+            disabled={loading || employee?.isCanDelete === false}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "กำลังลบ..." : "ลบพนักงาน"}
