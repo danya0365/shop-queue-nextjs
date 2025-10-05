@@ -171,7 +171,7 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -204,44 +204,6 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                ปิดใช้งาน
-              </p>
-              <p className="text-2xl font-bold text-red-600">
-                {viewModel.inactiveRewards}
-              </p>
-            </div>
-            <div className="text-2xl">❌</div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ส่วนลด</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {viewModel.rewardsByType.discount}
-              </p>
-            </div>
-            <div className="text-2xl">🎫</div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ของฟรี</p>
-              <p className="text-2xl font-bold text-green-600">
-                {viewModel.rewardsByType.free_item}
-              </p>
-            </div>
-            <div className="text-2xl">🆓</div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
                 ออกแล้วทั้งหมด (รวมที่ยังไม่ใช้)
               </p>
               <p className="text-2xl font-bold text-orange-600">
@@ -256,9 +218,14 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มที่ใช้ไปทั้งหมด</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มที่ใช้ไปทั้งหมด
+              </p>
               <p className="text-2xl font-bold text-purple-600">
-                {new Intl.NumberFormat("th-TH").format(viewModel.totalPointsRedeemed)} แต้ม
+                {new Intl.NumberFormat("th-TH").format(
+                  viewModel.totalPointsRedeemed
+                )}{" "}
+                แต้ม
               </p>
             </div>
             <div className="text-2xl">📈</div>
@@ -269,9 +236,14 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">แต้มเฉลี่ยต่อการแลก</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                แต้มเฉลี่ยต่อการแลก
+              </p>
               <p className="text-2xl font-bold text-indigo-600">
-                {new Intl.NumberFormat("th-TH").format(viewModel.averageRedemptionValue)} แต้ม
+                {new Intl.NumberFormat("th-TH").format(
+                  viewModel.averageRedemptionValue
+                )}{" "}
+                แต้ม
               </p>
             </div>
             <div className="text-2xl">🧮</div>
@@ -282,12 +254,101 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">ประเภทรางวัลยอดนิยม</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                ประเภทรางวัลยอดนิยม
+              </p>
               <p className="text-2xl font-bold">
-                {viewModel.popularRewardType ? getTypeLabel(viewModel.popularRewardType) : "ไม่มีข้อมูล"}
+                {viewModel.popularRewardType
+                  ? getTypeLabel(viewModel.popularRewardType)
+                  : "ไม่มีข้อมูล"}
               </p>
             </div>
             <div className="text-2xl">🏆</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Reward Type Statistics Cards */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            สถิติประเภทรางวัล
+          </h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            รวมทั้งหมด: {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.totalRewards)} รายการ
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Discount */}
+          <div className="rounded-xl p-4 border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-800 dark:text-blue-200">ส่วนลด</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  {viewModel.typeStats.discount.count}
+                </p>
+                <p className="text-xs text-blue-700/70 dark:text-blue-300/80">
+                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
+                    viewModel.typeStats.discount.percentage
+                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.discount.totalValue)} บาท
+                </p>
+              </div>
+              <div className="text-2xl">🎫</div>
+            </div>
+          </div>
+
+          {/* Free item */}
+          <div className="rounded-xl p-4 border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-800 dark:text-green-200">ของฟรี</p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  {viewModel.typeStats.freeItem.count}
+                </p>
+                <p className="text-xs text-green-700/70 dark:text-green-300/80">
+                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
+                    viewModel.typeStats.freeItem.percentage
+                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.freeItem.totalValue)} บาท
+                </p>
+              </div>
+              <div className="text-2xl">🆓</div>
+            </div>
+          </div>
+
+          {/* Cashback */}
+          <div className="rounded-xl p-4 border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950/40">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">คืนเงิน</p>
+                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">
+                  {viewModel.typeStats.cashback.count}
+                </p>
+                <p className="text-xs text-yellow-700/70 dark:text-yellow-300/80">
+                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
+                    viewModel.typeStats.cashback.percentage
+                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.cashback.totalValue)} บาท
+                </p>
+              </div>
+              <div className="text-2xl">💸</div>
+            </div>
+          </div>
+
+          {/* Special privilege */}
+          <div className="rounded-xl p-4 border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/40">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-purple-800 dark:text-purple-200">สิทธิพิเศษ</p>
+                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                  {viewModel.typeStats.specialPrivilege.count}
+                </p>
+                <p className="text-xs text-purple-700/70 dark:text-purple-300/80">
+                  {new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(
+                    viewModel.typeStats.specialPrivilege.percentage
+                  )}% • มูลค่ารวม {new Intl.NumberFormat("th-TH").format(viewModel.typeStats.specialPrivilege.totalValue)} บาท
+                </p>
+              </div>
+              <div className="text-2xl">🌟</div>
+            </div>
           </div>
         </div>
       </div>

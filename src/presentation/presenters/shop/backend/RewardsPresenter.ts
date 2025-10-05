@@ -1,6 +1,7 @@
 import type {
   CreateRewardDTO,
   RewardDTO as Reward,
+  RewardTypeStatsDTO,
   UpdateRewardDTO,
 } from "@/src/application/dtos/shop/backend/reward-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
@@ -24,12 +25,7 @@ export interface RewardsViewModel {
   totalPointsRedeemed: number;
   averageRedemptionValue: number;
   popularRewardType: Reward["type"] | null;
-  rewardsByType: {
-    discount: number;
-    free_item: number;
-    cashback: number;
-    special_privilege: number;
-  };
+  typeStats: RewardTypeStatsDTO;
 }
 
 // Main Presenter class
@@ -82,17 +78,8 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
       const totalRedeemed = rewardsData.stats.totalRedemptions;
       const totalPointsRedeemed = rewardsData.stats.totalPointsRedeemed;
       const averageRedemptionValue = rewardsData.stats.averageRedemptionValue;
-      const popularRewardType = (rewardsData.stats
-        .popularRewardType || null) as Reward["type"] | null;
-
-      // Calculate rewards by type
-      const rewardsByType = {
-        discount: rewards.filter((r) => r.type === "discount").length,
-        free_item: rewards.filter((r) => r.type === "free_item").length,
-        cashback: rewards.filter((r) => r.type === "cashback").length,
-        special_privilege: rewards.filter((r) => r.type === "special_privilege")
-          .length,
-      };
+      const popularRewardType = (rewardsData.stats.popularRewardType ||
+        null) as Reward["type"] | null;
 
       return {
         rewards,
@@ -104,7 +91,7 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
         totalPointsRedeemed,
         averageRedemptionValue,
         popularRewardType,
-        rewardsByType,
+        typeStats: rewardsData.typeStats,
       };
     } catch (error) {
       this.logger.error("RewardsPresenter: Error getting view model", error);
