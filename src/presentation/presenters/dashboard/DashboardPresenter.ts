@@ -6,6 +6,7 @@ import { IAuthService } from "@/src/application/interfaces/auth-service.interfac
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { IGlobalDashboardService } from "@/src/application/services/dashboard/GlobalDashboardService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseSubscriptionPresenter } from "../base/BaseSubscriptionPresenter";
@@ -20,6 +21,15 @@ export interface DashboardStats {
   servedToday: number;
   pendingQueues: number;
   averageWaitTime: number;
+  // Change statistics
+  activeQueuesChange?: string;
+  activeQueuesChangeType?: 'increase' | 'decrease' | 'neutral';
+  revenueChange?: string;
+  revenueChangeType?: 'increase' | 'decrease' | 'neutral';
+  servedChange?: string;
+  servedChangeType?: 'increase' | 'decrease' | 'neutral';
+  waitTimeChange?: string;
+  waitTimeChangeType?: 'increase' | 'decrease' | 'neutral';
 }
 
 /**
@@ -60,7 +70,8 @@ export class DashboardPresenter extends BaseSubscriptionPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     private readonly shopService: IShopService,
-    subscriptionService: ISubscriptionService
+    subscriptionService: ISubscriptionService,
+    private readonly globalDashboardService: IGlobalDashboardService
   ) { 
     super(logger, authService, profileService, subscriptionService);
   }
@@ -84,11 +95,19 @@ export class DashboardPresenter extends BaseSubscriptionPresenter {
       const shops = await this.shopService.getShopsByOwnerId(profile.id);
       const hasShops = shops.length > 0;
 
-      // Calculate dashboard statistics
-      const stats = await this.calculateStats(profile.id, shops);
+      // Get global dashboard data from service
+      const globalData = await this.globalDashboardService.getGlobalDashboardData(
+        profile.id,
+        10 // activity limit
+      );
 
-      // Get recent activity
-      const recentActivity = await this.getRecentActivity(profile.id, shops);
+      // Map global stats to dashboard stats
+      const stats = this.mapGlobalStatsToDashboardStats(globalData.stats);
+
+      // Map global activities to recent activities
+      const recentActivity = this.mapGlobalActivitiesToRecentActivities(
+        globalData.recentActivities
+      );
 
       // Get subscription information based on profile
       const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
@@ -116,76 +135,138 @@ export class DashboardPresenter extends BaseSubscriptionPresenter {
   }
 
   /**
-   * Calculate dashboard statistics
+   * Map Global Stats to Dashboard Stats
    */
-  private async calculateStats(
-    userId: string,
-    shops: ShopDTO[]
-  ): Promise<DashboardStats> {
-    try {
-      console.log(userId);
-      console.log(shops);
-      // Mock data for now - replace with actual service calls
+  private mapGlobalStatsToDashboardStats(
+    globalStats: {
+      totalShops: number;
+      activeQueues: number;
+      todayRevenue: number;
+      servedToday: number;
+      pendingQueues: number;
+      averageWaitTime: number;
+      revenueChange: number;
+      revenueChangeType: 'increase' | 'decrease' | 'stable';
+      servedChange: number;
+      servedChangeType: 'increase' | 'decrease' | 'stable';
+      waitTimeChange: number;
+      waitTimeChangeType: 'increase' | 'decrease' | 'stable';
+    }
+  ): DashboardStats {
+    return {
+      totalShops: globalStats.totalShops,
+      activeQueues: globalStats.activeQueues,
+      todayRevenue: globalStats.todayRevenue,
+      servedToday: globalStats.servedToday,
+      pendingQueues: globalStats.pendingQueues,
+      averageWaitTime: globalStats.averageWaitTime,
+      // Format change percentages
+      revenueChange: this.formatChangePercentage(globalStats.revenueChange),
+      revenueChangeType: this.mapChangeType(globalStats.revenueChangeType),
+      servedChange: this.formatChangeNumber(globalStats.servedChange),
+      servedChangeType: this.mapChangeType(globalStats.servedChangeType),
+      waitTimeChange: this.formatChangeMinutes(globalStats.waitTimeChange),
+      waitTimeChangeType: this.mapChangeType(globalStats.waitTimeChangeType),
+    };
+  }
+
+  /**
+   * Map change type from 'stable' to 'neutral'
+   */
+  private mapChangeType(type: 'increase' | 'decrease' | 'stable'): 'increase' | 'decrease' | 'neutral' {
+    return type === 'stable' ? 'neutral' : type;
+  }
+
+  /**
+   * Format change percentage
+   */
+  private formatChangePercentage(change: number): string {
+    const sign = change > 0 ? '+' : '';
+    return `${sign}${change.toFixed(1)}%`;
+  }
+
+  /**
+   * Format change number
+   */
+  private formatChangeNumber(change: number): string {
+    const sign = change > 0 ? '+' : '';
+    return `${sign}${Math.round(change)} จากเมื่อวาน`;
+  }
+
+  /**
+   * Format change minutes
+   */
+  private formatChangeMinutes(change: number): string {
+    const sign = change > 0 ? '+' : '';
+    return `${sign}${Math.round(change)} นาที`;
+  }
+
+  /**
+   * Map Global Activities to Recent Activities
+   */
+  private mapGlobalActivitiesToRecentActivities(
+    globalActivities: Array<{
+      id: string;
+      shopId: string;
+      shopName: string;
+      type: string;
+      title: string;
+      description: string | null;
+      createdAt: string;
+    }>
+  ): RecentActivity[] {
+    return globalActivities.map((activity) => {
+      // Map activity type
+      const type = this.mapActivityType(activity.type);
+
+      // Format message with shop name
+      const message = activity.description
+        ? `${activity.title} - ${activity.shopName}: ${activity.description}`
+        : `${activity.title} - ${activity.shopName}`;
+
+      // Format timestamp to relative time
+      const timestamp = this.formatRelativeTime(activity.createdAt);
+
       return {
-        totalShops: shops.length,
-        activeQueues: 12,
-        todayRevenue: 15750,
-        servedToday: 45,
-        pendingQueues: 8,
-        averageWaitTime: 15,
+        id: activity.id,
+        type,
+        message,
+        timestamp,
       };
-    } catch (error) {
-      this.logger.error("DashboardPresenter: Error calculating stats", error);
-      return {
-        totalShops: 0,
-        activeQueues: 0,
-        todayRevenue: 0,
-        servedToday: 0,
-        pendingQueues: 0,
-        averageWaitTime: 0,
-      };
+    });
+  }
+
+  /**
+   * Map activity type from global to dashboard format
+   */
+  private mapActivityType(
+    type: string
+  ): "queue_created" | "queue_served" | "payment_received" {
+    switch (type) {
+      case "queue_completed":
+        return "queue_served";
+      case "payment_received":
+        return "payment_received";
+      default:
+        return "queue_created";
     }
   }
 
   /**
-   * Get recent activity
+   * Format timestamp to Thai relative time
    */
-  private async getRecentActivity(
-    userId: string,
-    shops: ShopDTO[]
-  ): Promise<RecentActivity[]> {
-    console.log(userId);
-    console.log(shops);
-    try {
-      // Mock data for now - replace with actual service calls
-      return [
-        {
-          id: "1",
-          type: "queue_created",
-          message: 'ลูกค้าใหม่เข้าคิวที่ร้าน "กาแฟดีดี"',
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-        {
-          id: "2",
-          type: "payment_received",
-          message: "ได้รับชำระเงินจากคิว #045",
-          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          amount: 350,
-        },
-        {
-          id: "3",
-          type: "queue_served",
-          message: "ให้บริการคิว #044 เรียบร้อยแล้ว",
-          timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-        },
-      ];
-    } catch (error) {
-      this.logger.error(
-        "DashboardPresenter: Error getting recent activity",
-        error
-      );
-      return [];
-    }
+  private formatRelativeTime(createdAt: string): string {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffMs = now.getTime() - created.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return "เมื่อสักครู่";
+    if (diffMinutes < 60) return `${diffMinutes} นาทีที่แล้ว`;
+    if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+    return `${diffDays} วันที่แล้ว`;
   }
 
 
@@ -253,12 +334,14 @@ export class DashboardPresenterFactory {
     const profileService = serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const subscriptionService = serverContainer.resolve<ISubscriptionService>("SubscriptionService");
+    const globalDashboardService = serverContainer.resolve<IGlobalDashboardService>("GlobalDashboardService");
     return new DashboardPresenter(
       logger,
       authService,
       profileService,
       shopService,
-      subscriptionService
+      subscriptionService,
+      globalDashboardService
     );
   }
 }

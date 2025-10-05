@@ -5191,6 +5191,23 @@ export type Database = {
           other_count: number
         }[]
       }
+      get_global_dashboard_stats: {
+        Args: { p_profile_id: string }
+        Returns: Json
+      }
+      get_global_recent_activities: {
+        Args: { p_profile_id: string; p_limit?: number }
+        Returns: {
+          id: string
+          shop_id: string
+          shop_name: string
+          type: string
+          title: string
+          description: string
+          metadata: Json
+          created_at: string
+        }[]
+      }
       get_marketplace_categories_with_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -5729,6 +5746,20 @@ export type Database = {
           created_at: string
           updated_at: string
           total_queues: number
+        }[]
+      }
+      get_shop_performances: {
+        Args: { p_profile_id: string }
+        Returns: {
+          shop_id: string
+          shop_name: string
+          today_queues: number
+          today_revenue: number
+          today_served: number
+          average_wait_time: number
+          active_queues: number
+          completion_rate: number
+          status: string
         }[]
       }
       get_user_profiles: {

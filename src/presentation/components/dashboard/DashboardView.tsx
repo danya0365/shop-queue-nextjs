@@ -78,8 +78,8 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
               <StatsCard
                 title="คิวที่ใช้งานอยู่"
                 value={stats.activeQueues}
-                change="+3 จากเมื่อวาน"
-                changeType="increase"
+                change={stats.activeQueuesChange}
+                changeType={stats.activeQueuesChangeType}
                 icon={
                   <svg
                     className="w-8 h-8"
@@ -101,8 +101,8 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
               <StatsCard
                 title="รายได้วันนี้"
                 value={formatCurrency(stats.todayRevenue)}
-                change="+12.5%"
-                changeType="increase"
+                change={stats.revenueChange}
+                changeType={stats.revenueChangeType}
                 icon={
                   <svg
                     className="w-8 h-8"
@@ -124,8 +124,8 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
               <StatsCard
                 title="ให้บริการแล้ววันนี้"
                 value={stats.servedToday}
-                change="+8 จากเมื่อวาน"
-                changeType="increase"
+                change={stats.servedChange}
+                changeType={stats.servedChangeType}
                 icon={
                   <svg
                     className="w-8 h-8"
@@ -168,8 +168,8 @@ export function DashboardView({ viewModel }: DashboardViewProps) {
               <StatsCard
                 title="เวลารอเฉลี่ย"
                 value={formatTime(stats.averageWaitTime)}
-                change="-2 นาที"
-                changeType="decrease"
+                change={stats.waitTimeChange}
+                changeType={stats.waitTimeChangeType}
                 icon={
                   <svg
                     className="w-8 h-8"

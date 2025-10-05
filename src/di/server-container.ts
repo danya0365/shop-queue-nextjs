@@ -4,6 +4,7 @@ import { ActivityIconService } from "../application/services/ActivityIconService
 import { AuthServiceFactory } from "../application/services/auth-service";
 import { AuthorizationServiceFactory } from "../application/services/authorization.service";
 import { CategoryServiceFactory } from "../application/services/category-service";
+import { GlobalDashboardServiceFactory } from "../application/services/dashboard/GlobalDashboardService";
 import { ProfileServiceFactory } from "../application/services/profile-service";
 import { ShopBackendCustomersServiceFactory } from "../application/services/shop/backend/BackendCustomersService";
 import { ShopBackendDashboardServiceFactory } from "../application/services/shop/backend/BackendDashboardService";
@@ -59,6 +60,7 @@ import { SupabaseShopBackendQueueAnalyticsRepository } from "../infrastructure/r
 import { SupabaseShopBackendServiceRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-service-repository";
 import { SupabaseShopBackendShopRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-repository";
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
+import { SupabaseGlobalDashboardRepository } from "../infrastructure/repositories/dashboard/supabase-global-dashboard-repository";
 import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
 import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
 import { SupabaseCustomerQueueJoinRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-join-repository";
@@ -156,6 +158,10 @@ export async function createServerContainer(): Promise<Container> {
       logger
     );
     const shopBackendQueueAnalyticsRepository = new SupabaseShopBackendQueueAnalyticsRepository(
+      databaseDatasource,
+      logger
+    );
+    const globalDashboardRepository = new SupabaseGlobalDashboardRepository(
       databaseDatasource,
       logger
     );
@@ -281,6 +287,12 @@ export async function createServerContainer(): Promise<Container> {
     const shopBackendAnalyticsService = ShopBackendAnalyticsServiceFactory.create(
       shopBackendQueueRepository,
       shopBackendQueueAnalyticsRepository,
+      logger
+    );
+
+    // Create global dashboard service
+    const globalDashboardService = GlobalDashboardServiceFactory.create(
+      globalDashboardRepository,
       logger
     );
 
@@ -451,6 +463,7 @@ export async function createServerContainer(): Promise<Container> {
     // Create and register utility services
     const activityIconService = new ActivityIconService();
     container.registerInstance("ActivityIconService", activityIconService);
+    container.registerInstance("GlobalDashboardService", globalDashboardService);
 
     logger.info("Server container initialized successfully");
   } catch (error) {
