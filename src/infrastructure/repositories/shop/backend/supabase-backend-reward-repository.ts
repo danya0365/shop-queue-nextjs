@@ -92,14 +92,45 @@ export class SupabaseShopBackendRewardRepository
         joins: queryOptions.joins,
       });
 
+      // Fetch usage stats from view in a separate query and map by reward_id
+      type UsageViewRow = Record<string, unknown> & {
+        reward_id: string;
+        shop_id: string;
+        usage_count: number | null;
+        remaining_usage: number | null;
+      };
+
+      const rewardIds = rewards.map((r) => (r as RewardSchema).id);
+      const usageMap = new Map<string, { usage_count: number; remaining_usage: number | null }>();
+      if (rewardIds.length > 0) {
+        const usageRows = await this.dataSource.getAdvanced<UsageViewRow>(
+          "reward_usage_by_reward_view",
+          {
+            filters: [
+              { field: "reward_id", operator: FilterOperator.IN, value: rewardIds },
+            ],
+          }
+        );
+        for (const row of usageRows) {
+          usageMap.set(row.reward_id, {
+            usage_count: row.usage_count ?? 0,
+            remaining_usage: row.remaining_usage ?? 0,
+          });
+        }
+      }
+
       // Map database results to domain entities (already filtered by shopId)
       const data = rewards.map((reward) => {
         const rewardWithJoinedData = reward as RewardWithJoins;
+        const usage = usageMap.get(rewardWithJoinedData.id) || {
+          usage_count: 0,
+          remaining_usage: 0,
+        };
         return SupabaseShopBackendRewardMapper.toDomain({
           ...reward,
           shop_name: rewardWithJoinedData.shops?.name,
-          usage_count: 0, // TODO: Calculate usage count
-          remaining_usage: 0, // TODO: Calculate remaining usage
+          usage_count: usage.usage_count,
+          remaining_usage: usage.remaining_usage ?? 0,
         });
       });
 
@@ -364,13 +395,30 @@ export class SupabaseShopBackendRewardRepository
         return null;
       }
 
+      // Fetch usage stats from view separately
+      type UsageViewRowSingle = Record<string, unknown> & {
+        reward_id: string;
+        usage_count: number | null;
+        remaining_usage: number | null;
+      };
+      const usageRows = await this.dataSource.getAdvanced<UsageViewRowSingle>(
+        "reward_usage_by_reward_view",
+        {
+          filters: [
+            { field: "reward_id", operator: FilterOperator.EQ, value: id },
+          ],
+          pagination: { limit: 1 },
+        }
+      );
+      const usage = usageRows[0];
+
       // Handle joined data from shops table and map
       const rewardWithJoinedData = reward as RewardWithJoins;
       return SupabaseShopBackendRewardMapper.toDomain({
         ...reward,
         shop_name: rewardWithJoinedData.shops?.name,
-        usage_count: 0, // TODO: Calculate usage count
-        remaining_usage: 0, // TODO: Calculate remaining usage
+        usage_count: (usage?.usage_count as number | null) ?? 0,
+        remaining_usage: (usage?.remaining_usage as number | null) ?? 0,
       });
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {

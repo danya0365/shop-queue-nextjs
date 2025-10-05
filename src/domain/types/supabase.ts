@@ -1699,6 +1699,13 @@ export type Database = {
             foreignKeyName: "reward_usages_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
+            referencedRelation: "reward_usage_by_reward_view"
+            referencedColumns: ["reward_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
             referencedRelation: "rewards"
             referencedColumns: ["id"]
           },
@@ -3116,6 +3123,13 @@ export type Database = {
             foreignKeyName: "reward_usages_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
+            referencedRelation: "reward_usage_by_reward_view"
+            referencedColumns: ["reward_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
             referencedRelation: "rewards"
             referencedColumns: ["id"]
           },
@@ -3854,6 +3868,13 @@ export type Database = {
             foreignKeyName: "reward_usages_reward_id_fkey"
             columns: ["reward_id"]
             isOneToOne: false
+            referencedRelation: "reward_usage_by_reward_view"
+            referencedColumns: ["reward_id"]
+          },
+          {
+            foreignKeyName: "reward_usages_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
             referencedRelation: "rewards"
             referencedColumns: ["id"]
           },
@@ -3934,6 +3955,64 @@ export type Database = {
           total_rewards: number | null
         }
         Relationships: []
+      }
+      reward_usage_by_reward_view: {
+        Row: {
+          active_count: number | null
+          cancelled_count: number | null
+          expired_count: number | null
+          issued_count: number | null
+          remaining_usage: number | null
+          reward_id: string | null
+          shop_id: string | null
+          usage_count: number | null
+          usage_limit: number | null
+          used_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "rewards_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_stats_by_shop_view: {
         Row: {
