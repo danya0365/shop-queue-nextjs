@@ -1,15 +1,23 @@
-import type { CreateRewardEntity, PaginatedRewardsEntity, RewardEntity, RewardStatsEntity, RewardTypeStatsEntity, RewardUsageEntity, UpdateRewardEntity } from '@/src/domain/entities/shop/backend/backend-reward.entity';
-import type { PaginationParams } from '@/src/domain/interfaces/pagination-types';
+import type {
+  CreateRewardEntity,
+  PaginatedRewardsEntity,
+  RewardEntity,
+  RewardStatsEntity,
+  RewardTypeStatsEntity,
+  RewardUsageEntity,
+  UpdateRewardEntity,
+} from "@/src/domain/entities/shop/backend/backend-reward.entity";
+import type { PaginationParams } from "@/src/domain/interfaces/pagination-types";
 
 /**
  * Reward repository error types
  */
 export enum ShopBackendRewardErrorType {
-  NOT_FOUND = 'not_found',
-  OPERATION_FAILED = 'operation_failed',
-  VALIDATION_ERROR = 'validation_error',
-  UNAUTHORIZED = 'unauthorized',
-  UNKNOWN = 'unknown',
+  NOT_FOUND = "not_found",
+  OPERATION_FAILED = "operation_failed",
+  VALIDATION_ERROR = "validation_error",
+  UNAUTHORIZED = "unauthorized",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -22,10 +30,10 @@ export class ShopBackendRewardError extends Error {
     message: string,
     public readonly operation?: string,
     public readonly context?: Record<string, unknown>,
-    public readonly cause?: unknown,
+    public readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'ShopBackendRewardError';
+    this.name = "ShopBackendRewardError";
   }
 }
 
@@ -40,7 +48,9 @@ export interface ShopBackendRewardRepository {
    * @returns Paginated rewards data
    * @throws ShopBackendRewardError if the operation fails
    */
-  getPaginatedRewards(params: PaginationParams & { shopId: string }): Promise<PaginatedRewardsEntity>;
+  getPaginatedRewards(
+    params: PaginationParams & { shopId: string }
+  ): Promise<PaginatedRewardsEntity>;
 
   /**
    * Get reward statistics
@@ -62,7 +72,9 @@ export interface ShopBackendRewardRepository {
    * @returns Array of reward usage entities
    * @throws ShopBackendRewardError if the operation fails
    */
-  getRecentRewardUsage(limit: number | undefined, shopId: string): Promise<RewardUsageEntity[]>;
+  getRecentRewardUsage(
+    params: PaginationParams & { shopId: string }
+  ): Promise<RewardUsageEntity[]>;
 
   /**
    * Get reward by ID
@@ -78,7 +90,9 @@ export interface ShopBackendRewardRepository {
    * @returns Created reward entity
    * @throws ShopBackendRewardError if the operation fails
    */
-  createReward(reward: Omit<CreateRewardEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<RewardEntity>;
+  createReward(
+    reward: Omit<CreateRewardEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<RewardEntity>;
 
   /**
    * Update an existing reward
@@ -87,7 +101,10 @@ export interface ShopBackendRewardRepository {
    * @returns Updated reward entity
    * @throws ShopBackendRewardError if the operation fails
    */
-  updateReward(id: string, reward: Partial<Omit<UpdateRewardEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<RewardEntity>;
+  updateReward(
+    id: string,
+    reward: Partial<Omit<UpdateRewardEntity, "id" | "createdAt" | "updatedAt">>
+  ): Promise<RewardEntity>;
 
   /**
    * Delete a reward

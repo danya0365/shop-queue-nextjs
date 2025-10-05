@@ -4,10 +4,10 @@ import { PaginatedResult } from "../../interfaces/pagination-types";
  * Reward type enum
  */
 export enum RewardType {
-  DISCOUNT = 'discount',
-  FREE_ITEM = 'free_item',
-  CASHBACK = 'cashback',
-  SPECIAL_PRIVILEGE = 'special_privilege'
+  DISCOUNT = "discount",
+  FREE_ITEM = "free_item",
+  CASHBACK = "cashback",
+  SPECIAL_PRIVILEGE = "special_privilege",
 }
 
 /**

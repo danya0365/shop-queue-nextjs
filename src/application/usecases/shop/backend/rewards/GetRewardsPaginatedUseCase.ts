@@ -1,4 +1,4 @@
-import { RewardsDataDTO } from "@/src/application/dtos/shop/backend/reward-dto";
+import { PaginatedRewardsDTO } from "@/src/application/dtos/shop/backend/reward-dto";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
 import { RewardMapper } from "@/src/application/mappers/shop/backend/reward-mapper";
 import { PaginationParams } from "@/src/domain/interfaces/pagination-types";
@@ -11,35 +11,28 @@ export interface GetRewardsPaginatedInput {
 }
 
 /**
- * Use case for getting paginated rewards data with stats and recent usage
+ * Use case for getting only paginated rewards data
  * Following SOLID principles and Clean Architecture
  */
-export class GetRewardsPaginatedUseCase implements IUseCase<GetRewardsPaginatedInput, RewardsDataDTO> {
+export class GetRewardsPaginatedUseCase implements IUseCase<GetRewardsPaginatedInput, PaginatedRewardsDTO> {
   constructor(
     private rewardRepository: ShopBackendRewardRepository
   ) { }
 
   /**
-   * Execute the use case to get paginated rewards data
+   * Execute the use case to get paginated rewards only
    * @param input Pagination parameters
-   * @returns Rewards data with pagination, stats, and recent usage
+   * @returns Paginated rewards DTO
    */
-  async execute(input: GetRewardsPaginatedInput): Promise<RewardsDataDTO> {
+  async execute(input: GetRewardsPaginatedInput): Promise<PaginatedRewardsDTO> {
     try {
       const paginationParams: PaginationParams = {
         page: input.page || 1,
         limit: input.limit || 10
       };
 
-      // Get rewards, stats, type stats, and recent usage in parallel
-      const [paginatedRewards, stats, typeStats, recentUsage] = await Promise.all([
-        this.rewardRepository.getPaginatedRewards({ ...paginationParams, shopId: input.shopId }),
-        this.rewardRepository.getRewardStats(input.shopId),
-        this.rewardRepository.getRewardTypeStats(input.shopId),
-        this.rewardRepository.getRecentRewardUsage(5, input.shopId)
-      ]);
-
-      return RewardMapper.toRewardsDataDTO(paginatedRewards, stats, typeStats, recentUsage);
+      const paginatedRewards = await this.rewardRepository.getPaginatedRewards({ ...paginationParams, shopId: input.shopId });
+      return RewardMapper.toPaginatedDTO(paginatedRewards);
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {
         throw error;

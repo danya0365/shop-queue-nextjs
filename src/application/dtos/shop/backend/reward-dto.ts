@@ -1,4 +1,5 @@
-import { RewardType } from '@/src/domain/entities/backend/backend-reward.entity';
+import { RewardType } from "@/src/domain/entities/backend/backend-reward.entity";
+import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
 
 export interface RewardDTO {
   id: string;
@@ -9,9 +10,11 @@ export interface RewardDTO {
   pointsRequired: number;
   value: number;
   isAvailable: boolean;
-  expiryDays: number | null;
-  usageLimit: number | null;
-  icon: string | null;
+  expiryDays: number;
+  usageLimit: number;
+  usageCount: number;
+  remainingUsage: number;
+  icon: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +48,12 @@ export interface RewardsDataDTO {
   typeStats: RewardTypeStatsDTO;
   recentUsage: RewardUsageDTO[];
   totalCount: number;
+}
+
+export interface GetRewardsDataInput {
+  shopId: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface CreateRewardDTO {
@@ -96,3 +105,6 @@ export interface RewardTypeStatsDTO {
   };
   totalRewards: number;
 }
+
+// Paginated rewards DTO using generic pagination meta from domain layer
+export type PaginatedRewardsDTO = PaginatedResult<RewardDTO>;

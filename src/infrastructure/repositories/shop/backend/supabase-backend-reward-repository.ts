@@ -98,6 +98,8 @@ export class SupabaseShopBackendRewardRepository
         return SupabaseShopBackendRewardMapper.toDomain({
           ...reward,
           shop_name: rewardWithJoinedData.shops?.name,
+          usage_count: 0, // TODO: Calculate usage count
+          remaining_usage: 0, // TODO: Calculate remaining usage
         });
       });
 
@@ -280,10 +282,10 @@ export class SupabaseShopBackendRewardRepository
    * @returns Array of reward usage entities
    */
   async getRecentRewardUsage(
-    limit: number = 10,
-    shopId: string
+    params: PaginationParams & { shopId: string }
   ): Promise<RewardUsageEntity[]> {
     try {
+      const { page = 1, limit = 10, shopId } = params;
       // Use getAdvanced to fetch recent reward usage data
       const queryOptions: QueryOptions = {
         select: ["*"],
@@ -301,7 +303,7 @@ export class SupabaseShopBackendRewardRepository
         sort: [{ field: "used_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset: 0,
+          offset: (page - 1) * limit,
         },
       };
 
@@ -327,12 +329,12 @@ export class SupabaseShopBackendRewardRepository
         throw error;
       }
 
-      this.logger.error("Error in getRecentRewardUsage", { error, limit });
+      this.logger.error("Error in getRecentRewardUsage", { error, params });
       throw new ShopBackendRewardError(
         ShopBackendRewardErrorType.UNKNOWN,
         "An unexpected error occurred while fetching recent reward usage",
         "getRecentRewardUsage",
-        { limit },
+        { params },
         error
       );
     }
@@ -367,6 +369,8 @@ export class SupabaseShopBackendRewardRepository
       return SupabaseShopBackendRewardMapper.toDomain({
         ...reward,
         shop_name: rewardWithJoinedData.shops?.name,
+        usage_count: 0, // TODO: Calculate usage count
+        remaining_usage: 0, // TODO: Calculate remaining usage
       });
     } catch (error) {
       if (error instanceof ShopBackendRewardError) {

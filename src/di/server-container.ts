@@ -25,7 +25,6 @@ import { PaymentsBackendService } from "../application/services/shop/backend/pay
 import { PosterTemplateBackendService } from "../application/services/shop/backend/poster-templates-backend-service";
 import { QueueServiceBackendService } from "../application/services/shop/backend/queue-services-backend-service";
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
-import { RewardsBackendService } from "../application/services/shop/backend/rewards-backend-service";
 import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
 import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
 import { ShopCustomerQueueJoinServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueJoinService";
@@ -211,7 +210,6 @@ export async function createServerContainer(): Promise<Container> {
       logger
     );
     const paymentsBackendService = new PaymentsBackendService(logger);
-    const rewardsBackendService = new RewardsBackendService(logger);
     const paymentItemsBackendService = new PaymentItemsBackendService(logger);
     const customerPointsBackendService = new CustomerPointsBackendService(
       logger
@@ -409,7 +407,6 @@ export async function createServerContainer(): Promise<Container> {
       "PaymentsBackendService",
       paymentsBackendService
     );
-    container.registerInstance("RewardsBackendService", rewardsBackendService);
 
     container.registerInstance(
       "PaymentItemsBackendService",

@@ -2,6 +2,7 @@ import { getClientService } from "@/src/di/client-container";
 import { Logger } from "@/src/domain/interfaces/logger";
 import { useCallback, useEffect, useState } from "react";
 import { RewardsViewModel } from "./RewardsPresenter";
+import { RewardType } from "@/src/domain/entities/backend/backend-reward.entity";
 
 const logger = getClientService<Logger>("Logger");
 
@@ -9,7 +10,7 @@ const logger = getClientService<Logger>("Logger");
 export interface CreateRewardFormData {
   name: string;
   description?: string;
-  type: 'discount' | 'free_item' | 'cashback' | 'special_privilege';
+  type: RewardType;
   pointsRequired: number;
   value: number;
   expiryDays?: number;
@@ -22,7 +23,7 @@ export interface UpdateRewardFormData {
   id: string;
   name?: string;
   description?: string;
-  type?: 'discount' | 'free_item' | 'cashback' | 'special_privilege';
+  type?: RewardType;
   pointsRequired?: number;
   value?: number;
   isAvailable?: boolean;
@@ -34,7 +35,7 @@ export interface UpdateRewardFormData {
 
 export interface RewardFilters {
   search?: string;
-  type?: 'discount' | 'free_item' | 'cashback' | 'special_privilege' | 'all';
+  type?: RewardType | "all";
   isAvailable?: boolean;
 }
 
@@ -283,9 +284,7 @@ export const useRewardsPresenter = (
     } catch (error) {
       logger.error("RewardsPresenter: Error deleting reward", error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "เกิดข้อผิดพลาดในการลบรางวัล";
+        error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการลบรางวัล";
       setError(errorMessage);
       return false;
     } finally {
@@ -309,11 +308,17 @@ export const useRewardsPresenter = (
       const presenter = await ClientRewardsPresenterFactory.create();
       await presenter.toggleRewardAvailability(shopId, id);
 
-      logger.info("RewardsPresenter: Reward availability toggled successfully", { id });
+      logger.info(
+        "RewardsPresenter: Reward availability toggled successfully",
+        { id }
+      );
       await loadData(); // Refresh data after toggle
       return true;
     } catch (error) {
-      logger.error("RewardsPresenter: Error toggling reward availability", error);
+      logger.error(
+        "RewardsPresenter: Error toggling reward availability",
+        error
+      );
       const errorMessage =
         error instanceof Error
           ? error.message

@@ -1,14 +1,7 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
+import { RewardType } from "../../backend/backend-reward.entity";
 
-/**
- * Reward type enum
- */
-export enum RewardType {
-  DISCOUNT = 'discount',
-  FREE_ITEM = 'free_item',
-  CASHBACK = 'cashback',
-  SPECIAL_PRIVILEGE = 'special_privilege'
-}
+export { RewardType };
 
 /**
  * Reward entity representing a loyalty reward in the system
@@ -24,9 +17,11 @@ export interface RewardEntity {
   pointsRequired: number;
   value: number;
   isAvailable: boolean;
-  expiryDays: number | null;
-  usageLimit: number | null;
-  icon: string | null;
+  expiryDays: number;
+  usageLimit: number;
+  usageCount: number;
+  remainingUsage: number;
+  icon: string;
   createdAt: string;
   updatedAt: string;
 }

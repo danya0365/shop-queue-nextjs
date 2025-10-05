@@ -1,5 +1,20 @@
-import { CreateRewardDTO, RewardDTO, RewardStatsDTO, RewardTypeStatsDTO, RewardUsageDTO, RewardsDataDTO, UpdateRewardDTO } from '@/src/application/dtos/shop/backend/reward-dto';
-import { PaginatedRewardsEntity, RewardEntity, RewardStatsEntity, RewardTypeStatsEntity, RewardUsageEntity } from '@/src/domain/entities/shop/backend/backend-reward.entity';
+import {
+  CreateRewardDTO,
+  PaginatedRewardsDTO,
+  RewardDTO,
+  RewardStatsDTO,
+  RewardTypeStatsDTO,
+  RewardUsageDTO,
+  RewardsDataDTO,
+  UpdateRewardDTO,
+} from "@/src/application/dtos/shop/backend/reward-dto";
+import {
+  PaginatedRewardsEntity,
+  RewardEntity,
+  RewardStatsEntity,
+  RewardTypeStatsEntity,
+  RewardUsageEntity,
+} from "@/src/domain/entities/shop/backend/backend-reward.entity";
 
 /**
  * Mapper class for converting between domain entities and DTOs
@@ -23,9 +38,23 @@ export class RewardMapper {
       isAvailable: entity.isAvailable,
       expiryDays: entity.expiryDays,
       usageLimit: entity.usageLimit,
+      usageCount: entity.usageCount,
+      remainingUsage: entity.remainingUsage,
       icon: entity.icon,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
+    };
+  }
+
+  /**
+   * Map paginated rewards domain entity to PaginatedRewardsDTO
+   */
+  public static toPaginatedDTO(
+    paginatedEntity: PaginatedRewardsEntity
+  ): PaginatedRewardsDTO {
+    return {
+      data: paginatedEntity.data.map((r) => this.toDTO(r)),
+      pagination: paginatedEntity.pagination,
     };
   }
 
@@ -46,7 +75,7 @@ export class RewardMapper {
       rewardValue: entity.rewardValue,
       usedAt: entity.usedAt,
       queueId: entity.queueId,
-      queueNumber: entity.queueNumber
+      queueNumber: entity.queueNumber,
     };
   }
 
@@ -62,7 +91,7 @@ export class RewardMapper {
       totalRedemptions: entity.totalRedemptions,
       totalPointsRedeemed: entity.totalPointsRedeemed,
       averageRedemptionValue: entity.averageRedemptionValue,
-      popularRewardType: entity.popularRewardType
+      popularRewardType: entity.popularRewardType,
     };
   }
 
@@ -71,29 +100,31 @@ export class RewardMapper {
    * @param entity Reward type stats domain entity
    * @returns Reward type stats DTO
    */
-  public static typeStatsToDTO(entity: RewardTypeStatsEntity): RewardTypeStatsDTO {
+  public static typeStatsToDTO(
+    entity: RewardTypeStatsEntity
+  ): RewardTypeStatsDTO {
     return {
       discount: {
         count: entity.discount.count,
         percentage: entity.discount.percentage,
-        totalValue: entity.discount.totalValue
+        totalValue: entity.discount.totalValue,
       },
       freeItem: {
         count: entity.free_item.count,
         percentage: entity.free_item.percentage,
-        totalValue: entity.free_item.totalValue
+        totalValue: entity.free_item.totalValue,
       },
       cashback: {
         count: entity.cashback.count,
         percentage: entity.cashback.percentage,
-        totalValue: entity.cashback.totalValue
+        totalValue: entity.cashback.totalValue,
       },
       specialPrivilege: {
         count: entity.special_privilege.count,
         percentage: entity.special_privilege.percentage,
-        totalValue: entity.special_privilege.totalValue
+        totalValue: entity.special_privilege.totalValue,
       },
-      totalRewards: entity.totalRewards
+      totalRewards: entity.totalRewards,
     };
   }
 
@@ -111,11 +142,11 @@ export class RewardMapper {
     recentUsage: RewardUsageEntity[]
   ): RewardsDataDTO {
     return {
-      rewards: paginatedEntity.data.map(reward => this.toDTO(reward)),
+      rewards: paginatedEntity.data.map((reward) => this.toDTO(reward)),
       stats: this.statsToDTO(stats),
       typeStats: this.typeStatsToDTO(typeStats),
-      recentUsage: recentUsage.map(usage => this.usageToDTO(usage)),
-      totalCount: paginatedEntity.pagination.totalItems
+      recentUsage: recentUsage.map((usage) => this.usageToDTO(usage)),
+      totalCount: paginatedEntity.pagination.totalItems,
     };
   }
 
@@ -135,7 +166,7 @@ export class RewardMapper {
       isAvailable: dto.isAvailable,
       expiryDays: dto.expiryDays,
       usageLimit: dto.usageLimit,
-      icon: dto.icon
+      icon: dto.icon,
     };
   }
 
@@ -154,7 +185,7 @@ export class RewardMapper {
       isAvailable: dto.isAvailable,
       expiryDays: dto.expiryDays,
       usageLimit: dto.usageLimit,
-      icon: dto.icon
+      icon: dto.icon,
     };
   }
 }

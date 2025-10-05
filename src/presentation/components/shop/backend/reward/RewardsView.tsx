@@ -1,6 +1,7 @@
 "use client";
 
-import type { Reward } from "@/src/application/services/shop/backend/rewards-backend-service";
+import type { RewardDTO } from "@/src/application/dtos/shop/backend/reward-dto";
+import { RewardType } from "@/src/domain/entities/backend/backend-reward.entity";
 import { RewardsViewModel } from "@/src/presentation/presenters/shop/backend/RewardsPresenter";
 import {
   useRewardsPresenter,
@@ -401,7 +402,7 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                     ถูกแลกแล้ว:
                   </span>
                   <span className="font-semibold text-orange-600">
-                    {reward.totalRedeemed || 0} ครั้ง
+                    {reward.usageCount} ครั้ง
                   </span>
                 </div>
 
@@ -411,7 +412,7 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
                       คงเหลือ:
                     </span>
                     <span className="font-semibold text-purple-600">
-                      {reward.remainingUsage || 0} ครั้ง
+                      {reward.remainingUsage} ครั้ง
                     </span>
                   </div>
                 )}
@@ -504,7 +505,7 @@ function CreateRewardModal({
   const [form, setForm] = React.useState<Omit<CreateRewardFormData, "shopId">>({
     name: "",
     description: "",
-    type: "discount",
+    type: RewardType.DISCOUNT,
     pointsRequired: 0,
     value: 0,
     expiryDays: 30,
@@ -550,10 +551,10 @@ function CreateRewardModal({
               })
             }
           >
-            <option value="discount">ส่วนลด</option>
-            <option value="free_item">ของฟรี</option>
-            <option value="cashback">คืนเงิน</option>
-            <option value="special_privilege">สิทธิพิเศษ</option>
+            <option value={RewardType.DISCOUNT}>ส่วนลด</option>
+            <option value={RewardType.FREE_ITEM}>ของฟรี</option>
+            <option value={RewardType.CASHBACK}>คืนเงิน</option>
+            <option value={RewardType.SPECIAL_PRIVILEGE}>สิทธิพิเศษ</option>
           </select>
           <input
             type="number"
@@ -620,7 +621,7 @@ function EditRewardModal({
   onSubmit,
   loading,
 }: {
-  reward: Reward;
+  reward: RewardDTO;
   shopId: string;
   onClose: () => void;
   onSubmit: (data: UpdateRewardFormData) => Promise<boolean>;
@@ -671,7 +672,7 @@ function EditRewardModal({
             className="w-full px-3 py-2 border rounded"
             value={form.type}
             onChange={(e) =>
-              setForm({ ...form, type: e.target.value as Reward["type"] })
+              setForm({ ...form, type: e.target.value as RewardDTO["type"] })
             }
           >
             <option value="discount">ส่วนลด</option>
@@ -752,7 +753,7 @@ function DeleteRewardConfirmation({
   onConfirm,
   loading,
 }: {
-  reward: Reward;
+  reward: RewardDTO;
   onClose: () => void;
   onConfirm: () => Promise<boolean>;
   loading: boolean;

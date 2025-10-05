@@ -1,4 +1,4 @@
-export type RewardType = 'discount' | 'free_item' | 'cashback' | 'special_privilege';
+import { RewardType } from "./backend/backend-reward.entity";
 
 export interface RewardEntity {
   id: string;

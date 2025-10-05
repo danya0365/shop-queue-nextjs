@@ -1,33 +1,51 @@
-import type { CreateRewardDTO, RewardDTO, RewardsDataDTO, RewardStatsDTO, UpdateRewardDTO } from '@/src/application/dtos/shop/backend/reward-dto';
-import type { IUseCase } from '@/src/application/interfaces/use-case.interface';
-import { CreateRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/CreateRewardUseCase';
-import { DeleteRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/DeleteRewardUseCase';
-import { GetRewardByIdUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardByIdUseCase';
-import { GetRewardsPaginatedInput, GetRewardsPaginatedUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardsPaginatedUseCase';
-import { GetRewardStatsUseCase } from '@/src/application/usecases/shop/backend/rewards/GetRewardStatsUseCase';
-import { UpdateRewardUseCase } from '@/src/application/usecases/shop/backend/rewards/UpdateRewardUseCase';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { ShopBackendRewardRepository } from '@/src/domain/repositories/shop/backend/backend-reward-repository';
+import type {
+  CreateRewardDTO,
+  GetRewardsDataInput,
+  RewardDTO,
+  RewardsDataDTO,
+  RewardStatsDTO,
+  UpdateRewardDTO,
+} from "@/src/application/dtos/shop/backend/reward-dto";
+import type { IUseCase } from "@/src/application/interfaces/use-case.interface";
+import { CreateRewardUseCase } from "@/src/application/usecases/shop/backend/rewards/CreateRewardUseCase";
+import { DeleteRewardUseCase } from "@/src/application/usecases/shop/backend/rewards/DeleteRewardUseCase";
+import { GetRewardByIdUseCase } from "@/src/application/usecases/shop/backend/rewards/GetRewardByIdUseCase";
+// Removed paginated-only use case from service wiring; using GetRewardsDataUseCase instead
+import { GetRewardsDataUseCase } from "@/src/application/usecases/shop/backend/rewards/GetRewardsDataUseCase";
+import { GetRewardStatsUseCase } from "@/src/application/usecases/shop/backend/rewards/GetRewardStatsUseCase";
+import { UpdateRewardUseCase } from "@/src/application/usecases/shop/backend/rewards/UpdateRewardUseCase";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { ShopBackendRewardRepository } from "@/src/domain/repositories/shop/backend/backend-reward-repository";
 
 export interface IShopBackendRewardsService {
-  getRewardsData(shopId: string, page?: number, perPage?: number): Promise<RewardsDataDTO>;
+  getRewardsData(
+    shopId: string,
+    page?: number,
+    perPage?: number
+  ): Promise<RewardsDataDTO>;
   getRewardStats(shopId: string): Promise<RewardStatsDTO>;
   getRewardById(id: string): Promise<RewardDTO>;
   createReward(params: CreateRewardDTO): Promise<RewardDTO>;
-  updateReward(id: string, params: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO>;
+  updateReward(
+    id: string,
+    params: Omit<UpdateRewardDTO, "id">
+  ): Promise<RewardDTO>;
   deleteReward(id: string): Promise<boolean>;
 }
 
 export class ShopBackendRewardsService implements IShopBackendRewardsService {
   constructor(
-    private readonly getRewardsPaginatedUseCase: IUseCase<GetRewardsPaginatedInput, RewardsDataDTO>,
+    private readonly getRewardsDataUseCase: IUseCase<
+      GetRewardsDataInput,
+      RewardsDataDTO
+    >,
     private readonly getRewardStatsUseCase: IUseCase<string, RewardStatsDTO>,
     private readonly getRewardByIdUseCase: IUseCase<string, RewardDTO>,
     private readonly createRewardUseCase: IUseCase<CreateRewardDTO, RewardDTO>,
     private readonly updateRewardUseCase: IUseCase<UpdateRewardDTO, RewardDTO>,
     private readonly deleteRewardUseCase: IUseCase<string, boolean>,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   /**
    * Get rewards data including paginated rewards and statistics
@@ -35,14 +53,27 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    * @param perPage Items per page (default: 10)
    * @returns Rewards data DTO
    */
-  async getRewardsData(shopId: string, page: number = 1, perPage: number = 10): Promise<RewardsDataDTO> {
+  async getRewardsData(
+    shopId: string,
+    page: number = 1,
+    perPage: number = 10
+  ): Promise<RewardsDataDTO> {
     try {
-      this.logger.info('Getting rewards data', { shopId, page, perPage });
+      this.logger.info("Getting rewards data", { shopId, page, perPage });
 
-      const result = await this.getRewardsPaginatedUseCase.execute({ shopId, page, limit: perPage });
+      const result = await this.getRewardsDataUseCase.execute({
+        shopId,
+        page,
+        limit: perPage,
+      });
       return result;
     } catch (error) {
-      this.logger.error('Error getting rewards data', { error, shopId, page, perPage });
+      this.logger.error("Error getting rewards data", {
+        error,
+        shopId,
+        page,
+        perPage,
+      });
       throw error;
     }
   }
@@ -53,12 +84,12 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    */
   async getRewardStats(shopId: string): Promise<RewardStatsDTO> {
     try {
-      this.logger.info('Getting reward stats', { shopId });
+      this.logger.info("Getting reward stats", { shopId });
 
       const stats = await this.getRewardStatsUseCase.execute(shopId);
       return stats;
     } catch (error) {
-      this.logger.error('Error getting reward stats', { error, shopId });
+      this.logger.error("Error getting reward stats", { error, shopId });
       throw error;
     }
   }
@@ -70,12 +101,12 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    */
   async getRewardById(id: string): Promise<RewardDTO> {
     try {
-      this.logger.info('Getting reward by ID', { id });
+      this.logger.info("Getting reward by ID", { id });
 
       const result = await this.getRewardByIdUseCase.execute(id);
       return result;
     } catch (error) {
-      this.logger.error('Error getting reward by ID', { error, id });
+      this.logger.error("Error getting reward by ID", { error, id });
       throw error;
     }
   }
@@ -87,12 +118,12 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    */
   async createReward(params: CreateRewardDTO): Promise<RewardDTO> {
     try {
-      this.logger.info('Creating reward', { params });
+      this.logger.info("Creating reward", { params });
 
       const result = await this.createRewardUseCase.execute(params);
       return result;
     } catch (error) {
-      this.logger.error('Error creating reward', { error, params });
+      this.logger.error("Error creating reward", { error, params });
       throw error;
     }
   }
@@ -103,15 +134,18 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    * @param params Reward update parameters
    * @returns Updated reward DTO
    */
-  async updateReward(id: string, params: Omit<UpdateRewardDTO, 'id'>): Promise<RewardDTO> {
+  async updateReward(
+    id: string,
+    params: Omit<UpdateRewardDTO, "id">
+  ): Promise<RewardDTO> {
     try {
-      this.logger.info('Updating reward', { id, params });
+      this.logger.info("Updating reward", { id, params });
 
       const updateData = { ...params, id };
       const result = await this.updateRewardUseCase.execute(updateData);
       return result;
     } catch (error) {
-      this.logger.error('Error updating reward', { error, id, params });
+      this.logger.error("Error updating reward", { error, id, params });
       throw error;
     }
   }
@@ -123,25 +157,36 @@ export class ShopBackendRewardsService implements IShopBackendRewardsService {
    */
   async deleteReward(id: string): Promise<boolean> {
     try {
-      this.logger.info('Deleting reward', { id });
+      this.logger.info("Deleting reward", { id });
 
       const result = await this.deleteRewardUseCase.execute(id);
       return result;
     } catch (error) {
-      this.logger.error('Error deleting reward', { error, id });
+      this.logger.error("Error deleting reward", { error, id });
       throw error;
     }
   }
 }
 
 export class ShopBackendRewardsServiceFactory {
-  static create(repository: ShopBackendRewardRepository, logger: Logger): ShopBackendRewardsService {
-    const getRewardsPaginatedUseCase = new GetRewardsPaginatedUseCase(repository);
+  static create(
+    repository: ShopBackendRewardRepository,
+    logger: Logger
+  ): ShopBackendRewardsService {
+    const getRewardsDataUseCase = new GetRewardsDataUseCase(repository);
     const getRewardStatsUseCase = new GetRewardStatsUseCase(repository);
     const getRewardByIdUseCase = new GetRewardByIdUseCase(repository);
     const createRewardUseCase = new CreateRewardUseCase(repository);
     const updateRewardUseCase = new UpdateRewardUseCase(repository);
     const deleteRewardUseCase = new DeleteRewardUseCase(repository);
-    return new ShopBackendRewardsService(getRewardsPaginatedUseCase, getRewardStatsUseCase, getRewardByIdUseCase, createRewardUseCase, updateRewardUseCase, deleteRewardUseCase, logger);
+    return new ShopBackendRewardsService(
+      getRewardsDataUseCase,
+      getRewardStatsUseCase,
+      getRewardByIdUseCase,
+      createRewardUseCase,
+      updateRewardUseCase,
+      deleteRewardUseCase,
+      logger
+    );
   }
 }

@@ -1,6 +1,17 @@
-import { RewardEntity, RewardStatsEntity, RewardType, RewardTypeStatsEntity, RewardUsageEntity } from "@/src/domain/entities/shop/backend/backend-reward.entity";
+import {
+  RewardEntity,
+  RewardStatsEntity,
+  RewardType,
+  RewardTypeStatsEntity,
+  RewardUsageEntity,
+} from "@/src/domain/entities/shop/backend/backend-reward.entity";
 import { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
-import { RewardSchema, RewardStatsSchema, RewardTypeStatsSchema, RewardUsageSchema } from "@/src/infrastructure/schemas/shop/backend/reward.schema";
+import {
+  RewardSchema,
+  RewardStatsSchema,
+  RewardTypeStatsSchema,
+  RewardUsageSchema,
+} from "@/src/infrastructure/schemas/shop/backend/reward.schema";
 
 /**
  * Mapper class for converting between reward database schema and domain entities
@@ -12,7 +23,9 @@ export class SupabaseShopBackendRewardMapper {
    * @param schema Reward database schema
    * @returns Reward domain entity
    */
-  public static toDomain(schema: RewardSchema): RewardEntity {
+  public static toDomain(
+    schema: RewardSchema & { usage_count: number; remaining_usage: number }
+  ): RewardEntity {
     return {
       id: schema.id,
       shopId: schema.shop_id,
@@ -23,11 +36,13 @@ export class SupabaseShopBackendRewardMapper {
       pointsRequired: schema.points_required,
       value: schema.value,
       isAvailable: schema.is_available,
-      expiryDays: schema.expiry_days,
-      usageLimit: schema.usage_limit,
-      icon: schema.icon,
+      expiryDays: schema.expiry_days || 0,
+      usageLimit: schema.usage_limit || 0,
+      usageCount: schema.usage_count || 0,
+      remainingUsage: schema.remaining_usage || 0,
+      icon: schema.icon || "",
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
     };
   }
 
@@ -51,7 +66,7 @@ export class SupabaseShopBackendRewardMapper {
       usage_limit: entity.usageLimit,
       icon: entity.icon,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
     };
   }
 
@@ -72,7 +87,7 @@ export class SupabaseShopBackendRewardMapper {
       rewardValue: schema.reward_value,
       usedAt: schema.used_at,
       queueId: schema.queue_id,
-      queueNumber: schema.queue_number
+      queueNumber: schema.queue_number,
     };
   }
 
@@ -88,7 +103,7 @@ export class SupabaseShopBackendRewardMapper {
       totalRedemptions: schema.total_redemptions,
       totalPointsRedeemed: schema.total_points_redeemed,
       averageRedemptionValue: schema.average_redemption_value,
-      popularRewardType: schema.popular_reward_type as RewardType | null
+      popularRewardType: schema.popular_reward_type as RewardType | null,
     };
   }
 
@@ -97,29 +112,31 @@ export class SupabaseShopBackendRewardMapper {
    * @param schema Reward type stats database schema
    * @returns Reward type stats domain entity
    */
-  public static typeStatsToEntity(schema: RewardTypeStatsSchema): RewardTypeStatsEntity {
+  public static typeStatsToEntity(
+    schema: RewardTypeStatsSchema
+  ): RewardTypeStatsEntity {
     return {
       discount: {
         count: schema.discount_count,
         percentage: schema.discount_percentage,
-        totalValue: schema.discount_total_value
+        totalValue: schema.discount_total_value,
       },
       free_item: {
         count: schema.free_item_count,
         percentage: schema.free_item_percentage,
-        totalValue: schema.free_item_total_value
+        totalValue: schema.free_item_total_value,
       },
       cashback: {
         count: schema.cashback_count,
         percentage: schema.cashback_percentage,
-        totalValue: schema.cashback_total_value
+        totalValue: schema.cashback_total_value,
       },
       special_privilege: {
         count: schema.special_privilege_count,
         percentage: schema.special_privilege_percentage,
-        totalValue: schema.special_privilege_total_value
+        totalValue: schema.special_privilege_total_value,
       },
-      totalRewards: schema.total_rewards
+      totalRewards: schema.total_rewards,
     };
   }
 
@@ -143,7 +160,7 @@ export class SupabaseShopBackendRewardMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }
