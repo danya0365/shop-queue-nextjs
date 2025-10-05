@@ -1,11 +1,14 @@
-import type { SubscriptionLimits, UsageStatsDto } from '@/src/application/dtos/subscription-dto';
-import type { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import { IShopService } from '@/src/application/services/shop/ShopService';
-import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
+import type {
+  SubscriptionLimits,
+  UsageStatsDto,
+} from "@/src/application/dtos/subscription-dto";
+import type { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define interfaces for data structures
 export interface RevenueData {
@@ -47,10 +50,10 @@ export interface CustomerInsights {
 }
 
 export interface AnalyticsFilters {
-  dateRange: 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom';
+  dateRange: "today" | "week" | "month" | "quarter" | "year" | "custom";
   startDate?: string;
   endDate?: string;
-  compareWith?: 'previous_period' | 'last_year' | 'none';
+  compareWith?: "previous_period" | "last_year" | "none";
 }
 
 // Define ViewModel interface
@@ -80,12 +83,22 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
     shopService: IShopService,
     authService: IAuthService,
     profileService: IProfileService,
-    subscriptionService: ISubscriptionService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    subscriptionService: ISubscriptionService
+  ) {
+    super(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
+  }
 
   async getViewModel(shopId: string): Promise<AnalyticsViewModel> {
     try {
-      this.logger.info('AnalyticsPresenter: Getting view model for shop', { shopId });
+      this.logger.info("AnalyticsPresenter: Getting view model for shop", {
+        shopId,
+      });
 
       const user = await this.getUser();
       if (!user) {
@@ -97,14 +110,19 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         throw new Error("Profile not found");
       }
 
-      const subscriptionPlan = await this.getSubscriptionPlan(profile.id, profile.role);
+      const subscriptionPlan = await this.getSubscriptionPlan(
+        profile.id,
+        profile.role
+      );
       const limits = this.mapSubscriptionPlanToLimits(subscriptionPlan);
       const usage = await this.getUsageStats(profile.id);
 
       // Check data retention limits
-      const hasDataRetentionLimit = false;// limits.dataRetentionDays !== null;
+      const hasDataRetentionLimit = false; // limits.dataRetentionDays !== null;
       const dataRetentionDays = 365; // limits.maxDataRetentionDays || 365;
-      const isFreeTier = subscriptionPlan.tier === 'free';
+
+      const isFreeTier = false; // TODO: for test
+      //const isFreeTier = subscriptionPlan.tier === 'free';
 
       // Mock data - replace with actual service calls
       const revenueData = this.getRevenueData(dataRetentionDays);
@@ -112,8 +130,14 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       const employeePerformance = this.getEmployeePerformance();
       const customerInsights = this.getCustomerInsights();
 
-      const totalRevenue = revenueData.reduce((sum, data) => sum + data.revenue, 0);
-      const totalOrders = revenueData.reduce((sum, data) => sum + data.orders, 0);
+      const totalRevenue = revenueData.reduce(
+        (sum, data) => sum + data.revenue,
+        0
+      );
+      const totalOrders = revenueData.reduce(
+        (sum, data) => sum + data.orders,
+        0
+      );
 
       return {
         revenueData,
@@ -121,8 +145,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         employeePerformance,
         customerInsights,
         filters: {
-          dateRange: 'month',
-          compareWith: 'previous_period',
+          dateRange: "month",
+          compareWith: "previous_period",
         },
         totalRevenue,
         totalOrders,
@@ -137,7 +161,7 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         },
       };
     } catch (error) {
-      this.logger.error('AnalyticsPresenter: Error getting view model', error);
+      this.logger.error("AnalyticsPresenter: Error getting view model", error);
       throw error;
     }
   }
@@ -149,66 +173,66 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
     cutoffDate.setDate(cutoffDate.getDate() - dataRetentionDays);
 
     const allData = this.getAllRevenueData();
-    return allData.filter(data => new Date(data.date) >= cutoffDate);
+    return allData.filter((data) => new Date(data.date) >= cutoffDate);
   }
 
   private getAllRevenueData(): RevenueData[] {
     return [
-      { date: '2024-01-01', revenue: 12500, orders: 85, avgOrderValue: 147 },
-      { date: '2024-01-02', revenue: 15200, orders: 92, avgOrderValue: 165 },
-      { date: '2024-01-03', revenue: 18300, orders: 108, avgOrderValue: 169 },
-      { date: '2024-01-04', revenue: 14800, orders: 89, avgOrderValue: 166 },
-      { date: '2024-01-05', revenue: 22100, orders: 125, avgOrderValue: 177 },
-      { date: '2024-01-06', revenue: 25400, orders: 142, avgOrderValue: 179 },
-      { date: '2024-01-07', revenue: 19800, orders: 115, avgOrderValue: 172 },
-      { date: '2024-01-08', revenue: 16900, orders: 98, avgOrderValue: 173 },
-      { date: '2024-01-09', revenue: 20500, orders: 118, avgOrderValue: 174 },
-      { date: '2024-01-10', revenue: 23200, orders: 135, avgOrderValue: 172 },
-      { date: '2024-01-11', revenue: 21800, orders: 128, avgOrderValue: 170 },
-      { date: '2024-01-12', revenue: 26500, orders: 152, avgOrderValue: 174 },
-      { date: '2024-01-13', revenue: 24300, orders: 140, avgOrderValue: 174 },
-      { date: '2024-01-14', revenue: 27800, orders: 158, avgOrderValue: 176 },
-      { date: '2024-01-15', revenue: 29200, orders: 165, avgOrderValue: 177 },
+      { date: "2024-01-01", revenue: 12500, orders: 85, avgOrderValue: 147 },
+      { date: "2024-01-02", revenue: 15200, orders: 92, avgOrderValue: 165 },
+      { date: "2024-01-03", revenue: 18300, orders: 108, avgOrderValue: 169 },
+      { date: "2024-01-04", revenue: 14800, orders: 89, avgOrderValue: 166 },
+      { date: "2024-01-05", revenue: 22100, orders: 125, avgOrderValue: 177 },
+      { date: "2024-01-06", revenue: 25400, orders: 142, avgOrderValue: 179 },
+      { date: "2024-01-07", revenue: 19800, orders: 115, avgOrderValue: 172 },
+      { date: "2024-01-08", revenue: 16900, orders: 98, avgOrderValue: 173 },
+      { date: "2024-01-09", revenue: 20500, orders: 118, avgOrderValue: 174 },
+      { date: "2024-01-10", revenue: 23200, orders: 135, avgOrderValue: 172 },
+      { date: "2024-01-11", revenue: 21800, orders: 128, avgOrderValue: 170 },
+      { date: "2024-01-12", revenue: 26500, orders: 152, avgOrderValue: 174 },
+      { date: "2024-01-13", revenue: 24300, orders: 140, avgOrderValue: 174 },
+      { date: "2024-01-14", revenue: 27800, orders: 158, avgOrderValue: 176 },
+      { date: "2024-01-15", revenue: 29200, orders: 165, avgOrderValue: 177 },
     ];
   }
 
   private getServiceStats(): ServiceStats[] {
     return [
       {
-        serviceId: '1',
-        serviceName: 'กาแฟลาเต้',
+        serviceId: "1",
+        serviceName: "กาแฟลาเต้",
         totalOrders: 245,
         totalRevenue: 20825,
         avgRating: 4.8,
         popularityRank: 1,
       },
       {
-        serviceId: '2',
-        serviceName: 'กาแฟอเมริกาโน่',
+        serviceId: "2",
+        serviceName: "กาแฟอเมริกาโน่",
         totalOrders: 198,
         totalRevenue: 12870,
         avgRating: 4.6,
         popularityRank: 2,
       },
       {
-        serviceId: '3',
-        serviceName: 'เค้กช็อกโกแลต',
+        serviceId: "3",
+        serviceName: "เค้กช็อกโกแลต",
         totalOrders: 156,
         totalRevenue: 18720,
         avgRating: 4.9,
         popularityRank: 3,
       },
       {
-        serviceId: '4',
-        serviceName: 'แซนด์วิชไก่',
+        serviceId: "4",
+        serviceName: "แซนด์วิชไก่",
         totalOrders: 134,
         totalRevenue: 12730,
         avgRating: 4.5,
         popularityRank: 4,
       },
       {
-        serviceId: '5',
-        serviceName: 'สมูทตี้ผลไม้',
+        serviceId: "5",
+        serviceName: "สมูทตี้ผลไม้",
         totalOrders: 98,
         totalRevenue: 8330,
         avgRating: 4.7,
@@ -220,8 +244,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
   private getEmployeePerformance(): EmployeePerformance[] {
     return [
       {
-        employeeId: '1',
-        employeeName: 'สมชาย ใจดี',
+        employeeId: "1",
+        employeeName: "สมชาย ใจดี",
         totalQueues: 156,
         totalRevenue: 28420,
         avgServiceTime: 8.5,
@@ -229,8 +253,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         efficiency: 92,
       },
       {
-        employeeId: '2',
-        employeeName: 'สมหญิง รักงาน',
+        employeeId: "2",
+        employeeName: "สมหญิง รักงาน",
         totalQueues: 142,
         totalRevenue: 26180,
         avgServiceTime: 9.2,
@@ -238,8 +262,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         efficiency: 89,
       },
       {
-        employeeId: '3',
-        employeeName: 'สมศรี ขยันทำงาน',
+        employeeId: "3",
+        employeeName: "สมศรี ขยันทำงาน",
         totalQueues: 189,
         totalRevenue: 31250,
         avgServiceTime: 7.8,
@@ -247,8 +271,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
         efficiency: 95,
       },
       {
-        employeeId: '4',
-        employeeName: 'สมปอง มีความสุข',
+        employeeId: "4",
+        employeeName: "สมปอง มีความสุข",
         totalQueues: 98,
         totalRevenue: 18940,
         avgServiceTime: 10.1,
@@ -289,8 +313,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
   async generateMetadata(shopId: string) {
     return this.generateShopMetadata(
       shopId,
-      'รายงานและวิเคราะห์',
-      'ดูรายงานยอดขาย สถิติการใช้งาน และวิเคราะห์ประสิทธิภาพของร้าน',
+      "รายงานและวิเคราะห์",
+      "ดูรายงานยอดขาย สถิติการใช้งาน และวิเคราะห์ประสิทธิภาพของร้าน"
     );
   }
 }
@@ -299,11 +323,20 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
 export class AnalyticsPresenterFactory {
   static async create(): Promise<AnalyticsPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
-    const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    return new AnalyticsPresenter(logger, shopService, authService, profileService, subscriptionService);
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    return new AnalyticsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
   }
 }

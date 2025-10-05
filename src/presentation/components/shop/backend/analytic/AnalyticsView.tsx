@@ -551,44 +551,6 @@ export function AnalyticsView({ viewModel }: AnalyticsViewProps) {
           </div>
         )}
       </div>
-      {/* Development Status Overlay */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">🚧</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              กำลังพัฒนาระบบ
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              เปิดใช้งานเร็วๆ นี้
-            </p>
-          </div>
-          <div className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>กำลังปรับปรุงฟีเจอร์การวิเคราะห์ข้อมูล</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-100"></div>
-              <span>เพิ่มประสิทธิภาพการทำงาน</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-200"></div>
-              <span>ปรับปรุงประสบการณ์ผู้ใช้</span>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              ขออภัยในความไม่สะดวก
-              <br />
-              ทีมงานกำลังพัฒนาเพื่อคุณ
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
