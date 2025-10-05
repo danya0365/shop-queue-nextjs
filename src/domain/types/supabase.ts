@@ -1397,6 +1397,36 @@ export type Database = {
           },
         ]
       }
+      queue_analytics_cache: {
+        Row: {
+          analytics_data: Json
+          cache_key: string
+          created_at: string
+          expires_at: string
+          id: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          analytics_data: Json
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          analytics_data?: Json
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       queue_services: {
         Row: {
           created_at: string | null
@@ -3373,6 +3403,266 @@ export type Database = {
         }
         Relationships: []
       }
+      queue_analytics: {
+        Row: {
+          average_service_time: number | null
+          average_wait_time: number | null
+          cancellation_rate: number | null
+          cancelled_queues: number | null
+          completed_queues: number | null
+          completion_rate: number | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          in_progress_queues: number | null
+          no_show_queues: number | null
+          no_show_rate: number | null
+          shop_id: string | null
+          total_queues: number | null
+          updated_at: string | null
+          waiting_queues: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_analytics_this_month: {
+        Row: {
+          average_service_time: number | null
+          average_wait_time: number | null
+          cancellation_rate: number | null
+          cancelled_queues: number | null
+          completed_queues: number | null
+          completion_rate: number | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          in_progress_queues: number | null
+          no_show_queues: number | null
+          no_show_rate: number | null
+          shop_id: string | null
+          total_queues: number | null
+          updated_at: string | null
+          waiting_queues: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_analytics_this_week: {
+        Row: {
+          average_service_time: number | null
+          average_wait_time: number | null
+          cancellation_rate: number | null
+          cancelled_queues: number | null
+          completed_queues: number | null
+          completion_rate: number | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          in_progress_queues: number | null
+          no_show_queues: number | null
+          no_show_rate: number | null
+          shop_id: string | null
+          total_queues: number | null
+          updated_at: string | null
+          waiting_queues: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_analytics_today: {
+        Row: {
+          average_service_time: number | null
+          average_wait_time: number | null
+          cancellation_rate: number | null
+          cancelled_queues: number | null
+          completed_queues: number | null
+          completion_rate: number | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          in_progress_queues: number | null
+          no_show_queues: number | null
+          no_show_rate: number | null
+          shop_id: string | null
+          total_queues: number | null
+          updated_at: string | null
+          waiting_queues: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       queue_comprehensive_stats_by_shop_view: {
         Row: {
           active_queues: number | null
@@ -3436,6 +3726,120 @@ export type Database = {
           weekly_growth_percentage: number | null
         }
         Relationships: []
+      }
+      queue_peak_hours: {
+        Row: {
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          peak_hours: Json | null
+          quiet_hours: Json | null
+          recommended_staffing: Json | null
+          shop_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue_service_analytics: {
+        Row: {
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          least_popular_services: Json | null
+          service_stats: Json | null
+          shop_id: string | null
+          top_services: Json | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "queue_comprehensive_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shop_stats_by_shop_view"
+            referencedColumns: ["shop_id"]
+          },
+          {
+            foreignKeyName: "queues_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       queue_stats_by_shop_view: {
         Row: {
@@ -4297,6 +4701,10 @@ export type Database = {
       cancel_queue_by_id: {
         Args: { p_queue_id: string; p_customer_id: string }
         Returns: boolean
+      }
+      clean_expired_analytics_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_old_activities: {
         Args: { p_days_to_keep?: number }
@@ -5466,6 +5874,14 @@ export type Database = {
           p_employee_id?: string
         }
         Returns: Json
+      }
+      refresh_queue_analytics_for_shop: {
+        Args: { p_shop_id: string }
+        Returns: undefined
+      }
+      refresh_queue_analytics_views: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       register_customer_with_phone: {
         Args: {

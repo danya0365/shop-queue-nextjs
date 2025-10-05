@@ -120,11 +120,11 @@ export class GetQueueAnalyticsUseCase implements IUseCase<GetQueueAnalyticsInput
 
     // Calculate service times
     const serviceTimes = queues
-      .filter(q => q.completedAt && q.calledAt)
+      .filter(q => q.completedAt && q.servedAt)
       .map(q => {
         const completed = new Date(q.completedAt).getTime();
-        const called = new Date(q.calledAt).getTime();
-        return Math.round((completed - called) / (1000 * 60)); // Convert to minutes
+        const served = new Date(q.servedAt).getTime();
+        return Math.round((completed - served) / (1000 * 60)); // Convert to minutes
       })
       .filter(time => time > 0);
 

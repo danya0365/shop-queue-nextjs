@@ -99,10 +99,8 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
       if (!result || result.length === 0) {
         // If no analytics exist, calculate them from raw queue data
         const calculatedAnalytics = await this.calculateQueueAnalytics(shopId, dateFrom, dateTo, filters);
-        
-        // Cache the result
-        await this.cacheQueueAnalytics(shopId, calculatedAnalytics);
-        
+        // Cache the result (ignore if cache table missing)
+        try { await this.cacheQueueAnalytics(shopId, calculatedAnalytics); } catch {}
         return calculatedAnalytics;
       }
 
@@ -115,12 +113,17 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
 
       return analytics;
     } catch (error) {
+      // If the analytics view is missing, fall back to calculation
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_analytics view missing, calculating on the fly', { shopId });
+        const calculatedAnalytics = await this.calculateQueueAnalytics(shopId, dateFrom, dateTo, filters);
+        try { await this.cacheQueueAnalytics(shopId, calculatedAnalytics); } catch (_e) {}
+        return calculatedAnalytics;
+      }
       this.logger.error('Failed to get queue analytics', { shopId, dateFrom, dateTo, error });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to get queue analytics',
@@ -200,16 +203,16 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
       );
 
       if (!result || result.length === 0) {
-        throw new ShopBackendQueueAnalyticsError(
-          ShopBackendQueueAnalyticsErrorType.NOT_FOUND,
-          `No peak hours data found for shop ${shopId}`,
-          'getQueuePeakHours',
-          { shopId, dateFrom, dateTo, filters }
-        );
+        // Fallback: calculate from queues
+        return await this.calculateQueuePeakHours(shopId, dateFrom, dateTo, filters);
       }
 
       return SupabaseShopBackendQueueAnalyticsMapper.toQueuePeakHoursEntity(result);
     } catch (error) {
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_peak_hours view missing, calculating on the fly', { shopId });
+        return await this.calculateQueuePeakHours(shopId, dateFrom, dateTo, filters);
+      }
       this.logger.error('Failed to get queue peak hours', {
         error,
         shopId,
@@ -217,11 +220,9 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
         dateTo,
         filters
       });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-      
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to get queue peak hours',
@@ -268,16 +269,16 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
       );
 
       if (!result || result.length === 0) {
-        throw new ShopBackendQueueAnalyticsError(
-          ShopBackendQueueAnalyticsErrorType.NOT_FOUND,
-          `No service analytics data found for shop ${shopId}`,
-          'getQueueServiceAnalytics',
-          { shopId, dateFrom, dateTo, filters }
-        );
+        // Fallback: calculate from queues
+        return await this.calculateQueueServiceAnalytics(shopId, dateFrom, dateTo, filters);
       }
 
       return SupabaseShopBackendQueueAnalyticsMapper.toQueueServiceAnalyticsEntity(result);
     } catch (error) {
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_service_analytics view missing, calculating on the fly', { shopId });
+        return await this.calculateQueueServiceAnalytics(shopId, dateFrom, dateTo, filters);
+      }
       this.logger.error('Failed to get queue service analytics', {
         error,
         shopId,
@@ -285,11 +286,9 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
         dateTo,
         filters
       });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-      
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to get queue service analytics',
@@ -476,12 +475,15 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
 
       await this.dataSource.insert('queue_analytics_cache', cacheData);
     } catch (error) {
+      // Gracefully ignore when cache table is not present
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_analytics_cache table missing, skipping cache write', { shopId });
+        return;
+      }
       this.logger.error('Failed to cache queue analytics', { shopId, error });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to cache queue analytics',
@@ -540,12 +542,15 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
       const cacheData = result[0];
       return cacheData.analytics_data as unknown as QueueAnalyticsEntity;
     } catch (error) {
+      // Gracefully ignore when cache table is not present
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_analytics_cache table missing, returning null cache', { shopId });
+        return null;
+      }
       this.logger.error('Failed to get cached queue analytics', { shopId, error });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to get cached queue analytics',
@@ -565,12 +570,15 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
 
       await this.dataSource.delete('queue_analytics_cache', `queue_analytics_${shopId}`);
     } catch (error) {
+      // Gracefully ignore when cache table is not present
+      if (this.isTableMissing(error)) {
+        this.logger.warn('queue_analytics_cache table missing, skipping cache invalidation', { shopId });
+        return;
+      }
       this.logger.error('Failed to invalidate analytics cache', { shopId, error });
-      
       if (error instanceof ShopBackendQueueAnalyticsError) {
         throw error;
       }
-
       throw new ShopBackendQueueAnalyticsError(
         ShopBackendQueueAnalyticsErrorType.OPERATION_FAILED,
         'Failed to invalidate analytics cache',
@@ -579,6 +587,15 @@ export class SupabaseShopBackendQueueAnalyticsRepository extends StandardReposit
         error
       );
     }
+  }
+
+  /**
+   * Detect if error is due to missing relation/table (e.g., Postgres 42P01)
+   */
+  private isTableMissing(error: unknown): boolean {
+    const err = error as { code?: string; cause?: { code?: string } } | undefined;
+    const code = err?.code || err?.cause?.code;
+    return code === '42P01';
   }
 
   /**

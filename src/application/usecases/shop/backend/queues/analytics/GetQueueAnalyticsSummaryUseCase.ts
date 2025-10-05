@@ -211,11 +211,11 @@ export class GetQueueAnalyticsSummaryUseCase implements IUseCase<string, QueueAn
       : 0;
 
     const serviceTimes = queues
-      .filter(q => q.completedAt && q.calledAt)
+      .filter(q => q.completedAt && q.servedAt)
       .map(q => {
         const completed = new Date(q.completedAt).getTime();
-        const called = new Date(q.calledAt).getTime();
-        return Math.round((completed - called) / (1000 * 60));
+        const served = new Date(q.servedAt).getTime();
+        return Math.round((completed - served) / (1000 * 60));
       })
       .filter(time => time > 0);
 
@@ -346,11 +346,11 @@ export class GetQueueAnalyticsSummaryUseCase implements IUseCase<string, QueueAn
         : 0;
 
       const serviceTimes = serviceQueues
-        .filter(q => q.completedAt && q.calledAt)
+        .filter(q => q.completedAt && q.servedAt)
         .map(q => {
           const completed = new Date(q.completedAt).getTime();
-          const called = new Date(q.calledAt).getTime();
-          return Math.round((completed - called) / (1000 * 60));
+          const served = new Date(q.servedAt).getTime();
+          return Math.round((completed - served) / (1000 * 60));
         })
         .filter(time => time > 0);
 

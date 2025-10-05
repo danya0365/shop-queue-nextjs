@@ -107,11 +107,11 @@ export class GetQueueServiceAnalyticsUseCase implements IUseCase<GetQueueService
 
       // Calculate average service time for this service
       const serviceTimes = serviceQueues
-        .filter(q => q.completedAt && q.calledAt)
+        .filter(q => q.completedAt && q.servedAt)
         .map(q => {
           const completed = new Date(q.completedAt).getTime();
-          const called = new Date(q.calledAt).getTime();
-          return Math.round((completed - called) / (1000 * 60)); // Convert to minutes
+          const served = new Date(q.servedAt).getTime();
+          return Math.round((completed - served) / (1000 * 60)); // Convert to minutes
         })
         .filter(time => time > 0);
 

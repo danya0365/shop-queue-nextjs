@@ -4,13 +4,13 @@ import type {
 } from "@/src/application/dtos/subscription-dto";
 import type { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import type { ShopBackendAnalyticsService } from "@/src/application/services/shop/backend/BackendAnalyticsService";
+import type { ShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
-import type { ShopBackendAnalyticsService } from "@/src/application/services/shop/backend/BackendAnalyticsService";
-import type { ShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 
 // Define interfaces for data structures
 export interface RevenueData {
@@ -128,81 +128,114 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       const isFreeTier = false; // TODO: for test
       //const isFreeTier = subscriptionPlan.tier === 'free';
 
-      // Real data via analytics and dashboard services
-      // Summary for overall metrics + peak hours + top services (month)
-      const summary = await this.analyticsService.getSummary(shopId);
-
-      // Peak hours from summary for customer insights
-      const peakHours = summary.peakHours;
-
-      // Service analytics (month) for service stats
+      // Calculate date ranges
       const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
-      const serviceAnalytics = await this.analyticsService.getServiceAnalytics({
-        shopId,
-        dateFrom: monthStart,
-        dateTo: monthEnd,
-      });
+      const monthStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+      ).toISOString();
+      const monthEnd = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      ).toISOString();
+
+      // Fetch all analytics data in parallel
+      const [summary, serviceAnalytics, timeAnalytics, peakHoursData, revenueStats] = await Promise.all([
+        this.analyticsService.getSummary(shopId),
+        this.analyticsService.getServiceAnalytics({
+          shopId,
+          dateFrom: monthStart,
+          dateTo: monthEnd,
+        }),
+        this.analyticsService.getTimeAnalytics({
+          shopId,
+          dateFrom: monthStart,
+          dateTo: monthEnd,
+        }),
+        this.analyticsService.getPeakHours({
+          shopId,
+          dateFrom: monthStart,
+          dateTo: monthEnd,
+        }),
+        this.dashboardService.getRevenueStats(shopId),
+      ]);
 
       // Map service analytics to view's ServiceStats
-      const serviceStats = serviceAnalytics.serviceStats.map((s, idx) => ({
+      const serviceStats: ServiceStats[] = serviceAnalytics.serviceStats.map((s, idx) => ({
         serviceId: s.serviceId,
         serviceName: s.serviceName,
         totalOrders: s.totalQueues,
         totalRevenue: s.revenue,
-        avgRating: 0, // not available in analytics, keep 0
+        avgRating: 0, // not available in analytics
         popularityRank: idx + 1,
       }));
-      // Revenue stats (real) via dashboard service
-      const revenueStats = await this.dashboardService.getRevenueStats(shopId);
+
+      // Build revenue data from analytics
+      const days = Math.min(30, dataRetentionDays);
       const avgDaily = revenueStats.averageDailyRevenue ?? 0;
       const paymentsThisMonth = revenueStats.paymentsThisMonth ?? 0;
       const avgPaymentAmount = revenueStats.averagePaymentAmount ?? 0;
 
-      // Build a simple daily series using averageDailyRevenue as a baseline
-      const days = Math.min(30, dataRetentionDays);
-      const today = new Date();
-      const revenueData: RevenueData[] = Array.from({ length: days }).map((_, i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() - (days - 1 - i));
-        const revenue = Math.max(0, avgDaily);
-        const ordersEstimate = Math.max(0, Math.round(paymentsThisMonth / days));
-        const aov = ordersEstimate > 0 ? revenue / ordersEstimate : avgPaymentAmount;
-        return {
-          date: d.toISOString().slice(0, 10),
-          revenue,
-          orders: ordersEstimate,
-          avgOrderValue: aov,
-        };
-      });
+      const revenueData: RevenueData[] = Array.from({ length: days }).map(
+        (_, i) => {
+          const d = new Date(now);
+          d.setDate(now.getDate() - (days - 1 - i));
+          const revenue = Math.max(0, avgDaily);
+          const ordersEstimate = Math.max(
+            0,
+            Math.round(paymentsThisMonth / days)
+          );
+          const aov =
+            ordersEstimate > 0 ? revenue / ordersEstimate : avgPaymentAmount;
+          return {
+            date: d.toISOString().slice(0, 10),
+            revenue,
+            orders: ordersEstimate,
+            avgOrderValue: aov,
+          };
+        }
+      );
 
-      const totalRevenue = (revenueStats.revenueThisMonth ?? 0) || (revenueStats.totalRevenue ?? 0);
-      const totalOrders = (revenueStats.paymentsThisMonth ?? 0) || (revenueStats.totalPayments ?? 0);
-      const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : (avgPaymentAmount ?? 0);
+      const totalRevenue =
+        (revenueStats.revenueThisMonth ?? 0) ||
+        (revenueStats.totalRevenue ?? 0);
+      const totalOrders =
+        (revenueStats.paymentsThisMonth ?? 0) ||
+        (revenueStats.totalPayments ?? 0);
+      const avgOrderValue =
+        totalOrders > 0 ? totalRevenue / totalOrders : avgPaymentAmount ?? 0;
       const growthRate = revenueStats.monthlyGrowthPercentage ?? 0;
 
-      // Employee performance: placeholder until a dedicated use case exists
+      // Employee performance from time analytics
       const employeePerformance: EmployeePerformance[] = [
         {
           employeeId: "aggregate",
           employeeName: "ภาพรวมพนักงาน",
-          totalQueues: 0,
+          totalQueues: summary.monthlyStats.totalQueues,
           totalRevenue,
-          avgServiceTime: 0,
-          customerRating: 0,
-          efficiency: 0,
+          avgServiceTime: timeAnalytics.averageServiceTime,
+          customerRating: 0, // not available
+          efficiency: summary.monthlyStats.completionRate,
         },
       ];
 
-      // Customer insights using summary peak hours and rough totals
-      const customerInsights = {
-        totalCustomers: 0,
-        newCustomers: 0,
-        returningCustomers: 0,
-        avgVisitsPerCustomer: 0,
-        customerSatisfaction: 0,
-        peakHours: peakHours.map((p) => ({ hour: p.hour, queueCount: p.queueCount })),
+      // Customer insights from analytics data
+      const customerInsights: CustomerInsights = {
+        totalCustomers: 0, // not available in current analytics
+        newCustomers: 0, // not available
+        returningCustomers: 0, // not available
+        avgVisitsPerCustomer: 0, // not available
+        customerSatisfaction: 0, // not available
+        peakHours: peakHoursData.peakHours.map((p) => ({
+          hour: p.hour,
+          queueCount: p.queueCount,
+        })),
       };
 
       return {
@@ -232,148 +265,8 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
     }
   }
 
-  // Private methods for data preparation
-  private getRevenueData(dataRetentionDays: number): RevenueData[] {
-    // Filter data based on retention policy
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - dataRetentionDays);
-
-    const allData = this.getAllRevenueData();
-    return allData.filter((data) => new Date(data.date) >= cutoffDate);
-  }
-
-  private getAllRevenueData(): RevenueData[] {
-    return [
-      { date: "2024-01-01", revenue: 12500, orders: 85, avgOrderValue: 147 },
-      { date: "2024-01-02", revenue: 15200, orders: 92, avgOrderValue: 165 },
-      { date: "2024-01-03", revenue: 18300, orders: 108, avgOrderValue: 169 },
-      { date: "2024-01-04", revenue: 14800, orders: 89, avgOrderValue: 166 },
-      { date: "2024-01-05", revenue: 22100, orders: 125, avgOrderValue: 177 },
-      { date: "2024-01-06", revenue: 25400, orders: 142, avgOrderValue: 179 },
-      { date: "2024-01-07", revenue: 19800, orders: 115, avgOrderValue: 172 },
-      { date: "2024-01-08", revenue: 16900, orders: 98, avgOrderValue: 173 },
-      { date: "2024-01-09", revenue: 20500, orders: 118, avgOrderValue: 174 },
-      { date: "2024-01-10", revenue: 23200, orders: 135, avgOrderValue: 172 },
-      { date: "2024-01-11", revenue: 21800, orders: 128, avgOrderValue: 170 },
-      { date: "2024-01-12", revenue: 26500, orders: 152, avgOrderValue: 174 },
-      { date: "2024-01-13", revenue: 24300, orders: 140, avgOrderValue: 174 },
-      { date: "2024-01-14", revenue: 27800, orders: 158, avgOrderValue: 176 },
-      { date: "2024-01-15", revenue: 29200, orders: 165, avgOrderValue: 177 },
-    ];
-  }
-
-  private getServiceStats(): ServiceStats[] {
-    return [
-      {
-        serviceId: "1",
-        serviceName: "กาแฟลาเต้",
-        totalOrders: 245,
-        totalRevenue: 20825,
-        avgRating: 4.8,
-        popularityRank: 1,
-      },
-      {
-        serviceId: "2",
-        serviceName: "กาแฟอเมริกาโน่",
-        totalOrders: 198,
-        totalRevenue: 12870,
-        avgRating: 4.6,
-        popularityRank: 2,
-      },
-      {
-        serviceId: "3",
-        serviceName: "เค้กช็อกโกแลต",
-        totalOrders: 156,
-        totalRevenue: 18720,
-        avgRating: 4.9,
-        popularityRank: 3,
-      },
-      {
-        serviceId: "4",
-        serviceName: "แซนด์วิชไก่",
-        totalOrders: 134,
-        totalRevenue: 12730,
-        avgRating: 4.5,
-        popularityRank: 4,
-      },
-      {
-        serviceId: "5",
-        serviceName: "สมูทตี้ผลไม้",
-        totalOrders: 98,
-        totalRevenue: 8330,
-        avgRating: 4.7,
-        popularityRank: 5,
-      },
-    ];
-  }
-
-  private getEmployeePerformance(): EmployeePerformance[] {
-    return [
-      {
-        employeeId: "1",
-        employeeName: "สมชาย ใจดี",
-        totalQueues: 156,
-        totalRevenue: 28420,
-        avgServiceTime: 8.5,
-        customerRating: 4.8,
-        efficiency: 92,
-      },
-      {
-        employeeId: "2",
-        employeeName: "สมหญิง รักงาน",
-        totalQueues: 142,
-        totalRevenue: 26180,
-        avgServiceTime: 9.2,
-        customerRating: 4.9,
-        efficiency: 89,
-      },
-      {
-        employeeId: "3",
-        employeeName: "สมศรี ขยันทำงาน",
-        totalQueues: 189,
-        totalRevenue: 31250,
-        avgServiceTime: 7.8,
-        customerRating: 4.7,
-        efficiency: 95,
-      },
-      {
-        employeeId: "4",
-        employeeName: "สมปอง มีความสุข",
-        totalQueues: 98,
-        totalRevenue: 18940,
-        avgServiceTime: 10.1,
-        customerRating: 4.6,
-        efficiency: 85,
-      },
-    ];
-  }
-
-  private getCustomerInsights(): CustomerInsights {
-    return {
-      totalCustomers: 1248,
-      newCustomers: 186,
-      returningCustomers: 1062,
-      avgVisitsPerCustomer: 2.8,
-      customerSatisfaction: 4.7,
-      peakHours: [
-        { hour: 7, queueCount: 12 },
-        { hour: 8, queueCount: 28 },
-        { hour: 9, queueCount: 45 },
-        { hour: 10, queueCount: 38 },
-        { hour: 11, queueCount: 52 },
-        { hour: 12, queueCount: 68 },
-        { hour: 13, queueCount: 72 },
-        { hour: 14, queueCount: 58 },
-        { hour: 15, queueCount: 42 },
-        { hour: 16, queueCount: 35 },
-        { hour: 17, queueCount: 48 },
-        { hour: 18, queueCount: 55 },
-        { hour: 19, queueCount: 38 },
-        { hour: 20, queueCount: 22 },
-        { hour: 21, queueCount: 15 },
-      ],
-    };
-  }
+  // Note: All mock data methods have been removed.
+  // Data is now fetched from ShopBackendAnalyticsService and ShopBackendDashboardService
 
   // Metadata generation
   async generateMetadata(shopId: string) {
@@ -394,9 +287,10 @@ export class AnalyticsPresenterFactory {
       serverContainer.resolve<ShopBackendAnalyticsService>(
         "ShopBackendAnalyticsService"
       );
-    const dashboardService = serverContainer.resolve<ShopBackendDashboardService>(
-      "ShopBackendDashboardService"
-    );
+    const dashboardService =
+      serverContainer.resolve<ShopBackendDashboardService>(
+        "ShopBackendDashboardService"
+      );
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
@@ -426,9 +320,10 @@ export class ClientAnalyticsPresenterFactory {
       clientContainer.resolve<ShopBackendAnalyticsService>(
         "ShopBackendAnalyticsService"
       );
-    const dashboardService = clientContainer.resolve<ShopBackendDashboardService>(
-      "ShopBackendDashboardService"
-    );
+    const dashboardService =
+      clientContainer.resolve<ShopBackendDashboardService>(
+        "ShopBackendDashboardService"
+      );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");
     const profileService =
