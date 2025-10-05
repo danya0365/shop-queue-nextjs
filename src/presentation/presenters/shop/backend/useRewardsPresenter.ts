@@ -160,12 +160,13 @@ export const useRewardsPresenter = (
         throw new Error("มูลค่าต้องมากกว่า 0");
       }
 
-      if (data.expiryDays && data.expiryDays <= 0) {
+      if (data.expiryDays !== undefined && data.expiryDays <= 0) {
         throw new Error("จำนวนวันหมดอายุต้องมากกว่า 0");
       }
 
-      if (data.usageLimit && data.usageLimit <= 0) {
-        throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
+      // 0 means unlimited usages (allowed). Only reject negative values.
+      if (data.usageLimit !== undefined && data.usageLimit < 0) {
+        throw new Error("จำนวนครั้งที่ใช้ได้ต้องไม่ติดลบ (ใส่ 0 หากไม่จำกัด)");
       }
 
       const { ClientRewardsPresenterFactory } = await import(
@@ -222,8 +223,9 @@ export const useRewardsPresenter = (
         throw new Error("จำนวนวันหมดอายุต้องมากกว่า 0");
       }
 
-      if (data.usageLimit !== undefined && data.usageLimit <= 0) {
-        throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
+      // 0 means unlimited usages (allowed). Only reject negative values.
+      if (data.usageLimit !== undefined && data.usageLimit < 0) {
+        throw new Error("จำนวนครั้งที่ใช้ได้ต้องไม่ติดลบ (ใส่ 0 หากไม่จำกัด)");
       }
 
       const { ClientRewardsPresenterFactory } = await import(

@@ -139,8 +139,9 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
       if (data.value <= 0) throw new Error("มูลค่าต้องมากกว่า 0");
       if (data.expiryDays !== undefined && data.expiryDays <= 0)
         throw new Error("จำนวนวันหมดอายุต้องมากกว่า 0");
-      if (data.usageLimit !== undefined && data.usageLimit <= 0)
-        throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
+      // 0 = unlimited (allowed); only reject negative values
+      if (data.usageLimit !== undefined && data.usageLimit < 0)
+        throw new Error("จำนวนครั้งที่ใช้ได้ต้องไม่ติดลบ (ใส่ 0 หากไม่จำกัด)");
 
       const dto: CreateRewardDTO = {
         shopId,
@@ -188,8 +189,9 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
         throw new Error("มูลค่าต้องมากกว่า 0");
       if (data.expiryDays !== undefined && data.expiryDays <= 0)
         throw new Error("จำนวนวันหมดอายุต้องมากกว่า 0");
-      if (data.usageLimit !== undefined && data.usageLimit <= 0)
-        throw new Error("จำนวนครั้งที่ใช้ได้ต้องมากกว่า 0");
+      // 0 = unlimited (allowed); only reject negative values
+      if (data.usageLimit !== undefined && data.usageLimit < 0)
+        throw new Error("จำนวนครั้งที่ใช้ได้ต้องไม่ติดลบ (ใส่ 0 หากไม่จำกัด)");
 
       const updateData: Omit<UpdateRewardDTO, "id"> = {
         name: data.name,
@@ -296,7 +298,7 @@ export class ClientRewardsPresenterFactory {
     const logger = clientContainer.resolve<Logger>("Logger");
     const rewardsBackendService =
       clientContainer.resolve<ShopBackendRewardsService>(
-        "ShopBackendRewardsServiceBackendRewardsService"
+        "ShopBackendRewardsService"
       );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");

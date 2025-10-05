@@ -141,8 +141,9 @@ export class SupabaseShopBackendRewardRepository
           issued_count: 0,
         };
         const remainingRedemptions =
-          (reward.usage_limit as number | 0) -
-          (usage?.issued_count as number | 0);
+          reward.usage_limit == null
+            ? (null as unknown as number)
+            : ((reward.usage_limit as number) - (usage?.issued_count as number | 0));
         return SupabaseShopBackendRewardMapper.toDomain({
           ...reward,
           shop_name: rewardWithJoinedData.shops?.name,
@@ -435,7 +436,9 @@ export class SupabaseShopBackendRewardRepository
       // Handle joined data from shops table and map
       const rewardWithJoinedData = reward as RewardWithJoins;
       const remainingRedemptions =
-        (reward.usage_limit as number | 0) - (usage?.issued_count as number | 0);
+        reward.usage_limit == null
+          ? (null as unknown as number)
+          : ((reward.usage_limit as number) - (usage?.issued_count as number | 0));
       return SupabaseShopBackendRewardMapper.toDomain({
         ...reward,
         shop_name: rewardWithJoinedData.shops?.name,
@@ -478,9 +481,15 @@ export class SupabaseShopBackendRewardRepository
         points_required: reward.pointsRequired,
         value: reward.value,
         is_available: reward.isAvailable ?? true,
-        expiry_days: reward.expiryDays || null,
-        usage_limit: reward.usageLimit || null,
-        icon: reward.icon || null,
+        expiry_days: reward.expiryDays || undefined,
+        // 0 = unlimited -> store as NULL
+        usage_limit:
+          reward.usageLimit === undefined
+            ? undefined
+            : reward.usageLimit === 0
+            ? null
+            : reward.usageLimit,
+        icon: reward.icon || "🎁",
       };
 
       // Create reward in database
@@ -552,7 +561,9 @@ export class SupabaseShopBackendRewardRepository
       if (reward.expiryDays !== undefined)
         rewardSchema.expiry_days = reward.expiryDays;
       if (reward.usageLimit !== undefined)
-        rewardSchema.usage_limit = reward.usageLimit;
+        // 0 = unlimited -> persist as NULL
+        rewardSchema.usage_limit =
+          reward.usageLimit === 0 ? (null as unknown as number) : reward.usageLimit;
       if (reward.icon !== undefined) rewardSchema.icon = reward.icon;
 
       // Update reward in database
