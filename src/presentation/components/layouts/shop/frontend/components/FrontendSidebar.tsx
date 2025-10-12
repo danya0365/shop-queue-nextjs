@@ -98,8 +98,10 @@ const FrontendSidebar: React.FC<FrontendSidebarProps> = ({
         {/* Shop Info in Sidebar */}
         <div className="p-4 border-t shop-frontend-sidebar-border flex-none">
           <div className="text-sm shop-frontend-sidebar-text-muted">
-            <div className="font-medium mb-1">ร้านกาแฟดีใจ</div>
-            <div className="text-xs opacity-75">เปิดทุกวัน 08:00 - 20:00</div>
+            <div className="font-medium mb-1">{shop.name}</div>
+            <div className="text-xs opacity-75">
+              {shop.formattedOpeningHours}
+            </div>
           </div>
         </div>
       </aside>
