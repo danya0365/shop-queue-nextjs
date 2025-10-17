@@ -33,6 +33,7 @@ interface ImportSettingsData {
   pointsPerBaht?: number;
   pointsExpiryMonths?: number;
   minimumPointsToRedeem?: number;
+  queueNumberPrefix?: string;
   smsEnabled?: boolean;
   emailEnabled?: boolean;
   lineNotifyEnabled?: boolean;
@@ -163,6 +164,11 @@ export class ImportShopSettingsUseCase
         updateData.maxQueuePerService = importData.maxQueuePerService;
       if (importData.queueTimeoutMinutes !== undefined)
         updateData.queueTimeoutMinutes = importData.queueTimeoutMinutes;
+      if (importData.queueNumberPrefix !== undefined && importData.queueNumberPrefix !== null)
+        updateData.queueNumberPrefix = importData.queueNumberPrefix
+          .toString()
+          .trim()
+          .toUpperCase();
       if (importData.allowWalkIn !== undefined)
         updateData.allowWalkIn = importData.allowWalkIn;
       if (importData.allowAdvanceBooking !== undefined)
@@ -285,6 +291,8 @@ export class ImportShopSettingsUseCase
         data.maxQueuePerService = parseInt(value);
       else if (key === "queueTimeoutMinutes")
         data.queueTimeoutMinutes = parseInt(value);
+      else if (key === "queueNumberPrefix")
+        data.queueNumberPrefix = value.toUpperCase();
       else if (key === "allowWalkIn")
         data.allowWalkIn = value.toLowerCase() === "true";
       else if (key === "allowAdvanceBooking")

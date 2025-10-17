@@ -25,6 +25,7 @@ export interface ShopSettingsDTO {
   isAcceptingQueues: boolean;
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
+  queueNumberPrefix: string;
   allowWalkIn: boolean;
   allowAdvanceBooking: boolean;
   maxAdvanceBookingDays: number;
@@ -88,6 +89,7 @@ export interface CreateShopSettingsInputDTO {
   isAcceptingQueues?: boolean;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
+  queueNumberPrefix?: string;
   allowWalkIn?: boolean;
   allowAdvanceBooking?: boolean;
   maxAdvanceBookingDays?: number;
@@ -137,6 +139,7 @@ export interface UpdateShopSettingsInputDTO {
   isAcceptingQueues?: boolean;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
+  queueNumberPrefix?: string;
   allowWalkIn?: boolean;
   allowAdvanceBooking?: boolean;
   maxAdvanceBookingDays?: number;

@@ -23,6 +23,7 @@ export interface ShopSettingsEntity {
   maxQueueSize: number;
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
+  queueNumberPrefix: string;
   allowWalkIn: boolean;
   allowAdvanceBooking: boolean;
   maxAdvanceBookingDays: number;
@@ -105,6 +106,7 @@ export interface CreateShopSettingsEntity {
   maxQueueSize?: number;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
+  queueNumberPrefix?: string;
   allowWalkIn?: boolean;
   allowAdvanceBooking?: boolean;
   maxAdvanceBookingDays?: number;
@@ -172,6 +174,7 @@ export interface UpdateShopSettingsEntity {
   maxQueueSize?: number;
   maxQueuePerService?: number;
   queueTimeoutMinutes?: number;
+  queueNumberPrefix?: string;
   allowWalkIn?: boolean;
   allowAdvanceBooking?: boolean;
   maxAdvanceBookingDays?: number;

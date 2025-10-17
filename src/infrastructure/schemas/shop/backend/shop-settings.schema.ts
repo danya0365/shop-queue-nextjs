@@ -44,6 +44,7 @@ export interface ShopSettingsSchema {
   max_queue_size: number | null;
   minimum_points_to_redeem: number;
   notify_before_minutes: number;
+  queue_number_prefix: string;
   points_enabled: boolean;
   points_expiry_months: number;
   points_per_baht: number;

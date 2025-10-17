@@ -81,6 +81,22 @@ export class ValidateShopSettingsUseCase
     }
 
     // Validate queue settings
+    if (settings.queueNumberPrefix !== undefined) {
+      if (settings.queueNumberPrefix === null) {
+        result.errors.push("Queue number prefix cannot be null");
+      } else {
+        const prefix = settings.queueNumberPrefix.trim();
+        const prefixRegex = /^[A-Z0-9]{1,5}$/;
+        if (prefix.length === 0) {
+          result.errors.push("Queue number prefix cannot be empty");
+        } else if (!prefixRegex.test(prefix)) {
+          result.errors.push(
+            "Queue number prefix must be 1-5 uppercase letters or numbers"
+          );
+        }
+      }
+    }
+
     if (settings.maxQueuePerService !== undefined) {
       if (
         settings.maxQueuePerService < 1 ||

@@ -47,6 +47,7 @@ export class ShopSettingsMapper {
       isAcceptingQueues: entity.isAcceptingQueues,
       maxQueuePerService: entity.maxQueuePerService,
       queueTimeoutMinutes: entity.queueTimeoutMinutes,
+      queueNumberPrefix: entity.queueNumberPrefix,
       allowWalkIn: entity.allowWalkIn,
       allowAdvanceBooking: entity.allowAdvanceBooking,
       maxAdvanceBookingDays: entity.maxAdvanceBookingDays,
@@ -167,6 +168,7 @@ export class ShopSettingsMapper {
       shopId: dto.shopId,
       maxQueuePerService: dto.maxQueuePerService || 10,
       queueTimeoutMinutes: dto.queueTimeoutMinutes || 30,
+      queueNumberPrefix: dto.queueNumberPrefix || "A",
       allowWalkIn: dto.allowWalkIn ?? true,
       allowAdvanceBooking: dto.allowAdvanceBooking ?? true,
       maxAdvanceBookingDays: dto.maxAdvanceBookingDays || 7,
@@ -217,6 +219,8 @@ export class ShopSettingsMapper {
       entity.maxQueuePerService = dto.maxQueuePerService;
     if (dto.queueTimeoutMinutes !== undefined)
       entity.queueTimeoutMinutes = dto.queueTimeoutMinutes;
+    if (dto.queueNumberPrefix !== undefined)
+      entity.queueNumberPrefix = dto.queueNumberPrefix;
     if (dto.allowWalkIn !== undefined) entity.allowWalkIn = dto.allowWalkIn;
     if (dto.allowAdvanceBooking !== undefined)
       entity.allowAdvanceBooking = dto.allowAdvanceBooking;

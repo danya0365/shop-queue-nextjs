@@ -34,6 +34,7 @@ export interface ShopSettings {
   isAcceptingQueues: boolean;
   maxQueuePerService: number;
   queueTimeoutMinutes: number;
+  queueNumberPrefix: string;
   allowWalkIn: boolean;
   allowAdvanceBooking: boolean;
   maxAdvanceBookingDays: number;
@@ -158,6 +159,7 @@ export class ShopBackendShopSettingsService
         isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
+        queueNumberPrefix: result.queueNumberPrefix,
         allowWalkIn: result.allowWalkIn,
         allowAdvanceBooking: result.allowAdvanceBooking,
         maxAdvanceBookingDays: result.maxAdvanceBookingDays,
@@ -234,6 +236,7 @@ export class ShopBackendShopSettingsService
         isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
+        queueNumberPrefix: result.queueNumberPrefix,
         allowWalkIn: result.allowWalkIn,
         allowAdvanceBooking: result.allowAdvanceBooking,
         maxAdvanceBookingDays: result.maxAdvanceBookingDays,
@@ -303,6 +306,7 @@ export class ShopBackendShopSettingsService
         shopId: settings.shopId,
         maxQueuePerService: settings.maxQueuePerService,
         queueTimeoutMinutes: settings.queueTimeoutMinutes,
+        queueNumberPrefix: settings.queueNumberPrefix,
         allowWalkIn: settings.allowWalkIn,
         allowAdvanceBooking: settings.allowAdvanceBooking,
         maxAdvanceBookingDays: settings.maxAdvanceBookingDays,
@@ -329,17 +333,12 @@ export class ShopBackendShopSettingsService
         allowGuestBooking: settings.allowGuestBooking,
         showPricesPublic: settings.showPricesPublic,
         enableReviews: settings.enableReviews,
-        // Security Settings
         enableTwoFactor: settings.enableTwoFactor,
         requireEmailVerification: settings.requireEmailVerification,
         enableSessionTimeout: settings.enableSessionTimeout,
-
-        // Data & Privacy Settings
         enableAnalytics: settings.enableAnalytics,
         enableDataBackup: settings.enableDataBackup,
         allowDataExport: settings.allowDataExport,
-
-        // API & Integration Settings
         apiKey: settings.apiKey,
         enableWebhooks: settings.enableWebhooks,
       };
@@ -360,6 +359,7 @@ export class ShopBackendShopSettingsService
         isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
+        queueNumberPrefix: result.queueNumberPrefix,
         allowWalkIn: result.allowWalkIn,
         allowAdvanceBooking: result.allowAdvanceBooking,
         maxAdvanceBookingDays: result.maxAdvanceBookingDays,
@@ -386,20 +386,14 @@ export class ShopBackendShopSettingsService
         allowGuestBooking: result.allowGuestBooking,
         showPricesPublic: result.showPricesPublic,
         enableReviews: result.enableReviews,
-        // Security Settings
         enableTwoFactor: result.enableTwoFactor,
         requireEmailVerification: result.requireEmailVerification,
         enableSessionTimeout: result.enableSessionTimeout,
-
-        // Data & Privacy Settings
         enableAnalytics: result.enableAnalytics,
         enableDataBackup: result.enableDataBackup,
         allowDataExport: result.allowDataExport,
-
-        // API & Integration Settings
         apiKey: result.apiKey,
         enableWebhooks: result.enableWebhooks,
-
         createdAt: new Date(result.createdAt),
         updatedAt: new Date(result.updatedAt),
       };
@@ -434,6 +428,7 @@ export class ShopBackendShopSettingsService
         shopId: shopId,
         maxQueuePerService: data.maxQueuePerService,
         queueTimeoutMinutes: data.queueTimeoutMinutes,
+        queueNumberPrefix: data.queueNumberPrefix,
         allowWalkIn: data.allowWalkIn,
         allowAdvanceBooking: data.allowAdvanceBooking,
         maxAdvanceBookingDays: data.maxAdvanceBookingDays,
@@ -478,6 +473,7 @@ export class ShopBackendShopSettingsService
         isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,
+        queueNumberPrefix: result.queueNumberPrefix,
         allowWalkIn: result.allowWalkIn,
         allowAdvanceBooking: result.allowAdvanceBooking,
         maxAdvanceBookingDays: result.maxAdvanceBookingDays,
@@ -591,6 +587,7 @@ export class ShopBackendShopSettingsService
         shopAddress: result.shopAddress || undefined,
         shopWebsite: result.shopWebsite || undefined,
         shopLogo: result.shopLogo || undefined,
+        queueNumberPrefix: result.queueNumberPrefix || "",
         isAcceptingQueues: result.isAcceptingQueues,
         maxQueuePerService: result.maxQueuePerService,
         queueTimeoutMinutes: result.queueTimeoutMinutes,

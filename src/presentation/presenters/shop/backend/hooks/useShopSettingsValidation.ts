@@ -69,6 +69,24 @@ export function useShopSettingsValidation(): UseShopSettingsValidationReturn {
         }
         return null;
 
+      case "queueNumberPrefix": {
+        if (typeof value !== "string") {
+          return "รหัสคิวต้องเป็นตัวอักษร";
+        }
+        const trimmed = value.trim();
+        if (!trimmed) {
+          return "กรุณาระบุรหัสนำหน้าคิว";
+        }
+        if (trimmed.length > 5) {
+          return "รหัสนำหน้าคิวต้องไม่เกิน 5 ตัวอักษร";
+        }
+        const regex = /^[A-Z0-9]+$/;
+        if (!regex.test(trimmed)) {
+          return "ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษพิมพ์ใหญ่หรือเลข 0-9";
+        }
+        return null;
+      }
+
       case "pointsPerQueue":
         if (value && (value < 0 || value > 1000)) {
           return "แต้มต่อคิวต้องอยู่ระหว่าง 0-1000";

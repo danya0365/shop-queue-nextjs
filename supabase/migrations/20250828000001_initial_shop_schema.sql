@@ -383,6 +383,7 @@ CREATE TABLE shop_settings (
     max_queue_size INTEGER DEFAULT 50,
     max_queue_per_service INTEGER NOT NULL DEFAULT 10,
     queue_timeout_minutes INTEGER NOT NULL DEFAULT 30,
+    queue_number_prefix TEXT NOT NULL DEFAULT 'A',
     allow_walk_in BOOLEAN NOT NULL DEFAULT true,
     allow_advance_booking BOOLEAN NOT NULL DEFAULT true,
     max_advance_booking_days INTEGER NOT NULL DEFAULT 7,
@@ -590,6 +591,7 @@ BEGIN
     max_queue_size,
     max_queue_per_service,
     queue_timeout_minutes,
+    queue_number_prefix,
     allow_walk_in,
     allow_advance_booking,
     max_advance_booking_days,
@@ -637,6 +639,7 @@ BEGIN
     50, -- max_queue_size
     10, -- max_queue_per_service
     30, -- queue_timeout_minutes
+    'A', -- queue_number_prefix
     true, -- allow_walk_in
     true, -- allow_advance_booking
     7, -- max_advance_booking_days
@@ -1427,6 +1430,8 @@ DECLARE
   v_profile_id UUID;
   v_queue_id UUID;
   v_queue_number TEXT;
+  v_queue_prefix TEXT := 'A';
+  v_queue_sequence INTEGER;
   v_service_item JSONB;
   v_service_id UUID;
   v_service_quantity INTEGER;
@@ -1485,14 +1490,33 @@ BEGIN
     END IF;
   END IF;
 
+  -- Get queue number prefix from shop settings
+  SELECT COALESCE(queue_number_prefix, 'A')
+  INTO v_queue_prefix
+  FROM public.shop_settings
+  WHERE shop_id = p_shop_id
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  v_queue_prefix := UPPER(REGEXP_REPLACE(v_queue_prefix, '[^A-Z0-9]', '', 'g'));
+
+  IF v_queue_prefix IS NULL OR LENGTH(v_queue_prefix) = 0 THEN
+    v_queue_prefix := 'A';
+  END IF;
+
+  IF LENGTH(v_queue_prefix) > 5 THEN
+    v_queue_prefix := SUBSTRING(v_queue_prefix FROM 1 FOR 5);
+  END IF;
+
   -- Generate queue number
   SELECT COALESCE(MAX(CAST(SUBSTRING(queue_number FROM '[0-9]+') AS INTEGER)), 0) + 1
-  INTO v_queue_number
+  INTO v_queue_sequence
   FROM public.queues
   WHERE shop_id = p_shop_id 
-    AND DATE(created_at) = CURRENT_DATE;
-  
-  v_queue_number := LPAD(v_queue_number::TEXT, 3, '0');
+    AND DATE(created_at) = CURRENT_DATE
+    AND queue_number ILIKE v_queue_prefix || '%';
+
+  v_queue_number := v_queue_prefix || LPAD(v_queue_sequence::TEXT, 3, '0');
 
   -- Calculate total estimated duration from services
   IF p_services IS NOT NULL AND jsonb_array_length(p_services) > 0 THEN

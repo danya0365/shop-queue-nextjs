@@ -82,6 +82,7 @@ export class ResetShopSettingsUseCase
         originalValues.queueSettings = {
           maxQueuePerService: existingSettings.maxQueuePerService,
           queueTimeoutMinutes: existingSettings.queueTimeoutMinutes,
+          queueNumberPrefix: existingSettings.queueNumberPrefix,
           allowWalkIn: existingSettings.allowWalkIn,
           allowAdvanceBooking: existingSettings.allowAdvanceBooking,
           maxAdvanceBookingDays: existingSettings.maxAdvanceBookingDays,
@@ -220,6 +221,7 @@ export class ResetShopSettingsUseCase
     return {
       maxQueuePerService: 50,
       queueTimeoutMinutes: 30,
+      queueNumberPrefix: "A",
       allowWalkIn: true,
       allowAdvanceBooking: true,
       maxAdvanceBookingDays: 30,
