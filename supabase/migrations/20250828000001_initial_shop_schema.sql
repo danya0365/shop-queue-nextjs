@@ -645,7 +645,7 @@ BEGIN
     7, -- max_advance_booking_days
     24, -- booking_window_hours
     30, -- cancellation_deadline
-    false, -- points_enabled
+    true, -- points_enabled
     1, -- points_per_baht
     12, -- points_expiry_months
     100, -- minimum_points_to_redeem

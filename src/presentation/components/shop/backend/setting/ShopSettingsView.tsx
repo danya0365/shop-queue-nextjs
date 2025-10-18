@@ -232,7 +232,9 @@ export function ShopSettingsView({
             type="checkbox"
             id="isAcceptingQueues"
             checked={currentSettings.isAcceptingQueues || false}
-            onChange={(e) => handleInputChange("isAcceptingQueues", e.target.checked)}
+            onChange={(e) =>
+              handleInputChange("isAcceptingQueues", e.target.checked)
+            }
             disabled={!isEditing}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
           />
@@ -407,39 +409,44 @@ export function ShopSettingsView({
   );
 
   const renderPointsSettings = () => (
-    <div className="flex gap-6 relative min-h-[200px]">
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="text-center py-8 z-10">
-          <div className="text-4xl mb-4">🚧</div>
-          <p className="text-gray-600 dark:text-gray-400">
-            หมวดหมู่นี้กำลังพัฒนา
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            ระบบแต้ม
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            แต้มสะสมและอัตราแลกเปลี่ยนสำหรับลูกค้า
           </p>
         </div>
-      </div>
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="pointsEnabled"
-          checked={currentSettings.pointsEnabled || false}
-          onChange={(e) => handleInputChange("pointsEnabled", e.target.checked)}
-          disabled={!isEditing}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
-        />
-        <label
-          htmlFor="pointsEnabled"
-          className="ml-2 block text-sm text-gray-900 dark:text-white"
-        >
-          เปิดใช้งานระบบแต้มสะสม
+        <label className="inline-flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="pointsEnabled"
+            checked={currentSettings.pointsEnabled || false}
+            onChange={(e) =>
+              handleInputChange("pointsEnabled", e.target.checked)
+            }
+            disabled={!isEditing}
+            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
+          />
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            เปิดใช้งานระบบแต้มสะสม
+          </span>
         </label>
       </div>
 
-      {currentSettings.pointsEnabled && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              แต้มต่อ 1 บาท
-            </label>
+      {currentSettings.pointsEnabled ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                แต้มต่อ 1 บาท
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                กำหนดจำนวนแต้มที่ลูกค้าได้รับต่อยอดใช้จ่าย 1 บาท
+              </p>
+            </div>
             <input
               type="number"
               value={currentSettings.pointsPerBaht || 0}
@@ -453,13 +460,19 @@ export function ShopSettingsView({
               min="0"
               max="100"
               step="0.1"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/80 px-3 py-2 text-gray-900 dark:text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-800"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              แต้มหมดอายุ (เดือน)
-            </label>
+
+          <div className="space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                แต้มหมดอายุ (เดือน)
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                ระบุจำนวนเดือนที่แต้มจะหมดอายุหลังจากได้รับ
+              </p>
+            </div>
             <input
               type="number"
               value={currentSettings.pointsExpiryMonths || 1}
@@ -472,13 +485,19 @@ export function ShopSettingsView({
               disabled={!isEditing}
               min="1"
               max="60"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/80 px-3 py-2 text-gray-900 dark:text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-800"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              แต้มขั้นต่ำที่ใช้ได้
-            </label>
+
+          <div className="space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                แต้มขั้นต่ำที่ใช้ได้
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                ลูกค้าต้องมีแต้มขั้นต่ำเท่าใดก่อนนำไปแลกใช้
+              </p>
+            </div>
             <input
               type="number"
               value={currentSettings.minimumPointsToRedeem || 0}
@@ -490,9 +509,13 @@ export function ShopSettingsView({
               }
               disabled={!isEditing}
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/80 px-3 py-2 text-gray-900 dark:text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-800"
             />
           </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
+          ระบบแต้มสะสมถูกปิดใช้งานอยู่ เปิดการใช้งานด้านบนเพื่อเริ่มกำหนดค่าแต้มสะสมสำหรับลูกค้า
         </div>
       )}
     </div>
@@ -500,15 +523,6 @@ export function ShopSettingsView({
 
   const renderPaymentSettings = () => (
     <div className="flex gap-6 relative">
-      <div className="absolute inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="text-center py-8 z-10">
-          <div className="text-4xl mb-4">🚧</div>
-          <p className="text-gray-600 dark:text-gray-400">
-            หมวดหมู่นี้กำลังพัฒนา
-          </p>
-        </div>
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">

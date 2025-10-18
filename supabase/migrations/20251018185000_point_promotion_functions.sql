@@ -25,7 +25,8 @@ DECLARE
     v_total_points INTEGER := 0;
     v_promotion RECORD;
     v_promotion_details JSONB := '[]'::jsonb;
-    v_points_per_baht INTEGER;
+    v_points_per_baht INTEGER := 1;
+    v_points_enabled BOOLEAN := false;
     v_conditions JSONB;
     v_eligibility JSONB;
     v_points_config JSONB;
@@ -78,12 +79,30 @@ BEGIN
     AND status = 'completed'
     AND created_at >= NOW() - INTERVAL '30 days';
     
-    -- ดึง points_per_baht จาก shop_settings
-    SELECT COALESCE(points_per_baht, 1)
-    INTO v_points_per_baht
+    -- ดึงค่าการตั้งค่าระบบแต้มจาก shop_settings
+    SELECT 
+        COALESCE(points_per_baht, 1),
+        COALESCE(points_enabled, false)
+    INTO 
+        v_points_per_baht,
+        v_points_enabled
     FROM shop_settings
     WHERE shop_id = v_shop_id
     LIMIT 1;
+
+    -- หากระบบแต้มถูกปิดใช้งาน ให้คืนค่า 0 โดยไม่คำนวณต่อ
+    IF NOT v_points_enabled THEN
+        RETURN QUERY SELECT 
+            0,
+            jsonb_build_object(
+                'base_points', 0,
+                'total_points', 0,
+                'payment_amount', p_payment_amount,
+                'points_per_baht', v_points_per_baht,
+                'promotions_applied', '[]'::jsonb
+            );
+        RETURN;
+    END IF;
     
     -- คำนวณคะแนนพื้นฐาน (ถ้ามี payment_amount)
     IF p_payment_amount IS NOT NULL AND p_payment_amount > 0 THEN
@@ -256,7 +275,7 @@ BEGIN
             
             -- บันทึกรายละเอียดโปรโมชั่นที่ใช้
             IF v_promotion_points > 0 THEN
-                v_promotion_details := v_promotion_details || jsonb_build_object(
+                v_promotion_details := v_promotion_details || jsonb_build_array(jsonb_build_object(
                     'promotion_id', v_promotion.id,
                     'promotion_name', v_promotion.name,
                     'promotion_type', v_promotion.type,
@@ -266,7 +285,7 @@ BEGIN
                         WHEN v_promotion.type = 'bonus_points' THEN 'fixed'
                         WHEN v_promotion.type = 'points_cashback' THEN 'percentage'
                     END
-                );
+                ));
                 
                 -- บันทึก usage log
                 INSERT INTO promotion_usage_logs (
