@@ -7,6 +7,7 @@ import type {
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { ShopBackendRewardsService } from "@/src/application/services/shop/backend/BackendRewardsService";
+import type { ShopBackendShopSettingsService } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getServerContainer } from "@/src/di/server-container";
@@ -26,6 +27,7 @@ export interface RewardsViewModel {
   averageRedemptionValue: number;
   popularRewardType: Reward["type"] | null;
   typeStats: RewardTypeStatsDTO;
+  pointsEnabled: boolean;
 }
 
 // Main Presenter class
@@ -36,7 +38,8 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly rewardsBackendService: ShopBackendRewardsService
+    private readonly rewardsBackendService: ShopBackendRewardsService,
+    private readonly shopBackendShopSettingsService: ShopBackendShopSettingsService
   ) {
     super(
       logger,
@@ -62,10 +65,12 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
       }
 
       // Get rewards data (scoped by shop)
-      const rewardsData = await this.rewardsBackendService.getRewardsData(
-        shopId
-      );
+      const [rewardsData, shopSettings] = await Promise.all([
+        this.rewardsBackendService.getRewardsData(shopId),
+        this.shopBackendShopSettingsService.getShopSettings(shopId),
+      ]);
       const rewards = rewardsData.rewards;
+      const pointsEnabled = shopSettings?.pointsEnabled ?? false;
 
       // Calculate statistics (prefer stats from service if available)
       const totalRewards = rewardsData.stats.totalRewards;
@@ -92,6 +97,7 @@ export class RewardsPresenter extends BaseShopBackendPresenter {
         averageRedemptionValue,
         popularRewardType,
         typeStats: rewardsData.typeStats,
+        pointsEnabled,
       };
     } catch (error) {
       this.logger.error("RewardsPresenter: Error getting view model", error);
@@ -272,6 +278,10 @@ export class RewardsPresenterFactory {
       serverContainer.resolve<ShopBackendRewardsService>(
         "ShopBackendRewardsService"
       );
+    const shopBackendShopSettingsService =
+      serverContainer.resolve<ShopBackendShopSettingsService>(
+        "ShopBackendShopSettingsService"
+      );
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -285,7 +295,8 @@ export class RewardsPresenterFactory {
       authService,
       profileService,
       subscriptionService,
-      rewardsBackendService
+      rewardsBackendService,
+      shopBackendShopSettingsService
     );
   }
 }
@@ -300,6 +311,10 @@ export class ClientRewardsPresenterFactory {
       clientContainer.resolve<ShopBackendRewardsService>(
         "ShopBackendRewardsService"
       );
+    const shopBackendShopSettingsService =
+      clientContainer.resolve<ShopBackendShopSettingsService>(
+        "ShopBackendShopSettingsService"
+      );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -313,7 +328,8 @@ export class ClientRewardsPresenterFactory {
       authService,
       profileService,
       subscriptionService,
-      rewardsBackendService
+      rewardsBackendService,
+      shopBackendShopSettingsService
     );
   }
 }

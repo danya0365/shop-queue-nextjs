@@ -4,6 +4,7 @@ import { RewardsViewModel } from "@/src/presentation/presenters/shop/backend/Rew
 import {
   useRewardsPresenter,
 } from "@/src/presentation/presenters/shop/backend/useRewardsPresenter";
+import Link from "next/link";
 import React from "react";
 import { CreateRewardModal } from "./modals/CreateRewardModal";
 import { EditRewardModal } from "./modals/EditRewardModal";
@@ -18,6 +19,7 @@ interface RewardsViewProps {
 export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
   const [state, actions] = useRewardsPresenter(shopId, initialViewModel);
   const viewModel = state.viewModel;
+  const pointsEnabled = viewModel?.pointsEnabled ?? false;
 
   const selectedReward = viewModel?.rewards.find(
     (r) => r.id === state.selectedRewardId
@@ -149,6 +151,31 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
 
   return (
     <div className="flex flex-col gap-8 relative">
+      {!pointsEnabled && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
+                  ระบบแต้มถูกปิดใช้งานอยู่
+                </h2>
+                <p className="text-sm text-amber-700/80 dark:text-amber-200/80">
+                  เปิดใช้งานระบบแต้มจากหน้าการตั้งค่า เพื่อให้ลูกค้าสามารถสะสมแต้มและแลกรางวัลได้
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/shop/${shopId}/backend/settings?tab=points`}
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              ไปที่การตั้งค่าระบบแต้ม
+              <span aria-hidden>↗</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -161,8 +188,16 @@ export function RewardsView({ shopId, initialViewModel }: RewardsViewProps) {
         </div>
         <div className="flex space-x-4">
           <button
-            onClick={actions.openCreateModal}
-            className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+            onClick={() => {
+              if (!pointsEnabled) return;
+              actions.openCreateModal();
+            }}
+            disabled={!pointsEnabled}
+            className={`px-4 py-2 rounded-lg transition-colors text-white ${
+              pointsEnabled
+                ? "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed opacity-70"
+            }`}
           >
             🎁 สร้างรางวัล
           </button>
