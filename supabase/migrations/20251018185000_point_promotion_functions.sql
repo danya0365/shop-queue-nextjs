@@ -326,7 +326,16 @@ BEGIN
                 NEW.customer_id,
                 v_points_result.total_points,
                 'คะแนนจากการใช้บริการ #' || NEW.queue_number,
-                NEW.id
+                NEW.id,
+                jsonb_build_object(
+                    'queue_id', NEW.id,
+                    'queue_number', NEW.queue_number,
+                    'shop_id', NEW.shop_id,
+                    'payment_amount', v_payment_amount,
+                    'promotions_applied', v_points_result.applied_promotions,
+                    'awarded_points', v_points_result.total_points,
+                    'awarded_at', NOW()
+                )
             );
             
             -- อัพเดท metadata ใน queue (optional)
