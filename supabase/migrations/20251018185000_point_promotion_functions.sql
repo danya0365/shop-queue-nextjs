@@ -18,6 +18,7 @@ DECLARE
     v_customer_id UUID;
     v_customer_tier membership_tier;
     v_customer_profile_id UUID;
+    v_customer_birthdate DATE;
     v_service_ids UUID[];
     v_queue_created_at TIMESTAMPTZ;
     v_base_points INTEGER := 0;
@@ -45,7 +46,7 @@ BEGIN
         v_queue_created_at,
         v_customer_tier,
         v_customer_profile_id,
-        v_is_birthday_month
+        v_customer_birthdate
     FROM queues q
     LEFT JOIN customers c ON c.id = q.customer_id
     LEFT JOIN customer_points cp ON cp.customer_id = q.customer_id
@@ -56,7 +57,11 @@ BEGIN
     END IF;
     
     -- เช็คว่าเป็นเดือนเกิดหรือไม่
-    v_is_birthday_month := EXTRACT(MONTH FROM v_is_birthday_month) = EXTRACT(MONTH FROM NOW());
+    IF v_customer_birthdate IS NOT NULL THEN
+        v_is_birthday_month := EXTRACT(MONTH FROM v_customer_birthdate) = EXTRACT(MONTH FROM NOW());
+    ELSE
+        v_is_birthday_month := false;
+    END IF;
     
     -- ดึง service_ids ที่ใช้
     SELECT ARRAY_AGG(service_id)
