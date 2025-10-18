@@ -1671,6 +1671,7 @@ DECLARE
   v_status queue_status;
   v_completed_at TIMESTAMP WITH TIME ZONE;
   v_feedback_deadline TIMESTAMP WITH TIME ZONE;
+  v_customer_profile_id UUID;
   feedback_window_days INTEGER := 30; -- Configurable feedback window
 BEGIN
   -- Validate rating
@@ -1690,6 +1691,15 @@ BEGIN
   -- Validate customer ownership
   IF v_customer_id != p_customer_id THEN
     RAISE EXCEPTION 'unauthorized: customer does not own this queue';
+  END IF;
+
+  -- Validate authenticated ownership if customer linked to a profile
+  SELECT profile_id INTO v_customer_profile_id
+  FROM public.customers
+  WHERE id = v_customer_id;
+
+  IF v_customer_profile_id IS NOT NULL AND v_customer_profile_id != public.get_active_profile_id() THEN
+    RAISE EXCEPTION 'unauthorized: profile mismatch for this customer';
   END IF;
 
   -- Only allow feedback for completed queues
