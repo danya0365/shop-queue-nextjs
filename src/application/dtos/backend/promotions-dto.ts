@@ -1,8 +1,5 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
-
-export interface PromotionCondition {
-  [key: string]: string;
-}
+import { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 
 export interface PromotionDTO {
   id: string;
@@ -18,7 +15,7 @@ export interface PromotionDTO {
   endAt: string;
   usageLimit: number | null;
   status: "active" | "inactive" | "expired" | "scheduled";
-  conditions: PromotionCondition[] | null;
+  conditions: PromotionConditions | null;
   createdBy: string; // joined from profile
   createdByName: string | null; // joined from profile
   createdAt: string;
@@ -37,7 +34,7 @@ export interface CreatePromotionParams {
   endAt: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
   createdBy: string;
 }
 
@@ -54,7 +51,7 @@ export interface UpdatePromotionParams {
   endAt?: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
 }
 
 /**

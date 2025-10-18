@@ -1,29 +1,46 @@
-import { CreatePromotionEntity, PaginatedPromotionsEntity, PromotionEntity, PromotionStatsEntity } from "../../../domain/entities/backend/backend-promotion.entity";
-import { DatabaseDataSource, QueryOptions, SortDirection } from "../../../domain/interfaces/datasources/database-datasource";
+import {
+  CreatePromotionEntity,
+  PaginatedPromotionsEntity,
+  PromotionEntity,
+  PromotionStatsEntity,
+} from "../../../domain/entities/backend/backend-promotion.entity";
+import {
+  DatabaseDataSource,
+  QueryOptions,
+  SortDirection,
+} from "../../../domain/interfaces/datasources/database-datasource";
 import { Logger } from "../../../domain/interfaces/logger";
 import { PaginationParams } from "../../../domain/interfaces/pagination-types";
-import { BackendPromotionError, BackendPromotionErrorType, BackendPromotionRepository } from "../../../domain/repositories/backend/backend-promotion-repository";
+import {
+  BackendPromotionError,
+  BackendPromotionErrorType,
+  BackendPromotionRepository,
+} from "../../../domain/repositories/backend/backend-promotion-repository";
 import { SupabaseBackendPromotionMapper } from "../../mappers/backend/supabase-backend-promotion.mapper";
-import { PromotionSchema, PromotionStatsSchema } from "../../schemas/backend/promotion.schema";
+import {
+  PromotionSchema,
+  PromotionStatsSchema,
+} from "../../schemas/backend/promotion.schema";
 import { BackendRepository } from "../base/backend-repository";
 
 // Extended types for joined data
 type PromotionWithJoins = PromotionSchema & {
-  shops?: { name?: string },
-  profiles?: { name?: string }
+  shops?: { name?: string };
+  profiles?: { name?: string };
 };
 type PromotionSchemaRecord = Record<string, unknown> & PromotionSchema;
-type PromotionStatsSchemaRecord = Record<string, unknown> & PromotionStatsSchema;
+type PromotionStatsSchemaRecord = Record<string, unknown> &
+  PromotionStatsSchema;
 
 /**
  * Supabase implementation of the promotion repository
  * Following Clean Architecture principles for repository implementation
  */
-export class SupabaseBackendPromotionRepository extends BackendRepository implements BackendPromotionRepository {
-  constructor(
-    dataSource: DatabaseDataSource,
-    logger: Logger
-  ) {
+export class SupabaseBackendPromotionRepository
+  extends BackendRepository
+  implements BackendPromotionRepository
+{
+  constructor(dataSource: DatabaseDataSource, logger: Logger) {
     super(dataSource, logger, "BackendPromotion");
   }
 
@@ -32,64 +49,74 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
    * @param params Pagination parameters
    * @returns Paginated promotions data
    */
-  async getPaginatedPromotions(params: PaginationParams): Promise<PaginatedPromotionsEntity> {
+  async getPaginatedPromotions(
+    params: PaginationParams
+  ): Promise<PaginatedPromotionsEntity> {
     try {
       const { page, limit } = params;
       const offset = (page - 1) * limit;
 
       // Use getAdvanced with proper QueryOptions format
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         joins: [
-          { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } },
-          { table: 'profiles', on: { fromField: 'created_by', toField: 'id' } }
+          { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+          { table: "profiles", on: { fromField: "created_by", toField: "id" } },
         ],
-        sort: [{ field: 'created_at', direction: SortDirection.DESC }],
+        sort: [{ field: "created_at", direction: SortDirection.DESC }],
         pagination: {
           limit,
-          offset
-        }
+          offset,
+        },
       };
 
       // Use extended type that satisfies Record<string, unknown> constraint
-      const promotions = await this.dataSource.getAdvanced<PromotionSchemaRecord>(
-        'promotions',
+      const promotions =
+        await this.dataSource.getAdvanced<PromotionSchemaRecord>(
+          "promotions",
+          queryOptions
+        );
+
+      // Count total items
+      const totalItems = await this.dataSource.count(
+        "promotions",
         queryOptions
       );
 
-      // Count total items
-      const totalItems = await this.dataSource.count('promotions', queryOptions);
-
       // Map database results to domain entities
-      const mappedPromotions = promotions.map(promotion => {
+      const mappedPromotions = promotions.map((promotion) => {
         // Handle joined data from shops and profiles tables
         const promotionWithJoinedData = promotion as PromotionWithJoins;
 
         const promotionWithJoins = {
           ...promotion,
           shop_name: promotionWithJoinedData.shops?.name,
-          created_by_name: promotionWithJoinedData.profiles?.name
+          created_by_name: promotionWithJoinedData.profiles?.name,
         };
         return SupabaseBackendPromotionMapper.toDomain(promotionWithJoins);
       });
 
       // Create pagination metadata
-      const pagination = SupabaseBackendPromotionMapper.createPaginationMeta(page, limit, totalItems);
+      const pagination = SupabaseBackendPromotionMapper.createPaginationMeta(
+        page,
+        limit,
+        totalItems
+      );
 
       return {
         data: mappedPromotions,
-        pagination
+        pagination,
       };
     } catch (error) {
       if (error instanceof BackendPromotionError) {
         throw error;
       }
 
-      this.logger.error('Error in getPaginatedPromotions', { error });
+      this.logger.error("Error in getPaginatedPromotions", { error });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching promotions',
-        'getPaginatedPromotions',
+        "An unexpected error occurred while fetching promotions",
+        "getPaginatedPromotions",
         {},
         error
       );
@@ -104,17 +131,18 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
     try {
       // Use getAdvanced to fetch statistics data
       const queryOptions: QueryOptions = {
-        select: ['*'],
+        select: ["*"],
         // No joins needed for stats view
         // No pagination needed, we want all stats
       };
 
       // Assuming a view exists for promotion statistics
       // Use extended type that satisfies Record<string, unknown> constraint
-      const statsData = await this.dataSource.getAdvanced<PromotionStatsSchemaRecord>(
-        'promotion_stats_summary_view',
-        queryOptions
-      );
+      const statsData =
+        await this.dataSource.getAdvanced<PromotionStatsSchemaRecord>(
+          "promotion_stats_summary_view",
+          queryOptions
+        );
 
       if (!statsData || statsData.length === 0) {
         // If no stats are found, return default values
@@ -127,7 +155,7 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
           totalUsage: 0,
           totalDiscountGiven: 0,
           averageDiscountAmount: 0,
-          mostUsedPromotionType: 'percentage'
+          mostUsedPromotionType: "percentage",
         };
       }
 
@@ -139,11 +167,11 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw error;
       }
 
-      this.logger.error('Error in getPromotionStats', { error });
+      this.logger.error("Error in getPromotionStats", { error });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching promotion statistics',
-        'getPromotionStats',
+        "An unexpected error occurred while fetching promotion statistics",
+        "getPromotionStats",
         {},
         error
       );
@@ -160,14 +188,17 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
       // Use getById which is designed for fetching by ID
       // Use extended type that satisfies Record<string, unknown> constraint
       const promotion = await this.dataSource.getById<PromotionSchemaRecord>(
-        'promotions',
+        "promotions",
         id,
         {
-          select: ['*'],
+          select: ["*"],
           joins: [
-            { table: 'shops', on: { fromField: 'shop_id', toField: 'id' } },
-            { table: 'profiles', on: { fromField: 'created_by', toField: 'id' } }
-          ]
+            { table: "shops", on: { fromField: "shop_id", toField: "id" } },
+            {
+              table: "profiles",
+              on: { fromField: "created_by", toField: "id" },
+            },
+          ],
         }
       );
 
@@ -181,7 +212,7 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
       const promotionWithJoins = {
         ...promotion,
         shop_name: promotionWithJoinedData.shops?.name,
-        created_by_name: promotionWithJoinedData.profiles?.name
+        created_by_name: promotionWithJoinedData.profiles?.name,
       };
 
       // Map database result to domain entity
@@ -191,11 +222,11 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw error;
       }
 
-      this.logger.error('Error in getPromotionById', { error, id });
+      this.logger.error("Error in getPromotionById", { error, id });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while fetching promotion',
-        'getPromotionById',
+        "An unexpected error occurred while fetching promotion",
+        "getPromotionById",
         { id },
         error
       );
@@ -207,7 +238,9 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
    * @param promotion Promotion data to create
    * @returns Created promotion entity
    */
-  async createPromotion(promotion: Omit<CreatePromotionEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<PromotionEntity> {
+  async createPromotion(
+    promotion: Omit<CreatePromotionEntity, "id" | "createdAt" | "updatedAt">
+  ): Promise<PromotionEntity> {
     try {
       // Convert domain entity to database schema
       const promotionSchema = {
@@ -221,38 +254,41 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         start_at: promotion.startAt,
         end_at: promotion.endAt,
         usage_limit: promotion.usageLimit || null,
-        status: promotion.status || 'active',
+        status: promotion.status || "active",
         conditions: promotion.conditions || null,
-        created_by: promotion.createdBy
+        created_by: promotion.createdBy,
       };
 
       // Create promotion in database
-      const createdPromotion = await this.dataSource.insert<PromotionSchemaRecord>(
-        'promotions',
-        promotionSchema
-      );
+      const createdPromotion =
+        await this.dataSource.insert<PromotionSchemaRecord>(
+          "promotions",
+          promotionSchema
+        );
 
       if (!createdPromotion) {
         throw new BackendPromotionError(
           BackendPromotionErrorType.OPERATION_FAILED,
-          'Failed to create promotion',
-          'createPromotion',
+          "Failed to create promotion",
+          "createPromotion",
           { promotion }
         );
       }
 
       // Get the created promotion with joined data
-      return this.getPromotionById(createdPromotion.id) as Promise<PromotionEntity>;
+      return this.getPromotionById(
+        createdPromotion.id
+      ) as Promise<PromotionEntity>;
     } catch (error) {
       if (error instanceof BackendPromotionError) {
         throw error;
       }
 
-      this.logger.error('Error in createPromotion', { error, promotion });
+      this.logger.error("Error in createPromotion", { error, promotion });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while creating promotion',
-        'createPromotion',
+        "An unexpected error occurred while creating promotion",
+        "createPromotion",
         { promotion },
         error
       );
@@ -265,7 +301,10 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
    * @param promotion Promotion data to update
    * @returns Updated promotion entity
    */
-  async updatePromotion(id: string, promotion: Partial<Omit<PromotionEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PromotionEntity> {
+  async updatePromotion(
+    id: string,
+    promotion: Partial<Omit<PromotionEntity, "id" | "createdAt" | "updatedAt">>
+  ): Promise<PromotionEntity> {
     try {
       // Check if promotion exists
       const existingPromotion = await this.getPromotionById(id);
@@ -273,38 +312,52 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw new BackendPromotionError(
           BackendPromotionErrorType.NOT_FOUND,
           `Promotion with ID ${id} not found`,
-          'updatePromotion',
+          "updatePromotion",
           { id, promotion }
         );
       }
 
       // Convert domain entity to database schema
       const promotionSchema: Partial<PromotionSchema> = {};
-      if (promotion.shopId !== undefined) promotionSchema.shop_id = promotion.shopId;
+      if (promotion.shopId !== undefined)
+        promotionSchema.shop_id = promotion.shopId;
       if (promotion.name !== undefined) promotionSchema.name = promotion.name;
-      if (promotion.description !== undefined) promotionSchema.description = promotion.description;
+      if (promotion.description !== undefined)
+        promotionSchema.description = promotion.description;
       if (promotion.type !== undefined) promotionSchema.type = promotion.type;
-      if (promotion.value !== undefined) promotionSchema.value = promotion.value;
-      if (promotion.minPurchaseAmount !== undefined) promotionSchema.min_purchase_amount = promotion.minPurchaseAmount;
-      if (promotion.maxDiscountAmount !== undefined) promotionSchema.max_discount_amount = promotion.maxDiscountAmount;
-      if (promotion.startAt !== undefined) promotionSchema.start_at = promotion.startAt;
-      if (promotion.endAt !== undefined) promotionSchema.end_at = promotion.endAt;
-      if (promotion.usageLimit !== undefined) promotionSchema.usage_limit = promotion.usageLimit;
-      if (promotion.status !== undefined) promotionSchema.status = promotion.status;
-      if (promotion.conditions !== undefined) promotionSchema.conditions = promotion.conditions as Record<string, unknown>[] | null;
+      if (promotion.value !== undefined)
+        promotionSchema.value = promotion.value;
+      if (promotion.minPurchaseAmount !== undefined)
+        promotionSchema.min_purchase_amount = promotion.minPurchaseAmount;
+      if (promotion.maxDiscountAmount !== undefined)
+        promotionSchema.max_discount_amount = promotion.maxDiscountAmount;
+      if (promotion.startAt !== undefined)
+        promotionSchema.start_at = promotion.startAt;
+      if (promotion.endAt !== undefined)
+        promotionSchema.end_at = promotion.endAt;
+      if (promotion.usageLimit !== undefined)
+        promotionSchema.usage_limit = promotion.usageLimit;
+      if (promotion.status !== undefined)
+        promotionSchema.status = promotion.status;
+      if (promotion.conditions !== undefined)
+        promotionSchema.conditions = promotion.conditions as Record<
+          string,
+          string
+        >;
 
       // Update promotion in database
-      const updatedPromotion = await this.dataSource.update<PromotionSchemaRecord>(
-        'promotions',
-        id,
-        promotionSchema
-      );
+      const updatedPromotion =
+        await this.dataSource.update<PromotionSchemaRecord>(
+          "promotions",
+          id,
+          promotionSchema
+        );
 
       if (!updatedPromotion) {
         throw new BackendPromotionError(
           BackendPromotionErrorType.OPERATION_FAILED,
-          'Failed to update promotion',
-          'updatePromotion',
+          "Failed to update promotion",
+          "updatePromotion",
           { id, promotion }
         );
       }
@@ -316,11 +369,11 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw error;
       }
 
-      this.logger.error('Error in updatePromotion', { error, id, promotion });
+      this.logger.error("Error in updatePromotion", { error, id, promotion });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while updating promotion',
-        'updatePromotion',
+        "An unexpected error occurred while updating promotion",
+        "updatePromotion",
         { id, promotion },
         error
       );
@@ -340,16 +393,13 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw new BackendPromotionError(
           BackendPromotionErrorType.NOT_FOUND,
           `Promotion with ID ${id} not found`,
-          'deletePromotion',
+          "deletePromotion",
           { id }
         );
       }
 
       // Delete promotion from database
-      await this.dataSource.delete(
-        'promotions',
-        id
-      );
+      await this.dataSource.delete("promotions", id);
 
       // Since we've already checked if the promotion exists, we can return true
       return true;
@@ -358,11 +408,11 @@ export class SupabaseBackendPromotionRepository extends BackendRepository implem
         throw error;
       }
 
-      this.logger.error('Error in deletePromotion', { error, id });
+      this.logger.error("Error in deletePromotion", { error, id });
       throw new BackendPromotionError(
         BackendPromotionErrorType.UNKNOWN,
-        'An unexpected error occurred while deleting promotion',
-        'deletePromotion',
+        "An unexpected error occurred while deleting promotion",
+        "deletePromotion",
         { id },
         error
       );

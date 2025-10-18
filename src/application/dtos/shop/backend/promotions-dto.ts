@@ -1,8 +1,5 @@
 import { PaginatedResult } from "@/src/domain/interfaces/pagination-types";
-
-export interface PromotionCondition {
-  [key: string]: string;
-}
+import { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 
 export interface PromotionDTO {
   id: string;
@@ -10,7 +7,14 @@ export interface PromotionDTO {
   shopName: string; // joined from shop
   name: string;
   description: string | null;
-  type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
+  type:
+    | "percentage"
+    | "fixed_amount"
+    | "buy_x_get_y"
+    | "free_item"
+    | "points_multiplier"
+    | "bonus_points"
+    | "points_cashback";
   value: number;
   minPurchaseAmount: number | null;
   maxDiscountAmount: number | null;
@@ -18,7 +22,7 @@ export interface PromotionDTO {
   endAt: string;
   usageLimit: number | null;
   status: "active" | "inactive" | "expired" | "scheduled";
-  conditions: PromotionCondition[] | null;
+  conditions: PromotionConditions | null;
   createdBy: string; // joined from profile
   createdByName: string | null; // joined from profile
   createdAt: string;
@@ -37,7 +41,7 @@ export interface CreatePromotionParams {
   endAt: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
   createdBy: string;
 }
 
@@ -54,7 +58,7 @@ export interface UpdatePromotionParams {
   endAt?: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
 }
 
 /**
@@ -65,6 +69,9 @@ export enum PromotionType {
   FIXED_AMOUNT = "fixed_amount",
   BUY_X_GET_Y = "buy_x_get_y",
   FREE_ITEM = "free_item",
+  POINTS_MULTIPLIER = "points_multiplier",
+  BONUS_POINTS = "bonus_points",
+  POINTS_CASHBACK = "points_cashback",
 }
 
 /**
@@ -106,6 +113,21 @@ export interface PromotionTypeStatsDTO {
     totalUsage: number;
   };
   free_item: {
+    count: number;
+    percentage: number;
+    totalUsage: number;
+  };
+  points_multiplier: {
+    count: number;
+    percentage: number;
+    totalUsage: number;
+  };
+  bonus_points: {
+    count: number;
+    percentage: number;
+    totalUsage: number;
+  };
+  points_cashback: {
     count: number;
     percentage: number;
     totalUsage: number;

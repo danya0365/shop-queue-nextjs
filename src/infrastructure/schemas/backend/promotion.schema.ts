@@ -20,7 +20,7 @@ export interface PromotionSchema {
   end_at: string;
   usage_limit: number | null;
   status: string;
-  conditions: Record<string, unknown>[] | null;
+  conditions: Record<string, unknown>;
   created_by: string;
   created_by_name?: string; // Joined data
   created_at: string;

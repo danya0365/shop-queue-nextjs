@@ -4,27 +4,28 @@ import {
   PromotionStatus,
   PromotionType,
 } from "@/src/application/dtos/shop/backend/promotions-dto";
+import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 import type { PromotionData } from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { PromotionConditionsForm } from "./PromotionConditionsForm";
 
 export interface EditPromotionForm {
   id: string;
-  name?: string;
+  name: string;
   description?: string;
-  type?: PromotionType;
-  value?: number;
+  type: PromotionType;
+  value: number;
   minPurchaseAmount?: number;
   maxDiscountAmount?: number;
   usageLimit?: number;
-  startAt?: string;
-  endAt?: string;
+  startAt: string;
+  endAt: string;
   status?: PromotionStatus;
-  conditions?: Record<string, string>[];
+  conditions?: PromotionConditions | null;
 }
 
 interface EditPromotionModalProps {
   promotion: PromotionData;
-  shopId: string;
   onClose: () => void;
   onSubmit: (data: EditPromotionForm) => Promise<boolean>;
   loading?: boolean;
@@ -32,11 +33,22 @@ interface EditPromotionModalProps {
 
 export function EditPromotionModal({
   promotion,
-  shopId,
   onClose,
   onSubmit,
   loading,
 }: EditPromotionModalProps) {
+  const conditionSupportedTypes = useMemo(
+    () => [
+      PromotionType.POINTS_MULTIPLIER,
+      PromotionType.BONUS_POINTS,
+      PromotionType.POINTS_CASHBACK,
+    ],
+    []
+  );
+
+  const isConditionSupported = (type: PromotionType) =>
+    conditionSupportedTypes.includes(type);
+
   const [form, setForm] = useState<EditPromotionForm>({
     id: promotion.id,
     name: promotion.name,
@@ -49,7 +61,9 @@ export function EditPromotionModal({
     startAt: promotion.startAt,
     endAt: promotion.endAt,
     status: (promotion.status ?? "inactive") as PromotionStatus,
-    conditions: promotion.conditions ?? [],
+    conditions: isConditionSupported(promotion.type as PromotionType)
+      ? promotion.conditions ?? null
+      : null,
   });
 
   useEffect(() => {
@@ -65,6 +79,16 @@ export function EditPromotionModal({
     >
   ) => {
     const { name, value } = e.target;
+    if (name === "type") {
+      const nextType = value as PromotionType;
+      setForm((prev) => ({
+        ...prev,
+        type: nextType,
+        conditions: isConditionSupported(nextType) ? prev.conditions ?? null : null,
+      }));
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
       [name]:
@@ -81,9 +105,28 @@ export function EditPromotionModal({
     await onSubmit(form);
   };
 
+  const handleConditionsChange = (conditions: PromotionConditions | null) => {
+    setForm((prev) => ({
+      ...prev,
+      conditions,
+    }));
+  };
+
+  const promotionTypeOptions: { value: PromotionType; label: string }[] = [
+    { value: PromotionType.PERCENTAGE, label: "ส่วนลด %" },
+    { value: PromotionType.FIXED_AMOUNT, label: "ส่วนลดคงที่" },
+    { value: PromotionType.BUY_X_GET_Y, label: "ซื้อ X แถม Y" },
+    { value: PromotionType.FREE_ITEM, label: "ของแถม" },
+    { value: PromotionType.POINTS_MULTIPLIER, label: "ตัวคูณคะแนน" },
+    { value: PromotionType.BONUS_POINTS, label: "โบนัสคะแนน" },
+    { value: PromotionType.POINTS_CASHBACK, label: "คืนคะแนน/เงิน" },
+  ];
+
+  const showConditionsSection = isConditionSupported(form.type);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           แก้ไขโปรโมชั่น
         </h3>
@@ -100,35 +143,66 @@ export function EditPromotionModal({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                ประเภท
-              </label>
-              <select
-                name="type"
-                value={form.type}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value={PromotionType.PERCENTAGE}>ส่วนลด %</option>
-                <option value={PromotionType.FIXED_AMOUNT}>ส่วนลดคงที่</option>
-                <option value={PromotionType.BUY_X_GET_Y}>ซื้อ X แถม Y</option>
-                <option value={PromotionType.FREE_ITEM}>ของแถม</option>
-              </select>
+            <div className="space-y-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                  ประเภทโปรโมชั่น
+                </label>
+                <select
+                  name="type"
+                  value={form.type}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  {promotionTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 px-3 py-2 text-xs text-blue-700 dark:text-blue-200">
+                {form.type === PromotionType.POINTS_MULTIPLIER && (
+                  <p>
+                    ตัวคูณคะแนน: ตั้งค่าตัวคูณคะแนน (เช่น 2 = คะแนนเพิ่ม 2 เท่าเมื่อเข้าเงื่อนไข)
+                  </p>
+                )}
+                {form.type === PromotionType.BONUS_POINTS && (
+                  <p>
+                    โบนัสคะแนน: ใส่จำนวนคะแนนพิเศษที่ต้องการมอบให้ลูกค้าเมื่อเข้าเงื่อนไข
+                  </p>
+                )}
+                {form.type === PromotionType.POINTS_CASHBACK && (
+                  <p>
+                    คืนคะแนน/เงิน: ใส่จำนวนคะแนนหรือเปอร์เซ็นต์ที่ต้องการคืนให้ลูกค้าเมื่อเข้าเงื่อนไข
+                  </p>
+                )}
+                {![
+                  PromotionType.POINTS_MULTIPLIER,
+                  PromotionType.BONUS_POINTS,
+                  PromotionType.POINTS_CASHBACK,
+                ].includes(form.type) && (
+                  <p>
+                    เลือกประเภทโปรโมชั่นเพื่อกำหนดรูปแบบส่วนลดหรือสิทธิพิเศษที่ต้องการให้ลูกค้า
+                  </p>
+                )}
+              </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                ค่าส่วนลด
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                ค่าโปรโมชั่น
               </label>
               <input
                 type="number"
                 name="value"
                 value={form.value ?? 0}
                 onChange={handleChange}
-                min={0}
-                step={1}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                min={0}
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                ค่านี้หมายถึงจำนวนเงินหรือเปอร์เซ็นต์ส่วนลด สำหรับโปรโมชั่นคะแนนให้กรอกค่าตัวคูณหรือจำนวนโบนัสที่ต้องการ
+              </p>
             </div>
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
@@ -225,6 +299,23 @@ export function EditPromotionModal({
               rows={3}
             />
           </div>
+
+          {showConditionsSection && (
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-4">
+              <div>
+                <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                  เงื่อนไขการให้คะแนน
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  ปรับเงื่อนไขการสะสมคะแนนและคุณสมบัติของลูกค้าที่ได้รับโปรโมชั่นนี้ให้ครบถ้วน เพื่อให้ระบบมอบคะแนนได้ถูกต้อง
+                </p>
+              </div>
+              <PromotionConditionsForm
+                value={form.conditions ?? null}
+                onChange={handleConditionsChange}
+              />
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <button

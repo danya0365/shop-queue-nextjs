@@ -423,8 +423,8 @@ export class SupabaseShopBackendPromotionRepository
         promotionSchema.status = promotion.status;
       if (promotion.conditions !== undefined)
         promotionSchema.conditions = promotion.conditions as
-          | Record<string, unknown>[]
-          | null;
+          | Record<string, unknown>
+          | undefined;
 
       // Update promotion in database
       const updatedPromotion =

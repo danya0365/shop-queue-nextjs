@@ -11,6 +11,7 @@ import {
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
+import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
@@ -31,7 +32,7 @@ export interface PromotionData {
   usageLimit: number | null;
   startAt: string;
   endAt: string;
-  conditions: Record<string, string>[] | null;
+  conditions: PromotionConditions | null;
   shopId: string;
   createdBy: string;
   createdAt: string | null;
@@ -89,6 +90,12 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
         return PromotionType.BUY_X_GET_Y;
       case "free_item":
         return PromotionType.FREE_ITEM;
+      case "points_multiplier":
+        return PromotionType.POINTS_MULTIPLIER;
+      case "bonus_points":
+        return PromotionType.BONUS_POINTS;
+      case "points_cashback":
+        return PromotionType.POINTS_CASHBACK;
       default:
         return PromotionType.PERCENTAGE;
     }
@@ -145,7 +152,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
       startAt: string;
       endAt: string;
       status?: PromotionDTO["status"];
-      conditions?: Record<string, any>[];
+      conditions?: PromotionConditions | null;
     }
   ): Promise<PromotionData> {
     try {
@@ -183,7 +190,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
         status: data.status
           ? this.toPromotionStatusEnum(data.status)
           : undefined,
-        conditions: data.conditions,
+        conditions: data.conditions ?? null,
         createdBy: profile.id,
       };
       const dto = await this.promotionsService.createPromotion(params);
@@ -208,7 +215,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
       usageLimit?: number;
       startAt?: string;
       endAt?: string;
-      conditions?: Record<string, any>[];
+      conditions?: PromotionConditions | null;
     }
   ): Promise<PromotionData> {
     try {
@@ -248,7 +255,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
         status: data.status
           ? this.toPromotionStatusEnum(data.status)
           : undefined,
-        conditions: data.conditions,
+        conditions: data.conditions ?? null,
       };
       const dto = await this.promotionsService.updatePromotion(
         promotionId,
@@ -363,7 +370,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
       usageLimit: promotion.usageLimit,
       startAt: promotion.startAt,
       endAt: promotion.endAt,
-      conditions: promotion.conditions,
+      conditions: promotion.conditions ?? null,
       shopId: promotion.shopId,
       createdBy: promotion.createdBy,
       createdAt: promotion.createdAt,

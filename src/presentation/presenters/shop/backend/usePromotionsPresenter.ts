@@ -6,6 +6,7 @@ import {
   type PromotionsViewModel,
   ClientPromotionsPresenterFactory,
 } from "./PromotionsPresenter";
+import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 
 const presenter = ClientPromotionsPresenterFactory.create();
 
@@ -13,14 +14,21 @@ const presenter = ClientPromotionsPresenterFactory.create();
 export interface CreatePromotionData {
   name: string;
   description?: string;
-  type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
+  type:
+    | "percentage"
+    | "fixed_amount"
+    | "buy_x_get_y"
+    | "free_item"
+    | "points_multiplier"
+    | "bonus_points"
+    | "points_cashback";
   value: number;
   minPurchaseAmount?: number;
   maxDiscountAmount?: number;
   usageLimit?: number;
   startAt: string;
   endAt: string;
-  conditions?: Record<string, string>[];
+  conditions?: PromotionConditions | null;
   status?: "active" | "inactive" | "expired" | "scheduled";
 }
 
@@ -28,7 +36,14 @@ export interface UpdatePromotionData {
   id: string;
   name?: string;
   description?: string;
-  type?: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
+  type?:
+    | "percentage"
+    | "fixed_amount"
+    | "buy_x_get_y"
+    | "free_item"
+    | "points_multiplier"
+    | "bonus_points"
+    | "points_cashback";
   status?: "active" | "inactive" | "expired" | "scheduled";
   value?: number;
   minPurchaseAmount?: number;
@@ -36,7 +51,7 @@ export interface UpdatePromotionData {
   usageLimit?: number;
   startAt?: string;
   endAt?: string;
-  conditions?: Record<string, string>[];
+  conditions?: PromotionConditions | null;
 }
 
 // Define state interface

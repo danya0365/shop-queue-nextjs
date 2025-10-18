@@ -1,8 +1,5 @@
+import { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 import { PaginatedResult } from "../../interfaces/pagination-types";
-
-export interface PromotionCondition {
-  [key: string]: string;
-}
 
 /**
  * Promotion entity representing a promotion in the system
@@ -22,7 +19,7 @@ export interface PromotionEntity {
   endAt: string;
   usageLimit: number | null;
   status: PromotionStatus;
-  conditions: PromotionCondition[] | null;
+  conditions: PromotionConditions | null;
   createdBy: string;
   createdByName?: string; // Joined data
   createdAt: string;
@@ -41,7 +38,7 @@ export interface CreatePromotionEntity {
   endAt: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
   createdBy: string;
 }
 
@@ -57,7 +54,7 @@ export interface UpdatePromotionEntity {
   endAt?: string;
   usageLimit?: number;
   status?: PromotionStatus;
-  conditions?: PromotionCondition[];
+  conditions?: PromotionConditions | null;
 }
 
 /**

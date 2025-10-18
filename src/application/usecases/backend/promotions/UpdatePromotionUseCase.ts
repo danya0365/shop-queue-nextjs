@@ -1,5 +1,6 @@
 import { UpdatePromotionParams, PromotionDTO } from "@/src/application/dtos/backend/promotions-dto";
 import { PromotionMapper } from "@/src/application/mappers/backend/promotion-mapper";
+import { PromotionConditionsSchema } from "@/src/application/validators/promotion-conditions.schema";
 import { BackendPromotionRepository, BackendPromotionError, BackendPromotionErrorType } from "@/src/domain/repositories/backend/backend-promotion-repository";
 import { UpdatePromotionEntity, PromotionStatus, PromotionType } from "@/src/domain/entities/backend/backend-promotion.entity";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
@@ -19,7 +20,7 @@ const UpdatePromotionSchema = z.object({
   endAt: z.string().min(1).optional(),
   usageLimit: z.number().min(1).optional(),
   status: z.nativeEnum(PromotionStatus).optional(),
-  conditions: z.array(z.record(z.string())).optional()
+  conditions: PromotionConditionsSchema
 });
 
 /**
@@ -66,7 +67,7 @@ export class UpdatePromotionUseCase implements IUseCase<UpdatePromotionParams, P
       if (validatedInput.endAt !== undefined) promotionEntity.endAt = validatedInput.endAt;
       if (validatedInput.usageLimit !== undefined) promotionEntity.usageLimit = validatedInput.usageLimit;
       if (validatedInput.status !== undefined) promotionEntity.status = validatedInput.status;
-      if (validatedInput.conditions !== undefined) promotionEntity.conditions = validatedInput.conditions;
+      if (validatedInput.conditions !== undefined) promotionEntity.conditions = validatedInput.conditions ?? null;
 
       const updatedPromotion = await this.promotionRepository.updatePromotion(validatedInput.id, promotionEntity);
       return PromotionMapper.toDTO(updatedPromotion);

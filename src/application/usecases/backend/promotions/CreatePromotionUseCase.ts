@@ -1,5 +1,6 @@
 import { CreatePromotionParams, PromotionDTO } from "@/src/application/dtos/backend/promotions-dto";
 import { PromotionMapper } from "@/src/application/mappers/backend/promotion-mapper";
+import { PromotionConditionsSchema } from "@/src/application/validators/promotion-conditions.schema";
 import { BackendPromotionRepository, BackendPromotionError, BackendPromotionErrorType } from "@/src/domain/repositories/backend/backend-promotion-repository";
 import { CreatePromotionEntity, PromotionStatus, PromotionType } from "@/src/domain/entities/backend/backend-promotion.entity";
 import { IUseCase } from "@/src/application/interfaces/use-case.interface";
@@ -18,7 +19,7 @@ const CreatePromotionSchema = z.object({
   endAt: z.string().min(1, "End date is required"),
   usageLimit: z.number().min(1).optional(),
   status: z.nativeEnum(PromotionStatus).optional(),
-  conditions: z.array(z.record(z.string())).optional(),
+  conditions: PromotionConditionsSchema,
   createdBy: z.string().min(1, "Created by is required")
 });
 
@@ -54,7 +55,7 @@ export class CreatePromotionUseCase implements IUseCase<CreatePromotionParams, P
         endAt: validatedInput.endAt,
         usageLimit: validatedInput.usageLimit,
         status: validatedInput.status || PromotionStatus.ACTIVE,
-        conditions: validatedInput.conditions,
+        conditions: validatedInput.conditions ?? null,
         createdBy: validatedInput.createdBy
       };
 

@@ -1,10 +1,16 @@
 "use client";
 
-import { PromotionsViewModel } from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
+import { useState } from "react";
+import {
+  type PromotionData,
+  PromotionsViewModel,
+} from "@/src/presentation/presenters/shop/backend/PromotionsPresenter";
 import { usePromotionsPresenter } from "@/src/presentation/presenters/shop/backend/usePromotionsPresenter";
 import { CreatePromotionModal } from "./modals/CreatePromotionModal";
-import { EditPromotionModal } from "./modals/EditPromotionModal";
 import { DeletePromotionConfirmation } from "./modals/DeletePromotionConfirmation";
+import { EditPromotionModal } from "./modals/EditPromotionModal";
+import { PromotionDetailModal } from "./modals/PromotionDetailModal";
+import { PromotionCard } from "./PromotionCard";
 
 interface PromotionsViewProps {
   shopId: string;
@@ -17,83 +23,9 @@ export function PromotionsView({
 }: PromotionsViewProps) {
   const [state, actions] = usePromotionsPresenter(shopId, initialViewModel);
   const viewModel = state.viewModel;
-
-  const getStatusBadge = (status: string | null) => {
-    const statusConfig = {
-      active: {
-        label: "ใช้งาน",
-        class:
-          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      },
-      inactive: {
-        label: "ไม่ใช้งาน",
-        class: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-      },
-      expired: {
-        label: "หมดอายุ",
-        class: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      },
-      scheduled: {
-        label: "กำหนดการ",
-        class: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      },
-    };
-
-    const config =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.inactive;
-    return (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.class}`}
-      >
-        {config.label}
-      </span>
-    );
-  };
-
-  const getPromotionTypeLabel = (type: string) => {
-    const typeLabels = {
-      percentage: "ส่วนลด %",
-      fixed_amount: "ส่วนลดคงที่",
-      buy_x_get_y: "ซื้อ X แถม Y",
-      free_item: "ของแถม",
-    };
-    return typeLabels[type as keyof typeof typeLabels] || type;
-  };
-
-  const getPromotionTypeColor = (type: string) => {
-    const colors = {
-      percentage:
-        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      fixed_amount:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      buy_x_get_y:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      free_item:
-        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    };
-    return (
-      colors[type as keyof typeof colors] ||
-      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-    );
-  };
-
-  const formatValue = (type: string, value: number) => {
-    if (type === "percentage") {
-      return `${value}%`;
-    } else if (type === "fixed_amount") {
-      return `฿${value.toLocaleString()}`;
-    }
-    return value.toString();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("th-TH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const [detailPromotion, setDetailPromotion] = useState<PromotionData | null>(
+    null
+  );
 
   // Show loading only on initial load or when explicitly loading
   if (state.isLoading && !viewModel) {
@@ -339,160 +271,34 @@ export function PromotionsView({
           </div>
         ) : (
           filteredPromotions.map((promotion) => (
-            <div
+            <PromotionCard
               key={promotion.id}
-              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow"
-            >
-              {/* Promotion Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="text-3xl mr-3">🏷️</div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {promotion.name}
-                    </h3>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPromotionTypeColor(
-                        promotion.type
-                      )}`}
-                    >
-                      {getPromotionTypeLabel(promotion.type)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={() => {
-                      actions.setSelectedPromotion(promotion);
-                      actions.openEditModal(promotion);
-                    }}
-                    className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => {
-                      actions.setSelectedPromotion(promotion);
-                      actions.openDeleteModal(promotion);
-                    }}
-                    className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Promotion Description */}
-              {promotion.description && (
-                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
-                  {promotion.description}
-                </p>
-              )}
-
-              {/* Promotion Details */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    ค่าส่วนลด:
-                  </span>
-                  <span className="font-semibold text-blue-600">
-                    {formatValue(promotion.type, promotion.value)}
-                  </span>
-                </div>
-
-                {promotion.minPurchaseAmount && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      ยอดซื้อขั้นต่ำ:
-                    </span>
-                    <span className="font-semibold text-green-600">
-                      ฿{promotion.minPurchaseAmount.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                {promotion.maxDiscountAmount && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      ส่วนลดสูงสุด:
-                    </span>
-                    <span className="font-semibold text-orange-600">
-                      ฿{promotion.maxDiscountAmount.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    ระยะเวลา:
-                  </span>
-                  <span className="text-sm text-gray-900 dark:text-white">
-                    {formatDate(promotion.startAt)} -{" "}
-                    {formatDate(promotion.endAt)}
-                  </span>
-                </div>
-
-                {promotion.usageLimit && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      จำกัดการใช้:
-                    </span>
-                    <span className="font-semibold text-purple-600">
-                      {promotion.usageLimit} ครั้ง
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Status Badge */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex justify-between items-center">
-                  {getStatusBadge(promotion.status)}
-                  <button
-                    onClick={() => actions.togglePromotionStatus(promotion.id)}
-                    className={`text-sm font-medium ${
-                      promotion.status === "active"
-                        ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                        : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
-                    }`}
-                  >
-                    {promotion.status === "active" ? "ปิดใช้งาน" : "เปิดใช้งาน"}
-                  </button>
-                </div>
-              </div>
-            </div>
+              promotion={promotion}
+              onEdit={() => {
+                actions.setSelectedPromotion(promotion);
+                actions.openEditModal(promotion);
+              }}
+              onDelete={() => {
+                actions.setSelectedPromotion(promotion);
+                actions.openDeleteModal(promotion);
+              }}
+              onToggleStatus={() => actions.togglePromotionStatus(promotion.id)}
+              onView={() => setDetailPromotion(promotion)}
+            />
           ))
         )}
       </div>
 
+      {detailPromotion && (
+        <PromotionDetailModal
+          promotion={detailPromotion}
+          onClose={() => setDetailPromotion(null)}
+        />
+      )}
+
       {/* Create Promotion Modal */}
       {state.showCreateModal && (
         <CreatePromotionModal
-          shopId={shopId}
           onClose={actions.closeCreateModal}
           onSubmit={actions.createPromotion}
           loading={state.isCreating}
@@ -503,7 +309,6 @@ export function PromotionsView({
       {state.showEditModal && state.selectedPromotion && (
         <EditPromotionModal
           promotion={state.selectedPromotion}
-          shopId={shopId}
           onClose={actions.closeEditModal}
           onSubmit={async (data) =>
             actions.updatePromotion({

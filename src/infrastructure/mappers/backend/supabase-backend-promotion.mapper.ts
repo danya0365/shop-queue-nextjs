@@ -1,6 +1,14 @@
-import { PromotionEntity, PromotionStatsEntity, PromotionStatus, PromotionType } from "../../../domain/entities/backend/backend-promotion.entity";
+import {
+  PromotionEntity,
+  PromotionStatsEntity,
+  PromotionStatus,
+  PromotionType,
+} from "../../../domain/entities/backend/backend-promotion.entity";
 import { PaginationMeta } from "../../../domain/interfaces/pagination-types";
-import { PromotionSchema, PromotionStatsSchema } from "../../schemas/backend/promotion.schema";
+import {
+  PromotionSchema,
+  PromotionStatsSchema,
+} from "../../schemas/backend/promotion.schema";
 
 /**
  * Mapper class for converting between promotion database schema and domain entities
@@ -27,11 +35,11 @@ export class SupabaseBackendPromotionMapper {
       endAt: schema.end_at,
       usageLimit: schema.usage_limit,
       status: schema.status as PromotionStatus,
-      conditions: schema.conditions as Record<string, string>[] | null,
+      conditions: schema.conditions as Record<string, string>,
       createdBy: schema.created_by,
       createdByName: schema.created_by_name,
       createdAt: schema.created_at,
-      updatedAt: schema.updated_at
+      updatedAt: schema.updated_at,
     };
   }
 
@@ -55,11 +63,11 @@ export class SupabaseBackendPromotionMapper {
       end_at: entity.endAt,
       usage_limit: entity.usageLimit,
       status: entity.status,
-      conditions: entity.conditions as Record<string, unknown>[] | null,
+      conditions: entity.conditions as Record<string, unknown>,
       created_by: entity.createdBy,
       created_by_name: entity.createdByName,
       created_at: entity.createdAt,
-      updated_at: entity.updatedAt
+      updated_at: entity.updatedAt,
     };
   }
 
@@ -68,7 +76,9 @@ export class SupabaseBackendPromotionMapper {
    * @param schema Promotion stats database schema
    * @returns Promotion stats domain entity
    */
-  public static statsToEntity(schema: PromotionStatsSchema): PromotionStatsEntity {
+  public static statsToEntity(
+    schema: PromotionStatsSchema
+  ): PromotionStatsEntity {
     return {
       totalPromotions: schema.total_promotions,
       activePromotions: schema.active_promotions,
@@ -78,7 +88,7 @@ export class SupabaseBackendPromotionMapper {
       totalUsage: schema.total_usage,
       totalDiscountGiven: schema.total_discount_given,
       averageDiscountAmount: schema.average_discount_amount,
-      mostUsedPromotionType: schema.most_used_promotion_type
+      mostUsedPromotionType: schema.most_used_promotion_type,
     };
   }
 
@@ -102,7 +112,7 @@ export class SupabaseBackendPromotionMapper {
       totalItems,
       itemsPerPage: limit,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 }
