@@ -28,6 +28,21 @@ interface CreatePromotionModalProps {
   loading?: boolean;
 }
 
+const dateToInputValue = (date: Date) => {
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 16);
+};
+
+interface PromotionTemplateDefinition {
+  id: string;
+  name: string;
+  description: string;
+  highlights: string[];
+  data: Partial<CreatePromotionForm> & {
+    type: PromotionType;
+  };
+}
+
 export function CreatePromotionModal({
   onClose,
   onSubmit,
@@ -45,26 +60,225 @@ export function CreatePromotionModal({
   const isConditionSupported = (type: PromotionType) =>
     conditionSupportedTypes.includes(type);
 
+  const defaultStartAt = useMemo(() => dateToInputValue(new Date()), []);
+  const defaultEndAt = useMemo(
+    () => dateToInputValue(new Date(Date.now() + 86400000)),
+    [],
+  );
+
+  const defaultFormValues = useMemo<CreatePromotionForm>(
+    () => ({
+      name: "",
+      description: "",
+      type: PromotionType.PERCENTAGE,
+      value: 10,
+      minPurchaseAmount: undefined,
+      maxDiscountAmount: undefined,
+      usageLimit: undefined,
+      startAt: defaultStartAt,
+      endAt: defaultEndAt,
+      status: PromotionStatus.ACTIVE,
+      conditions: null,
+    }),
+    [defaultStartAt, defaultEndAt],
+  );
+
   const [form, setForm] = useState<CreatePromotionForm>({
-    name: "",
-    description: "",
-    type: PromotionType.PERCENTAGE,
-    value: 10,
-    minPurchaseAmount: undefined,
-    maxDiscountAmount: undefined,
-    usageLimit: undefined,
-    startAt: new Date().toISOString().slice(0, 16),
-    endAt: new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-    status: PromotionStatus.ACTIVE,
-    conditions: null,
+    ...defaultFormValues,
   });
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+
+  const promotionTemplates = useMemo<PromotionTemplateDefinition[]>(() => {
+    const buildDate = (daysFromNow: number) =>
+      dateToInputValue(new Date(Date.now() + daysFromNow * 86400000));
+
+    return [
+      {
+        id: "weekday-double-points",
+        name: "Happy Hour คะแนนคูณ 2",
+        description: "กระตุ้นยอดช่วงบ่ายวันทำงานด้วยคะแนนพิเศษ",
+        highlights: [
+          "คะแนนเพิ่ม x2 เวลา 14:00-18:00 (จันทร์-ศุกร์)",
+          "จำกัดสูงสุด 1,000 แต้มต่อรายการ",
+        ],
+        data: {
+          name: "Happy Hour คะแนนคูณ 2",
+          description:
+            "รับคะแนนคูณสองในช่วงเวลา 14:00-18:00 ทุกวันจันทร์ถึงศุกร์",
+          type: PromotionType.POINTS_MULTIPLIER,
+          value: 2,
+          minPurchaseAmount: 0,
+          startAt: defaultStartAt,
+          endAt: buildDate(30),
+          status: PromotionStatus.ACTIVE,
+          conditions: {
+            points_config: {
+              award_timing: "on_completion",
+              base_calculation: "purchase_amount",
+              max_points_per_transaction: 1000,
+            },
+            eligibility: {
+              days_of_week: [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+              ],
+              time_range: { start: "14:00", end: "18:00" },
+            },
+          },
+        },
+      },
+      {
+        id: "premium-service-bonus",
+        name: "โบนัสบริการพรีเมียม +150 แต้ม",
+        description: "มอบคะแนนพิเศษสำหรับบริการมูลค่าสูง",
+        highlights: [
+          "โบนัส 150 แต้มเมื่อมียอดซื้อขั้นต่ำ 800 บาท",
+          "จำกัดสำหรับบริการประเภทพรีเมียม",
+        ],
+        data: {
+          name: "โบนัสบริการพรีเมียม",
+          description:
+            "รับโบนัส 150 แต้มเมื่อใช้บริการพรีเมียมและมียอดซื้อขั้นต่ำ 800 บาท",
+          type: PromotionType.BONUS_POINTS,
+          value: 150,
+          minPurchaseAmount: 800,
+          startAt: defaultStartAt,
+          endAt: buildDate(45),
+          status: PromotionStatus.ACTIVE,
+          conditions: {
+            points_config: {
+              award_timing: "on_completion",
+            },
+            eligibility: {
+              min_purchase_amount: 800,
+              min_services: 1,
+            },
+          },
+        },
+      },
+      {
+        id: "vip-cashback",
+        name: "Cashback 10% สำหรับสมาชิก Gold",
+        description: "คืนคะแนนตามยอดใช้จ่ายให้ลูกค้า VIP",
+        highlights: [
+          "คืนคะแนน 10% สำหรับยอดใช้จ่ายตั้งแต่ 1,000 บาท",
+          "เฉพาะสมาชิกระดับ Gold ขึ้นไป",
+        ],
+        data: {
+          name: "Cashback สมาชิก Gold",
+          description:
+            "คืนคะแนน 10% จากยอดใช้จ่ายให้กับสมาชิกระดับ Gold และ Platinum",
+          type: PromotionType.POINTS_CASHBACK,
+          value: 10,
+          minPurchaseAmount: 1000,
+          startAt: defaultStartAt,
+          endAt: buildDate(60),
+          status: PromotionStatus.ACTIVE,
+          conditions: {
+            points_config: {
+              award_timing: "on_completion",
+              max_points_per_transaction: 500,
+            },
+            eligibility: {
+              customer_tiers: ["gold", "platinum"],
+              min_purchase_amount: 1000,
+            },
+          },
+        },
+      },
+      {
+        id: "one-point-per-baht",
+        name: "1 แต้มต่อ 1 บาท",
+        description: "สะสมแต้มจากทุกยอดใช้จ่ายแบบเข้าใจง่าย",
+        highlights: [
+          "คืนคะแนน 100% จากยอดซื้อทุกบริการ",
+          "ไม่มีขั้นต่ำและใช้ได้กับลูกค้าทุกคน",
+        ],
+        data: {
+          name: "สะสมแต้ม 1 ต่อ 1",
+          description:
+            "รับ 1 แต้มต่อยอดใช้จ่าย 1 บาทสำหรับลูกค้าทุกคนแบบไม่จำกัด",
+          type: PromotionType.POINTS_CASHBACK,
+          value: 100,
+          minPurchaseAmount: 0,
+          startAt: defaultStartAt,
+          endAt: buildDate(90),
+          status: PromotionStatus.ACTIVE,
+          conditions: {
+            points_config: {
+              award_timing: "on_completion",
+              base_calculation: "purchase_amount",
+            },
+          },
+        },
+      },
+      {
+        id: "launch-percentage",
+        name: "เปิดร้านใหม่ ลด 15%",
+        description: "ดึงลูกค้าใหม่ด้วยส่วนลดระยะสั้น",
+        highlights: [
+          "ส่วนลด 15% สำหรับทุกบริการ",
+          "ใช้งานได้ 14 วัน พร้อมจำกัด 200 บาทต่อครั้ง",
+        ],
+        data: {
+          name: "โปรโมชั่นเปิดฤดูกาล",
+          description:
+            "ส่วนลด 15% สำหรับทุกบริการในช่วงเปิดร้าน เพื่อดึงดูดลูกค้าใหม่",
+          type: PromotionType.PERCENTAGE,
+          value: 15,
+          minPurchaseAmount: 0,
+          maxDiscountAmount: 200,
+          startAt: defaultStartAt,
+          endAt: buildDate(14),
+          status: PromotionStatus.ACTIVE,
+          conditions: null,
+        },
+      },
+    ];
+  }, [defaultStartAt]);
+
+  const getPromotionTypeLabel = (type: PromotionType) =>
+    promotionTypeOptions.find((option) => option.value === type)?.label ?? type;
+
+  const applyTemplate = (template: PromotionTemplateDefinition) => {
+    setForm((prev) => {
+      const nextType = template.data.type ?? prev.type;
+      const nextConditions =
+        template.data.conditions !== undefined
+          ? template.data.conditions
+          : isConditionSupported(nextType)
+          ? prev.conditions
+          : null;
+
+      return {
+        ...prev,
+        ...template.data,
+        type: nextType,
+        startAt: template.data.startAt ?? prev.startAt,
+        endAt: template.data.endAt ?? prev.endAt,
+        conditions: nextConditions,
+      };
+    });
+    setActiveTemplateId(template.id);
+  };
+
+  const resetForm = () => {
+    setForm({
+      ...defaultFormValues,
+    });
+    setActiveTemplateId(null);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
+    setActiveTemplateId(null);
     if (name === "type") {
       const nextType = value as PromotionType;
       setForm((prev) => ({
@@ -92,6 +306,7 @@ export function CreatePromotionModal({
   };
 
   const handleConditionsChange = (conditions: PromotionConditions | null) => {
+    setActiveTemplateId(null);
     setForm((prev) => ({
       ...prev,
       conditions,
@@ -117,6 +332,68 @@ export function CreatePromotionModal({
           สร้างโปรโมชั่น
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                เทมเพลตยอดนิยม
+              </h4>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                รีเซ็ตเป็นค่าเริ่มต้น
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {promotionTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className={`rounded-xl border p-4 shadow-sm transition-all ${
+                    activeTemplateId === template.id
+                      ? "border-blue-500 bg-blue-50/70 dark:border-blue-400 dark:bg-blue-900/20"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {template.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {template.description}
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                      {getPromotionTypeLabel(template.data.type)}
+                    </span>
+                  </div>
+                  <ul className="mt-3 space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    {template.highlights.map((highlight) => (
+                      <li key={highlight} className="flex items-start gap-2">
+                        <span className="mt-0.5 text-blue-500">•</span>
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => applyTemplate(template)}
+                    className={`mt-4 w-full rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                      activeTemplateId === template.id
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+                    }`}
+                  >
+                    {activeTemplateId === template.id
+                      ? "กำลังใช้งานเทมเพลตนี้"
+                      : "ใช้เทมเพลตนี้"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">

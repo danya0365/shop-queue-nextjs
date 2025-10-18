@@ -62,6 +62,9 @@ export enum PromotionType {
   FIXED_AMOUNT = "fixed_amount",
   BUY_X_GET_Y = "buy_x_get_y",
   FREE_ITEM = "free_item",
+  POINTS_MULTIPLIER = "points_multiplier",
+  BONUS_POINTS = "bonus_points",
+  POINTS_CASHBACK = "points_cashback",
 }
 
 /**

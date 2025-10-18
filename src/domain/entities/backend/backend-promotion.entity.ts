@@ -61,20 +61,23 @@ export interface UpdatePromotionEntity {
  * Promotion type enum
  */
 export enum PromotionType {
-  PERCENTAGE = 'percentage',
-  FIXED_AMOUNT = 'fixed_amount',
-  BUY_X_GET_Y = 'buy_x_get_y',
-  FREE_ITEM = 'free_item'
+  PERCENTAGE = "percentage",
+  FIXED_AMOUNT = "fixed_amount",
+  BUY_X_GET_Y = "buy_x_get_y",
+  FREE_ITEM = "free_item",
+  POINTS_MULTIPLIER = "points_multiplier",
+  BONUS_POINTS = "bonus_points",
+  POINTS_CASHBACK = "points_cashback",
 }
 
 /**
  * Promotion status enum
  */
 export enum PromotionStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  EXPIRED = 'expired',
-  SCHEDULED = 'scheduled'
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  EXPIRED = "expired",
+  SCHEDULED = "scheduled",
 }
 
 /**
