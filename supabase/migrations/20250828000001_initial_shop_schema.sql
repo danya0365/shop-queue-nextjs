@@ -2320,7 +2320,8 @@ CREATE OR REPLACE FUNCTION public.add_customer_points(
   p_customer_id UUID,
   p_points INTEGER,
   p_description TEXT,
-  p_queue_id UUID DEFAULT NULL
+  p_queue_id UUID DEFAULT NULL,
+  p_metadata JSONB DEFAULT NULL
 ) RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -2371,10 +2372,16 @@ BEGIN
   -- Create transaction record
   INSERT INTO public.customer_point_transactions (
     customer_point_id, type, points, description, related_queue_id,
-    transaction_date, created_at
+    metadata, transaction_date, created_at
   ) VALUES (
-    (SELECT id FROM public.customer_points WHERE customer_id = p_customer_id), 'earned', p_points, p_description, p_queue_id,
-    NOW(), NOW()
+    (SELECT id FROM public.customer_points WHERE customer_id = p_customer_id),
+    'earned',
+    p_points,
+    p_description,
+    p_queue_id,
+    COALESCE(p_metadata, '{}'::jsonb),
+    NOW(),
+    NOW()
   );
 END;
 $$;
