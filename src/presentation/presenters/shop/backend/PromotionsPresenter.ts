@@ -11,6 +11,7 @@ import {
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type { IShopBackendPromotionsService } from "@/src/application/services/shop/backend/BackendPromotionsService";
+import type { ShopBackendShopSettingsService } from "@/src/application/services/shop/backend/BackendShopSettingsService";
 import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
@@ -59,6 +60,7 @@ export interface PromotionsViewModel {
   currentPage: number;
   perPage: number;
   totalPages: number;
+  pointsEnabled: boolean;
 }
 
 // Main Presenter class
@@ -69,7 +71,8 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly promotionsService: IShopBackendPromotionsService
+    private readonly promotionsService: IShopBackendPromotionsService,
+    private readonly shopBackendShopSettingsService: ShopBackendShopSettingsService
   ) {
     super(
       logger,
@@ -326,21 +329,23 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
       });
 
       // Get promotions data from service
-      const paginatedPromotions =
-        await this.promotionsService.getPaginatedPromotionsByShopId(
-          shopId,
-          page,
-          perPage
-        );
-
-      const promotionStats =
-        await this.promotionsService.getPromotionsStatsByShopId(shopId);
+      const [paginatedPromotions, promotionStats, shopSettings] =
+        await Promise.all([
+          this.promotionsService.getPaginatedPromotionsByShopId(
+            shopId,
+            page,
+            perPage
+          ),
+          this.promotionsService.getPromotionsStatsByShopId(shopId),
+          this.shopBackendShopSettingsService.getShopSettings(shopId),
+        ]);
 
       // Map service DTOs to view model
       const promotions: PromotionData[] = paginatedPromotions.data.map((p) =>
         this.mapPromotionData(p)
       );
       const stats: PromotionStats = this.mapStatsData(promotionStats);
+      const pointsEnabled = shopSettings?.pointsEnabled ?? false;
 
       return {
         promotions,
@@ -349,6 +354,7 @@ export class PromotionsPresenter extends BaseShopBackendPresenter {
         currentPage: paginatedPromotions.pagination.currentPage,
         perPage: paginatedPromotions.pagination.itemsPerPage,
         totalPages: paginatedPromotions.pagination.totalPages,
+        pointsEnabled,
       };
     } catch (error) {
       this.logger.error("PromotionsPresenter: Error getting view model", error);
@@ -410,6 +416,10 @@ export class PromotionsPresenterFactory {
       serverContainer.resolve<IShopBackendPromotionsService>(
         "ShopBackendPromotionsService"
       );
+    const shopBackendShopSettingsService =
+      serverContainer.resolve<ShopBackendShopSettingsService>(
+        "ShopBackendShopSettingsService"
+      );
     const logger = serverContainer.resolve<Logger>("Logger");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
     const profileService =
@@ -424,7 +434,8 @@ export class PromotionsPresenterFactory {
       authService,
       profileService,
       subscriptionService,
-      promotionsService
+      promotionsService,
+      shopBackendShopSettingsService
     );
   }
 }
@@ -444,13 +455,18 @@ export class ClientPromotionsPresenterFactory {
       clientContainer.resolve<IShopBackendPromotionsService>(
         "ShopBackendPromotionsService"
       );
+    const shopBackendShopSettingsService =
+      clientContainer.resolve<ShopBackendShopSettingsService>(
+        "ShopBackendShopSettingsService"
+      );
     return new PromotionsPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      promotionsService
+      promotionsService,
+      shopBackendShopSettingsService
     );
   }
 }

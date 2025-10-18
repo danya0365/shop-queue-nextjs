@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   type PromotionData,
@@ -23,6 +24,7 @@ export function PromotionsView({
 }: PromotionsViewProps) {
   const [state, actions] = usePromotionsPresenter(shopId, initialViewModel);
   const viewModel = state.viewModel;
+  const pointsEnabled = viewModel?.pointsEnabled ?? false;
   const [detailPromotion, setDetailPromotion] = useState<PromotionData | null>(
     null
   );
@@ -107,7 +109,32 @@ export function PromotionsView({
   });
 
   return (
-    <div className="space-y-8 relative">
+    <div className="flex flex-col gap-8 relative">
+      {!pointsEnabled && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
+                  ระบบแต้มถูกปิดใช้งานอยู่
+                </h2>
+                <p className="text-sm text-amber-700/80 dark:text-amber-200/80">
+                  เปิดใช้งานระบบแต้มจากหน้าการตั้งค่าเพื่อให้ลูกค้าสามารถสะสมแต้มและใช้โปรโมชั่นประเภทแต้มได้
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/shop/${shopId}/backend/settings?tab=points`}
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              ไปที่การตั้งค่าระบบแต้ม
+              <span aria-hidden>↗</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
