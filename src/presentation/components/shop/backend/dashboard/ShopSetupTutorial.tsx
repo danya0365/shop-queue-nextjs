@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useShopSetupTutorialStore } from "@/src/presentation/stores/shop-setup-tutorial-store";
 
 interface SetupStep {
   id: string;
@@ -33,7 +33,11 @@ export function ShopSetupTutorial({
   shopId,
   setupProgress,
 }: ShopSetupTutorialProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const isCollapsed = useShopSetupTutorialStore((state) => {
+    return state.collapsedShops[shopId] ?? false;
+  });
+  const setCollapsed = useShopSetupTutorialStore((state) => state.setCollapsed);
+  const isExpanded = !isCollapsed;
 
   // Calculate setup steps based on current progress
   const setupSteps: SetupStep[] = [
@@ -148,7 +152,7 @@ export function ShopSetupTutorial({
             </div>
           </div>
           <button
-            onClick={() => setIsExpanded(true)}
+            onClick={() => setCollapsed(shopId, false)}
             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
           >
             ดูรายละเอียด →
@@ -193,7 +197,7 @@ export function ShopSetupTutorial({
             </div>
           </div>
           <button
-            onClick={() => setIsExpanded(false)}
+            onClick={() => setCollapsed(shopId, true)}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <svg
