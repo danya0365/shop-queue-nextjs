@@ -2152,7 +2152,7 @@ BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.payments p
     JOIN public.queues q ON q.id = p.queue_id
-    WHERE p.id = payment_id AND (public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
+    WHERE p.id = payment_id AND (public.is_shop_employee(q.shop_id) OR public.is_shop_manager(q.shop_id) OR public.is_shop_owner(q.shop_id))
   );
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -2184,7 +2184,7 @@ CREATE POLICY "Shop managers can delete payment items"
 -- Function to check if user has access to promotions
 CREATE OR REPLACE FUNCTION is_valid_promotion_access(shop_id UUID) RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN (public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
+  RETURN (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
@@ -2217,7 +2217,7 @@ CREATE OR REPLACE FUNCTION is_valid_promotion_service_access(promotion_id UUID) 
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.promotions p
-    WHERE p.id = promotion_id AND (public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
+    WHERE p.id = promotion_id AND (public.is_shop_employee(p.shop_id) OR public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
   );
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -2251,7 +2251,7 @@ CREATE OR REPLACE FUNCTION is_valid_promotion_usage_log_access(promotion_id UUID
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.promotions p
-    WHERE p.id = promotion_id AND (public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
+    WHERE p.id = promotion_id AND (public.is_shop_employee(p.shop_id) OR public.is_shop_manager(p.shop_id) OR public.is_shop_owner(p.shop_id))
   );
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -2281,35 +2281,31 @@ CREATE POLICY "Shop managers can delete promotion usage logs"
 -- =============================================================================
 
 -- Function to check if user has access to customer points
-CREATE OR REPLACE FUNCTION is_valid_customer_points_access(customer_point_id UUID) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION is_valid_customer_points_access(shop_id UUID) RETURNS BOOLEAN AS $$
 BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM public.customer_points cp
-    JOIN public.customers c ON c.id = cp.customer_id
-    WHERE cp.id = customer_point_id AND (public.is_shop_manager(c.shop_id) OR public.is_shop_owner(c.shop_id))
-  );
+  RETURN (public.is_shop_employee(shop_id) OR public.is_shop_manager(shop_id) OR public.is_shop_owner(shop_id));
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 -- Shop managers can view customer points
 CREATE POLICY "Shop managers can view customer points"
   ON public.customer_points FOR SELECT
-  USING (is_valid_customer_points_access(id));
+  USING (is_valid_customer_points_access(shop_id));
 
 -- Shop managers can insert customer points
 CREATE POLICY "Shop managers can insert customer points"
   ON public.customer_points FOR INSERT
-  WITH CHECK (is_valid_customer_points_access(id));
+  WITH CHECK (is_valid_customer_points_access(shop_id));
 
 -- Shop managers can update customer points
 CREATE POLICY "Shop managers can update customer points"
   ON public.customer_points FOR UPDATE
-  USING (is_valid_customer_points_access(id));
+  USING (is_valid_customer_points_access(shop_id));
 
 -- Shop managers can delete customer points (emergency cleanup)
 CREATE POLICY "Shop managers can delete customer points"
   ON public.customer_points FOR DELETE
-  USING (is_valid_customer_points_access(id));
+  USING (is_valid_customer_points_access(shop_id));
 
 -- =============================================================================
 -- SECURE API FUNCTIONS FOR CUSTOMER POINTS
@@ -2340,6 +2336,15 @@ BEGIN
 
   IF v_shop_id IS NULL THEN
     RAISE EXCEPTION 'customer_not_found: %', p_customer_id;
+  END IF;
+
+  -- Ensure caller has privilege to modify points
+  IF NOT (
+    public.is_shop_employee(v_shop_id)
+    OR public.is_shop_manager(v_shop_id)
+    OR public.is_shop_owner(v_shop_id)
+  ) THEN
+    RAISE EXCEPTION 'insufficient_privilege: shop role required';
   END IF;
 
   -- Validate points
