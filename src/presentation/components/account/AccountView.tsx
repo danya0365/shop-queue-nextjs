@@ -10,6 +10,7 @@ import { ChangePasswordForm } from "@/src/presentation/components/account/Change
 import { ChangePasswordFormData } from "@/src/presentation/schemas/auth-schemas";
 import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
+import { useToastStore } from "@/src/presentation/stores/toast-store";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CreateProfileForm } from "./CreateProfileForm";
@@ -38,11 +39,11 @@ export function AccountView({ user }: AccountViewProps) {
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingProfile, setEditingProfile] = useState<ProfileDto | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPasswordSaving, setIsPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const { updatePassword } = useAuthStore();
+  const { addToast } = useToastStore();
 
   const metadataEntries = useMemo(
     () => Object.entries(user.userMetadata ?? {}),
@@ -74,18 +75,10 @@ export function AccountView({ user }: AccountViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
-  // Clear success message after 3 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
   const handleCreateProfile = async (data: CreateProfileInputDto) => {
     try {
       await createProfile(data);
-      setSuccessMessage("สร้างโปรไฟล์ใหม่เรียบร้อยแล้ว");
+      addToast({ type: "success", message: "สร้างโปรไฟล์ใหม่เรียบร้อยแล้ว" });
       setViewMode("list");
     } catch (error) {
       // Error is handled by the store
@@ -99,7 +92,7 @@ export function AccountView({ user }: AccountViewProps) {
   ) => {
     try {
       await updateProfile(profileId, data);
-      setSuccessMessage("อัปเดตโปรไฟล์เรียบร้อยแล้ว");
+      addToast({ type: "success", message: "อัปเดตโปรไฟล์เรียบร้อยแล้ว" });
       setViewMode("list");
       setEditingProfile(null);
     } catch (error) {
@@ -112,7 +105,7 @@ export function AccountView({ user }: AccountViewProps) {
     try {
       const success = await switchProfile(profileId, user.id);
       if (success) {
-        setSuccessMessage("เปลี่ยนโปรไฟล์หลักเรียบร้อยแล้ว");
+        addToast({ type: "success", message: "เปลี่ยนโปรไฟล์หลักเรียบร้อยแล้ว" });
       }
     } catch (error) {
       // Error is handled by the store
@@ -129,7 +122,7 @@ export function AccountView({ user }: AccountViewProps) {
       try {
         const success = await deleteProfile(profileId);
         if (success) {
-          setSuccessMessage("ลบโปรไฟล์เรียบร้อยแล้ว");
+          addToast({ type: "success", message: "ลบโปรไฟล์เรียบร้อยแล้ว" });
         }
       } catch (error) {
         // Error is handled by the store
@@ -153,10 +146,11 @@ export function AccountView({ user }: AccountViewProps) {
 
       if (result.error) {
         setPasswordError(result.error.message || "ไม่สามารถเปลี่ยนรหัสผ่านได้");
+        addToast({ type: "error", message: result.error.message || "ไม่สามารถเปลี่ยนรหัสผ่านได้" });
         return false;
       }
 
-      setSuccessMessage("เปลี่ยนรหัสผ่านเรียบร้อยแล้ว");
+      addToast({ type: "success", message: "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว" });
       return true;
     } finally {
       setIsPasswordSaving(false);
@@ -295,16 +289,6 @@ export function AccountView({ user }: AccountViewProps) {
             </dl>
           </div>
         </div>
-
-        {/* Success Message */}
-        {successMessage && (
-          <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 shadow-sm dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-200">
-            <div className="flex items-center gap-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-              <span>{successMessage}</span>
-            </div>
-          </div>
-        )}
 
         {/* Error Message */}
         {error && (

@@ -1,4 +1,5 @@
 import AuthInitializerWrapper from "@/src/presentation/components/auth/AuthInitializerWrapper";
+import { ToastContainer } from "@/src/presentation/components/ToastContainer";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
 import "../public/styles/index.css";
@@ -104,6 +105,7 @@ export default function RootLayout({
     <html lang="th" suppressHydrationWarning>
       <body className="antialiased">
         <AuthInitializerWrapper />
+        <ToastContainer />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

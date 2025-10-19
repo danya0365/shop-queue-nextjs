@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { SwitchProfileViewModel } from "@/src/presentation/presenters/account/SwitchProfilePresenter";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
+import { useToastStore } from "@/src/presentation/stores/toast-store";
 
 interface SwitchProfileViewProps {
   viewModel: SwitchProfileViewModel;
@@ -18,6 +19,7 @@ const roleLabelMap = {
 
 export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
   const { switchProfile, loading, error } = useProfileStore();
+  const { addToast } = useToastStore();
   const initialProfiles = useMemo(
     () => viewModel.profiles,
     [viewModel.profiles]
@@ -59,8 +61,10 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
       );
       setActiveProfileId(profileId);
       setSuccessMessage("เปลี่ยนโปรไฟล์หลักเรียบร้อยแล้ว");
+      addToast({ type: "success", message: "เปลี่ยนโปรไฟล์หลักเรียบร้อยแล้ว" });
     } else {
       setLocalError("ไม่สามารถเปลี่ยนโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง");
+      addToast({ type: "error", message: "ไม่สามารถเปลี่ยนโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง" });
     }
   };
 
