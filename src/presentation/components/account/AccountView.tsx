@@ -58,7 +58,9 @@ export function AccountView({ user }: AccountViewProps) {
     if (!activeProfile) {
       return profiles;
     }
-    const others = profiles.filter((profile) => profile.id !== activeProfile.id);
+    const others = profiles.filter(
+      (profile) => profile.id !== activeProfile.id
+    );
     return [activeProfile, ...others];
   }, [activeProfile, profiles]);
 
@@ -150,9 +152,7 @@ export function AccountView({ user }: AccountViewProps) {
       const result = await updatePassword(data.newPassword);
 
       if (result.error) {
-        setPasswordError(
-          result.error.message || "ไม่สามารถเปลี่ยนรหัสผ่านได้"
-        );
+        setPasswordError(result.error.message || "ไม่สามารถเปลี่ยนรหัสผ่านได้");
         return false;
       }
 
@@ -171,11 +171,14 @@ export function AccountView({ user }: AccountViewProps) {
   // Calculate stats
   const totalProfiles = profiles.length;
   const activeProfilesCount = profiles.filter((p) => p.isActive).length;
-  const activeProfilesPercentage = totalProfiles > 0
-    ? Math.round((activeProfilesCount / totalProfiles) * 100)
-    : 0;
+  const activeProfilesPercentage =
+    totalProfiles > 0
+      ? Math.round((activeProfilesCount / totalProfiles) * 100)
+      : 0;
 
-  const accountStatusLabel = user.emailConfirmedAt ? "ยืนยันแล้ว" : "รอการยืนยัน";
+  const accountStatusLabel = user.emailConfirmedAt
+    ? "ยืนยันแล้ว"
+    : "รอการยืนยัน";
   const accountStatusTone = user.emailConfirmedAt
     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200"
     : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200";
@@ -252,7 +255,8 @@ export function AccountView({ user }: AccountViewProps) {
               แดชบอร์ดบัญชี
             </h1>
             <p className="mt-2 text-muted">
-              ภาพรวมข้อมูลจาก Supabase Auth พร้อมการจัดการโปรไฟล์และสถานะความปลอดภัยของบัญชีในศูนย์เดียว
+              ภาพรวมข้อมูลจาก Supabase Auth
+              พร้อมการจัดการโปรไฟล์และสถานะความปลอดภัยของบัญชีในศูนย์เดียว
             </p>
           </div>
           <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-sm">
@@ -263,7 +267,9 @@ export function AccountView({ user }: AccountViewProps) {
                   {user.email}
                 </p>
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}
+              >
                 {accountStatusLabel}
               </span>
             </div>
@@ -329,8 +335,12 @@ export function AccountView({ user }: AccountViewProps) {
                       <span className="text-2xl font-semibold text-foreground">
                         {accountStatusLabel}
                       </span>
-                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
-                        {user.emailConfirmedAt ? "ยืนยันอีเมลแล้ว" : "รอการยืนยัน"}
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}
+                      >
+                        {user.emailConfirmedAt
+                          ? "ยืนยันอีเมลแล้ว"
+                          : "รอการยืนยัน"}
                       </span>
                     </div>
                     <p className="mt-4 text-xs text-muted">
@@ -342,18 +352,24 @@ export function AccountView({ user }: AccountViewProps) {
                     <p className="mt-3 text-2xl font-semibold text-foreground">
                       {formatDateTime(user.lastSignInAt)}
                     </p>
-                    <p className="mt-4 text-xs text-muted">ผ่านบัญชี {user.email}</p>
+                    <p className="mt-4 text-xs text-muted">
+                      ผ่านบัญชี {user.email}
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
                     <p className="text-sm text-muted">สร้างบัญชีเมื่อ</p>
                     <p className="mt-3 text-2xl font-semibold text-foreground">
                       {formatDateTime(user.createdAt)}
                     </p>
-                    <p className="mt-4 text-xs text-muted">รหัสผู้ใช้ {user.id}</p>
+                    <p className="mt-4 text-xs text-muted">
+                      รหัสผู้ใช้ {user.id}
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted">โปรไฟล์ที่ผูกกับบัญชี</p>
+                      <p className="text-sm text-muted">
+                        โปรไฟล์ที่ผูกกับบัญชี
+                      </p>
                       <span className="text-xs text-muted">
                         ใช้งาน {activeProfilesCount}/{totalProfiles}
                       </span>
@@ -375,9 +391,12 @@ export function AccountView({ user }: AccountViewProps) {
                     <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
                       <div className="flex flex-col gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <h2 className="text-xl font-semibold text-foreground">รายละเอียดบัญชี</h2>
+                          <h2 className="text-xl font-semibold text-foreground">
+                            รายละเอียดบัญชี
+                          </h2>
                           <p className="mt-1 text-sm text-muted">
-                            ข้อมูลจากตาราง `auth.users` ที่ผูกกับบัญชี Shop Queue ของคุณ
+                            ข้อมูลจากตาราง `auth.users` ที่ผูกกับบัญชี Shop
+                            Queue ของคุณ
                           </p>
                         </div>
                         <Link
@@ -416,7 +435,9 @@ export function AccountView({ user }: AccountViewProps) {
                         <div>
                           <dt className="text-sm text-muted">การยืนยันอีเมล</dt>
                           <dd className="mt-1 text-base font-semibold text-foreground">
-                            {user.emailConfirmedAt ? formatDateTime(user.emailConfirmedAt) : "ยังไม่ยืนยัน"}
+                            {user.emailConfirmedAt
+                              ? formatDateTime(user.emailConfirmedAt)
+                              : "ยังไม่ยืนยัน"}
                           </dd>
                         </div>
                         <div>
@@ -429,29 +450,37 @@ export function AccountView({ user }: AccountViewProps) {
                     </section>
 
                     <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-                      <h2 className="text-xl font-semibold text-foreground">ความปลอดภัยและกิจกรรม</h2>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        ความปลอดภัยและกิจกรรม
+                      </h2>
                       <p className="mt-1 text-sm text-muted">
                         ตรวจสอบสถานะความปลอดภัยและกิจกรรมล่าสุดเพื่อป้องกันการเข้าถึงที่ไม่พึงประสงค์
                       </p>
 
                       <div className="mt-6 space-y-6">
-                        <div className="rounded-xl border border-border/60 bg-muted/30 p-5">
+                        <div className="rounded-xl border border-border bg-muted-light p-5">
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <p className="text-sm font-semibold text-foreground">การยืนยันอีเมล</p>
+                              <p className="text-sm font-semibold text-foreground">
+                                การยืนยันอีเมล
+                              </p>
                               <p className="mt-1 text-xs text-muted">
                                 {user.emailConfirmedAt
                                   ? "บัญชีนี้ได้รับการยืนยันแล้ว"
                                   : "กรุณายืนยันอีเมลเพื่อเพิ่มความปลอดภัย"}
                               </p>
                             </div>
-                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
-                              {user.emailConfirmedAt ? "ยืนยันแล้ว" : "ยังไม่ยืนยัน"}
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}
+                            >
+                              {user.emailConfirmedAt
+                                ? "ยืนยันแล้ว"
+                                : "ยังไม่ยืนยัน"}
                             </span>
                           </div>
                         </div>
 
-                        <div className="rounded-xl border border-border/60 bg-muted/30 p-5">
+                        <div className="rounded-xl border border-border bg-muted-light p-5">
                           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div className="max-w-sm">
                               <p className="text-sm font-semibold text-foreground">
@@ -472,17 +501,26 @@ export function AccountView({ user }: AccountViewProps) {
                         </div>
 
                         <div>
-                          <p className="text-sm font-semibold text-foreground">กิจกรรมล่าสุด</p>
+                          <p className="text-sm font-semibold text-foreground">
+                            กิจกรรมล่าสุด
+                          </p>
                           {activityTimeline.length > 0 ? (
                             <ol className="mt-4 space-y-3">
                               {activityTimeline.map((item, index) => (
-                                <li key={`${item.label}-${item.value}`} className="flex items-start gap-3">
+                                <li
+                                  key={`${item.label}-${item.value}`}
+                                  className="flex items-start gap-3"
+                                >
                                   <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                                     {index + 1}
                                   </span>
                                   <div>
-                                    <p className="text-sm font-medium text-foreground">{item.label}</p>
-                                    <p className="text-xs text-muted">{item.description}</p>
+                                    <p className="text-sm font-medium text-foreground">
+                                      {item.label}
+                                    </p>
+                                    <p className="text-xs text-muted">
+                                      {item.description}
+                                    </p>
                                     <p className="mt-1 text-xs font-medium text-foreground/70">
                                       {formatDateTime(item.value)}
                                     </p>
@@ -491,7 +529,9 @@ export function AccountView({ user }: AccountViewProps) {
                               ))}
                             </ol>
                           ) : (
-                            <p className="mt-3 text-sm text-muted">ยังไม่มีประวัติกิจกรรมล่าสุด</p>
+                            <p className="mt-3 text-sm text-muted">
+                              ยังไม่มีประวัติกิจกรรมล่าสุด
+                            </p>
                           )}
                         </div>
                       </div>
@@ -500,15 +540,21 @@ export function AccountView({ user }: AccountViewProps) {
 
                   <div className="space-y-8">
                     <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-                      <h2 className="text-xl font-semibold text-foreground">ข้อมูลเมตา</h2>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        ข้อมูลเมตา
+                      </h2>
                       <p className="mt-1 text-sm text-muted">
-                        ตรวจสอบค่า `user_metadata` และ `app_metadata` ที่แนบมากับบัญชีเพื่อการดีบักหรือการปรับแต่งประสบการณ์ผู้ใช้
+                        ตรวจสอบค่า `user_metadata` และ `app_metadata`
+                        ที่แนบมากับบัญชีเพื่อการดีบักหรือการปรับแต่งประสบการณ์ผู้ใช้
                       </p>
 
                       <div className="mt-6 space-y-6 text-sm">
-                        {metadataEntries.length === 0 && appMetadataEntries.length === 0 && (
-                          <p className="text-muted">ยังไม่มีข้อมูลเมตาที่กำหนดไว้สำหรับบัญชีนี้</p>
-                        )}
+                        {metadataEntries.length === 0 &&
+                          appMetadataEntries.length === 0 && (
+                            <p className="text-muted">
+                              ยังไม่มีข้อมูลเมตาที่กำหนดไว้สำหรับบัญชีนี้
+                            </p>
+                          )}
 
                         {metadataEntries.length > 0 && (
                           <div className="space-y-3">
@@ -519,14 +565,21 @@ export function AccountView({ user }: AccountViewProps) {
                               {metadataEntries.map(([key, value]) => {
                                 const mapped = mapMetadataValue(value);
                                 return (
-                                  <div key={`user-metadata-${key}`} className="rounded-lg border border-border/60 bg-muted/20 p-3">
-                                    <p className="text-xs font-semibold text-muted">{key}</p>
+                                  <div
+                                    key={`user-metadata-${key}`}
+                                    className="rounded-lg border border-border bg-muted-light p-3"
+                                  >
+                                    <p className="text-xs font-semibold text-muted">
+                                      {key}
+                                    </p>
                                     {mapped.multiline ? (
                                       <pre className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
                                         {mapped.text}
                                       </pre>
                                     ) : (
-                                      <p className="mt-1 text-sm text-foreground">{mapped.text}</p>
+                                      <p className="mt-1 text-sm text-foreground">
+                                        {mapped.text}
+                                      </p>
                                     )}
                                   </div>
                                 );
@@ -544,14 +597,21 @@ export function AccountView({ user }: AccountViewProps) {
                               {appMetadataEntries.map(([key, value]) => {
                                 const mapped = mapMetadataValue(value);
                                 return (
-                                  <div key={`app-metadata-${key}`} className="rounded-lg border border-border/60 bg-muted/20 p-3">
-                                    <p className="text-xs font-semibold text-muted">{key}</p>
+                                  <div
+                                    key={`app-metadata-${key}`}
+                                    className="rounded-lg border border-border bg-muted-light p-3"
+                                  >
+                                    <p className="text-xs font-semibold text-muted">
+                                      {key}
+                                    </p>
                                     {mapped.multiline ? (
                                       <pre className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
                                         {mapped.text}
                                       </pre>
                                     ) : (
-                                      <p className="mt-1 text-sm text-foreground">{mapped.text}</p>
+                                      <p className="mt-1 text-sm text-foreground">
+                                        {mapped.text}
+                                      </p>
                                     )}
                                   </div>
                                 );
@@ -567,9 +627,12 @@ export function AccountView({ user }: AccountViewProps) {
                 <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
                   <div className="flex flex-col gap-4 border-b border-border/60 pb-6 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold text-foreground">โปรไฟล์ที่เชื่อมต่อกับบัญชี</h2>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        โปรไฟล์ที่เชื่อมต่อกับบัญชี
+                      </h2>
                       <p className="mt-1 text-sm text-muted">
-                        สลับโปรไฟล์เพื่อจัดการข้อมูลร้านค้า การจองคิว และสิทธิ์การเข้าถึงได้รวดเร็ว
+                        สลับโปรไฟล์เพื่อจัดการข้อมูลร้านค้า การจองคิว
+                        และสิทธิ์การเข้าถึงได้รวดเร็ว
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -645,7 +708,9 @@ export function AccountView({ user }: AccountViewProps) {
               <div className="mx-auto max-w-3xl">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-semibold text-foreground">สร้างโปรไฟล์ใหม่</h2>
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      สร้างโปรไฟล์ใหม่
+                    </h2>
                     <p className="text-sm text-muted">
                       เชื่อมต่อบัญชีของคุณกับโปรไฟล์ลูกค้าหรือลูกค้าองค์กรเพื่อใช้งานบริการของร้านค้า
                     </p>
@@ -672,7 +737,9 @@ export function AccountView({ user }: AccountViewProps) {
               <div className="mx-auto max-w-3xl">
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-semibold text-foreground">แก้ไขโปรไฟล์</h2>
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      แก้ไขโปรไฟล์
+                    </h2>
                     <p className="text-sm text-muted">
                       ปรับปรุงข้อมูลโปรไฟล์เพื่อให้สอดคล้องกับทีมและการทำงานในปัจจุบัน
                     </p>

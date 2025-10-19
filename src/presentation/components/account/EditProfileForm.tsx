@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import { ProfileDto, UpdateProfileInputDto } from '@/src/application/dtos/profile-dto';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import {
+  ProfileDto,
+  UpdateProfileInputDto,
+} from "@/src/application/dtos/profile-dto";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const updateProfileSchema = z.object({
-  username: z.string()
-    .min(3, 'ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร')
-    .max(20, 'ชื่อผู้ใช้ต้องไม่เกิน 20 ตัวอักษร')
-    .regex(/^[a-zA-Z0-9_]+$/, 'ชื่อผู้ใช้ใช้ได้เฉพาะตัวอักษร ตัวเลข และ _'),
-  name: z.string()
-    .min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร')
-    .max(50, 'ชื่อต้องไม่เกิน 50 ตัวอักษร'),
-  bio: z.string()
-    .max(200, 'แนะนำตัวต้องไม่เกิน 200 ตัวอักษร')
-    .optional(),
+  username: z
+    .string()
+    .min(3, "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร")
+    .max(20, "ชื่อผู้ใช้ต้องไม่เกิน 20 ตัวอักษร")
+    .regex(/^[a-zA-Z0-9_]+$/, "ชื่อผู้ใช้ใช้ได้เฉพาะตัวอักษร ตัวเลข และ _"),
+  name: z
+    .string()
+    .min(2, "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร")
+    .max(50, "ชื่อต้องไม่เกิน 50 ตัวอักษร"),
+  bio: z.string().max(200, "แนะนำตัวต้องไม่เกิน 200 ตัวอักษร").optional(),
 });
 
 type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
@@ -28,11 +31,11 @@ interface EditProfileFormProps {
   loading?: boolean;
 }
 
-export function EditProfileForm({ 
-  profile, 
-  onSubmit, 
-  onCancel, 
-  loading = false 
+export function EditProfileForm({
+  profile,
+  onSubmit,
+  onCancel,
+  loading = false,
 }: EditProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,8 +48,8 @@ export function EditProfileForm({
     defaultValues: {
       username: profile.username,
       name: profile.name,
-      bio: profile.bio || '',
-    }
+      bio: profile.bio || "",
+    },
   });
 
   const handleFormSubmit = async (data: UpdateProfileFormData) => {
@@ -68,16 +71,24 @@ export function EditProfileForm({
   return (
     <div className="bg-surface rounded-lg border border-border p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-foreground">
-          แก้ไขโปรไฟล์
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground">แก้ไขโปรไฟล์</h3>
         <button
           onClick={onCancel}
           className="text-muted hover:text-foreground transition-colors"
           disabled={isSubmitting || loading}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -85,16 +96,19 @@ export function EditProfileForm({
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         {/* Username Field */}
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="username"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             ชื่อผู้ใช้ *
           </label>
           <input
-            {...register('username')}
+            {...register("username")}
             type="text"
             id="username"
             className={`
               w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground
-              ${errors.username ? 'border-error' : 'border-border'}
+              ${errors.username ? "border-error" : "border-border"}
             `}
             placeholder="ชื่อผู้ใช้ของคุณ"
             disabled={isSubmitting || loading}
@@ -106,16 +120,19 @@ export function EditProfileForm({
 
         {/* Name Field */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             ชื่อที่แสดง *
           </label>
           <input
-            {...register('name')}
+            {...register("name")}
             type="text"
             id="name"
             className={`
               w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground
-              ${errors.name ? 'border-error' : 'border-border'}
+              ${errors.name ? "border-error" : "border-border"}
             `}
             placeholder="ชื่อที่จะแสดงในระบบ"
             disabled={isSubmitting || loading}
@@ -127,16 +144,19 @@ export function EditProfileForm({
 
         {/* Bio Field */}
         <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="bio"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             แนะนำตัว
           </label>
           <textarea
-            {...register('bio')}
+            {...register("bio")}
             id="bio"
             rows={3}
             className={`
               w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none bg-background text-foreground
-              ${errors.bio ? 'border-error' : 'border-border'}
+              ${errors.bio ? "border-error" : "border-border"}
             `}
             placeholder="เล่าเกี่ยวกับตัวคุณ (ไม่บังคับ)"
             disabled={isSubmitting || loading}
@@ -148,19 +168,24 @@ export function EditProfileForm({
 
         {/* Profile Info */}
         <div className="bg-muted-light rounded-lg p-4">
-          <h4 className="text-sm font-medium text-foreground mb-2">ข้อมูลโปรไฟล์</h4>
+          <h4 className="text-sm font-medium text-foreground mb-2">
+            ข้อมูลโปรไฟล์
+          </h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted">บทบาท:</span>
               <p className="text-foreground">
-                {profile.role === 'admin' ? 'ผู้ดูแลระบบ' : 
-                 profile.role === 'moderator' ? 'ผู้ดูแล' : 'ผู้ใช้งาน'}
+                {profile.role === "admin"
+                  ? "ผู้ดูแลระบบ"
+                  : profile.role === "moderator"
+                  ? "ผู้ดูแล"
+                  : "ผู้ใช้งาน"}
               </p>
             </div>
             <div>
               <span className="text-muted">สถานะ:</span>
               <p className="text-foreground">
-                {profile.isActive ? 'ใช้งานอยู่' : 'ไม่ได้ใช้งาน'}
+                {profile.isActive ? "ใช้งานอยู่" : "ไม่ได้ใช้งาน"}
               </p>
             </div>
           </div>
@@ -173,7 +198,7 @@ export function EditProfileForm({
             disabled={isSubmitting || loading}
             className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
-            {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+            {isSubmitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
           </button>
           <button
             type="button"

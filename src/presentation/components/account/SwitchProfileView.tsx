@@ -17,14 +17,15 @@ const roleLabelMap = {
 } as const;
 
 export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
-  const {
-    switchProfile,
-    loading,
-    error,
-  } = useProfileStore();
-  const initialProfiles = useMemo(() => viewModel.profiles, [viewModel.profiles]);
+  const { switchProfile, loading, error } = useProfileStore();
+  const initialProfiles = useMemo(
+    () => viewModel.profiles,
+    [viewModel.profiles]
+  );
   const [profiles, setProfiles] = useState(initialProfiles);
-  const [activeProfileId, setActiveProfileId] = useState(viewModel.activeProfile?.id ?? null);
+  const [activeProfileId, setActiveProfileId] = useState(
+    viewModel.activeProfile?.id ?? null
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -63,21 +64,25 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
     }
   };
 
-  const activeProfile = profiles.find((profile) => profile.id === activeProfileId) ?? null;
+  const activeProfile =
+    profiles.find((profile) => profile.id === activeProfileId) ?? null;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">สลับโปรไฟล์การใช้งาน</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              สลับโปรไฟล์การใช้งาน
+            </h1>
             <p className="mt-2 text-muted-foreground">
-              เลือกโปรไฟล์ที่จะใช้สำหรับการดำเนินงานในระบบ Shop Queue ได้อย่างรวดเร็ว
+              เลือกโปรไฟล์ที่จะใช้สำหรับการดำเนินงานในระบบ Shop Queue
+              ได้อย่างรวดเร็ว
             </p>
           </div>
           <Link
             href="/account"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/70 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted-light transition-colors"
           >
             <span aria-hidden>←</span>
             กลับไปหน้าจัดการโปรไฟล์
@@ -100,8 +105,12 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
           <div className="rounded-xl border border-primary/40 bg-primary/10 p-6 shadow-sm">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold text-primary">โปรไฟล์ที่ใช้งานอยู่</p>
-                <h2 className="mt-1 text-xl font-semibold text-foreground">{activeProfile.fullName || activeProfile.name}</h2>
+                <p className="text-sm font-semibold text-primary">
+                  โปรไฟล์ที่ใช้งานอยู่
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-foreground">
+                  {activeProfile.fullName || activeProfile.name}
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   @{activeProfile.username} · {roleLabelMap[activeProfile.role]}
                 </p>
@@ -118,17 +127,19 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
         )}
 
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">โปรไฟล์ทั้งหมด</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            โปรไฟล์ทั้งหมด
+          </h2>
           <div className="grid gap-4">
             {profiles.map((profile) => {
               const isActive = profile.id === activeProfileId;
               return (
                 <div
                   key={profile.id}
-                  className={`rounded-xl border p-6 transition-all ${
+                  className={`bg-surface rounded-xl border-2 p-6 transition-all ${
                     isActive
-                      ? "border-primary shadow-lg ring-1 ring-primary/40 bg-surface"
-                      : "border-border bg-background hover:border-border-dark hover:shadow-md"
+                      ? "border-primary shadow-lg ring-2 ring-primary-light"
+                      : "border-border-light hover:border-border hover:shadow-md"
                   }`}
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -140,7 +151,9 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
                         <p className="text-lg font-semibold text-foreground">
                           {profile.fullName || profile.name}
                         </p>
-                        <p className="text-sm text-muted-foreground">@{profile.username}</p>
+                        <p className="text-sm text-muted-foreground">
+                          @{profile.username}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {roleLabelMap[profile.role]}
                         </p>
@@ -153,8 +166,8 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
                         disabled={isActive || loading}
                         className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                           isActive
-                            ? "bg-muted text-muted-foreground cursor-not-allowed"
-                            : "bg-primary text-white hover:bg-primary/90"
+                            ? "bg-success-light text-success-dark cursor-not-allowed"
+                            : "bg-primary text-white hover:bg-primary-dark"
                         } ${loading ? "opacity-75" : ""}`}
                       >
                         {isActive ? "ใช้งานอยู่" : "ใช้โปรไฟล์นี้"}
@@ -162,7 +175,7 @@ export function SwitchProfileView({ viewModel }: SwitchProfileViewProps) {
                       {!isActive && (
                         <Link
                           href="/account"
-                          className="w-full rounded-lg border border-border px-4 py-2 text-center text-sm font-medium text-foreground hover:bg-muted/70 transition-colors"
+                          className="w-full rounded-lg border border-border px-4 py-2 text-center text-sm font-medium text-foreground hover:bg-muted-light transition-colors"
                         >
                           แก้ไขในหน้าจัดการโปรไฟล์
                         </Link>
