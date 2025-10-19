@@ -95,6 +95,28 @@ BEGIN
     ) vs;
 
     -- Count total distinct shop-customer pairs for pagination
+    WITH profile_customers AS (
+        SELECT c.id AS customer_id, c.shop_id
+        FROM customers c
+        WHERE c.profile_id = p_profile_id
+    ),
+    customer_visits AS (
+        SELECT
+            pc.shop_id,
+            pc.customer_id,
+            COUNT(q.id) AS total_visits,
+            MIN(q.created_at) AS first_visited_at,
+            MAX(q.created_at) AS last_visited_at
+        FROM profile_customers pc
+        JOIN queues q ON q.customer_id = pc.customer_id
+        GROUP BY pc.shop_id, pc.customer_id
+    ),
+    visited_shops AS (
+        SELECT DISTINCT
+            cv.shop_id,
+            cv.customer_id
+        FROM customer_visits cv
+    )
     SELECT COUNT(*) INTO v_total_count FROM visited_shops;
 
     v_total_pages := CEIL(v_total_count::FLOAT / p_limit::FLOAT);
