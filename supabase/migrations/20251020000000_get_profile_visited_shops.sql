@@ -40,7 +40,7 @@ BEGIN
            SELECT 1
            FROM profiles p
            WHERE p.id = p_profile_id
-             AND p.user_id = auth.uid()
+             AND p.auth_id = auth.uid()
        ) THEN
         RAISE EXCEPTION 'Access denied: invalid profile';
     END IF;
