@@ -9,7 +9,7 @@ import {
   useShopCreatePresenter,
 } from "@/src/presentation/presenters/dashboard/shop-create/useShopCreatePresenter";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToastStore } from "@/src/presentation/stores/toast-store";
 import { OperatingHoursTemplateSelector } from "./OperatingHoursTemplateSelector";
 
@@ -124,6 +124,25 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
       addToast({ type: "error", message: state.error });
     }
   }, [state.error, addToast]);
+
+  const shopUsage = useMemo(() => {
+    const current = viewModel.currentShopsCount ?? 0;
+    const max = viewModel.maxShopsAllowed;
+    const hasLimit = typeof max === "number" && max > 0;
+    const percentage = hasLimit
+      ? Math.min(100, Math.round((current / max) * 100))
+      : 0;
+    const remaining = hasLimit ? Math.max(0, max - current) : null;
+
+    return {
+      current,
+      max,
+      hasLimit,
+      percentage,
+      remaining,
+      limitReached: hasLimit && remaining === 0,
+    };
+  }, [viewModel.currentShopsCount, viewModel.maxShopsAllowed]);
 
   const handleInputChange = (field: keyof ShopCreateData, value: string) => {
     setFormData((prev) => ({
@@ -314,31 +333,77 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
             กรอกข้อมูลร้านค้าของคุณเพื่อเริ่มใช้งานระบบจัดการคิว
           </p>
 
-          {/* Progress indicator */}
-          <div className="mt-4 p-4 bg-info-light rounded-lg border border-info">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-info mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-info-dark font-medium">
-                จำนวนร้านค้าที่สร้างแล้ว {viewModel.currentShopsCount}{" "}
-                ร้าน/สูงสุด{" "}
-                {viewModel.maxShopsAllowed === null
-                  ? "ไม่จำกัด"
-                  : viewModel.maxShopsAllowed}{" "}
-                ร้าน
-              </span>
+          {/* Shop usage summary */}
+          <div className="mt-6 rounded-2xl border border-border bg-muted-light p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  สถานะการใช้งานร้านค้า
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  ติดตามจำนวนร้านค้าที่คุณสร้างไว้ เพื่อบริหารโควต้าได้อย่างชัดเจน
+                </p>
+              </div>
+              <div className="flex flex-col items-start gap-2 sm:items-end">
+                <span className="text-2xl font-semibold text-foreground">
+                  {shopUsage.hasLimit && shopUsage.max
+                    ? `${shopUsage.current}/${shopUsage.max} ร้าน`
+                    : `${shopUsage.current} ร้าน`}
+                </span>
+                {shopUsage.hasLimit ? (
+                  <span className="rounded-full bg-info-light px-3 py-1 text-xs font-medium text-info-dark">
+                    เหลือ {shopUsage.remaining} ร้านสำหรับแผนปัจจุบัน
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-success-light px-3 py-1 text-xs font-medium text-success-dark">
+                    แผนปัจจุบันสร้างร้านค้าได้ไม่จำกัด
+                  </span>
+                )}
+              </div>
             </div>
+
+            {shopUsage.hasLimit && shopUsage.max ? (
+              <>
+                <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-border">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${shopUsage.percentage}%` }}
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-muted">
+                  <span>0 ร้าน</span>
+                  <span>{shopUsage.percentage}% ของโควต้า</span>
+                  <span>สูงสุด {shopUsage.max} ร้าน</span>
+                </div>
+
+                {shopUsage.limitReached && (
+                  <div className="mt-4 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning-dark">
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg" aria-hidden>
+                        ⚠️
+                      </span>
+                      <div>
+                        <p className="font-medium">ถึงขีดจำกัดแล้ว</p>
+                        <p className="text-xs text-warning-dark/80">
+                          คุณสร้างร้านค้าครบโควต้า หากต้องการสร้างเพิ่ม กรุณาลบร้านที่ไม่ใช้หรืออัปเกรดแผนการใช้งาน
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-4 rounded-xl border border-success/40 bg-success/10 px-4 py-3 text-sm text-success-dark">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg" aria-hidden>
+                    🎉
+                  </span>
+                  <p className="text-sm">
+                    คุณสามารถสร้างร้านค้าได้ไม่จำกัดจำนวนในแผนการใช้งานนี้
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
