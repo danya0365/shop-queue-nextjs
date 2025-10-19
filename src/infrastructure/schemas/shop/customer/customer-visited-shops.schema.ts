@@ -9,12 +9,12 @@ export interface ProfileVisitedShopRecord {
 }
 
 export interface ProfileVisitedShopsPaginationRecord {
-  currentPage: number;
-  perPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
+  current_page: number;
+  per_page: number;
+  total_items: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
 }
 
 export interface GetProfileVisitedShopsRpcResult {

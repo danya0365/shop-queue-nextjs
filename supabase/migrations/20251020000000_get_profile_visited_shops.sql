@@ -126,12 +126,12 @@ BEGIN
     RETURN JSONB_BUILD_OBJECT(
         'data', v_result_data,
         'pagination', JSONB_BUILD_OBJECT(
-            'currentPage', p_page,
-            'perPage', p_limit,
-            'totalItems', v_total_count,
-            'totalPages', v_total_pages,
-            'hasNext', v_has_next,
-            'hasPrev', v_has_prev
+            'current_page', p_page,
+            'per_page', p_limit,
+            'total_items', v_total_count,
+            'total_pages', v_total_pages,
+            'has_next', v_has_next,
+            'has_prev', v_has_prev
         )
     );
 END;

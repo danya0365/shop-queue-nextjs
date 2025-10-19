@@ -62,15 +62,17 @@ export class SupabaseCustomerVisitedShopsRepository
         SupabaseCustomerVisitedShopsMapper.toVisitedShopEntity(record)
       );
 
+      const pagination = result.pagination;
+
       return {
         visitedShops,
         pagination: {
-          currentPage: Number(result.pagination.currentPage ?? page),
-          perPage: Number(result.pagination.perPage ?? limit),
-          totalItems: Number(result.pagination.totalItems ?? visitedShops.length),
-          totalPages: Number(result.pagination.totalPages ?? 1),
-          hasNext: Boolean(result.pagination.hasNext ?? false),
-          hasPrev: Boolean(result.pagination.hasPrev ?? false),
+          currentPage: Number(pagination.current_page ?? page),
+          perPage: Number(pagination.per_page ?? limit),
+          totalItems: Number(pagination.total_items ?? visitedShops.length),
+          totalPages: Number(pagination.total_pages ?? 1),
+          hasNext: Boolean(pagination.has_next ?? false),
+          hasPrev: Boolean(pagination.has_prev ?? false),
         },
       };
     } catch (error) {
