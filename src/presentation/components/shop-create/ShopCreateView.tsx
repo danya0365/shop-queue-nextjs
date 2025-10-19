@@ -9,7 +9,8 @@ import {
   useShopCreatePresenter,
 } from "@/src/presentation/presenters/dashboard/shop-create/useShopCreatePresenter";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useToastStore } from "@/src/presentation/stores/toast-store";
 import { OperatingHoursTemplateSelector } from "./OperatingHoursTemplateSelector";
 
 interface ShopCreateViewProps {
@@ -18,6 +19,7 @@ interface ShopCreateViewProps {
 
 export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
   const [state, actions] = useShopCreatePresenter();
+  const { addToast } = useToastStore();
 
   // Use mock data as default values in local development
   const getDefaultFormData = (): ShopCreateData => {
@@ -116,6 +118,12 @@ export function ShopCreateView({ viewModel }: ShopCreateViewProps) {
     getDefaultFormData()
   );
   const [showOperatingHours, setShowOperatingHours] = useState(false);
+
+  useEffect(() => {
+    if (state.error) {
+      addToast({ type: "error", message: state.error });
+    }
+  }, [state.error, addToast]);
 
   const handleInputChange = (field: keyof ShopCreateData, value: string) => {
     setFormData((prev) => ({
