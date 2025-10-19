@@ -107,11 +107,13 @@ export default async function [PageName]Page({ params }: [PageName]PageProps) {
 ## 2. Pattern: `src/presentation/presenters/[page-name]/[PageName]Presenter.ts`
 
 ```typescript
-import { createServerSupabaseClient } from "@/src/infrastructure/config/supabase-server-client.ts";
-import { createClientSupabaseClient } from "@/src/infrastructure/config/supabase-client-client.ts";
-import type { User } from "@supabase/supabase-js";
-
 // Define your interfaces and types here
+export interface PresenterUser {
+  id: string;
+  email: string;
+  displayName?: string;
+}
+
 export interface [PageItem] {
   id: string;
   name: string;
@@ -139,7 +141,7 @@ export interface Update[PageItem]Data {
 }
 
 export interface [PageName]ViewModel {
-  user: User | null;
+  user: PresenterUser | null;
   items: [PageItem][];
   stats: [PageStats];
   totalCount: number;
@@ -148,200 +150,207 @@ export interface [PageName]ViewModel {
   // Add your view model fields here
 }
 
+export interface [PageName]Repository {
+  getUser(): Promise<PresenterUser | null>;
+  getPaginated[PageItems](page: number, perPage: number): Promise<{ data: [PageItem][]; total: number }>;
+  getStats(): Promise<[PageStats]>;
+  create[PageItem](data: Create[PageItem]Data): Promise<[PageItem]>;
+  update[PageItem](id: string, data: Update[PageItem]Data): Promise<[PageItem]>;
+  delete[PageItem](id: string): Promise<boolean>;
+  get[PageItem]ById(id: string): Promise<[PageItem]>;
+}
+
+/**
+ * ✅ Default mock implementation. Replace with real repository when ready.
+ */
+class Mock[PageName]Repository implements [PageName]Repository {
+  private items: [PageItem][] = [];
+  private stats: [PageStats] = {
+    totalItems: 0,
+    activeItems: 0,
+    inactiveItems: 0,
+  };
+
+  async getUser(): Promise<PresenterUser | null> {
+    return {
+      id: "mock-user-id",
+      email: "mock-user@example.com",
+    };
+  }
+
+  async getPaginated[PageItems](page: number, perPage: number) {
+    const start = (page - 1) * perPage;
+    const data = this.items.slice(start, start + perPage);
+    return { data, total: this.items.length };
+  }
+
+  async getStats(): Promise<[PageStats]> {
+    return this.stats;
+  }
+
+  async create[PageItem](data: Create[PageItem]Data): Promise<[PageItem]> {
+    const newItem: [PageItem] = {
+      id: crypto.randomUUID(),
+      name: data.name,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.items = [newItem, ...this.items];
+    this.stats = {
+      ...this.stats,
+      totalItems: this.items.length,
+      activeItems: this.items.length,
+    };
+    return newItem;
+  }
+
+  async update[PageItem](id: string, data: Update[PageItem]Data): Promise<[PageItem]> {
+    const index = this.items.findIndex((item) => item.id === id);
+    if (index === -1) {
+      throw new Error("[PageItem] not found");
+    }
+    const updated: [PageItem] = {
+      ...this.items[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    this.items[index] = updated;
+    return updated;
+  }
+
+  async delete[PageItem](id: string): Promise<boolean> {
+    const before = this.items.length;
+    this.items = this.items.filter((item) => item.id !== id);
+    this.stats = {
+      ...this.stats,
+      totalItems: this.items.length,
+      activeItems: this.items.length,
+    };
+    return this.items.length < before;
+  }
+
+  async get[PageItem]ById(id: string): Promise<[PageItem]> {
+    const item = this.items.find((current) => current.id === id);
+    if (!item) {
+      throw new Error("[PageItem] not found");
+    }
+    return item;
+  }
+}
+
 /**
  * Presenter for [PageName] management
  * Follows Clean Architecture with proper separation of concerns
  */
 export class [PageName]Presenter {
   constructor(
-    private readonly supabase: SupabaseClient
-  ) {
-  }
+    private readonly repository: [PageName]Repository
+  ) {}
 
-  /**
-   * Get view model for the page
-   */
   async getViewModel([paramName]: string, page: number, perPage: number): Promise<[PageName]ViewModel> {
-    try {
-      // Get user for authentication
-      const user = await this.getUser();
+    const user = await this.getUser();
+    const [items, stats] = await Promise.all([
+      this.getPaginated[PageItems](page, perPage),
+      this.getStats(),
+    ]);
 
-      // Get data in parallel for better performance
-      const [items, stats] = await Promise.all([
-        this.getPaginatedItems(page, perPage),
-        this.getStats()
-      ]);
-
-      return {
-        user,
-        items: items.data,
-        stats,
-        totalCount: items.total,
-        page,
-        perPage
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      user,
+      items: items.data,
+      stats,
+      totalCount: items.total,
+      page,
+      perPage,
+    };
   }
 
-  /**
-   * Generate metadata for the page
-   */
   async generateMetadata([paramName]: string) {
-    try {
-      return {
-        title: "จัดการ[PageThaiName] | Shop Queue",
-        description: "ระบบจัดการ[PageThaiDescription]",
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      title: "จัดการ[PageThaiName] | Shop Queue",
+      description: "ระบบจัดการ[PageThaiDescription]",
+    };
   }
 
-  /**
-   * Create a new item
-   */
   async create[PageItem](data: Create[PageItem]Data): Promise<[PageItem]> {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const item = await this.supabase.from("[page-name]").insert(data);
-      return item;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.create[PageItem](data);
   }
 
-  /**
-   * Update an existing item
-   */
   async update[PageItem](id: string, data: Update[PageItem]Data): Promise<[PageItem]> {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const item = await this.supabase.from("[page-name]").update(data).eq("id", id);
-      return item;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.update[PageItem](id, data);
   }
 
-  /**
-   * Delete an item
-   */
   async delete[PageItem](id: string): Promise<boolean> {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      await this.supabase.from("[page-name]").delete().eq("id", id);
-      return true;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.delete[PageItem](id);
   }
 
-  /**
-   * Get item by ID
-   */
   async get[PageItem]ById(id: string): Promise<[PageItem]> {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const item = await this.supabase.from("[page-name]").select("*").eq("id", id);
-      return item;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.get[PageItem]ById(id);
   }
 
-  /**
-   * Get paginated items
-   */
   async getPaginated[PageItems](page: number, perPage: number) {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const result = await this.supabase.from("[page-name]").select("*").order("createdAt", { ascending: false }).limit(perPage).offset((page - 1) * perPage);
-      return result;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.getPaginated[PageItems](page, perPage);
   }
 
-  /**
-   * Get stats
-   */
   async getStats() {
-    try {
-      const user = await this.getUser();
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
-      const result = await this.supabase.from("[page-name]").select("*").order("createdAt", { ascending: false }).limit(perPage).offset((page - 1) * perPage);
-      return result;
-    } catch (error) {
-      throw error;
+    const user = await this.getUser();
+    if (!user) {
+      throw new Error("User not authenticated");
     }
+    return this.repository.getStats();
   }
 
-  /**
-   * Get user
-   */
-  async getUser() {
-    try {
-      const user = await this.supabase.auth.getUser();
-      return user;
-    } catch (error) {
-      throw error;
-    }
+  private getUser() {
+    return this.repository.getUser();
   }
 }
 
 /**
  * Factory for creating [PageName]Presenter instances
+ * ✅ Inject repository here (mock, Supabase, REST, etc.)
  */
 export class [PageName]PresenterFactory {
   static async createServer(): Promise<[PageName]Presenter> {
-    const supabase = createServerSupabaseClient();
-    return new [PageName]Presenter(
-      supabase,
-    );
+    // TODO: Replace Mock repository with real repository resolved from server container
+    const repository = new Mock[PageName]Repository();
+    return new [PageName]Presenter(repository);
   }
 
   static createClient(): [PageName]Presenter {
-    const supabase = createClientSupabaseClient();
-    return new [PageName]Presenter(
-      supabase,
-    );
+    // TODO: Replace Mock repository with client-side repository implementation when ready
+    const repository = new Mock[PageName]Repository();
+    return new [PageName]Presenter(repository);
   }
 }
 ```
 
 ### Key Features:
 
-- **Clean Architecture** with proper separation of concerns
-- **Authentication and authorization** checks
-- **CRUD operations** with proper error handling
+- **Repository abstraction** for infrastructure independence
+- **Mock repository** ready for quick prototyping and testing
+- **Swap-in real repositories** via dependency injection (Supabase, REST, etc.)
+- **Authentication and authorization** checks inside presenter
 - **Parallel data fetching** for performance
-- **Factory pattern** for dependency injection
-- **Server and client factories** for different environments
+- **Factory pattern** controlling dependency wiring
 
 ---
 

@@ -208,6 +208,27 @@ export function FrontendHeader() {
                 {/* Mobile Profile Menu Items */}
                 <div className="px-3 space-y-1">
                   <Link
+                    href="/account"
+                    className="flex items-center px-3 py-2 text-sm text-foreground hover:bg-muted-light rounded-md transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <svg
+                      className="w-4 h-4 mr-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5.121 17.804A7 7 0 0112 4a7 7 0 016.879 13.804A9.004 9.004 0 0112 21a9.004 9.004 0 01-6.879-3.196z"
+                      />
+                    </svg>
+                    จัดการบัญชี
+                  </Link>
+
+                  <Link
                     href="/switch-profile"
                     className="flex items-center px-3 py-2 text-sm text-foreground hover:bg-muted-light rounded-md transition-colors"
                     onClick={() => setIsMenuOpen(false)}

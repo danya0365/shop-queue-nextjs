@@ -7,7 +7,8 @@ import {
   UpdateProfileInputDto,
 } from "@/src/application/dtos/profile-dto";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { CreateProfileForm } from "./CreateProfileForm";
 import { EditProfileForm } from "./EditProfileForm";
 import { ProfileCard } from "./ProfileCard";
@@ -35,6 +36,24 @@ export function AccountView({ user }: AccountViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingProfile, setEditingProfile] = useState<ProfileDto | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const metadataEntries = useMemo(
+    () => Object.entries(user.userMetadata ?? {}),
+    [user.userMetadata]
+  );
+
+  const appMetadataEntries = useMemo(
+    () => Object.entries(user.appMetadata ?? {}),
+    [user.appMetadata]
+  );
+
+  const sortedProfiles = useMemo(() => {
+    if (!activeProfile) {
+      return profiles;
+    }
+    const others = profiles.filter((profile) => profile.id !== activeProfile.id);
+    return [activeProfile, ...others];
+  }, [activeProfile, profiles]);
 
   // Load profiles on component mount
   useEffect(() => {
@@ -122,63 +141,142 @@ export function AccountView({ user }: AccountViewProps) {
 
   // Calculate stats
   const totalProfiles = profiles.length;
-  const activeProfilesCount = profiles.filter(p => p.isActive).length;
+  const activeProfilesCount = profiles.filter((p) => p.isActive).length;
+  const activeProfilesPercentage = totalProfiles > 0
+    ? Math.round((activeProfilesCount / totalProfiles) * 100)
+    : 0;
+
+  const accountStatusLabel = user.emailConfirmedAt ? "ยืนยันแล้ว" : "รอการยืนยัน";
+  const accountStatusTone = user.emailConfirmedAt
+    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200"
+    : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200";
+
+  const formatDateTime = (value?: string | null) => {
+    if (!value) {
+      return "—";
+    }
+
+    try {
+      return new Intl.DateTimeFormat("th-TH", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch (err) {
+      console.error("Error formatting date", err);
+      return value;
+    }
+  };
+
+  const mapMetadataValue = (value: unknown) => {
+    if (value === null || value === undefined) {
+      return { text: "—", multiline: false };
+    }
+
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      return { text: String(value), multiline: false };
+    }
+
+    return { text: JSON.stringify(value, null, 2), multiline: true };
+  };
+
+  const activityTimeline = useMemo(
+    () =>
+      [
+        {
+          label: "สร้างบัญชี",
+          value: user.createdAt,
+          description: "สร้างบัญชี Shop Queue สำเร็จ",
+        },
+        {
+          label: "ยืนยันอีเมล",
+          value: user.emailConfirmedAt ?? null,
+          description: "ยืนยันตัวตนผ่านอีเมล",
+        },
+        {
+          label: "เข้าสู่ระบบล่าสุด",
+          value: user.lastSignInAt ?? null,
+          description: "กิจกรรมล่าสุด",
+        },
+        {
+          label: "อัปเดตข้อมูล",
+          value: user.updatedAt,
+          description: "เปลี่ยนแปลงข้อมูลบัญชี",
+        },
+      ].filter((item) => Boolean(item.value)),
+    [user.createdAt, user.emailConfirmedAt, user.lastSignInAt, user.updatedAt]
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40">
+      <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            สวัสดี, {user?.email?.split("@")[0] || "ผู้ใช้"}! 👋
-          </h1>
-          <p className="text-muted">
-            {totalProfiles > 0
-              ? "จัดการโปรไฟล์และการตั้งค่าบัญชีของคุณ"
-              : "เริ่มต้นด้วยการสร้างโปรไฟล์แรกของคุณ"}
-          </p>
+        <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+              บัญชีของคุณ
+            </span>
+            <h1 className="mt-3 text-3xl font-bold text-foreground">
+              แดชบอร์ดบัญชี
+            </h1>
+            <p className="mt-2 text-muted">
+              ภาพรวมข้อมูลจาก Supabase Auth พร้อมการจัดการโปรไฟล์และสถานะความปลอดภัยของบัญชีในศูนย์เดียว
+            </p>
+          </div>
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted">อีเมลบัญชี</p>
+                <p className="mt-1 truncate text-lg font-semibold text-foreground">
+                  {user.email}
+                </p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
+                {accountStatusLabel}
+              </span>
+            </div>
+            <dl className="mt-6 space-y-3 text-sm text-muted">
+              <div className="flex items-center justify-between">
+                <dt>เข้าสู่ระบบล่าสุด</dt>
+                <dd className="font-medium text-foreground">
+                  {formatDateTime(user.lastSignInAt)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt>สร้างบัญชีเมื่อ</dt>
+                <dd className="font-medium text-foreground">
+                  {formatDateTime(user.createdAt)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt>อัปเดตล่าสุด</dt>
+                <dd className="font-medium text-foreground">
+                  {formatDateTime(user.updatedAt)}
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
 
         {/* Success Message */}
         {successMessage && (
-          <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-green-600 dark:text-green-400 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <p className="text-green-800 dark:text-green-200">{successMessage}</p>
+          <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 shadow-sm dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-200">
+            <div className="flex items-center gap-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500"></span>
+              <span>{successMessage}</span>
             </div>
           </div>
         )}
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-red-600 dark:text-red-400 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p className="text-red-800 dark:text-red-200">{error}</p>
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+            <div className="flex items-center gap-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+              <span>{error}</span>
             </div>
           </div>
         )}
@@ -186,197 +284,252 @@ export function AccountView({ user }: AccountViewProps) {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
             <span className="ml-2 text-muted">กำลังโหลด...</span>
           </div>
         )}
 
-        {/* Content based on view mode */}
         {!loading && (
           <>
             {viewMode === "list" && (
-              <>
-                {totalProfiles > 0 ? (
-                  <>
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                      {/* Total Profiles Card */}
-                      <div className="bg-surface rounded-lg border border-border p-6 hover:shadow-lg transition-shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm text-muted mb-1">โปรไฟล์ทั้งหมด</p>
-                            <p className="text-3xl font-bold text-foreground">{totalProfiles}</p>
-                            <p className="text-xs text-muted mt-1">โปรไฟล์ที่สร้างไว้</p>
-                          </div>
-                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-blue-600 dark:text-blue-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Active Profile Card */}
-                      <div className="bg-surface rounded-lg border border-border p-6 hover:shadow-lg transition-shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm text-muted mb-1">โปรไฟล์ที่ใช้งาน</p>
-                            <p className="text-3xl font-bold text-foreground">{activeProfilesCount}</p>
-                            <p className="text-xs text-muted mt-1">โปรไฟล์ที่เปิดใช้งาน</p>
-                          </div>
-                          <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-green-600 dark:text-green-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Account Email Card */}
-                      <div className="bg-surface rounded-lg border border-border p-6 hover:shadow-lg transition-shadow">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-muted mb-1">อีเมลบัญชี</p>
-                            <p className="text-lg font-semibold text-foreground truncate">{user.email}</p>
-                            <p className="text-xs text-muted mt-1">บัญชีหลัก</p>
-                          </div>
-                          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0 ml-4">
-                            <svg
-                              className="w-6 h-6 text-purple-600 dark:text-purple-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
+              <div className="space-y-10">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                    <p className="text-sm text-muted">สถานะบัญชี</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-2xl font-semibold text-foreground">
+                        {accountStatusLabel}
+                      </span>
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
+                        {user.emailConfirmedAt ? "ยืนยันอีเมลแล้ว" : "รอการยืนยัน"}
+                      </span>
                     </div>
-
-                    {/* Active Profile Section */}
-                    {activeProfile && (
-                      <div className="mb-8">
-                        <div className="flex items-center justify-between mb-4">
-                          <h2 className="text-xl font-semibold text-foreground">
-                            โปรไฟล์ที่ใช้งานอยู่
-                          </h2>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
-                            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                            ใช้งานอยู่
-                          </span>
-                        </div>
-                        <ProfileCard
-                          profile={activeProfile}
-                          isActive={true}
-                          onSwitch={handleSwitchProfile}
-                          onEdit={handleEditProfile}
-                          onDelete={handleDeleteProfile}
-                        />
-                      </div>
-                    )}
-
-                    {/* All Profiles Section */}
-                    <div className="mb-8">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-foreground">
-                          โปรไฟล์ทั้งหมด
-                        </h2>
-                        <button
-                          onClick={() => setViewMode("create")}
-                          className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center gap-2 shadow-sm hover:shadow-md"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          สร้างโปรไฟล์ใหม่
-                        </button>
-                      </div>
-
-                      <div className="grid gap-4">
-                        {profiles.map((profile) => (
-                          <ProfileCard
-                            key={profile.id}
-                            profile={profile}
-                            isActive={profile.id === activeProfile?.id}
-                            onSwitch={handleSwitchProfile}
-                            onEdit={handleEditProfile}
-                            onDelete={handleDeleteProfile}
-                          />
-                        ))}
-                      </div>
+                    <p className="mt-4 text-xs text-muted">
+                      ปรับปรุงล่าสุด {formatDateTime(user.updatedAt)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                    <p className="text-sm text-muted">เข้าสู่ระบบล่าสุด</p>
+                    <p className="mt-3 text-2xl font-semibold text-foreground">
+                      {formatDateTime(user.lastSignInAt)}
+                    </p>
+                    <p className="mt-4 text-xs text-muted">ผ่านบัญชี {user.email}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                    <p className="text-sm text-muted">สร้างบัญชีเมื่อ</p>
+                    <p className="mt-3 text-2xl font-semibold text-foreground">
+                      {formatDateTime(user.createdAt)}
+                    </p>
+                    <p className="mt-4 text-xs text-muted">รหัสผู้ใช้ {user.id}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted">โปรไฟล์ที่ผูกกับบัญชี</p>
+                      <span className="text-xs text-muted">
+                        ใช้งาน {activeProfilesCount}/{totalProfiles}
+                      </span>
                     </div>
-                  </>
-                ) : (
-                  /* No Profiles State */
-                  <div className="text-center py-16">
-                    <div className="max-w-md mx-auto">
-                      <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg
-                          className="w-12 h-12 text-blue-600 dark:text-blue-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                    <p className="mt-3 text-2xl font-semibold text-foreground">
+                      {totalProfiles}
+                    </p>
+                    <div className="mt-4 h-2 rounded-full bg-muted">
+                      <div
+                        className="h-2 rounded-full bg-primary"
+                        style={{ width: `${activeProfilesPercentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                  <div className="space-y-8">
+                    <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                      <div className="flex flex-col gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h2 className="text-xl font-semibold text-foreground">รายละเอียดบัญชี</h2>
+                          <p className="mt-1 text-sm text-muted">
+                            ข้อมูลจากตาราง `auth.users` ที่ผูกกับบัญชี Shop Queue ของคุณ
+                          </p>
+                        </div>
+                        <Link
+                          href="/switch-profile"
+                          className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/20"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
+                          จัดการการเชื่อมต่อโปรไฟล์
+                        </Link>
                       </div>
 
-                      <h2 className="text-2xl font-bold text-foreground mb-4">
-                        ยินดีต้อนรับสู่ Shop Queue!
-                      </h2>
+                      <dl className="mt-6 grid gap-6 md:grid-cols-2">
+                        <div>
+                          <dt className="text-sm text-muted">ไอดีผู้ใช้</dt>
+                          <dd className="mt-1 break-all text-base font-semibold text-foreground">
+                            {user.id}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm text-muted">บทบาท</dt>
+                          <dd className="mt-1 text-base font-semibold text-foreground">
+                            {user.role ?? "ผู้ใช้งานทั่วไป"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm text-muted">อีเมล</dt>
+                          <dd className="mt-1 truncate text-base font-semibold text-foreground">
+                            {user.email}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm text-muted">เบอร์โทรศัพท์</dt>
+                          <dd className="mt-1 text-base font-semibold text-foreground">
+                            {user.phone ?? "ยังไม่ได้ระบุ"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm text-muted">การยืนยันอีเมล</dt>
+                          <dd className="mt-1 text-base font-semibold text-foreground">
+                            {user.emailConfirmedAt ? formatDateTime(user.emailConfirmedAt) : "ยังไม่ยืนยัน"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm text-muted">Audience</dt>
+                          <dd className="mt-1 text-base font-semibold text-foreground">
+                            {user.aud ?? "ไม่ระบุ"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </section>
 
-                      <p className="text-muted mb-8">
-                        เริ่มต้นด้วยการสร้างโปรไฟล์แรกของคุณ
-                        โปรไฟล์จะช่วยให้คุณจัดการข้อมูลส่วนตัวและการตั้งค่าต่างๆ ได้อย่างมีประสิทธิภาพ
+                    <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                      <h2 className="text-xl font-semibold text-foreground">ความปลอดภัยและกิจกรรม</h2>
+                      <p className="mt-1 text-sm text-muted">
+                        ตรวจสอบสถานะความปลอดภัยและกิจกรรมล่าสุดเพื่อป้องกันการเข้าถึงที่ไม่พึงประสงค์
                       </p>
 
+                      <div className="mt-6 space-y-6">
+                        <div className="rounded-xl border border-border/60 bg-muted/30 p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">การยืนยันอีเมล</p>
+                              <p className="mt-1 text-xs text-muted">
+                                {user.emailConfirmedAt
+                                  ? "บัญชีนี้ได้รับการยืนยันแล้ว"
+                                  : "กรุณายืนยันอีเมลเพื่อเพิ่มความปลอดภัย"}
+                              </p>
+                            </div>
+                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
+                              {user.emailConfirmedAt ? "ยืนยันแล้ว" : "ยังไม่ยืนยัน"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">กิจกรรมล่าสุด</p>
+                          {activityTimeline.length > 0 ? (
+                            <ol className="mt-4 space-y-3">
+                              {activityTimeline.map((item, index) => (
+                                <li key={`${item.label}-${item.value}`} className="flex items-start gap-3">
+                                  <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                                    {index + 1}
+                                  </span>
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">{item.label}</p>
+                                    <p className="text-xs text-muted">{item.description}</p>
+                                    <p className="mt-1 text-xs font-medium text-foreground/70">
+                                      {formatDateTime(item.value)}
+                                    </p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p className="mt-3 text-sm text-muted">ยังไม่มีประวัติกิจกรรมล่าสุด</p>
+                          )}
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div className="space-y-8">
+                    <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                      <h2 className="text-xl font-semibold text-foreground">ข้อมูลเมตา</h2>
+                      <p className="mt-1 text-sm text-muted">
+                        ตรวจสอบค่า `user_metadata` และ `app_metadata` ที่แนบมากับบัญชีเพื่อการดีบักหรือการปรับแต่งประสบการณ์ผู้ใช้
+                      </p>
+
+                      <div className="mt-6 space-y-6 text-sm">
+                        {metadataEntries.length === 0 && appMetadataEntries.length === 0 && (
+                          <p className="text-muted">ยังไม่มีข้อมูลเมตาที่กำหนดไว้สำหรับบัญชีนี้</p>
+                        )}
+
+                        {metadataEntries.length > 0 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">
+                              User Metadata
+                            </h3>
+                            <div className="space-y-2">
+                              {metadataEntries.map(([key, value]) => {
+                                const mapped = mapMetadataValue(value);
+                                return (
+                                  <div key={`user-metadata-${key}`} className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                                    <p className="text-xs font-semibold text-muted">{key}</p>
+                                    {mapped.multiline ? (
+                                      <pre className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
+                                        {mapped.text}
+                                      </pre>
+                                    ) : (
+                                      <p className="mt-1 text-sm text-foreground">{mapped.text}</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {appMetadataEntries.length > 0 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">
+                              App Metadata
+                            </h3>
+                            <div className="space-y-2">
+                              {appMetadataEntries.map(([key, value]) => {
+                                const mapped = mapMetadataValue(value);
+                                return (
+                                  <div key={`app-metadata-${key}`} className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                                    <p className="text-xs font-semibold text-muted">{key}</p>
+                                    {mapped.multiline ? (
+                                      <pre className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
+                                        {mapped.text}
+                                      </pre>
+                                    ) : (
+                                      <p className="mt-1 text-sm text-foreground">{mapped.text}</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+
+                <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 border-b border-border/60 pb-6 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">โปรไฟล์ที่เชื่อมต่อกับบัญชี</h2>
+                      <p className="mt-1 text-sm text-muted">
+                        สลับโปรไฟล์เพื่อจัดการข้อมูลร้านค้า การจองคิว และสิทธิ์การเข้าถึงได้รวดเร็ว
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => setViewMode("create")}
-                        className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium inline-flex items-center gap-2 shadow-lg hover:shadow-xl"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
                       >
                         <svg
-                          className="w-5 h-5"
+                          className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -392,29 +545,104 @@ export function AccountView({ user }: AccountViewProps) {
                       </button>
                     </div>
                   </div>
-                )}
-              </>
+
+                  <div className="mt-6 space-y-4">
+                    {totalProfiles > 0 ? (
+                      sortedProfiles.map((profile) => (
+                        <ProfileCard
+                          key={profile.id}
+                          profile={profile}
+                          isActive={profile.id === activeProfile?.id}
+                          onSwitch={handleSwitchProfile}
+                          onEdit={handleEditProfile}
+                          onDelete={handleDeleteProfile}
+                        />
+                      ))
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          ยังไม่มีโปรไฟล์ที่เชื่อมต่อ
+                        </h3>
+                        <p className="mt-2 text-sm text-muted">
+                          สร้างโปรไฟล์แรกของคุณเพื่อเชื่อมต่อกับร้านค้าและข้อมูลลูกค้าได้เร็วขึ้น
+                        </p>
+                        <button
+                          onClick={() => setViewMode("create")}
+                          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                          สร้างโปรไฟล์ใหม่
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </div>
             )}
 
             {viewMode === "create" && (
-              <div className="max-w-2xl mx-auto">
-                <CreateProfileForm
-                  authId={user.id}
-                  onSubmit={handleCreateProfile}
-                  onCancel={handleCancelForm}
-                  loading={loading}
-                />
+              <div className="mx-auto max-w-3xl">
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-foreground">สร้างโปรไฟล์ใหม่</h2>
+                    <p className="text-sm text-muted">
+                      เชื่อมต่อบัญชีของคุณกับโปรไฟล์ลูกค้าหรือลูกค้าองค์กรเพื่อใช้งานบริการของร้านค้า
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCancelForm}
+                    className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                  >
+                    กลับสู่แดชบอร์ด
+                  </button>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                  <CreateProfileForm
+                    authId={user.id}
+                    onSubmit={handleCreateProfile}
+                    onCancel={handleCancelForm}
+                    loading={loading}
+                  />
+                </div>
               </div>
             )}
 
             {viewMode === "edit" && editingProfile && (
-              <div className="max-w-2xl mx-auto">
-                <EditProfileForm
-                  profile={editingProfile}
-                  onSubmit={handleUpdateProfile}
-                  onCancel={handleCancelForm}
-                  loading={loading}
-                />
+              <div className="mx-auto max-w-3xl">
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-foreground">แก้ไขโปรไฟล์</h2>
+                    <p className="text-sm text-muted">
+                      ปรับปรุงข้อมูลโปรไฟล์เพื่อให้สอดคล้องกับทีมและการทำงานในปัจจุบัน
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCancelForm}
+                    className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                  >
+                    กลับสู่แดชบอร์ด
+                  </button>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                  <EditProfileForm
+                    profile={editingProfile}
+                    onSubmit={handleUpdateProfile}
+                    onCancel={handleCancelForm}
+                    loading={loading}
+                  />
+                </div>
               </div>
             )}
           </>
