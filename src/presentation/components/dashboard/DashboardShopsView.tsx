@@ -1,8 +1,8 @@
 "use client";
 
 import type { ShopDTO } from "@/src/application/dtos/shop/backend/shops-dto";
-import Link from "next/link";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { ShopListCard } from "./ShopListCard";
 
 interface DashboardShopsViewProps {
@@ -18,10 +18,12 @@ export function DashboardShopsView({
 }: DashboardShopsViewProps) {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">ร้านค้าของคุณ</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              ร้านค้าของคุณ
+            </h1>
             <p className="mt-2 text-muted-foreground">
               จัดการร้านค้าทั้งหมดของคุณและสร้างร้านใหม่ได้จากหน้านี้
             </p>
