@@ -147,7 +147,14 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <ShoppingBag className="w-4 h-4 mr-3" />
-                            แดชบอร์ดลูกค้า
+                            แดชบอร์ดสำหรับลูกค้า
+                          </Link>
+                          <Link
+                            href="/dashboard/shops"
+                            className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
+                          >
+                            <ShoppingBag className="w-4 h-4 mr-3" />
+                            แดชบอร์ดสำหรับร้านค้า
                           </Link>
                           <hr className="my-2 border-slate-200 dark:border-slate-700" />
                           <button
