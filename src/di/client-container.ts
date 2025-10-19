@@ -30,6 +30,7 @@ import { QueueServiceBackendService } from "../application/services/shop/backend
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
 import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
+import { ShopCustomerVisitedShopsServiceFactory } from "../application/services/shop/customer/ShopCustomerVisitedShopsService";
 import { ShopCustomerQueueJoinServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueJoinService";
 import { ShopCustomerQueueStatusServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueStatusService";
 import { ShopCustomerRewardServiceFactory } from "../application/services/shop/customer/ShopCustomerRewardService";
@@ -63,6 +64,7 @@ import { SupabaseShopBackendShopRepository } from "../infrastructure/repositorie
 import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-shop-settings-repository";
 import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
 import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
+import { SupabaseCustomerVisitedShopsRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-visited-shops-repository";
 import { SupabaseCustomerQueueJoinRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-join-repository";
 import { SupabaseCustomerQueueStatusRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-status-repository";
 import { SupabaseCustomerRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-repository";
@@ -137,6 +139,8 @@ export function createClientContainer(): Container {
       databaseDatasource,
       logger
     );
+    const customerVisitedShopsRepository =
+      new SupabaseCustomerVisitedShopsRepository(databaseDatasource, logger);
     const customerQueueStatusRepository =
       new SupabaseCustomerQueueStatusRepository(databaseDatasource, logger);
     const customerQueueJoinRepository = new SupabaseCustomerQueueJoinRepository(
@@ -302,6 +306,11 @@ export function createClientContainer(): Container {
       customerHistoryRepository,
       logger
     );
+    const shopCustomerVisitedShopsService =
+      ShopCustomerVisitedShopsServiceFactory.create(
+        customerVisitedShopsRepository,
+        logger
+      );
 
     // Create customer queue status service
     const shopCustomerQueueStatusService =
@@ -413,6 +422,10 @@ export function createClientContainer(): Container {
     container.registerInstance(
       "ShopCustomerHistoryService",
       shopCustomerHistoryService
+    );
+    container.registerInstance(
+      "ShopCustomerVisitedShopsService",
+      shopCustomerVisitedShopsService
     );
     container.registerInstance(
       "ShopCustomerQueueStatusService",

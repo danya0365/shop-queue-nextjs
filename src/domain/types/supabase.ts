@@ -2179,6 +2179,7 @@ export type Database = {
           points_expiry_months: number
           points_per_baht: number
           promptpay_id: string | null
+          queue_number_prefix: string
           queue_timeout_minutes: number
           require_customer_phone: boolean
           require_email_verification: boolean
@@ -2231,6 +2232,7 @@ export type Database = {
           points_expiry_months?: number
           points_per_baht?: number
           promptpay_id?: string | null
+          queue_number_prefix?: string
           queue_timeout_minutes?: number
           require_customer_phone?: boolean
           require_email_verification?: boolean
@@ -2283,6 +2285,7 @@ export type Database = {
           points_expiry_months?: number
           points_per_baht?: number
           promptpay_id?: string | null
+          queue_number_prefix?: string
           queue_timeout_minutes?: number
           require_customer_phone?: boolean
           require_email_verification?: boolean
@@ -4682,6 +4685,7 @@ export type Database = {
           p_points: number
           p_description: string
           p_queue_id?: string
+          p_metadata?: Json
         }
         Returns: undefined
       }
@@ -4693,6 +4697,13 @@ export type Database = {
           p_rating?: number
         }
         Returns: undefined
+      }
+      calculate_points_from_promotions: {
+        Args: { p_queue_id: string; p_payment_amount?: number }
+        Returns: {
+          total_points: number
+          applied_promotions: Json
+        }[]
       }
       can_perform_action: {
         Args: { p_profile_id: string; p_action: string; p_shop_id?: string }
@@ -4811,6 +4822,25 @@ export type Database = {
       get_auth_user_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_available_point_promotions: {
+        Args: {
+          p_shop_id: string
+          p_customer_id?: string
+          p_estimated_amount?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          type: Database["public"]["Enums"]["promotion_type"]
+          value: number
+          min_purchase_amount: number
+          estimated_points: number
+          start_at: string
+          end_at: string
+          conditions: Json
+        }[]
       }
       get_available_rewards: {
         Args: {
@@ -5332,6 +5362,10 @@ export type Database = {
         Args: { profile_id: string }
         Returns: Database["public"]["Enums"]["profile_role"]
       }
+      get_profile_visited_shops: {
+        Args: { p_profile_id: string; p_page?: number; p_limit?: number }
+        Returns: Json
+      }
       get_public_queue_comprehensive_stats: {
         Args: { p_shop_id: string }
         Returns: {
@@ -5764,7 +5798,7 @@ export type Database = {
         Returns: boolean
       }
       is_valid_customer_points_access: {
-        Args: { customer_point_id: string }
+        Args: { shop_id: string }
         Returns: boolean
       }
       is_valid_department_access: {
@@ -6021,6 +6055,9 @@ export type Database = {
         | "fixed_amount"
         | "buy_x_get_y"
         | "free_item"
+        | "points_multiplier"
+        | "bonus_points"
+        | "points_cashback"
       queue_priority: "normal" | "high" | "urgent"
       queue_status:
         | "waiting"
@@ -6231,6 +6268,9 @@ export const Constants = {
         "fixed_amount",
         "buy_x_get_y",
         "free_item",
+        "points_multiplier",
+        "bonus_points",
+        "points_cashback",
       ],
       queue_priority: ["normal", "high", "urgent"],
       queue_status: [

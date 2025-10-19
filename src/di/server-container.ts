@@ -29,6 +29,7 @@ import { QueueServiceBackendService } from "../application/services/shop/backend
 import { RewardTransactionBackendService } from "../application/services/shop/backend/reward-transactions-backend-service";
 import { ShopCustomerDashboardServiceFactory } from "../application/services/shop/customer/ShopCustomerDashboardService";
 import { ShopCustomerHistoryServiceFactory } from "../application/services/shop/customer/ShopCustomerHistoryService";
+import { ShopCustomerVisitedShopsServiceFactory } from "../application/services/shop/customer/ShopCustomerVisitedShopsService";
 import { ShopCustomerQueueJoinServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueJoinService";
 import { ShopCustomerQueueStatusServiceFactory } from "../application/services/shop/customer/ShopCustomerQueueStatusService";
 import { ShopCustomerRewardServiceFactory } from "../application/services/shop/customer/ShopCustomerRewardService";
@@ -63,6 +64,7 @@ import { SupabaseShopBackendShopSettingsRepository } from "../infrastructure/rep
 import { SupabaseGlobalDashboardRepository } from "../infrastructure/repositories/dashboard/supabase-global-dashboard-repository";
 import { SupabaseCustomerDashboardRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-dashboard-repository";
 import { SupabaseCustomerHistoryRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-history-repository";
+import { SupabaseCustomerVisitedShopsRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-visited-shops-repository";
 import { SupabaseCustomerQueueJoinRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-join-repository";
 import { SupabaseCustomerQueueStatusRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-queue-status-repository";
 import { SupabaseCustomerRepository } from "../infrastructure/repositories/shop/customer/supabase-customer-repository";
@@ -133,6 +135,8 @@ export async function createServerContainer(): Promise<Container> {
       databaseDatasource,
       logger
     );
+    const customerVisitedShopsRepository =
+      new SupabaseCustomerVisitedShopsRepository(databaseDatasource, logger);
     const customerRewardRepository = new SupabaseCustomerRewardRepository(
       databaseDatasource,
       logger
@@ -308,6 +312,11 @@ export async function createServerContainer(): Promise<Container> {
       customerHistoryRepository,
       logger
     );
+    const shopCustomerVisitedShopsService =
+      ShopCustomerVisitedShopsServiceFactory.create(
+        customerVisitedShopsRepository,
+        logger
+      );
 
     // Create customer reward service
     const shopCustomerRewardService = ShopCustomerRewardServiceFactory.create(
@@ -404,6 +413,10 @@ export async function createServerContainer(): Promise<Container> {
     container.registerInstance(
       "ShopCustomerHistoryService",
       shopCustomerHistoryService
+    );
+    container.registerInstance(
+      "ShopCustomerVisitedShopsService",
+      shopCustomerVisitedShopsService
     );
     container.registerInstance(
       "ShopCustomerRewardService",
