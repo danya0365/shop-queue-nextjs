@@ -42,6 +42,5 @@ export interface IAuthService {
    * @returns true if sign out was successful, false otherwise
    */
   signOut(): Promise<boolean>;
-  
-
+  updatePassword(newPassword: string): Promise<AuthUserDto | null>;
 }

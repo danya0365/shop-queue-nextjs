@@ -146,6 +146,24 @@ export class SupabaseAuthDataSource implements AuthDataSource {
     }
   }
 
+  async updatePassword(newPassword: string): Promise<AuthResult> {
+    try {
+      const { data, error } = await this.client.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        this.handleError(error, 'updatePassword');
+      }
+
+      if (!data.user) {
+        this.handleError(new Error('No user returned after password update'), 'updatePassword');
+      }
+
+      return this.mapAuthUser(data.user);
+    } catch (error) {
+      this.handleError(error, 'updatePassword');
+    }
+  }
+
   async getSession(): Promise<AuthUser | null> {
     try {
       const { data, error } = await this.client.auth.getSession();

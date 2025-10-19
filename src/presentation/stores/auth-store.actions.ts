@@ -279,6 +279,33 @@ export const createAuthActions = (
     }
   },
 
+  updatePassword: async (newPassword: string) => {
+    setState({ loading: true, error: null });
+    try {
+      const user = await authService.updatePassword(newPassword);
+
+      if (!user) {
+        const updateError = new Error("Failed to update password");
+        setState({ error: updateError.message, loading: false });
+        return { error: updateError };
+      }
+
+      setState({
+        authAccount: mapAuthUserToStoreAccount(user),
+        loading: false,
+        error: null,
+      });
+
+      return { error: null };
+    } catch (error) {
+      logger.error("Error updating password:", error);
+      const updateError =
+        error instanceof Error ? error : new Error("Failed to update password");
+      setState({ error: updateError.message, loading: false });
+      return { error: updateError };
+    }
+  },
+
   signOut: async () => {
     setState({ loading: true, error: null });
     try {

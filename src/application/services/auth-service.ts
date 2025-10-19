@@ -18,6 +18,7 @@ export class AuthService implements IAuthService {
   private readonly signInWithPasswordUseCase: IUseCase<{ email: string; password: string }, AuthUserDto | null>;
   private readonly signUpUseCase: IUseCase<{ email: string; password: string; metadata?: Record<string, unknown> }, AuthUserDto | null>;
   private readonly signOutUseCase: IUseCase<void, boolean>;
+  private readonly updatePasswordUseCase: IUseCase<{ newPassword: string }, AuthUserDto | null>;
 
   /**
    * Constructor with dependency injection
@@ -51,6 +52,11 @@ export class AuthService implements IAuthService {
 
     this.signOutUseCase = new ErrorHandlingDecorator(
       AuthUseCaseFactory.createSignOutUseCase(authDataSource),
+      logger
+    );
+
+    this.updatePasswordUseCase = new ErrorHandlingDecorator(
+      AuthUseCaseFactory.createUpdatePasswordUseCase(authDataSource),
       logger
     );
   }
@@ -130,6 +136,11 @@ export class AuthService implements IAuthService {
   async signOut(): Promise<boolean> {
     // Error handling is now managed by the decorator
     return this.signOutUseCase.execute();
+  }
+
+  async updatePassword(newPassword: string): Promise<AuthUserDto | null> {
+    const user = await this.updatePasswordUseCase.execute({ newPassword });
+    return AuthMapper.toDto(user);
   }
 }
 

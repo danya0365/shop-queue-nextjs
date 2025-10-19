@@ -42,6 +42,8 @@ export interface IAuthenticationDataSource extends IBaseAuthDataSource {
    * @throws AuthError if the operation fails
    */
   signOut(): Promise<void>;
+
+  updatePassword(newPassword: string): Promise<AuthResult>;
 }
 
 /**

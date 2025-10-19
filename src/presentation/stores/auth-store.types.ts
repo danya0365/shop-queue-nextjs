@@ -43,6 +43,7 @@ export interface AuthActions {
   signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshAuthAccount: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
 
   // Auth listener
   initializeAuthListener: () => () => void;

@@ -5,6 +5,7 @@ import { OnAuthStateChangeUseCase } from "../usecases/auth/on-auth-state-change"
 import { SignInWithPasswordUseCase } from "../usecases/auth/sign-in-with-password";
 import { SignOutUseCase } from "../usecases/auth/sign-out";
 import { SignUpUseCase } from "../usecases/auth/sign-up";
+import { UpdatePasswordUseCase } from "../usecases/auth/update-password";
 
 /**
  * Factory for creating authentication use cases
@@ -54,5 +55,9 @@ export class AuthUseCaseFactory {
    */
   static createSignOutUseCase(authDataSource: AuthDataSource): SignOutUseCase {
     return new SignOutUseCase(authDataSource);
+  }
+
+  static createUpdatePasswordUseCase(authDataSource: AuthDataSource): UpdatePasswordUseCase {
+    return new UpdatePasswordUseCase(authDataSource);
   }
 }

@@ -22,6 +22,19 @@ export const registerSchema = z.object({
   path: ['confirmPassword']
 });
 
+export const changePasswordSchema = z.object({
+  newPassword: z
+    .string()
+    .min(8, { message: 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร' })
+    .regex(/[A-Z]/, { message: 'รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว' })
+    .regex(/[a-z]/, { message: 'รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว' })
+    .regex(/[0-9]/, { message: 'รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว' }),
+  confirmPassword: z.string().min(1, { message: 'กรุณายืนยันรหัสผ่านใหม่' })
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: 'รหัสผ่านไม่ตรงกัน',
+  path: ['confirmPassword']
+});
+
 export const loginSchema = z.object({
   email: z
     .string()
@@ -34,3 +47,4 @@ export const loginSchema = z.object({
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
