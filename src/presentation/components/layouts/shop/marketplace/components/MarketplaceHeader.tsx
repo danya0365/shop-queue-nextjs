@@ -140,7 +140,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <User className="w-4 h-4 mr-3" />
-                            สลับโปรไฟล์
+                            สลับโปรไฟล์ไอดี
                           </Link>
                           <Link
                             href="/shop/customer/dashboard"
@@ -302,7 +302,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <User className="w-5 h-5 mr-3" />
-                        <span>สลับโปรไฟล์</span>
+                        <span>สลับโปรไฟล์ไอดี</span>
                       </Link>
 
                       <Link

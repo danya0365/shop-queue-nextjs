@@ -40,9 +40,9 @@ export function ShopMerchantDashboardView({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <p className="text-sm uppercase tracking-wide text-orange-500 font-semibold">
-              Dashboard Overview
+              ภาพรวม
             </p>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
               ยินดีต้อนรับกลับ, {activeProfile?.fullName || "ผู้ประกอบการ"}
             </h1>
             <p className="text-slate-600 dark:text-slate-300 max-w-2xl">

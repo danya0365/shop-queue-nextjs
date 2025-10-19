@@ -38,15 +38,18 @@ export class SwitchProfilePresenter {
         activeProfile,
       };
     } catch (error) {
-      this.logger.error("SwitchProfilePresenter: Failed to build view model", error);
+      this.logger.error(
+        "SwitchProfilePresenter: Failed to build view model",
+        error
+      );
       throw error;
     }
   }
 
   generateMetadata(): Metadata {
     return {
-      title: "เปลี่ยนโปรไฟล์การใช้งาน | Shop Queue",
-      description: "สลับโปรไฟล์เพื่อใช้งานในบทบาทที่ต้องการได้อย่างรวดเร็ว",
+      title: "เปลี่ยนโปรไฟล์ไอดี | Shop Queue",
+      description: "สลับโปรไฟล์ไอดีเพื่อใช้งานในบทบาทที่ต้องการได้อย่างรวดเร็ว",
     };
   }
 
@@ -54,7 +57,10 @@ export class SwitchProfilePresenter {
     try {
       return await this.authService.getCurrentUser();
     } catch (error) {
-      this.logger.error("SwitchProfilePresenter: Failed to get current user", error);
+      this.logger.error(
+        "SwitchProfilePresenter: Failed to get current user",
+        error
+      );
       return null;
     }
   }
@@ -65,7 +71,8 @@ export class SwitchProfilePresenterFactory {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const authService = serverContainer.resolve<IAuthService>("AuthService");
-    const profileService = serverContainer.resolve<IProfileService>("ProfileService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
 
     return new SwitchProfilePresenter(logger, authService, profileService);
   }
