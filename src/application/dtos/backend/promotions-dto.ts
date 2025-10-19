@@ -7,14 +7,14 @@ export interface PromotionDTO {
   shopName: string; // joined from shop
   name: string;
   description: string | null;
-  type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item";
+  type: PromotionType;
   value: number;
   minPurchaseAmount: number | null;
   maxDiscountAmount: number | null;
   startAt: string;
   endAt: string;
   usageLimit: number | null;
-  status: "active" | "inactive" | "expired" | "scheduled";
+  status: PromotionStatus;
   conditions: PromotionConditions | null;
   createdBy: string; // joined from profile
   createdByName: string | null; // joined from profile

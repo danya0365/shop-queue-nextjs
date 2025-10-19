@@ -1,6 +1,7 @@
 "use client";
 
 import { PromotionDTO } from "@/src/application/dtos/backend/promotions-dto";
+import { PromotionType } from "@/src/application/dtos/shop/backend/promotions-dto";
 import { PromotionsViewModel } from "@/src/presentation/presenters/backend/promotions/PromotionsPresenter";
 import { usePromotionsPresenter } from "@/src/presentation/presenters/backend/promotions/usePromotionsPresenter";
 import { useState } from "react";
@@ -52,9 +53,7 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
     }
   };
 
-  const getTypeText = (
-    type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item"
-  ) => {
+  const getTypeText = (type: PromotionType) => {
     switch (type) {
       case "percentage":
         return "ลดเปอร์เซ็นต์";
@@ -87,7 +86,7 @@ export function PromotionsView({ viewModel }: PromotionsViewProps) {
     });
   };
 
-  const formatValue = (type: string, value: number) => {
+  const formatValue = (type: PromotionType, value: number) => {
     switch (type) {
       case "percentage":
         return `${value}%`;
