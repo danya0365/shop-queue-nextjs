@@ -8,6 +8,7 @@ import {
   ShopMarketplaceLayoutPresenterFactory,
   type ShopMarketplaceLayoutViewModel,
 } from "@/src/presentation/presenters/shop/marketplace/ShopMarketplaceLayoutPresenter";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -26,7 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const metadata = await presenter.generateMetadata();
     return metadata;
   } catch (error) {
-    console.error("Error generating metadata for customer marketplace dashboard:", error);
+    console.error(
+      "Error generating metadata for customer marketplace dashboard:",
+      error
+    );
     return {
       title: "ร้านค้าที่ฉันเคยใช้บริการ | Shop Queue",
       description: "ติดตามร้านค้าที่คุณเคยใช้บริการและจองคิวอีกครั้ง",
@@ -40,7 +44,10 @@ interface ShopCustomerDashboardPageProps {
   searchParams?: PageSearchParams;
 }
 
-function parseNumberParam(value: string | string[] | undefined, fallback: number) {
+function parseNumberParam(
+  value: string | string[] | undefined,
+  fallback: number
+) {
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return fallback;
   const parsed = Number.parseInt(raw, 10);
@@ -58,7 +65,10 @@ export default async function ShopCustomerDashboardPage({
   try {
     layoutData = await layoutPresenter.getLayoutViewModel();
   } catch (layoutError) {
-    console.error("Error loading marketplace layout data for customer dashboard:", layoutError);
+    console.error(
+      "Error loading marketplace layout data for customer dashboard:",
+      layoutError
+    );
   }
 
   try {
@@ -68,19 +78,28 @@ export default async function ShopCustomerDashboardPage({
     const viewModel = await presenter.getViewModel(page, limit);
 
     return (
-      <ShopMarketplaceLayout layoutData={layoutData ?? FALLBACK_LAYOUT_DATA} showHero={false}>
+      <ShopMarketplaceLayout
+        layoutData={layoutData ?? FALLBACK_LAYOUT_DATA}
+        showHero={false}
+      >
         <ShopCustomerDashboardView viewModel={viewModel} />
       </ShopMarketplaceLayout>
     );
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ยังไม่ได้เข้าสู่ระบบ")) {
+    if (
+      error instanceof Error &&
+      error.message.includes("ยังไม่ได้เข้าสู่ระบบ")
+    ) {
       redirect("/auth/login");
     }
 
     console.error("Error loading customer marketplace dashboard:", error);
 
     return (
-      <ShopMarketplaceLayout layoutData={layoutData ?? FALLBACK_LAYOUT_DATA} showHero={false}>
+      <ShopMarketplaceLayout
+        layoutData={layoutData ?? FALLBACK_LAYOUT_DATA}
+        showHero={false}
+      >
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="max-w-md w-full">
             <div className="bg-surface rounded-lg border border-border p-8 text-center">
@@ -100,13 +119,15 @@ export default async function ShopCustomerDashboardPage({
                 </svg>
               </div>
 
-              <h2 className="text-xl font-bold text-foreground mb-2">เกิดข้อผิดพลาด</h2>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                เกิดข้อผิดพลาด
+              </h2>
               <p className="text-muted mb-6">
                 ไม่สามารถโหลดข้อมูลประวัติร้านค้าได้ กรุณาลองใหม่อีกครั้ง
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a
+                <Link
                   href="/shop/customer/dashboard"
                   className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
                 >
@@ -124,8 +145,8 @@ export default async function ShopCustomerDashboardPage({
                     />
                   </svg>
                   ลองใหม่อีกครั้ง
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center px-4 py-2 bg-surface border border-border text-foreground rounded-md hover:bg-muted/50 transition-colors"
                 >
@@ -143,7 +164,7 @@ export default async function ShopCustomerDashboardPage({
                     />
                   </svg>
                   กลับแดชบอร์ด
-                </a>
+                </Link>
               </div>
             </div>
           </div>

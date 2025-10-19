@@ -150,7 +150,7 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                             แดชบอร์ดสำหรับลูกค้า
                           </Link>
                           <Link
-                            href="/shop/dashboard/shops"
+                            href="/shop/merchant/dashboard"
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <ShoppingBag className="w-4 h-4 mr-3" />
@@ -312,6 +312,15 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       >
                         <ShoppingBag className="w-5 h-5 mr-3" />
                         <span>แดชบอร์ดสำหรับลูกค้า</span>
+                      </Link>
+
+                      <Link
+                        href="/shop/merchant/dashboard"
+                        className="flex items-center px-3 py-3 marketplace-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <ShoppingBag className="w-5 h-5 mr-3" />
+                        <span>แดชบอร์ดร้านค้า</span>
                       </Link>
 
                       <button
