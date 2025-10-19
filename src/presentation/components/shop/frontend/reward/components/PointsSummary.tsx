@@ -1,9 +1,9 @@
 "use client";
 
-import { useCustomerStore } from "@/src/presentation/stores/customer-store";
-import React from "react";
 import { getFormatPhone } from "@/src/domain/utils/phone";
+import { useCustomerStore } from "@/src/presentation/stores/customer-store";
 import { cn } from "@/src/utils/cn";
+import React from "react";
 
 interface PointItemProps {
   value: number;
@@ -26,9 +26,13 @@ function PointItem({ value, label, isSuccess, isMuted, icon }: PointItemProps) {
     <div
       className={cn(
         "p-4 rounded-lg border transition-colors duration-200",
-        isSuccess && "bg-green-50 border-green-100 dark:bg-green-900/30 dark:border-green-800/50",
-        isMuted && "bg-gray-50 border-gray-100 dark:bg-gray-800/50 dark:border-gray-700/50",
-        !isSuccess && !isMuted && "bg-blue-50 border-blue-100 dark:bg-blue-900/30 dark:border-blue-800/50"
+        isSuccess &&
+          "bg-green-50 border-green-100 dark:bg-green-900/30 dark:border-green-800/50",
+        isMuted &&
+          "bg-gray-50 border-gray-100 dark:bg-gray-800/50 dark:border-gray-700/50",
+        !isSuccess &&
+          !isMuted &&
+          "bg-blue-50 border-blue-100 dark:bg-blue-900/30 dark:border-blue-800/50"
       )}
     >
       <div className="flex items-center justify-between">
@@ -80,16 +84,12 @@ export function PointsSummary({
 
   if (!customer) {
     return (
-      <div className={cn("shop-frontend-card relative bg-white dark:bg-gray-800 shadow-sm", className)}>
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/20 dark:bg-gray-900/80 backdrop-blur-sm"></div>
-          <div className="text-center py-8 z-10">
-            <div className="text-4xl mb-4">❌</div>
-            <p className="text-gray-600 dark:text-gray-400">
-              ไม่พบข้อมูลสมาชิก
-            </p>
-          </div>
-        </div>
+      <div
+        className={cn(
+          "shop-frontend-card relative bg-white dark:bg-gray-800 shadow-sm",
+          className
+        )}
+      >
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             สรุปแต้ม
@@ -100,6 +100,15 @@ export function PointsSummary({
             <PointItem value={currentPoints} label="แต้มปัจจุบัน" />
             <PointItem value={totalEarned} label="แต้มที่ได้รับ" isSuccess />
             <PointItem value={totalRedeemed} label="แต้มที่ใช้แล้ว" isMuted />
+          </div>
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/20 dark:bg-gray-900/80 backdrop-blur-sm"></div>
+          <div className="text-center py-8 z-10">
+            <div className="text-4xl mb-4">❌</div>
+            <p className="text-gray-600 dark:text-gray-400">
+              ไม่พบข้อมูลสมาชิก
+            </p>
           </div>
         </div>
       </div>
@@ -118,7 +127,12 @@ export function PointsSummary({
   })();
 
   return (
-    <div className={cn("bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden", className)}>
+    <div
+      className={cn(
+        "bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden",
+        className
+      )}
+    >
       {/* Customer Profile Section */}
       <div className="relative bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-6">
         <div className="flex items-center space-x-4">

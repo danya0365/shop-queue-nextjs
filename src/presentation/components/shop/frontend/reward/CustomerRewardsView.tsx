@@ -273,17 +273,6 @@ export function CustomerRewardsView({
         {/* Redeemed Rewards Tab */}
         {activeTab === TabType.REDEEMED && (
           <div className="p-6 relative min-h-48">
-            {!customer ? (
-              <div className="absolute inset-0 z-50 flex items-center justify-center">
-                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-                <div className="text-center py-8 z-10">
-                  <div className="text-4xl mb-4">❌</div>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    ไม่พบข้อมูลสมาชิก
-                  </p>
-                </div>
-              </div>
-            ) : null}
             {viewModel.redeemedRewards.data.length === 0 ? (
               <div className="text-center py-8">
                 <div className="shop-frontend-text-muted text-6xl mb-4">📦</div>
@@ -350,14 +339,8 @@ export function CustomerRewardsView({
                 )}
               </div>
             )}
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === TabType.HISTORY && (
-          <div className="p-6 relative min-h-48">
             {!customer ? (
-              <div className="absolute inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
                 <div className="text-center py-8 z-10">
                   <div className="text-4xl mb-4">❌</div>
@@ -367,6 +350,12 @@ export function CustomerRewardsView({
                 </div>
               </div>
             ) : null}
+          </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === TabType.HISTORY && (
+          <div className="p-6 relative min-h-48">
             <div className="space-y-4">
               {viewModel.rewardTransactions.data.map(
                 (transaction: RewardTransaction) => (
@@ -401,6 +390,17 @@ export function CustomerRewardsView({
                 )
               )}
             </div>
+            {!customer ? (
+              <div className="absolute inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+                <div className="text-center py-8 z-10">
+                  <div className="text-4xl mb-4">❌</div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    ไม่พบข้อมูลสมาชิก
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

@@ -22,15 +22,6 @@ export function TierBenefits({
   if (!customer) {
     return (
       <div className={cn("shop-frontend-card p-6 relative", className)}>
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-          <div className="text-center py-8 z-10">
-            <div className="text-4xl mb-4">❌</div>
-            <p className="text-gray-600 dark:text-gray-400">
-              ไม่พบข้อมูลสมาชิก
-            </p>
-          </div>
-        </div>
         <h3 className="text-lg font-medium shop-frontend-text-primary mb-4">
           สิทธิประโยชน์สมาชิก {tier}
         </h3>
@@ -41,6 +32,15 @@ export function TierBenefits({
               <span className="shop-frontend-text-primary">{benefit}</span>
             </div>
           ))}
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+          <div className="text-center py-8 z-10">
+            <div className="text-4xl mb-4">❌</div>
+            <p className="text-gray-600 dark:text-gray-400">
+              ไม่พบข้อมูลสมาชิก
+            </p>
+          </div>
         </div>
       </div>
     );

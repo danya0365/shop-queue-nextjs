@@ -143,11 +143,11 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                             จัดการโปรไฟล์
                           </Link>
                           <Link
-                            href="/orders"
+                            href="/dashboard/customer"
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <ShoppingBag className="w-4 h-4 mr-3" />
-                            ประวัติการใช้งาน
+                            แดชบอร์ดลูกค้า
                           </Link>
                           <hr className="my-2 border-slate-200 dark:border-slate-700" />
                           <button

@@ -56,6 +56,11 @@ export function FrontendHeader() {
             <Link href="/shop" className="nav-link">
               ตลาดร้านค้า
             </Link>
+            {activeProfile && (
+              <Link href="/dashboard/shops" className="nav-link">
+                ร้านค้าของคุณ
+              </Link>
+            )}
             <Link href="/features" className="nav-link">
               ฟีเจอร์
             </Link>
@@ -143,6 +148,22 @@ export function FrontendHeader() {
           >
             หน้าหลัก
           </Link>
+          <Link
+            href="/shop"
+            className="block px-3 py-2 rounded-md text-base font-medium nav-link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            ตลาดร้านค้า
+          </Link>
+          {activeProfile && (
+            <Link
+              href="/dashboard/shops"
+              className="block px-3 py-2 rounded-md text-base font-medium nav-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              ร้านค้าของคุณ
+            </Link>
+          )}
           <Link
             href="/features"
             className="block px-3 py-2 rounded-md text-base font-medium nav-link"
