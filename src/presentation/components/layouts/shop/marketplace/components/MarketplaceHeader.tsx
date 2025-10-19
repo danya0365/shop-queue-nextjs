@@ -136,21 +136,21 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                       <div className="absolute right-0 mt-2 w-48 marketplace-card shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                         <div className="py-2">
                           <Link
-                            href="/account"
+                            href="/switch-profile"
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <User className="w-4 h-4 mr-3" />
-                            จัดการโปรไฟล์
+                            สลับโปรไฟล์
                           </Link>
                           <Link
-                            href="/dashboard/customer"
+                            href="/shop/customer/dashboard"
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <ShoppingBag className="w-4 h-4 mr-3" />
                             แดชบอร์ดสำหรับลูกค้า
                           </Link>
                           <Link
-                            href="/dashboard/shops"
+                            href="/shop/dashboard/shops"
                             className="flex items-center px-4 py-2 text-sm marketplace-text-secondary hover:bg-slate-50 dark:hover:bg-slate-700"
                           >
                             <ShoppingBag className="w-4 h-4 mr-3" />
@@ -297,21 +297,21 @@ const MarketplaceHeader: React.FC<MarketplaceHeaderProps> = ({
                     {/* User Menu Items */}
                     <div className="space-y-1">
                       <Link
-                        href="/account"
+                        href="/switch-profile"
                         className="flex items-center px-3 py-3 marketplace-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <User className="w-5 h-5 mr-3" />
-                        <span>จัดการโปรไฟล์</span>
+                        <span>สลับโปรไฟล์</span>
                       </Link>
 
                       <Link
-                        href="/orders"
+                        href="/shop/customer/dashboard"
                         className="flex items-center px-3 py-3 marketplace-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <ShoppingBag className="w-5 h-5 mr-3" />
-                        <span>ประวัติการใช้งาน</span>
+                        <span>แดชบอร์ดสำหรับลูกค้า</span>
                       </Link>
 
                       <button

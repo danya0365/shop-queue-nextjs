@@ -137,7 +137,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
                 {/* Mobile Profile Menu Items */}
                 <div className="space-y-1">
                   <Link
-                    href="/account"
+                    href="/switch-profile"
                     className="flex items-center px-3 py-2 text-sm shop-frontend-header-text shop-frontend-header-hover rounded-md transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -154,7 +154,7 @@ const FrontendHeader: React.FC<FrontendHeaderProps> = ({
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    จัดการโปรไฟล์
+                    สลับโปรไฟล์
                   </Link>
 
                   <button
