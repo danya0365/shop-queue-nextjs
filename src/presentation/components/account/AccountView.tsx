@@ -6,6 +6,9 @@ import {
   ProfileDto,
   UpdateProfileInputDto,
 } from "@/src/application/dtos/profile-dto";
+import { ChangePasswordForm } from "@/src/presentation/components/account/ChangePasswordForm";
+import { ChangePasswordFormData } from "@/src/presentation/schemas/auth-schemas";
+import { useAuthStore } from "@/src/presentation/stores/auth-store";
 import { useProfileStore } from "@/src/presentation/stores/profile-store";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -36,6 +39,10 @@ export function AccountView({ user }: AccountViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingProfile, setEditingProfile] = useState<ProfileDto | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const { updatePassword } = useAuthStore();
 
   const metadataEntries = useMemo(
     () => Object.entries(user.userMetadata ?? {}),
@@ -132,6 +139,28 @@ export function AccountView({ user }: AccountViewProps) {
   const handleEditProfile = (profile: ProfileDto) => {
     setEditingProfile(profile);
     setViewMode("edit");
+  };
+
+  const handleChangePassword = async (
+    data: ChangePasswordFormData
+  ): Promise<boolean> => {
+    setIsPasswordSaving(true);
+    setPasswordError(null);
+    try {
+      const result = await updatePassword(data.newPassword);
+
+      if (result.error) {
+        setPasswordError(
+          result.error.message || "ไม่สามารถเปลี่ยนรหัสผ่านได้"
+        );
+        return false;
+      }
+
+      setSuccessMessage("เปลี่ยนรหัสผ่านเรียบร้อยแล้ว");
+      return true;
+    } finally {
+      setIsPasswordSaving(false);
+    }
   };
 
   const handleCancelForm = () => {
@@ -419,6 +448,26 @@ export function AccountView({ user }: AccountViewProps) {
                             <span className={`rounded-full px-3 py-1 text-xs font-medium ${accountStatusTone}`}>
                               {user.emailConfirmedAt ? "ยืนยันแล้ว" : "ยังไม่ยืนยัน"}
                             </span>
+                          </div>
+                        </div>
+
+                        <div className="rounded-xl border border-border/60 bg-muted/30 p-5">
+                          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                            <div className="max-w-sm">
+                              <p className="text-sm font-semibold text-foreground">
+                                เปลี่ยนรหัสผ่าน
+                              </p>
+                              <p className="mt-1 text-xs text-muted">
+                                สร้างรหัสผ่านใหม่เพื่อเพิ่มความปลอดภัยให้บัญชีของคุณ
+                              </p>
+                            </div>
+                            <div className="w-full max-w-md">
+                              <ChangePasswordForm
+                                loading={isPasswordSaving}
+                                error={passwordError}
+                                onSubmit={handleChangePassword}
+                              />
+                            </div>
                           </div>
                         </div>
 
