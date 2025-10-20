@@ -288,7 +288,7 @@ export function ShopSettingsView({
             </p>
           )}
         </div>
-        <div>
+        <div className="hidden">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             จำนวนคิวสูงสุดต่อบริการ
           </label>
@@ -316,7 +316,7 @@ export function ShopSettingsView({
             </p>
           )}
         </div>
-        <div>
+        <div className="hidden">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             เวลาหมดอายุคิว (นาที)
           </label>
@@ -346,7 +346,7 @@ export function ShopSettingsView({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 hidden">
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -385,7 +385,7 @@ export function ShopSettingsView({
       </div>
 
       {currentSettings.allowAdvanceBooking && (
-        <div>
+        <div className="hidden">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             จองล่วงหน้าได้สูงสุด (วัน)
           </label>
@@ -515,7 +515,8 @@ export function ShopSettingsView({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
-          ระบบแต้มสะสมถูกปิดใช้งานอยู่ เปิดการใช้งานด้านบนเพื่อเริ่มกำหนดค่าแต้มสะสมสำหรับลูกค้า
+          ระบบแต้มสะสมถูกปิดใช้งานอยู่
+          เปิดการใช้งานด้านบนเพื่อเริ่มกำหนดค่าแต้มสะสมสำหรับลูกค้า
         </div>
       )}
     </div>
