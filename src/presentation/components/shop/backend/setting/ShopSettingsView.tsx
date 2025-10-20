@@ -1083,9 +1083,34 @@ export function ShopSettingsView({
         </div>
       )}
 
+      <div className="lg:hidden">
+        <div className="flex overflow-x-auto gap-3 pb-2">
+          {viewModel.settingsCategories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.id)}
+              className={`flex-shrink-0 min-w-[200px] px-4 py-3 rounded-xl border transition-all duration-200 text-left ${
+                activeCategory === category.id
+                  ? "border-blue-500 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 shadow-sm"
+                  : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{category.icon}</span>
+                <div className="space-y-1">
+                  <div className="font-medium">{category.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {category.settingsCount} รายการ
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Categories Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="hidden lg:block lg:col-span-1">
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               หมวดหมู่การตั้งค่า
