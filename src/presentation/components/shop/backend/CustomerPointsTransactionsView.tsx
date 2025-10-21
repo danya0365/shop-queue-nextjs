@@ -13,7 +13,7 @@ export function CustomerPointsTransactionsView({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"createdAt" | "points" | "customerName">(
+  const [sortBy, setSortBy] = useState<"createdAt" | "points" | "customer">(
     "createdAt"
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -21,26 +21,53 @@ export function CustomerPointsTransactionsView({
 
   // Get unique customers for filter
   const uniqueCustomers = Array.from(
-    new Map(
-      viewModel.transactions
-        .filter((t) => t.customerName)
-        .map((t) => [t.customerId, { id: t.customerId, name: t.customerName! }])
+    new Map(viewModel.transactions.map((transaction) => [transaction.customerId, transaction.customerId])).values()
+  )
+    .map((id) => ({ id, name: id }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const topCustomers = Array.from(
+    viewModel.transactions.reduce(
+      (acc, transaction) => {
+        const existing = acc.get(transaction.customerId) ?? {
+          customerId: transaction.customerId,
+          totalPoints: 0,
+          transactionCount: 0,
+        };
+
+        existing.totalPoints += transaction.points;
+        existing.transactionCount += 1;
+        acc.set(transaction.customerId, existing);
+        return acc;
+      },
+      new Map<
+        string,
+        {
+          customerId: string;
+          totalPoints: number;
+          transactionCount: number;
+        }
+      >()
     ).values()
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  )
+    .sort((a, b) => Math.abs(b.totalPoints) - Math.abs(a.totalPoints))
+    .slice(0, 5);
 
   // Filter and sort transactions
   const filteredTransactions = viewModel.transactions
     .filter((transaction) => {
       const matchesSearch =
-        transaction.customerName
-          ?.toLowerCase()
+        transaction.customerId
+          .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        transaction.customerPhone?.includes(searchTerm) ||
-        transaction.description
+        (transaction.description ?? "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (transaction.relatedQueueId ?? "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
       const matchesType =
-        selectedType === "all" || transaction.transactionType === selectedType;
+        selectedType === "all" || transaction.type === selectedType;
       const matchesCustomer =
         selectedCustomer === "all" ||
         transaction.customerId === selectedCustomer;
@@ -59,9 +86,9 @@ export function CustomerPointsTransactionsView({
           aValue = Math.abs(a.points);
           bValue = Math.abs(b.points);
           break;
-        case "customerName":
-          aValue = a.customerName || "";
-          bValue = b.customerName || "";
+        case "customer":
+          aValue = a.customerId || "";
+          bValue = b.customerId || "";
           break;
         default:
           aValue = a.createdAt.getTime();
@@ -99,7 +126,6 @@ export function CustomerPointsTransactionsView({
         "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       redeemed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
       expired: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-      adjusted: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     };
     return (
       colors[type as keyof typeof colors] ||
@@ -112,7 +138,6 @@ export function CustomerPointsTransactionsView({
       earned: "➕",
       redeemed: "➖",
       expired: "⏰",
-      adjusted: "🔧",
     };
     return icons[type as keyof typeof icons] || "📝";
   };
@@ -122,7 +147,6 @@ export function CustomerPointsTransactionsView({
       earned: "ได้รับแต้ม",
       redeemed: "ใช้แต้ม",
       expired: "หมดอายุ",
-      adjusted: "ปรับแต้ม",
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -199,26 +223,6 @@ export function CustomerPointsTransactionsView({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                แต้มปรับ
-              </p>
-              <p
-                className={`text-2xl font-bold ${
-                  viewModel.stats.totalPointsAdjusted >= 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {viewModel.stats.totalPointsAdjusted >= 0 ? "+" : ""}
-                {formatPoints(viewModel.stats.totalPointsAdjusted)}
-              </p>
-            </div>
-            <div className="text-2xl">🔧</div>
-          </div>
-        </div>
       </div>
 
       {/* Monthly Trends */}
@@ -249,7 +253,7 @@ export function CustomerPointsTransactionsView({
                         trend.net >= 0 ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {trend.net >= 0 ? "+" : ""}
+                      {trend.net >= 0 ? "+" : "-"}
                       {formatPoints(trend.net)}
                     </div>
                   </div>
@@ -294,7 +298,7 @@ export function CustomerPointsTransactionsView({
             ลูกค้าที่ได้แต้มมากที่สุด (Top 5)
           </h2>
           <div className="space-y-3">
-            {viewModel.stats.topCustomers.map((customer, index) => (
+            {topCustomers.map((customer, index) => (
               <div
                 key={customer.customerId}
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -315,7 +319,7 @@ export function CustomerPointsTransactionsView({
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {customer.customerName}
+                      ลูกค้า {customer.customerId}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {customer.transactionCount} รายการ
@@ -324,7 +328,8 @@ export function CustomerPointsTransactionsView({
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-green-600">
-                    +{formatPoints(customer.totalPoints)} แต้ม
+                    {customer.totalPoints >= 0 ? "+" : ""}
+                    {formatPoints(customer.totalPoints)} แต้ม
                   </p>
                 </div>
               </div>
@@ -385,14 +390,14 @@ export function CustomerPointsTransactionsView({
               value={sortBy}
               onChange={(e) =>
                 setSortBy(
-                  e.target.value as "createdAt" | "points" | "customerName"
+                  e.target.value as "createdAt" | "points" | "customer"
                 )
               }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="createdAt">เรียงตามวันที่</option>
               <option value="points">เรียงตามแต้ม</option>
-              <option value="customerName">เรียงตามชื่อ</option>
+              <option value="customer">เรียงตามลูกค้า</option>
             </select>
           </div>
 
@@ -429,13 +434,7 @@ export function CustomerPointsTransactionsView({
                   แต้ม
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  ยอดคงเหลือ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   รายละเอียด
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  พนักงาน
                 </th>
               </tr>
             </thead>
@@ -479,21 +478,20 @@ export function CustomerPointsTransactionsView({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {transaction.customerName}
+                          ลูกค้า {transaction.customerId}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {transaction.customerPhone}
+                          รหัสธุรกรรม: {transaction.id}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionTypeColor(
-                          transaction.transactionType
+                          transaction.type
                         )}`}
                       >
-                        {getTransactionTypeIcon(transaction.transactionType)}{" "}
-                        {getTransactionTypeLabel(transaction.transactionType)}
+                        {getTransactionTypeIcon(transaction.type)} {getTransactionTypeLabel(transaction.type)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -508,26 +506,10 @@ export function CustomerPointsTransactionsView({
                         {formatPoints(transaction.points)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm">
-                        <div className="text-gray-500 dark:text-gray-400">
-                          {formatPoints(transaction.previousBalance)} →{" "}
-                          {formatPoints(transaction.newBalance)}
-                        </div>
-                      </div>
-                    </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                        {transaction.description}
+                        {transaction.description ?? "-"}
                       </div>
-                      {transaction.referenceId && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          อ้างอิง: {transaction.referenceId}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {transaction.employeeName || "-"}
                     </td>
                   </tr>
                 ))

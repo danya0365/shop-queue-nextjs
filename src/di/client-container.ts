@@ -48,6 +48,7 @@ import {
 } from "../infrastructure/datasources/supabase-datasource";
 import { ProfileRepositoryFactory } from "../infrastructure/factories/profile-repository-factory";
 import { ConsoleLogger } from "../infrastructure/loggers/console-logger";
+import { SupabaseBackendCustomerPointsRepository } from "../infrastructure/repositories/backend/supabase-backend-customer-points-repository";
 import { SupabaseShopBackendCategoryRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-category-repository";
 import { SupabaseShopBackendCustomerRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-customer-repository";
 import { SupabaseShopBackendDashboardRepository } from "../infrastructure/repositories/shop/backend/supabase-backend-dashboard-repository";
@@ -169,6 +170,8 @@ export function createClientContainer(): Container {
       databaseDatasource,
       logger
     );
+    const customerPointsRepository =
+      new SupabaseBackendCustomerPointsRepository(databaseDatasource, logger);
 
     // Create subscription repositories
     const subscriptionPlanRepository = new SupabaseSubscriptionPlanRepository(
@@ -228,11 +231,15 @@ export function createClientContainer(): Container {
     const paymentsBackendService = new PaymentsBackendService(logger);
     const paymentItemsBackendService = new PaymentItemsBackendService(logger);
     const customerPointsBackendService = new CustomerPointsBackendService(
+      customerPointsRepository,
       logger
     );
     const queueServiceBackendService = new QueueServiceBackendService(logger);
     const customerPointsTransactionBackendService =
-      new CustomerPointsTransactionBackendService(logger);
+      new CustomerPointsTransactionBackendService(
+        customerPointsRepository,
+        logger
+      );
     const notificationSettingsBackendService =
       new NotificationSettingsBackendService(logger);
     const rewardTransactionBackendService = new RewardTransactionBackendService(

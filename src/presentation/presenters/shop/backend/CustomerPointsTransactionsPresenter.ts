@@ -1,18 +1,28 @@
-import { IAuthService } from '@/src/application/interfaces/auth-service.interface';
-import { IProfileService } from '@/src/application/interfaces/profile-service.interface';
-import type { CustomerPointsTransaction, CustomerPointsTransactionBackendService, CustomerPointsTransactionStats } from '@/src/application/services/shop/backend/customer-points-transactions-backend-service';
-import { IShopService } from '@/src/application/services/shop/ShopService';
-import { ISubscriptionService } from '@/src/application/services/subscription/SubscriptionService';
-import { getServerContainer } from '@/src/di/server-container';
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { BaseShopBackendPresenter } from './BaseShopBackendPresenter';
+import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
+import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import type {
+  CustomerPointsTransaction,
+  CustomerPointsTransactionBackendService,
+  CustomerPointsTransactionStats,
+} from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
+import { IShopService } from "@/src/application/services/shop/ShopService";
+import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getServerContainer } from "@/src/di/server-container";
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define ViewModel interface
 export interface CustomerPointsTransactionsViewModel {
   transactions: CustomerPointsTransaction[];
   stats: CustomerPointsTransactionStats;
   transactionTypes: Array<{ value: string; label: string; count: number }>;
-  monthlyTrends: Array<{ month: string; monthLabel: string; earned: number; redeemed: number; net: number }>;
+  monthlyTrends: Array<{
+    month: string;
+    monthLabel: string;
+    earned: number;
+    redeemed: number;
+    net: number;
+  }>;
 }
 
 // Main Presenter class
@@ -23,43 +33,78 @@ export class CustomerPointsTransactionsPresenter extends BaseShopBackendPresente
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly customerPointsTransactionBackendService: CustomerPointsTransactionBackendService,
-  ) { super(logger, shopService, authService, profileService, subscriptionService); }
+    private readonly customerPointsTransactionBackendService: CustomerPointsTransactionBackendService
+  ) {
+    super(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService
+    );
+  }
 
-  async getViewModel(shopId: string): Promise<CustomerPointsTransactionsViewModel> {
+  async getViewModel(
+    shopId: string
+  ): Promise<CustomerPointsTransactionsViewModel> {
     try {
-      this.logger.info('CustomerPointsTransactionsPresenter: Getting view model', { shopId });
+      this.logger.info(
+        "CustomerPointsTransactionsPresenter: Getting view model",
+        { shopId }
+      );
 
       // Get transactions data and stats
-      const [transactions, stats] = await Promise.all([
-        this.customerPointsTransactionBackendService.getTransactions(shopId),
-        this.customerPointsTransactionBackendService.getTransactionStats(shopId)
+      const [transactionsResult, stats] = await Promise.all([
+        this.customerPointsTransactionBackendService.getTransactions(shopId, {
+          page: 1,
+          limit: 100,
+        }),
+        this.customerPointsTransactionBackendService.getTransactionStats(
+          shopId
+        ),
       ]);
+
+      const transactions = transactionsResult.data;
 
       // Prepare transaction types with labels and counts
       const transactionTypeLabels = {
-        earned: 'ได้รับแต้ม',
-        redeemed: 'ใช้แต้ม',
-        expired: 'แต้มหมดอายุ',
-        adjusted: 'ปรับแต้ม'
+        earned: "ได้รับแต้ม",
+        redeemed: "ใช้แต้ม",
+        expired: "แต้มหมดอายุ",
+        adjusted: "ปรับแต้ม",
       };
 
-      const transactionTypes = Object.entries(stats.transactionsByType).map(([type, count]) => ({
-        value: type,
-        label: transactionTypeLabels[type as keyof typeof transactionTypeLabels] || type,
-        count
-      }));
+      const transactionTypes = Object.entries(stats.transactionsByType).map(
+        ([type, count]) => ({
+          value: type,
+          label:
+            transactionTypeLabels[type as keyof typeof transactionTypeLabels] ||
+            type,
+          count,
+        })
+      );
 
       // Prepare monthly trends with Thai month labels
       const monthLabels = {
-        '01': 'ม.ค.', '02': 'ก.พ.', '03': 'มี.ค.', '04': 'เม.ย.',
-        '05': 'พ.ค.', '06': 'มิ.ย.', '07': 'ก.ค.', '08': 'ส.ค.',
-        '09': 'ก.ย.', '10': 'ต.ค.', '11': 'พ.ย.', '12': 'ธ.ค.'
+        "01": "ม.ค.",
+        "02": "ก.พ.",
+        "03": "มี.ค.",
+        "04": "เม.ย.",
+        "05": "พ.ค.",
+        "06": "มิ.ย.",
+        "07": "ก.ค.",
+        "08": "ส.ค.",
+        "09": "ก.ย.",
+        "10": "ต.ค.",
+        "11": "พ.ย.",
+        "12": "ธ.ค.",
       };
 
-      const monthlyTrends = stats.transactionsByMonth.map(monthData => {
-        const [year, month] = monthData.month.split('-');
-        const monthLabel = `${monthLabels[month as keyof typeof monthLabels]} ${parseInt(year) + 543}`;
+      const monthlyTrends = stats.transactionsByMonth.map((monthData) => {
+        const [year, month] = monthData.month.split("-");
+        const monthLabel = `${monthLabels[month as keyof typeof monthLabels]} ${
+          parseInt(year) + 543
+        }`;
         const net = monthData.earned - monthData.redeemed;
 
         return {
@@ -67,7 +112,7 @@ export class CustomerPointsTransactionsPresenter extends BaseShopBackendPresente
           monthLabel,
           earned: monthData.earned,
           redeemed: monthData.redeemed,
-          net
+          net,
         };
       });
 
@@ -78,14 +123,21 @@ export class CustomerPointsTransactionsPresenter extends BaseShopBackendPresente
         monthlyTrends,
       };
     } catch (error) {
-      this.logger.error('CustomerPointsTransactionsPresenter: Error getting view model', error);
+      this.logger.error(
+        "CustomerPointsTransactionsPresenter: Error getting view model",
+        error
+      );
       throw error;
     }
   }
 
   // Metadata generation
   async generateMetadata(shopId: string) {
-    return this.generateShopMetadata(shopId, 'ประวัติการใช้แต้ม', 'ดูประวัติการทำรายการแต้มลูกค้า การได้รับแต้ม การใช้แต้ม และสถิติการใช้งาน');
+    return this.generateShopMetadata(
+      shopId,
+      "ประวัติการใช้แต้ม",
+      "ดูประวัติการทำรายการแต้มลูกค้า การได้รับแต้ม การใช้แต้ม และสถิติการใช้งาน"
+    );
   }
 }
 
@@ -93,12 +145,25 @@ export class CustomerPointsTransactionsPresenter extends BaseShopBackendPresente
 export class CustomerPointsTransactionsPresenterFactory {
   static async create(): Promise<CustomerPointsTransactionsPresenter> {
     const serverContainer = await getServerContainer();
-    const logger = serverContainer.resolve<Logger>('Logger');
-    const customerPointsTransactionBackendService = serverContainer.resolve<CustomerPointsTransactionBackendService>('CustomerPointsTransactionBackendService');
-    const shopService = serverContainer.resolve<IShopService>('ShopService');
-    const authService = serverContainer.resolve<IAuthService>('AuthService');
-    const profileService = serverContainer.resolve<IProfileService>('ProfileService');
-    const subscriptionService = serverContainer.resolve<ISubscriptionService>('SubscriptionService');
-    return new CustomerPointsTransactionsPresenter(logger, shopService, authService, profileService, subscriptionService, customerPointsTransactionBackendService);
+    const logger = serverContainer.resolve<Logger>("Logger");
+    const customerPointsTransactionBackendService =
+      serverContainer.resolve<CustomerPointsTransactionBackendService>(
+        "CustomerPointsTransactionBackendService"
+      );
+    const shopService = serverContainer.resolve<IShopService>("ShopService");
+    const authService = serverContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      serverContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new CustomerPointsTransactionsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      customerPointsTransactionBackendService
+    );
   }
 }
