@@ -2328,6 +2328,9 @@ DECLARE
   v_points_id UUID;
   v_new_total INTEGER;
   v_new_tier membership_tier;
+  v_points_expiry_months INTEGER;
+  v_expiry_date TIMESTAMPTZ;
+  v_transaction_id UUID;
 BEGIN
   -- Get customer info
   SELECT shop_id INTO v_shop_id
@@ -2352,6 +2355,15 @@ BEGIN
     RAISE EXCEPTION 'invalid_points: must be > 0';
   END IF;
 
+  -- Resolve points expiry configuration
+  SELECT points_expiry_months
+  INTO v_points_expiry_months
+  FROM public.shop_settings
+  WHERE shop_id = v_shop_id
+  LIMIT 1;
+
+  v_points_expiry_months := GREATEST(COALESCE(v_points_expiry_months, 12), 0);
+
   -- Update points
   UPDATE public.customer_points
   SET 
@@ -2359,7 +2371,7 @@ BEGIN
     total_earned = total_earned + p_points,
     updated_at = NOW()
   WHERE customer_id = p_customer_id
-  RETURNING current_points INTO v_new_total;
+  RETURNING id, current_points INTO v_points_id, v_new_total;
 
   -- Determine new tier based on total points
   v_new_tier := CASE 
@@ -2379,7 +2391,7 @@ BEGIN
     customer_point_id, type, points, description, related_queue_id,
     metadata, transaction_date, created_at
   ) VALUES (
-    (SELECT id FROM public.customer_points WHERE customer_id = p_customer_id),
+    v_points_id,
     'earned',
     p_points,
     p_description,
@@ -2387,7 +2399,25 @@ BEGIN
     COALESCE(p_metadata, '{}'::jsonb),
     NOW(),
     NOW()
-  );
+  )
+  RETURNING id INTO v_transaction_id;
+
+  -- Create expiry record when configured (> 0 months)
+  IF v_points_expiry_months > 0 THEN
+    v_expiry_date := NOW() + (v_points_expiry_months || ' months')::INTERVAL;
+
+    INSERT INTO public.customer_point_expiry (
+      customer_point_transaction_id,
+      expiry_date,
+      points,
+      created_at
+    ) VALUES (
+      v_transaction_id,
+      v_expiry_date,
+      p_points,
+      NOW()
+    );
+  END IF;
 END;
 $$;
 
