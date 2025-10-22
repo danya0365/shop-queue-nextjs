@@ -63,6 +63,11 @@ const ShopBackendSidebar: React.FC<ShopBackendSidebarProps> = ({
       icon: CreditCard,
     },
     {
+      href: `/shop/${shop.id}/backend/customer-points`,
+      label: "จัดการแต้มลูกค้า",
+      icon: CreditCard,
+    },
+    {
       href: `/shop/${shop.id}/backend/rewards`,
       label: "จัดการรางวัล",
       icon: Gift,

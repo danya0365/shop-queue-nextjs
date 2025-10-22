@@ -36,19 +36,21 @@ import type {
   CustomerPointsWithCustomerSchema,
 } from "@/src/infrastructure/schemas/backend/customer-points.schema";
 
-type CustomerPointTransactionRow = CustomerPointTransactionWithCustomerSchema & Record<string, unknown>;
+type CustomerPointTransactionRow = CustomerPointTransactionWithCustomerSchema &
+  Record<string, unknown>;
 type CustomerPointsRow = CustomerPointsSchema & Record<string, unknown>;
-type CustomerPointsStatsRow = CustomerPointsStatsSchema & Record<string, unknown>;
-type CustomerPointExpiryRow = CustomerPointExpirySchema & Record<string, unknown>;
+type CustomerPointsStatsRow = CustomerPointsStatsSchema &
+  Record<string, unknown>;
+type CustomerPointExpiryRow = CustomerPointExpirySchema &
+  Record<string, unknown>;
 
 interface CustomerPointsWithMeta extends CustomerPointsWithCustomerSchema {
   transaction_count?: number;
 }
 
-type CustomerPointsWithMetaRow =
-  (CustomerPointsWithMeta & {
-    customers?: CustomerPointsWithMeta["customers"];
-  }) &
+type CustomerPointsWithMetaRow = (CustomerPointsWithMeta & {
+  customers?: CustomerPointsWithMeta["customers"];
+}) &
   Record<string, unknown>;
 
 export class SupabaseBackendCustomerPointsRepository
@@ -212,6 +214,14 @@ export class SupabaseBackendCustomerPointsRepository
   async getCustomerPointsStats(
     shopId: string
   ): Promise<CustomerPointsStatsEntity> {
+    return {
+      totalCustomers: 0,
+      totalPointsIssued: 0,
+      totalPointsRedeemed: 0,
+      totalPointsExpired: 0,
+      averagePointsPerCustomer: 0,
+      tierDistribution: {},
+    };
     try {
       const rows = await this.dataSource.getAdvanced<CustomerPointsStatsRow>(
         "customer_points_stats_view",
@@ -461,10 +471,11 @@ export class SupabaseBackendCustomerPointsRepository
         },
       };
 
-      const rows = await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
-        "customer_point_transactions",
-        queryOptions
-      );
+      const rows =
+        await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
+          "customer_point_transactions",
+          queryOptions
+        );
 
       const totalItems = await this.dataSource.count(
         "customer_point_transactions",
@@ -533,10 +544,11 @@ export class SupabaseBackendCustomerPointsRepository
         },
       };
 
-      const rows = await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
-        "customer_point_transactions",
-        queryOptions
-      );
+      const rows =
+        await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
+          "customer_point_transactions",
+          queryOptions
+        );
 
       return rows.map((row) =>
         SupabaseBackendCustomerPointsMapper.transactionToDomain(row)
@@ -585,10 +597,11 @@ export class SupabaseBackendCustomerPointsRepository
         },
       };
 
-      const rows = await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
-        "customer_point_transactions",
-        queryOptions
-      );
+      const rows =
+        await this.dataSource.getAdvanced<CustomerPointTransactionRow>(
+          "customer_point_transactions",
+          queryOptions
+        );
 
       const transaction = rows[0];
       if (!transaction) {
