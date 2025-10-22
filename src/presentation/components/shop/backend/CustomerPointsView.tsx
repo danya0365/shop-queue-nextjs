@@ -1,13 +1,17 @@
 "use client";
 
 import { CustomerPointsViewModel } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CustomerPointsViewProps {
   viewModel: CustomerPointsViewModel;
+  initialCustomerId?: string;
 }
 
-export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
+export function CustomerPointsView({
+  viewModel,
+  initialCustomerId,
+}: CustomerPointsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTier, setSelectedTier] = useState<string>("all");
   const [sortBy, setSortBy] = useState<
@@ -16,10 +20,28 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAddPointsModal, setShowAddPointsModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const hasAppliedInitialFocusRef = useRef(false);
 
   useEffect(() => {
-    console.log("CustomerPointsView selectedCustomer", selectedCustomer);
-  }, [selectedCustomer]);
+    if (!initialCustomerId || hasAppliedInitialFocusRef.current) {
+      return;
+    }
+
+    const targetCustomer = viewModel.customerPoints.find(
+      (customer) => customer.id === initialCustomerId
+    );
+
+    if (targetCustomer) {
+      const initialSearchValue =
+        targetCustomer.customerName || targetCustomer.customerPhone || "";
+      if (initialSearchValue) {
+        setSearchTerm(initialSearchValue);
+      }
+      setSelectedCustomer(initialCustomerId);
+      setShowAddPointsModal(true);
+      hasAppliedInitialFocusRef.current = true;
+    }
+  }, [initialCustomerId, viewModel.customerPoints]);
 
   // Filter and sort customer points
   const filteredCustomers = viewModel.customerPoints
@@ -405,7 +427,11 @@ export function CustomerPointsView({ viewModel }: CustomerPointsViewProps) {
                 filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      selectedCustomer === customer.id
+                        ? "bg-blue-50 dark:bg-blue-900/30"
+                        : ""
+                    }`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>

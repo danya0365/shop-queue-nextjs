@@ -4,6 +4,7 @@ import type { CustomerDTO } from "@/src/application/dtos/shop/backend/customers-
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { CustomersViewModel } from "@/src/presentation/presenters/shop/backend/CustomersPresenter";
 import { useCustomersPresenter } from "@/src/presentation/presenters/shop/backend/useCustomersPresenter";
+import Link from "next/link";
 import { useState } from "react";
 import { CreateCustomerModal } from "./modals/CreateCustomerModal";
 import { DeleteCustomerConfirmation } from "./modals/DeleteCustomerConfirmation";
@@ -23,7 +24,6 @@ export function CustomersView({
     viewModel,
     loading,
     error,
-    currentPage,
     filters,
     handlePageChange,
     handleNextPage,
@@ -474,6 +474,12 @@ export function CustomersView({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
+                        <Link
+                          href={`/shop/${shopId}/backend/customer-points?customerId=${customer.id}`}
+                          className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        >
+                          จัดการแต้ม
+                        </Link>
                         <button
                           onClick={() => {
                             setSelectedCustomer(customer);
