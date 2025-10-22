@@ -1,10 +1,10 @@
 "use client";
 
-import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import {
   PaymentMethod,
   PaymentStatus,
 } from "@/src/application/dtos/shop/backend/payments-dto";
+import { QueueStatus } from "@/src/domain/entities/backend/backend-queue.entity";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { useCallback, useEffect, useState } from "react";
 import type {

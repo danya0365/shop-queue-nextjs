@@ -6,6 +6,7 @@ import { IAuthService } from "@/src/application/interfaces/auth-service.interfac
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -116,9 +117,8 @@ export class ProfileSelectionPresenterFactory {
 
 // Client-side Factory class
 export class ClientProfileSelectionPresenterFactory {
-  static async create(): Promise<ProfileSelectionPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): ProfileSelectionPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");

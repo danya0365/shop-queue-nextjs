@@ -1,8 +1,17 @@
 "use client";
 
+import type {
+  CreateEmployeeParams,
+  UpdateEmployeeParams,
+} from "@/src/application/dtos/shop/backend/employees-dto";
 import { useCallback, useEffect, useState } from "react";
-import type { Employee, EmployeesViewModel } from "./EmployeesPresenter";
-import type { CreateEmployeeParams, UpdateEmployeeParams } from "@/src/application/dtos/shop/backend/employees-dto";
+import {
+  ClientEmployeesPresenterFactory,
+  type Employee,
+  type EmployeesViewModel,
+} from "./EmployeesPresenter";
+
+const presenter = ClientEmployeesPresenterFactory.create();
 
 export function useEmployeesPresenter(
   shopId: string,
@@ -53,11 +62,6 @@ export function useEmployeesPresenter(
     try {
       setLoading(true);
       setError(null);
-
-      const { ClientEmployeesPresenterFactory } = await import(
-        "./EmployeesPresenter"
-      );
-      const presenter = await ClientEmployeesPresenterFactory.create();
 
       const newViewModel = await presenter.getViewModel(shopId);
 
@@ -171,82 +175,85 @@ export function useEmployeesPresenter(
   }, []);
 
   // CRUD operations
-  const createEmployee = useCallback(async (employeeData: CreateEmployeeParams) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, create: true }));
-      const { ClientEmployeesPresenterFactory } = await import(
-        "./EmployeesPresenter"
-      );
-      const presenter = await ClientEmployeesPresenterFactory.create();
-      await presenter.createEmployee(shopId, employeeData);
-      await loadData(); // Refresh data after creation
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create employee"
-      );
-      throw err;
-    } finally {
-      setActionLoading((prev) => ({ ...prev, create: false }));
-    }
-  }, [shopId, loadData]);
+  const createEmployee = useCallback(
+    async (employeeData: CreateEmployeeParams) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, create: true }));
+        await presenter.createEmployee(shopId, employeeData);
+        await loadData(); // Refresh data after creation
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to create employee"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, create: false }));
+      }
+    },
+    [shopId, loadData]
+  );
 
-  const updateEmployee = useCallback(async (employeeId: string, employeeData: Omit<UpdateEmployeeParams, "id">) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, update: true }));
-      const { ClientEmployeesPresenterFactory } = await import(
-        "./EmployeesPresenter"
-      );
-      const presenter = await ClientEmployeesPresenterFactory.create();
-      await presenter.updateEmployee(employeeId, employeeData);
-      await loadData(); // Refresh data after update
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update employee"
-      );
-      throw err;
-    } finally {
-      setActionLoading((prev) => ({ ...prev, update: false }));
-    }
-  }, [loadData]);
+  const updateEmployee = useCallback(
+    async (
+      employeeId: string,
+      employeeData: Omit<UpdateEmployeeParams, "id">
+    ) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, update: true }));
+        await presenter.updateEmployee(employeeId, employeeData);
+        await loadData(); // Refresh data after update
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update employee"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, update: false }));
+      }
+    },
+    [loadData]
+  );
 
-  const deleteEmployee = useCallback(async (employeeId: string) => {
-    try {
-      setActionLoading((prev) => ({ ...prev, delete: true }));
-      const { ClientEmployeesPresenterFactory } = await import(
-        "./EmployeesPresenter"
-      );
-      const presenter = await ClientEmployeesPresenterFactory.create();
-      await presenter.deleteEmployee(employeeId);
-      await loadData(); // Refresh data after deletion
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete employee"
-      );
-      throw err;
-    } finally {
-      setActionLoading((prev) => ({ ...prev, delete: false }));
-    }
-  }, [loadData]);
+  const deleteEmployee = useCallback(
+    async (employeeId: string) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, delete: true }));
+        await presenter.deleteEmployee(employeeId);
+        await loadData(); // Refresh data after deletion
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to delete employee"
+        );
+        throw err;
+      } finally {
+        setActionLoading((prev) => ({ ...prev, delete: false }));
+      }
+    },
+    [loadData]
+  );
 
   // Computed properties
   const employees = viewModel?.employees || [];
-  
+
   const filteredEmployees = employees.filter((employee) => {
     const matchesSearch =
       filters.search === "" ||
       employee.name.toLowerCase().includes(filters.search.toLowerCase()) ||
       employee.email.toLowerCase().includes(filters.search.toLowerCase());
-    
+
     const matchesStatus =
       filters.status === "all" || employee.status === filters.status;
-    
+
     const matchesDepartment =
-      filters.department === "all" || employee.department === filters.department;
-    
+      filters.department === "all" ||
+      employee.department === filters.department;
+
     const matchesPosition =
       filters.position === "all" || employee.position === filters.position;
-    
-    return matchesSearch && matchesStatus && matchesDepartment && matchesPosition;
+
+    return (
+      matchesSearch && matchesStatus && matchesDepartment && matchesPosition
+    );
   });
 
   const uniquePositions = [...new Set(employees.map((emp) => emp.position))];
@@ -287,52 +294,66 @@ export function useEmployeesPresenter(
         : "ยังไม่มีพนักงานในระบบ",
       description: hasActiveFilters
         ? "ลองปรับเงื่อนไขการค้นหาหรือเพิ่มพนักงานใหม่"
-        : "คลิกปุ่ม 'เพิ่มพนักงาน' เพื่อเริ่มเพิ่มพนักงานคนแรกของคุณ"
+        : "คลิกปุ่ม 'เพิ่มพนักงาน' เพื่อเริ่มเพิ่มพนักงานคนแรกของคุณ",
     };
   }, [filters]);
 
-  const getPermissionName = useCallback((permissionId: string) => {
-    return viewModel?.permissions.find((p) => p.id === permissionId)?.name || null;
-  }, [viewModel?.permissions]);
+  const getPermissionName = useCallback(
+    (permissionId: string) => {
+      return (
+        viewModel?.permissions.find((p) => p.id === permissionId)?.name || null
+      );
+    },
+    [viewModel?.permissions]
+  );
 
   const formatRating = useCallback((rating: number | undefined) => {
     return rating && rating > 0 ? rating.toFixed(1) : "-";
   }, []);
 
   // Modal submission handlers with error handling
-  const handleCreateEmployee = useCallback(async (employeeData: CreateEmployeeParams) => {
-    try {
-      await createEmployee(employeeData);
-      closeAddModal();
-      refreshData();
-    } catch (error) {
-      console.error("Error creating employee:", error);
-      throw error;
-    }
-  }, [createEmployee, closeAddModal, refreshData]);
+  const handleCreateEmployee = useCallback(
+    async (employeeData: CreateEmployeeParams) => {
+      try {
+        await createEmployee(employeeData);
+        closeAddModal();
+        refreshData();
+      } catch (error) {
+        console.error("Error creating employee:", error);
+        throw error;
+      }
+    },
+    [createEmployee, closeAddModal, refreshData]
+  );
 
-  const handleDeleteEmployee = useCallback(async (employeeId: string) => {
-    try {
-      await deleteEmployee(employeeId);
-      closeDeleteModal();
-      refreshData();
-    } catch (error) {
-      console.error("Error deleting employee:", error);
-      throw error;
-    }
-  }, [deleteEmployee, closeDeleteModal, refreshData]);
+  const handleDeleteEmployee = useCallback(
+    async (employeeId: string) => {
+      try {
+        await deleteEmployee(employeeId);
+        closeDeleteModal();
+        refreshData();
+      } catch (error) {
+        console.error("Error deleting employee:", error);
+        throw error;
+      }
+    },
+    [deleteEmployee, closeDeleteModal, refreshData]
+  );
 
-  const handleUpdateEmployee = useCallback(async (employeeData: UpdateEmployeeParams) => {
-    try {
-      const { id, ...updateData } = employeeData;
-      await updateEmployee(id, updateData);
-      closeEditModal();
-      refreshData();
-    } catch (error) {
-      console.error("Error updating employee:", error);
-      throw error;
-    }
-  }, [updateEmployee, closeEditModal, refreshData]);
+  const handleUpdateEmployee = useCallback(
+    async (employeeData: UpdateEmployeeParams) => {
+      try {
+        const { id, ...updateData } = employeeData;
+        await updateEmployee(id, updateData);
+        closeEditModal();
+        refreshData();
+      } catch (error) {
+        console.error("Error updating employee:", error);
+        throw error;
+      }
+    },
+    [updateEmployee, closeEditModal, refreshData]
+  );
 
   return {
     viewModel,

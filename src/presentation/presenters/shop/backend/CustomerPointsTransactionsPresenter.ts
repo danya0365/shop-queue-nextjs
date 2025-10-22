@@ -7,6 +7,7 @@ import type {
 } from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -155,6 +156,33 @@ export class CustomerPointsTransactionsPresenterFactory {
     const profileService =
       serverContainer.resolve<IProfileService>("ProfileService");
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
+      "SubscriptionService"
+    );
+    return new CustomerPointsTransactionsPresenter(
+      logger,
+      shopService,
+      authService,
+      profileService,
+      subscriptionService,
+      customerPointsTransactionBackendService
+    );
+  }
+}
+
+// Client Factory class
+export class ClientCustomerPointsTransactionsPresenterFactory {
+  static create(): CustomerPointsTransactionsPresenter {
+    const clientContainer = getClientContainer();
+    const logger = clientContainer.resolve<Logger>("Logger");
+    const customerPointsTransactionBackendService =
+      clientContainer.resolve<CustomerPointsTransactionBackendService>(
+        "CustomerPointsTransactionBackendService"
+      );
+    const shopService = clientContainer.resolve<IShopService>("ShopService");
+    const authService = clientContainer.resolve<IAuthService>("AuthService");
+    const profileService =
+      clientContainer.resolve<IProfileService>("ProfileService");
+    const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
     return new CustomerPointsTransactionsPresenter(

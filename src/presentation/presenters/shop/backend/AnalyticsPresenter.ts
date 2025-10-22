@@ -8,6 +8,7 @@ import type { ShopBackendAnalyticsService } from "@/src/application/services/sho
 import type { ShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -146,7 +147,13 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       ).toISOString();
 
       // Fetch all analytics data in parallel
-      const [summary, serviceAnalytics, timeAnalytics, peakHoursData, revenueStats] = await Promise.all([
+      const [
+        summary,
+        serviceAnalytics,
+        timeAnalytics,
+        peakHoursData,
+        revenueStats,
+      ] = await Promise.all([
         this.analyticsService.getSummary(shopId),
         this.analyticsService.getServiceAnalytics({
           shopId,
@@ -167,14 +174,16 @@ export class AnalyticsPresenter extends BaseShopBackendPresenter {
       ]);
 
       // Map service analytics to view's ServiceStats
-      const serviceStats: ServiceStats[] = serviceAnalytics.serviceStats.map((s, idx) => ({
-        serviceId: s.serviceId,
-        serviceName: s.serviceName,
-        totalOrders: s.totalQueues,
-        totalRevenue: s.revenue,
-        avgRating: 0, // not available in analytics
-        popularityRank: idx + 1,
-      }));
+      const serviceStats: ServiceStats[] = serviceAnalytics.serviceStats.map(
+        (s, idx) => ({
+          serviceId: s.serviceId,
+          serviceName: s.serviceName,
+          totalOrders: s.totalQueues,
+          totalRevenue: s.revenue,
+          avgRating: 0, // not available in analytics
+          popularityRank: idx + 1,
+        })
+      );
 
       // Build revenue data from analytics
       const days = Math.min(30, dataRetentionDays);
@@ -312,9 +321,8 @@ export class AnalyticsPresenterFactory {
 
 // Client Factory class
 export class ClientAnalyticsPresenterFactory {
-  static async create(): Promise<AnalyticsPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): AnalyticsPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const analyticsService =
       clientContainer.resolve<ShopBackendAnalyticsService>(

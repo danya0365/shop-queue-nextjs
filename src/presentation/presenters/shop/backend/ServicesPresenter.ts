@@ -8,8 +8,8 @@ import { getClientContainer } from "@/src/di/client-container";
 import { Container } from "@/src/di/container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
-import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
+import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
 
 // Define ViewModel interface
 export interface ServicesViewModel {
@@ -143,15 +143,18 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
   }
 
   // Create service method
-  async createService(shopId: string, data: {
-    name: string;
-    description: string | null;
-    category: string;
-    price: number;
-    estimatedDuration: number | null;
-    icon: string | null;
-    isAvailable: boolean;
-  }): Promise<void> {
+  async createService(
+    shopId: string,
+    data: {
+      name: string;
+      description: string | null;
+      category: string;
+      price: number;
+      estimatedDuration: number | null;
+      icon: string | null;
+      isAvailable: boolean;
+    }
+  ): Promise<void> {
     try {
       this.logger.info("ServicesPresenter: Creating service", {
         shopId,
@@ -161,7 +164,7 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       await this.backendServicesService.createService({
         shopId,
         name: data.name,
-        slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+        slug: data.name.toLowerCase().replace(/\s+/g, "-"),
         description: data.description || undefined,
         category: data.category,
         price: data.price,
@@ -188,21 +191,27 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       const service = await this.backendServicesService.getServiceById(id);
       return service;
     } catch (error) {
-      this.logger.error("ServicesPresenter: Error getting service by ID", error);
+      this.logger.error(
+        "ServicesPresenter: Error getting service by ID",
+        error
+      );
       throw error;
     }
   }
 
   // Update service method
-  async updateService(id: string, data: {
-    name: string;
-    description: string | null;
-    category: string;
-    price: number;
-    estimatedDuration: number | null;
-    icon: string | null;
-    isAvailable: boolean;
-  }): Promise<void> {
+  async updateService(
+    id: string,
+    data: {
+      name: string;
+      description: string | null;
+      category: string;
+      price: number;
+      estimatedDuration: number | null;
+      icon: string | null;
+      isAvailable: boolean;
+    }
+  ): Promise<void> {
     try {
       this.logger.info("ServicesPresenter: Updating service", {
         id,
@@ -212,14 +221,14 @@ export class ServicesPresenter extends BaseShopBackendPresenter {
       await this.backendServicesService.updateService(id, {
         updates: {
           name: data.name,
-          slug: data.name.toLowerCase().replace(/\s+/g, '-'),
+          slug: data.name.toLowerCase().replace(/\s+/g, "-"),
           description: data.description || undefined,
           category: data.category,
           price: data.price,
           estimatedDuration: data.estimatedDuration || undefined,
           icon: data.icon || undefined,
           isAvailable: data.isAvailable,
-        }
+        },
       });
 
       this.logger.info("ServicesPresenter: Service updated successfully", {
@@ -296,7 +305,7 @@ export class ServicesPresenterFactory extends BaseServicesPresenterFactory {
 
 // Factory class for client-side
 export class ClientServicesPresenterFactory extends BaseServicesPresenterFactory {
-  static async create(): Promise<ServicesPresenter> {
+  static create(): Promise<ServicesPresenter> {
     return this.createPresenter(() => getClientContainer());
   }
 }

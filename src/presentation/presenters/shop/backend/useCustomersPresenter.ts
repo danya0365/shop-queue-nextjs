@@ -6,6 +6,9 @@ import type { UpdateCustomerUseCaseInput } from "@/src/application/usecases/shop
 import { getPaginationConfig } from "@/src/infrastructure/config/PaginationConfig";
 import { useCallback, useEffect, useState } from "react";
 import type { CustomersViewModel } from "./CustomersPresenter";
+import { ClientCustomersPresenterFactory } from "./CustomersPresenter";
+
+const presenter = ClientCustomersPresenterFactory.create();
 
 interface UseCustomersPresenterReturn {
   viewModel: CustomersViewModel | null;
@@ -107,11 +110,6 @@ export function useCustomersPresenter(
     try {
       setLoading(true);
       setError(null);
-
-      const { ClientCustomersPresenterFactory } = await import(
-        "./CustomersPresenter"
-      );
-      const presenter = await ClientCustomersPresenterFactory.create();
 
       const newViewModel = await presenter.getViewModel(
         shopId,
@@ -258,12 +256,6 @@ export function useCustomersPresenter(
       try {
         setActionLoading((prev) => ({ ...prev, create: true }));
         setError(null); // Clear previous errors
-
-        const { ClientCustomersPresenterFactory } = await import(
-          "./CustomersPresenter"
-        );
-        const presenter = await ClientCustomersPresenterFactory.create();
-
         await presenter.createCustomer(shopId, data);
 
         // Refresh data after creating customer
@@ -284,10 +276,6 @@ export function useCustomersPresenter(
   const getCustomerById = useCallback(
     async (id: string): Promise<CustomerDTO | null> => {
       try {
-        const { ClientCustomersPresenterFactory } = await import(
-          "./CustomersPresenter"
-        );
-        const presenter = await ClientCustomersPresenterFactory.create();
         const customer = await presenter.getCustomerById(id);
         return customer;
       } catch (err) {
@@ -306,11 +294,6 @@ export function useCustomersPresenter(
       try {
         setActionLoading((prev) => ({ ...prev, update: true }));
         setError(null); // Clear previous errors
-
-        const { ClientCustomersPresenterFactory } = await import(
-          "./CustomersPresenter"
-        );
-        const presenter = await ClientCustomersPresenterFactory.create();
 
         await presenter.updateCustomer(data.id, {
           name: data.name,
@@ -469,11 +452,6 @@ export function useCustomersPresenter(
         setActionLoading((prev) => ({ ...prev, delete: true }));
         setError(null); // Clear previous errors
 
-        const { ClientCustomersPresenterFactory } = await import(
-          "./CustomersPresenter"
-        );
-        const presenter = await ClientCustomersPresenterFactory.create();
-
         await presenter.deleteCustomer(id);
 
         // Refresh data after successful deletion
@@ -509,11 +487,6 @@ export function useCustomersPresenter(
       try {
         setActionLoading((prev) => ({ ...prev, delete: true }));
         setError(null); // Clear previous errors
-
-        const { ClientCustomersPresenterFactory } = await import(
-          "@/src/presentation/presenters/shop/backend/CustomersPresenter"
-        );
-        const presenter = await ClientCustomersPresenterFactory.create();
 
         // Get current customer data
         const customer = await presenter.getCustomerById(id);

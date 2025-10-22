@@ -6,6 +6,8 @@ import type {
 } from "@/src/application/dtos/shop/backend/department-dto";
 import { useCallback, useEffect, useState } from "react";
 import type { Department, DepartmentsViewModel } from "./DepartmentsPresenter";
+import { ClientDepartmentsPresenterFactory } from "./DepartmentsPresenter";
+const presenter = ClientDepartmentsPresenterFactory.create();
 
 export function useDepartmentsPresenter(
   shopId: string,
@@ -52,11 +54,6 @@ export function useDepartmentsPresenter(
     try {
       setLoading(true);
       setError(null);
-
-      const { ClientDepartmentsPresenterFactory } = await import(
-        "./DepartmentsPresenter"
-      );
-      const presenter = await ClientDepartmentsPresenterFactory.create();
 
       const newViewModel = await presenter.getViewModel(shopId);
 
@@ -158,10 +155,6 @@ export function useDepartmentsPresenter(
     async (departmentData: Omit<CreateDepartmentDTO, "shopId">) => {
       try {
         setActionLoading((prev) => ({ ...prev, create: true }));
-        const { ClientDepartmentsPresenterFactory } = await import(
-          "./DepartmentsPresenter"
-        );
-        const presenter = await ClientDepartmentsPresenterFactory.create();
 
         await presenter.createDepartment(shopId, departmentData);
         await loadData(); // Refresh data after creation
@@ -184,10 +177,6 @@ export function useDepartmentsPresenter(
     ) => {
       try {
         setActionLoading((prev) => ({ ...prev, update: true }));
-        const { ClientDepartmentsPresenterFactory } = await import(
-          "./DepartmentsPresenter"
-        );
-        const presenter = await ClientDepartmentsPresenterFactory.create();
         await presenter.updateDepartment(departmentId, departmentData);
         await loadData(); // Refresh data after update
       } catch (err) {
@@ -206,10 +195,6 @@ export function useDepartmentsPresenter(
     async (departmentId: string) => {
       try {
         setActionLoading((prev) => ({ ...prev, delete: true }));
-        const { ClientDepartmentsPresenterFactory } = await import(
-          "./DepartmentsPresenter"
-        );
-        const presenter = await ClientDepartmentsPresenterFactory.create();
         await presenter.deleteDepartment(departmentId);
         await loadData(); // Refresh data after deletion
       } catch (err) {

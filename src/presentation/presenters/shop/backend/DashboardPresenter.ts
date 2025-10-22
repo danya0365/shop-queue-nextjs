@@ -8,6 +8,7 @@ import {
 } from "@/src/application/dtos/subscription-dto";
 import { IAuthService } from "@/src/application/interfaces/auth-service.interface";
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
+import { IActivityIconService } from "@/src/application/services/ActivityIconService";
 import type { IShopBackendDashboardService } from "@/src/application/services/shop/backend/BackendDashboardService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import {
@@ -15,7 +16,7 @@ import {
   ShopSetupProgressService,
 } from "@/src/application/services/shop/ShopSetupProgressService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
-import { IActivityIconService } from "@/src/application/services/ActivityIconService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -235,10 +236,9 @@ export class BackendDashboardPresenterFactory {
         "ShopSetupProgressService"
       );
 
-    const activityIconService =
-      serverContainer.resolve<IActivityIconService>(
-        "ActivityIconService"
-      );
+    const activityIconService = serverContainer.resolve<IActivityIconService>(
+      "ActivityIconService"
+    );
 
     return new BackendDashboardPresenter(
       logger,
@@ -255,9 +255,8 @@ export class BackendDashboardPresenterFactory {
 
 // Client-side Factory class
 export class ClientBackendDashboardPresenterFactory {
-  static async create(): Promise<BackendDashboardPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): BackendDashboardPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
@@ -275,10 +274,9 @@ export class ClientBackendDashboardPresenterFactory {
         "ShopSetupProgressService"
       );
 
-    const activityIconService =
-      clientContainer.resolve<IActivityIconService>(
-        "ActivityIconService"
-      );
+    const activityIconService = clientContainer.resolve<IActivityIconService>(
+      "ActivityIconService"
+    );
 
     return new BackendDashboardPresenter(
       logger,

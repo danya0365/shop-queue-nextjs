@@ -6,6 +6,7 @@ import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import type { CreateCustomerUseCaseInput } from "@/src/application/usecases/shop/backend/customers/CreateCustomerUseCase";
 import type { UpdateCustomerUseCaseInput } from "@/src/application/usecases/shop/backend/customers/UpdateCustomerUseCase";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -226,9 +227,8 @@ export class CustomersPresenterFactory {
 
 // Client-side Factory class
 export class ClientCustomersPresenterFactory {
-  static async create(): Promise<CustomersPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): CustomersPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const customersBackendService =
       clientContainer.resolve<ShopBackendCustomersService>(

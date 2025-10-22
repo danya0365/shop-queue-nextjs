@@ -1,5 +1,5 @@
 import BackendLayout from "@/src/presentation/components/layouts/shop/backend/BackendLayout";
-import { CustomerPointsView } from "@/src/presentation/components/shop/backend/CustomerPointsView";
+import { CustomerPointsView } from "@/src/presentation/components/shop/backend/customer-points/CustomerPointsView";
 import { CustomerPointsPresenterFactory } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -50,7 +50,7 @@ export default async function CustomerPointsPage({
     const shopInfo = await presenter.getShopInfo(shopId);
     return (
       <BackendLayout shop={shopInfo}>
-        <CustomerPointsView viewModel={viewModel} />
+        <CustomerPointsView shopId={shopId} initialViewModel={viewModel} />
       </BackendLayout>
     );
   } catch (error) {

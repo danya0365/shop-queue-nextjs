@@ -299,8 +299,8 @@ export class ShopSettingsPresenterFactory {
 
 // Factory class for client-side
 export class ClientShopSettingsPresenterFactory {
-  static async create(): Promise<ShopSettingsPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): ShopSettingsPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const shopBackendShopSettingsService =
       clientContainer.resolve<IShopBackendShopSettingsService>(

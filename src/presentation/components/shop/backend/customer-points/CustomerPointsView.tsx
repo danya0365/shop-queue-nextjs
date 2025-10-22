@@ -4,14 +4,18 @@ import { CustomerPointsViewModel } from "@/src/presentation/presenters/shop/back
 import { useEffect, useRef, useState } from "react";
 
 interface CustomerPointsViewProps {
-  viewModel: CustomerPointsViewModel;
+  shopId: string;
+  initialViewModel?: CustomerPointsViewModel;
   initialCustomerId?: string;
 }
 
 export function CustomerPointsView({
-  viewModel,
+  initialViewModel,
   initialCustomerId,
 }: CustomerPointsViewProps) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const viewModel = initialViewModel;
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTier, setSelectedTier] = useState<string>("all");
   const [sortBy, setSortBy] = useState<
@@ -22,8 +26,57 @@ export function CustomerPointsView({
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const hasAppliedInitialFocusRef = useRef(false);
 
+  const refreshData = () => {
+    // TODO: Implement refresh data logic
+    setLoading(true);
+    setError(null);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
+  const formatPoints = (points: number) => {
+    return new Intl.NumberFormat("th-TH").format(points);
+  };
+
+  const getTierColor = (tier: string) => {
+    const colors = {
+      bronze:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+      silver: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+      gold: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      platinum:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    };
+    return (
+      colors[tier as keyof typeof colors] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    );
+  };
+
+  const getTierLabel = (tier: string) => {
+    const labels = {
+      bronze: "บรอนซ์",
+      silver: "เงิน",
+      gold: "ทอง",
+      platinum: "แพลทินัม",
+    };
+    return labels[tier as keyof typeof labels] || tier;
+  };
+
+  const getTierIcon = (tier: string) => {
+    const icons = {
+      bronze: "🥉",
+      silver: "🥈",
+      gold: "🥇",
+      platinum: "💎",
+    };
+    return icons[tier as keyof typeof icons] || "🏆";
+  };
+
   useEffect(() => {
-    if (!initialCustomerId || hasAppliedInitialFocusRef.current) {
+    if (!initialCustomerId || hasAppliedInitialFocusRef.current || !viewModel) {
       return;
     }
 
@@ -41,7 +94,53 @@ export function CustomerPointsView({
       setShowAddPointsModal(true);
       hasAppliedInitialFocusRef.current = true;
     }
-  }, [initialCustomerId, viewModel.customerPoints]);
+  }, [initialCustomerId, viewModel?.customerPoints]);
+
+  // Show loading only on initial load or when explicitly loading
+  if (loading && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">
+                กำลังโหลดข้อมูลลูกค้า...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error but we have no data
+  if (error && !viewModel) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <p className="text-red-600 dark:text-red-400 font-medium mb-2">
+                {error}
+              </p>
+              <button
+                onClick={refreshData}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                ลองใหม่อีกครั้ง
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!viewModel) {
+    return null;
+  }
 
   // Filter and sort customer points
   const filteredCustomers = viewModel.customerPoints
@@ -91,45 +190,6 @@ export function CustomerPointsView({
         ? (aValue as number) - (bValue as number)
         : (bValue as number) - (aValue as number);
     });
-
-  const formatPoints = (points: number) => {
-    return new Intl.NumberFormat("th-TH").format(points);
-  };
-
-  const getTierColor = (tier: string) => {
-    const colors = {
-      bronze:
-        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      silver: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-      gold: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      platinum:
-        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-    };
-    return (
-      colors[tier as keyof typeof colors] ||
-      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-    );
-  };
-
-  const getTierLabel = (tier: string) => {
-    const labels = {
-      bronze: "บรอนซ์",
-      silver: "เงิน",
-      gold: "ทอง",
-      platinum: "แพลทินัม",
-    };
-    return labels[tier as keyof typeof labels] || tier;
-  };
-
-  const getTierIcon = (tier: string) => {
-    const icons = {
-      bronze: "🥉",
-      silver: "🥈",
-      gold: "🥇",
-      platinum: "💎",
-    };
-    return icons[tier as keyof typeof icons] || "🏆";
-  };
 
   return (
     <div className="space-y-8">

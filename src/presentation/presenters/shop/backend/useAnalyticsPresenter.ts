@@ -1,9 +1,8 @@
-import { getClientService } from "@/src/di/client-container";
-import type { Logger } from "@/src/domain/interfaces/logger";
 import { useCallback, useEffect, useState } from "react";
 import type { AnalyticsViewModel } from "./AnalyticsPresenter";
+import { ClientAnalyticsPresenterFactory } from "./AnalyticsPresenter";
 
-const logger = getClientService<Logger>("Logger");
+const presenter = ClientAnalyticsPresenterFactory.create();
 
 export interface AnalyticsPresenterState {
   viewModel: AnalyticsViewModel | null;
@@ -43,16 +42,12 @@ export const useAnalyticsPresenter = (
       setLoading(true);
       setError(null);
 
-      const { ClientAnalyticsPresenterFactory } = await import(
-        "./AnalyticsPresenter"
-      );
-      const presenter = await ClientAnalyticsPresenterFactory.create();
       const vm = await presenter.getViewModel(shopId);
       setViewModel(vm);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "โหลดข้อมูลไม่สำเร็จ";
+      const message =
+        err instanceof Error ? err.message : "โหลดข้อมูลไม่สำเร็จ";
       setError(message);
-      logger.error("AnalyticsPresenter: Error loading data", err);
     } finally {
       setLoading(false);
     }

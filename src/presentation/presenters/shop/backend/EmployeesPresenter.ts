@@ -182,7 +182,9 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
       const canAddEmployee = !staffLimitReached;
 
       // Transform EmployeeDTO to Employee interface for View compatibility
-      type EmployeeDTOWithDelete = typeof employees[number] & { isCanDelete?: boolean };
+      type EmployeeDTOWithDelete = (typeof employees)[number] & {
+        isCanDelete?: boolean;
+      };
       const transformedEmployees: Employee[] = employees.map((emp) => ({
         id: emp.id,
         employeeCode: emp.employeeCode,
@@ -197,14 +199,16 @@ export class EmployeesPresenter extends BaseShopBackendPresenter {
         permissions: emp.permissions,
         avatar: emp.profile?.avatar || "👤", // Use profile avatar if available
         lastLogin: emp.lastLogin,
-        profile: emp.profile ? {
-          id: emp.profile.id,
-          fullName: emp.profile.fullName,
-          username: emp.profile.username || undefined,
-          phone: emp.profile.phone || undefined,
-          avatar: emp.profile.avatar || undefined,
-          isActive: emp.profile.isActive,
-        } : undefined,
+        profile: emp.profile
+          ? {
+              id: emp.profile.id,
+              fullName: emp.profile.fullName,
+              username: emp.profile.username || undefined,
+              phone: emp.profile.phone || undefined,
+              avatar: emp.profile.avatar || undefined,
+              isActive: emp.profile.isActive,
+            }
+          : undefined,
         todayStats: emp.todayStats,
         isCanDelete: (emp as EmployeeDTOWithDelete).isCanDelete ?? true,
       }));
@@ -386,8 +390,8 @@ export class EmployeesPresenterFactory {
 
 // Client-side factory for use in React hooks
 export class ClientEmployeesPresenterFactory {
-  static async create(): Promise<EmployeesPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): EmployeesPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const employeesBackendService =
       clientContainer.resolve<ShopBackendEmployeesService>(

@@ -4,6 +4,7 @@ import { IProfileService } from "@/src/application/interfaces/profile-service.in
 import { IShopBackendDepartmentsService } from "@/src/application/services/shop/backend/BackendDepartmentsService";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
+import { getClientContainer } from "@/src/di/client-container";
 import { getServerContainer } from "@/src/di/server-container";
 import type { Logger } from "@/src/domain/interfaces/logger";
 import { BaseShopBackendPresenter } from "./BaseShopBackendPresenter";
@@ -135,9 +136,8 @@ export class DepartmentSelectionPresenterFactory {
 
 // Client-side Factory class
 export class ClientDepartmentSelectionPresenterFactory {
-  static async create(): Promise<DepartmentSelectionPresenter> {
-    const { getClientContainer } = await import("@/src/di/client-container");
-    const clientContainer = await getClientContainer();
+  static create(): DepartmentSelectionPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const departmentsService =
       clientContainer.resolve<IShopBackendDepartmentsService>(

@@ -194,8 +194,8 @@ export class PaymentsPresenterFactory {
 }
 
 export class ClientPaymentsPresenterFactory {
-  static async create(): Promise<PaymentsPresenter> {
-    const clientContainer = await getClientContainer();
+  static create(): PaymentsPresenter {
+    const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"

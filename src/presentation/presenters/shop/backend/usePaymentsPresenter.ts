@@ -2,12 +2,13 @@ import {
   PaymentMethod,
   PaymentStatus,
 } from "@/src/application/dtos/shop/backend/payments-dto";
-import { getClientService } from "@/src/di/client-container";
-import { Logger } from "@/src/domain/interfaces/logger";
 import { useCallback, useEffect, useState } from "react";
-import { PaymentsViewModel } from "./PaymentsPresenter";
+import {
+  ClientPaymentsPresenterFactory,
+  PaymentsViewModel,
+} from "./PaymentsPresenter";
 
-const logger = getClientService<Logger>("Logger");
+const presenter = ClientPaymentsPresenterFactory.create();
 
 // Define form/action data interfaces
 export interface CreatePaymentData {
@@ -123,11 +124,6 @@ export const usePaymentsPresenter = (
       setLoading(true);
       setError(null);
 
-      const { ClientPaymentsPresenterFactory } = await import(
-        "./PaymentsPresenter"
-      );
-      const presenter = await ClientPaymentsPresenterFactory.create();
-
       const newViewModel = await presenter.getViewModel(shopId);
 
       setViewModel(newViewModel);
@@ -183,11 +179,9 @@ export const usePaymentsPresenter = (
       // API call would go here
       // const result = await paymentsService.createPayment(data);
 
-      logger.info("PaymentsPresenter: Payment created successfully", { data });
       setIsCreateModalOpen(false);
       return true;
     } catch (error) {
-      logger.error("PaymentsPresenter: Error creating payment", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -228,12 +222,10 @@ export const usePaymentsPresenter = (
       // API call would go here
       // const result = await paymentsService.updatePayment(data.id, data);
 
-      logger.info("PaymentsPresenter: Payment updated successfully", { data });
       setIsEditModalOpen(false);
       setSelectedPaymentId(null);
       return true;
     } catch (error) {
-      logger.error("PaymentsPresenter: Error updating payment", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -258,12 +250,10 @@ export const usePaymentsPresenter = (
       // API call would go here
       // const result = await paymentsService.deletePayment(id);
 
-      logger.info("PaymentsPresenter: Payment deleted successfully", { id });
       setIsDeleteModalOpen(false);
       setSelectedPaymentId(null);
       return true;
     } catch (error) {
-      logger.error("PaymentsPresenter: Error deleting payment", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -278,52 +268,44 @@ export const usePaymentsPresenter = (
   const openCreateModal = () => {
     setIsCreateModalOpen(true);
     setError(null);
-    logger.info("PaymentsPresenter: Create modal opened");
   };
 
   const closeCreateModal = () => {
     setIsCreateModalOpen(false);
     setError(null);
-    logger.info("PaymentsPresenter: Create modal closed");
   };
 
   const openEditModal = (paymentId: string) => {
     setSelectedPaymentId(paymentId);
     setIsEditModalOpen(true);
     setError(null);
-    logger.info("PaymentsPresenter: Edit modal opened", { paymentId });
   };
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedPaymentId(null);
     setError(null);
-    logger.info("PaymentsPresenter: Edit modal closed");
   };
 
   const openDeleteModal = (paymentId: string) => {
     setSelectedPaymentId(paymentId);
     setIsDeleteModalOpen(true);
     setError(null);
-    logger.info("PaymentsPresenter: Delete modal opened", { paymentId });
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setSelectedPaymentId(null);
     setError(null);
-    logger.info("PaymentsPresenter: Delete modal closed");
   };
 
   const handleSetFilters = (newFilters: PaymentFilters) => {
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when filters change
-    logger.info("PaymentsPresenter: Filters updated", { filters: newFilters });
   };
 
   const handleSetCurrentPage = (page: number) => {
     setCurrentPage(page);
-    logger.info("PaymentsPresenter: Page changed", { page });
   };
 
   const reset = () => {
@@ -335,7 +317,6 @@ export const usePaymentsPresenter = (
     setSelectedPaymentId(null);
     setFilters({});
     setCurrentPage(1);
-    logger.info("PaymentsPresenter: Reset");
   };
 
   return [

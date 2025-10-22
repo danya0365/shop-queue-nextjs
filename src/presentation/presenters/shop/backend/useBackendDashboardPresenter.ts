@@ -1,10 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { BackendDashboardViewModel } from './DashboardPresenter';
+import { useCallback, useEffect, useState } from "react";
+import type { BackendDashboardViewModel } from "./DashboardPresenter";
+import { ClientBackendDashboardPresenterFactory } from "./DashboardPresenter";
 
-export function useBackendDashboardPresenter(shopId: string, initialViewModel?: BackendDashboardViewModel) {
-  const [viewModel, setViewModel] = useState<BackendDashboardViewModel | null>(initialViewModel || null);
+const presenter = ClientBackendDashboardPresenterFactory.create();
+
+export function useBackendDashboardPresenter(
+  shopId: string,
+  initialViewModel?: BackendDashboardViewModel
+) {
+  const [viewModel, setViewModel] = useState<BackendDashboardViewModel | null>(
+    initialViewModel || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,16 +34,15 @@ export function useBackendDashboardPresenter(shopId: string, initialViewModel?: 
     try {
       setLoading(true);
       setError(null);
-      
-      const { ClientBackendDashboardPresenterFactory } = await import('./DashboardPresenter');
-      const presenter = await ClientBackendDashboardPresenterFactory.create();
-      
+
       const newViewModel = await presenter.getViewModel(shopId);
-      
+
       setViewModel(newViewModel);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
-      console.error('Error loading dashboard data:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load dashboard data"
+      );
+      console.error("Error loading dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -51,10 +58,10 @@ export function useBackendDashboardPresenter(shopId: string, initialViewModel?: 
   // Refresh data function
   const refreshData = useCallback(async () => {
     try {
-      setActionLoading(prev => ({ ...prev, refresh: true }));
+      setActionLoading((prev) => ({ ...prev, refresh: true }));
       await loadData();
     } finally {
-      setActionLoading(prev => ({ ...prev, refresh: false }));
+      setActionLoading((prev) => ({ ...prev, refresh: false }));
     }
   }, [loadData]);
 

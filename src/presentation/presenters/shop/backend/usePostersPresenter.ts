@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import {
+  ClientPostersPresenterFactory,
   PosterCustomization,
   PostersViewModel,
   PosterTemplate,
 } from "./PostersPresenter";
+
+const presenter = ClientPostersPresenterFactory.create();
 
 // Define form/action data interfaces
 export interface CreatePosterData {
@@ -96,11 +99,6 @@ export const usePostersPresenter = (
     try {
       setIsLoading(true);
       setError(null);
-
-      const { ClientPostersPresenterFactory } = await import(
-        "./PostersPresenter"
-      );
-      const presenter = await ClientPostersPresenterFactory.create();
 
       const newViewModel = await presenter.getViewModel(shopId);
 

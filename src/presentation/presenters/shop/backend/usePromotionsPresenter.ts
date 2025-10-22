@@ -1,12 +1,10 @@
-import { getClientService } from "@/src/di/client-container";
-import { Logger } from "@/src/domain/interfaces/logger";
+import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 import { useCallback, useEffect, useState } from "react";
 import {
   type PromotionData,
   type PromotionsViewModel,
   ClientPromotionsPresenterFactory,
 } from "./PromotionsPresenter";
-import type { PromotionConditions } from "@/src/domain/value-objects/promotion/promotion-conditions";
 
 const presenter = ClientPromotionsPresenterFactory.create();
 
@@ -100,8 +98,6 @@ export const usePromotionsPresenter = (
   shopId: string,
   initialViewModel?: PromotionsViewModel
 ): PromotionsPresenterHook => {
-  const logger = getClientService<Logger>("Logger");
-
   const [viewModel, setViewModel] = useState<PromotionsViewModel | null>(
     initialViewModel || null
   );
@@ -208,7 +204,6 @@ export const usePromotionsPresenter = (
       setShowCreateModal(false);
       return true;
     } catch (error) {
-      logger.error("PromotionsPresenter: Error creating promotion", error);
       setError(
         error instanceof Error
           ? error.message
@@ -272,7 +267,6 @@ export const usePromotionsPresenter = (
       setSelectedPromotion(null);
       return true;
     } catch (error) {
-      logger.error("PromotionsPresenter: Error updating promotion", error);
       setError(
         error instanceof Error
           ? error.message
@@ -300,7 +294,6 @@ export const usePromotionsPresenter = (
       setSelectedPromotion(null);
       return true;
     } catch (error) {
-      logger.error("PromotionsPresenter: Error deleting promotion", error);
       setError(
         error instanceof Error
           ? error.message
@@ -319,10 +312,6 @@ export const usePromotionsPresenter = (
       await loadData();
       return true;
     } catch (error) {
-      logger.error(
-        "PromotionsPresenter: Error toggling promotion status",
-        error
-      );
       setError(
         error instanceof Error
           ? error.message
@@ -342,7 +331,6 @@ export const usePromotionsPresenter = (
     setShowCreateModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
-    logger.info("PromotionsPresenter: Reset");
   };
 
   return [
