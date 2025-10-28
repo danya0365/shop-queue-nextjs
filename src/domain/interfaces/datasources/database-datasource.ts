@@ -57,6 +57,7 @@ export interface QuerySort {
   field: string;
   direction: SortDirection;
   nullsFirst?: boolean;
+  foreignTable?: string;
 }
 
 /**
@@ -89,6 +90,7 @@ export interface QueryJoin {
 export interface QueryOptions {
   select?: string[];
   filters?: QueryFilter[];
+  or?: string;
   sort?: QuerySort[];
   pagination?: QueryPagination;
   joins?: QueryJoin[];
@@ -148,7 +150,10 @@ export interface IReadDataSource extends IBaseDataSource {
    * @returns Promise with the count of matching records
    * @throws DatabaseError if the operation fails
    */
-  count(table: string, options?: Pick<QueryOptions, 'filters' | 'joins'>): Promise<number>;
+  count(
+    table: string,
+    options?: Pick<QueryOptions, "filters" | "joins" | "or">
+  ): Promise<number>;
 }
 
 /**

@@ -17,6 +17,8 @@ export interface CustomerPointsListFilters {
   minTotalEarned?: number;
   maxTotalEarned?: number;
   includeInactiveCustomers?: boolean;
+  sortBy?: "name" | "currentPoints" | "totalEarned" | "tier" | "updatedAt";
+  sortOrder?: "asc" | "desc";
 }
 
 export enum CustomerPointsRepositoryErrorType {

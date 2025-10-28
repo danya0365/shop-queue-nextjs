@@ -1,7 +1,11 @@
 "use client";
 
-import { CustomerPointsViewModel } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
-import { useEffect, useRef, useState } from "react";
+import {
+  CustomerPointsSortByOption,
+  CustomerPointsSortOrder,
+  CustomerPointsViewModel,
+} from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
+import { useCustomerPointsPresenter } from "@/src/presentation/presenters/shop/backend/useCustomerPointsPresenter";
 
 interface CustomerPointsViewProps {
   shopId: string;
@@ -10,31 +14,39 @@ interface CustomerPointsViewProps {
 }
 
 export function CustomerPointsView({
+  shopId,
   initialViewModel,
   initialCustomerId,
 }: CustomerPointsViewProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const viewModel = initialViewModel;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTier, setSelectedTier] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<
-    "name" | "currentPoints" | "totalEarned" | "tier"
-  >("currentPoints");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [showAddPointsModal, setShowAddPointsModal] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-  const hasAppliedInitialFocusRef = useRef(false);
+  const [state, actions] = useCustomerPointsPresenter({
+    shopId,
+    initialViewModel,
+    initialCustomerId,
+  });
 
-  const refreshData = () => {
-    // TODO: Implement refresh data logic
-    setLoading(true);
-    setError(null);
+  const {
+    viewModel,
+    loading,
+    error,
+    searchTerm,
+    selectedTier,
+    sortBy,
+    sortOrder,
+    filteredCustomers,
+    selectedCustomerId,
+    isAddPointsModalOpen,
+  } = state;
 
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
+  const {
+    setSearchTerm,
+    setSelectedTier,
+    setSortBy,
+    setSortOrder,
+    selectCustomer,
+    openAddPointsModal,
+    closeAddPointsModal,
+    loadData,
+  } = actions;
 
   const formatPoints = (points: number) => {
     return new Intl.NumberFormat("th-TH").format(points);
@@ -75,27 +87,6 @@ export function CustomerPointsView({
     return icons[tier as keyof typeof icons] || "🏆";
   };
 
-  useEffect(() => {
-    if (!initialCustomerId || hasAppliedInitialFocusRef.current || !viewModel) {
-      return;
-    }
-
-    const targetCustomer = viewModel.customerPoints.find(
-      (customer) => customer.id === initialCustomerId
-    );
-
-    if (targetCustomer) {
-      const initialSearchValue =
-        targetCustomer.customerName || targetCustomer.customerPhone || "";
-      if (initialSearchValue) {
-        setSearchTerm(initialSearchValue);
-      }
-      setSelectedCustomer(initialCustomerId);
-      setShowAddPointsModal(true);
-      hasAppliedInitialFocusRef.current = true;
-    }
-  }, [initialCustomerId, viewModel?.customerPoints]);
-
   // Show loading only on initial load or when explicitly loading
   if (loading && !viewModel) {
     return (
@@ -126,7 +117,7 @@ export function CustomerPointsView({
                 {error}
               </p>
               <button
-                onClick={refreshData}
+                onClick={loadData}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 ลองใหม่อีกครั้ง
@@ -142,55 +133,6 @@ export function CustomerPointsView({
     return null;
   }
 
-  // Filter and sort customer points
-  const filteredCustomers = viewModel.customerPoints
-    .filter((customer) => {
-      const matchesSearch =
-        customer.customerName
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        customer.customerPhone?.includes(searchTerm);
-      const matchesTier =
-        selectedTier === "all" || customer.membershipTier === selectedTier;
-      return matchesSearch && matchesTier;
-    })
-    .sort((a, b) => {
-      let aValue: number | string;
-      let bValue: number | string;
-
-      switch (sortBy) {
-        case "name":
-          aValue = a.customerName || "";
-          bValue = b.customerName || "";
-          break;
-        case "currentPoints":
-          aValue = a.currentPoints;
-          bValue = b.currentPoints;
-          break;
-        case "totalEarned":
-          aValue = a.totalEarned;
-          bValue = b.totalEarned;
-          break;
-        case "tier":
-          aValue = a.membershipTier;
-          bValue = b.membershipTier;
-          break;
-        default:
-          aValue = a.currentPoints;
-          bValue = b.currentPoints;
-      }
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortOrder === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      return sortOrder === "asc"
-        ? (aValue as number) - (bValue as number)
-        : (bValue as number) - (aValue as number);
-    });
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -204,7 +146,7 @@ export function CustomerPointsView({
           </p>
         </div>
         <button
-          onClick={() => setShowAddPointsModal(true)}
+          onClick={openAddPointsModal}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
         >
           <span>➕</span>
@@ -402,13 +344,7 @@ export function CustomerPointsView({
             <select
               value={sortBy}
               onChange={(e) =>
-                setSortBy(
-                  e.target.value as
-                    | "name"
-                    | "currentPoints"
-                    | "totalEarned"
-                    | "tier"
-                )
+                setSortBy(e.target.value as CustomerPointsSortByOption)
               }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
@@ -423,7 +359,9 @@ export function CustomerPointsView({
           <div className="lg:w-32">
             <select
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+              onChange={(e) =>
+                setSortOrder(e.target.value as CustomerPointsSortOrder)
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="desc">มาก → น้อย</option>
@@ -488,7 +426,7 @@ export function CustomerPointsView({
                   <tr
                     key={customer.id}
                     className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                      selectedCustomer === customer.id
+                      selectedCustomerId === customer.id
                         ? "bg-blue-50 dark:bg-blue-900/30"
                         : ""
                     }`}
@@ -534,13 +472,13 @@ export function CustomerPointsView({
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => setSelectedCustomer(customer.id)}
+                          onClick={() => selectCustomer(customer.id)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           เพิ่มแต้ม
                         </button>
                         <button
-                          onClick={() => setSelectedCustomer(customer.id)}
+                          onClick={() => selectCustomer(customer.id)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
                           ใช้แต้ม
@@ -559,7 +497,7 @@ export function CustomerPointsView({
       </div>
 
       {/* Add/Redeem Points Modal Placeholder */}
-      {showAddPointsModal && (
+      {isAddPointsModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
@@ -570,7 +508,7 @@ export function CustomerPointsView({
             </p>
             <div className="flex justify-end space-x-2">
               <button
-                onClick={() => setShowAddPointsModal(false)}
+                onClick={closeAddPointsModal}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 ปิด

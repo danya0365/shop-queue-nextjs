@@ -268,6 +268,7 @@ export class SupabaseDatasource
           queryBuilder = queryBuilder.order(sort.field, {
             ascending: sort.direction === SortDirection.ASC,
             nullsFirst: sort.nullsFirst,
+            foreignTable: sort.foreignTable,
           });
         });
       }

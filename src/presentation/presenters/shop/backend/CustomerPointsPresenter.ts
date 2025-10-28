@@ -4,6 +4,11 @@ import type {
   CustomerPoints,
   CustomerPointsBackendService,
 } from "@/src/application/services/shop/backend/customer-points-backend-service";
+import type {
+  CustomerPointsFilters as ServiceCustomerPointsFilters,
+  CustomerPointsSortByOption as ServiceCustomerPointsSortByOption,
+  CustomerPointsSortOrder as ServiceCustomerPointsSortOrder,
+} from "@/src/application/services/shop/backend/customer-points-backend-service";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
@@ -22,6 +27,10 @@ export interface CustomerPointsViewModel {
   topCustomers: CustomerPoints[];
   recentActivity: CustomerPoints[];
 }
+
+export type CustomerPointsFilters = ServiceCustomerPointsFilters;
+export type CustomerPointsSortByOption = ServiceCustomerPointsSortByOption;
+export type CustomerPointsSortOrder = ServiceCustomerPointsSortOrder;
 
 // Main Presenter class
 export class CustomerPointsPresenter extends BaseShopBackendPresenter {
@@ -42,15 +51,22 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
     );
   }
 
-  async getViewModel(shopId: string): Promise<CustomerPointsViewModel> {
+  async getViewModel(
+    shopId: string,
+    filters?: CustomerPointsFilters
+  ): Promise<CustomerPointsViewModel> {
     try {
       this.logger.info("CustomerPointsPresenter: Getting view model", {
         shopId,
+        filters,
       });
 
       // Get customer points data
       const customerPoints =
-        await this.customerPointsBackendService.getCustomerPoints(shopId);
+        await this.customerPointsBackendService.getCustomerPoints(
+          shopId,
+          filters
+        );
       const stats = await this.customerPointsBackendService.getPointsStats(
         shopId
       );
@@ -99,7 +115,7 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
 
 // Factory class
 export class CustomerPointsPresenterFactory {
-  static async create(): Promise<CustomerPointsPresenter> {
+  static async createServer(): Promise<CustomerPointsPresenter> {
     const serverContainer = await getServerContainer();
     const logger = serverContainer.resolve<Logger>("Logger");
     const subscriptionService = serverContainer.resolve<ISubscriptionService>(
@@ -122,11 +138,8 @@ export class CustomerPointsPresenterFactory {
       customerPointsBackendService
     );
   }
-}
 
-// Client-side Factory class
-export class ClientCustomerPointsPresenterFactory {
-  static create(): CustomerPointsPresenter {
+  static createClient(): CustomerPointsPresenter {
     const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const customerPointsBackendService =

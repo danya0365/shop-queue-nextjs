@@ -162,6 +162,34 @@ export class SupabaseBackendCustomerPointsRepository
         });
       }
 
+      let sortField = "updated_at";
+      let sortForeignTable: string | undefined;
+      if (filters?.sortBy === "name") {
+        sortField = "name";
+        sortForeignTable = "customers";
+      } else if (filters?.sortBy === "currentPoints") {
+        sortField = "current_points";
+      } else if (filters?.sortBy === "totalEarned") {
+        sortField = "total_earned";
+      } else if (filters?.sortBy === "tier") {
+        sortField = "membership_tier";
+      }
+
+      const sortDirection =
+        filters?.sortOrder === "asc" ? SortDirection.ASC : SortDirection.DESC;
+
+      const normalizedSearch = filters?.searchQuery?.trim();
+      const sanitizedSearch = normalizedSearch
+        ? normalizedSearch.replace(/,/g, "\\,")
+        : undefined;
+
+      const searchOr = sanitizedSearch
+        ? `customer_points.customer_id.ilike.%${sanitizedSearch}%` +
+          `,customer_points.id.ilike.%${sanitizedSearch}%` +
+          `,customers.name.ilike.%${sanitizedSearch}%` +
+          `,customers.phone.ilike.%${sanitizedSearch}%`
+        : undefined;
+
       const queryOptions: QueryOptions = {
         select: ["*"],
         joins: [
@@ -172,7 +200,15 @@ export class SupabaseBackendCustomerPointsRepository
           },
         ],
         filters: queryFilters,
-        sort: [{ field: "updated_at", direction: SortDirection.DESC }],
+        or: searchOr,
+        sort: [
+          {
+            field: sortField,
+            direction: sortDirection,
+            nullsFirst: sortDirection === SortDirection.ASC,
+            foreignTable: sortForeignTable,
+          },
+        ],
         pagination: {
           limit,
           offset,

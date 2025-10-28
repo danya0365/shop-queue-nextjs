@@ -1,15 +1,36 @@
-import type { Logger } from '@/src/domain/interfaces/logger';
-import { MembershipTier } from '@/src/domain/entities/backend/backend-customer.entity';
+import type { Logger } from "@/src/domain/interfaces/logger";
+import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import type {
   CustomerPointsEntity,
   CustomerPointsStatsEntity,
   CustomerPointsWithCustomerEntity,
-} from '@/src/domain/entities/backend/backend-customer-points.entity';
+} from "@/src/domain/entities/backend/backend-customer-points.entity";
 import {
   CustomerPointsRepository,
   CustomerPointsRepositoryError,
   CustomerPointsRepositoryErrorType,
-} from '@/src/domain/repositories/backend/backend-customer-points-repository';
+  type CustomerPointsListFilters,
+} from "@/src/domain/repositories/backend/backend-customer-points-repository";
+
+export type CustomerPointsSortByOption =
+  | "currentPoints"
+  | "totalEarned"
+  | "name"
+  | "tier"
+  | "updatedAt";
+
+export type CustomerPointsSortOrder = "asc" | "desc";
+
+export interface CustomerPointsFilters {
+  searchQuery?: string;
+  membershipTier?: string;
+  minCurrentPoints?: number;
+  maxCurrentPoints?: number;
+  minTotalEarned?: number;
+  maxTotalEarned?: number;
+  sortBy?: CustomerPointsSortByOption;
+  sortOrder?: CustomerPointsSortOrder;
+}
 
 export interface CustomerPoints {
   id: string;
@@ -38,7 +59,10 @@ export interface UpdateCustomerPointsData {
 }
 
 export interface ICustomerPointsBackendService {
-  getCustomerPoints(shopId: string): Promise<CustomerPoints[]>;
+  getCustomerPoints(
+    shopId: string,
+    filters?: CustomerPointsFilters
+  ): Promise<CustomerPoints[]>;
   getCustomerPointsById(shopId: string, pointsId: string): Promise<CustomerPoints | null>;
   getCustomerPointsByCustomerId(shopId: string, customerId: string): Promise<CustomerPoints | null>;
   createCustomerPoints(shopId: string, data: CreateCustomerPointsData): Promise<CustomerPoints>;
@@ -63,19 +87,32 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     private readonly logger: Logger,
   ) { }
 
-  async getCustomerPoints(shopId: string): Promise<CustomerPoints[]> {
+  async getCustomerPoints(
+    shopId: string,
+    filters?: CustomerPointsFilters
+  ): Promise<CustomerPoints[]> {
     try {
-      this.logger.info('CustomerPointsBackendService: Fetching customer points', { shopId });
-      const entities = await this.fetchAllCustomerPointsEntities(shopId);
-      return entities.map(entity => this.mapToServiceModel(entity));
+      this.logger.info(
+        "CustomerPointsBackendService: Fetching customer points",
+        { shopId, filters }
+      );
+      const repositoryFilters = this.mapToRepositoryFilters(filters);
+      const entities = await this.fetchAllCustomerPointsEntities(
+        shopId,
+        repositoryFilters
+      );
+      return entities.map((entity) => this.mapToServiceModel(entity));
     } catch (error) {
-      this.handleError(error, 'getCustomerPoints', { shopId });
+      this.handleError(error, "getCustomerPoints", { shopId, filters });
     }
   }
 
   async getCustomerPointsById(shopId: string, pointsId: string): Promise<CustomerPoints | null> {
     try {
-      this.logger.info('CustomerPointsBackendService: Fetching customer points by ID', { shopId, pointsId });
+      this.logger.info(
+        "CustomerPointsBackendService: Fetching customer points by ID",
+        { shopId, pointsId }
+      );
       const entities = await this.fetchAllCustomerPointsEntities(shopId);
       const match = entities.find(entity => entity.id === pointsId);
       return match ? this.mapToServiceModel(match) : null;
@@ -86,7 +123,10 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
   async getCustomerPointsByCustomerId(shopId: string, customerId: string): Promise<CustomerPoints | null> {
     try {
-      this.logger.info('CustomerPointsBackendService: Fetching customer points by customer ID', { shopId, customerId });
+      this.logger.info(
+        "CustomerPointsBackendService: Fetching customer points by customer ID",
+        { shopId, customerId }
+      );
       const entity = await this.repository.getCustomerPointsByCustomerId(shopId, customerId);
       return entity ? this.mapToServiceModel(entity) : null;
     } catch (error) {
@@ -96,7 +136,10 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
   async createCustomerPoints(shopId: string, data: CreateCustomerPointsData): Promise<CustomerPoints> {
     try {
-      this.logger.info('CustomerPointsBackendService: Creating customer points', { shopId, data });
+      this.logger.info("CustomerPointsBackendService: Creating customer points", {
+        shopId,
+        data,
+      });
       const existing = await this.repository.getCustomerPointsByCustomerId(shopId, data.customerId);
       if (existing) {
         return this.mapToServiceModel(existing);
@@ -137,7 +180,11 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
   async updateCustomerPoints(shopId: string, pointsId: string, data: UpdateCustomerPointsData): Promise<CustomerPoints> {
     try {
-      this.logger.info('CustomerPointsBackendService: Updating customer points', { shopId, pointsId, data });
+      this.logger.info("CustomerPointsBackendService: Updating customer points", {
+        shopId,
+        pointsId,
+        data,
+      });
       const existing = await this.getCustomerPointsById(shopId, pointsId);
       if (!existing) {
         throw new CustomerPointsRepositoryError(
@@ -176,7 +223,10 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
   }
 
   async deleteCustomerPoints(shopId: string, pointsId: string): Promise<boolean> {
-    this.logger.warn('CustomerPointsBackendService: deleteCustomerPoints is not supported', { shopId, pointsId });
+    this.logger.warn("CustomerPointsBackendService: deleteCustomerPoints is not supported", {
+      shopId,
+      pointsId,
+    });
     throw new CustomerPointsRepositoryError(
       CustomerPointsRepositoryErrorType.OPERATION_FAILED,
       'ยังไม่รองรับการลบข้อมูลแต้มลูกค้า',
@@ -187,7 +237,12 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
   async addPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints> {
     try {
-      this.logger.info('CustomerPointsBackendService: Adding points', { shopId, customerId, points, description });
+      this.logger.info("CustomerPointsBackendService: Adding points", {
+        shopId,
+        customerId,
+        points,
+        description,
+      });
       if (points <= 0) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.VALIDATION_ERROR,
@@ -216,7 +271,12 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
   async redeemPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints> {
     try {
-      this.logger.info('CustomerPointsBackendService: Redeeming points', { shopId, customerId, points, description });
+      this.logger.info("CustomerPointsBackendService: Redeeming points", {
+        shopId,
+        customerId,
+        points,
+        description,
+      });
       if (points <= 0) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.VALIDATION_ERROR,
@@ -251,7 +311,9 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     tierDistribution: Record<MembershipTier, number>;
   }> {
     try {
-      this.logger.info('CustomerPointsBackendService: Fetching point statistics', { shopId });
+      this.logger.info("CustomerPointsBackendService: Fetching point statistics", {
+        shopId,
+      });
       const [stats, entities] = await Promise.all([
         this.repository.getCustomerPointsStats(shopId),
         this.fetchAllCustomerPointsEntities(shopId),
@@ -296,12 +358,19 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     };
   }
 
-  private async fetchAllCustomerPointsEntities(shopId: string): Promise<CustomerPointsWithCustomerEntity[]> {
+  private async fetchAllCustomerPointsEntities(
+    shopId: string,
+    filters?: CustomerPointsListFilters
+  ): Promise<CustomerPointsWithCustomerEntity[]> {
     const results: CustomerPointsWithCustomerEntity[] = [];
     let page = 1;
 
     while (true) {
-      const { data } = await this.repository.getCustomerPointsList(shopId, { page, limit: CustomerPointsBackendService.PAGE_SIZE });
+      const { data } = await this.repository.getCustomerPointsList(
+        shopId,
+        { page, limit: CustomerPointsBackendService.PAGE_SIZE },
+        filters
+      );
       results.push(...data);
       if (data.length < CustomerPointsBackendService.PAGE_SIZE) {
         break;
@@ -368,8 +437,31 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     };
   }
 
-  private handleError(error: unknown, operation: string, context: Record<string, unknown>): never {
-    this.logger.error('CustomerPointsBackendService: Operation failed', {
+  private mapToRepositoryFilters(
+    filters?: CustomerPointsFilters
+  ): CustomerPointsListFilters | undefined {
+    if (!filters) {
+      return undefined;
+    }
+
+    return {
+      searchQuery: filters.searchQuery,
+      membershipTier: filters.membershipTier,
+      minCurrentPoints: filters.minCurrentPoints,
+      maxCurrentPoints: filters.maxCurrentPoints,
+      minTotalEarned: filters.minTotalEarned,
+      maxTotalEarned: filters.maxTotalEarned,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    };
+  }
+
+  private handleError(
+    error: unknown,
+    operation: string,
+    context: Record<string, unknown>
+  ): never {
+    this.logger.error("CustomerPointsBackendService: Operation failed", {
       operation,
       error,
       context,
@@ -381,7 +473,7 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
     throw new CustomerPointsRepositoryError(
       CustomerPointsRepositoryErrorType.UNKNOWN,
-      'เกิดข้อผิดพลาดในการจัดการแต้มลูกค้า',
+      "เกิดข้อผิดพลาดในการจัดการแต้มลูกค้า",
       operation,
       context,
       error,

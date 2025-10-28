@@ -19,7 +19,7 @@ export async function generateMetadata({
   params,
 }: CustomerPointsPageProps): Promise<Metadata> {
   const { shopId } = await params;
-  const presenter = await CustomerPointsPresenterFactory.create();
+  const presenter = await CustomerPointsPresenterFactory.createServer();
 
   try {
     return presenter.generateMetadata(shopId);
@@ -42,7 +42,7 @@ export default async function CustomerPointsPage({
   params,
 }: CustomerPointsPageProps) {
   const { shopId } = await params;
-  const presenter = await CustomerPointsPresenterFactory.create();
+  const presenter = await CustomerPointsPresenterFactory.createServer();
 
   try {
     // Get view model from presenter
