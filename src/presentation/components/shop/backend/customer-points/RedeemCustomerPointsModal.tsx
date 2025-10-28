@@ -5,7 +5,7 @@ import type { CustomerPointsViewModel } from "@/src/presentation/presenters/shop
 
 type CustomerPointsItem = CustomerPointsViewModel["customerPoints"][number];
 
-interface AddCustomerPointsModalProps {
+interface RedeemCustomerPointsModalProps {
   isOpen: boolean;
   customers: CustomerPointsItem[];
   selectedCustomerId: string | null;
@@ -14,7 +14,7 @@ interface AddCustomerPointsModalProps {
     customerId: string;
     points: number;
     description: string;
-    mode: "add";
+    mode: "redeem";
   }) => Promise<boolean>;
   onSelectCustomer: (customerId: string | null) => void;
   isSubmitting: boolean;
@@ -27,7 +27,7 @@ interface FormErrors {
   points?: string;
 }
 
-export function AddCustomerPointsModal({
+export function RedeemCustomerPointsModal({
   isOpen,
   customers,
   selectedCustomerId,
@@ -37,7 +37,7 @@ export function AddCustomerPointsModal({
   isSubmitting,
   error,
   clearError,
-}: AddCustomerPointsModalProps) {
+}: RedeemCustomerPointsModalProps) {
   const [customerId, setCustomerId] = useState<string>("");
   const [pointsValue, setPointsValue] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -63,6 +63,8 @@ export function AddCustomerPointsModal({
     return customers.find((customer) => customer.id === customerId) ?? null;
   }, [customerId, customers]);
 
+  const maxRedeemablePoints = selectedCustomer?.currentPoints ?? 0;
+
   const validateForm = () => {
     const errors: FormErrors = {};
 
@@ -71,8 +73,11 @@ export function AddCustomerPointsModal({
     }
 
     const numericPoints = Number(pointsValue);
+
     if (!Number.isFinite(numericPoints) || numericPoints <= 0) {
       errors.points = "จำนวนแต้มต้องมากกว่า 0";
+    } else if (numericPoints > maxRedeemablePoints) {
+      errors.points = "แต้มไม่เพียงพอ";
     }
 
     setFormErrors(errors);
@@ -90,7 +95,7 @@ export function AddCustomerPointsModal({
       customerId,
       points: Number(pointsValue),
       description: description.trim(),
-      mode: "add" as const,
+      mode: "redeem" as const,
     };
 
     const success = await onSubmit(payload);
@@ -105,6 +110,12 @@ export function AddCustomerPointsModal({
     setCustomerId(value);
     onSelectCustomer(value || null);
     setFormErrors((prev) => ({ ...prev, customerId: undefined }));
+    clearError();
+  };
+
+  const handlePointsQuickSelect = (value: number) => {
+    setPointsValue(String(value));
+    setFormErrors((prev) => ({ ...prev, points: undefined }));
     clearError();
   };
 
@@ -126,14 +137,20 @@ export function AddCustomerPointsModal({
     return null;
   }
 
+  const quickRedeemOptions = [50, 100, 200, 500].filter(
+    (option) => option <= maxRedeemablePoints
+  );
+
+  const remainingPoints = maxRedeemablePoints - Number(pointsValue || 0);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-white dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-red-600 to-rose-600 px-6 py-4 text-white dark:border-gray-800">
           <div>
-            <h3 className="text-lg font-semibold">เพิ่มแต้มลูกค้า</h3>
-            <p className="text-sm text-blue-100">
-              จัดการแต้มสะสมลูกค้าได้อย่างรวดเร็วและปลอดภัย
+            <h3 className="text-lg font-semibold">ใช้แต้มลูกค้า</h3>
+            <p className="text-sm text-rose-100">
+              ตรวจสอบแต้มที่เหลือก่อนใช้ทุกครั้งเพื่อป้องกันข้อผิดพลาด
             </p>
           </div>
           <button
@@ -153,7 +170,7 @@ export function AddCustomerPointsModal({
             <select
               value={customerId}
               onChange={(event) => handleCustomerChange(event.target.value)}
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white ${
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white ${
                 formErrors.customerId
                   ? "border-red-500 focus:ring-red-500"
                   : "border-gray-300"
@@ -172,32 +189,32 @@ export function AddCustomerPointsModal({
           </div>
 
           {selectedCustomer && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
+            <div className="rounded-lg border border-rose-100 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200">
               <div className="font-medium">ข้อมูลแต้มปัจจุบัน</div>
               <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div>
-                  <span className="text-xs text-blue-600 dark:text-blue-300">แต้มปัจจุบัน</span>
+                  <span className="text-xs text-rose-600 dark:text-rose-300">แต้มปัจจุบัน</span>
                   <p className="text-base font-semibold">
-                    {selectedCustomer.currentPoints.toLocaleString("th-TH")}
+                    {selectedCustomer.currentPoints.toLocaleString("th-TH")} แต้ม
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs text-blue-600 dark:text-blue-300">แต้มรวมที่ได้รับ</span>
+                  <span className="text-xs text-rose-600 dark:text-rose-300">แต้มที่ใช้แล้ว</span>
                   <p className="text-base font-semibold">
-                    {selectedCustomer.totalEarned.toLocaleString("th-TH")}
+                    {selectedCustomer.totalRedeemed.toLocaleString("th-TH")} แต้ม
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs text-blue-600 dark:text-blue-300">แต้มที่ใช้แล้ว</span>
+                  <span className="text-xs text-rose-600 dark:text-rose-300">แต้มที่ได้รับทั้งหมด</span>
                   <p className="text-base font-semibold">
-                    {selectedCustomer.totalRedeemed.toLocaleString("th-TH")}
+                    {selectedCustomer.totalEarned.toLocaleString("th-TH")} แต้ม
                   </p>
                 </div>
-                {selectedCustomer.pointsToNextTier && selectedCustomer.pointsToNextTier > 0 && (
+                {Number(pointsValue) > 0 && (
                   <div>
-                    <span className="text-xs text-blue-600 dark:text-blue-300">แต้มถึงระดับถัดไป</span>
-                    <p className="text-base font-semibold">
-                      อีก {selectedCustomer.pointsToNextTier.toLocaleString("th-TH")}
+                    <span className="text-xs text-rose-600 dark:text-rose-300">แต้มคงเหลือหลังการใช้</span>
+                    <p className={`text-base font-semibold ${remainingPoints < 0 ? "text-red-600" : ""}`}>
+                      {Math.max(remainingPoints, 0).toLocaleString("th-TH")} แต้ม
                     </p>
                   </div>
                 )}
@@ -206,19 +223,35 @@ export function AddCustomerPointsModal({
           )}
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              จำนวนแต้ม <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                จำนวนแต้มที่ต้องการใช้ <span className="text-red-500">*</span>
+              </label>
+              {quickRedeemOptions.length > 0 && (
+                <div className="flex gap-2">
+                  {quickRedeemOptions.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => handlePointsQuickSelect(option)}
+                      className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:hover:bg-rose-900/40"
+                    >
+                      {option.toLocaleString("th-TH")} แต้ม
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <input
               type="number"
               min={1}
               step={1}
               value={pointsValue}
               onChange={(event) => handlePointsChange(event.target.value)}
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white ${
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white ${
                 formErrors.points ? "border-red-500 focus:ring-red-500" : "border-gray-300"
               }`}
-              placeholder="กรอกจำนวนแต้ม"
+              placeholder="กรอกจำนวนแต้มที่ต้องการใช้"
             />
             {formErrors.points && (
               <p className="mt-1 text-sm text-red-500">{formErrors.points}</p>
@@ -236,8 +269,8 @@ export function AddCustomerPointsModal({
                 clearError();
               }}
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-              placeholder="เช่น เพิ่มแต้มจากการซื้อสินค้า"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              placeholder="เช่น ใช้แต้มแลกรางวัลลูกค้า"
             />
           </div>
 
@@ -259,11 +292,11 @@ export function AddCustomerPointsModal({
             <button
               type="submit"
               className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
-                "bg-blue-600 hover:bg-blue-700"
+                "bg-red-600 hover:bg-red-700"
               } ${isSubmitting ? "opacity-70" : ""}`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "กำลังบันทึก..." : "เพิ่มแต้ม"}
+              {isSubmitting ? "กำลังบันทึก..." : "ใช้แต้ม"}
             </button>
           </div>
         </form>

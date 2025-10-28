@@ -7,6 +7,7 @@ import {
 } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
 import { useCustomerPointsPresenter } from "@/src/presentation/presenters/shop/backend/useCustomerPointsPresenter";
 import { AddCustomerPointsModal } from "./AddCustomerPointsModal";
+import { RedeemCustomerPointsModal } from "./RedeemCustomerPointsModal";
 
 interface CustomerPointsViewProps {
   shopId: string;
@@ -51,7 +52,6 @@ export function CustomerPointsView({
     closeAddPointsModal,
     loadData,
     setSelectedCustomerId,
-    setPointsMode,
     submitPointsChange,
     clearSubmissionError,
   } = actions;
@@ -90,16 +90,15 @@ export function CustomerPointsView({
       bronze: "🥉",
       silver: "🥈",
       gold: "🥇",
-      platinum: "💎",
     };
-    return icons[tier as keyof typeof icons] || "🏆";
+    return icons[tier as keyof typeof icons] || "";
   };
 
   // Show loading only on initial load or when explicitly loading
-  if (loading && !viewModel) {
+  if (loading || !viewModel) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex h-full items-center justify-center">
+        <div className="space-y-3 text-center">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -142,7 +141,7 @@ export function CustomerPointsView({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -504,19 +503,33 @@ export function CustomerPointsView({
         </div>
       </div>
 
-      <AddCustomerPointsModal
-        isOpen={isAddPointsModalOpen}
-        mode={pointsMode}
-        customers={viewModel.customerPoints}
-        selectedCustomerId={selectedCustomerId}
-        onClose={closeAddPointsModal}
-        onSubmit={submitPointsChange}
-        onSelectCustomer={setSelectedCustomerId}
-        onModeChange={setPointsMode}
-        isSubmitting={isSubmitting}
-        error={submissionError}
-        clearError={clearSubmissionError}
-      />
+      {isAddPointsModalOpen && pointsMode === "add" && (
+        <AddCustomerPointsModal
+          isOpen={isAddPointsModalOpen}
+          customers={viewModel?.customerPoints ?? []}
+          selectedCustomerId={selectedCustomerId}
+          onClose={closeAddPointsModal}
+          onSubmit={submitPointsChange}
+          onSelectCustomer={setSelectedCustomerId}
+          isSubmitting={isSubmitting}
+          error={submissionError}
+          clearError={clearSubmissionError}
+        />
+      )}
+
+      {isAddPointsModalOpen && pointsMode === "redeem" && (
+        <RedeemCustomerPointsModal
+          isOpen={isAddPointsModalOpen}
+          customers={viewModel?.customerPoints ?? []}
+          selectedCustomerId={selectedCustomerId}
+          onClose={closeAddPointsModal}
+          onSubmit={submitPointsChange}
+          onSelectCustomer={setSelectedCustomerId}
+          isSubmitting={isSubmitting}
+          error={submissionError}
+          clearError={clearSubmissionError}
+        />
+      )}
     </div>
   );
 }
