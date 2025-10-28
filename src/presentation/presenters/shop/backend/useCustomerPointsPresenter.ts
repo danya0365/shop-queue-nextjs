@@ -29,6 +29,8 @@ export interface CustomerPointsPresenterState {
   pointsMode: CustomerPointsMode;
   isSubmitting: boolean;
   submissionError: string | null;
+  isHistoryModalOpen: boolean;
+  historyCustomerId: string | null;
 }
 
 export interface CustomerPointsPresenterActions {
@@ -51,6 +53,8 @@ export interface CustomerPointsPresenterActions {
     mode: CustomerPointsMode;
   }) => Promise<boolean>;
   clearSubmissionError: () => void;
+  openHistoryModal: (customerId: string) => void;
+  closeHistoryModal: () => void;
 }
 
 interface UseCustomerPointsPresenterArgs {
@@ -87,6 +91,10 @@ export function useCustomerPointsPresenter({
   const [pointsMode, setPointsMode] = useState<CustomerPointsMode>("add");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historyCustomerId, setHistoryCustomerId] = useState<string | null>(
+    null
+  );
   const clearSubmissionErrorCallback = useCallback(() => {
     setSubmissionError(null);
   }, []);
@@ -151,6 +159,19 @@ export function useCustomerPointsPresenter({
     setSelectedCustomerId(null);
     setPointsMode("add");
     setSubmissionError(null);
+  }, []);
+
+  const openHistoryModal = useCallback(
+    (customerId: string) => {
+      setHistoryCustomerId(customerId);
+      setIsHistoryModalOpen(true);
+    },
+    []
+  );
+
+  const closeHistoryModal = useCallback(() => {
+    setHistoryCustomerId(null);
+    setIsHistoryModalOpen(false);
   }, []);
 
   const submitPointsChange = useCallback(
@@ -249,6 +270,8 @@ export function useCustomerPointsPresenter({
     pointsMode,
     isSubmitting,
     submissionError,
+    isHistoryModalOpen,
+    historyCustomerId,
   };
 
   const actions: CustomerPointsPresenterActions = {
@@ -266,6 +289,8 @@ export function useCustomerPointsPresenter({
     setPointsMode,
     submitPointsChange,
     clearSubmissionError: clearSubmissionErrorCallback,
+    openHistoryModal,
+    closeHistoryModal,
   };
 
   return [state, actions];

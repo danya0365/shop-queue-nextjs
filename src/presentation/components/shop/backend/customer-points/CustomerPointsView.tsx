@@ -7,6 +7,7 @@ import {
 } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
 import { useCustomerPointsPresenter } from "@/src/presentation/presenters/shop/backend/useCustomerPointsPresenter";
 import { AddCustomerPointsModal } from "./AddCustomerPointsModal";
+import { CustomerPointsHistoryModal } from "./CustomerPointsHistoryModal";
 import { RedeemCustomerPointsModal } from "./RedeemCustomerPointsModal";
 
 interface CustomerPointsViewProps {
@@ -40,6 +41,8 @@ export function CustomerPointsView({
     pointsMode,
     isSubmitting,
     submissionError,
+    isHistoryModalOpen,
+    historyCustomerId,
   } = state;
 
   const {
@@ -54,6 +57,8 @@ export function CustomerPointsView({
     setSelectedCustomerId,
     submitPointsChange,
     clearSubmissionError,
+    openHistoryModal,
+    closeHistoryModal,
   } = actions;
 
   const formatPoints = (points: number) => {
@@ -490,7 +495,10 @@ export function CustomerPointsView({
                         >
                           ใช้แต้ม
                         </button>
-                        <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
+                        <button
+                          onClick={() => openHistoryModal(customer.id)}
+                          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                        >
                           ประวัติ
                         </button>
                       </div>
@@ -528,6 +536,15 @@ export function CustomerPointsView({
           isSubmitting={isSubmitting}
           error={submissionError}
           clearError={clearSubmissionError}
+        />
+      )}
+
+      {isHistoryModalOpen && historyCustomerId && (
+        <CustomerPointsHistoryModal
+          isOpen={isHistoryModalOpen}
+          customerId={historyCustomerId}
+          customers={viewModel?.customerPoints ?? []}
+          onClose={closeHistoryModal}
         />
       )}
     </div>
