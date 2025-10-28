@@ -103,6 +103,54 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
     }
   }
 
+  async addPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints> {
+    try {
+      this.logger.info("CustomerPointsPresenter: Adding points", {
+        shopId,
+        customerId,
+        points,
+      });
+      return await this.customerPointsBackendService.addPoints(
+        shopId,
+        customerId,
+        points,
+        description
+      );
+    } catch (error) {
+      this.logger.error("CustomerPointsPresenter: Error adding points", error);
+      throw error;
+    }
+  }
+
+  async redeemPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints> {
+    try {
+      this.logger.info("CustomerPointsPresenter: Redeeming points", {
+        shopId,
+        customerId,
+        points,
+      });
+      return await this.customerPointsBackendService.redeemPoints(
+        shopId,
+        customerId,
+        points,
+        description
+      );
+    } catch (error) {
+      this.logger.error("CustomerPointsPresenter: Error redeeming points", error);
+      throw error;
+    }
+  }
+
   // Metadata generation
   async generateMetadata(_shopId: string) {
     return this.generateShopMetadata(

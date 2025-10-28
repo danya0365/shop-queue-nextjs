@@ -6,6 +6,7 @@ import {
   CustomerPointsViewModel,
 } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
 import { useCustomerPointsPresenter } from "@/src/presentation/presenters/shop/backend/useCustomerPointsPresenter";
+import { AddCustomerPointsModal } from "./AddCustomerPointsModal";
 
 interface CustomerPointsViewProps {
   shopId: string;
@@ -35,6 +36,9 @@ export function CustomerPointsView({
     filteredCustomers,
     selectedCustomerId,
     isAddPointsModalOpen,
+    pointsMode,
+    isSubmitting,
+    submissionError,
   } = state;
 
   const {
@@ -46,6 +50,10 @@ export function CustomerPointsView({
     openAddPointsModal,
     closeAddPointsModal,
     loadData,
+    setSelectedCustomerId,
+    setPointsMode,
+    submitPointsChange,
+    clearSubmissionError,
   } = actions;
 
   const formatPoints = (points: number) => {
@@ -472,13 +480,13 @@ export function CustomerPointsView({
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => selectCustomer(customer.id)}
+                          onClick={() => selectCustomer(customer.id, "add")}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           เพิ่มแต้ม
                         </button>
                         <button
-                          onClick={() => selectCustomer(customer.id)}
+                          onClick={() => selectCustomer(customer.id, "redeem")}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
                           ใช้แต้ม
@@ -496,27 +504,19 @@ export function CustomerPointsView({
         </div>
       </div>
 
-      {/* Add/Redeem Points Modal Placeholder */}
-      {isAddPointsModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              จัดการแต้มลูกค้า
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              ฟีเจอร์นี้จะพัฒนาในเร็วๆ นี้
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={closeAddPointsModal}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                ปิด
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddCustomerPointsModal
+        isOpen={isAddPointsModalOpen}
+        mode={pointsMode}
+        customers={viewModel.customerPoints}
+        selectedCustomerId={selectedCustomerId}
+        onClose={closeAddPointsModal}
+        onSubmit={submitPointsChange}
+        onSelectCustomer={setSelectedCustomerId}
+        onModeChange={setPointsMode}
+        isSubmitting={isSubmitting}
+        error={submissionError}
+        clearError={clearSubmissionError}
+      />
     </div>
   );
 }
