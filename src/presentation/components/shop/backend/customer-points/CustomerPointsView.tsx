@@ -43,6 +43,10 @@ export function CustomerPointsView({
     submissionError,
     isHistoryModalOpen,
     historyCustomerId,
+    historyTransactions,
+    historyPagination,
+    historyLoading,
+    historyError,
   } = state;
 
   const {
@@ -59,6 +63,7 @@ export function CustomerPointsView({
     clearSubmissionError,
     openHistoryModal,
     closeHistoryModal,
+    loadHistoryTransactions,
   } = actions;
 
   const formatPoints = (points: number) => {
@@ -544,6 +549,13 @@ export function CustomerPointsView({
           isOpen={isHistoryModalOpen}
           customerId={historyCustomerId}
           customers={viewModel?.customerPoints ?? []}
+          transactions={historyTransactions}
+          pagination={historyPagination}
+          loading={historyLoading}
+          error={historyError}
+          onReload={({ page } = {}) =>
+            loadHistoryTransactions({ page, customerId: historyCustomerId })
+          }
           onClose={closeHistoryModal}
         />
       )}

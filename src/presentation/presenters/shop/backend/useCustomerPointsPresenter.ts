@@ -7,7 +7,9 @@ import {
   type CustomerPointsSortByOption,
   type CustomerPointsSortOrder,
   type CustomerPointsViewModel,
+  type CustomerPointTransactionItem,
 } from "./CustomerPointsPresenter";
+import type { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
 
 const presenter = CustomerPointsPresenterFactory.createClient();
 
@@ -31,6 +33,10 @@ export interface CustomerPointsPresenterState {
   submissionError: string | null;
   isHistoryModalOpen: boolean;
   historyCustomerId: string | null;
+  historyTransactions: CustomerPointTransactionItem[];
+  historyPagination: PaginationMeta | null;
+  historyLoading: boolean;
+  historyError: string | null;
 }
 
 export interface CustomerPointsPresenterActions {
@@ -55,6 +61,7 @@ export interface CustomerPointsPresenterActions {
   clearSubmissionError: () => void;
   openHistoryModal: (customerId: string) => void;
   closeHistoryModal: () => void;
+  loadHistoryTransactions: (options?: { customerId?: string; page?: number }) => Promise<void>;
 }
 
 interface UseCustomerPointsPresenterArgs {
@@ -95,6 +102,14 @@ export function useCustomerPointsPresenter({
   const [historyCustomerId, setHistoryCustomerId] = useState<string | null>(
     null
   );
+  const [historyTransactions, setHistoryTransactions] = useState<
+    CustomerPointTransactionItem[]
+  >([]);
+  const [historyPagination, setHistoryPagination] = useState<PaginationMeta | null>(
+    null
+  );
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const clearSubmissionErrorCallback = useCallback(() => {
     setSubmissionError(null);
   }, []);
@@ -161,17 +176,49 @@ export function useCustomerPointsPresenter({
     setSubmissionError(null);
   }, []);
 
+  const loadHistoryTransactions = useCallback(
+    async ({ customerId, page = 1 }: { customerId?: string; page?: number } = {}) => {
+      const targetCustomerId = customerId ?? historyCustomerId;
+      if (!targetCustomerId) {
+        return;
+      }
+
+      try {
+        setHistoryLoading(true);
+        setHistoryError(null);
+        const result = await presenter.getCustomerTransactions(shopId, targetCustomerId, {
+          page,
+          limit: 10,
+        });
+        setHistoryTransactions(result.data);
+        setHistoryPagination(result.pagination);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "ไม่สามารถโหลดประวัติแต้มได้";
+        setHistoryError(message);
+        console.error("CustomerPointsPresenter: Error loading history", err);
+      } finally {
+        setHistoryLoading(false);
+      }
+    },
+    [historyCustomerId, shopId]
+  );
+
   const openHistoryModal = useCallback(
     (customerId: string) => {
       setHistoryCustomerId(customerId);
       setIsHistoryModalOpen(true);
+      void loadHistoryTransactions({ customerId, page: 1 });
     },
-    []
+    [loadHistoryTransactions]
   );
 
   const closeHistoryModal = useCallback(() => {
     setHistoryCustomerId(null);
     setIsHistoryModalOpen(false);
+    setHistoryTransactions([]);
+    setHistoryPagination(null);
+    setHistoryError(null);
   }, []);
 
   const submitPointsChange = useCallback(
@@ -272,6 +319,10 @@ export function useCustomerPointsPresenter({
     submissionError,
     isHistoryModalOpen,
     historyCustomerId,
+    historyTransactions,
+    historyPagination,
+    historyLoading,
+    historyError,
   };
 
   const actions: CustomerPointsPresenterActions = {
@@ -291,6 +342,7 @@ export function useCustomerPointsPresenter({
     clearSubmissionError: clearSubmissionErrorCallback,
     openHistoryModal,
     closeHistoryModal,
+    loadHistoryTransactions,
   };
 
   return [state, actions];

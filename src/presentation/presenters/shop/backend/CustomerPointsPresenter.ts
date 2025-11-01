@@ -5,6 +5,11 @@ import type {
   CustomerPointsBackendService,
 } from "@/src/application/services/shop/backend/customer-points-backend-service";
 import type {
+  CustomerPointsTransaction,
+  CustomerPointsTransactionBackendService,
+  CustomerPointsTransactionListResult,
+} from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
+import type {
   CustomerPointsFilters as ServiceCustomerPointsFilters,
   CustomerPointsSortByOption as ServiceCustomerPointsSortByOption,
   CustomerPointsSortOrder as ServiceCustomerPointsSortOrder,
@@ -31,6 +36,7 @@ export interface CustomerPointsViewModel {
 export type CustomerPointsFilters = ServiceCustomerPointsFilters;
 export type CustomerPointsSortByOption = ServiceCustomerPointsSortByOption;
 export type CustomerPointsSortOrder = ServiceCustomerPointsSortOrder;
+export type CustomerPointTransactionItem = CustomerPointsTransaction;
 
 // Main Presenter class
 export class CustomerPointsPresenter extends BaseShopBackendPresenter {
@@ -40,7 +46,8 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly customerPointsBackendService: CustomerPointsBackendService
+    private readonly customerPointsBackendService: CustomerPointsBackendService,
+    private readonly customerPointsTransactionBackendService: CustomerPointsTransactionBackendService
   ) {
     super(
       logger,
@@ -49,6 +56,35 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
       profileService,
       subscriptionService
     );
+  }
+
+  async getCustomerTransactions(
+    shopId: string,
+    customerId: string,
+    pagination: { page: number; limit: number }
+  ): Promise<CustomerPointsTransactionListResult> {
+    try {
+      this.logger.info(
+        "CustomerPointsPresenter: Fetching customer transactions",
+        {
+          shopId,
+          customerId,
+          pagination,
+        }
+      );
+
+      return await this.customerPointsTransactionBackendService.getTransactionsByCustomer(
+        shopId,
+        customerId,
+        pagination
+      );
+    } catch (error) {
+      this.logger.error(
+        "CustomerPointsPresenter: Error fetching customer transactions",
+        error
+      );
+      throw error;
+    }
   }
 
   async getViewModel(
@@ -177,13 +213,18 @@ export class CustomerPointsPresenterFactory {
       serverContainer.resolve<CustomerPointsBackendService>(
         "CustomerPointsBackendService"
       );
+    const customerPointsTransactionBackendService =
+      serverContainer.resolve<CustomerPointsTransactionBackendService>(
+        "CustomerPointsTransactionBackendService"
+      );
     return new CustomerPointsPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      customerPointsBackendService
+      customerPointsBackendService,
+      customerPointsTransactionBackendService
     );
   }
 
@@ -201,13 +242,18 @@ export class CustomerPointsPresenterFactory {
     const subscriptionService = clientContainer.resolve<ISubscriptionService>(
       "SubscriptionService"
     );
+    const customerPointsTransactionBackendService =
+      clientContainer.resolve<CustomerPointsTransactionBackendService>(
+        "CustomerPointsTransactionBackendService"
+      );
     return new CustomerPointsPresenter(
       logger,
       shopService,
       authService,
       profileService,
       subscriptionService,
-      customerPointsBackendService
+      customerPointsBackendService,
+      customerPointsTransactionBackendService
     );
   }
 }

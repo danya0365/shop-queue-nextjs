@@ -1,12 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
-import type { CustomerPointsViewModel } from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
+import type {
+  CustomerPointTransactionItem,
+  CustomerPointsViewModel,
+} from "@/src/presentation/presenters/shop/backend/CustomerPointsPresenter";
+import type { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
 
 interface CustomerPointsHistoryModalProps {
   isOpen: boolean;
   customerId: string | null;
   customers: CustomerPointsViewModel["customerPoints"];
+  transactions: CustomerPointTransactionItem[];
+  pagination: PaginationMeta | null;
+  loading: boolean;
+  error: string | null;
+  onReload: (options?: { page?: number }) => void;
   onClose: () => void;
 }
 
@@ -20,10 +29,42 @@ function formatDate(date: Date | string | undefined) {
   }).format(parsed);
 }
 
+function formatTransactionType(type: CustomerPointTransactionItem["type"]) {
+  const map = {
+    earned: "ได้รับแต้ม",
+    redeemed: "ใช้แต้ม",
+    expired: "แต้มหมดอายุ",
+    adjusted: "ปรับแต้ม",
+  } as const;
+  return map[type] ?? type;
+}
+
+function formatPointsValue(transaction: CustomerPointTransactionItem) {
+  const sign = transaction.type === "redeemed" || transaction.type === "expired" ? "-" : "+";
+  return `${sign}${Math.abs(transaction.points).toLocaleString("th-TH")} แต้ม`;
+}
+
+function formatDateWithTime(date: Date | string | undefined) {
+  if (!date) return "-";
+  const parsed = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(parsed);
+}
+
 export function CustomerPointsHistoryModal({
   isOpen,
   customerId,
   customers,
+  transactions,
+  pagination,
+  loading,
+  error,
+  onReload,
   onClose,
 }: CustomerPointsHistoryModalProps) {
   const customer = useMemo(() => {
@@ -121,32 +162,142 @@ export function CustomerPointsHistoryModal({
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between border-b border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-              <span>รายละเอียดแต้ม</span>
-              <span>
-                สร้างเมื่อ: {formatDate(customer.createdAt)} • อัปเดตล่าสุด: {formatDate(customer.updatedAt)}
-              </span>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                <span>รายละเอียดแต้ม</span>
+                <span>
+                  สร้างเมื่อ: {formatDate(customer.createdAt)} • อัปเดตล่าสุด: {formatDate(customer.updatedAt)}
+                </span>
+              </div>
+              <div className="grid gap-2 p-4 text-sm text-gray-700 dark:text-gray-200">
+                <div className="flex items-center justify-between">
+                  <span>แต้มสะสมทั้งหมด</span>
+                  <span className="font-semibold text-green-600 dark:text-green-300">
+                    {customer.totalEarned.toLocaleString("th-TH")} แต้ม
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>แต้มที่ใช้ไป</span>
+                  <span className="font-semibold text-red-600 dark:text-red-300">
+                    {customer.totalRedeemed.toLocaleString("th-TH")} แต้ม
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>แต้มคงเหลือ</span>
+                  <span className="font-semibold text-blue-600 dark:text-blue-300">
+                    {customer.currentPoints.toLocaleString("th-TH")} แต้ม
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="grid gap-2 p-4 text-sm text-gray-700 dark:text-gray-200">
-              <div className="flex items-center justify-between">
-                <span>แต้มสะสมทั้งหมด</span>
-                <span className="font-semibold text-green-600 dark:text-green-300">
-                  {customer.totalEarned.toLocaleString("th-TH")} แต้ม
-                </span>
+
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                <span>ประวัติการเคลื่อนไหว</span>
+                <button
+                  type="button"
+                  onClick={() => onReload({ page: pagination?.currentPage ?? 1 })}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-500 disabled:text-gray-400"
+                  disabled={loading}
+                >
+                  โหลดซ้ำ
+                </button>
               </div>
-              <div className="flex items-center justify-between">
-                <span>แต้มที่ใช้ไป</span>
-                <span className="font-semibold text-red-600 dark:text-red-300">
-                  {customer.totalRedeemed.toLocaleString("th-TH")} แต้ม
-                </span>
+
+              <div className="relative min-h-[180px]">
+                {loading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      กำลังโหลดประวัติแต้ม...
+                    </span>
+                  </div>
+                )}
+
+                {error && !loading ? (
+                  <div className="p-6 text-center text-sm text-red-500">
+                    <p className="mb-3">{error}</p>
+                    <button
+                      type="button"
+                      onClick={() => onReload({ page: pagination?.currentPage ?? 1 })}
+                      className="rounded-md bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
+                    >
+                      ลองอีกครั้ง
+                    </button>
+                  </div>
+                ) : null}
+
+                {!loading && !error && transactions.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    <div className="mb-3 text-3xl">🗒️</div>
+                    <p>ยังไม่มีประวัติการเคลื่อนไหวของแต้ม</p>
+                  </div>
+                ) : null}
+
+                {!loading && !error && transactions.length > 0 ? (
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {transactions.map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {formatTransactionType(transaction.type)}
+                          </p>
+                          {transaction.description && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {transaction.description}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            วันที่ทำรายการ: {formatDateWithTime(transaction.transactionDate)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`text-sm font-semibold ${
+                              transaction.type === "redeemed" || transaction.type === "expired"
+                                ? "text-red-600 dark:text-red-300"
+                                : "text-green-600 dark:text-green-300"
+                            }`}
+                          >
+                            {formatPointsValue(transaction)}
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            บันทึกเมื่อ: {formatDateWithTime(transaction.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-              <div className="flex items-center justify-between">
-                <span>แต้มคงเหลือ</span>
-                <span className="font-semibold text-blue-600 dark:text-blue-300">
-                  {customer.currentPoints.toLocaleString("th-TH")} แต้ม
-                </span>
-              </div>
+
+              {pagination && (pagination.totalPages > 1 || pagination.hasPrevPage || pagination.hasNextPage) ? (
+                <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                  <button
+                    type="button"
+                    onClick={() => onReload({ page: Math.max(1, pagination.currentPage - 1) })}
+                    disabled={!pagination.hasPrevPage || loading}
+                    className="rounded-md px-3 py-1 font-medium transition disabled:cursor-not-allowed disabled:text-gray-400 enabled:hover:bg-gray-200 dark:enabled:hover:bg-gray-700"
+                  >
+                    ก่อนหน้า
+                  </button>
+                  <span>
+                    หน้า {pagination.currentPage} / {pagination.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onReload({ page: pagination.currentPage + 1 })}
+                    disabled={!pagination.hasNextPage || loading}
+                    className="rounded-md px-3 py-1 font-medium transition disabled:cursor-not-allowed disabled:text-gray-400 enabled:hover:bg-gray-200 dark:enabled:hover:bg-gray-700"
+                  >
+                    ถัดไป
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
