@@ -8,6 +8,7 @@ import type {
   CustomerPointsTransaction,
   CustomerPointsTransactionBackendService,
   CustomerPointsTransactionListResult,
+  CustomerPointsTransactionFiltersInput,
 } from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
 import type {
   CustomerPointsFilters as ServiceCustomerPointsFilters,
@@ -37,6 +38,7 @@ export type CustomerPointsFilters = ServiceCustomerPointsFilters;
 export type CustomerPointsSortByOption = ServiceCustomerPointsSortByOption;
 export type CustomerPointsSortOrder = ServiceCustomerPointsSortOrder;
 export type CustomerPointTransactionItem = CustomerPointsTransaction;
+export type CustomerPointTransactionFilters = CustomerPointsTransactionFiltersInput;
 
 // Main Presenter class
 export class CustomerPointsPresenter extends BaseShopBackendPresenter {
@@ -61,7 +63,11 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
   async getCustomerTransactions(
     shopId: string,
     customerId: string,
-    pagination: { page: number; limit: number }
+    params: {
+      page: number;
+      limit: number;
+      filters?: CustomerPointsTransactionFiltersInput;
+    }
   ): Promise<CustomerPointsTransactionListResult> {
     try {
       this.logger.info(
@@ -69,14 +75,15 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
         {
           shopId,
           customerId,
-          pagination,
+          params,
         }
       );
 
       return await this.customerPointsTransactionBackendService.getTransactionsByCustomer(
         shopId,
         customerId,
-        pagination
+        { page: params.page, limit: params.limit },
+        params.filters
       );
     } catch (error) {
       this.logger.error(

@@ -8,12 +8,19 @@ import {
   type CustomerPointsSortOrder,
   type CustomerPointsViewModel,
   type CustomerPointTransactionItem,
+  type CustomerPointTransactionFilters,
 } from "./CustomerPointsPresenter";
 import type { PaginationMeta } from "@/src/domain/interfaces/pagination-types";
 
 const presenter = CustomerPointsPresenterFactory.createClient();
 
 declare type CustomerPointsItem = CustomerPointsViewModel["customerPoints"][number];
+
+type HistoryTypeFilter = "all" | CustomerPointTransactionItem["type"];
+type HistoryDateRange = "all" | "30d" | "90d" | "365d";
+
+const DEFAULT_HISTORY_TYPE_FILTER: HistoryTypeFilter = "all";
+const DEFAULT_HISTORY_DATE_RANGE: HistoryDateRange = "90d";
 
 export type CustomerPointsMode = "add" | "redeem";
 
@@ -37,6 +44,8 @@ export interface CustomerPointsPresenterState {
   historyPagination: PaginationMeta | null;
   historyLoading: boolean;
   historyError: string | null;
+  historyTypeFilter: HistoryTypeFilter;
+  historyDateRange: HistoryDateRange;
 }
 
 export interface CustomerPointsPresenterActions {
@@ -61,7 +70,15 @@ export interface CustomerPointsPresenterActions {
   clearSubmissionError: () => void;
   openHistoryModal: (customerId: string) => void;
   closeHistoryModal: () => void;
-  loadHistoryTransactions: (options?: { customerId?: string; page?: number }) => Promise<void>;
+  loadHistoryTransactions: (options?: {
+    customerId?: string;
+    page?: number;
+    typeFilter?: HistoryTypeFilter;
+    dateRange?: HistoryDateRange;
+  }) => Promise<void>;
+  setHistoryTypeFilter: (filter: HistoryTypeFilter) => void;
+  setHistoryDateRange: (range: HistoryDateRange) => void;
+  resetHistoryFilters: () => void;
 }
 
 interface UseCustomerPointsPresenterArgs {
@@ -110,6 +127,12 @@ export function useCustomerPointsPresenter({
   );
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyTypeFilter, setHistoryTypeFilterState] = useState<HistoryTypeFilter>(
+    DEFAULT_HISTORY_TYPE_FILTER
+  );
+  const [historyDateRange, setHistoryDateRangeState] = useState<HistoryDateRange>(
+    DEFAULT_HISTORY_DATE_RANGE
+  );
   const clearSubmissionErrorCallback = useCallback(() => {
     setSubmissionError(null);
   }, []);
@@ -177,11 +200,45 @@ export function useCustomerPointsPresenter({
   }, []);
 
   const loadHistoryTransactions = useCallback(
-    async ({ customerId, page = 1 }: { customerId?: string; page?: number } = {}) => {
+    async ({
+      customerId,
+      page = 1,
+      typeFilter,
+      dateRange,
+    }: {
+      customerId?: string;
+      page?: number;
+      typeFilter?: HistoryTypeFilter;
+      dateRange?: HistoryDateRange;
+    } = {}) => {
       const targetCustomerId = customerId ?? historyCustomerId;
       if (!targetCustomerId) {
         return;
       }
+
+      const effectiveTypeFilter = typeFilter ?? historyTypeFilter;
+      const effectiveDateRange = dateRange ?? historyDateRange;
+
+      const filters: CustomerPointTransactionFilters = {};
+      if (effectiveTypeFilter !== "all") {
+        filters.type = effectiveTypeFilter;
+      }
+
+      if (effectiveDateRange !== "all") {
+        const now = new Date();
+        const start = new Date(now);
+        if (effectiveDateRange === "30d") {
+          start.setDate(start.getDate() - 30);
+        } else if (effectiveDateRange === "90d") {
+          start.setDate(start.getDate() - 90);
+        } else if (effectiveDateRange === "365d") {
+          start.setDate(start.getDate() - 365);
+        }
+        filters.startDate = start.toISOString();
+        filters.endDate = now.toISOString();
+      }
+
+      const hasFilters = Object.keys(filters).length > 0;
 
       try {
         setHistoryLoading(true);
@@ -189,6 +246,7 @@ export function useCustomerPointsPresenter({
         const result = await presenter.getCustomerTransactions(shopId, targetCustomerId, {
           page,
           limit: 10,
+          filters: hasFilters ? filters : undefined,
         });
         setHistoryTransactions(result.data);
         setHistoryPagination(result.pagination);
@@ -201,14 +259,21 @@ export function useCustomerPointsPresenter({
         setHistoryLoading(false);
       }
     },
-    [historyCustomerId, shopId]
+    [historyCustomerId, historyDateRange, historyTypeFilter, shopId]
   );
 
   const openHistoryModal = useCallback(
     (customerId: string) => {
       setHistoryCustomerId(customerId);
       setIsHistoryModalOpen(true);
-      void loadHistoryTransactions({ customerId, page: 1 });
+      setHistoryTypeFilterState(DEFAULT_HISTORY_TYPE_FILTER);
+      setHistoryDateRangeState(DEFAULT_HISTORY_DATE_RANGE);
+      void loadHistoryTransactions({
+        customerId,
+        page: 1,
+        typeFilter: DEFAULT_HISTORY_TYPE_FILTER,
+        dateRange: DEFAULT_HISTORY_DATE_RANGE,
+      });
     },
     [loadHistoryTransactions]
   );
@@ -219,7 +284,35 @@ export function useCustomerPointsPresenter({
     setHistoryTransactions([]);
     setHistoryPagination(null);
     setHistoryError(null);
+    setHistoryTypeFilterState(DEFAULT_HISTORY_TYPE_FILTER);
+    setHistoryDateRangeState(DEFAULT_HISTORY_DATE_RANGE);
   }, []);
+
+  const setHistoryTypeFilter = useCallback(
+    (filter: HistoryTypeFilter) => {
+      setHistoryTypeFilterState(filter);
+      void loadHistoryTransactions({ page: 1, typeFilter: filter });
+    },
+    [loadHistoryTransactions]
+  );
+
+  const setHistoryDateRange = useCallback(
+    (range: HistoryDateRange) => {
+      setHistoryDateRangeState(range);
+      void loadHistoryTransactions({ page: 1, dateRange: range });
+    },
+    [loadHistoryTransactions]
+  );
+
+  const resetHistoryFilters = useCallback(() => {
+    setHistoryTypeFilterState(DEFAULT_HISTORY_TYPE_FILTER);
+    setHistoryDateRangeState(DEFAULT_HISTORY_DATE_RANGE);
+    void loadHistoryTransactions({
+      page: 1,
+      typeFilter: DEFAULT_HISTORY_TYPE_FILTER,
+      dateRange: DEFAULT_HISTORY_DATE_RANGE,
+    });
+  }, [loadHistoryTransactions]);
 
   const submitPointsChange = useCallback(
     async ({ customerId, points, description, mode }: {
@@ -323,6 +416,8 @@ export function useCustomerPointsPresenter({
     historyPagination,
     historyLoading,
     historyError,
+    historyTypeFilter,
+    historyDateRange,
   };
 
   const actions: CustomerPointsPresenterActions = {
@@ -343,6 +438,9 @@ export function useCustomerPointsPresenter({
     openHistoryModal,
     closeHistoryModal,
     loadHistoryTransactions,
+    setHistoryTypeFilter,
+    setHistoryDateRange,
+    resetHistoryFilters,
   };
 
   return [state, actions];

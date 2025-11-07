@@ -16,6 +16,11 @@ interface CustomerPointsHistoryModalProps {
   loading: boolean;
   error: string | null;
   onReload: (options?: { page?: number }) => void;
+  typeFilter: "all" | CustomerPointTransactionItem["type"];
+  dateRange: "all" | "30d" | "90d" | "365d";
+  onChangeTypeFilter: (value: "all" | CustomerPointTransactionItem["type"]) => void;
+  onChangeDateRange: (value: "all" | "30d" | "90d" | "365d") => void;
+  onResetFilters: () => void;
   onClose: () => void;
 }
 
@@ -65,12 +70,56 @@ export function CustomerPointsHistoryModal({
   loading,
   error,
   onReload,
+  typeFilter,
+  dateRange,
+  onChangeTypeFilter,
+  onChangeDateRange,
+  onResetFilters,
   onClose,
 }: CustomerPointsHistoryModalProps) {
   const customer = useMemo(() => {
     if (!customerId) return null;
     return customers.find((item) => item.id === customerId) ?? null;
   }, [customerId, customers]);
+
+  const totals = useMemo(() => {
+    return transactions.reduce(
+      (
+        acc,
+        transaction,
+      ) => {
+        if (transaction.type === "earned") {
+          acc.earned += transaction.points;
+        } else if (transaction.type === "redeemed") {
+          acc.redeemed += Math.abs(transaction.points);
+        } else if (transaction.type === "expired") {
+          acc.expired += Math.abs(transaction.points);
+        }
+        acc.net = acc.earned - acc.redeemed - acc.expired;
+        return acc;
+      },
+      {
+        earned: 0,
+        redeemed: 0,
+        expired: 0,
+        net: 0,
+      }
+    );
+  }, [transactions]);
+
+  const typeOptions: Array<{ value: typeof typeFilter; label: string }> = [
+    { value: "all", label: "ทุกประเภท" },
+    { value: "earned", label: "ได้รับแต้ม" },
+    { value: "redeemed", label: "ใช้แต้ม" },
+    { value: "expired", label: "แต้มหมดอายุ" },
+  ];
+
+  const dateOptions: Array<{ value: typeof dateRange; label: string }> = [
+    { value: "30d", label: "30 วัน" },
+    { value: "90d", label: "90 วัน" },
+    { value: "365d", label: "1 ปี" },
+    { value: "all", label: "ทั้งหมด" },
+  ];
 
   if (!isOpen || !customer) {
     return null;
@@ -205,6 +254,80 @@ export function CustomerPointsHistoryModal({
                 </button>
               </div>
 
+              <div className="flex flex-col gap-4 border-b border-gray-100 bg-white/60 px-4 py-4 dark:border-gray-800 dark:bg-gray-900/40 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  {typeOptions.map((option) => {
+                    const isActive = option.value === typeFilter;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => onChangeTypeFilter(option.value)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                          isActive
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {dateOptions.map((option) => {
+                    const isActive = option.value === dateRange;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => onChangeDateRange(option.value)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                          isActive
+                            ? "bg-slate-900 text-white shadow-sm dark:bg-slate-600"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={onResetFilters}
+                    className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    รีเซ็ตตัวกรอง
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 border-b border-gray-100 bg-white/70 px-4 py-4 text-sm dark:border-gray-800 dark:bg-gray-900/40 md:grid-cols-4">
+                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700 dark:border-green-900/40 dark:bg-green-900/30 dark:text-green-200">
+                  <p className="text-xs uppercase tracking-wide">แต้มสะสม</p>
+                  <p className="mt-1 text-lg font-semibold">{totals.earned.toLocaleString("th-TH")}</p>
+                </div>
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600 dark:border-red-900/40 dark:bg-red-900/30 dark:text-red-200">
+                  <p className="text-xs uppercase tracking-wide">แต้มใช้ไป</p>
+                  <p className="mt-1 text-lg font-semibold">{totals.redeemed.toLocaleString("th-TH")}</p>
+                </div>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/30 dark:text-amber-200">
+                  <p className="text-xs uppercase tracking-wide">แต้มหมดอายุ</p>
+                  <p className="mt-1 text-lg font-semibold">{totals.expired.toLocaleString("th-TH")}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 dark:border-slate-900/40 dark:bg-slate-900/40 dark:text-slate-200">
+                  <p className="text-xs uppercase tracking-wide">สุทธิ</p>
+                  <p className={`mt-1 text-lg font-semibold ${
+                    totals.net >= 0 ? "text-emerald-600 dark:text-emerald-300" : "text-rose-600 dark:text-rose-300"
+                  }`}>
+                    {totals.net >= 0 ? "+" : "-"}
+                    {Math.abs(totals.net).toLocaleString("th-TH")}
+                  </p>
+                </div>
+              </div>
+
               <div className="relative min-h-[180px]">
                 {loading && (
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
@@ -243,12 +366,17 @@ export function CustomerPointsHistoryModal({
                         className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between"
                       >
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {formatTransactionType(transaction.type)}
                           </p>
                           {transaction.description && (
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                               {transaction.description}
+                            </p>
+                          )}
+                          {transaction.relatedQueueId && (
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              อ้างอิงคิว: {transaction.relatedQueueId}
                             </p>
                           )}
                           <p className="text-xs text-gray-400 dark:text-gray-500">

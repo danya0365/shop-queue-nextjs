@@ -47,6 +47,8 @@ export function CustomerPointsView({
     historyPagination,
     historyLoading,
     historyError,
+    historyTypeFilter,
+    historyDateRange,
   } = state;
 
   const {
@@ -64,6 +66,9 @@ export function CustomerPointsView({
     openHistoryModal,
     closeHistoryModal,
     loadHistoryTransactions,
+    setHistoryTypeFilter,
+    setHistoryDateRange,
+    resetHistoryFilters,
   } = actions;
 
   const formatPoints = (points: number) => {
@@ -553,9 +558,20 @@ export function CustomerPointsView({
           pagination={historyPagination}
           loading={historyLoading}
           error={historyError}
-          onReload={({ page } = {}) =>
-            loadHistoryTransactions({ page, customerId: historyCustomerId })
-          }
+          typeFilter={historyTypeFilter}
+          dateRange={historyDateRange}
+          onReload={({ page } = {}) => {
+            void loadHistoryTransactions({ page, customerId: historyCustomerId });
+          }}
+          onChangeTypeFilter={(value) => {
+            setHistoryTypeFilter(value);
+          }}
+          onChangeDateRange={(value) => {
+            setHistoryDateRange(value);
+          }}
+          onResetFilters={() => {
+            resetHistoryFilters();
+          }}
           onClose={closeHistoryModal}
         />
       )}
