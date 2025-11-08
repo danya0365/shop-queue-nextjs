@@ -2,19 +2,17 @@ import { IAuthService } from "@/src/application/interfaces/auth-service.interfac
 import { IProfileService } from "@/src/application/interfaces/profile-service.interface";
 import type {
   CustomerPoints,
-  CustomerPointsBackendService,
-} from "@/src/application/services/shop/backend/customer-points-backend-service";
-import type {
-  CustomerPointsTransaction,
-  CustomerPointsTransactionBackendService,
-  CustomerPointsTransactionListResult,
-  CustomerPointsTransactionFiltersInput,
-} from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
-import type {
+  IShopBackendCustomerPointsService,
   CustomerPointsFilters as ServiceCustomerPointsFilters,
   CustomerPointsSortByOption as ServiceCustomerPointsSortByOption,
   CustomerPointsSortOrder as ServiceCustomerPointsSortOrder,
-} from "@/src/application/services/shop/backend/customer-points-backend-service";
+} from "@/src/application/services/shop/backend/BackendCustomerPointsService";
+import type {
+  CustomerPointsTransaction,
+  CustomerPointsTransactionBackendService,
+  CustomerPointsTransactionFiltersInput,
+  CustomerPointsTransactionListResult,
+} from "@/src/application/services/shop/backend/customer-points-transactions-backend-service";
 import { IShopService } from "@/src/application/services/shop/ShopService";
 import { ISubscriptionService } from "@/src/application/services/subscription/SubscriptionService";
 import { getClientContainer } from "@/src/di/client-container";
@@ -38,7 +36,8 @@ export type CustomerPointsFilters = ServiceCustomerPointsFilters;
 export type CustomerPointsSortByOption = ServiceCustomerPointsSortByOption;
 export type CustomerPointsSortOrder = ServiceCustomerPointsSortOrder;
 export type CustomerPointTransactionItem = CustomerPointsTransaction;
-export type CustomerPointTransactionFilters = CustomerPointsTransactionFiltersInput;
+export type CustomerPointTransactionFilters =
+  CustomerPointsTransactionFiltersInput;
 
 // Main Presenter class
 export class CustomerPointsPresenter extends BaseShopBackendPresenter {
@@ -48,7 +47,7 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
     authService: IAuthService,
     profileService: IProfileService,
     subscriptionService: ISubscriptionService,
-    private readonly customerPointsBackendService: CustomerPointsBackendService,
+    private readonly customerPointsBackendService: IShopBackendCustomerPointsService,
     private readonly customerPointsTransactionBackendService: CustomerPointsTransactionBackendService
   ) {
     super(
@@ -189,7 +188,10 @@ export class CustomerPointsPresenter extends BaseShopBackendPresenter {
         description
       );
     } catch (error) {
-      this.logger.error("CustomerPointsPresenter: Error redeeming points", error);
+      this.logger.error(
+        "CustomerPointsPresenter: Error redeeming points",
+        error
+      );
       throw error;
     }
   }
@@ -217,8 +219,8 @@ export class CustomerPointsPresenterFactory {
       serverContainer.resolve<IProfileService>("ProfileService");
     const shopService = serverContainer.resolve<IShopService>("ShopService");
     const customerPointsBackendService =
-      serverContainer.resolve<CustomerPointsBackendService>(
-        "CustomerPointsBackendService"
+      serverContainer.resolve<IShopBackendCustomerPointsService>(
+        "ShopBackendCustomerPointsService"
       );
     const customerPointsTransactionBackendService =
       serverContainer.resolve<CustomerPointsTransactionBackendService>(
@@ -239,8 +241,8 @@ export class CustomerPointsPresenterFactory {
     const clientContainer = getClientContainer();
     const logger = clientContainer.resolve<Logger>("Logger");
     const customerPointsBackendService =
-      clientContainer.resolve<CustomerPointsBackendService>(
-        "CustomerPointsBackendService"
+      clientContainer.resolve<IShopBackendCustomerPointsService>(
+        "ShopBackendCustomerPointsService"
       );
     const shopService = clientContainer.resolve<IShopService>("ShopService");
     const authService = clientContainer.resolve<IAuthService>("AuthService");

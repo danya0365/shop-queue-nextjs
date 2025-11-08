@@ -1,10 +1,10 @@
-import type { Logger } from "@/src/domain/interfaces/logger";
-import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
 import type {
   CustomerPointsEntity,
   CustomerPointsStatsEntity,
   CustomerPointsWithCustomerEntity,
 } from "@/src/domain/entities/backend/backend-customer-points.entity";
+import { MembershipTier } from "@/src/domain/entities/backend/backend-customer.entity";
+import type { Logger } from "@/src/domain/interfaces/logger";
 import {
   CustomerPointsRepository,
   CustomerPointsRepositoryError,
@@ -58,18 +58,41 @@ export interface UpdateCustomerPointsData {
   currentPoints?: number;
 }
 
-export interface ICustomerPointsBackendService {
+export interface IShopBackendCustomerPointsService {
   getCustomerPoints(
     shopId: string,
     filters?: CustomerPointsFilters
   ): Promise<CustomerPoints[]>;
-  getCustomerPointsById(shopId: string, pointsId: string): Promise<CustomerPoints | null>;
-  getCustomerPointsByCustomerId(shopId: string, customerId: string): Promise<CustomerPoints | null>;
-  createCustomerPoints(shopId: string, data: CreateCustomerPointsData): Promise<CustomerPoints>;
-  updateCustomerPoints(shopId: string, pointsId: string, data: UpdateCustomerPointsData): Promise<CustomerPoints>;
+  getCustomerPointsById(
+    shopId: string,
+    pointsId: string
+  ): Promise<CustomerPoints | null>;
+  getCustomerPointsByCustomerId(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPoints | null>;
+  createCustomerPoints(
+    shopId: string,
+    data: CreateCustomerPointsData
+  ): Promise<CustomerPoints>;
+  updateCustomerPoints(
+    shopId: string,
+    pointsId: string,
+    data: UpdateCustomerPointsData
+  ): Promise<CustomerPoints>;
   deleteCustomerPoints(shopId: string, pointsId: string): Promise<boolean>;
-  addPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints>;
-  redeemPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints>;
+  addPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints>;
+  redeemPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints>;
   getPointsStats(shopId: string): Promise<{
     totalCustomers: number;
     totalPointsIssued: number;
@@ -79,13 +102,15 @@ export interface ICustomerPointsBackendService {
   }>;
 }
 
-export class CustomerPointsBackendService implements ICustomerPointsBackendService {
+export class ShopBackendCustomerPointsService
+  implements IShopBackendCustomerPointsService
+{
   private static readonly PAGE_SIZE = 100;
 
   constructor(
     private readonly repository: CustomerPointsRepository,
-    private readonly logger: Logger,
-  ) { }
+    private readonly logger: Logger
+  ) {}
 
   async getCustomerPoints(
     shopId: string,
@@ -93,7 +118,7 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
   ): Promise<CustomerPoints[]> {
     try {
       this.logger.info(
-        "CustomerPointsBackendService: Fetching customer points",
+        "ShopBackendCustomerPointsService: Fetching customer points",
         { shopId, filters }
       );
       const repositoryFilters = this.mapToRepositoryFilters(filters);
@@ -107,40 +132,61 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     }
   }
 
-  async getCustomerPointsById(shopId: string, pointsId: string): Promise<CustomerPoints | null> {
+  async getCustomerPointsById(
+    shopId: string,
+    pointsId: string
+  ): Promise<CustomerPoints | null> {
     try {
       this.logger.info(
-        "CustomerPointsBackendService: Fetching customer points by ID",
+        "ShopBackendCustomerPointsService: Fetching customer points by ID",
         { shopId, pointsId }
       );
       const entities = await this.fetchAllCustomerPointsEntities(shopId);
-      const match = entities.find(entity => entity.id === pointsId);
+      const match = entities.find((entity) => entity.id === pointsId);
       return match ? this.mapToServiceModel(match) : null;
     } catch (error) {
-      this.handleError(error, 'getCustomerPointsById', { shopId, pointsId });
+      this.handleError(error, "getCustomerPointsById", { shopId, pointsId });
     }
   }
 
-  async getCustomerPointsByCustomerId(shopId: string, customerId: string): Promise<CustomerPoints | null> {
+  async getCustomerPointsByCustomerId(
+    shopId: string,
+    customerId: string
+  ): Promise<CustomerPoints | null> {
     try {
       this.logger.info(
-        "CustomerPointsBackendService: Fetching customer points by customer ID",
+        "ShopBackendCustomerPointsService: Fetching customer points by customer ID",
         { shopId, customerId }
       );
-      const entity = await this.repository.getCustomerPointsByCustomerId(shopId, customerId);
+      const entity = await this.repository.getCustomerPointsByCustomerId(
+        shopId,
+        customerId
+      );
       return entity ? this.mapToServiceModel(entity) : null;
     } catch (error) {
-      this.handleError(error, 'getCustomerPointsByCustomerId', { shopId, customerId });
+      this.handleError(error, "getCustomerPointsByCustomerId", {
+        shopId,
+        customerId,
+      });
     }
   }
 
-  async createCustomerPoints(shopId: string, data: CreateCustomerPointsData): Promise<CustomerPoints> {
+  async createCustomerPoints(
+    shopId: string,
+    data: CreateCustomerPointsData
+  ): Promise<CustomerPoints> {
     try {
-      this.logger.info("CustomerPointsBackendService: Creating customer points", {
+      this.logger.info(
+        "ShopBackendCustomerPointsService: Creating customer points",
+        {
+          shopId,
+          data,
+        }
+      );
+      const existing = await this.repository.getCustomerPointsByCustomerId(
         shopId,
-        data,
-      });
-      const existing = await this.repository.getCustomerPointsByCustomerId(shopId, data.customerId);
+        data.customerId
+      );
       if (existing) {
         return this.mapToServiceModel(existing);
       }
@@ -149,9 +195,9 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
       if (initialPoints <= 0) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.VALIDATION_ERROR,
-          'ต้องระบุจำนวนแต้มเริ่มต้นมากกว่า 0 เพื่อสร้างข้อมูลแต้มลูกค้า',
-          'createCustomerPoints',
-          { shopId, data },
+          "ต้องระบุจำนวนแต้มเริ่มต้นมากกว่า 0 เพื่อสร้างข้อมูลแต้มลูกค้า",
+          "createCustomerPoints",
+          { shopId, data }
         );
       }
 
@@ -159,39 +205,49 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
         shopId,
         data.customerId,
         initialPoints,
-        'Initial points allocation',
+        "Initial points allocation"
       );
 
-      const created = await this.repository.getCustomerPointsByCustomerId(shopId, data.customerId);
+      const created = await this.repository.getCustomerPointsByCustomerId(
+        shopId,
+        data.customerId
+      );
       if (!created) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.OPERATION_FAILED,
-          'ไม่สามารถสร้างข้อมูลแต้มลูกค้าตามที่ร้องขอได้',
-          'createCustomerPoints',
-          { shopId, data },
+          "ไม่สามารถสร้างข้อมูลแต้มลูกค้าตามที่ร้องขอได้",
+          "createCustomerPoints",
+          { shopId, data }
         );
       }
 
       return this.mapToServiceModel(created);
     } catch (error) {
-      this.handleError(error, 'createCustomerPoints', { shopId, data });
+      this.handleError(error, "createCustomerPoints", { shopId, data });
     }
   }
 
-  async updateCustomerPoints(shopId: string, pointsId: string, data: UpdateCustomerPointsData): Promise<CustomerPoints> {
+  async updateCustomerPoints(
+    shopId: string,
+    pointsId: string,
+    data: UpdateCustomerPointsData
+  ): Promise<CustomerPoints> {
     try {
-      this.logger.info("CustomerPointsBackendService: Updating customer points", {
-        shopId,
-        pointsId,
-        data,
-      });
+      this.logger.info(
+        "ShopBackendCustomerPointsService: Updating customer points",
+        {
+          shopId,
+          pointsId,
+          data,
+        }
+      );
       const existing = await this.getCustomerPointsById(shopId, pointsId);
       if (!existing) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.NOT_FOUND,
-          'ไม่พบข้อมูลแต้มลูกค้าที่ต้องการปรับปรุง',
-          'updateCustomerPoints',
-          { shopId, pointsId },
+          "ไม่พบข้อมูลแต้มลูกค้าที่ต้องการปรับปรุง",
+          "updateCustomerPoints",
+          { shopId, pointsId }
         );
       }
 
@@ -201,43 +257,71 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
 
       const difference = data.currentPoints - existing.currentPoints;
       if (difference > 0) {
-        await this.repository.addPoints(shopId, existing.customerId, difference, 'Manual adjustment');
+        await this.repository.addPoints(
+          shopId,
+          existing.customerId,
+          difference,
+          "Manual adjustment"
+        );
       } else if (difference < 0) {
-        await this.repository.redeemPoints(shopId, existing.customerId, Math.abs(difference), 'Manual adjustment');
+        await this.repository.redeemPoints(
+          shopId,
+          existing.customerId,
+          Math.abs(difference),
+          "Manual adjustment"
+        );
       }
 
-      const updated = await this.repository.getCustomerPointsByCustomerId(shopId, existing.customerId);
+      const updated = await this.repository.getCustomerPointsByCustomerId(
+        shopId,
+        existing.customerId
+      );
       if (!updated) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.OPERATION_FAILED,
-          'ไม่สามารถดึงข้อมูลแต้มลูกค้าหลังการปรับปรุงได้',
-          'updateCustomerPoints',
-          { shopId, pointsId },
+          "ไม่สามารถดึงข้อมูลแต้มลูกค้าหลังการปรับปรุงได้",
+          "updateCustomerPoints",
+          { shopId, pointsId }
         );
       }
 
       return this.mapToServiceModel(updated);
     } catch (error) {
-      this.handleError(error, 'updateCustomerPoints', { shopId, pointsId, data });
+      this.handleError(error, "updateCustomerPoints", {
+        shopId,
+        pointsId,
+        data,
+      });
     }
   }
 
-  async deleteCustomerPoints(shopId: string, pointsId: string): Promise<boolean> {
-    this.logger.warn("CustomerPointsBackendService: deleteCustomerPoints is not supported", {
-      shopId,
-      pointsId,
-    });
+  async deleteCustomerPoints(
+    shopId: string,
+    pointsId: string
+  ): Promise<boolean> {
+    this.logger.warn(
+      "ShopBackendCustomerPointsService: deleteCustomerPoints is not supported",
+      {
+        shopId,
+        pointsId,
+      }
+    );
     throw new CustomerPointsRepositoryError(
       CustomerPointsRepositoryErrorType.OPERATION_FAILED,
-      'ยังไม่รองรับการลบข้อมูลแต้มลูกค้า',
-      'deleteCustomerPoints',
-      { shopId, pointsId },
+      "ยังไม่รองรับการลบข้อมูลแต้มลูกค้า",
+      "deleteCustomerPoints",
+      { shopId, pointsId }
     );
   }
 
-  async addPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints> {
+  async addPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints> {
     try {
-      this.logger.info("CustomerPointsBackendService: Adding points", {
+      this.logger.info("ShopBackendCustomerPointsService: Adding points", {
         shopId,
         customerId,
         points,
@@ -246,32 +330,40 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
       if (points <= 0) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.VALIDATION_ERROR,
-          'จำนวนแต้มที่เพิ่มต้องมากกว่า 0',
-          'addPoints',
-          { shopId, customerId, points },
+          "จำนวนแต้มที่เพิ่มต้องมากกว่า 0",
+          "addPoints",
+          { shopId, customerId, points }
         );
       }
 
       await this.repository.addPoints(shopId, customerId, points, description);
-      const updated = await this.repository.getCustomerPointsByCustomerId(shopId, customerId);
+      const updated = await this.repository.getCustomerPointsByCustomerId(
+        shopId,
+        customerId
+      );
       if (!updated) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.NOT_FOUND,
-          'ไม่พบข้อมูลแต้มลูกค้าหลังเพิ่มแต้ม',
-          'addPoints',
-          { shopId, customerId },
+          "ไม่พบข้อมูลแต้มลูกค้าหลังเพิ่มแต้ม",
+          "addPoints",
+          { shopId, customerId }
         );
       }
 
       return this.mapToServiceModel(updated);
     } catch (error) {
-      this.handleError(error, 'addPoints', { shopId, customerId, points });
+      this.handleError(error, "addPoints", { shopId, customerId, points });
     }
   }
 
-  async redeemPoints(shopId: string, customerId: string, points: number, description: string): Promise<CustomerPoints> {
+  async redeemPoints(
+    shopId: string,
+    customerId: string,
+    points: number,
+    description: string
+  ): Promise<CustomerPoints> {
     try {
-      this.logger.info("CustomerPointsBackendService: Redeeming points", {
+      this.logger.info("ShopBackendCustomerPointsService: Redeeming points", {
         shopId,
         customerId,
         points,
@@ -280,26 +372,34 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
       if (points <= 0) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.VALIDATION_ERROR,
-          'จำนวนแต้มที่แลกต้องมากกว่า 0',
-          'redeemPoints',
-          { shopId, customerId, points },
+          "จำนวนแต้มที่แลกต้องมากกว่า 0",
+          "redeemPoints",
+          { shopId, customerId, points }
         );
       }
 
-      await this.repository.redeemPoints(shopId, customerId, points, description);
-      const updated = await this.repository.getCustomerPointsByCustomerId(shopId, customerId);
+      await this.repository.redeemPoints(
+        shopId,
+        customerId,
+        points,
+        description
+      );
+      const updated = await this.repository.getCustomerPointsByCustomerId(
+        shopId,
+        customerId
+      );
       if (!updated) {
         throw new CustomerPointsRepositoryError(
           CustomerPointsRepositoryErrorType.NOT_FOUND,
-          'ไม่พบข้อมูลแต้มลูกค้าหลังแลกแต้ม',
-          'redeemPoints',
-          { shopId, customerId },
+          "ไม่พบข้อมูลแต้มลูกค้าหลังแลกแต้ม",
+          "redeemPoints",
+          { shopId, customerId }
         );
       }
 
       return this.mapToServiceModel(updated);
     } catch (error) {
-      this.handleError(error, 'redeemPoints', { shopId, customerId, points });
+      this.handleError(error, "redeemPoints", { shopId, customerId, points });
     }
   }
 
@@ -311,28 +411,34 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     tierDistribution: Record<MembershipTier, number>;
   }> {
     try {
-      this.logger.info("CustomerPointsBackendService: Fetching point statistics", {
-        shopId,
-      });
+      this.logger.info(
+        "ShopBackendCustomerPointsService: Fetching point statistics",
+        {
+          shopId,
+        }
+      );
       const [stats, entities] = await Promise.all([
         this.repository.getCustomerPointsStats(shopId),
         this.fetchAllCustomerPointsEntities(shopId),
       ]);
 
-      const tierDistribution = entities.reduce<Record<MembershipTier, number>>((acc, entity) => {
-        const tier = entity.membershipTier ?? MembershipTier.BRONZE;
-        acc[tier] = (acc[tier] ?? 0) + 1;
-        return acc;
-      }, {} as Record<MembershipTier, number>);
+      const tierDistribution = entities.reduce<Record<MembershipTier, number>>(
+        (acc, entity) => {
+          const tier = entity.membershipTier ?? MembershipTier.BRONZE;
+          acc[tier] = (acc[tier] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<MembershipTier, number>
+      );
 
       return this.composeStats(stats, tierDistribution);
     } catch (error) {
-      this.handleError(error, 'getPointsStats', { shopId });
+      this.handleError(error, "getPointsStats", { shopId });
     }
   }
 
   private mapToServiceModel(
-    entity: CustomerPointsWithCustomerEntity | CustomerPointsEntity,
+    entity: CustomerPointsWithCustomerEntity | CustomerPointsEntity
   ): CustomerPoints {
     const membershipTier = entity.membershipTier ?? MembershipTier.BRONZE;
     const tierProgress = this.calculateTierProgress(entity.totalEarned ?? 0);
@@ -351,8 +457,12 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
           : this.getTierBenefits(membershipTier),
       createdAt: entity.createdAt ? new Date(entity.createdAt) : new Date(),
       updatedAt: entity.updatedAt ? new Date(entity.updatedAt) : new Date(),
-      customerName: 'customerName' in entity ? entity.customerName ?? undefined : undefined,
-      customerPhone: 'customerPhone' in entity ? entity.customerPhone ?? undefined : undefined,
+      customerName:
+        "customerName" in entity ? entity.customerName ?? undefined : undefined,
+      customerPhone:
+        "customerPhone" in entity
+          ? entity.customerPhone ?? undefined
+          : undefined,
       pointsToNextTier: tierProgress.pointsToNextTier,
       nextTier: tierProgress.nextTier,
     };
@@ -368,11 +478,11 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     while (true) {
       const { data } = await this.repository.getCustomerPointsList(
         shopId,
-        { page, limit: CustomerPointsBackendService.PAGE_SIZE },
+        { page, limit: ShopBackendCustomerPointsService.PAGE_SIZE },
         filters
       );
       results.push(...data);
-      if (data.length < CustomerPointsBackendService.PAGE_SIZE) {
+      if (data.length < ShopBackendCustomerPointsService.PAGE_SIZE) {
         break;
       }
       page += 1;
@@ -412,21 +522,26 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
   private getTierBenefits(tier: MembershipTier): string[] {
     switch (tier) {
       case MembershipTier.PLATINUM:
-        return ['ส่วนลด 15%', 'แต้มพิเศษ x2.0', 'บริการพิเศษ', 'ของขวัญวันเกิด'];
+        return [
+          "ส่วนลด 15%",
+          "แต้มพิเศษ x2.0",
+          "บริการพิเศษ",
+          "ของขวัญวันเกิด",
+        ];
       case MembershipTier.GOLD:
-        return ['ส่วนลด 10%', 'แต้มพิเศษ x1.5', 'บริการพิเศษ'];
+        return ["ส่วนลด 10%", "แต้มพิเศษ x1.5", "บริการพิเศษ"];
       case MembershipTier.SILVER:
-        return ['ส่วนลด 5%', 'แต้มพิเศษ x1.2'];
+        return ["ส่วนลด 5%", "แต้มพิเศษ x1.2"];
       case MembershipTier.BRONZE:
       case MembershipTier.REGULAR:
       default:
-        return ['แต้มพิเศษ x1.0'];
+        return ["แต้มพิเศษ x1.0"];
     }
   }
 
   private composeStats(
     stats: CustomerPointsStatsEntity,
-    tierDistribution: Record<MembershipTier, number>,
+    tierDistribution: Record<MembershipTier, number>
   ) {
     return {
       totalCustomers: stats.totalCustomers,
@@ -461,7 +576,7 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
     operation: string,
     context: Record<string, unknown>
   ): never {
-    this.logger.error("CustomerPointsBackendService: Operation failed", {
+    this.logger.error("ShopBackendCustomerPointsService: Operation failed", {
       operation,
       error,
       context,
@@ -476,7 +591,7 @@ export class CustomerPointsBackendService implements ICustomerPointsBackendServi
       "เกิดข้อผิดพลาดในการจัดการแต้มลูกค้า",
       operation,
       context,
-      error,
+      error
     );
   }
 }
